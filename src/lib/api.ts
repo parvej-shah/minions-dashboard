@@ -139,6 +139,19 @@ export const INITIAL_BRAND_DIRECTIVES: BrandDirectiveItem[] = [
 ];
 
 export async function fetchBrandSettings(): Promise<BrandSettings> {
+  let directives = INITIAL_BRAND_DIRECTIVES;
+  try {
+    if (typeof window !== "undefined") {
+      const res = await fetch("/api/brand");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.directives) return data;
+      }
+    }
+  } catch (err) {
+    console.error("fetchBrandSettings error:", err);
+  }
+
   return {
     id: "BRAND-MINIONS-01",
     brand_name: "getminions.ai",
@@ -169,7 +182,7 @@ export async function fetchBrandSettings(): Promise<BrandSettings> {
       title_word_count_min: 3,
       title_word_count_max: 6
     },
-    directives: INITIAL_BRAND_DIRECTIVES,
+    directives,
     updated_at: new Date().toISOString()
   };
 }
@@ -285,14 +298,15 @@ export const INITIAL_IDEAS: IdeaItem[] = [
 
 export async function fetchIdeas(): Promise<IdeaItem[]> {
   try {
-    const { data, error } = await supabaseAdmin
-      .from("ideas")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (!error && data && data.length > 0) return data;
+    if (typeof window !== "undefined") {
+      const res = await fetch("/api/ideas");
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) return data;
+      }
+    }
   } catch (err) {
-    // Graceful fallback to rich initial ideas
+    console.error("fetchIdeas error:", err);
   }
   return INITIAL_IDEAS;
 }
@@ -545,14 +559,15 @@ The result: warranty callbacks reduced by 74%, saving contractors an average of 
 
 export async function fetchAssets(): Promise<AssetItem[]> {
   try {
-    const { data, error } = await supabaseAdmin
-      .from("assets")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (!error && data && data.length > 0) return data;
+    if (typeof window !== "undefined") {
+      const res = await fetch("/api/assets");
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) return data;
+      }
+    }
   } catch (err) {
-    // Graceful fallback to verified initial assets
+    console.error("fetchAssets error:", err);
   }
   return INITIAL_ASSETS;
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export interface PublishedPostRecord {
   id: string;
@@ -14,96 +15,106 @@ export interface PublishedPostRecord {
   first_comment?: string;
 }
 
-export const PUBLISHED_FEED: PublishedPostRecord[] = [
-  {
-    id: "PUB-001",
-    asset_id: "ASSET-0003",
-    platform: "BLOG",
-    title: "Raw JSON Over Agent Summaries: Why Multi-Agent LLM Systems Drift in Production",
-    excerpt: "Every multi-agent system looks invincible in the playground. Then you deploy to production, and the game of telephone begins. Here is why deterministic JSON schemas beat reasoning summaries.",
-    hero_image_url: "/images/social-covers/github/github_social_dark.png",
-    published_url: "https://getminions.ai/blog/raw-json-over-agent-summaries",
-    audience: "PEER",
-    cost_usd: 0.0386,
-    published_at: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
-    first_comment: "Full technical teardown with Go validator benchmarks."
-  },
-  {
-    id: "PUB-002",
-    asset_id: "ASSET-0003",
-    platform: "LINKEDIN",
-    title: "Why we stopped letting our AI agents talk to each other in English",
-    excerpt: "When Agent A passes a prose summary to Agent B, subtle constraints get smoothed away, latency compounds, and schema drift is impossible to unit test.",
-    hero_image_url: "/images/social-covers/linkedin/linkedin_cover_dark.png",
-    published_url: "https://linkedin.com/company/getminionsai",
-    audience: "PEER",
-    cost_usd: 0.0386,
-    published_at: new Date(Date.now() - 1000 * 60 * 60 * 2.5).toISOString(),
-    first_comment: "Read the full engineering deep dive: https://getminions.ai/blog/raw-json-over-agent-summaries"
-  },
-  {
-    id: "PUB-003",
-    asset_id: "ASSET-0003",
-    platform: "FACEBOOK",
-    title: "The $240 Wasted Attic Truck Roll: Why Multi-Agent Chat Fails in Dispatch",
-    excerpt: "When you manage 100+ home service dispatches a day, a lost gate code or wrong equipment model costs a contractor $300+ in wasted labor.",
-    hero_image_url: "/images/social-covers/facebook/facebook_cover_dark.png",
-    published_url: "https://facebook.com/getminionsai",
-    audience: "ICP",
-    cost_usd: 0.0386,
-    published_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    first_comment: "Full case study on getminions.ai/blog"
-  },
-  {
-    id: "PUB-004",
-    asset_id: "ASSET-0001",
-    platform: "BLOG",
-    title: "Deterministic WebSocket Voice Pipelines: Sub-1.8s Latency in Field Operations",
-    excerpt: "Speed-to-lead benchmarks showing how sub-1.8s audio packet processing prevents emergency callers from hanging up.",
-    hero_image_url: "/images/social-covers/twitter/twitter_cover_dark.png",
-    published_url: "https://getminions.ai/blog",
-    audience: "PEER",
-    cost_usd: 0.0392,
-    published_at: new Date(Date.now() - 1000 * 60 * 60 * 28).toISOString(),
-    first_comment: "Benchmark code on GitHub."
-  }
-];
-
-import { prisma } from "@/lib/prisma";
-
 export async function GET() {
   try {
-    const blogs = await prisma.blog.findMany({
-      orderBy: { publishedAt: "desc" }
+    const publishedAssets = await prisma.asset.findMany({
+      where: {
+        status: "PUBLISHED",
+      },
+      orderBy: {
+        publishedAt: "desc",
+      },
     });
 
-    if (blogs && blogs.length > 0) {
-      const dynamicFeed: PublishedPostRecord[] = blogs.map((blog, idx) => {
-        let heroImageUrl = "/images/social-covers/github/github_social_dark.png";
-        const imgMatch = (blog.content || "").match(/!\[.*?\]\((https?:\/\/[^\s\)]+)\)/);
-        if (imgMatch && imgMatch[1]) {
-          heroImageUrl = imgMatch[1];
-        }
+    const publishedBlogs = await prisma.blog.findMany({
+      orderBy: {
+        publishedAt: "desc",
+      },
+    });
 
-        return {
-          id: `PUB-LIVE-${idx + 1}`,
-          asset_id: blog.assetId || `ASSET-${String(idx + 1).padStart(4, "0")}`,
-          platform: "BLOG" as const,
-          title: blog.title || "Untitled Post",
-          excerpt: blog.hook || blog.coreArgument || (blog.content || "").slice(0, 160),
-          hero_image_url: heroImageUrl,
-          published_url: `https://getminions.ai/blog/${blog.slug}`,
-          audience: (blog.audience || "ICP") as "ICP" | "PEER" | "BRIDGE",
-          cost_usd: 0.0386,
-          published_at: blog.publishedAt.toISOString(),
-          first_comment: `Full operational guide: https://getminions.ai/blog/${blog.slug}`
-        };
+    const feed: PublishedPostRecord[] = [];
+
+    // 1. Map dynamic blog posts from Supabase blogs table
+    for (let i = 0; i < publishedBlogs.length; i++) {
+      const b = publishedBlogs[i];
+      let heroImg = "/images/social-covers/github/github_social_dark.png";
+      const imgMatch = (b.content || "").match(/!\[.*?\]\((https?:\/\/[^\s\)]+)\)/);
+      if (imgMatch && imgMatch[1]) {
+        heroImg = imgMatch[1];
+      }
+
+      feed.push({
+        id: `PUB-BLOG-${b.assetId || b.slug || i + 1}`,
+        asset_id: b.assetId || `ASSET-${String(i + 1).padStart(4, "0")}`,
+        platform: "BLOG",
+        title: b.title || "Untitled Post",
+        excerpt: b.hook || b.coreArgument || (b.content || "").slice(0, 160),
+        hero_image_url: heroImg,
+        published_url: `https://getminions.ai/blog/${b.slug}`,
+        audience: (b.audience || "ICP") as "ICP" | "PEER" | "BRIDGE",
+        cost_usd: 0.0386,
+        published_at: b.publishedAt ? b.publishedAt.toISOString() : new Date().toISOString(),
+        first_comment: `Read the full engineering deep dive: https://getminions.ai/blog/${b.slug}`,
       });
-
-      const socialVariants = PUBLISHED_FEED.filter(p => p.platform !== "BLOG");
-      return NextResponse.json([...dynamicFeed, ...socialVariants]);
     }
-  } catch (e) {}
 
-  return NextResponse.json(PUBLISHED_FEED);
+    // 2. Map dynamic social variants from published assets in PostgreSQL
+    for (const a of publishedAssets) {
+      const cost = Number(a.generationCost) || 0.0386;
+      const pubDate = a.publishedAt ? a.publishedAt.toISOString() : a.createdAt.toISOString();
+
+      if (a.linkedinVariant) {
+        feed.push({
+          id: `PUB-LI-${a.id}`,
+          asset_id: a.id,
+          platform: "LINKEDIN",
+          title: a.title,
+          excerpt: a.linkedinVariant.slice(0, 180),
+          hero_image_url: "/images/social-covers/linkedin/linkedin_cover_dark.png",
+          published_url: "https://linkedin.com/company/getminionsai",
+          audience: (a.audience || "ICP") as "ICP" | "PEER" | "BRIDGE",
+          cost_usd: cost,
+          published_at: pubDate,
+          first_comment: `Read the full operational breakdown: https://getminions.ai/blog/${a.slug}`,
+        });
+      }
+
+      if (a.facebookVariant) {
+        feed.push({
+          id: `PUB-FB-${a.id}`,
+          asset_id: a.id,
+          platform: "FACEBOOK",
+          title: a.title,
+          excerpt: a.facebookVariant.slice(0, 180),
+          hero_image_url: "/images/social-covers/facebook/facebook_cover_dark.png",
+          published_url: "https://facebook.com/getminionsai",
+          audience: (a.audience || "ICP") as "ICP" | "PEER" | "BRIDGE",
+          cost_usd: cost,
+          published_at: pubDate,
+          first_comment: `Full case study on getminions.ai/blog/${a.slug}`,
+        });
+      }
+
+      if (a.xVariant) {
+        feed.push({
+          id: `PUB-X-${a.id}`,
+          asset_id: a.id,
+          platform: "TWITTER",
+          title: a.title,
+          excerpt: a.xVariant.slice(0, 180),
+          hero_image_url: "/images/social-covers/twitter/twitter_cover_dark.png",
+          published_url: "https://twitter.com/getminionsai",
+          audience: (a.audience || "ICP") as "ICP" | "PEER" | "BRIDGE",
+          cost_usd: cost,
+          published_at: pubDate,
+          first_comment: `Technical benchmark: https://getminions.ai/blog/${a.slug}`,
+        });
+      }
+    }
+
+    return NextResponse.json(feed);
+  } catch (error) {
+    console.error("Error fetching dynamic published feed from Prisma:", error);
+    return NextResponse.json({ error: "Failed to fetch published feed" }, { status: 500 });
+  }
 }
