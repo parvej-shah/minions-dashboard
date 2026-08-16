@@ -432,7 +432,7 @@ export default function TelemetryPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs min-w-[760px]">
             <thead>
               <tr className="border-b border-[#1F2D3D] text-[#94A3B8] font-mono text-[11px]">
                 <th className="pb-3 font-semibold">ASSET ID</th>

@@ -365,7 +365,7 @@ export default function FleetPage() {
                         key={st}
                         type="button"
                         onClick={() => setEditStatus(st)}
-                        className={`py-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
+                        className={`py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
                           editStatus === st
                             ? st === "ACTIVE"
                               ? "bg-[#00C9A7] text-[#070B0F]"

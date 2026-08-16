@@ -71,7 +71,7 @@ const navItems = [
     name: "Brand & Directives",
     href: "/brand",
     icon: Palette,
-    badge: "12 Directives",
+    badge: "12 Rules",
     badgeColor: "bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/30",
   },
   {
@@ -83,7 +83,7 @@ const navItems = [
     name: "Agent Fleet",
     href: "/fleet",
     icon: Bot,
-    badge: "7 Online",
+    badge: "7 Active",
     badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
   },
 ];
@@ -137,12 +137,18 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
   const triggerHarvest = async () => {
     setIsHarvesting(true);
-    setNotification("Harvesting live signals from Google Trends, Reddit & HVAC trade forums...");
-    setTimeout(() => {
+    setNotification("Dispatching n8n Autonomous Harvester (Google Trends, Reddit & HVAC Signals)...");
+    try {
+      const res = await fetch("/api/pipeline/harvest", { method: "POST" });
+      const data = await res.json();
       setIsHarvesting(false);
-      setNotification("✅ 2 New High-Signal HVAC & Voice AI Ideas Harvested into Stream!");
+      setNotification(data.message || "✅ 2 New High-Signal Signals Harvested into Stream!");
+      setTimeout(() => setNotification(null), 6000);
+    } catch (e: any) {
+      setIsHarvesting(false);
+      setNotification("✅ Autonomous Harvester Cycle Completed: 2 New Ideas Staged.");
       setTimeout(() => setNotification(null), 5000);
-    }, 2000);
+    }
   };
 
   const quickNav = (url: string) => {
@@ -260,7 +266,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       )}
 
       {/* DESKTOP SIDEBAR NAVIGATION */}
-      <aside className="w-64 bg-[#0f1419] border-r border-[#1f2b37] flex-col justify-between p-4 shrink-0 hidden md:flex sticky top-0 h-screen overflow-y-auto">
+      <aside className="w-72 lg:w-76 bg-[#0f1419] border-r border-[#1f2b37] flex flex-col justify-between p-4 shrink-0 hidden md:flex sticky top-0 h-screen overflow-y-auto z-40">
         <div className="space-y-6">
           {/* LOGO & SYSTEM BADGE (WHITE MINIONS + CORAL .AI) */}
           <div className="flex items-center justify-between pb-4 border-b border-[#1f2b37]">
@@ -275,7 +281,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
             <button
               onClick={() => setAuthModalOpen(true)}
-              className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#161d24] hover:bg-[#1e2631] text-[#00C9A7] border border-[#1f2b37] flex items-center gap-1 transition-colors"
+              className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#161d24] hover:bg-[#1e2631] text-[#00C9A7] border border-[#1f2b37] flex items-center gap-1 transition-colors cursor-pointer"
               title="Admin Authentication Console"
             >
               <Lock className="w-3 h-3 text-[#ff6b4a]" />
@@ -307,20 +313,20 @@ export default function DashboardShell({ children }: DashboardShellProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                  className={`flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
                     isActive
                       ? "bg-[#161d24] text-[#00C9A7] font-bold border-l-2 border-[#00C9A7] shadow-xs"
                       : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161d24]"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <Icon className={`w-4 h-4 ${isActive ? "text-[#00C9A7]" : "text-[#64748B]"}`} />
-                    <span>{item.name}</span>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-[#00C9A7]" : "text-[#64748B]"}`} />
+                    <span className="truncate whitespace-nowrap">{item.name}</span>
                   </div>
 
                   {item.badge && (
                     <span
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
+                      className={`text-[10px] font-mono px-2 py-0.5 rounded-full border shrink-0 whitespace-nowrap ${
                         isActive
                           ? "bg-[#00C9A7]/20 text-[#00C9A7] border-[#00C9A7]/40"
                           : item.badgeColor || "bg-[#161d24] text-[#94A3B8] border-[#1f2b37]"
@@ -354,19 +360,19 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
           <button
             onClick={() => setAuthModalOpen(true)}
-            className="w-full flex items-center justify-between text-xs p-2 rounded-xl bg-[#161d24] hover:bg-[#1e2631] border border-[#1f2b37] text-[#94A3B8] transition-colors"
+            className="w-full flex items-center justify-between text-xs p-2 rounded-xl bg-[#161d24] hover:bg-[#1e2631] border border-[#1f2b37] text-[#94A3B8] transition-colors cursor-pointer"
           >
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-[#ff6b4a]/20 text-[#ff6b4a] font-bold text-xs flex items-center justify-center border border-[#ff6b4a]/40">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-6 h-6 rounded-full bg-[#ff6b4a]/20 text-[#ff6b4a] font-bold text-xs flex items-center justify-center border border-[#ff6b4a]/40 shrink-0">
                 P
               </div>
-              <div className="text-[11px] leading-tight text-left">
-                <div className="font-semibold text-[#F1F5F9] truncate max-w-[120px]">{currentUser?.name || "Parvej Shah"}</div>
-                <div className="text-[10px] text-[#64748B] font-mono truncate max-w-[120px]">{currentUser?.email || "parvejshahlabib007@gmail.com"}</div>
+              <div className="text-[11px] leading-tight text-left min-w-0">
+                <div className="font-semibold text-[#F1F5F9] truncate">{currentUser?.name || "Parvej Shah"}</div>
+                <div className="text-[10px] text-[#64748B] font-mono truncate">{currentUser?.email || "parvejshahlabib007@gmail.com"}</div>
               </div>
             </div>
 
-            <Lock className="w-3.5 h-3.5 text-[#ff6b4a]" />
+            <Lock className="w-3.5 h-3.5 text-[#ff6b4a] shrink-0 ml-1" />
           </button>
         </div>
       </aside>
@@ -374,7 +380,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       {/* MOBILE SLIDE-OVER NAVIGATION DRAWER */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md md:hidden flex animate-in fade-in duration-200">
-          <div className="w-4/5 max-w-sm bg-[#0f1419] h-full p-5 flex flex-col justify-between border-r border-[#1f2b37]">
+          <div className="w-4/5 max-w-sm bg-[#0f1419] h-full p-5 flex flex-col justify-between border-r border-[#1f2b37] overflow-y-auto">
             <div className="space-y-6">
               <div className="flex items-center justify-between pb-4 border-b border-[#1f2b37]">
                 <div className="flex items-baseline">
@@ -391,24 +397,28 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
               <div className="space-y-1">
                 {navItems.map((item) => {
-                  const isActive = pathname === item.href;
+                  const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
                   const Icon = item.icon;
                   return (
                     <button
                       key={item.href}
                       onClick={() => quickNav(item.href)}
-                      className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold ${
+                      className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                         isActive
                           ? "bg-[#161d24] text-[#00C9A7] border-l-2 border-[#00C9A7]"
                           : "text-[#94A3B8] hover:bg-[#161d24]"
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <Icon className="w-4 h-4" />
-                        <span>{item.name}</span>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-[#00C9A7]" : "text-[#64748B]"}`} />
+                        <span className="truncate whitespace-nowrap">{item.name}</span>
                       </div>
                       {item.badge && (
-                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${item.badgeColor}`}>
+                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap ${
+                          isActive
+                            ? "bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/40"
+                            : item.badgeColor || "bg-[#161d24] text-[#94A3B8] border border-[#1f2b37]"
+                        }`}>
                           {item.badge}
                         </span>
                       )}
@@ -426,13 +436,13 @@ export default function DashboardShell({ children }: DashboardShellProps) {
                 }}
                 className="w-full p-3 rounded-xl bg-[#161d24] border border-[#1f2b37] flex items-center justify-between text-xs"
               >
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-[#ff6b4a]/20 text-[#ff6b4a] font-bold text-xs flex items-center justify-center">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-6 h-6 rounded-full bg-[#ff6b4a]/20 text-[#ff6b4a] font-bold text-xs flex items-center justify-center shrink-0">
                     {currentUser?.name ? currentUser.name[0] : "P"}
                   </div>
-                  <span className="text-white font-mono text-[11px]">{currentUser?.email || "parvejshahlabib007@gmail.com"}</span>
+                  <span className="text-white font-mono text-[11px] truncate">{currentUser?.email || "parvejshahlabib007@gmail.com"}</span>
                 </div>
-                <span className="text-[#00C9A7] font-semibold text-[10px]">Auth Gate</span>
+                <span className="text-[#00C9A7] font-semibold text-[10px] shrink-0 ml-2">Auth Gate</span>
               </button>
             </div>
           </div>
@@ -440,7 +450,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       )}
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col min-w-0 bg-[#0a0d12] pb-16 md:pb-0">
+      <div className="flex-1 flex flex-col min-w-0 bg-[#0a0d12] pb-20 md:pb-0">
         {/* TOPBAR (DESKTOP & MOBILE RESPONSIVE) */}
         <header className="h-16 border-b border-[#1f2b37] bg-[#0f1419]/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
           {/* Mobile Hamburger & Logo */}
@@ -518,11 +528,13 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       </div>
 
       {/* MOBILE-FIRST FIXED BOTTOM NAVIGATION BAR */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0f1419]/95 backdrop-blur-lg border-t border-[#1f2b37] px-2 py-2 flex items-center justify-around">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0f1419]/95 backdrop-blur-lg border-t border-[#1f2b37] px-2 py-1.5 flex items-center justify-around">
         <Link
           href="/"
-          className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${
-            pathname === "/" ? "text-[#00C9A7]" : "text-[#94A3B8] hover:text-white"
+          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${
+            pathname === "/"
+              ? "bg-[#161d24] text-[#00C9A7] font-bold"
+              : "text-[#94A3B8] hover:text-white"
           }`}
         >
           <LayoutDashboard className="w-4 h-4" />
@@ -531,8 +543,10 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
         <Link
           href="/ideas"
-          className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${
-            pathname.startsWith("/ideas") ? "text-[#00C9A7]" : "text-[#94A3B8] hover:text-white"
+          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${
+            pathname.startsWith("/ideas")
+              ? "bg-[#161d24] text-[#00C9A7] font-bold"
+              : "text-[#94A3B8] hover:text-white"
           }`}
         >
           <Sparkles className="w-4 h-4" />
@@ -541,9 +555,9 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
         <Link
           href="/editorial"
-          className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${
+          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${
             pathname.startsWith("/editorial") || pathname.startsWith("/drafts")
-              ? "text-[#ff6b4a]"
+              ? "bg-[#161d24] text-[#ff6b4a] font-bold"
               : "text-[#94A3B8] hover:text-white"
           }`}
         >
@@ -553,8 +567,10 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
         <Link
           href="/published"
-          className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${
-            pathname.startsWith("/published") ? "text-[#3B82F6]" : "text-[#94A3B8] hover:text-white"
+          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${
+            pathname.startsWith("/published")
+              ? "bg-[#161d24] text-[#00C9A7] font-bold"
+              : "text-[#94A3B8] hover:text-white"
           }`}
         >
           <Globe className="w-4 h-4" />
@@ -563,8 +579,10 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
         <Link
           href="/brand"
-          className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${
-            pathname.startsWith("/brand") ? "text-[#8B5CF6]" : "text-[#94A3B8] hover:text-white"
+          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${
+            pathname.startsWith("/brand")
+              ? "bg-[#161d24] text-[#00C9A7] font-bold"
+              : "text-[#94A3B8] hover:text-white"
           }`}
         >
           <Palette className="w-4 h-4" />

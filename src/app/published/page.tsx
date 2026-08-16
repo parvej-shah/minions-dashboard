@@ -117,8 +117,8 @@ export default function PublishedPostsPage() {
 
       {/* Filter Bar */}
       <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-3">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="relative w-full md:w-80">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+          <div className="relative w-full lg:w-80">
             <Search className="w-4 h-4 text-[#64748B] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
@@ -129,38 +129,40 @@ export default function PublishedPostsPage() {
             />
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
-            <span className="text-[11px] font-mono text-[#64748B] shrink-0">Platform:</span>
-            {["ALL", "BLOG", "LINKEDIN", "FACEBOOK"].map((plat) => (
-              <button
-                key={plat}
-                onClick={() => setPlatformFilter(plat)}
-                className={`px-3 py-1 rounded-lg text-xs font-medium transition-all shrink-0 ${
-                  platformFilter === plat
-                    ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-xs"
-                    : "bg-[#161D26] text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#1E2733]"
-                }`}
-              >
-                {plat === "ALL" ? "All Platforms" : plat}
-              </button>
-            ))}
-          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+              <span className="text-[11px] font-mono text-[#64748B] shrink-0">Platform:</span>
+              {["ALL", "BLOG", "LINKEDIN", "FACEBOOK"].map((plat) => (
+                <button
+                  key={plat}
+                  onClick={() => setPlatformFilter(plat)}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
+                    platformFilter === plat
+                      ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-xs"
+                      : "bg-[#161D26] text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#1E2733]"
+                  }`}
+                >
+                  {plat === "ALL" ? "All Platforms" : plat}
+                </button>
+              ))}
+            </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-mono text-[#64748B]">Audience:</span>
-            {["ALL", "ICP", "PEER"].map((aud) => (
-              <button
-                key={aud}
-                onClick={() => setAudienceFilter(aud)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
-                  audienceFilter === aud
-                    ? "bg-[#1E2733] text-[#00C9A7] border border-[#00C9A7]/40 font-bold"
-                    : "text-[#64748B] hover:text-[#94A3B8]"
-                }`}
-              >
-                {aud}
-              </button>
-            ))}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-mono text-[#64748B] shrink-0">Audience:</span>
+              {["ALL", "ICP", "PEER"].map((aud) => (
+                <button
+                  key={aud}
+                  onClick={() => setAudienceFilter(aud)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    audienceFilter === aud
+                      ? "bg-[#1E2733] text-[#00C9A7] border border-[#00C9A7]/40 font-bold"
+                      : "text-[#64748B] hover:text-[#94A3B8]"
+                  }`}
+                >
+                  {aud}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

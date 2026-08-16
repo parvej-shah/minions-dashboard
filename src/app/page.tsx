@@ -159,7 +159,7 @@ export default function MissionControlPage() {
           <span>Automated n8n Loop</span>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 text-center">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
           <Link href="/ideas" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] transition-all group">
             <div className="text-xs font-bold text-[#F1F5F9] group-hover:text-[#00C9A7] flex items-center justify-center gap-1.5">
               <span>✨ Ingested</span>

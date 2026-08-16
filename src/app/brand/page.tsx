@@ -589,10 +589,10 @@ export default function BrandStudioPage() {
         </div>
 
         {/* Primary Tab Switcher */}
-        <div className="flex flex-wrap items-center bg-[#0F1419] p-1 rounded-xl border border-[#1F2D3D] self-start md:self-auto gap-1">
+        <div className="flex flex-wrap items-center bg-[#0F1419] p-1 rounded-xl border border-[#1F2D3D] self-start md:self-auto gap-1 max-w-full overflow-x-auto">
           <button
             onClick={() => setActiveTab("visuals")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "visuals"
                 ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
                 : "text-[#94A3B8] hover:text-[#F1F5F9]"
@@ -603,7 +603,7 @@ export default function BrandStudioPage() {
           </button>
           <button
             onClick={() => setActiveTab("mascots")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "mascots"
                 ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
                 : "text-[#94A3B8] hover:text-[#F1F5F9]"
@@ -614,7 +614,7 @@ export default function BrandStudioPage() {
           </button>
           <button
             onClick={() => setActiveTab("social")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "social"
                 ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
                 : "text-[#94A3B8] hover:text-[#F1F5F9]"
@@ -625,7 +625,7 @@ export default function BrandStudioPage() {
           </button>
           <button
             onClick={() => setActiveTab("directives")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "directives"
                 ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
                 : "text-[#94A3B8] hover:text-[#F1F5F9]"
@@ -636,7 +636,7 @@ export default function BrandStudioPage() {
           </button>
           <button
             onClick={() => setActiveTab("multi_brand")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "multi_brand"
                 ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
                 : "text-[#94A3B8] hover:text-[#F1F5F9]"
@@ -647,7 +647,7 @@ export default function BrandStudioPage() {
           </button>
           <button
             onClick={() => setActiveTab("lexicon")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "lexicon"
                 ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
                 : "text-[#94A3B8] hover:text-[#F1F5F9]"

@@ -292,38 +292,37 @@ export default function IdeaStreamPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070B0F] text-[#F1F5F9] pb-24 selection:bg-[#00C9A7]/30 selection:text-[#00C9A7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-2">
-        {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-6">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold tracking-widest text-[#00C9A7] uppercase px-2.5 py-0.5 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#00C9A7] animate-pulse" />
-                Workflow 01 · Signal Harvester
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#F1F5F9]">
-              Idea Stream
-            </h1>
-            <p className="text-sm text-[#94A3B8] mt-1 max-w-2xl">
-              Continuous intake stream of high-intent content opportunities harvested from search trends, technician forums, and operator telemetry.
-            </p>
+    <div className="space-y-6 max-w-7xl mx-auto pb-16 selection:bg-[#00C9A7]/30 selection:text-[#00C9A7]">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-6">
+        <div>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold tracking-widest text-[#00C9A7] uppercase px-2.5 py-0.5 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00C9A7] animate-pulse" />
+              Workflow 01 · Signal Harvester
+            </span>
           </div>
-
-          <button
-            onClick={() => setIsInjectOpen(true)}
-            className="inline-flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/15 transition-all active:scale-95 self-start sm:self-auto cursor-pointer"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            + Inject Manual Topic
-          </button>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#F1F5F9]">
+            Idea Stream
+          </h1>
+          <p className="text-sm text-[#94A3B8] mt-1 max-w-2xl">
+            Continuous intake stream of high-intent content opportunities harvested from search trends, technician forums, and operator telemetry.
+          </p>
         </div>
 
-        {/* Filter Bar (Sticky Container) */}
-        <div className="sticky top-0 z-20 bg-[#070B0F]/95 backdrop-blur-md pt-2 pb-4 space-y-3.5 border-b border-[#1F2D3D]/80">
-          {/* Row 1: Search & Audience Filters */}
-          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+        <button
+          onClick={() => setIsInjectOpen(true)}
+          className="inline-flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/15 transition-all active:scale-95 self-start sm:self-auto cursor-pointer"
+        >
+          <Plus className="w-4 h-4 stroke-[2.5]" />
+          + Inject Manual Topic
+        </button>
+      </div>
+
+      {/* Filter Bar (Sticky Container) */}
+      <div className="sticky top-16 z-20 bg-[#0a0d12]/95 backdrop-blur-md pt-2 pb-4 space-y-3.5 border-b border-[#1F2D3D]/80">
+        {/* Row 1: Search & Audience Filters */}
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
             {/* Search Input */}
             <div className="relative flex-1 max-w-md">
               <Search className="w-4 h-4 text-[#64748B] absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -612,7 +611,6 @@ export default function IdeaStreamPage() {
             );
           })}
         </div>
-      </div>
 
       {/* Slide-over / Modal for "+ Inject Manual Topic" */}
       {isInjectOpen && (

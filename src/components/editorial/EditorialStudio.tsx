@@ -219,7 +219,7 @@ export default function EditorialStudio({
   const twitterVariant = activeAsset.social_variants?.find((v) => v.platform === "TWITTER");
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto pb-20">
+    <div className="space-y-6 max-w-[1400px] mx-auto pb-32 lg:pb-16">
       {/* ── Top Header & Draft Switcher ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-5">
         <div className="flex items-center gap-3.5">
@@ -1341,7 +1341,7 @@ export default function EditorialStudio({
             href={activeAsset.blog_url || `https://getminions.ai/blog/${activeAsset.slug}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0"
+            className="px-4 py-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-sm"
           >
             <span>Live Blog</span>
             <ExternalLink className="w-3.5 h-3.5" />
@@ -1350,7 +1350,7 @@ export default function EditorialStudio({
           <button
             onClick={handleApproveAndPublish}
             disabled={publishPhase !== "IDLE"}
-            className="px-4 py-2.5 bg-[#ff6b4a] hover:bg-[#ff522b] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-lg shadow-[#ff6b4a]/25 disabled:opacity-50"
+            className="px-4 py-2.5 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-lg shadow-[#00C9A7]/20 disabled:opacity-50 cursor-pointer"
           >
             {publishPhase !== "IDLE" ? (
               <>
