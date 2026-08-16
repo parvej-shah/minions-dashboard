@@ -50,11 +50,11 @@ export async function GET() {
         title: b.title || "Untitled Post",
         excerpt: b.hook || b.coreArgument || (b.content || "").slice(0, 160),
         hero_image_url: heroImg,
-        published_url: `https://getminions.ai/blog/${b.slug}`,
+        published_url: `https://www.getminions.ai/blog/${b.slug}`,
         audience: (b.audience || "ICP") as "ICP" | "PEER" | "BRIDGE",
         cost_usd: 0.0386,
         published_at: b.publishedAt ? b.publishedAt.toISOString() : new Date().toISOString(),
-        first_comment: `Read the full engineering deep dive: https://getminions.ai/blog/${b.slug}`,
+        first_comment: `Read the full engineering deep dive: https://www.getminions.ai/blog/${b.slug}`,
       });
     }
 
@@ -71,11 +71,11 @@ export async function GET() {
           title: a.title,
           excerpt: a.linkedinVariant.slice(0, 180),
           hero_image_url: "/images/social-covers/linkedin/linkedin_cover_dark.png",
-          published_url: "https://linkedin.com/company/getminionsai",
+          published_url: "https://www.linkedin.com/company/getminionsai",
           audience: (a.audience || "ICP") as "ICP" | "PEER" | "BRIDGE",
           cost_usd: cost,
           published_at: pubDate,
-          first_comment: `Read the full operational breakdown: https://getminions.ai/blog/${a.slug}`,
+          first_comment: `Read the full operational breakdown: https://www.getminions.ai/blog/${a.slug}`,
         });
       }
 
@@ -87,11 +87,11 @@ export async function GET() {
           title: a.title,
           excerpt: a.facebookVariant.slice(0, 180),
           hero_image_url: "/images/social-covers/facebook/facebook_cover_dark.png",
-          published_url: "https://facebook.com/getminionsai",
+          published_url: "https://www.facebook.com/getminionsai",
           audience: (a.audience || "ICP") as "ICP" | "PEER" | "BRIDGE",
           cost_usd: cost,
           published_at: pubDate,
-          first_comment: `Full case study on getminions.ai/blog/${a.slug}`,
+          first_comment: `Full case study on https://www.getminions.ai/blog/${a.slug}`,
         });
       }
 
@@ -107,7 +107,7 @@ export async function GET() {
           audience: (a.audience || "ICP") as "ICP" | "PEER" | "BRIDGE",
           cost_usd: cost,
           published_at: pubDate,
-          first_comment: `Technical benchmark: https://getminions.ai/blog/${a.slug}`,
+          first_comment: `Technical benchmark: https://www.getminions.ai/blog/${a.slug}`,
         });
       }
     }
