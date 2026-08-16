@@ -26,7 +26,8 @@ import {
   X,
   Send,
   BookOpen,
-  AlertTriangle
+  AlertTriangle,
+  Globe
 } from "lucide-react";
 
 interface DashboardShellProps {
@@ -39,28 +40,35 @@ const navItems = [
     href: "/",
     icon: LayoutDashboard,
     badge: "Live",
-    badgeColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
   },
   {
     name: "Idea Stream",
     href: "/ideas",
     icon: Sparkles,
     badge: "4 Ready",
-    badgeColor: "bg-teal-500/10 text-teal-300 border-teal-500/20",
+    badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
   },
   {
     name: "Editorial Studio",
-    href: "/drafts",
+    href: "/editorial",
     icon: FileText,
     badge: "1 Review",
-    badgeColor: "bg-[#ff6b4a]/10 text-[#ff6b4a] border-[#ff6b4a]/20",
+    badgeColor: "bg-[#ff6b4a]/10 text-[#ff6b4a] border-[#ff6b4a]/30",
+  },
+  {
+    name: "Published Posts",
+    href: "/published",
+    icon: Globe,
+    badge: "4 Live",
+    badgeColor: "bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/30",
   },
   {
     name: "Brand & Directives",
     href: "/brand",
     icon: Palette,
     badge: "12 Directives",
-    badgeColor: "bg-primary/10 text-primary border-primary/20",
+    badgeColor: "bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/30",
   },
   {
     name: "Cost & Telemetry",
@@ -72,7 +80,7 @@ const navItems = [
     href: "/fleet",
     icon: Bot,
     badge: "7 Online",
-    badgeColor: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
   },
 ];
 
@@ -86,12 +94,12 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   const [showPalette, setShowPalette] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Keyboard shortcut listener (Cmd+K or Ctrl+K)
+  // Keyboard shortcut listener (Cmd+K)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setShowPalette(prev => !prev);
+        setShowPalette((prev) => !prev);
       }
       if (e.key === "Escape") {
         setShowPalette(false);
@@ -118,24 +126,24 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#faf9f6] text-[#12242a]">
+    <div className="flex min-h-screen bg-[#070B0F] text-[#F1F5F9]">
       {/* COMMAND PALETTE MODAL */}
       {showPalette && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center pt-24 px-4 animate-in fade-in duration-150">
-          <div className="bg-[#12242a] text-white w-full max-w-2xl rounded-2xl border border-border/40 shadow-2xl overflow-hidden space-y-3">
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-border/30">
-              <Search className="w-5 h-5 text-primary" />
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-start justify-center pt-24 px-4 animate-in fade-in duration-150">
+          <div className="bg-[#0F1419] text-[#F1F5F9] w-full max-w-2xl rounded-2xl border border-[#1F2D3D] shadow-2xl overflow-hidden space-y-3">
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[#1F2D3D]">
+              <Search className="w-5 h-5 text-[#00C9A7]" />
               <input
                 type="text"
-                placeholder="Search drafts, ideas, brand directives, or agent fleet..."
+                placeholder="Search drafts, published posts, ideas, brand directives, or agent fleet..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 autoFocus
-                className="flex-1 bg-transparent border-0 text-sm font-sans text-white focus:outline-none placeholder:text-muted-foreground"
+                className="flex-1 bg-transparent border-0 text-sm text-[#F1F5F9] focus:outline-none placeholder:text-[#64748B]"
               />
               <button 
                 onClick={() => setShowPalette(false)}
-                className="text-xs font-mono text-muted-foreground hover:text-white px-2 py-1 rounded bg-card/60"
+                className="text-[10px] font-mono text-[#94A3B8] hover:text-white px-2 py-1 rounded bg-[#161D26] border border-[#1F2D3D]"
               >
                 ESC
               </button>
@@ -144,188 +152,187 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             <div className="p-3 max-h-[400px] overflow-y-auto space-y-4">
               {/* Drafts Section */}
               <div className="space-y-1">
-                <div className="text-[10px] font-mono text-muted-foreground uppercase px-3">
+                <div className="text-[10px] font-mono text-[#64748B] uppercase px-3">
                   Drafts & Reviewer
                 </div>
                 <button
                   onClick={() => quickNav("/drafts/ASSET-0003")}
-                  className="w-full text-left flex items-center justify-between p-2.5 rounded-xl hover:bg-white/10 transition-colors"
+                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#161D26] flex items-center justify-between text-xs transition-colors group"
                 >
                   <div className="flex items-center gap-2.5">
-                    <FileText className="w-4 h-4 text-primary" />
-                    <div>
-                      <div className="text-xs font-semibold text-white">Raw JSON Over Agent Summaries</div>
-                      <div className="text-[11px] text-muted-foreground">ASSET-0003 • PEER Engineering • Published</div>
-                    </div>
+                    <FileText className="w-4 h-4 text-[#00C9A7]" />
+                    <span className="font-semibold text-[#F1F5F9]">Raw JSON Over Agent Summaries</span>
+                    <span className="text-[10px] font-mono bg-[#00C9A7]/10 text-[#00C9A7] px-1.5 py-0.5 rounded">ASSET-0003</span>
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-                </button>
-
-                <button
-                  onClick={() => quickNav("/drafts/ASSET-0004")}
-                  className="w-full text-left flex items-center justify-between p-2.5 rounded-xl hover:bg-white/10 transition-colors"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <FileText className="w-4 h-4 text-amber-400" />
-                    <div>
-                      <div className="text-xs font-semibold text-white">The $3,800 Attic Saturation Leak</div>
-                      <div className="text-[11px] text-muted-foreground">ASSET-0004 • ICP Operations • Pending Review</div>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className="text-[11px] text-[#64748B] group-hover:text-[#00C9A7]">Review & Publish →</span>
                 </button>
               </div>
 
-              {/* Brand Directives Section */}
+              {/* Published Posts Section */}
               <div className="space-y-1">
-                <div className="text-[10px] font-mono text-muted-foreground uppercase px-3">
-                  Brand Guidelines (Google Sheet Tab)
+                <div className="text-[10px] font-mono text-[#64748B] uppercase px-3">
+                  Published Broadcasts
                 </div>
                 <button
-                  onClick={() => quickNav("/brand")}
-                  className="w-full text-left flex items-center justify-between p-2.5 rounded-xl hover:bg-white/10 transition-colors"
+                  onClick={() => quickNav("/published")}
+                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#161D26] flex items-center justify-between text-xs transition-colors group"
                 >
                   <div className="flex items-center gap-2.5">
-                    <BookOpen className="w-4 h-4 text-emerald-400" />
-                    <div>
-                      <div className="text-xs font-semibold text-white">Sheet Directives & Tone Rules</div>
-                      <div className="text-[11px] text-muted-foreground">12 Active Rules • Banned Lexicon • Proof Standards</div>
-                    </div>
+                    <Globe className="w-4 h-4 text-[#3B82F6]" />
+                    <span className="font-semibold text-[#F1F5F9]">View All Published Posts & Social Variants</span>
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className="text-[11px] text-[#64748B] group-hover:text-[#3B82F6]">4 Live →</span>
                 </button>
               </div>
 
-              {/* Fleet Section */}
+              {/* Ideas Section */}
               <div className="space-y-1">
-                <div className="text-[10px] font-mono text-muted-foreground uppercase px-3">
-                  Autonomous Agent Fleet
+                <div className="text-[10px] font-mono text-[#64748B] uppercase px-3">
+                  Idea Stream
                 </div>
                 <button
-                  onClick={() => quickNav("/fleet")}
-                  className="w-full text-left flex items-center justify-between p-2.5 rounded-xl hover:bg-white/10 transition-colors"
+                  onClick={() => quickNav("/ideas")}
+                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#161D26] flex items-center justify-between text-xs transition-colors group"
                 >
                   <div className="flex items-center gap-2.5">
-                    <Bot className="w-4 h-4 text-cyan-400" />
-                    <div>
-                      <div className="text-xs font-semibold text-white">Agent Fleet Manager</div>
-                      <div className="text-[11px] text-muted-foreground">Rex, Pip, Zip, Strategist, Writer, Editor (7 Online)</div>
-                    </div>
+                    <Sparkles className="w-4 h-4 text-[#ff6b4a]" />
+                    <span className="font-semibold text-[#F1F5F9]">High-Temperature Attic Condenser Failures (HVAC)</span>
+                    <span className="text-[10px] font-mono bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded">ICP</span>
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className="text-[11px] text-[#64748B] group-hover:text-[#ff6b4a]">Claim & Draft →</span>
                 </button>
+              </div>
+
+              {/* Quick Navigation Links */}
+              <div className="space-y-1 pt-2 border-t border-[#1F2D3D]">
+                <div className="text-[10px] font-mono text-[#64748B] uppercase px-3">
+                  Navigation
+                </div>
+                <div className="grid grid-cols-2 gap-1 px-1">
+                  <button onClick={() => quickNav("/")} className="text-left px-2.5 py-1.5 rounded-lg hover:bg-[#161D26] text-xs text-[#94A3B8] hover:text-white">
+                    ⇥ Mission Control
+                  </button>
+                  <button onClick={() => quickNav("/brand")} className="text-left px-2.5 py-1.5 rounded-lg hover:bg-[#161D26] text-xs text-[#94A3B8] hover:text-white">
+                    ⇥ Brand & Visual Studio
+                  </button>
+                  <button onClick={() => quickNav("/fleet")} className="text-left px-2.5 py-1.5 rounded-lg hover:bg-[#161D26] text-xs text-[#94A3B8] hover:text-white">
+                    ⇥ Agent Fleet (7 Workers)
+                  </button>
+                  <button onClick={() => quickNav("/telemetry")} className="text-left px-2.5 py-1.5 rounded-lg hover:bg-[#161D26] text-xs text-[#94A3B8] hover:text-white">
+                    ⇥ Cost & Telemetry
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* LEFT SIDEBAR */}
-      <aside className="w-64 border-r border-[#e5e7eb] bg-[#12242a] flex flex-col justify-between shrink-0 shadow-sm text-white">
-        <div>
-          {/* Brand Header */}
-          <div className="h-16 px-6 border-b border-[#1f343d] flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0e5c63] to-[#ff6b4a] flex items-center justify-center font-bold text-white shadow-md text-sm">
+      {/* SIDEBAR NAVIGATION */}
+      <aside className="w-64 bg-[#0F1419] border-r border-[#1F2D3D] flex flex-col justify-between p-4 shrink-0 hidden md:flex sticky top-0 h-screen overflow-y-auto">
+        <div className="space-y-6">
+          {/* LOGO & SYSTEM BADGE */}
+          <div className="flex items-center justify-between pb-4 border-b border-[#1F2D3D]">
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#00C9A7] to-[#0e5c63] flex items-center justify-center font-black text-[#070B0F] text-sm shadow-md group-hover:scale-105 transition-transform">
                 M
               </div>
               <div className="flex items-baseline">
-                <span className="font-semibold text-lg tracking-tight text-white">Minions</span>
-                <span className="text-[#ff6b4a] font-mono text-sm ml-0.5 font-bold">.AI</span>
+                <span className="font-bold text-base tracking-tight text-[#F1F5F9]">Minions</span>
+                <span className="text-[#00C9A7] font-mono text-sm font-semibold ml-0.5">.AI</span>
               </div>
             </Link>
-            <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-[#0e5c63]/40 text-[#4fd1c5] border border-[#0e5c63]/60 font-semibold tracking-wide">
-              OPS
+
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#161D26] text-[#00C9A7] border border-[#1F2D3D]">
+              COCKPIT
             </span>
           </div>
 
-          {/* Quick Trigger Button */}
-          <div className="p-4">
-            <button
-              onClick={triggerHarvest}
-              disabled={isHarvesting}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#0e5c63] to-[#128a96] hover:opacity-95 text-white text-xs font-semibold py-2.5 px-4 rounded-xl shadow-md transition-all disabled:opacity-50"
-            >
-              {isHarvesting ? (
-                <>
-                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Harvesting Signals...</span>
-                </>
-              ) : (
-                <>
-                  <Zap className="w-3.5 h-3.5 text-[#ff6b4a]" />
-                  <span>Trigger Idea Harvester</span>
-                </>
-              )}
-            </button>
-          </div>
+          {/* QUICK TRIGGER BUTTON */}
+          <button
+            onClick={triggerHarvest}
+            disabled={isHarvesting}
+            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#00C9A7] to-[#00A88A] text-[#070B0F] hover:opacity-95 text-xs font-bold py-2.5 px-3 rounded-xl shadow-lg shadow-[#00C9A7]/10 transition-all cursor-pointer disabled:opacity-50"
+          >
+            <Zap className={`w-3.5 h-3.5 ${isHarvesting ? "animate-spin" : ""}`} />
+            <span>{isHarvesting ? "Harvesting Signals..." : "Trigger Idea Harvester"}</span>
+          </button>
 
-          {/* Navigation Links */}
-          <nav className="px-3 space-y-1 mt-1">
-            <div className="px-3 py-1.5 text-[11px] font-mono font-semibold uppercase text-slate-400 tracking-wider">
+          {/* NAVIGATION LINKS */}
+          <div className="space-y-1">
+            <div className="text-[10px] font-mono font-bold tracking-wider text-[#64748B] uppercase px-3 mb-2">
               Agent Control
             </div>
+
             {navItems.map((item) => {
               const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
               const Icon = item.icon;
 
               return (
                 <Link
-                  key={item.name}
+                  key={item.href}
                   href={item.href}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
+                  className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                     isActive
-                      ? "bg-[#0e5c63] text-white shadow-sm font-semibold"
-                      : "text-slate-300 hover:text-white hover:bg-white/5"
+                      ? "bg-[#161D26] text-[#00C9A7] font-bold border-l-2 border-[#00C9A7] shadow-xs"
+                      : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26]"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`} />
+                  <div className="flex items-center gap-2.5">
+                    <Icon className={`w-4 h-4 ${isActive ? "text-[#00C9A7]" : "text-[#64748B]"}`} />
                     <span>{item.name}</span>
                   </div>
+
                   {item.badge && (
-                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${item.badgeColor}`}>
+                    <span
+                      className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
+                        isActive
+                          ? "bg-[#00C9A7]/20 text-[#00C9A7] border-[#00C9A7]/40"
+                          : item.badgeColor || "bg-[#161D26] text-[#94A3B8] border-[#1F2D3D]"
+                      }`}
+                    >
                       {item.badge}
                     </span>
                   )}
                 </Link>
               );
             })}
-          </nav>
+          </div>
         </div>
 
-        {/* Sidebar Footer */}
-        <div className="p-4 border-t border-[#1f343d] space-y-3">
-          <div className="bg-[#0b171b] p-3 rounded-xl border border-[#1f343d] space-y-1.5">
+        {/* SIDEBAR FOOTER (PERSISTENT AMBIENT STATUS) */}
+        <div className="pt-4 border-t border-[#1F2D3D] space-y-3">
+          <div className="p-3 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-1.5">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-400 font-medium">Fleet Operational</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[#94A3B8] font-mono">Fleet Operational</span>
+              <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-ping" />
             </div>
-            <div className="flex items-center justify-between text-[11px] font-mono">
-              <span className="text-slate-400">7 Workers</span>
-              <span className="text-white font-bold">100% Health</span>
+            <div className="flex items-center justify-between text-xs font-semibold text-[#F1F5F9]">
+              <span>7 Workers</span>
+              <span className="text-[#00C9A7]">100% Health</span>
             </div>
-            <div className="text-[10px] text-slate-400 pt-1 border-t border-[#1f343d]/60 flex justify-between">
+            <div className="text-[10px] text-[#64748B] font-mono flex items-center justify-between pt-1 border-t border-[#1F2D3D]">
               <span>Avg Cost / Post:</span>
-              <span className="text-[#ff6b4a] font-mono font-bold">$0.038</span>
+              <span className="text-[#00C9A7] font-semibold">$0.038</span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between px-1">
+          <div className="flex items-center justify-between text-xs px-1 text-[#94A3B8]">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-[#0e5c63] text-white font-bold text-xs flex items-center justify-center border border-[#1f343d]">
+              <div className="w-6 h-6 rounded-full bg-[#00C9A7]/20 text-[#00C9A7] font-bold text-xs flex items-center justify-center border border-[#00C9A7]/40">
                 P
               </div>
-              <div className="text-left">
-                <div className="text-xs font-semibold text-white">Parvej Shah</div>
-                <div className="text-[10px] text-slate-400">Admin / Lead</div>
+              <div className="text-[11px] leading-tight">
+                <div className="font-semibold text-[#F1F5F9]">Parvej Shah</div>
+                <div className="text-[10px] text-[#64748B]">Admin / Lead</div>
               </div>
             </div>
+
             <a
               href="https://getminions.ai"
               target="_blank"
-              rel="noopener noreferrer"
-              className="text-slate-400 hover:text-white p-1"
+              rel="noreferrer"
+              className="text-[#64748B] hover:text-[#00C9A7] transition-colors"
               title="Open Public Site"
             >
               <ExternalLink className="w-3.5 h-3.5" />
@@ -335,27 +342,27 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* TOP APP HEADER */}
-        <header className="h-16 border-b border-[#e5e7eb] bg-white px-8 flex items-center justify-between sticky top-0 z-30 shadow-xs">
-          <div className="flex items-center gap-4 flex-1 max-w-xl">
+      <div className="flex-1 flex flex-col min-w-0 bg-[#070B0F]">
+        {/* TOPBAR */}
+        <header className="h-16 border-b border-[#1F2D3D] bg-[#0F1419]/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
+          <div className="flex items-center gap-3 flex-1 max-w-md">
             <button
               onClick={() => setShowPalette(true)}
-              className="w-full flex items-center justify-between bg-[#f3f4f6] hover:bg-[#eaecee] border border-[#e5e7eb] rounded-xl px-3.5 py-2 text-xs text-[#6b7280] transition-all cursor-pointer text-left"
+              className="w-full flex items-center justify-between px-3.5 py-1.5 rounded-xl bg-[#161D26] border border-[#1F2D3D] text-xs text-[#64748B] hover:border-[#00C9A7]/50 hover:text-[#94A3B8] transition-all cursor-pointer shadow-xs"
             >
               <div className="flex items-center gap-2">
-                <Search className="w-4 h-4 text-[#9ca3af]" />
+                <Search className="w-3.5 h-3.5 text-[#00C9A7]" />
                 <span>Search ideas, drafts, agents, published links, or R2 assets...</span>
               </div>
-              <kbd className="font-mono text-[10px] bg-white px-1.5 py-0.5 rounded border border-[#d1d5db] text-[#4b5563]">
+              <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono bg-[#070B0F] border border-[#1F2D3D] rounded text-[#94A3B8]">
                 ⌘K
               </kbd>
             </button>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-[#161D26] border border-[#1F2D3D] text-[11px] font-mono text-[#94A3B8]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00C9A7]" />
               <span>Cloudflare R2: Active</span>
             </div>
 
@@ -363,7 +370,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
               href="https://getminions.ai/blog"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 bg-[#12242a] hover:bg-[#1f343d] text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition-all shadow-sm"
+              className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-[#070B0F] bg-[#00C9A7] hover:bg-[#00A88A] px-3.5 py-1.5 rounded-xl transition-all shadow-sm"
             >
               <span>Live Blog</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -371,21 +378,18 @@ export default function DashboardShell({ children }: DashboardShellProps) {
           </div>
         </header>
 
-        {/* Global Toast Notification */}
+        {/* NOTIFICATION TOAST */}
         {notification && (
-          <div className="bg-[#12242a] text-white px-6 py-2.5 border-b border-[#0e5c63] flex items-center justify-between text-xs animate-in slide-in-from-top duration-300">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#ff6b4a] animate-pulse" />
-              <span>{notification}</span>
-            </div>
-            <button onClick={() => setNotification(null)} className="text-slate-400 hover:text-white text-xs">
-              ✕
+          <div className="bg-[#00C9A7]/20 border-b border-[#00C9A7]/40 px-6 py-2 text-xs font-medium text-[#00C9A7] flex items-center justify-between animate-in slide-in-from-top-2">
+            <span>{notification}</span>
+            <button onClick={() => setNotification(null)} className="hover:opacity-75">
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
 
-        {/* PAGE CONTENT CONTAINER */}
-        <main className="flex-1 p-8 overflow-y-auto">
+        {/* PAGE BODY */}
+        <main className="p-6 md:p-8 flex-1 max-w-7xl w-full mx-auto">
           {children}
         </main>
       </div>

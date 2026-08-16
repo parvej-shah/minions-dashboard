@@ -3,12 +3,15 @@
 export type AudienceLane = "ICP" | "PEER" | "BRIDGE";
 export type TargetTrade = "HVAC" | "Plumbing" | "Electrical" | "Roofing" | "Pest Control" | "Voice AI" | "Systems Architecture" | "Operations";
 export type ContentPillar = "Operations" | "Engineering" | "Revenue" | "Unit Economics" | "Field Playbook";
-export type IdeaSource = "GOOGLE_TRENDS" | "HACKER_NEWS" | "REDDIT_R_LOCALLAMA" | "TRADE_NEWS" | "MANUAL_INJECTION" | "COMPETITOR_INTEL";
-export type IdeaStatus = "HARVESTED" | "REFINED" | "PICKED" | "DRAFTING" | "QUEUED" | "FAILED" | "DISCARDED";
+export type IdeaSource = "GOOGLE_TRENDS" | "REDDIT" | "HACKER_NEWS" | "MANUAL" | "REDDIT_R_LOCALLAMA" | "TRADE_NEWS" | "MANUAL_INJECTION" | "COMPETITOR_INTEL";
+export type IdeaStatus = "HARVESTED" | "CLAIMED" | "DRAFTED" | "PUBLISHED" | "REJECTED" | "REFINED" | "PICKED" | "DRAFTING" | "QUEUED" | "FAILED" | "DISCARDED";
 
 export interface IdeaItem {
   id: string;
+  ideaId?: string;
+  title?: string;
   raw_idea: string;
+  excerpt?: string;
   angle: string;
   audience: AudienceLane;
   target_trade?: TargetTrade | string;
@@ -16,6 +19,7 @@ export interface IdeaItem {
   source: IdeaSource | string;
   status: IdeaStatus;
   estimated_cost?: number;
+  tags?: string[];
   created_at: string;
   updated_at: string;
 }

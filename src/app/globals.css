@@ -1,68 +1,88 @@
 @import "tailwindcss";
 
 :root {
-  --primary-ink: #12242a;
-  --brand-teal: #0e5c63;
-  --brand-teal-light: #167a84;
-  --brand-teal-dark: #0a464c;
-  --brand-coral: #ff6b4a;
-  --brand-coral-hover: #ff522b;
-  --brand-coral-subtle: #fff1ed;
-  --brand-cream: #fff8f0;
-  --brand-cream-border: #f0e6da;
-  --brand-bg: #faf9f6;
-  --card-bg: #ffffff;
-  --slate-text: #4b5563;
-  --slate-subtle: #6b7280;
-  --border-light: #e5e7eb;
+  --bg: #070B0F;
+  --surface: #0F1419;
+  --surface-2: #161D26;
+  --surface-3: #1E2733;
+  --border: #1F2D3D;
+  --border-2: #2A3D52;
+  --teal: #00C9A7;
+  --teal-dim: #00A88A;
+  --teal-brand: #0e5c63;
+  --teal-muted: rgba(0, 201, 167, 0.12);
+  --teal-glow: rgba(0, 201, 167, 0.06);
+  --coral: #ff6b4a;
+  --cream: #fff8f0;
+  --ink: #12242a;
+  --amber: #F59E0B;
+  --red: #EF4444;
+  --blue: #3B82F6;
+  --purple: #8B5CF6;
+  --text: #F1F5F9;
+  --text-2: #94A3B8;
+  --text-3: #64748B;
+  --code-bg: #0D1117;
 }
 
 @layer base {
   body {
-    background-color: var(--brand-bg);
-    color: var(--primary-ink);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Display", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 }
 
-/* Custom Scrollbars */
+/* Custom Sleek Dark Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: var(--border-2);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: var(--text-3);
 }
 
-/* Glass & Glow utilities */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(229, 231, 235, 0.8);
+/* Apple / Stripe Glass & Elevation */
+.cockpit-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.dark-terminal {
-  background: #0c0d12;
-  border: 1px solid #1f2430;
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+.cockpit-card:hover {
+  background: var(--surface-2);
+  border-color: var(--border-2);
 }
 
-.hero-glow-teal {
-  box-shadow: 0 0 60px -15px rgba(14, 92, 99, 0.25);
+.cockpit-card-interactive {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.hero-glow-coral {
-  box-shadow: 0 0 60px -15px rgba(255, 107, 74, 0.25);
+.cockpit-card-interactive:hover {
+  background: var(--surface-2);
+  border-color: var(--teal);
+  box-shadow: 0 8px 24px -8px var(--teal-muted);
+}
+
+.prose-reading {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Georgia", serif;
+  font-size: 16.5px;
+  line-height: 1.75;
+  color: #E2E8F0;
 }
