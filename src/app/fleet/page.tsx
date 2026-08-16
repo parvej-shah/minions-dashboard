@@ -1,129 +1,76 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import Link from "next/link";
 import {
   Bot,
   Zap,
   CheckCircle2,
-  Sliders,
   Cpu,
   Clock,
   ShieldCheck,
-  Settings,
-  Save,
-  Activity,
   Sparkles,
-  RefreshCw,
   Layers,
-  Terminal,
-  AlertCircle
+  FileText,
+  Palette,
+  ArrowRight,
+  Globe,
+  Radio
 } from "lucide-react";
-import { fetchAgentFleet } from "@/lib/api";
-import { AgentWorkerItem } from "@/lib/types";
 
-const ROLE_BADGE_MAP: Record<string, string> = {
-  "WORKER-001": "MARKETING_STRATEGIST",
-  "WORKER-002": "CONTENT_WRITER",
-  "WORKER-003": "EDITORIAL_REVIEWER",
-  "WORKER-004": "VISUAL_ART_DIRECTOR"
-};
-
-const WORKER_AVATAR_MAP: Record<string, string> = {
-  "WORKER-001": "/images/social-avatars/ai-generated/linkedin_profile_avatar_ai.jpg",
-  "WORKER-002": "/images/social-avatars/ai-generated/twitter_profile_avatar_ai.jpg",
-  "WORKER-003": "/images/mascots/otto.png",
-  "WORKER-004": "/images/social-avatars/ai-generated/github_profile_avatar_ai.jpg"
-};
-
-const QWEN_MODELS = [
-  { value: "qwen3.7-max", label: "qwen3.7-max (High-reasoning strategist)" },
-  { value: "qwen-plus", label: "qwen-plus (Fast long-form writer)" },
-  { value: "qwen3.7-flash", label: "qwen3.7-flash (Low-latency editor)" },
-  { value: "qwen-image-3.0", label: "qwen-image-3.0 (2K Visual Studio)" }
+const WORKER_DETAILS = [
+  {
+    id: "WORKER-001",
+    name: "Marketing Strategist",
+    simpleRole: "Topic & Angle Formulator",
+    description: "Analyzes real-time search trends and technician forum discussions to formulate high-converting, contrarian article angles for HVAC, plumbing, and electrical contractors.",
+    model: "qwen3.7-max",
+    modelBadge: "High Reasoning",
+    n8nStage: "Workflow 01 · Signal Harvester",
+    avatar: "/images/social-avatars/ai-generated/linkedin_profile_avatar_ai.jpg",
+    status: "ACTIVE",
+    schedule: "Scheduled intake (Tue/Fri 06:00)"
+  },
+  {
+    id: "WORKER-002",
+    name: "Staff Writer",
+    simpleRole: "Article & Social Post Drafter",
+    description: "Drafts comprehensive 800–1,200 word deep dives using the Stripe/Linear editorial cadence. Simultaneously prepares ready-to-post variants for LinkedIn, Facebook, and Twitter.",
+    model: "qwen-plus",
+    modelBadge: "Long-Form Writer",
+    n8nStage: "Workflow 02 · Idea to Asset",
+    avatar: "/images/social-avatars/ai-generated/twitter_profile_avatar_ai.jpg",
+    status: "ACTIVE",
+    schedule: "Triggers when an idea is claimed"
+  },
+  {
+    id: "WORKER-003",
+    name: "Lead Editorial Reviewer",
+    simpleRole: "Claims Gate & Quality Verifier",
+    description: "Evaluates every numeric claim, pricing metric, and field benchmark before publication. Flags unproven assertions so you can review them with 1 click in the Editorial Studio.",
+    model: "qwen3.7-flash",
+    modelBadge: "Quality Gate",
+    n8nStage: "Workflow 02 · Claims Gate",
+    avatar: "/images/mascots/otto.png",
+    status: "ACTIVE",
+    schedule: "Automated pre-review gate"
+  },
+  {
+    id: "WORKER-004",
+    name: "Visual Art Director",
+    simpleRole: "2K Cover Art Creator",
+    description: "Synthesizes tactile 2K commercial studio flat-lay cover images with stitched leather clipboards, metallic clips, and sleek typography tailored for each article topic.",
+    model: "qwen-image-3.0",
+    modelBadge: "Visual Studio",
+    n8nStage: "Workflow 02 · Cover Synthesis",
+    avatar: "/images/social-avatars/ai-generated/github_profile_avatar_ai.jpg",
+    status: "ACTIVE",
+    schedule: "Automated multimodal engine"
+  }
 ];
 
 export default function FleetPage() {
-  const [fleet, setFleet] = useState<AgentWorkerItem[]>([]);
-  const [selectedWorker, setSelectedWorker] = useState<AgentWorkerItem | null>(null);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [notification, setNotification] = useState<string | null>(null);
-
-  // Form state for selected worker
-  const [editModel, setEditModel] = useState<string>("");
-  const [editStatus, setEditStatus] = useState<"ACTIVE" | "IDLE" | "PAUSED">("ACTIVE");
-  const [editPrompt, setEditPrompt] = useState<string>("");
-
-  useEffect(() => {
-    async function loadFleet() {
-      const data = await fetchAgentFleet();
-      // Filter strictly to content pipeline workers per PRD AF-01
-      const contentFleet = data.filter(w => ["WORKER-001", "WORKER-002", "WORKER-003", "WORKER-004"].includes(w.id));
-      setFleet(contentFleet);
-      if (contentFleet.length > 0) {
-        setSelectedWorker(contentFleet[0]);
-        setEditModel(contentFleet[0].model);
-        setEditStatus(contentFleet[0].status);
-        setEditPrompt(contentFleet[0].system_prompt || "");
-      }
-    }
-    loadFleet();
-  }, []);
-
-  const handleSelectWorker = (worker: AgentWorkerItem) => {
-    setSelectedWorker(worker);
-    setEditModel(worker.model);
-    setEditStatus(worker.status);
-    setEditPrompt(worker.system_prompt || "");
-  };
-
-  const handleUpdateAgent = async () => {
-    if (!selectedWorker) return;
-    setIsUpdating(true);
-
-    try {
-      // Trigger API update per PRD (PUT /api/agents/:id)
-      const res = await fetch(`/api/agents/${selectedWorker.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: editModel,
-          status: editStatus,
-          system_prompt: editPrompt
-        })
-      });
-
-      // Update local state
-      const updatedFleet = fleet.map((w) =>
-        w.id === selectedWorker.id
-          ? {
-              ...w,
-              model: editModel,
-              status: editStatus,
-              system_prompt: editPrompt,
-              last_active: "Just now"
-            }
-          : w
-      );
-
-      setFleet(updatedFleet);
-      setSelectedWorker({
-        ...selectedWorker,
-        model: editModel,
-        status: editStatus,
-        system_prompt: editPrompt,
-        last_active: "Just now"
-      });
-
-      setNotification(`Agent ${selectedWorker.name} updated. Prompt synced to n8n runtime.`);
-      setTimeout(() => setNotification(null), 4000);
-    } catch (err) {
-      setNotification(`Failed to update ${selectedWorker.name}.`);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  const activeCount = fleet.filter((w) => w.status === "ACTIVE").length;
+  const [fleet] = useState(WORKER_DETAILS);
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
@@ -132,290 +79,197 @@ export default function FleetPage() {
         <div>
           <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#00C9A7] uppercase mb-1">
             <Bot className="w-3.5 h-3.5" />
-            <span>Multi-Agent Autonomous Fleet</span>
+            <span>Autonomous Content Pipeline</span>
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-[#F1F5F9]">
-            Agent Fleet Manager
+            Agent Fleet Status
           </h1>
           <p className="text-sm text-[#94A3B8] mt-1">
-            Manage system prompts, model provisioning, and operational status across marketing and dispatch workers.
+            Your 4 specialized AI workers operate continuously in the background to harvest ideas, write drafts, verify claims, and generate cover art.
           </p>
         </div>
 
         {/* Fleet Health Indicator */}
-        <div className="flex items-center gap-3 self-start md:self-auto bg-[#0F1419] px-4 py-2 rounded-xl border border-[#1F2D3D]">
+        <div className="flex items-center gap-3 self-start md:self-auto bg-[#0F1419] px-4 py-2.5 rounded-xl border border-[#1F2D3D] shadow-sm">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-[#00C9A7] animate-pulse" />
             <span className="text-xs font-mono font-bold text-[#F1F5F9]">
-              {activeCount} of {fleet.length} Active
+              4 of 4 Active Workers
             </span>
           </div>
           <span className="text-[#1F2D3D]">|</span>
           <span className="text-xs font-mono text-[#00C9A7] font-semibold">
-            100% Fleet Health
+            100% Operational
           </span>
         </div>
       </div>
 
-      {/* Notification Toast */}
-      {notification && (
-        <div className="p-4 rounded-xl bg-[#0F1419] border border-[#00C9A7]/40 text-xs font-medium flex items-center justify-between shadow-lg shadow-[#00C9A7]/5">
-          <div className="flex items-center gap-2.5 text-[#F1F5F9]">
-            <CheckCircle2 className="w-4 h-4 text-[#00C9A7]" />
-            <span>{notification}</span>
+      {/* HOW THE PIPELINE WORKS: VISUAL WORKFLOW BANNER */}
+      <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4">
+        <div className="flex items-center justify-between border-b border-[#1F2D3D] pb-3">
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-[#00C9A7]" />
+            <h2 className="text-sm font-bold text-[#F1F5F9] uppercase tracking-wider font-mono">
+              Autonomous Content Pipeline Flow
+            </h2>
           </div>
-          <span className="text-[11px] font-mono text-[#00C9A7] uppercase tracking-wider">Live Synced</span>
+          <span className="text-xs text-[#94A3B8] font-mono">Fully Automated via n8n</span>
         </div>
-      )}
 
-      {/* TWO-COLUMN SPLIT PANEL LAYOUT */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* LEFT PANEL: VERTICAL LIST OF 7 AGENT CARDS (5 COLS) */}
-        <div className="lg:col-span-5 space-y-3">
-          <div className="flex items-center justify-between px-1 text-xs font-mono text-[#94A3B8]">
-            <span className="uppercase tracking-wider">PROVISIONED WORKERS ({fleet.length})</span>
-            <span>MODEL ROUTING</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+          <div className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-mono text-[#00C9A7] font-bold">STAGE 1</span>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-[#070B0F] text-[#94A3B8] font-mono">Worker 01</span>
+            </div>
+            <h3 className="text-xs font-bold text-[#F1F5F9]">Harvest Topic Signals</h3>
+            <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+              Finds real contractor pain points and search queries, formatting them into the Idea Stream.
+            </p>
           </div>
 
-          <div className="space-y-2.5">
-            {fleet.map((worker) => {
-              const isSelected = selectedWorker?.id === worker.id;
-              const roleBadge = ROLE_BADGE_MAP[worker.id] || worker.role.toUpperCase().replace(/\s+/g, "_").slice(0, 18);
+          <div className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-mono text-[#3B82F6] font-bold">STAGE 2</span>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-[#070B0F] text-[#94A3B8] font-mono">Worker 02</span>
+            </div>
+            <h3 className="text-xs font-bold text-[#F1F5F9]">Draft Article & Social Posts</h3>
+            <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+              Writes full-length deep dives and crafts matching LinkedIn, Facebook, and Twitter copy.
+            </p>
+          </div>
 
-              return (
-                <button
-                  key={worker.id}
-                  onClick={() => handleSelectWorker(worker)}
-                  className={`w-full p-4 rounded-2xl border text-left transition-all cursor-pointer group flex flex-col gap-2.5 ${
-                    isSelected
-                      ? "bg-[#161D26] border-[#00C9A7] shadow-lg shadow-[#00C9A7]/5 ring-1 ring-[#00C9A7]/30"
-                      : "bg-[#0F1419] border-[#1F2D3D] hover:bg-[#161D26]/70 hover:border-[#2A3D52]"
-                  }`}
-                >
-                  <div className="flex items-start justify-between w-full">
-                    <div className="flex items-center gap-3">
-                      {/* Avatar Thumbnail */}
-                      <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#070B0F] border border-[#1F2D3D] shrink-0 flex items-center justify-center">
-                        <img
-                          src={WORKER_AVATAR_MAP[worker.id] || "/images/mascots/rex.png"}
-                          alt={worker.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
+          <div className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-mono text-[#ff6b4a] font-bold">STAGE 3</span>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-[#070B0F] text-[#94A3B8] font-mono">Worker 03 & 04</span>
+            </div>
+            <h3 className="text-xs font-bold text-[#F1F5F9]">Verify Claims & Create Art</h3>
+            <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+              Checks factual accuracy and generates photorealistic 2K studio flat-lay cover images.
+            </p>
+          </div>
 
-                      <div className="space-y-0.5 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-mono text-[#64748B] font-bold">
-                            {worker.id}
-                          </span>
-                          <h3 className={`text-sm font-bold transition-colors truncate ${
-                            isSelected ? "text-[#00C9A7]" : "text-[#F1F5F9] group-hover:text-[#00C9A7]"
-                          }`}>
-                            {worker.name}
-                          </h3>
-                        </div>
-                        <p className="text-xs text-[#94A3B8] line-clamp-1">
-                          {worker.role}
-                        </p>
-                      </div>
-                    </div>
+          <div className="p-4 rounded-xl bg-[#161D26] border border-[#00C9A7]/40 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-mono text-[#00C9A7] font-bold">STAGE 4</span>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-[#00C9A7]/10 text-[#00C9A7] font-mono font-semibold">Your Cockpit</span>
+            </div>
+            <h3 className="text-xs font-bold text-[#F1F5F9]">Review & 1-Click Publish</h3>
+            <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+              Draft appears in your Editorial Studio ready for your quick review and 1-click live broadcast!
+            </p>
+          </div>
+        </div>
+      </div>
 
-                    {/* Status Dot */}
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <span
-                        className={`w-2 h-2 rounded-full ${
-                          worker.status === "ACTIVE"
-                            ? "bg-[#00C9A7] shadow-[0_0_8px_#00C9A7]"
-                            : worker.status === "PAUSED"
-                            ? "bg-[#F59E0B]"
-                            : "bg-[#64748B]"
-                        }`}
+      {/* 4 WORKER CARDS */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-sm font-mono font-bold uppercase text-[#94A3B8] tracking-wider">
+            Active Content Pipeline Workers (4)
+          </h2>
+          <span className="text-xs text-[#00C9A7] font-mono">Zero Manual Config Needed</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {fleet.map((worker) => (
+            <div
+              key={worker.id}
+              className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] hover:border-[#00C9A7]/40 transition-all flex flex-col justify-between space-y-5 shadow-sm group"
+            >
+              <div className="space-y-4">
+                {/* Header */}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#070B0F] border border-[#1F2D3D] shrink-0 flex items-center justify-center">
+                      <img
+                        src={worker.avatar}
+                        alt={worker.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
-                      <span className="text-[10px] font-mono uppercase text-[#94A3B8]">
-                        {worker.status}
-                      </span>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-base font-bold text-[#F1F5F9]">{worker.name}</h3>
+                        <span className="w-2 h-2 rounded-full bg-[#00C9A7]"></span>
+                      </div>
+                      <p className="text-xs text-[#00C9A7] font-semibold">{worker.simpleRole}</p>
                     </div>
                   </div>
 
-                  {/* Badges & Timestamp */}
-                  <div className="flex items-center justify-between pt-1 border-t border-[#1F2D3D]/50 text-[11px] font-mono">
-                    <div className="flex items-center gap-2">
-                      <span className="bg-[#1E2733] text-[#00C9A7] px-2 py-0.5 rounded text-[10px] font-semibold border border-[#1F2D3D]">
-                        {roleBadge}
-                      </span>
-                      <span className="bg-[#070B0F] text-[#94A3B8] px-2 py-0.5 rounded text-[10px] border border-[#1F2D3D]">
-                        {worker.model}
-                      </span>
-                    </div>
-
-                    <span className="text-[10px] text-[#64748B]">
-                      {worker.last_active || "Active"}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* RIGHT PANEL: SELECTED AGENT DETAIL EDITOR (7 COLS) */}
-        <div className="lg:col-span-7">
-          {selectedWorker ? (
-            <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-6 shadow-sm">
-              {/* Card Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#1F2D3D]">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#070B0F] border border-[#00C9A7]/40 shrink-0 p-1 flex items-center justify-center">
-                    <img
-                      src={WORKER_AVATAR_MAP[selectedWorker.id] || "/images/mascots/rex.png"}
-                      alt={selectedWorker.name}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-bold text-[#00C9A7]">
-                        {selectedWorker.id}
-                      </span>
-                      <span className="text-[#64748B]">·</span>
-                      <span className="text-xs font-mono text-[#94A3B8]">
-                        {ROLE_BADGE_MAP[selectedWorker.id] || "AGENT_WORKER"}
-                      </span>
-                    </div>
-                    <h2 className="text-xl font-bold text-[#F1F5F9] mt-0.5">
-                      {selectedWorker.name}
-                    </h2>
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleUpdateAgent}
-                  disabled={isUpdating}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold shadow-lg shadow-[#00C9A7]/20 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
-                >
-                  {isUpdating ? (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      <span>Syncing...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-3.5 h-3.5" />
-                      <span>Update Agent</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {/* Read-Only Identity Fields */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-mono font-bold text-[#94A3B8] uppercase">
-                    Agent Name
-                  </label>
-                  <div className="px-3.5 py-2.5 rounded-xl bg-[#161D26] border border-[#1F2D3D] text-xs font-medium text-[#F1F5F9]">
-                    {selectedWorker.name}
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-mono font-bold text-[#94A3B8] uppercase">
-                    Operational Role
-                  </label>
-                  <div className="px-3.5 py-2.5 rounded-xl bg-[#161D26] border border-[#1F2D3D] text-xs font-medium text-[#94A3B8] truncate">
-                    {selectedWorker.role}
-                  </div>
-                </div>
-              </div>
-
-              {/* Model Dropdown & Status Toggle */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Model Selector */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-mono font-bold text-[#94A3B8] uppercase flex items-center justify-between">
-                    <span>Model Routing</span>
-                    <span className="text-[10px] text-[#00C9A7]">DashScope</span>
-                  </label>
-                  <select
-                    value={editModel}
-                    onChange={(e) => setEditModel(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#161D26] border border-[#1F2D3D] text-xs font-mono text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7] transition-all cursor-pointer"
-                  >
-                    {QWEN_MODELS.map((m) => (
-                      <option key={m.value} value={m.value} className="bg-[#0F1419] text-[#F1F5F9]">
-                        {m.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Status Toggle */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-mono font-bold text-[#94A3B8] uppercase">
-                    Operational Status
-                  </label>
-                  <div className="grid grid-cols-3 gap-1.5 bg-[#161D26] p-1 rounded-xl border border-[#1F2D3D]">
-                    {(["ACTIVE", "IDLE", "PAUSED"] as const).map((st) => (
-                      <button
-                        key={st}
-                        type="button"
-                        onClick={() => setEditStatus(st)}
-                        className={`py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                          editStatus === st
-                            ? st === "ACTIVE"
-                              ? "bg-[#00C9A7] text-[#070B0F]"
-                              : st === "PAUSED"
-                              ? "bg-[#F59E0B] text-[#070B0F]"
-                              : "bg-[#64748B] text-[#F1F5F9]"
-                            : "text-[#94A3B8] hover:text-[#F1F5F9]"
-                        }`}
-                      >
-                        {st}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* System Prompt & Behavioral Rules Editor */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-[#F1F5F9] flex items-center gap-1.5">
-                    <Terminal className="w-3.5 h-3.5 text-[#00C9A7]" />
-                    <span>System Prompt & Behavioral Rules — Real-time LLM Instruction</span>
-                  </label>
-                  <span className="text-[11px] font-mono text-[#00C9A7]">
-                    Live Prompt Injection
+                  <span className="text-[11px] font-mono font-bold px-2.5 py-1 rounded bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/20 shrink-0">
+                    {worker.id}
                   </span>
                 </div>
 
-                <p className="text-xs text-[#94A3B8]">
-                  Any update here is immediately used on the next n8n workflow run. Enter strict rules, banned lexicon references, and output format constraints.
+                {/* Description in plain English */}
+                <p className="text-xs text-[#94A3B8] leading-relaxed">
+                  {worker.description}
                 </p>
 
-                <textarea
-                  value={editPrompt}
-                  onChange={(e) => setEditPrompt(e.target.value)}
-                  rows={10}
-                  className="w-full p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-xs font-mono text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7] focus:ring-1 focus:ring-[#00C9A7]/20 leading-relaxed transition-all resize-y"
-                  placeholder="Enter system prompt for this agent worker..."
-                />
+                {/* Operational Details */}
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#1F2D3D] text-[11px]">
+                  <div className="space-y-0.5">
+                    <span className="text-[#64748B] font-mono">AI Model:</span>
+                    <div className="text-[#F1F5F9] font-mono font-semibold flex items-center gap-1.5">
+                      <Cpu className="w-3 h-3 text-[#00C9A7]" />
+                      <span>{worker.model}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-0.5">
+                    <span className="text-[#64748B] font-mono">Pipeline Stage:</span>
+                    <div className="text-[#F1F5F9] font-medium truncate">
+                      {worker.n8nStage}
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Footer Audit Notice */}
-              <div className="flex items-center justify-between pt-2 border-t border-[#1F2D3D]/50 text-xs font-mono text-[#64748B]">
+              {/* Footer status bar */}
+              <div className="pt-3 border-t border-[#1F2D3D] flex items-center justify-between text-xs font-mono text-[#64748B]">
                 <div className="flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#00C9A7]" />
-                  <span>Config endpoint: GET /api/agents</span>
+                  <Clock className="w-3.5 h-3.5 text-[#00C9A7]" />
+                  <span>{worker.schedule}</span>
                 </div>
-                <span>Total Lifetime Runs: {selectedWorker.total_runs}</span>
+                <span className="text-[#00C9A7] font-semibold">● Online</span>
               </div>
             </div>
-          ) : (
-            <div className="p-12 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] text-center text-[#94A3B8] text-xs font-mono">
-              Select an agent from the left panel to edit configuration.
-            </div>
-          )}
+          ))}
+        </div>
+      </div>
+
+      {/* QUICK WORKFLOW SHORTCUTS FOR MARKETING DIRECTOR */}
+      <div className="p-6 rounded-2xl bg-gradient-to-r from-[#0F1419] to-[#161D26] border border-[#1F2D3D] flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="space-y-1 text-center md:text-left">
+          <h3 className="text-base font-bold text-[#F1F5F9]">Ready to review fresh content?</h3>
+          <p className="text-xs text-[#94A3B8]">
+            Jump straight into the Editorial Studio to approve drafts and broadcast live to the blog and social channels.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 flex-wrap justify-center">
+          <Link
+            href="/editorial"
+            className="px-4 py-2.5 rounded-xl bg-[#00C9A7] hover:bg-[#00B594] text-[#070B0F] font-bold text-xs flex items-center gap-2 transition-all shadow-lg shadow-[#00C9A7]/10"
+          >
+            <FileText className="w-4 h-4" />
+            <span>Open Editorial Studio →</span>
+          </Link>
+          <Link
+            href="/ideas"
+            className="px-4 py-2.5 rounded-xl bg-[#0F1419] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#F1F5F9] font-medium text-xs flex items-center gap-2 transition-colors"
+          >
+            <Sparkles className="w-4 h-4 text-[#00C9A7]" />
+            <span>View Idea Stream</span>
+          </Link>
+          <Link
+            href="/published"
+            className="px-4 py-2.5 rounded-xl bg-[#0F1419] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#F1F5F9] font-medium text-xs flex items-center gap-2 transition-colors"
+          >
+            <Globe className="w-4 h-4 text-[#3B82F6]" />
+            <span>Published Posts</span>
+          </Link>
         </div>
       </div>
     </div>
