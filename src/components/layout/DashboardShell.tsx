@@ -100,8 +100,8 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   // Auth modal state
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<AdminUser | null>({
-    email: "xbitlab@gmail.com",
-    name: "Parvej Shah",
+    email: "xpeedlab@gmail.com",
+    name: "Parvej (Lead Admin)",
     role: "MARKETING_DIRECTOR",
     authenticated_at: new Date().toISOString()
   });
@@ -342,8 +342,8 @@ export default function DashboardShell({ children }: DashboardShellProps) {
                 P
               </div>
               <div className="text-[11px] leading-tight text-left">
-                <div className="font-semibold text-[#F1F5F9] truncate max-w-[120px]">{currentUser?.name || "Parvej Shah"}</div>
-                <div className="text-[10px] text-[#64748B] font-mono truncate max-w-[120px]">{currentUser?.email || "xbitlab@gmail.com"}</div>
+                <div className="font-semibold text-[#F1F5F9] truncate max-w-[120px]">{currentUser?.name || "Parvej (Lead Admin)"}</div>
+                <div className="text-[10px] text-[#64748B] font-mono truncate max-w-[120px]">{currentUser?.email || "xpeedlab@gmail.com"}</div>
               </div>
             </div>
 
@@ -411,7 +411,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
                   <div className="w-6 h-6 rounded-full bg-[#ff6b4a]/20 text-[#ff6b4a] font-bold text-xs flex items-center justify-center">
                     P
                   </div>
-                  <span className="text-white font-mono text-[11px]">{currentUser?.email || "xbitlab@gmail.com"}</span>
+                  <span className="text-white font-mono text-[11px]">{currentUser?.email || "xpeedlab@gmail.com"}</span>
                 </div>
                 <span className="text-[#00C9A7] font-semibold text-[10px]">Auth Gate</span>
               </button>

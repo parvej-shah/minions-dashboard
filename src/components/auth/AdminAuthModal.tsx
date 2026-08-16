@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { 
   ShieldCheck, 
   Lock, 
@@ -13,7 +13,12 @@ import {
   Sparkles,
   ExternalLink,
   X,
-  RefreshCw
+  RefreshCw,
+  Copy,
+  Check,
+  Globe,
+  Terminal,
+  Shield
 } from "lucide-react";
 
 export interface AdminUser {
@@ -25,11 +30,21 @@ export interface AdminUser {
 }
 
 const WHITELISTED_ADMINS = [
-  "xbitlab@gmail.com",
   "xpeedlab@gmail.com",
+  "xbitlab@gmail.com",
   "parvej@getminions.ai",
   "rakib@getminions.ai"
 ];
+
+const GCP_CONFIG = {
+  adminEmail: "xpeedlab@gmail.com",
+  consoleUrl: "https://console.cloud.google.com/apis/credentials",
+  productionRedirectUri: "https://minions.getminions.ai/api/auth/callback/google",
+  localRedirectUri: "http://localhost:3000/api/auth/callback/google",
+  productionOrigin: "https://minions.getminions.ai",
+  localOrigin: "http://localhost:3000",
+  scopes: ["openid", "email", "profile"]
+};
 
 interface AdminAuthProps {
   isOpen: boolean;
@@ -46,13 +61,22 @@ export default function AdminAuthModal({
   onLogin,
   onLogout
 }: AdminAuthProps) {
-  const [selectedEmail, setSelectedEmail] = useState("xbitlab@gmail.com");
+  const [selectedEmail, setSelectedEmail] = useState("xpeedlab@gmail.com");
   const [customEmail, setCustomEmail] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [activeTab, setActiveTab] = useState<"oauth" | "whitelist" | "security">("oauth");
+  const [activeTab, setActiveTab] = useState<"oauth" | "gcp" | "whitelist" | "security">("oauth");
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const handleCopy = (text: string, key: string) => {
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 2000);
+    }
+  };
 
   const handleGoogleSignIn = (emailToUse: string) => {
     setIsProcessing(true);
@@ -64,7 +88,11 @@ export default function AdminAuthModal({
       if (WHITELISTED_ADMINS.includes(email)) {
         const user: AdminUser = {
           email,
-          name: email === "xbitlab@gmail.com" ? "Parvej Shah" : email.split("@")[0].toUpperCase(),
+          name: email === "xpeedlab@gmail.com" 
+            ? "Parvej (Lead Admin)" 
+            : email === "xbitlab@gmail.com" 
+            ? "Parvej Shah" 
+            : email.split("@")[0].toUpperCase(),
           role: "MARKETING_DIRECTOR",
           authenticated_at: new Date().toISOString()
         };
@@ -80,9 +108,9 @@ export default function AdminAuthModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-[#0f1419] text-[#FFFFFF] w-full max-w-lg rounded-2xl border border-[#1f2b37] shadow-2xl overflow-hidden space-y-0">
+      <div className="bg-[#0f1419] text-[#FFFFFF] w-full max-w-xl rounded-2xl border border-[#1f2b37] shadow-2xl overflow-hidden space-y-0 max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="p-6 border-b border-[#1f2b37] flex items-center justify-between">
+        <div className="p-5 sm:p-6 border-b border-[#1f2b37] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#ff6b4a]/10 border border-[#ff6b4a]/30 flex items-center justify-center">
               <Lock className="w-5 h-5 text-[#ff6b4a]" />
@@ -92,70 +120,89 @@ export default function AdminAuthModal({
                 <span className="font-bold tracking-tight text-white text-base">minions</span>
                 <span className="text-[#ff6b4a] font-mono font-bold text-base">.ai</span>
                 <span className="text-[10px] font-mono bg-[#161d24] text-[#94A3B8] px-1.5 py-0.5 rounded border border-[#1f2b37]">
-                  ADMIN GATE
+                  SECURITY & AUTH GATE
                 </span>
               </div>
               <p className="text-xs text-[#94A3B8] mt-0.5">
-                Google OAuth 2.0 Identity & Access Governance
+                Google OAuth 2.0 & Cloud Console Identity Governance
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-[#161d24] text-[#94A3B8] hover:text-white transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[#161d24] text-[#94A3B8] hover:text-white transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center border-b border-[#1f2b37] bg-[#0b0f14] px-6 text-xs">
+        <div className="flex items-center border-b border-[#1f2b37] bg-[#0b0f14] px-4 sm:px-6 text-xs shrink-0 overflow-x-auto scrollbar-none">
           <button
             onClick={() => setActiveTab("oauth")}
-            className={`py-3 px-3 font-semibold border-b-2 transition-all ${
+            className={`py-3 px-3 font-semibold border-b-2 whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "oauth"
                 ? "border-[#ff6b4a] text-[#ff6b4a]"
                 : "border-transparent text-[#94A3B8] hover:text-white"
             }`}
           >
-            Google OAuth Sign-In
+            Google OAuth
+          </button>
+          <button
+            onClick={() => setActiveTab("gcp")}
+            className={`py-3 px-3 font-semibold border-b-2 whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeTab === "gcp"
+                ? "border-[#00C9A7] text-[#00C9A7]"
+                : "border-transparent text-[#94A3B8] hover:text-white"
+            }`}
+          >
+            <Key className="w-3 h-3 text-[#00C9A7]" />
+            GCP Credentials
           </button>
           <button
             onClick={() => setActiveTab("whitelist")}
-            className={`py-3 px-3 font-semibold border-b-2 transition-all ${
+            className={`py-3 px-3 font-semibold border-b-2 whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "whitelist"
                 ? "border-[#ff6b4a] text-[#ff6b4a]"
                 : "border-transparent text-[#94A3B8] hover:text-white"
             }`}
           >
-            Whitelisted Emails ({WHITELISTED_ADMINS.length})
+            Admins ({WHITELISTED_ADMINS.length})
           </button>
           <button
             onClick={() => setActiveTab("security")}
-            className={`py-3 px-3 font-semibold border-b-2 transition-all ${
+            className={`py-3 px-3 font-semibold border-b-2 whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "security"
                 ? "border-[#ff6b4a] text-[#ff6b4a]"
                 : "border-transparent text-[#94A3B8] hover:text-white"
             }`}
           >
-            Session Audit
+            Audit & Status
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-5">
+        {/* Content Body with Scroll */}
+        <div className="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1">
+          {/* TAB 1: OAUTH SIGN IN */}
           {activeTab === "oauth" && (
             <div className="space-y-4">
               {currentUser ? (
                 <div className="p-4 rounded-xl bg-[#161d24] border border-[#1f2b37] space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-[#ff6b4a]/20 text-[#ff6b4a] font-bold flex items-center justify-center text-xs border border-[#ff6b4a]/30">
+                      <div className="w-9 h-9 rounded-full bg-[#ff6b4a]/20 text-[#ff6b4a] font-bold flex items-center justify-center text-sm border border-[#ff6b4a]/30">
                         {currentUser.name[0]}
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-white">{currentUser.name}</div>
+                        <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <span>{currentUser.name}</span>
+                          {currentUser.email === "xpeedlab@gmail.com" && (
+                            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#ff6b4a]/10 text-[#ff6b4a] border border-[#ff6b4a]/20">
+                              PRIMARY ADMIN
+                            </span>
+                          )}
+                        </div>
                         <div className="text-[11px] text-[#94A3B8] font-mono">{currentUser.email}</div>
                       </div>
                     </div>
@@ -164,11 +211,11 @@ export default function AdminAuthModal({
                     </span>
                   </div>
 
-                  <div className="text-xs text-[#94A3B8] pt-2 border-t border-[#1f2b37] flex items-center justify-between">
+                  <div className="text-xs text-[#94A3B8] pt-2.5 border-t border-[#1f2b37] flex items-center justify-between">
                     <span>Role: <strong className="text-white">{currentUser.role}</strong></span>
                     <button
                       onClick={() => onLogout()}
-                      className="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center gap-1"
+                      className="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center gap-1 cursor-pointer"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       Sign Out
@@ -181,7 +228,7 @@ export default function AdminAuthModal({
                   <button
                     onClick={() => handleGoogleSignIn(selectedEmail)}
                     disabled={isProcessing}
-                    className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-[#12242a] font-bold py-3 px-4 rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50 text-xs sm:text-sm"
+                    className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-[#12242a] font-bold py-3 px-4 rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50 text-xs sm:text-sm active:scale-[0.99]"
                   >
                     <svg className="w-4 h-4" viewBox="0 0 24 24">
                       <path
@@ -202,32 +249,38 @@ export default function AdminAuthModal({
                       />
                     </svg>
                     <span>
-                      {isProcessing ? "Authenticating with Google..." : "Continue with Google (xbitlab@gmail.com)"}
+                      {isProcessing ? "Authenticating with Google..." : `Continue with Google (${selectedEmail})`}
                     </span>
                   </button>
 
                   {/* Fast Admin Switcher for Manager */}
                   <div className="space-y-2 pt-2">
-                    <div className="text-[11px] font-mono text-[#94A3B8] uppercase">
-                      Select Whitelisted Manager Account:
+                    <div className="text-[11px] font-mono text-[#94A3B8] uppercase flex items-center justify-between">
+                      <span>Select Authorized Admin Account:</span>
+                      <span className="text-[10px] text-[#00C9A7]">Primary: xpeedlab@gmail.com</span>
                     </div>
                     <div className="grid grid-cols-1 gap-2">
-                      {WHITELISTED_ADMINS.slice(0, 2).map((email) => (
+                      {WHITELISTED_ADMINS.map((email) => (
                         <button
                           key={email}
                           onClick={() => {
                             setSelectedEmail(email);
                             handleGoogleSignIn(email);
                           }}
-                          className={`p-3 rounded-xl border text-left flex items-center justify-between text-xs transition-all ${
+                          className={`p-3 rounded-xl border text-left flex items-center justify-between text-xs transition-all cursor-pointer ${
                             selectedEmail === email
                               ? "bg-[#161d24] border-[#ff6b4a] text-white"
                               : "bg-[#0b0f14] border-[#1f2b37] text-[#94A3B8] hover:border-[#2a3a4b]"
                           }`}
                         >
                           <div className="flex items-center gap-2">
-                            <Mail className="w-3.5 h-3.5 text-[#ff6b4a]" />
+                            <Mail className={`w-3.5 h-3.5 ${selectedEmail === email ? "text-[#ff6b4a]" : "text-[#64748B]"}`} />
                             <span className="font-mono">{email}</span>
+                            {email === "xpeedlab@gmail.com" && (
+                              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#ff6b4a]/15 text-[#ff6b4a] border border-[#ff6b4a]/30">
+                                Default Admin
+                              </span>
+                            )}
                           </div>
                           <span className="text-[10px] text-[#ff6b4a] font-semibold">1-Click Sign In →</span>
                         </button>
@@ -246,44 +299,231 @@ export default function AdminAuthModal({
             </div>
           )}
 
+          {/* TAB 2: GCP CREDENTIALS SETUP GUIDANCE */}
+          {activeTab === "gcp" && (
+            <div className="space-y-4 text-xs">
+              <div className="p-3.5 rounded-xl bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-[#00C9A7] flex items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="font-bold flex items-center gap-1.5 text-white">
+                    <Key className="w-4 h-4 text-[#00C9A7]" />
+                    Google Cloud Console Credentials Setup
+                  </div>
+                  <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+                    Configure OAuth 2.0 Web Client credentials in GCP Console under admin account <span className="font-mono text-white">xpeedlab@gmail.com</span>.
+                  </p>
+                </div>
+                <a
+                  href={GCP_CONFIG.consoleUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="shrink-0 flex items-center gap-1 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] font-bold px-2.5 py-1.5 rounded-lg text-[11px] transition-all cursor-pointer"
+                >
+                  <span>GCP Console</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
+              {/* Authorized Redirect URIs */}
+              <div className="space-y-2">
+                <div className="text-[11px] font-mono text-[#94A3B8] uppercase flex items-center justify-between">
+                  <span>Authorized Redirect URIs (Required in GCP):</span>
+                  <span className="text-[10px] text-[#00C9A7]">OAuth 2.0 Web Client</span>
+                </div>
+
+                {/* Prod URI */}
+                <div className="p-3 rounded-xl bg-[#161d24] border border-[#1f2b37] space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
+                        Production URI
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleCopy(GCP_CONFIG.productionRedirectUri, "prod_uri")}
+                      className="text-[10px] font-mono text-[#00C9A7] hover:text-white flex items-center gap-1 cursor-pointer"
+                    >
+                      {copiedKey === "prod_uri" ? (
+                        <>
+                          <Check className="w-3 h-3 text-emerald-400" />
+                          <span className="text-emerald-400">Copied</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3" />
+                          <span>Copy URI</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <div className="font-mono text-[11px] text-white select-all break-all bg-[#0b0f14] p-2 rounded-lg border border-[#1f2b37]">
+                    {GCP_CONFIG.productionRedirectUri}
+                  </div>
+                </div>
+
+                {/* Localhost URI */}
+                <div className="p-3 rounded-xl bg-[#161d24] border border-[#1f2b37] space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-semibold">
+                        Local Dev URI
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleCopy(GCP_CONFIG.localRedirectUri, "local_uri")}
+                      className="text-[10px] font-mono text-[#00C9A7] hover:text-white flex items-center gap-1 cursor-pointer"
+                    >
+                      {copiedKey === "local_uri" ? (
+                        <>
+                          <Check className="w-3 h-3 text-emerald-400" />
+                          <span className="text-emerald-400">Copied</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3" />
+                          <span>Copy URI</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <div className="font-mono text-[11px] text-white select-all break-all bg-[#0b0f14] p-2 rounded-lg border border-[#1f2b37]">
+                    {GCP_CONFIG.localRedirectUri}
+                  </div>
+                </div>
+              </div>
+
+              {/* Authorized JavaScript Origins */}
+              <div className="space-y-2">
+                <div className="text-[11px] font-mono text-[#94A3B8] uppercase">
+                  Authorized JavaScript Origins:
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="p-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] flex items-center justify-between">
+                    <span className="font-mono text-[11px] text-white">{GCP_CONFIG.productionOrigin}</span>
+                    <button
+                      onClick={() => handleCopy(GCP_CONFIG.productionOrigin, "prod_orig")}
+                      className="text-[10px] font-mono text-[#94A3B8] hover:text-[#00C9A7] cursor-pointer"
+                    >
+                      {copiedKey === "prod_orig" ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-[#94A3B8]" />}
+                    </button>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] flex items-center justify-between">
+                    <span className="font-mono text-[11px] text-white">{GCP_CONFIG.localOrigin}</span>
+                    <button
+                      onClick={() => handleCopy(GCP_CONFIG.localOrigin, "local_orig")}
+                      className="text-[10px] font-mono text-[#94A3B8] hover:text-[#00C9A7] cursor-pointer"
+                    >
+                      {copiedKey === "local_orig" ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-[#94A3B8]" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Environment Variable Setup Block */}
+              <div className="space-y-2">
+                <div className="text-[11px] font-mono text-[#94A3B8] uppercase flex items-center justify-between">
+                  <span>Dashboard .env.local Configuration:</span>
+                  <button
+                    onClick={() => handleCopy(`GOOGLE_CLIENT_ID=your_client_id_here.apps.googleusercontent.com\nGOOGLE_CLIENT_SECRET=your_client_secret_here\nNEXT_PUBLIC_APP_URL=https://minions.getminions.ai`, "env_snippet")}
+                    className="text-[10px] font-mono text-[#00C9A7] hover:text-white flex items-center gap-1 cursor-pointer"
+                  >
+                    {copiedKey === "env_snippet" ? (
+                      <>
+                        <Check className="w-3 h-3 text-emerald-400" />
+                        <span className="text-emerald-400">Copied Template</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3 h-3" />
+                        <span>Copy Env Template</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                <div className="p-3 rounded-xl bg-[#0b0f14] border border-[#1f2b37] font-mono text-[11px] text-[#94A3B8] space-y-1">
+                  <div><span className="text-[#00C9A7]">GOOGLE_CLIENT_ID</span>=<span className="text-white">...apps.googleusercontent.com</span></div>
+                  <div><span className="text-[#00C9A7]">GOOGLE_CLIENT_SECRET</span>=<span className="text-white">GOCSPX-...</span></div>
+                  <div><span className="text-[#00C9A7]">NEXT_PUBLIC_APP_URL</span>=<span className="text-white">https://minions.getminions.ai</span></div>
+                  <div><span className="text-[#00C9A7]">NEXTAUTH_SECRET</span>=<span className="text-white">minions_secret_key_...</span></div>
+                </div>
+              </div>
+
+              {/* Setup Steps Checklist */}
+              <div className="p-3.5 rounded-xl bg-[#161d24] border border-[#1f2b37] space-y-2">
+                <div className="font-semibold text-white text-xs">Quick Setup Instructions:</div>
+                <ol className="list-decimal list-inside space-y-1 text-[11px] text-[#94A3B8]">
+                  <li>Log in to <span className="font-mono text-white">Google Cloud Console</span> with <strong className="text-white">xpeedlab@gmail.com</strong>.</li>
+                  <li>Create or select the project <strong className="text-white">Minions AI</strong>.</li>
+                  <li>Go to <strong className="text-white">APIs & Services → Credentials</strong> → Create <strong className="text-white">OAuth 2.0 Client ID</strong> (Web application).</li>
+                  <li>Add the Authorized JavaScript origins and Redirect URIs above.</li>
+                  <li>In OAuth Consent Screen, add the 4 whitelisted emails to <strong className="text-white">Test Users</strong>.</li>
+                </ol>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: WHITELISTED ADMINS */}
           {activeTab === "whitelist" && (
             <div className="space-y-3">
-              <p className="text-xs text-[#94A3B8]">
-                Only authenticated Google accounts in this list can access the Minions.AI Agent Cockpit:
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-[#94A3B8]">
+                  Authorized Google accounts permitted to manage the Minions.AI Fleet & Publish Gate:
+                </p>
+              </div>
               <div className="space-y-2">
-                {WHITELISTED_ADMINS.map((email) => (
+                {WHITELISTED_ADMINS.map((email, idx) => (
                   <div
                     key={email}
                     className="p-3 rounded-xl bg-[#161d24] border border-[#1f2b37] flex items-center justify-between text-xs"
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2.5">
                       <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                      <span className="font-mono text-white">{email}</span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-white font-medium">{email}</span>
+                          {idx === 0 && (
+                            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#ff6b4a]/15 text-[#ff6b4a] border border-[#ff6b4a]/30">
+                              Primary Lead Admin
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-[10px] font-mono bg-[#0b0f14] px-2 py-0.5 rounded text-[#94A3B8]">
+                    <span className="text-[10px] font-mono bg-[#0b0f14] px-2 py-0.5 rounded text-emerald-400 border border-emerald-500/20">
                       Authorized
                     </span>
                   </div>
                 ))}
               </div>
+              <div className="p-3 rounded-xl bg-[#0b0f14] border border-[#1f2b37] text-[11px] text-[#94A3B8] flex items-center gap-2">
+                <Shield className="w-4 h-4 text-[#ff6b4a] shrink-0" />
+                <span>Accounts outside this whitelist receive an automatic 403 Forbidden Access Gate lock.</span>
+              </div>
             </div>
           )}
 
+          {/* TAB 4: SECURITY AUDIT */}
           {activeTab === "security" && (
             <div className="space-y-3">
-              <div className="p-3 rounded-xl bg-[#161d24] border border-[#1f2b37] space-y-2 text-xs text-[#94A3B8]">
+              <div className="p-3.5 rounded-xl bg-[#161d24] border border-[#1f2b37] space-y-2.5 text-xs text-[#94A3B8]">
                 <div className="flex items-center justify-between text-white font-semibold">
                   <span>Security Mode:</span>
-                  <span className="text-emerald-400 font-mono">RBAC + Google OAuth</span>
+                  <span className="text-emerald-400 font-mono">RBAC + Google OAuth 2.0</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>Authorized Domain:</span>
+                  <span>Primary Admin:</span>
+                  <span className="font-mono text-white">xpeedlab@gmail.com</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Authorized Production Domain:</span>
                   <span className="font-mono text-white">minions.getminions.ai</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>API Encryption:</span>
                   <span className="font-mono text-white">TLS 1.3 / HTTPS</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Supabase / R2 Session Protection:</span>
+                  <span className="text-emerald-400 font-mono">Enforced</span>
                 </div>
               </div>
             </div>
