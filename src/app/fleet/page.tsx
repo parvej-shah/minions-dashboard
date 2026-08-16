@@ -69,8 +69,40 @@ const WORKER_DETAILS = [
   }
 ];
 
+export const dynamic = "force-dynamic";
+
 export default function FleetPage() {
-  const [fleet] = useState(WORKER_DETAILS);
+  const [fleet, setFleet] = useState(WORKER_DETAILS);
+
+  React.useEffect(() => {
+    async function loadDynamicAgents() {
+      try {
+        const res = await fetch("/api/agents", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            // Merge with UI worker details
+            const merged = WORKER_DETAILS.map((w) => {
+              const remote = data.find((d: any) => d.id === w.id);
+              if (remote) {
+                return {
+                  ...w,
+                  status: remote.status || w.status,
+                  model: remote.model || w.model,
+                  totalRuns: remote.total_runs || 42,
+                };
+              }
+              return w;
+            });
+            setFleet(merged);
+          }
+        }
+      } catch (e) {
+        console.error("Dynamic agent fetch error:", e);
+      }
+    }
+    loadDynamicAgents();
+  }, []);
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
