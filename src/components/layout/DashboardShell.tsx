@@ -238,9 +238,9 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
       {/* DESKTOP SIDEBAR NAVIGATION */}
       <aside className="w-72 lg:w-76 bg-[#0f1419] border-r border-[#1f2b37] flex flex-col justify-between p-4 shrink-0 hidden md:flex sticky top-0 h-screen overflow-y-auto z-40">
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* LOGO (WHITE MINIONS + CORAL .AI) */}
-          <div className="flex items-center justify-between pb-4 border-b border-[#1f2b37]">
+          <div className="flex items-center justify-between pb-3 border-b border-[#1f2b37]">
             <Link href="/" className="flex items-baseline group">
               <span className="font-extrabold text-2xl tracking-tight text-white group-hover:opacity-90 transition-opacity">
                 minions
@@ -250,6 +250,20 @@ export default function DashboardShell({ children }: DashboardShellProps) {
               </span>
             </Link>
           </div>
+
+          {/* SEARCH BAR (INTEGRATED IN SIDEBAR) */}
+          <button
+            onClick={() => setShowPalette(true)}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-[#161d24] border border-[#1f2b37] text-xs text-[#64748B] hover:border-[#00C9A7]/50 hover:text-[#94A3B8] transition-all cursor-pointer shadow-xs"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <Search className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
+              <span className="truncate">Search ideas, drafts...</span>
+            </div>
+            <kbd className="inline-block px-1.5 py-0.5 text-[10px] font-mono bg-[#0b0f14] border border-[#1f2b37] rounded text-[#94A3B8] shrink-0">
+              ⌘K
+            </kbd>
+          </button>
 
           {/* QUICK TRIGGER BUTTON */}
           <button
@@ -262,7 +276,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
           </button>
 
           {/* NAVIGATION LINKS */}
-          <div className="space-y-1">
+          <div className="space-y-1 pt-1">
             <div className="text-[10px] font-mono font-bold tracking-wider text-[#64748B] uppercase px-3 mb-2">
               Agent Control
             </div>
@@ -303,8 +317,23 @@ export default function DashboardShell({ children }: DashboardShellProps) {
           </div>
         </div>
 
-        {/* SIDEBAR FOOTER (CLEAN USER PROFILE) */}
-        <div className="pt-4 border-t border-[#1f2b37]">
+        {/* SIDEBAR FOOTER (LIVE BLOG BUTTON + CLEAN USER PROFILE) */}
+        <div className="pt-3 border-t border-[#1f2b37] space-y-2.5">
+          <a
+            href="https://www.getminions.ai/blog"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#ff6b4a]/10 hover:bg-[#ff6b4a]/20 border border-[#ff6b4a]/30 hover:border-[#ff6b4a] text-xs font-bold text-[#ff6b4a] transition-all group shadow-xs"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <ArrowUpRight className="w-4 h-4 text-[#ff6b4a] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <span className="truncate">View Live Blog</span>
+            </div>
+            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#ff6b4a]/20 text-white">
+              getminions.ai ↗
+            </span>
+          </a>
+
           <div
             className="w-full flex items-center justify-between text-xs p-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] text-[#94A3B8]"
           >
@@ -341,6 +370,23 @@ export default function DashboardShell({ children }: DashboardShellProps) {
                 </button>
               </div>
 
+              {/* Mobile Search */}
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setShowPalette(true);
+                }}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-[#161d24] border border-[#1f2b37] text-xs text-[#64748B]"
+              >
+                <div className="flex items-center gap-2">
+                  <Search className="w-3.5 h-3.5 text-[#00C9A7]" />
+                  <span>Search ideas, drafts...</span>
+                </div>
+                <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-[#0b0f14] border border-[#1f2b37] rounded text-[#94A3B8]">
+                  ⌘K
+                </kbd>
+              </button>
+
               <div className="space-y-1">
                 {navItems.map((item) => {
                   const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
@@ -375,6 +421,16 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             </div>
 
             <div className="space-y-3 pt-4 border-t border-[#1f2b37]">
+              <a
+                href="https://www.getminions.ai/blog"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#ff6b4a] text-white text-xs font-bold shadow-sm"
+              >
+                <span>View Live Blog</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </a>
+
               <div className="w-full p-3 rounded-xl bg-[#161d24] border border-[#1f2b37] flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2 min-w-0">
                   <div className="w-6 h-6 rounded-full bg-[#00C9A7]/20 text-[#00C9A7] font-bold text-xs flex items-center justify-center shrink-0">
@@ -391,10 +447,9 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
       {/* MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col min-w-0 bg-[#0a0d12] pb-20 md:pb-0">
-        {/* TOPBAR (DESKTOP & MOBILE RESPONSIVE) */}
-        <header className="h-16 border-b border-[#1f2b37] bg-[#0f1419]/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
-          {/* Mobile Hamburger & Logo */}
-          <div className="flex items-center gap-3 md:hidden">
+        {/* MOBILE HEADER ONLY (DESKTOP USES CLEAN FULL-HEIGHT SIDEBAR) */}
+        <header className="h-14 border-b border-[#1f2b37] bg-[#0f1419]/90 backdrop-blur-md px-4 flex items-center justify-between sticky top-0 z-30 md:hidden">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="p-2 rounded-xl bg-[#161d24] text-[#94A3B8] hover:text-white border border-[#1f2b37]"
@@ -408,27 +463,10 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             </Link>
           </div>
 
-          {/* Desktop Search Bar */}
-          <div className="hidden md:flex items-center gap-3 flex-1 max-w-md">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setShowPalette(true)}
-              className="w-full flex items-center justify-between px-3.5 py-1.5 rounded-xl bg-[#161d24] border border-[#1f2b37] text-xs text-[#64748B] hover:border-[#00C9A7]/50 hover:text-[#94A3B8] transition-all cursor-pointer shadow-xs"
-            >
-              <div className="flex items-center gap-2">
-                <Search className="w-3.5 h-3.5 text-[#00C9A7]" />
-                <span>Search ideas, drafts, agents, or published articles...</span>
-              </div>
-              <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono bg-[#0b0f14] border border-[#1f2b37] rounded text-[#94A3B8]">
-                ⌘K
-              </kbd>
-            </button>
-          </div>
-
-          {/* Right Action Icons & Badges */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              onClick={() => setShowPalette(true)}
-              className="md:hidden p-2 rounded-xl bg-[#161d24] text-[#94A3B8] hover:text-white border border-[#1f2b37]"
+              className="p-2 rounded-xl bg-[#161d24] text-[#94A3B8] hover:text-white border border-[#1f2b37]"
               title="Search"
             >
               <Search className="w-4 h-4 text-[#00C9A7]" />
@@ -438,10 +476,10 @@ export default function DashboardShell({ children }: DashboardShellProps) {
               href="https://getminions.ai/blog"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#ff6b4a] hover:bg-[#ff522b] px-3 sm:px-3.5 py-1.5 rounded-xl transition-all shadow-sm shadow-[#ff6b4a]/20"
+              className="flex items-center gap-1 text-xs font-bold text-white bg-[#ff6b4a] px-2.5 py-1.5 rounded-lg"
             >
-              <span>Live Blog</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              <span>Blog</span>
+              <ArrowUpRight className="w-3 h-3" />
             </a>
           </div>
         </header>
