@@ -74,7 +74,15 @@ export async function POST(request: Request) {
     }
 
     const contentType = (upstream.headers.get("content-type") || "image/png").split(";")[0].trim();
-    const ext = EXT_BY_TYPE[contentType] || "png";
+    // An expired signed URL often answers 200 with an XML or HTML error page. Storing
+    // that as a .png would publish a broken cover, so reject anything that is not an image.
+    const ext = EXT_BY_TYPE[contentType];
+    if (!ext) {
+      return NextResponse.json(
+        { error: `Source returned ${contentType}, not an image. The signed URL has probably expired.` },
+        { status: 422 }
+      );
+    }
     const prefix = safeSegment(body.key_prefix || "assets", "assets");
     const name = safeSegment(body.filename || `${Date.now()}`, `${Date.now()}`);
     const key = `${prefix}/${name}.${ext}`;
