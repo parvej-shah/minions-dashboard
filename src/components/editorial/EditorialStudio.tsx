@@ -549,40 +549,45 @@ export default function EditorialStudio({
         </div>
       )}
 
-      {/* ── Success Notification Banner ── */}
-      {publishSuccess && (
-        <div className="bg-[#00C9A7]/10 border border-[#00C9A7]/30 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-300">
-          <div className="flex items-center gap-3">
-            <CheckCircle2 className="w-5 h-5 text-[#00C9A7] shrink-0" />
-            <div>
-              <div className="text-xs font-bold text-[#00C9A7]">Article Successfully Approved & Published Live</div>
-              <div className="text-xs text-[#94A3B8] mt-0.5">
-                Staged content, cover image metadata, and social variants were synced to Supabase and published at getminions.ai/blog.
-              </div>
+      {/* ── Fresh Publish Success Notification Toast ── */}
+      {publishPhase === "DONE" && (
+        <div className="bg-[#00C9A7]/10 border border-[#00C9A7]/30 p-3.5 px-4 rounded-xl flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 className="w-4 h-4 text-[#00C9A7] shrink-0" />
+            <div className="text-xs text-[#F1F5F9]">
+              <span className="font-bold text-[#00C9A7]">Published Live:</span> Staged article, 2K cover art, and social webhooks are live!
             </div>
           </div>
-          <a
-            href={activeAsset.blog_url || `https://getminions.ai/blog/${activeAsset.slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs font-mono font-bold text-[#00C9A7] hover:underline flex items-center gap-1 shrink-0"
-          >
-            <span>Open Live URL</span>
-            <ExternalLink className="w-3 h-3" />
-          </a>
+          <div className="flex items-center gap-3 shrink-0">
+            <a
+              href={activeAsset.blog_url || `https://getminions.ai/blog/${activeAsset.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-mono font-bold text-[#00C9A7] hover:underline flex items-center gap-1"
+            >
+              <span>View Post</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+            <button
+              onClick={() => setPublishPhase("IDLE")}
+              className="text-[#64748B] hover:text-[#F1F5F9] p-1 cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       )}
 
-      {/* ── TWO-PANEL EDITORIAL LAYOUT (Page 3 PRD Specification) ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* ── TWO-PANEL EXPANSIVE EDITORIAL LAYOUT (8 Cols Reading / 4 Cols Sticky Inspector) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* ══════════════════════════════════════════════════════════
-            LEFT PANEL: Article Preview, 16:9 Cover, Social Variants (7 Cols)
+            LEFT EXPANSIVE PANEL: Article Preview, 16:9 Cover, Social (8 Cols)
             ══════════════════════════════════════════════════════════ */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="lg:col-span-8 space-y-6">
           
-          {/* 1. 16:9 Cover Image Card with Copyable R2 URL Link */}
-          <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-4 sm:p-5 space-y-3.5 shadow-xl">
+          {/* 1. 16:9 Cover Image Card */}
+          <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-4 sm:p-5 space-y-3 shadow-xl">
             <div className="flex items-center justify-between pb-2 border-b border-[#1F2D3D]/60">
               <div className="flex items-center gap-2">
                 <ImageIcon className="w-4 h-4 text-[#00C9A7]" />
@@ -616,12 +621,12 @@ export default function EditorialStudio({
               </div>
             </div>
 
-            {/* Clean Cover Image Action Bar */}
+            {/* Cover Image Bottom Info Bar */}
             {activeAsset.hero_image_url && (
-              <div className="flex items-center justify-between gap-3 bg-[#070B0F] border border-[#1F2D3D] rounded-xl px-4 py-2.5 text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#00C9A7]"></span>
-                  <span className="text-xs font-semibold text-[#F1F5F9]">
+              <div className="flex items-center justify-between gap-3 bg-[#070B0F] border border-[#1F2D3D] rounded-xl px-3.5 py-2 text-xs">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="w-2 h-2 rounded-full bg-[#00C9A7] shrink-0"></span>
+                  <span className="text-xs font-semibold text-[#F1F5F9] truncate">
                     16:9 Commercial Studio Cover Art Staged
                   </span>
                 </div>
@@ -631,10 +636,10 @@ export default function EditorialStudio({
                     href={activeAsset.hero_image_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-2.5 py-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-xs font-medium text-[#00C9A7] border border-[#00C9A7]/30 hover:border-[#00C9A7] transition-all flex items-center gap-1.5"
+                    className="px-2.5 py-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-xs font-medium text-[#00C9A7] border border-[#00C9A7]/30 hover:border-[#00C9A7] transition-all flex items-center gap-1.5 cursor-pointer"
                     title="Open full resolution cover image"
                   >
-                    <span>View Full 2K Art</span>
+                    <span>View 2K Art</span>
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
@@ -1349,152 +1354,74 @@ export default function EditorialStudio({
         </div>
 
         {/* ══════════════════════════════════════════════════════════
-            RIGHT PANEL: Review Controls, Metadata, Live Approve CTA,
-            Revision Request, Claims Gate (5 Cols)
+            RIGHT PANEL: Streamlined Sticky Review Inspector (4 Cols)
             ══════════════════════════════════════════════════════════ */}
-        <div className="lg:col-span-5 space-y-6">
+        <div className="lg:col-span-4 space-y-4 lg:sticky lg:top-6">
           
-          {/* 1. Asset Metadata Card */}
-          <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-5 space-y-4 shadow-xl">
+          {/* 1. Review Decision & Quick Action Hub */}
+          <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-4 sm:p-5 space-y-4 shadow-xl">
             <div className="flex items-center justify-between pb-2 border-b border-[#1F2D3D]/60">
-              <span className="text-xs font-bold font-mono text-[#64748B] uppercase tracking-wider">
-                Asset Metadata & Telemetry
+              <span className="text-xs font-bold font-mono text-[#F1F5F9] uppercase tracking-wider flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#00C9A7]" />
+                Review & Decision
               </span>
-              <span className="text-[10px] font-mono text-[#00C9A7] font-bold">
-                {activeAsset.id}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-2.5 rounded-xl bg-[#070B0F] border border-[#1F2D3D]/60 space-y-0.5">
-                <span className="text-[10px] font-mono text-[#64748B] uppercase block">Audience Lane</span>
-                <span className="font-bold text-[#F1F5F9]">{activeAsset.audience}</span>
-              </div>
-
-              <div className="p-2.5 rounded-xl bg-[#070B0F] border border-[#1F2D3D]/60 space-y-0.5">
-                <span className="text-[10px] font-mono text-[#64748B] uppercase block">Draft Version</span>
-                <span className="font-bold text-[#00C9A7] font-mono">v{activeAsset.version}.0</span>
-              </div>
-
-              <div className="p-2.5 rounded-xl bg-[#070B0F] border border-[#1F2D3D]/60 space-y-0.5">
-                <span className="text-[10px] font-mono text-[#64748B] uppercase block">Word Count</span>
-                <span className="font-bold text-[#F1F5F9]">{wordCount} words</span>
-              </div>
-
-              <div className="p-2.5 rounded-xl bg-[#070B0F] border border-[#1F2D3D]/60 space-y-0.5">
-                <span className="text-[10px] font-mono text-[#64748B] uppercase block">Reading Time</span>
-                <span className="font-bold text-[#F1F5F9]">~{readingTimeMinutes} min read</span>
-              </div>
-            </div>
-
-            {/* Claims Gate Status & Synthesis Cost Breakdown */}
-            <div className="space-y-2 pt-1 border-t border-[#1F2D3D]/60">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-[#94A3B8] flex items-center gap-1.5">
-                  <ShieldCheck className={`w-3.5 h-3.5 ${allClaimsVerified ? "text-[#00C9A7]" : "text-[#F59E0B]"}`} />
-                  Claims Gate Status:
-                </span>
-                <span className={`font-mono font-bold ${allClaimsVerified ? "text-[#00C9A7]" : "text-[#F59E0B]"}`}>
-                  {verifiedClaimsCount}/{totalClaims} Verified
-                </span>
-              </div>
-
-              {/* Expandable Cost Breakdown Tile */}
-              <div className="bg-[#070B0F] border border-[#1F2D3D] rounded-xl p-3 space-y-2">
-                <div
-                  onClick={() => setShowCostDetails(!showCostDetails)}
-                  className="flex items-center justify-between text-xs cursor-pointer select-none"
-                >
-                  <span className="text-[#94A3B8] flex items-center gap-1">
-                    <DollarSign className="w-3.5 h-3.5 text-[#00C9A7]" />
-                    Total Synthesis Cost:
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <span className="font-mono font-bold text-[#00C9A7]">${costBreakdown.total.toFixed(4)}</span>
-                    {showCostDetails ? <ChevronUp className="w-3 h-3 text-[#64748B]" /> : <ChevronDown className="w-3 h-3 text-[#64748B]" />}
-                  </div>
-                </div>
-
-                {showCostDetails && (
-                  <div className="pt-2 border-t border-[#1F2D3D]/60 space-y-1.5 text-[11px] font-mono text-[#94A3B8] animate-in fade-in duration-200">
-                    <div className="flex justify-between">
-                      <span>• Strategist (qwen3.7-max):</span>
-                      <span className="text-[#F1F5F9]">${costBreakdown.strategist.toFixed(3)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>• Writer (qwen-plus):</span>
-                      <span className="text-[#F1F5F9]">${costBreakdown.writer.toFixed(3)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>• Editor Claims Gate (qwen3.7-flash):</span>
-                      <span className="text-[#F1F5F9]">${costBreakdown.editor.toFixed(3)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>• Visual Art Cover (qwen-image-3.0):</span>
-                      <span className="text-[#F1F5F9]">${costBreakdown.coverArt.toFixed(4)}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* 2. Prominent Full-Width Actions & Save Bar */}
-          <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-5 space-y-3.5 shadow-xl">
-            <div className="flex items-center justify-between pb-1">
-              <span className="text-xs font-bold font-mono text-[#64748B] uppercase tracking-wider block">
-                Editorial Review Decision
-              </span>
-              {isDirty && (
-                <span className="text-[10px] font-mono text-[#F59E0B] font-bold animate-pulse">
+              {isDirty ? (
+                <span className="text-[10px] font-mono text-[#F59E0B] font-bold bg-[#F59E0B]/10 px-2 py-0.5 rounded border border-[#F59E0B]/30 animate-pulse">
                   ● Unsaved Edits
+                </span>
+              ) : (
+                <span className="text-[10px] font-mono text-[#00C9A7] bg-[#00C9A7]/10 px-2 py-0.5 rounded border border-[#00C9A7]/30">
+                  {activeAsset.status}
                 </span>
               )}
             </div>
 
-            {/* Quick Save Draft Button in Review Panel */}
+            {/* Quick Save Draft Button */}
             <button
               onClick={handleSaveDraft}
               disabled={isSaving}
-              className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`w-full py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
                 isDirty
-                  ? "bg-[#161D26] hover:bg-[#1E2733] text-[#00C9A7] border border-[#00C9A7]/50 shadow-md shadow-[#00C9A7]/10"
-                  : "bg-[#161D26] text-[#94A3B8] border border-[#1F2D3D]"
+                  ? "bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] shadow-md shadow-[#00C9A7]/20"
+                  : "bg-[#161D26] hover:bg-[#1E2733] text-[#F1F5F9] border border-[#1F2D3D]"
               }`}
             >
               {isSaving ? (
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
               ) : (
-                <CheckCircle2 className="w-3.5 h-3.5" />
+                <Check className="w-3.5 h-3.5" />
               )}
-              <span>{isSaving ? "Saving..." : isDirty ? "Save Draft Edits (⌘S)" : "Draft Saved to Database ✓"}</span>
+              <span>{isSaving ? "Saving to Database..." : isDirty ? "Save Draft Changes" : "Draft Synced to Database ✓"}</span>
+              <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[9px] font-mono rounded bg-black/20 text-current">
+                ⌘S
+              </kbd>
             </button>
 
+            {/* Main Publish Decision CTA */}
             {activeAsset.status === "PUBLISHED" || publishPhase === "DONE" ? (
-              <div className="space-y-3 pt-1">
-                <div className="w-full bg-[#00C9A7]/15 border border-[#00C9A7] text-[#00C9A7] p-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2">
+              <div className="space-y-2 pt-1">
+                <div className="w-full bg-[#00C9A7]/15 border border-[#00C9A7] text-[#00C9A7] p-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2">
                   <CheckCheck className="w-4 h-4" />
-                  <span>Approved & Published to Blog</span>
+                  <span>Approved & Published Live</span>
                 </div>
 
                 <a
                   href={activeAsset.blog_url || `https://getminions.ai/blog/${activeAsset.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#F1F5F9] text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all"
+                  className="w-full bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#F1F5F9] text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <Globe className="w-3.5 h-3.5 text-[#00C9A7]" />
-                  <span>View Live Published Page</span>
+                  <span>View Live Blog Post</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
             ) : (
-              <div className="space-y-2.5 pt-1">
-                {/* Large Prominent Teal CTA Button */}
+              <div className="space-y-2 pt-1">
                 <button
                   onClick={handleApproveAndPublish}
                   disabled={publishPhase !== "IDLE"}
-                  className="w-full bg-[#00C9A7] hover:bg-[#00A88A] active:scale-[0.98] text-[#070B0F] font-bold text-sm py-3.5 px-5 rounded-xl shadow-lg shadow-[#00C9A7]/20 flex items-center justify-center gap-2.5 transition-all disabled:opacity-75 cursor-pointer"
+                  className="w-full bg-[#00C9A7] hover:bg-[#00A88A] active:scale-[0.98] text-[#070B0F] font-bold text-xs py-3 px-4 rounded-xl shadow-lg shadow-[#00C9A7]/20 flex items-center justify-center gap-2 transition-all disabled:opacity-75 cursor-pointer"
                 >
                   {publishPhase === "IDLE" && (
                     <>
@@ -1505,58 +1432,58 @@ export default function EditorialStudio({
 
                   {publishPhase === "SYNCING" && (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin text-[#070B0F]" />
-                      <span>1/3 Synchronizing Supabase Payload...</span>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#070B0F]" />
+                      <span>1/3 Syncing Supabase...</span>
                     </>
                   )}
 
                   {publishPhase === "BROADCASTING" && (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin text-[#070B0F]" />
-                      <span>2/3 Broadcasting to Blog & R2 CDN...</span>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#070B0F]" />
+                      <span>2/3 Broadcasting CDN...</span>
                     </>
                   )}
 
                   {publishPhase === "EMITTING" && (
                     <>
-                      <Sparkles className="w-4 h-4 animate-pulse text-[#070B0F]" />
-                      <span>3/3 Emitting Omnichannel Social Webhook...</span>
+                      <Sparkles className="w-3.5 h-3.5 animate-pulse text-[#070B0F]" />
+                      <span>3/3 Emitting Webhook...</span>
                     </>
                   )}
                 </button>
 
-                {/* Secondary Review Actions: Request Revision & Copy Raw Markdown */}
-                <div className="grid grid-cols-2 gap-2 pt-1">
+                {/* Revision & Markdown Buttons */}
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setShowRevisionForm(!showRevisionForm)}
-                    className="bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#ff6b4a] hover:border-[#ff6b4a]/40 text-xs font-semibold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    className="bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#ff6b4a] hover:border-[#ff6b4a]/40 text-xs font-semibold py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   >
-                    <Edit3 className="w-3.5 h-3.5" />
-                    <span>Request Revision</span>
+                    <Edit3 className="w-3 h-3" />
+                    <span>Revision</span>
                   </button>
 
                   <button
                     onClick={() => copyToClipboard(editedBody, "raw-markdown-btn")}
-                    className="bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] text-xs font-semibold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    className="bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] text-xs font-semibold py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   >
                     {copiedKey === "raw-markdown-btn" ? (
-                      <Check className="w-3.5 h-3.5 text-[#00C9A7]" />
+                      <Check className="w-3 h-3 text-[#00C9A7]" />
                     ) : (
-                      <Copy className="w-3.5 h-3.5" />
+                      <Copy className="w-3 h-3" />
                     )}
-                    <span>{copiedKey === "raw-markdown-btn" ? "Copied" : "Copy Markdown"}</span>
+                    <span>{copiedKey === "raw-markdown-btn" ? "Copied" : "Copy MD"}</span>
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Request Revision Input Drawer */}
+            {/* Request Revision Form Drawer */}
             {showRevisionForm && (
-              <div className="bg-[#070B0F] border border-[#ff6b4a]/30 rounded-xl p-4 space-y-3 animate-in fade-in duration-200 mt-2">
+              <div className="bg-[#070B0F] border border-[#ff6b4a]/30 rounded-xl p-3.5 space-y-2.5 animate-in fade-in duration-200 mt-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#ff6b4a] font-mono uppercase flex items-center gap-1.5">
-                    <Edit3 className="w-3.5 h-3.5" />
-                    Editorial Revision Directives
+                  <span className="text-[11px] font-bold text-[#ff6b4a] font-mono uppercase flex items-center gap-1">
+                    <Edit3 className="w-3 h-3" />
+                    Revision Directives
                   </span>
                   <button
                     onClick={() => setShowRevisionForm(false)}
@@ -1566,19 +1493,17 @@ export default function EditorialStudio({
                   </button>
                 </div>
 
-                {/* Preset Quick Tags */}
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1">
                   {[
                     "Too conversational",
                     "Missing benchmark citation",
-                    "Add diagnostic telemetry",
                     "Strengthen technical hook",
                     "Trim introductory fluff"
                   ].map((preset) => (
                     <button
                       key={preset}
                       onClick={() => setRevisionPreset(revisionPreset === preset ? null : preset)}
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded border transition-all ${
+                      className={`text-[9px] font-mono px-2 py-0.5 rounded border transition-all ${
                         revisionPreset === preset
                           ? "bg-[#ff6b4a] text-[#070B0F] border-[#ff6b4a] font-bold"
                           : "bg-[#161D26] text-[#94A3B8] border-[#1F2D3D] hover:text-[#F1F5F9]"
@@ -1592,36 +1517,87 @@ export default function EditorialStudio({
                 <textarea
                   value={revisionNotes}
                   onChange={(e) => setRevisionNotes(e.target.value)}
-                  placeholder="Specify feedback for Staff Writer & Editor agent rerun..."
-                  rows={3}
-                  className="w-full bg-[#0F1419] border border-[#1F2D3D] rounded-lg p-2.5 text-xs text-[#F1F5F9] font-mono focus:outline-none focus:border-[#ff6b4a] resize-none"
+                  placeholder="Feedback for Staff Writer..."
+                  rows={2}
+                  className="w-full bg-[#0F1419] border border-[#1F2D3D] rounded-lg p-2 text-xs text-[#F1F5F9] font-mono focus:outline-none focus:border-[#ff6b4a] resize-none"
                 />
 
                 <div className="flex justify-end gap-2">
                   <button
-                    onClick={() => setShowRevisionForm(false)}
-                    className="text-xs text-[#64748B] hover:text-[#F1F5F9] px-3 py-1.5"
-                  >
-                    Cancel
-                  </button>
-                  <button
                     onClick={handleSubmitRevision}
-                    className="bg-[#ff6b4a] hover:bg-[#ff522c] text-[#070B0F] text-xs font-bold px-4 py-1.5 rounded-lg shadow-sm transition-all"
+                    className="bg-[#ff6b4a] hover:bg-[#ff522c] text-[#070B0F] text-xs font-bold px-3 py-1 rounded-lg shadow-sm transition-all"
                   >
-                    Submit Rejection & Notes
+                    Submit Notes
                   </button>
                 </div>
               </div>
             )}
+
+            {/* Compact Metadata Chips */}
+            <div className="pt-2 border-t border-[#1F2D3D]/60 space-y-2">
+              <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+                <div className="px-2.5 py-1.5 rounded-lg bg-[#070B0F] border border-[#1F2D3D]/60 flex items-center justify-between">
+                  <span className="text-[#64748B]">Audience:</span>
+                  <span className="text-[#F1F5F9] font-bold">{activeAsset.audience}</span>
+                </div>
+                <div className="px-2.5 py-1.5 rounded-lg bg-[#070B0F] border border-[#1F2D3D]/60 flex items-center justify-between">
+                  <span className="text-[#64748B]">Length:</span>
+                  <span className="text-[#F1F5F9] font-bold">{wordCount}w</span>
+                </div>
+                <div className="px-2.5 py-1.5 rounded-lg bg-[#070B0F] border border-[#1F2D3D]/60 flex items-center justify-between">
+                  <span className="text-[#64748B]">Read Time:</span>
+                  <span className="text-[#F1F5F9] font-bold">~{readingTimeMinutes}m</span>
+                </div>
+                <div className="px-2.5 py-1.5 rounded-lg bg-[#070B0F] border border-[#1F2D3D]/60 flex items-center justify-between">
+                  <span className="text-[#64748B]">Cost:</span>
+                  <span className="text-[#00C9A7] font-bold">${costBreakdown.total.toFixed(4)}</span>
+                </div>
+              </div>
+
+              {/* Expandable Cost Details Toggle */}
+              <div className="pt-1">
+                <button
+                  onClick={() => setShowCostDetails(!showCostDetails)}
+                  className="w-full text-left flex items-center justify-between text-[11px] font-mono text-[#64748B] hover:text-[#94A3B8] py-1 cursor-pointer"
+                >
+                  <span className="flex items-center gap-1">
+                    <DollarSign className="w-3 h-3 text-[#00C9A7]" />
+                    Model Rate Breakdown
+                  </span>
+                  {showCostDetails ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                </button>
+
+                {showCostDetails && (
+                  <div className="p-2.5 rounded-lg bg-[#070B0F] border border-[#1F2D3D]/60 space-y-1 text-[10px] font-mono text-[#94A3B8] animate-in fade-in duration-150">
+                    <div className="flex justify-between">
+                      <span>• Strategist (qwen3.7-max):</span>
+                      <span className="text-[#F1F5F9]">${costBreakdown.strategist.toFixed(3)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>• Writer (qwen-plus):</span>
+                      <span className="text-[#F1F5F9]">${costBreakdown.writer.toFixed(3)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>• Editor (qwen3.7-flash):</span>
+                      <span className="text-[#F1F5F9]">${costBreakdown.editor.toFixed(3)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>• Visual Art (qwen-image-3.0):</span>
+                      <span className="text-[#F1F5F9]">${costBreakdown.coverArt.toFixed(4)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* 3. Interactive Claims Verification Checklist Gate */}
-          <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-5 space-y-4 shadow-xl">
+          {/* 2. Compact Claims Verification Gate */}
+          <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-4 sm:p-5 space-y-3 shadow-xl">
             <div className="flex items-center justify-between pb-2 border-b border-[#1F2D3D]/60">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-[#00C9A7]" />
                 <span className="text-xs font-bold text-[#F1F5F9] font-mono uppercase tracking-wider">
-                  Claims Verification Gate
+                  Claims Gate
                 </span>
               </div>
               <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
@@ -1633,139 +1609,127 @@ export default function EditorialStudio({
               </span>
             </div>
 
-            <p className="text-[11px] text-[#94A3B8]">
-              Every numeric assertion, field benchmark, and performance claim is evaluated against verified telemetry before broadcast. Toggle status with 1 click:
-            </p>
-
-            <div className="space-y-2.5">
-              {activeAsset.claim_checks?.map((claim) => {
-                const isVerified = claim.verified === "Y";
-                return (
-                  <div
-                    key={claim.id}
-                    className={`p-3.5 rounded-xl border transition-all space-y-2 ${
-                      isVerified
-                        ? "bg-[#070B0F] border-[#00C9A7]/30 hover:border-[#00C9A7]/60"
-                        : "bg-[#070B0F] border-[#F59E0B]/40 hover:border-[#F59E0B]/80"
-                    }`}
-                  >
-                    {/* Header with Source & Clean Badge */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
+            {/* Scrollable Claims Checklist */}
+            <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+              {activeAsset.claim_checks && activeAsset.claim_checks.length > 0 ? (
+                activeAsset.claim_checks.map((claim) => {
+                  const isVerified = claim.verified === "Y";
+                  return (
+                    <div
+                      key={claim.id}
+                      className={`p-2.5 rounded-xl border transition-all space-y-1.5 ${
+                        isVerified
+                          ? "bg-[#070B0F] border-[#00C9A7]/30 hover:border-[#00C9A7]/60"
+                          : "bg-[#070B0F] border-[#F59E0B]/40 hover:border-[#F59E0B]/80"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-1">
                         <span
-                          className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+                          className={`text-[9px] font-semibold px-1.5 py-0.2 rounded font-mono ${
                             claim.source_type === "GO_BENCHMARK"
-                              ? "bg-[#00C9A7]/15 text-[#00C9A7] border border-[#00C9A7]/30"
+                              ? "bg-[#00C9A7]/15 text-[#00C9A7]"
                               : claim.source_type === "OPERATOR_DISPATCH_DATA"
-                                ? "bg-[#3B82F6]/15 text-[#3B82F6] border border-[#3B82F6]/30"
-                                : claim.source_type === "VOICE_PACKET_TRACE"
-                                  ? "bg-[#ff6b4a]/15 text-[#ff6b4a] border border-[#ff6b4a]/30"
-                                  : "bg-[#8B5CF6]/15 text-[#8B5CF6] border border-[#8B5CF6]/30"
+                                ? "bg-[#3B82F6]/15 text-[#3B82F6]"
+                                : "bg-[#ff6b4a]/15 text-[#ff6b4a]"
                           }`}
                         >
-                          {claim.source_type === "GO_BENCHMARK" 
-                            ? "Verified Benchmark" 
-                            : claim.source_type === "OPERATOR_DISPATCH_DATA" 
-                              ? "Field Dispatch Metric" 
-                              : claim.source_type === "VOICE_PACKET_TRACE"
-                                ? "Voice Telemetry"
-                                : "Contractor Ground Truth"}
+                          {claim.source_type === "GO_BENCHMARK"
+                            ? "Benchmark"
+                            : claim.source_type === "OPERATOR_DISPATCH_DATA"
+                              ? "Field Metric"
+                              : "Voice Telemetry"}
                         </span>
+
+                        <button
+                          onClick={() => toggleClaimStatus(claim.id)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                            isVerified
+                              ? "bg-[#00C9A7]/20 text-[#00C9A7]"
+                              : "bg-[#F59E0B]/20 text-[#F59E0B]"
+                          }`}
+                        >
+                          {isVerified ? <Check className="w-2.5 h-2.5" /> : <AlertTriangle className="w-2.5 h-2.5" />}
+                          <span>{isVerified ? "Verified" : "Flagged"}</span>
+                        </button>
                       </div>
 
-                      <span className="text-[10px] font-mono text-[#00C9A7]">
-                        {isVerified ? "● Automated Gate Passed" : "● Manual Check Required"}
-                      </span>
-                    </div>
-
-                    {/* Claim Text */}
-                    <p className="text-xs text-[#F1F5F9] font-medium leading-snug">
-                      "{claim.claim_text}"
-                    </p>
-
-                    {/* Notes */}
-                    {claim.notes && (
-                      <p className="text-[10px] text-[#64748B] italic">
-                        Proof Note: {claim.notes}
+                      <p className="text-[11px] text-[#F1F5F9] font-medium leading-snug">
+                        "{claim.claim_text}"
                       </p>
-                    )}
-
-                    {/* 1-Click Status Toggle Action */}
-                    <div className="flex justify-end pt-1">
-                      <button
-                        onClick={() => toggleClaimStatus(claim.id)}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5 transition-all ${
-                          isVerified
-                            ? "bg-[#00C9A7]/20 hover:bg-[#00C9A7]/30 text-[#00C9A7] border border-[#00C9A7]/40"
-                            : "bg-[#F59E0B]/20 hover:bg-[#F59E0B]/30 text-[#F59E0B] border border-[#F59E0B]/40"
-                        }`}
-                      >
-                        {isVerified ? (
-                          <>
-                            <Check className="w-3 h-3 text-[#00C9A7]" />
-                            <span>Verified Claim</span>
-                          </>
-                        ) : (
-                          <>
-                            <AlertTriangle className="w-3 h-3 text-[#F59E0B]" />
-                            <span>Flagged / Needs Proof</span>
-                          </>
-                        )}
-                      </button>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              ) : (
+                <div className="text-center py-4 text-xs text-[#64748B] font-mono">
+                  No claims checks attached to this draft.
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* MOBILE-FIRST STICKY ACTION BAR (VISIBLE ON PHONES) */}
-      <div className="lg:hidden fixed bottom-14 left-0 right-0 z-30 bg-[#0f1419]/95 backdrop-blur-md border-t border-[#1f2b37] p-3 px-4 flex items-center justify-between gap-3 shadow-2xl">
+      {/* ── MOBILE-FIRST FLOATING ACTION BAR (VISIBLE ON PHONES & TABLETS) ── */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0F1419]/95 backdrop-blur-lg border-t border-[#1F2D3D] p-3 px-4 flex items-center justify-between gap-3 shadow-2xl">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-mono font-bold text-[#ff6b4a]">
-              {activeAsset.id}
-            </span>
-            <span className="text-[10px] font-mono text-[#94A3B8]">
-              • {verifiedClaimsCount}/{totalClaims} Claims
+          <div className="flex items-center gap-1.5 text-[10px] font-mono">
+            <span className="font-bold text-[#00C9A7]">{activeAsset.id}</span>
+            <span className="text-[#64748B]">•</span>
+            <span className="text-[#94A3B8]">{wordCount}w</span>
+            <span className="text-[#64748B]">•</span>
+            <span className={allClaimsVerified ? "text-[#00C9A7]" : "text-[#F59E0B]"}>
+              {verifiedClaimsCount}/{totalClaims} Claims
             </span>
           </div>
-          <div className="text-xs font-bold text-white truncate">
-            {activeAsset.title}
+          <div className="text-xs font-bold text-[#F1F5F9] truncate">
+            {editedTitle}
           </div>
         </div>
 
-        {activeAsset.status === "PUBLISHED" || publishPhase === "DONE" ? (
-          <a
-            href={activeAsset.blog_url || `https://getminions.ai/blog/${activeAsset.slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-sm"
-          >
-            <span>Live Blog</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
-        ) : (
+        <div className="flex items-center gap-2 shrink-0">
           <button
-            onClick={handleApproveAndPublish}
-            disabled={publishPhase !== "IDLE"}
-            className="px-4 py-2.5 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-lg shadow-[#00C9A7]/20 disabled:opacity-50 cursor-pointer"
+            onClick={handleSaveDraft}
+            disabled={isSaving}
+            className={`p-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+              isDirty
+                ? "bg-[#00C9A7] text-[#070B0F] border-[#00C9A7]"
+                : "bg-[#161D26] text-[#94A3B8] border-[#1F2D3D]"
+            }`}
+            title="Save Draft (⌘S)"
           >
-            {publishPhase !== "IDLE" ? (
-              <>
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                <span>Publishing...</span>
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Approve</span>
-              </>
-            )}
+            {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
           </button>
-        )}
+
+          {activeAsset.status === "PUBLISHED" || publishPhase === "DONE" ? (
+            <a
+              href={activeAsset.blog_url || `https://getminions.ai/blog/${activeAsset.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3.5 py-2 bg-[#00C9A7] text-[#070B0F] rounded-xl text-xs font-bold flex items-center gap-1 shrink-0 shadow-sm"
+            >
+              <span>Live</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          ) : (
+            <button
+              onClick={handleApproveAndPublish}
+              disabled={publishPhase !== "IDLE"}
+              className="px-3.5 py-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-lg shadow-[#00C9A7]/20 disabled:opacity-50 cursor-pointer"
+            >
+              {publishPhase !== "IDLE" ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  <span>Publishing</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Approve</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
