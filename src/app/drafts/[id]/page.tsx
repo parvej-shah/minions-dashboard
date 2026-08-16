@@ -1,480 +1,552 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import {
-  FileText,
-  ShieldCheck,
-  Share2,
-  CheckCircle2,
-  Clock,
-  ArrowLeft,
-  Zap,
-  Upload,
-  Image as ImageIcon,
-  DollarSign,
-  ExternalLink,
-  Save,
-  AlertTriangle,
-  RefreshCw,
-  Copy,
-  Sparkles,
-  Layers
+import { 
+  ArrowLeft, 
+  CheckCircle2, 
+  AlertTriangle, 
+  ExternalLink, 
+  Share2, 
+  Send, 
+  Eye, 
+  Edit3, 
+  Sparkles, 
+  RefreshCw, 
+  ShieldCheck, 
+  Clock, 
+  FileText, 
+  DollarSign, 
+  Copy, 
+  Check, 
+  MessageSquare,
+  Maximize2,
+  ChevronRight,
+  Globe
 } from "lucide-react";
-import { fetchAssets } from "@/lib/api";
-import { AssetItem, SocialPlatform } from "@/lib/types";
+import { AssetItem, ClaimCheckItem, SocialVariantItem } from "@/lib/types";
+import { INITIAL_ASSETS } from "@/lib/api";
 
-export default function DraftReviewerPage() {
-  const params = useParams();
-  const router = useRouter();
-  const id = params.id as string;
+export default function DraftReviewerPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
+  const draftId = resolvedParams.id;
 
-  const [asset, setAsset] = useState<AssetItem | null>(null);
-  const [activeTab, setActiveTab] = useState<"BODY" | "CLAIMS" | "SOCIAL">("BODY");
-  const [activeSocialPlatform, setActiveSocialPlatform] = useState<SocialPlatform>("LINKEDIN");
-  const [isSaving, setIsSaving] = useState(false);
+  const [asset, setAsset] = useState<AssetItem>(() => {
+    return INITIAL_ASSETS.find(a => a.id === draftId || a.slug === draftId) || INITIAL_ASSETS[0];
+  });
+  
+  const [activeTab, setActiveTab] = useState<"editor" | "claims" | "social" | "cover">("editor");
+  const [editorMode, setEditorMode] = useState<"edit" | "preview" | "split">("split");
+  const [editedBody, setEditedBody] = useState(asset.body_content);
+  const [editedTitle, setEditedTitle] = useState(asset.title);
   const [isPublishing, setIsPublishing] = useState(false);
-  const [isRegeneratingImage, setIsRegeneratingImage] = useState(false);
-  const [notification, setNotification] = useState<string | null>(null);
-  const [copiedLink, setCopiedLink] = useState(false);
+  const [publishSuccess, setPublishSuccess] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  // Form State
-  const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
-  const [hook, setHook] = useState("");
-  const [bodyContent, setBodyContent] = useState("");
-
+  // Synchronize state if draftId matches another item
   useEffect(() => {
-    async function loadAsset() {
-      const all = await fetchAssets();
-      const found = all.find((a) => a.id === id) || all[0];
-      if (found) {
-        setAsset(found);
-        setTitle(found.title);
-        setSlug(found.slug);
-        setHook(found.hook || "");
-        setBodyContent(found.body_content);
-      }
+    const found = INITIAL_ASSETS.find(a => a.id === draftId || a.slug === draftId);
+    if (found) {
+      setAsset(found);
+      setEditedBody(found.body_content);
+      setEditedTitle(found.title);
     }
-    loadAsset();
-  }, [id]);
+  }, [draftId]);
 
-  if (!asset) {
-    return (
-      <div className="py-20 text-center text-slate-400 text-sm font-mono">
-        Loading draft {id}...
-      </div>
-    );
-  }
-
-  const handleSave = () => {
-    setIsSaving(true);
-    setNotification("Saving draft changes to Supabase...");
-    setTimeout(() => {
-      setIsSaving(false);
-      setNotification("✅ Saved successfully!");
-      setTimeout(() => setNotification(null), 3000);
-    }, 1000);
+  const copyToClipboard = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  const handleApproveAndPublish = () => {
+  const toggleClaimStatus = (claimId: string) => {
+    if (!asset.claim_checks) return;
+    const updated = asset.claim_checks.map(c => {
+      if (c.id === claimId) {
+        const nextStatus: "Y" | "N" | "NA" = c.verified === "Y" ? "N" : "Y";
+        return { ...c, verified: nextStatus };
+      }
+      return c;
+    });
+    setAsset({ ...asset, claim_checks: updated });
+  };
+
+  const handlePublish = async () => {
     setIsPublishing(true);
-    setNotification("Broadcasting to Minions Blog, Facebook Page, & LinkedIn...");
     setTimeout(() => {
       setIsPublishing(false);
-      if (asset) {
-        setAsset({
-          ...asset,
-          status: "PUBLISHED",
-          published_at: new Date().toISOString(),
-        });
-      }
-      setNotification("🎉 Successfully published across all channels!");
-      setTimeout(() => setNotification(null), 6000);
-    }, 2500);
+      setPublishSuccess(true);
+      setAsset(prev => ({
+        ...prev,
+        status: "PUBLISHED",
+        blog_url: `https://getminions.ai/blog/${prev.slug}`,
+        published_at: new Date().toISOString()
+      }));
+    }, 1200);
   };
 
-  const handleRegenerateImage = () => {
-    setIsRegeneratingImage(true);
-    setNotification("Qwen Image 3.0 synthesizing new tactile studio flat-lay...");
-    setTimeout(() => {
-      setIsRegeneratingImage(false);
-      setNotification("✅ New 2K cover card synthesized and synced to Cloudflare R2!");
-      setTimeout(() => setNotification(null), 4000);
-    }, 3000);
-  };
+  // Word count and reading time calculation
+  const wordCount = editedBody.trim().split(/\s+/).filter(Boolean).length;
+  const readingTimeMinutes = Math.ceil(wordCount / 225);
+
+  const claimsPassCount = asset.claim_checks?.filter(c => c.verified === "Y").length || 0;
+  const totalClaims = asset.claim_checks?.length || 0;
+  const allClaimsPassed = totalClaims > 0 && claimsPassCount === totalClaims;
 
   return (
-    <div className="space-y-6">
-      {/* TOP NAVIGATION & ACTIONS */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#e5e7eb]">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16">
+      {/* Top Breadcrumb & Status Navigation */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/40 pb-4">
         <div className="flex items-center gap-3">
           <Link
             href="/drafts"
-            className="p-2 rounded-xl bg-white border border-[#e5e7eb] hover:bg-slate-50 text-slate-600 transition-colors shadow-xs"
+            className="p-2 rounded-xl bg-card/60 border border-border/40 text-muted-foreground hover:text-foreground hover:bg-card transition-all"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-slate-400">{asset.id}</span>
-              <span className="text-xs text-slate-300">•</span>
-              <span
-                className={`px-2 py-0.5 text-[10px] font-mono font-semibold rounded-full border ${
-                  asset.status === "PUBLISHED"
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                    : "bg-[#fff1ed] text-[#ff6b4a] border-[#ff6b4a]/20"
-                }`}
-              >
-                {asset.status === "PUBLISHED" ? "● LIVE" : asset.status}
+            <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
+              <span>EDITORIAL STUDIO</span>
+              <span>/</span>
+              <span className="text-primary font-bold">{asset.id}</span>
+              <span>•</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
+                v{asset.version}
               </span>
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-[#12242a] line-clamp-1">{title}</h1>
+            <h1 className="text-xl font-bold tracking-tight text-foreground line-clamp-1 mt-0.5">
+              {editedTitle}
+            </h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {notification && (
-            <div className="px-3.5 py-1.5 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-xs font-medium animate-fade-in shadow-sm">
-              {notification}
-            </div>
+        {/* Action Header */}
+        <div className="flex items-center gap-2.5">
+          {asset.status === "PUBLISHED" ? (
+            <a
+              href={asset.blog_url || `https://getminions.ai/blog/${asset.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold px-3.5 py-2 rounded-xl transition-all shadow-sm"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              View Live Blog Post
+              <ExternalLink className="w-3 h-3 ml-0.5" />
+            </a>
+          ) : (
+            <button
+              onClick={handlePublish}
+              disabled={isPublishing}
+              className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold px-4 py-2 rounded-xl shadow-lg shadow-primary/20 transition-all disabled:opacity-50"
+            >
+              {isPublishing ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  Broadcasting Post...
+                </>
+              ) : (
+                <>
+                  <Send className="w-3.5 h-3.5" />
+                  1-Click Approve & Publish
+                </>
+              )}
+            </button>
           )}
-
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-[#e5e7eb] hover:border-slate-300 text-xs font-semibold text-[#12242a] shadow-sm transition-all cursor-pointer"
-          >
-            <Save className="w-3.5 h-3.5 text-slate-600" />
-            <span>{isSaving ? "Saving..." : "Save Draft"}</span>
-          </button>
-
-          <button
-            onClick={handleApproveAndPublish}
-            disabled={isPublishing}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#0e5c63] to-[#167a84] hover:from-[#116e76] hover:to-[#1a8e9b] text-xs font-bold text-white shadow-md transition-all active:scale-[0.98] cursor-pointer"
-          >
-            <Zap className="w-3.5 h-3.5 text-[#ff6b4a]" />
-            <span>{isPublishing ? "Broadcasting..." : "1-Click Approve & Publish"}</span>
-          </button>
         </div>
       </div>
 
-      {/* TWO-COLUMN STUDIO SPLIT */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* LEFT COLUMN: EDITORIAL CONTENT & TABS (7 COLS) */}
-        <div className="lg:col-span-7 space-y-6">
-          {/* TAB BAR */}
-          <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#e5e7eb] shadow-sm">
-            <button
-              onClick={() => setActiveTab("BODY")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                activeTab === "BODY"
-                  ? "bg-[#0e5c63] text-white shadow-xs"
-                  : "text-slate-600 hover:text-[#12242a]"
-              }`}
-            >
-              <FileText className="w-3.5 h-3.5" />
-              <span>5-Stage Article Markdown</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("CLAIMS")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                activeTab === "CLAIMS"
-                  ? "bg-[#0e5c63] text-white shadow-xs"
-                  : "text-slate-600 hover:text-[#12242a]"
-              }`}
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Claims Gate ({asset.claim_checks?.length || 0})</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("SOCIAL")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                activeTab === "SOCIAL"
-                  ? "bg-[#0e5c63] text-white shadow-xs"
-                  : "text-slate-600 hover:text-[#12242a]"
-              }`}
-            >
-              <Share2 className="w-3.5 h-3.5 text-blue-400" />
-              <span>Social Variants ({asset.social_variants?.length || 0})</span>
-            </button>
+      {/* Success Notification Banner */}
+      {publishSuccess && (
+        <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl flex items-center justify-between gap-4 animate-in fade-in duration-300">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+            <div>
+              <div className="text-xs font-semibold text-emerald-300">Post Successfully Published Live!</div>
+              <div className="text-xs text-muted-foreground mt-0.5">
+                Staged content, cover image, and metadata were synced to Supabase and published at getminions.ai/blog.
+              </div>
+            </div>
           </div>
+          <a
+            href={asset.blog_url || `https://getminions.ai/blog/${asset.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-mono font-bold text-emerald-400 hover:underline shrink-0"
+          >
+            Open Live ↗
+          </a>
+        </div>
+      )}
 
-          {/* TAB 1: ARTICLE BODY & METADATA */}
-          {activeTab === "BODY" && (
-            <div className="p-6 rounded-2xl bg-white border border-[#e5e7eb] shadow-sm space-y-5">
-              <div className="space-y-1">
-                <label className="text-[11px] font-mono font-semibold text-slate-500 uppercase">
-                  Article Title
-                </label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#faf9f6] border border-[#e5e7eb] text-sm font-bold text-[#12242a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0e5c63]/20 focus:border-[#0e5c63]"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[11px] font-mono font-semibold text-slate-500 uppercase">
-                    URL Slug
-                  </label>
-                  <input
-                    type="text"
-                    value={slug}
-                    onChange={(e) => setSlug(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-[#faf9f6] border border-[#e5e7eb] text-xs font-mono text-slate-700 focus:bg-white focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[11px] font-mono font-semibold text-slate-500 uppercase">
-                    Audience Lane
-                  </label>
-                  <select
-                    value={asset.audience}
-                    onChange={(e) => setAsset({ ...asset, audience: e.target.value as any })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-[#faf9f6] border border-[#e5e7eb] text-xs font-semibold text-slate-700 focus:bg-white focus:outline-none"
-                  >
-                    <option value="ICP">ICP (Home Service Contractors)</option>
-                    <option value="PEER">PEER (AI & Systems Engineers)</option>
-                    <option value="BRIDGE">BRIDGE (Unit Economics & Founders)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[11px] font-mono font-semibold text-slate-500 uppercase">
-                  Inversion Hook
-                </label>
-                <textarea
-                  value={hook}
-                  onChange={(e) => setHook(e.target.value)}
-                  rows={2}
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#faf9f6] border border-[#e5e7eb] text-xs text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0e5c63]/20 focus:border-[#0e5c63]"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-mono font-semibold text-slate-500 uppercase">
-                    5-Stage Markdown Content
-                  </label>
-                  <span className="text-[10px] text-slate-400 font-mono">
-                    {bodyContent.split(/\s+/).length} words
-                  </span>
-                </div>
-                <textarea
-                  value={bodyContent}
-                  onChange={(e) => setBodyContent(e.target.value)}
-                  rows={18}
-                  className="w-full p-4 rounded-xl bg-[#faf9f6] border border-[#e5e7eb] text-xs font-mono text-[#12242a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0e5c63]/20 focus:border-[#0e5c63] leading-relaxed resize-y"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* TAB 2: CLAIMS CHECK GATE */}
-          {activeTab === "CLAIMS" && (
-            <div className="p-6 rounded-2xl bg-white border border-[#e5e7eb] shadow-sm space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[#f3f4f6]">
-                <div>
-                  <h3 className="text-sm font-bold text-[#12242a]">Automated Claims Verification Gate</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Validates numeric assertions, dates, telemetry claims, and citations before publication.
-                  </p>
-                </div>
-                <span className="px-2.5 py-1 text-xs font-mono font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  Gate Passed
-                </span>
-              </div>
-
-              <div className="space-y-3 mt-4">
-                {asset.claim_checks?.map((claim) => (
-                  <div
-                    key={claim.id}
-                    className="p-4 rounded-xl bg-[#faf9f6] border border-[#e5e7eb] flex items-start gap-3"
-                  >
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <div className="space-y-1">
-                      <div className="text-xs font-bold text-[#12242a]">{claim.claim_text}</div>
-                      <div className="text-[11px] text-slate-500 font-mono">
-                        Source Type: <span className="font-semibold text-slate-700">{claim.source_type}</span> • Notes: {claim.notes || "Verified by benchmark run"}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: SOCIAL BROADCAST VARIANTS */}
-          {activeTab === "SOCIAL" && (
-            <div className="p-6 rounded-2xl bg-white border border-[#e5e7eb] shadow-sm space-y-5">
-              {/* Platform Selector */}
-              <div className="flex items-center gap-2">
-                {(["LINKEDIN", "FACEBOOK", "TWITTER"] as SocialPlatform[]).map((platform) => (
-                  <button
-                    key={platform}
-                    onClick={() => setActiveSocialPlatform(platform)}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                      activeSocialPlatform === platform
-                        ? "bg-[#0e5c63] text-white shadow-xs"
-                        : "bg-[#faf9f6] text-slate-600 hover:text-[#12242a] border border-[#e5e7eb]"
-                    }`}
-                  >
-                    {platform}
-                  </button>
-                ))}
-              </div>
-
-              {/* Variant Content */}
-              {(() => {
-                const variant = asset.social_variants?.find((v) => v.platform === activeSocialPlatform);
-                if (!variant) {
-                  return (
-                    <div className="py-8 text-center text-slate-400 text-xs font-mono">
-                      No variant generated for {activeSocialPlatform}.
-                    </div>
-                  );
-                }
-
-                return (
-                  <div className="space-y-4">
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-mono font-semibold text-slate-500 uppercase">
-                        {activeSocialPlatform} Post Copy
-                      </label>
-                      <textarea
-                        defaultValue={variant.content}
-                        rows={8}
-                        className="w-full p-4 rounded-xl bg-[#faf9f6] border border-[#e5e7eb] text-xs text-[#12242a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0e5c63]/20 focus:border-[#0e5c63] leading-relaxed"
-                      />
-                    </div>
-
-                    {variant.first_comment && (
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-mono font-semibold text-slate-500 uppercase">
-                          First Comment (Link Anchor)
-                        </label>
-                        <input
-                          type="text"
-                          defaultValue={variant.first_comment}
-                          className="w-full px-4 py-2 rounded-xl bg-[#faf9f6] border border-[#e5e7eb] text-xs text-slate-700 focus:bg-white focus:outline-none"
-                        />
-                      </div>
-                    )}
-
-                    {variant.published_url && (
-                      <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-xs">
-                        <span className="text-emerald-800 font-medium">Published Live URL:</span>
-                        <a
-                          href={variant.published_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="font-mono text-emerald-900 font-semibold hover:underline flex items-center gap-1"
-                        >
-                          <span>{variant.published_url}</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
-          )}
+      {/* Meta Telemetry & Stage Indicator Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-card/40 p-3.5 rounded-2xl border border-border/30">
+        <div className="flex items-center gap-2.5 px-3 py-1">
+          <FileText className="w-4 h-4 text-primary shrink-0" />
+          <div>
+            <div className="text-[10px] font-mono text-muted-foreground uppercase">Word Count</div>
+            <div className="text-xs font-bold text-foreground">{wordCount} words</div>
+          </div>
         </div>
 
-        {/* RIGHT COLUMN: 2K COVER INSPECTOR & TELEMETRY (5 COLS) */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* 16:9 COVER CARD INSPECTOR */}
-          <div className="p-6 rounded-2xl bg-white border border-[#e5e7eb] shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#f3f4f6]">
-              <div className="flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-[#ff6b4a]" />
-                <h3 className="text-sm font-bold text-[#12242a]">Commercial 16:9 Cover Card</h3>
+        <div className="flex items-center gap-2.5 px-3 py-1 border-l border-border/20">
+          <Clock className="w-4 h-4 text-cyan-400 shrink-0" />
+          <div>
+            <div className="text-[10px] font-mono text-muted-foreground uppercase">Reading Time</div>
+            <div className="text-xs font-bold text-foreground">~{readingTimeMinutes} min read</div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5 px-3 py-1 border-l border-border/20">
+          <ShieldCheck className={`w-4 h-4 shrink-0 ${allClaimsPassed ? "text-emerald-400" : "text-amber-400"}`} />
+          <div>
+            <div className="text-[10px] font-mono text-muted-foreground uppercase">Claims Gate</div>
+            <div className={`text-xs font-bold ${allClaimsPassed ? "text-emerald-400" : "text-amber-400"}`}>
+              {claimsPassCount}/{totalClaims} Verified
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5 px-3 py-1 border-l border-border/20">
+          <DollarSign className="w-4 h-4 text-primary shrink-0" />
+          <div>
+            <div className="text-[10px] font-mono text-muted-foreground uppercase">Synthesis Cost</div>
+            <div className="text-xs font-bold text-foreground">${asset.generation_cost || "0.0386"}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Studio Navigation Tabs */}
+      <div className="flex items-center justify-between border-b border-border/40">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setActiveTab("editor")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all ${
+              activeTab === "editor"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Edit3 className="w-3.5 h-3.5" />
+            Article Markdown
+          </button>
+
+          <button
+            onClick={() => setActiveTab("claims")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all ${
+              activeTab === "claims"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            Claims Verification ({claimsPassCount}/{totalClaims})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("social")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all ${
+              activeTab === "social"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            Social Variants ({asset.social_variants?.length || 0})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("cover")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all ${
+              activeTab === "cover"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Eye className="w-3.5 h-3.5" />
+            2K Cover Card
+          </button>
+        </div>
+
+        {activeTab === "editor" && (
+          <div className="flex items-center bg-card/60 p-1 rounded-lg border border-border/40 text-xs mb-1">
+            <button
+              onClick={() => setEditorMode("edit")}
+              className={`px-2.5 py-1 rounded font-medium ${editorMode === "edit" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+            >
+              Raw Edit
+            </button>
+            <button
+              onClick={() => setEditorMode("split")}
+              className={`px-2.5 py-1 rounded font-medium ${editorMode === "split" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+            >
+              Split View
+            </button>
+            <button
+              onClick={() => setEditorMode("preview")}
+              className={`px-2.5 py-1 rounded font-medium ${editorMode === "preview" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+            >
+              Preview
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* TAB 1: ARTICLE EDITOR & SPLIT VIEW */}
+      {activeTab === "editor" && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground block mb-1">H1 Article Headline</label>
+              <input
+                type="text"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="w-full bg-card border border-border/60 rounded-xl px-4 py-2.5 text-sm font-bold text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+          </div>
+
+          <div className={`grid gap-6 ${editorMode === "split" ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"}`}>
+            {/* Left: Raw Markdown Editor */}
+            {(editorMode === "edit" || editorMode === "split") && (
+              <div className="bg-card/70 rounded-2xl border border-border/40 p-4 flex flex-col h-[650px]">
+                <div className="flex items-center justify-between pb-3 border-b border-border/30 mb-3">
+                  <span className="text-xs font-mono text-muted-foreground flex items-center gap-2">
+                    <Edit3 className="w-3.5 h-3.5 text-primary" />
+                    Markdown Source (Stripe/Linear Cadence)
+                  </span>
+                  <button
+                    onClick={() => copyToClipboard(editedBody, "body")}
+                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                  >
+                    {copiedKey === "body" ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    Copy
+                  </button>
+                </div>
+                <textarea
+                  value={editedBody}
+                  onChange={(e) => setEditedBody(e.target.value)}
+                  className="flex-1 w-full bg-background/50 border-0 p-3 text-xs font-mono text-foreground leading-relaxed focus:outline-none resize-none overflow-y-auto"
+                />
               </div>
-              <span className="text-[10px] font-mono text-slate-400">Cloudflare R2 CDN</span>
+            )}
+
+            {/* Right: Rendered Typography Preview */}
+            {(editorMode === "preview" || editorMode === "split") && (
+              <div className="bg-background/80 rounded-2xl border border-border/40 p-6 flex flex-col h-[650px] overflow-y-auto">
+                <div className="flex items-center justify-between pb-3 border-b border-border/30 mb-4">
+                  <span className="text-xs font-mono text-muted-foreground flex items-center gap-2">
+                    <Eye className="w-3.5 h-3.5 text-primary" />
+                    Live Prose Rendering (#faf9f6 Reading Canvas)
+                  </span>
+                  <span className="text-[10px] font-mono text-muted-foreground">780px Prose Lane</span>
+                </div>
+
+                <div className="prose prose-invert prose-sm max-w-none text-foreground/90 space-y-4">
+                  {editedBody.split("\n\n").map((paragraph, index) => {
+                    if (paragraph.startsWith("## ")) {
+                      return (
+                        <h2 key={index} className="text-lg font-bold text-foreground border-b border-border/30 pb-1 mt-6">
+                          {paragraph.replace("## ", "")}
+                        </h2>
+                      );
+                    }
+                    if (paragraph.startsWith("### ")) {
+                      return (
+                        <h3 key={index} className="text-sm font-bold text-primary mt-4">
+                          {paragraph.replace("### ", "")}
+                        </h3>
+                      );
+                    }
+                    if (paragraph.startsWith("```")) {
+                      return (
+                        <pre key={index} className="bg-black/60 p-4 rounded-xl text-xs font-mono text-emerald-400 overflow-x-auto border border-border/30 my-4">
+                          {paragraph.replace(/```(json|bash|go)?/g, "")}
+                        </pre>
+                      );
+                    }
+                    return (
+                      <p key={index} className="text-xs text-foreground/80 leading-relaxed font-sans">
+                        {paragraph}
+                      </p>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: CLAIMS VERIFICATION GATE */}
+      {activeTab === "claims" && (
+        <div className="space-y-4">
+          <div className="bg-card/70 p-5 rounded-2xl border border-border/40 space-y-2">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-primary" />
+              Safety-Critical Claims Checklist Gate
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Every numeric claim, performance benchmark, and technical assertion is parsed by the Lead Editorial Reviewer. Toggle verification status below or add citation sources.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3">
+            {asset.claim_checks?.map((claim) => (
+              <div
+                key={claim.id}
+                className={`p-4 rounded-xl border transition-all ${
+                  claim.verified === "Y"
+                    ? "bg-emerald-500/5 border-emerald-500/30"
+                    : "bg-amber-500/5 border-amber-500/30"
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-1.5 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
+                        claim.verified === "Y"
+                          ? "bg-emerald-500/20 text-emerald-400"
+                          : "bg-amber-500/20 text-amber-400"
+                      }`}>
+                        {claim.source_type}
+                      </span>
+                      <span className="text-xs font-mono text-muted-foreground">{claim.id}</span>
+                      {claim.confidence_score && (
+                        <span className="text-[10px] font-mono text-muted-foreground">
+                          Confidence: {Math.round(claim.confidence_score * 100)}%
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs font-medium text-foreground">{claim.claim_text}</p>
+                    {claim.notes && (
+                      <p className="text-[11px] text-muted-foreground italic">Note: {claim.notes}</p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => toggleClaimStatus(claim.id)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                        claim.verified === "Y"
+                          ? "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40"
+                          : "bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/40"
+                      }`}
+                    >
+                      {claim.verified === "Y" ? (
+                        <>
+                          <Check className="w-3.5 h-3.5" />
+                          Verified
+                        </>
+                      ) : (
+                        <>
+                          <AlertTriangle className="w-3.5 h-3.5" />
+                          Flagged / Needs Proof
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: SOCIAL VARIANTS & PLATFORM PREVIEWS */}
+      {activeTab === "social" && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {asset.social_variants?.map((variant) => {
+            const isLinkedIn = variant.platform === "LINKEDIN";
+            const isFacebook = variant.platform === "FACEBOOK";
+            const isTwitter = variant.platform === "TWITTER";
+
+            return (
+              <div key={variant.id} className="bg-card/70 p-5 rounded-2xl border border-border/40 space-y-4 flex flex-col justify-between">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-border/30">
+                    <div className="flex items-center gap-2">
+                      <Share2 className="w-4 h-4 text-primary" />
+                      <span className="text-xs font-bold text-foreground">{variant.platform} Variant</span>
+                    </div>
+                    <span className="text-[10px] font-mono bg-primary/10 text-primary px-2 py-0.5 rounded">
+                      {variant.status}
+                    </span>
+                  </div>
+
+                  <div className="bg-background/60 p-3.5 rounded-xl border border-border/30 text-xs text-foreground/90 font-sans leading-relaxed whitespace-pre-wrap">
+                    {variant.content}
+                  </div>
+
+                  {variant.first_comment && (
+                    <div className="p-3 rounded-xl bg-primary/5 border border-primary/20 space-y-1">
+                      <div className="text-[10px] font-mono text-primary font-bold uppercase flex items-center gap-1">
+                        <MessageSquare className="w-3 h-3" />
+                        First Comment (Link Anchor)
+                      </div>
+                      <p className="text-xs text-muted-foreground font-mono">{variant.first_comment}</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-border/20">
+                  <span className="text-[10px] font-mono text-muted-foreground">
+                    {variant.content.length} chars
+                  </span>
+                  <button
+                    onClick={() => copyToClipboard(variant.content, variant.id)}
+                    className="text-xs text-primary hover:underline flex items-center gap-1 font-medium"
+                  >
+                    {copiedKey === variant.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    Copy Post Copy
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* TAB 4: 2K COVER CARD */}
+      {activeTab === "cover" && (
+        <div className="space-y-6">
+          <div className="bg-card/70 p-6 rounded-2xl border border-border/40 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-primary" />
+                  Staged 16:9 Studio Cover Card
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Synthesized via Qwen Image 3.0 following the tactile leather clipboard flat-lay formula.
+                </p>
+              </div>
+
+              {asset.hero_image_url && (
+                <a
+                  href={asset.hero_image_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:underline font-medium flex items-center gap-1"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  View 2K Source on R2
+                </a>
+              )}
             </div>
 
-            {/* Image Preview Container */}
-            <div className="relative aspect-video rounded-xl overflow-hidden bg-[#12242a] border border-[#1f343d] shadow-md group">
-              {asset.hero_image_url ? (
+            {asset.hero_image_url && (
+              <div className="relative rounded-2xl overflow-hidden border border-border/40 shadow-2xl aspect-[16/9] max-w-3xl mx-auto bg-black">
                 <img
                   src={asset.hero_image_url}
                   alt={asset.title}
-                  className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                  className="w-full h-full object-cover"
                 />
-              ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 text-xs font-mono">
-                  <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
-                  <span>No cover synthesized yet</span>
-                </div>
-              )}
-
-              <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-mono text-white border border-white/20">
-                2K 2048x1152
               </div>
-            </div>
-
-            {/* Image Actions */}
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              <button
-                onClick={handleRegenerateImage}
-                disabled={isRegeneratingImage}
-                className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#12242a] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-75"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${isRegeneratingImage ? "animate-spin" : ""}`} />
-                <span>{isRegeneratingImage ? "Synthesizing..." : "Regenerate Visual"}</span>
-              </button>
-
-              <label className="w-full py-2 px-3 rounded-xl bg-teal-50 hover:bg-teal-100 text-[#0e5c63] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-                <Upload className="w-3.5 h-3.5" />
-                <span>Upload Custom</span>
-                <input type="file" accept="image/*" className="hidden" />
-              </label>
-            </div>
-          </div>
-
-          {/* PER-POST COST & TOKEN TELEMETRY */}
-          <div className="p-6 rounded-2xl bg-[#12242a] text-white shadow-md border border-[#1f343d] space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#1f343d]">
-              <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-emerald-400" />
-                <h3 className="text-sm font-bold">Per-Post Cost Telemetry</h3>
-              </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                $0.0386 Total
-              </span>
-            </div>
-
-            <div className="space-y-2.5 text-xs font-mono">
-              <div className="flex items-center justify-between text-slate-300">
-                <span>Strategist (qwen3.7-max):</span>
-                <span className="text-white font-semibold">$0.0084</span>
-              </div>
-              <div className="flex items-center justify-between text-slate-300">
-                <span>Writer (qwen-plus):</span>
-                <span className="text-white font-semibold">$0.0062</span>
-              </div>
-              <div className="flex items-center justify-between text-slate-300">
-                <span>Visual Studio (qwen-image-3.0):</span>
-                <span className="text-white font-semibold">$0.0240</span>
-              </div>
-              <div className="pt-2 border-t border-[#1f343d] flex items-center justify-between font-bold">
-                <span className="text-teal-300">Total Synthesis Cost:</span>
-                <span className="text-emerald-400 text-sm">~3.86¢ USD</span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
