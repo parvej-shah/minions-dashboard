@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   Globe, 
@@ -15,19 +15,42 @@ import {
   MessageSquare,
   Sparkles,
   ArrowUpRight,
-  TrendingUp
+  TrendingUp,
+  RefreshCw
 } from "lucide-react";
 import { PUBLISHED_FEED, PublishedPostRecord } from "@/app/api/published/route";
 
 export default function PublishedPostsPage() {
+  const [feed, setFeed] = useState<PublishedPostRecord[]>(PUBLISHED_FEED);
+  const [loading, setLoading] = useState(false);
   const [platformFilter, setPlatformFilter] = useState<string>("ALL");
   const [audienceFilter, setAudienceFilter] = useState<string>("ALL");
   const [dateFilter, setDateFilter] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const totalSpend = PUBLISHED_FEED.reduce((acc, p) => acc + p.cost_usd, 0);
+  const loadFeed = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/published");
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setFeed(data);
+        }
+      }
+    } catch (e) {
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const filteredPosts = PUBLISHED_FEED.filter(post => {
+  useEffect(() => {
+    loadFeed();
+  }, []);
+
+  const totalSpend = feed.reduce((acc, p) => acc + (p.cost_usd || 0.038), 0);
+
+  const filteredPosts = feed.filter(post => {
     if (platformFilter !== "ALL" && post.platform !== platformFilter) return false;
     if (audienceFilter !== "ALL" && post.audience !== audienceFilter) return false;
     if (searchQuery.trim()) {
@@ -80,7 +103,7 @@ export default function PublishedPostsPage() {
             <CheckCircle2 className="w-4 h-4 text-[#00C9A7]" />
           </div>
           <div className="text-2xl font-bold text-[#F1F5F9]">
-            {PUBLISHED_FEED.length} Posts Live
+            {feed.length} Posts Live
           </div>
           <div className="text-[11px] text-[#00C9A7] flex items-center gap-1 font-medium">
             <TrendingUp className="w-3 h-3" />
@@ -94,10 +117,10 @@ export default function PublishedPostsPage() {
             <Clock className="w-4 h-4 text-[#3B82F6]" />
           </div>
           <div className="text-2xl font-bold text-[#F1F5F9]">
-            4 Omnichannel
+            {feed.length} Omnichannel
           </div>
           <div className="text-[11px] text-[#94A3B8]">
-            Blog (2) • LinkedIn (1) • Facebook (1)
+            Blog ({feed.filter(p => p.platform === "BLOG").length}) • LinkedIn ({feed.filter(p => p.platform === "LINKEDIN").length}) • Facebook ({feed.filter(p => p.platform === "FACEBOOK").length})
           </div>
         </div>
 
@@ -110,7 +133,7 @@ export default function PublishedPostsPage() {
             ${totalSpend.toFixed(4)}
           </div>
           <div className="text-[11px] text-[#94A3B8]">
-            Avg ${ (totalSpend / PUBLISHED_FEED.length).toFixed(3) } / post (Tokens + 2K Cover)
+            Avg ${ (totalSpend / (feed.length || 1)).toFixed(3) } / post (Tokens + 2K Cover)
           </div>
         </div>
       </div>

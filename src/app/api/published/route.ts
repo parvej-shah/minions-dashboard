@@ -69,6 +69,42 @@ export const PUBLISHED_FEED: PublishedPostRecord[] = [
   }
 ];
 
+import { supabaseAdmin } from "@/lib/supabase";
+
 export async function GET() {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("blogs")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!error && data && data.length > 0) {
+      const dynamicFeed: PublishedPostRecord[] = data.map((blog: any, idx: number) => {
+        let heroImageUrl = "/images/social-covers/github/github_social_dark.png";
+        const imgMatch = (blog.content || "").match(/!\[.*?\]\((https?:\/\/[^\s\)]+)\)/);
+        if (imgMatch && imgMatch[1]) {
+          heroImageUrl = imgMatch[1];
+        }
+
+        return {
+          id: `PUB-LIVE-${idx + 1}`,
+          asset_id: blog.asset_id || `ASSET-${String(idx + 1).padStart(4, "0")}`,
+          platform: "BLOG" as const,
+          title: blog.title || "Untitled Post",
+          excerpt: blog.hook || blog.core_argument || (blog.content || "").slice(0, 160),
+          hero_image_url: heroImageUrl,
+          published_url: `https://getminions.ai/blog/${blog.slug}`,
+          audience: (blog.audience || "ICP") as "ICP" | "PEER" | "BRIDGE",
+          cost_usd: 0.0386,
+          published_at: blog.published_at || blog.created_at || new Date().toISOString(),
+          first_comment: `Full operational guide: https://getminions.ai/blog/${blog.slug}`
+        };
+      });
+
+      const socialVariants = PUBLISHED_FEED.filter(p => p.platform !== "BLOG");
+      return NextResponse.json([...dynamicFeed, ...socialVariants]);
+    }
+  } catch (e) {}
+
   return NextResponse.json(PUBLISHED_FEED);
 }
