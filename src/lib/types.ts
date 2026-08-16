@@ -46,6 +46,20 @@ export interface SocialVariantItem {
   status: "DRAFT" | "READY" | "BROADCASTED";
 }
 
+export interface PublishedPostRecord {
+  id: string;
+  asset_id: string;
+  platform: "BLOG" | "LINKEDIN" | "FACEBOOK" | "TWITTER";
+  title: string;
+  excerpt: string;
+  hero_image_url: string;
+  published_url: string;
+  audience: "ICP" | "PEER" | "BRIDGE";
+  cost_usd: number;
+  published_at: string;
+  first_comment?: string;
+}
+
 export interface AssetItem {
   id: string;
   idea_id?: string;

@@ -1,11 +1,29 @@
 import { NextResponse } from "next/server";
-import { INITIAL_BRAND_DIRECTIVES, fetchBrandSettings } from "@/lib/api";
+import { prisma } from "@/lib/prisma";
+import { fetchBrandSettings } from "@/lib/api";
 
 export async function GET() {
   const brand = await fetchBrandSettings();
   
-  // Format structured brand context payload for n8n LLM ingestion
-  const activeDirectives = INITIAL_BRAND_DIRECTIVES.filter(d => d.is_active);
+  // Format structured brand context payload for n8n LLM ingestion directly from Supabase via Prisma
+  let activeDirectives: any[] = [];
+  try {
+    const dbDirectives = await prisma.brandDirective.findMany({
+      where: { isActive: true },
+      orderBy: { priority: "asc" }
+    });
+    activeDirectives = dbDirectives.map(d => ({
+      id: d.id,
+      category: d.category,
+      key: d.ruleKey,
+      content: d.instruction,
+      priority: d.priority,
+      audience_scope: d.audienceScope,
+      is_active: d.isActive
+    }));
+  } catch (e) {
+    activeDirectives = [];
+  }
   
   const contextPayload = {
     company_name: "getminions.ai",

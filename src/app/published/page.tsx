@@ -16,12 +16,11 @@ import {
   Sparkles,
   ArrowUpRight,
   TrendingUp,
-  RefreshCw
 } from "lucide-react";
-import { PUBLISHED_FEED, PublishedPostRecord } from "@/app/api/published/route";
+import { PublishedPostRecord } from "@/lib/types";
 
 export default function PublishedPostsPage() {
-  const [feed, setFeed] = useState<PublishedPostRecord[]>(PUBLISHED_FEED);
+  const [feed, setFeed] = useState<PublishedPostRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [platformFilter, setPlatformFilter] = useState<string>("ALL");
   const [audienceFilter, setAudienceFilter] = useState<string>("ALL");
