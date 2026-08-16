@@ -31,6 +31,16 @@ const ROLE_BADGE_MAP: Record<string, string> = {
   "WORKER-007": "LOGISTICS_DISPATCH"
 };
 
+const WORKER_AVATAR_MAP: Record<string, string> = {
+  "WORKER-001": "/images/social-avatars/ai-generated/linkedin_profile_avatar_ai.jpg",
+  "WORKER-002": "/images/social-avatars/ai-generated/twitter_profile_avatar_ai.jpg",
+  "WORKER-003": "/images/mascots/otto.png",
+  "WORKER-004": "/images/social-avatars/ai-generated/github_profile_avatar_ai.jpg",
+  "WORKER-005": "/images/mascots/rex.png",
+  "WORKER-006": "/images/mascots/pip.png",
+  "WORKER-007": "/images/mascots/zip.png",
+};
+
 const QWEN_MODELS = [
   { value: "qwen3.7-max", label: "qwen3.7-max (High-reasoning strategist)" },
   { value: "qwen-plus", label: "qwen-plus (Fast long-form writer)" },
@@ -188,20 +198,31 @@ export default function FleetPage() {
                   }`}
                 >
                   <div className="flex items-start justify-between w-full">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono text-[#64748B] font-bold">
-                          {worker.id}
-                        </span>
-                        <h3 className={`text-sm font-bold transition-colors ${
-                          isSelected ? "text-[#00C9A7]" : "text-[#F1F5F9] group-hover:text-[#00C9A7]"
-                        }`}>
-                          {worker.name}
-                        </h3>
+                    <div className="flex items-center gap-3">
+                      {/* Avatar Thumbnail */}
+                      <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#070B0F] border border-[#1F2D3D] shrink-0 flex items-center justify-center">
+                        <img
+                          src={WORKER_AVATAR_MAP[worker.id] || "/images/mascots/rex.png"}
+                          alt={worker.name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                      <p className="text-xs text-[#94A3B8] line-clamp-1">
-                        {worker.role}
-                      </p>
+
+                      <div className="space-y-0.5 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-mono text-[#64748B] font-bold">
+                            {worker.id}
+                          </span>
+                          <h3 className={`text-sm font-bold transition-colors truncate ${
+                            isSelected ? "text-[#00C9A7]" : "text-[#F1F5F9] group-hover:text-[#00C9A7]"
+                          }`}>
+                            {worker.name}
+                          </h3>
+                        </div>
+                        <p className="text-xs text-[#94A3B8] line-clamp-1">
+                          {worker.role}
+                        </p>
+                      </div>
                     </div>
 
                     {/* Status Dot */}
@@ -248,19 +269,28 @@ export default function FleetPage() {
             <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-6 shadow-sm">
               {/* Card Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#1F2D3D]">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold text-[#00C9A7]">
-                      {selectedWorker.id}
-                    </span>
-                    <span className="text-[#64748B]">·</span>
-                    <span className="text-xs font-mono text-[#94A3B8]">
-                      {ROLE_BADGE_MAP[selectedWorker.id] || "AGENT_WORKER"}
-                    </span>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#070B0F] border border-[#00C9A7]/40 shrink-0 p-1 flex items-center justify-center">
+                    <img
+                      src={WORKER_AVATAR_MAP[selectedWorker.id] || "/images/mascots/rex.png"}
+                      alt={selectedWorker.name}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
-                  <h2 className="text-xl font-bold text-[#F1F5F9] mt-0.5">
-                    {selectedWorker.name}
-                  </h2>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-bold text-[#00C9A7]">
+                        {selectedWorker.id}
+                      </span>
+                      <span className="text-[#64748B]">·</span>
+                      <span className="text-xs font-mono text-[#94A3B8]">
+                        {ROLE_BADGE_MAP[selectedWorker.id] || "AGENT_WORKER"}
+                      </span>
+                    </div>
+                    <h2 className="text-xl font-bold text-[#F1F5F9] mt-0.5">
+                      {selectedWorker.name}
+                    </h2>
+                  </div>
                 </div>
 
                 <button

@@ -99,11 +99,20 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
   // Auth modal state
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<AdminUser | null>({
-    email: "xpeedlab@gmail.com",
-    name: "Parvej (Lead Admin)",
-    role: "MARKETING_DIRECTOR",
-    authenticated_at: new Date().toISOString()
+  const [currentUser, setCurrentUser] = useState<AdminUser | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("minions_admin_session");
+        if (cached) return JSON.parse(cached);
+      } catch {}
+    }
+    return {
+      email: "parvejshahlabib007@gmail.com",
+      name: "Parvej Shah",
+      role: "MARKETING_DIRECTOR",
+      authenticated_at: new Date().toISOString(),
+      supabase_project: "kneafaxwkopodiausljf.supabase.co"
+    };
   });
 
   // Command palette state
@@ -152,10 +161,20 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         currentUser={currentUser}
         onLogin={(user) => {
           setCurrentUser(user);
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem("minions_admin_session", JSON.stringify(user));
+            } catch {}
+          }
           setNotification(`Authenticated as ${user.email} (${user.role})`);
         }}
         onLogout={() => {
           setCurrentUser(null);
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.removeItem("minions_admin_session");
+            } catch {}
+          }
           setNotification("Signed out of Minions.AI Cockpit");
         }}
       />
@@ -342,8 +361,8 @@ export default function DashboardShell({ children }: DashboardShellProps) {
                 P
               </div>
               <div className="text-[11px] leading-tight text-left">
-                <div className="font-semibold text-[#F1F5F9] truncate max-w-[120px]">{currentUser?.name || "Parvej (Lead Admin)"}</div>
-                <div className="text-[10px] text-[#64748B] font-mono truncate max-w-[120px]">{currentUser?.email || "xpeedlab@gmail.com"}</div>
+                <div className="font-semibold text-[#F1F5F9] truncate max-w-[120px]">{currentUser?.name || "Parvej Shah"}</div>
+                <div className="text-[10px] text-[#64748B] font-mono truncate max-w-[120px]">{currentUser?.email || "parvejshahlabib007@gmail.com"}</div>
               </div>
             </div>
 
@@ -409,9 +428,9 @@ export default function DashboardShell({ children }: DashboardShellProps) {
               >
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-full bg-[#ff6b4a]/20 text-[#ff6b4a] font-bold text-xs flex items-center justify-center">
-                    P
+                    {currentUser?.name ? currentUser.name[0] : "P"}
                   </div>
-                  <span className="text-white font-mono text-[11px]">{currentUser?.email || "xpeedlab@gmail.com"}</span>
+                  <span className="text-white font-mono text-[11px]">{currentUser?.email || "parvejshahlabib007@gmail.com"}</span>
                 </div>
                 <span className="text-[#00C9A7] font-semibold text-[10px]">Auth Gate</span>
               </button>

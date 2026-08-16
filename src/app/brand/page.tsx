@@ -25,7 +25,16 @@ import {
   ImageIcon,
   Maximize2,
   ExternalLink,
-  Lock
+  Lock,
+  Bot,
+  Globe,
+  Share2,
+  Download,
+  Filter,
+  Search,
+  Zap,
+  Radio,
+  Cpu
 } from "lucide-react";
 import { BrandDirectiveItem, BrandCategory } from "@/lib/types";
 import { INITIAL_BRAND_DIRECTIVES } from "@/lib/api";
@@ -42,21 +51,388 @@ const CATEGORIES: { label: string; value: BrandCategory; desc: string }[] = [
   { label: "Calls to Action", value: "CTA", desc: "Approved closing actions & test line" }
 ];
 
+// Mascot Squad Data
+interface MascotItem {
+  id: string;
+  name: string;
+  codename: string;
+  role: string;
+  trade: string;
+  model: string;
+  description: string;
+  avatar_path: string;
+  full_asset_path: string;
+  status: "ACTIVE" | "STANDBY";
+  skills: string[];
+}
+
+const MASCOT_SQUAD: MascotItem[] = [
+  {
+    id: "MASCOT-REX",
+    name: "Rex",
+    codename: "WORKER-005",
+    role: "Lead Emergency Voice Dispatcher",
+    trade: "HVAC & Emergency Calls",
+    model: "qwen-max (Sub-1.8s Voice)",
+    description: "Primary voice AI minion. Handles inbound emergency dispatch calls with sub-1.8s latency, ambient background noise suppression, and structured JSON booking handoffs.",
+    avatar_path: "/images/mascots/rex.png",
+    full_asset_path: "/images/rex-3d-mascot-hero.png",
+    status: "ACTIVE",
+    skills: ["<1.8s Voice Response", "Emergency Triage", "Noise Cancellation", "ServiceTitan Booking"]
+  },
+  {
+    id: "MASCOT-GIA",
+    name: "Gia",
+    codename: "WORKER-OPS",
+    role: "Operations & CRM Coordinator",
+    trade: "Field Logistics & GHL/CRM",
+    model: "qwen3.7-max (Ops Reasoning)",
+    description: "The operations brain. Syncs customer service histories, technician skill matrices, and bi-directional CRM updates across GoHighLevel and Housecall Pro.",
+    avatar_path: "/images/mascots/gia.png",
+    full_asset_path: "/images/gia-mascot.jpg",
+    status: "ACTIVE",
+    skills: ["CRM Bi-directional Sync", "Job History Auditing", "Skill-Based Routing", "GoHighLevel Engine"]
+  },
+  {
+    id: "MASCOT-OTTO",
+    name: "Otto",
+    codename: "WORKER-SECURITY",
+    role: "Deterministic Safety & Schema Gate",
+    trade: "Type Safety & Compliance",
+    model: "Compiled Go Binary + qwen3.7-flash",
+    description: "The ironclad validator. Enforces 100% JSON schema adherence on every inter-agent payload, redacting PII and rejecting hallucinated fields before database commits.",
+    avatar_path: "/images/mascots/otto.png",
+    full_asset_path: "/images/otto-security-photo.jpg",
+    status: "ACTIVE",
+    skills: ["Deterministic Go Validator", "Zero-Hallucination Gate", "PII Redaction", "Token Rate Limiting"]
+  },
+  {
+    id: "MASCOT-PIP",
+    name: "Pip",
+    codename: "WORKER-006",
+    role: "Speed-to-Lead Followup Engager",
+    trade: "SMS & Customer Lifecycle",
+    model: "qwen-plus (Lifecycle Engine)",
+    description: "The speed minion. Re-engages missed calls and web form leads via two-way SMS in under 45 seconds, maximizing conversion rates for emergency contractors.",
+    avatar_path: "/images/mascots/pip.png",
+    full_asset_path: "/images/mascots/pip.png",
+    status: "ACTIVE",
+    skills: ["<45s SMS Outreach", "Missed Call Recovery", "Review Collection", "Conversational Re-engagement"]
+  },
+  {
+    id: "MASCOT-ZIP",
+    name: "Zip",
+    codename: "WORKER-007",
+    role: "Route & Territory Logistics Optimizer",
+    trade: "Dispatch & Routing",
+    model: "qwen-plus (Logistics Engine)",
+    description: "The dispatch navigator. Optimizes multi-van drive routes, calculates traffic overhead, and locks firm 2-hour arrival windows to minimize technician windshield time.",
+    avatar_path: "/images/mascots/zip.png",
+    full_asset_path: "/images/mascots/zip.png",
+    status: "ACTIVE",
+    skills: ["Drive-Time Optimization", "Van Territory Clustering", "Arrival Window Locks", "Fuel & Labor Savings"]
+  }
+];
+
+// Social Templates Catalog
+interface SocialTemplateItem {
+  id: string;
+  platform: "LINKEDIN" | "FACEBOOK" | "TWITTER" | "GITHUB" | "YOUTUBE" | "SQUAD";
+  type: "COVER" | "AVATAR";
+  name: string;
+  dimensions: string;
+  theme: "DARK" | "TEAL" | "LIGHT" | "MONOGRAM" | "STACKED" | "AI";
+  path: string;
+  description: string;
+}
+
+const SOCIAL_TEMPLATES: SocialTemplateItem[] = [
+  // COVERS
+  {
+    id: "COV-LI-01",
+    platform: "LINKEDIN",
+    type: "COVER",
+    name: "LinkedIn Tactical Dark Studio Cover",
+    dimensions: "1584 × 396 px",
+    theme: "DARK",
+    path: "/images/social-covers/linkedin/linkedin_cover_dark.png",
+    description: "Official dark slate theme with stitched leather texture, brand wordmark, and tactical contractor positioning."
+  },
+  {
+    id: "COV-LI-02",
+    platform: "LINKEDIN",
+    type: "COVER",
+    name: "LinkedIn Minions Teal Brand Cover",
+    dimensions: "1584 × 396 px",
+    theme: "TEAL",
+    path: "/images/social-covers/linkedin/linkedin_cover_teal.png",
+    description: "Vibrant brand teal gradient with white typography and telemetry line accent."
+  },
+  {
+    id: "COV-FB-01",
+    platform: "FACEBOOK",
+    type: "COVER",
+    name: "Facebook Page Dark Header",
+    dimensions: "820 × 312 px",
+    theme: "DARK",
+    path: "/images/social-covers/facebook/facebook_cover_dark.png",
+    description: "Optimized mobile/desktop safe zone layout with primary branding on dark charcoal."
+  },
+  {
+    id: "COV-FB-02",
+    platform: "FACEBOOK",
+    type: "COVER",
+    name: "Facebook Page Teal Header",
+    dimensions: "820 × 312 px",
+    theme: "TEAL",
+    path: "/images/social-covers/facebook/facebook_cover_teal.png",
+    description: "High-contrast teal version tailored for local trade contractor community outreach."
+  },
+  {
+    id: "COV-TW-01",
+    platform: "TWITTER",
+    type: "COVER",
+    name: "Twitter / X Dark Header Banner",
+    dimensions: "1500 × 500 px",
+    theme: "DARK",
+    path: "/images/social-covers/twitter/twitter_cover_dark.png",
+    description: "High-DPI technical header with deterministic systems engineering callouts."
+  },
+  {
+    id: "COV-TW-02",
+    platform: "TWITTER",
+    type: "COVER",
+    name: "Twitter / X Teal Header Banner",
+    dimensions: "1500 × 500 px",
+    theme: "TEAL",
+    path: "/images/social-covers/twitter/twitter_cover_teal.png",
+    description: "Vibrant teal header banner with brand wordmark and responsive spacing."
+  },
+  {
+    id: "COV-GH-01",
+    platform: "GITHUB",
+    type: "COVER",
+    name: "GitHub Organization Social Dark Preview",
+    dimensions: "1280 × 640 px",
+    theme: "DARK",
+    path: "/images/social-covers/github/github_social_dark.png",
+    description: "High-contrast OpenGraph card for open-source audio streaming & schema repos."
+  },
+  {
+    id: "COV-GH-02",
+    platform: "GITHUB",
+    type: "COVER",
+    name: "GitHub Organization Social Teal Preview",
+    dimensions: "1280 × 640 px",
+    theme: "TEAL",
+    path: "/images/social-covers/github/github_social_teal.png",
+    description: "Teal OpenGraph card designed for rich social sharing cards on GitHub links."
+  },
+  {
+    id: "COV-YT-01",
+    platform: "YOUTUBE",
+    type: "COVER",
+    name: "YouTube Channel 4K Banner (Dark)",
+    dimensions: "2560 × 1440 px",
+    theme: "DARK",
+    path: "/images/social-covers/youtube/youtube_banner_dark.png",
+    description: "Ultra-HD channel art formatted for TV, desktop, and mobile viewports."
+  },
+  {
+    id: "COV-YT-02",
+    platform: "YOUTUBE",
+    type: "COVER",
+    name: "YouTube Channel 4K Banner (Teal)",
+    dimensions: "2560 × 1440 px",
+    theme: "TEAL",
+    path: "/images/social-covers/youtube/youtube_banner_teal.png",
+    description: "Teal 4K YouTube banner with centered branding in television-safe bounds."
+  },
+  {
+    id: "COV-SQUAD-01",
+    platform: "SQUAD",
+    type: "COVER",
+    name: "Minions Mascot Squad Showcase Hero",
+    dimensions: "1200 × 630 px",
+    theme: "DARK",
+    path: "/images/social-covers/test_squad.png",
+    description: "Wide panoramic showcase featuring the complete Minions squad in action."
+  },
+
+  // AVATARS
+  {
+    id: "AV-LI-01",
+    platform: "LINKEDIN",
+    type: "AVATAR",
+    name: "LinkedIn Profile Avatar (Dark)",
+    dimensions: "800 × 800 px",
+    theme: "DARK",
+    path: "/images/social-avatars/linkedin/linkedin_avatar_dark_800x800.png",
+    description: "High-contrast circular avatar on dark ink slate."
+  },
+  {
+    id: "AV-LI-02",
+    platform: "LINKEDIN",
+    type: "AVATAR",
+    name: "LinkedIn Profile Avatar (Teal)",
+    dimensions: "800 × 800 px",
+    theme: "TEAL",
+    path: "/images/social-avatars/linkedin/linkedin_avatar_teal_800x800.png",
+    description: "Brand teal background avatar with crisp white logo."
+  },
+  {
+    id: "AV-LI-03",
+    platform: "LINKEDIN",
+    type: "AVATAR",
+    name: "LinkedIn Profile Avatar (Light)",
+    dimensions: "800 × 800 px",
+    theme: "LIGHT",
+    path: "/images/social-avatars/linkedin/linkedin_avatar_light_800x800.png",
+    description: "Clean cream background avatar for high-contrast light profile headers."
+  },
+  {
+    id: "AV-FB-01",
+    platform: "FACEBOOK",
+    type: "AVATAR",
+    name: "Facebook Profile Avatar (Dark)",
+    dimensions: "800 × 800 px",
+    theme: "DARK",
+    path: "/images/social-avatars/facebook/facebook_avatar_dark_800x800.png",
+    description: "Square 800x800 avatar formatted for Facebook circular profile cropping."
+  },
+  {
+    id: "AV-FB-02",
+    platform: "FACEBOOK",
+    type: "AVATAR",
+    name: "Facebook Profile Avatar (Teal)",
+    dimensions: "800 × 800 px",
+    theme: "TEAL",
+    path: "/images/social-avatars/facebook/facebook_avatar_teal_800x800.png",
+    description: "Vibrant teal Facebook brand avatar."
+  },
+  {
+    id: "AV-TW-01",
+    platform: "TWITTER",
+    type: "AVATAR",
+    name: "Twitter / X Avatar (Dark Horizontal)",
+    dimensions: "800 × 800 px",
+    theme: "DARK",
+    path: "/images/social-avatars/twitter/twitter_avatar_dark_800x800.png",
+    description: "Standard horizontal wordmark on dark background."
+  },
+  {
+    id: "AV-TW-02",
+    platform: "TWITTER",
+    type: "AVATAR",
+    name: "Twitter / X Avatar (Dark Monogram)",
+    dimensions: "800 × 800 px",
+    theme: "MONOGRAM",
+    path: "/images/social-avatars/twitter/twitter_avatar_dark_monogram_800x800.png",
+    description: "Monogram M.ai icon mark optimized for small avatar bubbles."
+  },
+  {
+    id: "AV-TW-03",
+    platform: "TWITTER",
+    type: "AVATAR",
+    name: "Twitter / X Avatar (Dark Stacked)",
+    dimensions: "800 × 800 px",
+    theme: "STACKED",
+    path: "/images/social-avatars/twitter/twitter_avatar_dark_stacked_800x800.png",
+    description: "Two-line stacked lockup on dark background."
+  },
+  {
+    id: "AV-TW-04",
+    platform: "TWITTER",
+    type: "AVATAR",
+    name: "Twitter / X Avatar (Teal Monogram)",
+    dimensions: "800 × 800 px",
+    theme: "MONOGRAM",
+    path: "/images/social-avatars/twitter/twitter_avatar_teal_monogram_800x800.png",
+    description: "Monogram icon mark on teal brand background."
+  },
+  {
+    id: "AV-GH-01",
+    platform: "GITHUB",
+    type: "AVATAR",
+    name: "GitHub Organization Avatar (Dark)",
+    dimensions: "800 × 800 px",
+    theme: "DARK",
+    path: "/images/social-avatars/github/github_avatar_dark_800x800.png",
+    description: "Organization profile avatar on dark slate background."
+  },
+  {
+    id: "AV-GH-02",
+    platform: "GITHUB",
+    type: "AVATAR",
+    name: "GitHub Organization Avatar (Dark Stacked)",
+    dimensions: "800 × 800 px",
+    theme: "STACKED",
+    path: "/images/social-avatars/github/github_avatar_dark_stacked_800x800.png",
+    description: "Stacked organization logo avatar."
+  },
+  {
+    id: "AV-YT-01",
+    platform: "YOUTUBE",
+    type: "AVATAR",
+    name: "YouTube Channel Avatar (Dark)",
+    dimensions: "800 × 800 px",
+    theme: "DARK",
+    path: "/images/social-avatars/youtube/youtube_avatar_dark_800x800.png",
+    description: "High-resolution circular crop avatar for video channel headers."
+  },
+  {
+    id: "AV-YT-02",
+    platform: "YOUTUBE",
+    type: "AVATAR",
+    name: "YouTube Channel Avatar (Teal)",
+    dimensions: "800 × 800 px",
+    theme: "TEAL",
+    path: "/images/social-avatars/youtube/youtube_avatar_teal_800x800.png",
+    description: "Teal brand YouTube channel profile picture."
+  },
+  {
+    id: "AV-AI-01",
+    platform: "LINKEDIN",
+    type: "AVATAR",
+    name: "LinkedIn AI Persona Profile Avatar",
+    dimensions: "800 × 800 px",
+    theme: "AI",
+    path: "/images/social-avatars/ai-generated/linkedin_profile_avatar_ai.jpg",
+    description: "Photorealistic AI agent portrait for automated executive outreach."
+  },
+  {
+    id: "AV-AI-02",
+    platform: "TWITTER",
+    type: "AVATAR",
+    name: "Twitter / X AI Persona Profile Avatar",
+    dimensions: "800 × 800 px",
+    theme: "AI",
+    path: "/images/social-avatars/ai-generated/twitter_profile_avatar_ai.jpg",
+    description: "AI-generated operator portrait for automated tech updates."
+  }
+];
+
 export default function BrandStudioPage() {
-  const [activeTab, setActiveTab] = useState<"directives" | "multi_brand" | "visuals" | "lexicon">("visuals");
+  const [activeTab, setActiveTab] = useState<"visuals" | "mascots" | "social" | "directives" | "multi_brand" | "lexicon">("visuals");
   const [directives, setDirectives] = useState<BrandDirectiveItem[]>(INITIAL_BRAND_DIRECTIVES);
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [selectedPriority, setSelectedPriority] = useState<number | "ALL">("ALL");
   const [selectedAudience, setSelectedAudience] = useState<string>("ALL");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  // Visual Assets & Logo Management State
-  const [logoUrl, setLogoUrl] = useState("https://pub-13629069dfd74891bffc487ab4e135f5.r2.dev/minions_logo_primary.svg");
-  const [customLogoInput, setCustomLogoInput] = useState("");
+  // Logo Studio State
+  const [logoBgMode, setLogoBgMode] = useState<"dark" | "white" | "teal" | "checker">("dark");
+  const [activeLogoVariant, setActiveLogoVariant] = useState<"inverted" | "primary" | "teal">("inverted");
   const [logoSaved, setLogoSaved] = useState(false);
 
-  // Favicon state
-  const [faviconUrl, setFaviconUrl] = useState("/icon.svg");
+  // Social Template State
+  const [socialPlatformFilter, setSocialPlatformFilter] = useState<string>("ALL");
+  const [socialTypeFilter, setSocialTypeFilter] = useState<"ALL" | "COVER" | "AVATAR">("ALL");
+  const [activePreviewAsset, setActivePreviewAsset] = useState<SocialTemplateItem | null>(null);
+
+  // Mascot Squad State
+  const [selectedMascot, setSelectedMascot] = useState<MascotItem | null>(MASCOT_SQUAD[0]);
+  const [mascotPreviewModal, setMascotPreviewModal] = useState<MascotItem | null>(null);
 
   // Cover Reference Templates
   const [coverTemplates, setCoverTemplates] = useState([
@@ -65,26 +441,41 @@ export default function BrandStudioPage() {
       name: "Tactile Studio Leather Flat-Lay",
       description: "Real stitched leather clipboard, dark slate tabletop, volumetric rim lighting, centered minimalist title",
       is_active: true,
-      preview_url: "https://pub-13629069dfd74891bffc487ab4e135f5.r2.dev/raw-json-over-agent-summaries.png"
+      preview_url: "/images/social-covers/linkedin/linkedin_cover_dark.png"
     },
     {
       id: "TMPL-02",
       name: "Minimalist Slate Blueprint",
       description: "Dark carbon texture, architectural grid lines, cyan & teal schematics, high-contrast monochrome typography",
       is_active: false,
-      preview_url: "https://pub-13629069dfd74891bffc487ab4e135f5.r2.dev/raw-json-over-agent-summaries.png"
+      preview_url: "/images/social-covers/github/github_social_dark.png"
+    },
+    {
+      id: "TMPL-03",
+      name: "Minions Squad Hero Showcase",
+      description: "Full active AI fleet rendered in high-detail 3D isometric studio lighting with telemetry badges",
+      is_active: false,
+      preview_url: "/images/social-covers/test_squad.png"
+    },
+    {
+      id: "TMPL-04",
+      name: "Operator Voice Dispatch Studio",
+      description: "Technical audio waveform visualizers, sub-1.8s latency gauges, and deep slate dark mode styling",
+      is_active: false,
+      preview_url: "/images/social-covers/twitter/twitter_cover_dark.png"
     }
   ]);
 
   // Brand Colors state
-  const [brandColors, setBrandColors] = useState({
+  const [brandColors] = useState({
     primaryInk: "#12242a",
     brandTeal: "#0e5c63",
     brandCoral: "#ff6b4a",
-    creamCanvas: "#fff8f0"
+    creamCanvas: "#fff8f0",
+    accentBlue: "#3a6ea5"
   });
 
-  // Modal State
+  // Directives Modal State
   const [showAddModal, setShowAddModal] = useState(false);
   const [newCat, setNewCat] = useState<BrandCategory>("VOICE_DO");
   const [newKey, setNewKey] = useState("");
@@ -111,15 +502,6 @@ export default function BrandStudioPage() {
     navigator.clipboard.writeText(text);
     setCopiedKey(key);
     setTimeout(() => setCopiedKey(null), 2000);
-  };
-
-  const handleUpdateLogo = () => {
-    if (customLogoInput.trim()) {
-      setLogoUrl(customLogoInput.trim());
-      setLogoSaved(true);
-      setCustomLogoInput("");
-      setTimeout(() => setLogoSaved(false), 3000);
-    }
   };
 
   const toggleCoverTemplate = (id: string) => {
@@ -176,6 +558,19 @@ export default function BrandStudioPage() {
     return true;
   });
 
+  const filteredSocialTemplates = SOCIAL_TEMPLATES.filter(tmpl => {
+    if (socialPlatformFilter !== "ALL" && tmpl.platform !== socialPlatformFilter) return false;
+    if (socialTypeFilter !== "ALL" && tmpl.type !== socialTypeFilter) return false;
+    return true;
+  });
+
+  // Current active logo path
+  const currentLogoSrc = activeLogoVariant === "inverted"
+    ? "/images/minions_ai_logo_inverted_transparent.png"
+    : activeLogoVariant === "primary"
+    ? "/images/minions_ai_logo_primary_transparent.png"
+    : "/images/minions_ai_logo_teal_transparent.png";
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
       {/* Top Header */}
@@ -183,18 +578,18 @@ export default function BrandStudioPage() {
         <div>
           <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#00C9A7] uppercase mb-1">
             <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
-            Brand Governance & Context Engine
+            Brand Governance & Visual Asset Engine
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-[#F1F5F9]">
-            Brand Directives & Visual Assets
+            Brand Studio & Visual Assets
           </h1>
           <p className="text-sm text-[#94A3B8] mt-1">
-            Manage live LLM directives, upload AI logo references, inspect favicon tokens, and configure multi-brand instructions.
+            Real transparent logos, 3D Mascot Squad, official social avatars & covers, and live LLM prompt directives.
           </p>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="flex items-center bg-[#0F1419] p-1 rounded-xl border border-[#1F2D3D] self-start md:self-auto">
+        {/* Primary Tab Switcher */}
+        <div className="flex flex-wrap items-center bg-[#0F1419] p-1 rounded-xl border border-[#1F2D3D] self-start md:self-auto gap-1">
           <button
             onClick={() => setActiveTab("visuals")}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
@@ -205,6 +600,28 @@ export default function BrandStudioPage() {
           >
             <Palette className="w-3.5 h-3.5" />
             Visuals & Logo Studio
+          </button>
+          <button
+            onClick={() => setActiveTab("mascots")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              activeTab === "mascots"
+                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
+                : "text-[#94A3B8] hover:text-[#F1F5F9]"
+            }`}
+          >
+            <Bot className="w-3.5 h-3.5" />
+            Mascot Squad (5)
+          </button>
+          <button
+            onClick={() => setActiveTab("social")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              activeTab === "social"
+                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
+                : "text-[#94A3B8] hover:text-[#F1F5F9]"
+            }`}
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            Social Assets ({SOCIAL_TEMPLATES.length})
           </button>
           <button
             onClick={() => setActiveTab("directives")}
@@ -226,7 +643,7 @@ export default function BrandStudioPage() {
             }`}
           >
             <Send className="w-3.5 h-3.5" />
-            Instruct Agents
+            Instruct Fleet
           </button>
           <button
             onClick={() => setActiveTab("lexicon")}
@@ -237,172 +654,323 @@ export default function BrandStudioPage() {
             }`}
           >
             <AlertTriangle className="w-3.5 h-3.5" />
-            Banned Lexicon ({bannedWords.length})
+            Banned ({bannedWords.length})
           </button>
         </div>
       </div>
 
-      {/* TAB 1: VISUALS & LOGO STUDIO (THE MISSING FEATURE PER PRD) */}
+      {/* ======================================================== */}
+      {/* TAB 1: VISUALS & LOGO STUDIO */}
+      {/* ======================================================== */}
       {activeTab === "visuals" && (
         <div className="space-y-6">
-          {/* Logo & Favicon Management Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Primary Logo Configuration */}
-            <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm flex flex-col justify-between">
-              <div className="space-y-3">
+          {/* Main Logo & Vector Management Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Primary Logo Canvas (7 cols) */}
+            <div className="lg:col-span-7 p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-5 shadow-sm flex flex-col justify-between">
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <ImageIcon className="w-4 h-4 text-[#00C9A7]" />
-                    AI Brand Logo (Used for 2K Cover Synthesis)
-                  </h3>
-                  <span className="text-[10px] font-mono text-[#00C9A7] bg-[#00C9A7]/10 px-2 py-0.5 rounded-full border border-[#00C9A7]/30">
-                    Primary Wordmark
+                    <h2 className="text-sm font-bold text-[#F1F5F9]">
+                      Official Brand Transparent Logo Wordmarks
+                    </h2>
+                  </div>
+                  <span className="text-[10px] font-mono text-[#00C9A7] bg-[#00C9A7]/10 px-2 py-0.5 rounded-full border border-[#00C9A7]/30 font-semibold">
+                    Real PNG Alpha Assets
                   </span>
                 </div>
-                <p className="text-xs text-[#94A3B8]">
-                  This vector logo asset is served directly to the Visual Art Director agent (<code className="text-[#00C9A7] font-mono">qwen-image-3.0</code>) to render the official watermark on cover cards.
+                <p className="text-xs text-[#94A3B8] leading-relaxed">
+                  Real transparent brand logos rendered by the Visual Art Director (<code className="text-[#00C9A7] font-mono">qwen-image-3.0</code>) for cover synthesis, social cards, and PDF technical teardowns.
                 </p>
 
-                {/* Logo Preview Canvas */}
-                <div className="p-8 rounded-xl bg-[#070B0F] border border-[#1F2D3D] flex items-center justify-center min-h-[140px] shadow-inner relative group">
-                  <div className="flex items-baseline">
-                    <span className="text-4xl font-black tracking-tight text-white">
-                      minions
-                    </span>
-                    <span className="text-[#ff6b4a] font-mono font-black text-4xl ml-1">
-                      .ai
-                    </span>
-                  </div>
-
-                  <a
-                    href={logoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute top-2 right-2 p-1.5 rounded-lg bg-[#161D26] text-[#94A3B8] hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Open full asset"
+                {/* Variant Switcher Buttons */}
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <button
+                    onClick={() => {
+                      setActiveLogoVariant("inverted");
+                      setLogoBgMode("dark");
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
+                      activeLogoVariant === "inverted"
+                        ? "bg-[#161D26] text-[#00C9A7] border border-[#00C9A7] shadow-sm"
+                        : "bg-[#070B0F] text-[#94A3B8] border border-[#1F2D3D] hover:text-[#F1F5F9]"
+                    }`}
                   >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+                    <span>Inverted (White + Coral)</span>
+                    <span className="text-[10px] opacity-75">Dark Surfaces</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveLogoVariant("primary");
+                      setLogoBgMode("white");
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
+                      activeLogoVariant === "primary"
+                        ? "bg-[#161D26] text-[#00C9A7] border border-[#00C9A7] shadow-sm"
+                        : "bg-[#070B0F] text-[#94A3B8] border border-[#1F2D3D] hover:text-[#F1F5F9]"
+                    }`}
+                  >
+                    <span>Primary (Dark + Coral)</span>
+                    <span className="text-[10px] opacity-75">Light Canvas</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveLogoVariant("teal");
+                      setLogoBgMode("dark");
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
+                      activeLogoVariant === "teal"
+                        ? "bg-[#161D26] text-[#00C9A7] border border-[#00C9A7] shadow-sm"
+                        : "bg-[#070B0F] text-[#94A3B8] border border-[#1F2D3D] hover:text-[#F1F5F9]"
+                    }`}
+                  >
+                    <span>Teal Wordmark</span>
+                    <span className="text-[10px] opacity-75">Accent Cards</span>
+                  </button>
                 </div>
 
-                {/* Direct Logo URL Input & Uploader */}
-                <div className="space-y-2 pt-2">
-                  <label className="text-[11px] font-mono text-[#94A3B8] block">Modify Cloudflare R2 / Cloudinary Logo URL</label>
+                {/* Live Logo Preview Canvas with Interactive Backgrounds */}
+                <div 
+                  className={`p-10 rounded-2xl border border-[#1F2D3D] flex items-center justify-center min-h-[180px] shadow-inner relative transition-all group ${
+                    logoBgMode === "dark" 
+                      ? "bg-[#070B0F]" 
+                      : logoBgMode === "white" 
+                      ? "bg-white" 
+                      : logoBgMode === "teal"
+                      ? "bg-[#0E5C63]"
+                      : "bg-[#121820] bg-[radial-gradient(#263445_1px,transparent_1px)] [background-size:12px_12px]"
+                  }`}
+                >
+                  <img
+                    src={currentLogoSrc}
+                    alt="Minions.AI Brand Logo"
+                    className="max-h-16 max-w-[320px] object-contain drop-shadow-md transition-transform duration-300 group-hover:scale-105"
+                  />
+
+                  {/* Actions overlay */}
+                  <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => copyToClipboard(currentLogoSrc, "logo-path")}
+                      className="p-2 rounded-xl bg-[#0F1419]/90 backdrop-blur-md text-[#94A3B8] hover:text-[#00C9A7] border border-[#1F2D3D] shadow-lg transition-all"
+                      title="Copy asset path"
+                    >
+                      {copiedKey === "logo-path" ? (
+                        <Check className="w-3.5 h-3.5 text-[#00C9A7]" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                    <a
+                      href={currentLogoSrc}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-xl bg-[#0F1419]/90 backdrop-blur-md text-[#94A3B8] hover:text-white border border-[#1F2D3D] shadow-lg transition-all"
+                      title="Open full-resolution asset"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+
+                {/* Canvas Background Controls */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                   <div className="flex items-center gap-2">
-                    <input
-                      type="url"
-                      placeholder="https://pub-xxx.r2.dev/logo.svg"
-                      value={customLogoInput}
-                      onChange={(e) => setCustomLogoInput(e.target.value)}
-                      className="flex-1 bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3.5 py-2 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]"
+                    <span className="text-[11px] font-mono text-[#64748B]">Preview Background:</span>
+                    <button
+                      onClick={() => setLogoBgMode("dark")}
+                      className={`w-6 h-6 rounded-lg bg-[#070B0F] border ${logoBgMode === "dark" ? "border-[#00C9A7] ring-2 ring-[#00C9A7]/30" : "border-[#1F2D3D]"}`}
+                      title="Dark Slate #070B0F"
                     />
                     <button
-                      onClick={handleUpdateLogo}
-                      className="bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-sm shrink-0"
-                    >
-                      Update Logo
-                    </button>
+                      onClick={() => setLogoBgMode("white")}
+                      className={`w-6 h-6 rounded-lg bg-white border ${logoBgMode === "white" ? "border-[#00C9A7] ring-2 ring-[#00C9A7]/30" : "border-[#1F2D3D]"}`}
+                      title="Clean White #FFFFFF"
+                    />
+                    <button
+                      onClick={() => setLogoBgMode("teal")}
+                      className={`w-6 h-6 rounded-lg bg-[#0E5C63] border ${logoBgMode === "teal" ? "border-[#00C9A7] ring-2 ring-[#00C9A7]/30" : "border-[#1F2D3D]"}`}
+                      title="Brand Teal #0E5C63"
+                    />
+                    <button
+                      onClick={() => setLogoBgMode("checker")}
+                      className={`w-6 h-6 rounded-lg bg-[#121820] border ${logoBgMode === "checker" ? "border-[#00C9A7] ring-2 ring-[#00C9A7]/30" : "border-[#1F2D3D]"}`}
+                      title="Transparency Grid"
+                    />
+                  </div>
+
+                  <div className="text-[11px] font-mono text-[#00C9A7] flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#00C9A7]" />
+                    <span>{currentLogoSrc}</span>
                   </div>
                 </div>
+              </div>
 
-                {logoSaved && (
-                  <div className="text-xs text-[#00C9A7] flex items-center gap-1.5 font-medium animate-in fade-in">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Logo reference updated and synchronized to AI generation engine!
-                  </div>
-                )}
+              {/* Logo Path & Copy Bar */}
+              <div className="p-3.5 rounded-xl bg-[#161D26] border border-[#1F2D3D] flex items-center justify-between text-xs mt-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-[10px] font-mono uppercase bg-[#00C9A7]/10 text-[#00C9A7] px-2 py-0.5 rounded border border-[#00C9A7]/20 font-bold">
+                    Active Asset
+                  </span>
+                  <code className="text-[#F1F5F9] font-mono text-[11px] truncate">
+                    {currentLogoSrc}
+                  </code>
+                </div>
+
+                <button
+                  onClick={() => copyToClipboard(currentLogoSrc, "bar-path")}
+                  className="flex items-center gap-1 text-[11px] font-mono text-[#94A3B8] hover:text-[#00C9A7] shrink-0 font-semibold"
+                >
+                  {copiedKey === "bar-path" ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-[#00C9A7]" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy Path</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
 
-            {/* Favicon & Multi-Size Preview */}
-            <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm flex flex-col justify-between">
+            {/* Favicon & Vector Tokens (5 cols) */}
+            <div className="lg:col-span-5 p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm flex flex-col justify-between">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-[#3B82F6]" />
-                    App Favicon & Touch Icons
+                    App Favicon & Multi-Scale Assets
                   </h3>
-                  <span className="text-[10px] font-mono text-[#3B82F6] bg-[#3B82F6]/10 px-2 py-0.5 rounded-full border border-[#3B82F6]/30">
+                  <span className="text-[10px] font-mono text-[#3B82F6] bg-[#3B82F6]/10 px-2 py-0.5 rounded-full border border-[#3B82F6]/30 font-semibold">
                     Vector SVG Active
                   </span>
                 </div>
                 <p className="text-xs text-[#94A3B8]">
-                  The live browser tab icon served at <code className="text-[#3B82F6] font-mono">/icon.svg</code> with multi-size resolution scaling.
+                  Multi-resolution browser tab icon and PWA touch asset served at <code className="text-[#3B82F6] font-mono">/icon.svg</code> with vector scaling.
                 </p>
 
                 {/* Multi-Size Favicon Previews */}
                 <div className="p-6 rounded-xl bg-[#070B0F] border border-[#1F2D3D] flex items-center justify-around shadow-inner">
                   <div className="text-center space-y-2">
-                    <div className="w-16 h-16 rounded-2xl bg-[#161D26] border border-[#1F2D3D] flex items-center justify-center mx-auto shadow-md">
-                      <img src="/icon.svg" alt="64x64" className="w-12 h-12" />
+                    <div className="w-16 h-16 rounded-2xl bg-[#161D26] border border-[#1F2D3D] flex items-center justify-center mx-auto shadow-md group hover:border-[#00C9A7] transition-all">
+                      <img src="/icon.svg" alt="64x64" className="w-12 h-12 group-hover:scale-110 transition-transform" />
                     </div>
                     <div className="text-[10px] font-mono text-[#94A3B8]">64×64 (Hi-DPI)</div>
                   </div>
 
                   <div className="text-center space-y-2">
-                    <div className="w-12 h-12 rounded-xl bg-[#161D26] border border-[#1F2D3D] flex items-center justify-center mx-auto shadow-md">
-                      <img src="/icon.svg" alt="32x32" className="w-8 h-8" />
+                    <div className="w-12 h-12 rounded-xl bg-[#161D26] border border-[#1F2D3D] flex items-center justify-center mx-auto shadow-md group hover:border-[#00C9A7] transition-all">
+                      <img src="/icon.svg" alt="32x32" className="w-8 h-8 group-hover:scale-110 transition-transform" />
                     </div>
-                    <div className="text-[10px] font-mono text-[#94A3B8]">32×32 (Standard)</div>
+                    <div className="text-[10px] font-mono text-[#94A3B8]">32×32 (Desktop)</div>
                   </div>
 
                   <div className="text-center space-y-2">
-                    <div className="w-8 h-8 rounded-lg bg-[#161D26] border border-[#1F2D3D] flex items-center justify-center mx-auto shadow-md">
-                      <img src="/icon.svg" alt="16x16" className="w-5 h-5" />
+                    <div className="w-8 h-8 rounded-lg bg-[#161D26] border border-[#1F2D3D] flex items-center justify-center mx-auto shadow-md group hover:border-[#00C9A7] transition-all">
+                      <img src="/icon.svg" alt="16x16" className="w-5 h-5 group-hover:scale-110 transition-transform" />
                     </div>
                     <div className="text-[10px] font-mono text-[#94A3B8]">16×16 (Tab)</div>
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-[#161D26] border border-[#1F2D3D] text-xs text-[#94A3B8] flex items-center justify-between">
-                  <span>Current Favicon Source: <code className="text-[#F1F5F9] font-mono">src/app/icon.svg</code></span>
-                  <span className="text-[#00C9A7] font-semibold text-[11px]">Active</span>
+                <div className="p-3.5 rounded-xl bg-[#161D26] border border-[#1F2D3D] text-xs text-[#94A3B8] flex items-center justify-between">
+                  <span>Source File: <code className="text-[#F1F5F9] font-mono">public/icon.svg</code></span>
+                  <span className="text-[#00C9A7] font-semibold text-[11px] flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Synchronized
+                  </span>
                 </div>
+              </div>
+
+              {/* Quick Mascot Teaser Banner */}
+              <div 
+                onClick={() => setActiveTab("mascots")}
+                className="p-4 rounded-xl bg-gradient-to-r from-[#0E5C63]/30 via-[#161D26] to-[#0F1419] border border-[#00C9A7]/30 hover:border-[#00C9A7] transition-all cursor-pointer flex items-center justify-between group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full overflow-hidden bg-black/40 border border-[#00C9A7]/40 shrink-0">
+                    <img src="/images/mascots/rex.png" alt="Rex" className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-[#F1F5F9] group-hover:text-[#00C9A7] transition-colors">
+                      Mascot Squad Available (5 Minions)
+                    </div>
+                    <div className="text-[11px] text-[#94A3B8]">
+                      Rex, Gia, Otto, Pip & Zip active
+                    </div>
+                  </div>
+                </div>
+                <span className="text-xs font-mono text-[#00C9A7] font-bold">Inspect →</span>
               </div>
             </div>
           </div>
 
-          {/* Cover Style Reference Templates */}
+          {/* Cover Style Reference Templates (AI Ingestion) */}
           <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
                   <Layers className="w-4 h-4 text-[#ff6b4a]" />
-                  Cover Image Reference Style Templates
+                  AI Editorial Cover Style Reference Templates
                 </h3>
                 <p className="text-xs text-[#94A3B8] mt-0.5">
                   Visual style references injected into the Qwen Image 3.0 prompt for editorial cover synthesis.
                 </p>
               </div>
+              <span className="text-[10px] font-mono text-[#00C9A7] bg-[#00C9A7]/10 px-2 py-0.5 rounded border border-[#00C9A7]/30">
+                Working 2K Assets
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {coverTemplates.map((tmpl) => (
                 <div
                   key={tmpl.id}
                   onClick={() => toggleCoverTemplate(tmpl.id)}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all flex gap-4 ${
+                  className={`p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-3 group ${
                     tmpl.is_active
                       ? "bg-[#161D26] border-[#00C9A7] shadow-lg shadow-[#00C9A7]/10"
                       : "bg-[#0F1419] border-[#1F2D3D] hover:border-[#2A3D52]"
                   }`}
                 >
-                  <div className="w-32 h-20 rounded-lg overflow-hidden bg-black shrink-0 border border-[#1F2D3D]">
-                    <img src={tmpl.preview_url} alt={tmpl.name} className="w-full h-full object-cover" />
+                  <div className="aspect-[16/9] rounded-lg overflow-hidden bg-black shrink-0 border border-[#1F2D3D]">
+                    <img 
+                      src={tmpl.preview_url} 
+                      alt={tmpl.name} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                    />
                   </div>
 
-                  <div className="space-y-1 flex-1">
+                  <div className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#F1F5F9]">{tmpl.name}</span>
+                      <span className="text-xs font-bold text-[#F1F5F9] line-clamp-1">{tmpl.name}</span>
                       {tmpl.is_active ? (
-                        <span className="text-[10px] font-mono text-[#00C9A7] font-bold">● Active Style</span>
+                        <span className="text-[10px] font-mono text-[#00C9A7] font-bold shrink-0">● Active</span>
                       ) : (
-                        <span className="text-[10px] font-mono text-[#64748B]">Select Style</span>
+                        <span className="text-[10px] font-mono text-[#64748B] shrink-0">Select</span>
                       )}
                     </div>
                     <p className="text-[11px] text-[#94A3B8] leading-relaxed line-clamp-2">
                       {tmpl.description}
                     </p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-[#1F2D3D] text-[10px] font-mono text-[#64748B]">
+                    <span>{tmpl.id}</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        copyToClipboard(tmpl.preview_url, tmpl.id);
+                      }}
+                      className="text-[#94A3B8] hover:text-[#00C9A7]"
+                    >
+                      {copiedKey === tmpl.id ? "Copied!" : "Copy Path"}
+                    </button>
                   </div>
                 </div>
               ))}
@@ -411,18 +979,22 @@ export default function BrandStudioPage() {
 
           {/* Official Brand Color Tokens */}
           <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
-            <h3 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
-              <Palette className="w-4 h-4 text-[#00C9A7]" />
-              Official Brand Color Palette Tokens
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
+                <Palette className="w-4 h-4 text-[#00C9A7]" />
+                Official Brand Color Palette Tokens
+              </h3>
+              <span className="text-xs font-mono text-[#94A3B8]">Minions Design System Tokens</span>
+            </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
               <div className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-2">
                 <div className="h-12 rounded-lg bg-[#12242a] border border-[#1F2D3D] shadow-inner" />
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-[#F1F5F9]">Deep Slate Ink</span>
                   <code className="text-[#00C9A7] font-mono text-[11px]">#12242a</code>
                 </div>
+                <div className="text-[10px] text-[#64748B]">Primary Dark Background</div>
               </div>
 
               <div className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-2">
@@ -431,6 +1003,7 @@ export default function BrandStudioPage() {
                   <span className="font-bold text-[#F1F5F9]">Brand Teal</span>
                   <code className="text-[#00C9A7] font-mono text-[11px]">#0e5c63</code>
                 </div>
+                <div className="text-[10px] text-[#64748B]">Primary Brand Accent</div>
               </div>
 
               <div className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-2">
@@ -439,21 +1012,299 @@ export default function BrandStudioPage() {
                   <span className="font-bold text-[#F1F5F9]">Vibrant Coral</span>
                   <code className="text-[#00C9A7] font-mono text-[11px]">#ff6b4a</code>
                 </div>
+                <div className="text-[10px] text-[#64748B]">.ai Domain Dot & CTAs</div>
               </div>
 
               <div className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-2">
                 <div className="h-12 rounded-lg bg-[#fff8f0] border border-[#1F2D3D] shadow-inner" />
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-[#F1F5F9]">Cream Canvas</span>
+                  <span className="font-bold text-[#12242a] bg-white px-1.5 py-0.5 rounded">Cream Canvas</span>
                   <code className="text-[#00C9A7] font-mono text-[11px]">#fff8f0</code>
                 </div>
+                <div className="text-[10px] text-[#64748B]">Light Contrast Surfaces</div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-2">
+                <div className="h-12 rounded-lg bg-[#3a6ea5] border border-[#1F2D3D] shadow-inner" />
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-[#F1F5F9]">Electric Blue</span>
+                  <code className="text-[#00C9A7] font-mono text-[11px]">#3a6ea5</code>
+                </div>
+                <div className="text-[10px] text-[#64748B]">Telemetry & Benchmarks</div>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* TAB 2: DIRECTIVES TABLE (REPLACES SHEETS BRAND TAB) */}
+      {/* ======================================================== */}
+      {/* TAB 2: THE MASCOT SQUAD SHOWCASE */}
+      {/* ======================================================== */}
+      {activeTab === "mascots" && (
+        <div className="space-y-6">
+          {/* Header Banner */}
+          <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-2 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bot className="w-5 h-5 text-[#00C9A7]" />
+                <h2 className="text-base font-bold text-[#F1F5F9]">
+                  The Minions Mascot Squad (5 Active Field AI Minions)
+                </h2>
+              </div>
+              <span className="text-xs font-mono text-[#00C9A7] bg-[#00C9A7]/10 px-2.5 py-1 rounded-full border border-[#00C9A7]/30 font-semibold">
+                ● 5 Autonomous Workers Provisioned
+              </span>
+            </div>
+            <p className="text-xs text-[#94A3B8] max-w-3xl">
+              Each Minion represents an active autonomous subsystem inside getminions.ai, from sub-1.8s voice intake (Rex) to deterministic schema validation (Otto) and rapid speed-to-lead nurturing (Pip).
+            </p>
+          </div>
+
+          {/* 5 Mascot Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {MASCOT_SQUAD.map((mascot) => (
+              <div
+                key={mascot.id}
+                className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] hover:border-[#00C9A7]/60 transition-all flex flex-col justify-between space-y-4 shadow-sm group relative overflow-hidden"
+              >
+                <div className="space-y-3">
+                  {/* Top Avatar Preview Frame */}
+                  <div className="relative aspect-square rounded-xl bg-[#070B0F] border border-[#1F2D3D] flex items-center justify-center p-4 overflow-hidden group-hover:border-[#00C9A7]/40 transition-colors">
+                    <img
+                      src={mascot.avatar_path}
+                      alt={mascot.name}
+                      className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 drop-shadow-xl"
+                    />
+
+                    {/* Status Badge */}
+                    <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-[#0F1419]/90 backdrop-blur-md px-2 py-0.5 rounded-full border border-[#00C9A7]/30">
+                      <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
+                      <span className="text-[10px] font-mono text-[#00C9A7] font-semibold">Active Minion</span>
+                    </div>
+
+                    {/* Codename Badge */}
+                    <div className="absolute bottom-3 left-3 bg-[#0F1419]/90 backdrop-blur-md px-2 py-0.5 rounded-md border border-[#1F2D3D] text-[10px] font-mono text-[#94A3B8]">
+                      {mascot.codename}
+                    </div>
+
+                    {/* Open High-Res Button */}
+                    <a
+                      href={mascot.avatar_path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute top-3 left-3 p-1.5 rounded-lg bg-[#161D26]/90 backdrop-blur-md text-[#94A3B8] hover:text-white border border-[#1F2D3D] opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Open full avatar"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+
+                  {/* Info Header */}
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-base font-bold text-[#F1F5F9] group-hover:text-[#00C9A7] transition-colors">
+                        {mascot.name}
+                      </h3>
+                      <span className="text-[11px] font-mono text-[#ff6b4a] font-semibold bg-[#ff6b4a]/10 px-2 py-0.5 rounded border border-[#ff6b4a]/20">
+                        {mascot.trade}
+                      </span>
+                    </div>
+                    <div className="text-xs font-medium text-[#3B82F6] mt-0.5 font-mono">
+                      {mascot.role}
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-[#94A3B8] leading-relaxed">
+                    {mascot.description}
+                  </p>
+
+                  {/* Skills tags */}
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {mascot.skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="text-[10px] font-mono bg-[#161D26] text-[#94A3B8] px-2 py-0.5 rounded border border-[#1F2D3D]"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bottom Action Footer */}
+                <div className="pt-3 border-t border-[#1F2D3D] flex items-center justify-between">
+                  <div className="text-[10px] font-mono text-[#64748B] truncate max-w-[170px]">
+                    {mascot.avatar_path}
+                  </div>
+
+                  <button
+                    onClick={() => copyToClipboard(mascot.avatar_path, mascot.id)}
+                    className="flex items-center gap-1 text-xs font-bold text-[#00C9A7] hover:text-[#00A88A] bg-[#00C9A7]/10 hover:bg-[#00C9A7]/20 px-2.5 py-1 rounded-lg border border-[#00C9A7]/30 transition-all"
+                  >
+                    {copiedKey === mascot.id ? (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Copy Asset</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* TAB 3: SOCIAL AVATARS & COVERS SELECTOR */}
+      {/* ======================================================== */}
+      {activeTab === "social" && (
+        <div className="space-y-6">
+          {/* Filter Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0F1419] p-4 rounded-2xl border border-[#1F2D3D]">
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Platform Selector */}
+              <div className="flex items-center gap-1.5">
+                <Filter className="w-3.5 h-3.5 text-[#00C9A7]" />
+                <span className="text-xs font-mono text-[#94A3B8]">Platform:</span>
+                <select
+                  value={socialPlatformFilter}
+                  onChange={(e) => setSocialPlatformFilter(e.target.value)}
+                  className="bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3 py-1.5 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]"
+                >
+                  <option value="ALL">All Social Networks ({SOCIAL_TEMPLATES.length})</option>
+                  <option value="LINKEDIN">LinkedIn</option>
+                  <option value="FACEBOOK">Facebook</option>
+                  <option value="TWITTER">Twitter / X</option>
+                  <option value="GITHUB">GitHub</option>
+                  <option value="YOUTUBE">YouTube</option>
+                  <option value="SQUAD">Mascot Squad Banners</option>
+                </select>
+              </div>
+
+              {/* Type Selector */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-mono text-[#94A3B8]">Type:</span>
+                <select
+                  value={socialTypeFilter}
+                  onChange={(e) => setSocialTypeFilter(e.target.value as any)}
+                  className="bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3 py-1.5 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]"
+                >
+                  <option value="ALL">All Asset Formats</option>
+                  <option value="COVER">Social Covers & Headers</option>
+                  <option value="AVATAR">Profile Avatars (800×800)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="text-xs font-mono text-[#00C9A7]">
+              Showing {filteredSocialTemplates.length} real assets
+            </div>
+          </div>
+
+          {/* Social Templates Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredSocialTemplates.map((template) => {
+              const isCover = template.type === "COVER";
+
+              return (
+                <div
+                  key={template.id}
+                  className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] hover:border-[#00C9A7]/50 transition-all flex flex-col justify-between space-y-3 shadow-sm group"
+                >
+                  <div className="space-y-3">
+                    {/* Image Preview Container */}
+                    <div 
+                      className={`relative rounded-xl overflow-hidden bg-[#070B0F] border border-[#1F2D3D] flex items-center justify-center ${
+                        isCover ? "aspect-[16/7]" : "aspect-square max-h-56 mx-auto w-full"
+                      }`}
+                    >
+                      <img
+                        src={template.path}
+                        alt={template.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+
+                      {/* Platform Badge */}
+                      <div className="absolute top-2.5 left-2.5 bg-[#0F1419]/90 backdrop-blur-md px-2 py-0.5 rounded-md border border-[#1F2D3D] text-[10px] font-mono text-[#00C9A7] font-bold">
+                        {template.platform}
+                      </div>
+
+                      {/* Resolution Badge */}
+                      <div className="absolute bottom-2.5 right-2.5 bg-[#0F1419]/90 backdrop-blur-md px-2 py-0.5 rounded-md border border-[#1F2D3D] text-[10px] font-mono text-[#94A3B8]">
+                        {template.dimensions}
+                      </div>
+                    </div>
+
+                    {/* Meta info */}
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-bold text-[#F1F5F9] group-hover:text-[#00C9A7] transition-colors line-clamp-1">
+                          {template.name}
+                        </h4>
+                        <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded shrink-0 ${
+                          template.theme === "DARK" 
+                            ? "bg-[#161D26] text-[#94A3B8] border border-[#1F2D3D]" 
+                            : template.theme === "TEAL"
+                            ? "bg-[#0E5C63]/30 text-[#00C9A7] border border-[#0E5C63]"
+                            : template.theme === "LIGHT"
+                            ? "bg-white/10 text-white border border-white/20"
+                            : "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                        }`}>
+                          {template.theme}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#94A3B8] mt-1 leading-relaxed line-clamp-2">
+                        {template.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Actions Bar */}
+                  <div className="pt-3 border-t border-[#1F2D3D] flex items-center justify-between">
+                    <span className="text-[10px] font-mono text-[#64748B] truncate max-w-[160px]">
+                      {template.path}
+                    </span>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => copyToClipboard(template.path, template.id)}
+                        className="p-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-[#94A3B8] hover:text-[#00C9A7] transition-all"
+                        title="Copy Asset Path"
+                      >
+                        {copiedKey === template.id ? (
+                          <Check className="w-3.5 h-3.5 text-[#00C9A7]" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+
+                      <a
+                        href={template.path}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-[#94A3B8] hover:text-white transition-all"
+                        title="Open Full Asset"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* TAB 4: DIRECTIVES TABLE */}
+      {/* ======================================================== */}
       {activeTab === "directives" && (
         <div className="space-y-6">
           {/* Controls Bar */}
@@ -620,7 +1471,9 @@ export default function BrandStudioPage() {
                         ? "bg-red-500/5 border-red-500/30" 
                         : isProof
                           ? "bg-emerald-500/5 border-emerald-500/30"
-                          : "bg-[#0F1419] border-[#1F2D3D] hover:border-[#00C9A7]/40"
+                          : isVoice
+                            ? "bg-cyan-500/5 border-cyan-500/30"
+                            : "bg-[#0F1419] border-[#1F2D3D] hover:border-[#00C9A7]/40"
                       : "bg-[#0F1419]/40 border-[#1F2D3D]/30 opacity-50"
                   }`}
                 >
@@ -695,7 +1548,9 @@ export default function BrandStudioPage() {
         </div>
       )}
 
-      {/* TAB 3: INSTRUCT AGENTS / MULTI-BRAND INSTRUCTION */}
+      {/* ======================================================== */}
+      {/* TAB 5: INSTRUCT AGENTS / MULTI-BRAND INSTRUCTION */}
+      {/* ======================================================== */}
       {activeTab === "multi_brand" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
@@ -773,7 +1628,7 @@ export default function BrandStudioPage() {
 {`=== BRAND CONTEXT INJECTION [${selectedBrand.toUpperCase()}] ===
 Company Name: getminions.ai (lowercase, .ai suffix)
 Positioning: AI operations partner for US home-services businesses (1-10 techs)
-Primary Logo URL: "${logoUrl}"
+Primary Logo URL: "${currentLogoSrc}"
 Tone: Technical, tactile operator prose. 1-3 sentences per paragraph.
 Operator Directive: "${operatorPrompt}"
 Forbidden Words: [${bannedWords.slice(0, 8).join(", ")}...]
@@ -815,7 +1670,9 @@ Allowed Proof: Live callable demo number, RAG chatbot, deterministic Go schema.`
         </div>
       )}
 
-      {/* TAB 4: BANNED LEXICON & COMPLIANCE */}
+      {/* ======================================================== */}
+      {/* TAB 6: BANNED LEXICON & COMPLIANCE */}
+      {/* ======================================================== */}
       {activeTab === "lexicon" && (
         <div className="space-y-6">
           <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">

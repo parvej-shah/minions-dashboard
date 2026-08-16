@@ -226,7 +226,7 @@ export default function MissionControlPage() {
                       {/* 48x48 Thumbnail */}
                       <div className="w-12 h-12 rounded-lg bg-black border border-[#1F2D3D] shrink-0 overflow-hidden">
                         <img 
-                          src={asset.hero_image_url || "https://pub-13629069dfd74891bffc487ab4e135f5.r2.dev/raw-json-over-agent-summaries.png"} 
+                          src={asset.hero_image_url || "/images/social-covers/linkedin/linkedin_cover_dark.png"} 
                           alt="Cover" 
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
                         />
