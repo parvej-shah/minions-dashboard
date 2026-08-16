@@ -76,12 +76,11 @@ export default function FleetPage() {
     setIsUpdating(true);
 
     try {
-      // Simulate/Trigger API update
-      const res = await fetch("/api/fleet", {
-        method: "PATCH",
+      // Trigger API update per PRD (PUT /api/agents/:id)
+      const res = await fetch(`/api/agents/${selectedWorker.id}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id: selectedWorker.id,
           model: editModel,
           status: editStatus,
           system_prompt: editPrompt
