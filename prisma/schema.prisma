@@ -1,0 +1,182 @@
+// Minions AI Multi-Agent Cockpit Prisma Schema
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum AudienceLane {
+  ICP
+  PEER
+  BRIDGE
+}
+
+enum IdeaStatus {
+  HARVESTED
+  REFINED
+  QUEUED
+  REJECTED
+}
+
+enum AssetStatus {
+  DRAFTED
+  PENDING_REVIEW
+  APPROVED
+  PUBLISHING
+  PUBLISHED
+  REJECTED
+}
+
+enum SocialPlatform {
+  LINKEDIN
+  FACEBOOK
+  TWITTER
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  FAILED
+}
+
+enum AgentType {
+  MARKETING_STRATEGIST
+  CONTENT_WRITER
+  EDITORIAL_REVIEWER
+  VOICE_DISPATCHER
+  SALES_OUTREACH
+  BACKOFFICE_OPS
+}
+
+enum AgentStatus {
+  ACTIVE
+  IDLE
+  PAUSED
+  ERROR
+}
+
+model Idea {
+  id          String       @id // e.g. "IDEA-0001"
+  rawIdea     String       @map("raw_idea")
+  angle       String
+  audience    AudienceLane @default(ICP)
+  targetTrade String       @default("HVAC") @map("target_trade")
+  pillar      String       @default("Operations")
+  source      String       @default("GOOGLE_TRENDS")
+  status      IdeaStatus   @default(HARVESTED)
+  metadata    Json?
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  assets      Asset[]
+
+  @@map("ideas")
+}
+
+model Asset {
+  id             String       @id // e.g. "ASSET-0001"
+  ideaId         String?      @map("idea_id")
+  title          String
+  slug           String       @unique
+  hook           String?
+  coreArgument   String?      @map("core_argument")
+  bodyContent    String       @map("body_content") @db.Text
+  audience       AudienceLane @default(ICP)
+  pillar         String       @default("Operations")
+  status         AssetStatus  @default(PENDING_REVIEW)
+  version        Int          @default(1)
+  claimsVerified Boolean      @default(false) @map("claims_verified")
+  heroImageUrl   String?      @map("hero_image_url")
+  r2ObjectKey    String?      @map("r2_object_key")
+  publishedAt    DateTime?    @map("published_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  idea           Idea?        @relation(fields: [ideaId], references: [id], onDelete: SetNull)
+  socialVariants SocialVariant[]
+  claimChecks    ClaimCheck[]
+  telemetry      GenerationTelemetry[]
+
+  @@map("assets")
+}
+
+model SocialVariant {
+  id           String         @id @default(cuid())
+  assetId      String         @map("asset_id")
+  platform     SocialPlatform
+  content      String         @db.Text
+  firstComment String?        @map("first_comment") @db.Text
+  publishedId  String?        @map("published_id")
+  publishedUrl String?        @map("published_url")
+  status       PublishStatus  @default(DRAFT)
+  errorLog     String?        @map("error_log")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  asset        Asset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, platform])
+  @@map("social_variants")
+}
+
+model ClaimCheck {
+  id         String   @id @default(cuid())
+  assetId    String   @map("asset_id")
+  claimText  String   @map("claim_text")
+  sourceType String   @default("ANECDOTE") @map("source_type")
+  verified   Boolean  @default(false)
+  notes      String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  asset      Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@map("claim_checks")
+}
+
+model GenerationTelemetry {
+  id          String   @id @default(cuid())
+  assetId     String   @map("asset_id")
+  stage       String   // "HARVEST", "STRATEGY", "WRITER", "EDITOR", "VARIANTS", "IMAGE_GEN"
+  modelName   String   @map("model_name")
+  inputTokens Int      @default(0) @map("input_tokens")
+  outputTokens Int     @default(0) @map("output_tokens")
+  costUsd     Float    @default(0.0) @map("cost_usd")
+  latencyMs   Int      @default(0) @map("latency_ms")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  asset       Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@map("generation_telemetry")
+}
+
+model BrandSetting {
+  id              String   @id @default("default")
+  brandName       String   @default("Minions.AI") @map("brand_name")
+  primaryInk      String   @default("#12242a") @map("primary_ink")
+  brandTeal       String   @default("#0e5c63") @map("brand_teal")
+  brandCoral      String   @default("#ff6b4a") @map("brand_coral")
+  brandCream      String   @default("#fff8f0") @map("brand_cream")
+  logoUrl         String?  @map("logo_url")
+  watermarkUrl    String?  @map("watermark_url")
+  thumbnailLayout Json?    @map("thumbnail_layout")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("brand_settings")
+}
+
+model AgentWorker {
+  id           String      @id // e.g. "rex", "pip", "zip", "gia", "otto", "strategist"
+  name         String
+  type         AgentType
+  status       AgentStatus @default(IDLE)
+  systemPrompt String?     @map("system_prompt") @db.Text
+  model        String      @default("qwen-max")
+  lastActiveAt DateTime?   @map("last_active_at")
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  @@map("agent_workers")
+}
