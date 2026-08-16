@@ -79,6 +79,14 @@ export interface AssetItem {
   generation_cost?: number;
   claim_checks?: ClaimCheckItem[];
   social_variants?: SocialVariantItem[];
+  variants?: {
+    linkedin?: string;
+    facebook?: string;
+    twitter?: string;
+  };
+  linkedin_variant?: string;
+  facebook_variant?: string;
+  x_variant?: string;
   created_at: string;
   updated_at: string;
 }

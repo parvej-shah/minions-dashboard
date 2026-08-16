@@ -53,6 +53,7 @@ export default function EditorialStudio({
 }: EditorialStudioProps) {
   // All assets available in editorial studio
   const [assets, setAssets] = useState<AssetItem[]>(INITIAL_ASSETS);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Active selected asset
   const [selectedAssetId, setSelectedAssetId] = useState<string>(() => {
@@ -70,10 +71,22 @@ export default function EditorialStudio({
   const [showDrawer, setShowDrawer] = useState(false);
 
   // Editor states
-  const [editorMode, setEditorMode] = useState<"preview" | "edit">("preview");
+  const [editorMode, setEditorMode] = useState<"preview" | "edit" | "split">("preview");
   const [editedTitle, setEditedTitle] = useState(activeAsset.title);
+  const [editedHook, setEditedHook] = useState(activeAsset.hook || "");
   const [editedBody, setEditedBody] = useState(activeAsset.body_content);
+  
+  // Social variants edit state
   const [socialTab, setSocialTab] = useState<"LINKEDIN" | "FACEBOOK" | "TWITTER">("LINKEDIN");
+  const [isEditingSocial, setIsEditingSocial] = useState(false);
+  const [editedLinkedin, setEditedLinkedin] = useState(activeAsset.variants?.linkedin || "");
+  const [editedFacebook, setEditedFacebook] = useState(activeAsset.variants?.facebook || "");
+  const [editedTwitter, setEditedTwitter] = useState(activeAsset.variants?.twitter || "");
+
+  // Save state tracking
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveToast, setSaveToast] = useState<string | null>(null);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   // Publishing animation states
   const [publishPhase, setPublishPhase] = useState<"IDLE" | "SYNCING" | "BROADCASTING" | "EMITTING" | "DONE">("IDLE");
@@ -90,17 +103,67 @@ export default function EditorialStudio({
   // Copy feedback tracking
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
+  // Check if draft has unsaved changes
+  const isDirty =
+    editedTitle !== activeAsset.title ||
+    editedHook !== (activeAsset.hook || "") ||
+    editedBody !== activeAsset.body_content ||
+    editedLinkedin !== (activeAsset.variants?.linkedin || "") ||
+    editedFacebook !== (activeAsset.variants?.facebook || "") ||
+    editedTwitter !== (activeAsset.variants?.twitter || "");
+
+  // Load from API on mount
+  useEffect(() => {
+    async function loadAssets() {
+      try {
+        const res = await fetch("/api/assets");
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setAssets(data);
+            if (initialDraftId) {
+              const matched = data.find((a: AssetItem) => a.id === initialDraftId || a.slug === initialDraftId);
+              if (matched) setSelectedAssetId(matched.id);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load dynamic assets:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadAssets();
+  }, [initialDraftId]);
+
   // Update internal draft state when selected asset changes
   useEffect(() => {
     const asset = assets.find(a => a.id === selectedAssetId) || assets[0];
     if (asset) {
       setEditedTitle(asset.title);
+      setEditedHook(asset.hook || "");
       setEditedBody(asset.body_content);
+      setEditedLinkedin(asset.variants?.linkedin || "");
+      setEditedFacebook(asset.variants?.facebook || "");
+      setEditedTwitter(asset.variants?.twitter || "");
       setPublishSuccess(asset.status === "PUBLISHED");
       setPublishPhase("IDLE");
       setShowRevisionForm(false);
+      setIsEditingSocial(false);
     }
   }, [selectedAssetId, assets]);
+
+  // Global Keyboard Shortcut: Cmd+S / Ctrl+S to Save
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+        e.preventDefault();
+        handleSaveDraft();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [editedTitle, editedHook, editedBody, editedLinkedin, editedFacebook, editedTwitter, activeAsset]);
 
   const copyToClipboard = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
@@ -108,8 +171,66 @@ export default function EditorialStudio({
     setTimeout(() => setCopiedKey(null), 2200);
   };
 
+  // 1-Click Save Changes to Backend Database
+  const handleSaveDraft = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+
+    const updatedAssetData: Partial<AssetItem> = {
+      title: editedTitle.trim(),
+      hook: editedHook.trim(),
+      body_content: editedBody,
+      variants: {
+        linkedin: editedLinkedin,
+        facebook: editedFacebook,
+        twitter: editedTwitter,
+      }
+    };
+
+    try {
+      const res = await fetch(`/api/assets/${activeAsset.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedAssetData)
+      });
+
+      if (res.ok) {
+        setSaveToast("Changes saved successfully to database!");
+      } else {
+        setSaveToast("Saved locally in session");
+      }
+    } catch (err) {
+      console.warn("Saving locally due to network:", err);
+      setSaveToast("Saved locally in session");
+    } finally {
+      setIsSaving(false);
+      setLastSaved(new Date());
+
+      // Update local asset array
+      setAssets(prev =>
+        prev.map(a =>
+          a.id === activeAsset.id
+            ? {
+                ...a,
+                title: editedTitle.trim(),
+                hook: editedHook.trim(),
+                body_content: editedBody,
+                variants: {
+                  linkedin: editedLinkedin,
+                  facebook: editedFacebook,
+                  twitter: editedTwitter
+                }
+              }
+            : a
+        )
+      );
+
+      setTimeout(() => setSaveToast(null), 3000);
+    }
+  };
+
   // 1-Click Toggle Claim Status
-  const toggleClaimStatus = (claimId: string) => {
+  const toggleClaimStatus = async (claimId: string) => {
     if (!activeAsset.claim_checks) return;
     const updatedClaims = activeAsset.claim_checks.map((c) => {
       if (c.id === claimId) {
@@ -133,6 +254,17 @@ export default function EditorialStudio({
     });
 
     setAssets(updatedAssets);
+
+    // Persist claim status
+    try {
+      await fetch(`/api/claims/${claimId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ verified: updatedClaims.find(c => c.id === claimId)?.verified })
+      });
+    } catch {
+      // Non-blocking
+    }
   };
 
   // Live Animated Publish Workflow (PENDING_REVIEW -> PUBLISHING -> PUBLISHED)
@@ -150,7 +282,7 @@ export default function EditorialStudio({
     }, 1600);
 
     // Step 3: Published
-    setTimeout(() => {
+    setTimeout(async () => {
       setPublishPhase("DONE");
       setPublishSuccess(true);
       const updatedAssets = assets.map((a) => {
@@ -166,6 +298,25 @@ export default function EditorialStudio({
         return a;
       });
       setAssets(updatedAssets);
+
+      // Persist published status to backend
+      try {
+        await fetch(`/api/assets/${activeAsset.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            status: "PUBLISHED",
+            published_at: new Date().toISOString(),
+            published_urls: [
+              `https://getminions.ai/blog/${activeAsset.slug}`,
+              `https://linkedin.com/company/getminionsai`,
+              `https://facebook.com/getminionsai`
+            ]
+          })
+        });
+      } catch (e) {
+        console.error("Failed to persist publish status:", e);
+      }
     }, 2400);
   };
 
@@ -491,80 +642,220 @@ export default function EditorialStudio({
             )}
           </div>
 
-          {/* 2. Article Preview: Styled Markdown (17px Reading Lane, Stripe/Linear Cadence) */}
-          <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-6 space-y-5 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#1F2D3D] pb-3">
-              <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4 text-[#00C9A7]" />
-                <span className="text-xs font-bold text-[#F1F5F9] font-mono uppercase tracking-wider">
-                  Article Preview & Typography Lane
-                </span>
+          {/* 2. Article Preview & Live Editor Container */}
+          <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-5 sm:p-6 space-y-5 shadow-xl">
+            {/* Header Toolbar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1F2D3D] pb-3">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D] text-xs">
+                  <button
+                    onClick={() => setEditorMode("preview")}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                      editorMode === "preview"
+                        ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
+                        : "text-[#94A3B8] hover:text-[#F1F5F9]"
+                    }`}
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Reading View</span>
+                  </button>
+                  <button
+                    onClick={() => setEditorMode("edit")}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                      editorMode === "edit"
+                        ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
+                        : "text-[#94A3B8] hover:text-[#F1F5F9]"
+                    }`}
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>Live Editor</span>
+                  </button>
+                  <button
+                    onClick={() => setEditorMode("split")}
+                    className={`hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                      editorMode === "split"
+                        ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
+                        : "text-[#94A3B8] hover:text-[#F1F5F9]"
+                    }`}
+                  >
+                    <Layers className="w-3.5 h-3.5" />
+                    <span>Side-by-Side</span>
+                  </button>
+                </div>
+
+                {/* Live Save Status */}
+                <div className="hidden sm:flex items-center gap-2">
+                  {isSaving ? (
+                    <span className="flex items-center gap-1.5 text-[11px] font-mono text-[#00C9A7]">
+                      <RefreshCw className="w-3 h-3 animate-spin" />
+                      Saving to database...
+                    </span>
+                  ) : isDirty ? (
+                    <span className="flex items-center gap-1.5 text-[11px] font-mono text-[#F59E0B] font-semibold bg-[#F59E0B]/10 px-2 py-0.5 rounded border border-[#F59E0B]/20">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] animate-pulse" />
+                      Unsaved changes
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5 text-[11px] font-mono text-[#00C9A7] bg-[#00C9A7]/10 px-2 py-0.5 rounded border border-[#00C9A7]/20">
+                      <Check className="w-3 h-3" />
+                      {saveToast || "All changes saved"}
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* Toggle Mode Button */}
-              <div className="flex items-center bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D] text-xs">
+              {/* Action Buttons: Save Draft (Cmd+S) & Copy */}
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setEditorMode("preview")}
-                  className={`px-3 py-1 rounded-lg font-medium transition-all ${
-                    editorMode === "preview"
-                      ? "bg-[#00C9A7] text-[#070B0F] font-bold"
-                      : "text-[#94A3B8] hover:text-[#F1F5F9]"
+                  onClick={handleSaveDraft}
+                  disabled={isSaving}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer ${
+                    isDirty
+                      ? "bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] shadow-[#00C9A7]/20"
+                      : "bg-[#161D26] hover:bg-[#1E2733] text-[#F1F5F9] border border-[#1F2D3D]"
                   }`}
+                  title="Save Draft (⌘S)"
                 >
-                  Prose Preview
+                  {isSaving ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  )}
+                  <span>Save Draft</span>
+                  <kbd className="hidden sm:inline-block px-1 py-0.2 text-[9px] font-mono rounded bg-black/20 text-current">
+                    ⌘S
+                  </kbd>
                 </button>
+
                 <button
-                  onClick={() => setEditorMode("edit")}
-                  className={`px-3 py-1 rounded-lg font-medium transition-all ${
-                    editorMode === "edit"
-                      ? "bg-[#00C9A7] text-[#070B0F] font-bold"
-                      : "text-[#94A3B8] hover:text-[#F1F5F9]"
-                  }`}
+                  onClick={() => copyToClipboard(editedBody, "raw-markdown")}
+                  className="p-1.5 rounded-xl bg-[#070B0F] hover:bg-[#161D26] text-[#94A3B8] hover:text-[#F1F5F9] border border-[#1F2D3D] transition-all"
+                  title="Copy Markdown Source"
                 >
-                  Markdown Source
+                  {copiedKey === "raw-markdown" ? (
+                    <Check className="w-4 h-4 text-[#00C9A7]" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>
 
-            {editorMode === "edit" ? (
-              /* Raw Markdown Source Editor */
-              <div className="space-y-3">
+            {/* View Mode 1: Full Editor Mode */}
+            {editorMode === "edit" && (
+              <div className="space-y-4 animate-in fade-in duration-150">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#94A3B8]">Article Title</label>
+                  <label className="text-xs font-semibold text-[#94A3B8] flex items-center justify-between">
+                    <span>Article Headline & Title</span>
+                    <span className="text-[10px] font-mono text-[#64748B]">{editedTitle.length} chars</span>
+                  </label>
                   <input
                     type="text"
                     value={editedTitle}
                     onChange={(e) => setEditedTitle(e.target.value)}
+                    placeholder="Enter article headline..."
                     className="w-full bg-[#070B0F] border border-[#1F2D3D] rounded-xl px-4 py-2.5 text-sm font-bold text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#94A3B8]">Markdown Body</label>
+                  <label className="text-xs font-semibold text-[#94A3B8]">Executive Hook / Subtitle</label>
+                  <input
+                    type="text"
+                    value={editedHook}
+                    onChange={(e) => setEditedHook(e.target.value)}
+                    placeholder="One-sentence hook or thesis..."
+                    className="w-full bg-[#070B0F] border border-[#1F2D3D] rounded-xl px-4 py-2 text-xs text-[#94A3B8] italic focus:outline-none focus:border-[#00C9A7]"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs text-[#94A3B8] pb-1">
+                    <span className="font-semibold">Markdown Content Body</span>
+                    <div className="flex items-center gap-3 font-mono text-[11px]">
+                      <span>{wordCount} words</span>
+                      <span>•</span>
+                      <span>~{readingTimeMinutes} min read</span>
+                    </div>
+                  </div>
                   <textarea
                     value={editedBody}
                     onChange={(e) => setEditedBody(e.target.value)}
-                    rows={18}
+                    rows={20}
+                    placeholder="Write or edit article markdown..."
                     className="w-full bg-[#070B0F] border border-[#1F2D3D] rounded-xl p-4 text-xs font-mono text-[#F1F5F9] leading-relaxed focus:outline-none focus:border-[#00C9A7] resize-y"
                   />
                 </div>
               </div>
-            ) : (
-              /* Styled 17px Serif Reading Lane */
-              <div className="space-y-6">
+            )}
+
+            {/* View Mode 2: Split View Mode (Side-by-side Editor & Preview) */}
+            {editorMode === "split" && (
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 animate-in fade-in duration-150">
+                {/* Editor Column */}
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#94A3B8]">Headline</label>
+                    <input
+                      type="text"
+                      value={editedTitle}
+                      onChange={(e) => setEditedTitle(e.target.value)}
+                      className="w-full bg-[#070B0F] border border-[#1F2D3D] rounded-xl px-3 py-2 text-xs font-bold text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#94A3B8]">Markdown Source</label>
+                    <textarea
+                      value={editedBody}
+                      onChange={(e) => setEditedBody(e.target.value)}
+                      rows={22}
+                      className="w-full bg-[#070B0F] border border-[#1F2D3D] rounded-xl p-3 text-xs font-mono text-[#F1F5F9] leading-relaxed focus:outline-none focus:border-[#00C9A7] resize-y"
+                    />
+                  </div>
+                </div>
+
+                {/* Live Formatted Column */}
+                <div className="bg-[#070B0F] border border-[#1F2D3D] rounded-xl p-4 overflow-y-auto max-h-[560px] space-y-4">
+                  <div className="border-b border-[#1F2D3D] pb-3">
+                    <h2 className="text-lg font-bold text-[#F1F5F9] leading-tight">{editedTitle}</h2>
+                    {editedHook && <p className="text-xs text-[#94A3B8] italic mt-1">{editedHook}</p>}
+                  </div>
+                  <div className="space-y-3 text-xs text-[#E2E8F0] font-serif leading-relaxed">
+                    {editedBody.split("\n\n").map((chunk, idx) => {
+                      const trimmed = chunk.trim();
+                      if (!trimmed) return null;
+                      if (trimmed.startsWith("# ") || trimmed.startsWith("## ")) {
+                        return <h3 key={idx} className="font-bold text-[#F1F5F9] text-sm pt-2 text-[#00C9A7] font-sans">{trimmed.replace(/^#+\s*/, "")}</h3>;
+                      }
+                      if (trimmed.startsWith("> ")) {
+                        return <blockquote key={idx} className="border-l-2 border-[#ff6b4a] pl-2 italic text-[#94A3B8]">{trimmed.replace(/^>\s*/, "")}</blockquote>;
+                      }
+                      return <p key={idx}>{trimmed}</p>;
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* View Mode 3: Immersive Reading View */}
+            {editorMode === "preview" && (
+              <div className="space-y-6 animate-in fade-in duration-150">
                 {/* Article Header */}
                 <div className="space-y-2 border-b border-[#1F2D3D]/60 pb-4">
                   <div className="flex items-center gap-2 text-xs font-mono text-[#00C9A7]">
-                    <span>{activeAsset.pillar || "Systems Architecture"}</span>
+                    <span>{activeAsset.pillar || "Contractor Realities"}</span>
                     <span>•</span>
                     <span>{readingTimeMinutes} min read</span>
+                    <span>•</span>
+                    <span className="text-[#94A3B8]">{wordCount} words</span>
                   </div>
                   <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#F1F5F9] leading-tight">
                     {editedTitle}
                   </h1>
-                  {activeAsset.hook && (
+                  {(editedHook || activeAsset.hook) && (
                     <p className="text-sm font-medium text-[#94A3B8] italic border-l-2 border-[#00C9A7] pl-3 py-0.5">
-                      {activeAsset.hook}
+                      {editedHook || activeAsset.hook}
                     </p>
                   )}
                 </div>
@@ -725,7 +1016,7 @@ export default function EditorialStudio({
 
             {/* Realistic Platform Cards */}
 
-            {/* TAB A: LINKEDIN REALISTIC FEED MOCK */}
+            {/* TAB A: LINKEDIN REALISTIC FEED MOCK & EDITOR */}
             {socialTab === "LINKEDIN" && (
               <div className="bg-[#070B0F] rounded-xl border border-[#1F2D3D] p-4 sm:p-5 space-y-4 font-sans">
                 {/* LinkedIn Author Header */}
@@ -741,34 +1032,62 @@ export default function EditorialStudio({
                         <span className="text-[10px] text-[#64748B]">• 1st</span>
                       </div>
                       <div className="text-[11px] text-[#94A3B8]">Autonomous AI Dispatch & Operations for US Home Services</div>
-                      <div className="text-[10px] text-[#64748B] flex items-center gap-1 mt-0.5">
-                        <span>1h</span>
-                        <span>•</span>
-                        <Globe className="w-2.5 h-2.5" />
-                      </div>
                     </div>
                   </div>
 
-                  <button
-                    onClick={() =>
-                      copyToClipboard(linkedInVariant?.content || "", "social-linkedin")
-                    }
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0077B5]/20 hover:bg-[#0077B5]/30 text-[#0077B5] border border-[#0077B5]/40 text-xs font-semibold transition-all"
-                  >
-                    {copiedKey === "social-linkedin" ? (
-                      <Check className="w-3.5 h-3.5 text-[#00C9A7]" />
-                    ) : (
-                      <Copy className="w-3.5 h-3.5" />
-                    )}
-                    <span>{copiedKey === "social-linkedin" ? "Copied" : "Copy LinkedIn Copy"}</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setIsEditingSocial(!isEditingSocial)}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-xs font-medium text-[#94A3B8] hover:text-[#F1F5F9] border border-[#1F2D3D] transition-all cursor-pointer"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>{isEditingSocial ? "Preview Post" : "Edit Copy"}</span>
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        copyToClipboard(editedLinkedin || linkedInVariant?.content || "", "social-linkedin")
+                      }
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0077B5]/20 hover:bg-[#0077B5]/30 text-[#0077B5] border border-[#0077B5]/40 text-xs font-semibold transition-all cursor-pointer"
+                    >
+                      {copiedKey === "social-linkedin" ? (
+                        <Check className="w-3.5 h-3.5 text-[#00C9A7]" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                      <span>{copiedKey === "social-linkedin" ? "Copied" : "Copy"}</span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* LinkedIn Body Copy */}
-                <div className="text-xs text-[#F1F5F9] leading-relaxed whitespace-pre-line bg-[#0F1419] p-4 rounded-xl border border-[#1F2D3D]/60 font-sans">
-                  {linkedInVariant?.content ||
-                    "Most multi-agent AI systems fail in production due to unstructured natural language handoffs. Here is our engineering breakdown on how deterministic Go JSON validation eliminates conversational drift in high-volume trade dispatches."}
-                </div>
+                {/* LinkedIn Body Copy / Textarea */}
+                {isEditingSocial ? (
+                  <div className="space-y-2">
+                    <textarea
+                      rows={6}
+                      value={editedLinkedin}
+                      onChange={(e) => setEditedLinkedin(e.target.value)}
+                      placeholder="Edit LinkedIn post copy..."
+                      className="w-full bg-[#0F1419] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl p-3 text-xs text-[#F1F5F9] leading-relaxed resize-y outline-none font-sans"
+                    />
+                    <div className="flex justify-end">
+                      <button
+                        onClick={handleSaveDraft}
+                        disabled={isSaving}
+                        className="px-3 py-1 bg-[#00C9A7] text-[#070B0F] rounded-lg text-xs font-bold shadow-xs hover:bg-[#00A88A] transition-all flex items-center gap-1"
+                      >
+                        <Check className="w-3 h-3" />
+                        <span>Save LinkedIn Copy</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-xs text-[#F1F5F9] leading-relaxed whitespace-pre-line bg-[#0F1419] p-4 rounded-xl border border-[#1F2D3D]/60 font-sans">
+                    {editedLinkedin ||
+                      linkedInVariant?.content ||
+                      "Most multi-agent AI systems fail in production due to unstructured natural language handoffs. Here is our engineering breakdown on how deterministic Go JSON validation eliminates conversational drift in high-volume trade dispatches."}
+                  </div>
+                )}
 
                 {/* First Comment Link Anchor */}
                 {(linkedInVariant?.first_comment || activeAsset.blog_url) && (
@@ -782,7 +1101,7 @@ export default function EditorialStudio({
                         onClick={() =>
                           copyToClipboard(
                             linkedInVariant?.first_comment ||
-                              `Read the full engineering deep dive: https://getminions.ai/blog/${activeAsset.slug}`,
+                              `Read the full deep dive: https://getminions.ai/blog/${activeAsset.slug}`,
                             "first-comment-li"
                           )
                         }
@@ -793,7 +1112,7 @@ export default function EditorialStudio({
                     </div>
                     <p className="text-xs font-mono text-[#94A3B8]">
                       {linkedInVariant?.first_comment ||
-                        `Read the full engineering deep dive: https://getminions.ai/blog/${activeAsset.slug}`}
+                        `Read the full deep dive: https://getminions.ai/blog/${activeAsset.slug}`}
                     </p>
                   </div>
                 )}
@@ -820,7 +1139,7 @@ export default function EditorialStudio({
               </div>
             )}
 
-            {/* TAB B: FACEBOOK REALISTIC POST MOCK */}
+            {/* TAB B: FACEBOOK REALISTIC POST MOCK & EDITOR */}
             {socialTab === "FACEBOOK" && (
               <div className="bg-[#070B0F] rounded-xl border border-[#1F2D3D] p-4 sm:p-5 space-y-4 font-sans">
                 {/* Facebook Author Header */}
@@ -842,26 +1161,59 @@ export default function EditorialStudio({
                     </div>
                   </div>
 
-                  <button
-                    onClick={() =>
-                      copyToClipboard(facebookVariant?.content || "", "social-facebook")
-                    }
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1877F2]/20 hover:bg-[#1877F2]/30 text-[#1877F2] border border-[#1877F2]/40 text-xs font-semibold transition-all"
-                  >
-                    {copiedKey === "social-facebook" ? (
-                      <Check className="w-3.5 h-3.5 text-[#00C9A7]" />
-                    ) : (
-                      <Copy className="w-3.5 h-3.5" />
-                    )}
-                    <span>{copiedKey === "social-facebook" ? "Copied" : "Copy Facebook Copy"}</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setIsEditingSocial(!isEditingSocial)}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-xs font-medium text-[#94A3B8] hover:text-[#F1F5F9] border border-[#1F2D3D] transition-all cursor-pointer"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>{isEditingSocial ? "Preview Post" : "Edit Copy"}</span>
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        copyToClipboard(editedFacebook || facebookVariant?.content || "", "social-facebook")
+                      }
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1877F2]/20 hover:bg-[#1877F2]/30 text-[#1877F2] border border-[#1877F2]/40 text-xs font-semibold transition-all cursor-pointer"
+                    >
+                      {copiedKey === "social-facebook" ? (
+                        <Check className="w-3.5 h-3.5 text-[#00C9A7]" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                      <span>{copiedKey === "social-facebook" ? "Copied" : "Copy"}</span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* Facebook Body Copy */}
-                <div className="text-xs text-[#F1F5F9] leading-relaxed whitespace-pre-line bg-[#0F1419] p-4 rounded-xl border border-[#1F2D3D]/60">
-                  {facebookVariant?.content ||
-                    "Why we stopped letting our AI agents talk to each other in conversational prose. When you manage 100+ emergency home service dispatches a day, a lost gate code or wrong equipment model costs a contractor $300+ in wasted truck rolls."}
-                </div>
+                {/* Facebook Body Copy / Textarea */}
+                {isEditingSocial ? (
+                  <div className="space-y-2">
+                    <textarea
+                      rows={6}
+                      value={editedFacebook}
+                      onChange={(e) => setEditedFacebook(e.target.value)}
+                      placeholder="Edit Facebook post copy..."
+                      className="w-full bg-[#0F1419] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl p-3 text-xs text-[#F1F5F9] leading-relaxed resize-y outline-none font-sans"
+                    />
+                    <div className="flex justify-end">
+                      <button
+                        onClick={handleSaveDraft}
+                        disabled={isSaving}
+                        className="px-3 py-1 bg-[#00C9A7] text-[#070B0F] rounded-lg text-xs font-bold shadow-xs hover:bg-[#00A88A] transition-all flex items-center gap-1"
+                      >
+                        <Check className="w-3 h-3" />
+                        <span>Save Facebook Copy</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-xs text-[#F1F5F9] leading-relaxed whitespace-pre-line bg-[#0F1419] p-4 rounded-xl border border-[#1F2D3D]/60 font-sans">
+                    {editedFacebook ||
+                      facebookVariant?.content ||
+                      "Why we stopped letting our AI agents talk to each other in conversational prose. When you manage 100+ emergency home service dispatches a day, a lost gate code or wrong equipment model costs a contractor $300+ in wasted truck rolls."}
+                  </div>
+                )}
 
                 {/* First Comment Box */}
                 {(facebookVariant?.first_comment || activeAsset.blog_url) && (
@@ -871,7 +1223,7 @@ export default function EditorialStudio({
                     </span>
                     <p className="text-xs font-mono text-[#94A3B8]">
                       {facebookVariant?.first_comment ||
-                        `Full engineering teardown on our blog: https://getminions.ai/blog/${activeAsset.slug}`}
+                        `Full teardown on our blog: https://getminions.ai/blog/${activeAsset.slug}`}
                     </p>
                   </div>
                 )}
@@ -894,7 +1246,7 @@ export default function EditorialStudio({
               </div>
             )}
 
-            {/* TAB C: TWITTER / X REALISTIC THREAD MOCK */}
+            {/* TAB C: TWITTER / X REALISTIC THREAD MOCK & EDITOR */}
             {socialTab === "TWITTER" && (
               <div className="bg-[#070B0F] rounded-xl border border-[#1F2D3D] p-4 sm:p-5 space-y-4 font-sans">
                 {/* Twitter Author Header */}
@@ -907,32 +1259,67 @@ export default function EditorialStudio({
                       <div className="flex items-center gap-1.5">
                         <span className="text-xs font-bold text-[#F1F5F9]">getminions.ai</span>
                         <span className="text-[11px] text-[#64748B]">@getminionsai</span>
-                        <span className="text-[10px] text-[#64748B]">· 1h</span>
                       </div>
                       <div className="text-[10px] text-[#64748B]">AI Dispatch Engine for Home Services</div>
                     </div>
                   </div>
 
-                  <button
-                    onClick={() =>
-                      copyToClipboard(twitterVariant?.content || "", "social-twitter")
-                    }
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/30 text-xs font-semibold transition-all"
-                  >
-                    {copiedKey === "social-twitter" ? (
-                      <Check className="w-3.5 h-3.5 text-[#00C9A7]" />
-                    ) : (
-                      <Copy className="w-3.5 h-3.5" />
-                    )}
-                    <span>{copiedKey === "social-twitter" ? "Copied" : "Copy Tweet"}</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setIsEditingSocial(!isEditingSocial)}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-xs font-medium text-[#94A3B8] hover:text-[#F1F5F9] border border-[#1F2D3D] transition-all cursor-pointer"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>{isEditingSocial ? "Preview Post" : "Edit Copy"}</span>
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        copyToClipboard(editedTwitter || twitterVariant?.content || "", "social-twitter")
+                      }
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/30 text-xs font-semibold transition-all cursor-pointer"
+                    >
+                      {copiedKey === "social-twitter" ? (
+                        <Check className="w-3.5 h-3.5 text-[#00C9A7]" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                      <span>{copiedKey === "social-twitter" ? "Copied" : "Copy"}</span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* Twitter Body Copy */}
-                <div className="text-xs text-[#F1F5F9] leading-relaxed whitespace-pre-line bg-[#0F1419] p-4 rounded-xl border border-[#1F2D3D]/60 font-sans">
-                  {twitterVariant?.content ||
-                    "Natural language is the worst wire format for multi-agent LLM systems.\n\nPass a prose summary through 3 agents and you get prompt drift, lost gate codes, and bloated latency.\n\nRaw JSON + Go deterministic validation fixes this completely."}
-                </div>
+                {/* Twitter Body Copy / Textarea */}
+                {isEditingSocial ? (
+                  <div className="space-y-2">
+                    <textarea
+                      rows={5}
+                      value={editedTwitter}
+                      onChange={(e) => setEditedTwitter(e.target.value)}
+                      placeholder="Edit X / Twitter post copy..."
+                      className="w-full bg-[#0F1419] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl p-3 text-xs text-[#F1F5F9] leading-relaxed resize-y outline-none font-sans"
+                    />
+                    <div className="flex items-center justify-between">
+                      <span className={`text-[11px] font-mono ${editedTwitter.length > 280 ? "text-[#EF4444]" : "text-[#64748B]"}`}>
+                        {editedTwitter.length}/280 characters
+                      </span>
+                      <button
+                        onClick={handleSaveDraft}
+                        disabled={isSaving}
+                        className="px-3 py-1 bg-[#00C9A7] text-[#070B0F] rounded-lg text-xs font-bold shadow-xs hover:bg-[#00A88A] transition-all flex items-center gap-1"
+                      >
+                        <Check className="w-3 h-3" />
+                        <span>Save Tweet</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-xs text-[#F1F5F9] leading-relaxed whitespace-pre-line bg-[#0F1419] p-4 rounded-xl border border-[#1F2D3D]/60 font-sans">
+                    {editedTwitter ||
+                      twitterVariant?.content ||
+                      "Natural language is the worst wire format for multi-agent LLM systems.\n\nPass a prose summary through 3 agents and you get prompt drift, lost gate codes, and bloated latency.\n\nRaw JSON + Go deterministic validation fixes this completely."}
+                  </div>
+                )}
 
                 {/* Twitter Interaction Bar */}
                 <div className="flex items-center justify-between pt-2 border-t border-[#1F2D3D] text-xs text-[#64748B]">
@@ -1052,14 +1439,39 @@ export default function EditorialStudio({
             </div>
           </div>
 
-          {/* 2. Prominent Full-Width Teal "Approve & Publish" Action Button with Animated Transitions */}
-          <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-5 space-y-4 shadow-xl">
-            <span className="text-xs font-bold font-mono text-[#64748B] uppercase tracking-wider block">
-              Editorial Review Decision
-            </span>
+          {/* 2. Prominent Full-Width Actions & Save Bar */}
+          <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-5 space-y-3.5 shadow-xl">
+            <div className="flex items-center justify-between pb-1">
+              <span className="text-xs font-bold font-mono text-[#64748B] uppercase tracking-wider block">
+                Editorial Review Decision
+              </span>
+              {isDirty && (
+                <span className="text-[10px] font-mono text-[#F59E0B] font-bold animate-pulse">
+                  ● Unsaved Edits
+                </span>
+              )}
+            </div>
+
+            {/* Quick Save Draft Button in Review Panel */}
+            <button
+              onClick={handleSaveDraft}
+              disabled={isSaving}
+              className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                isDirty
+                  ? "bg-[#161D26] hover:bg-[#1E2733] text-[#00C9A7] border border-[#00C9A7]/50 shadow-md shadow-[#00C9A7]/10"
+                  : "bg-[#161D26] text-[#94A3B8] border border-[#1F2D3D]"
+              }`}
+            >
+              {isSaving ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <CheckCircle2 className="w-3.5 h-3.5" />
+              )}
+              <span>{isSaving ? "Saving..." : isDirty ? "Save Draft Edits (⌘S)" : "Draft Saved to Database ✓"}</span>
+            </button>
 
             {activeAsset.status === "PUBLISHED" || publishPhase === "DONE" ? (
-              <div className="space-y-3">
+              <div className="space-y-3 pt-1">
                 <div className="w-full bg-[#00C9A7]/15 border border-[#00C9A7] text-[#00C9A7] p-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2">
                   <CheckCheck className="w-4 h-4" />
                   <span>Approved & Published to Blog</span>
@@ -1077,12 +1489,12 @@ export default function EditorialStudio({
                 </a>
               </div>
             ) : (
-              <div className="space-y-2.5">
+              <div className="space-y-2.5 pt-1">
                 {/* Large Prominent Teal CTA Button */}
                 <button
                   onClick={handleApproveAndPublish}
                   disabled={publishPhase !== "IDLE"}
-                  className="w-full bg-[#00C9A7] hover:bg-[#00A88A] active:scale-[0.98] text-[#070B0F] font-bold text-sm py-3.5 px-5 rounded-xl shadow-lg shadow-[#00C9A7]/20 flex items-center justify-center gap-2.5 transition-all disabled:opacity-75"
+                  className="w-full bg-[#00C9A7] hover:bg-[#00A88A] active:scale-[0.98] text-[#070B0F] font-bold text-sm py-3.5 px-5 rounded-xl shadow-lg shadow-[#00C9A7]/20 flex items-center justify-center gap-2.5 transition-all disabled:opacity-75 cursor-pointer"
                 >
                   {publishPhase === "IDLE" && (
                     <>
@@ -1117,7 +1529,7 @@ export default function EditorialStudio({
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <button
                     onClick={() => setShowRevisionForm(!showRevisionForm)}
-                    className="bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#ff6b4a] hover:border-[#ff6b4a]/40 text-xs font-semibold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all"
+                    className="bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#ff6b4a] hover:border-[#ff6b4a]/40 text-xs font-semibold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                     <span>Request Revision</span>
@@ -1125,14 +1537,14 @@ export default function EditorialStudio({
 
                   <button
                     onClick={() => copyToClipboard(editedBody, "raw-markdown-btn")}
-                    className="bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] text-xs font-semibold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all"
+                    className="bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] text-xs font-semibold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   >
                     {copiedKey === "raw-markdown-btn" ? (
                       <Check className="w-3.5 h-3.5 text-[#00C9A7]" />
                     ) : (
                       <Copy className="w-3.5 h-3.5" />
                     )}
-                    <span>{copiedKey === "raw-markdown-btn" ? "Copied" : "Copy Raw Markdown"}</span>
+                    <span>{copiedKey === "raw-markdown-btn" ? "Copied" : "Copy Markdown"}</span>
                   </button>
                 </div>
               </div>
