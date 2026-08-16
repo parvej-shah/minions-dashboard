@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { PublishedPostRecord } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 export default function PublishedPostsPage() {
   const [feed, setFeed] = useState<PublishedPostRecord[]>([]);
   const [loading, setLoading] = useState(false);

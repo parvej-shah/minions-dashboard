@@ -70,7 +70,7 @@ const navItems = [
     name: "Published Posts",
     href: "/published",
     icon: Globe,
-    badge: "4 Live",
+    badge: "18 Live",
     badgeColor: "bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/30",
   },
   {
