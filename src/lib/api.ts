@@ -558,18 +558,20 @@ The result: warranty callbacks reduced by 74%, saving contractors an average of 
 ];
 
 export async function fetchAssets(): Promise<AssetItem[]> {
+  // Never fall back to INITIAL_ASSETS here. An empty Editorial Studio is a fact the
+  // operator needs to see; sample data in its place hides a broken pipeline.
   try {
     if (typeof window !== "undefined") {
       const res = await fetch("/api/assets");
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) return data;
+        if (Array.isArray(data)) return data;
       }
     }
   } catch (err) {
     console.error("fetchAssets error:", err);
   }
-  return INITIAL_ASSETS;
+  return [];
 }
 
 // ==========================================
