@@ -190,215 +190,167 @@ export default function MissionControlPage() {
         </div>
       </div>
 
-      {/* MAIN TWO-COLUMN COCKPIT SECTION */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* LEFT COLUMN (2/3 WIDTH) */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* PENDING REVIEW QUEUE */}
-          <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
-            <div className="flex items-center justify-between border-b border-[#1F2D3D] pb-3">
-              <div>
-                <h2 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-[#ff6b4a]" />
-                  Pending Editorial Review Queue
-                </h2>
-                <p className="text-xs text-[#94A3B8]">Review claims, adjust social variants, and broadcast to live channels.</p>
-              </div>
-              <span className="text-xs font-mono text-[#ff6b4a] font-bold bg-[#ff6b4a]/10 px-2 py-0.5 rounded border border-[#ff6b4a]/20">
-                1 Draft Waiting
-              </span>
+      {/* MAIN FULL-WIDTH COCKPIT SECTIONS */}
+      <div className="space-y-8">
+        {/* PENDING REVIEW QUEUE */}
+        <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
+          <div className="flex items-center justify-between border-b border-[#1F2D3D] pb-3">
+            <div>
+              <h2 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                <FileText className="w-4 h-4 text-[#ff6b4a]" />
+                Pending Editorial Review Queue
+              </h2>
+              <p className="text-xs text-[#94A3B8]">Review claims, adjust social variants, and broadcast to live channels.</p>
             </div>
-
-            {pendingReviewAssets.length === 0 ? (
-              <div className="p-8 text-center rounded-xl bg-[#161D26] border border-dashed border-[#1F2D3D] text-[#00C9A7]">
-                <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-[#00C9A7]" />
-                <p className="text-sm font-bold">All clear — no drafts waiting for review</p>
-                <p className="text-xs text-[#94A3B8] mt-1">Autonomous harvester is gathering fresh topics.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {pendingReviewAssets.map((asset) => (
-                  <div
-                    key={asset.id}
-                    className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] hover:border-[#00C9A7]/40 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group"
-                  >
-                    <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                      {/* 48x48 Thumbnail */}
-                      <div className="w-12 h-12 rounded-lg bg-[#0F1419] border border-[#1F2D3D] shrink-0 overflow-hidden flex items-center justify-center">
-                        {asset.hero_image_url ? (
-                          <img 
-                            src={asset.hero_image_url} 
-                            alt={asset.title} 
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                            onError={(e) => {
-                              (e.target as HTMLElement).style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-[#0e5c63]/20 text-[#00C9A7] font-mono text-[10px] font-bold">
-                            {asset.id}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="space-y-1 flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#ff6b4a]/10 text-[#ff6b4a] border border-[#ff6b4a]/20">
-                            PENDING REVIEW
-                          </span>
-                          <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold ${
-                            asset.audience === "ICP" ? "bg-blue-500/10 text-blue-400" : "bg-purple-500/10 text-purple-400"
-                          }`}>
-                            {asset.audience}
-                          </span>
-                          <span className="text-xs text-[#64748B] font-mono">{asset.pillar}</span>
-                        </div>
-                        <h3 className="text-sm font-bold text-[#F1F5F9] group-hover:text-[#00C9A7] transition-colors truncate">
-                          {asset.title}
-                        </h3>
-                        <p className="text-xs text-[#94A3B8] line-clamp-1">
-                          {asset.hook || asset.body_content?.slice(0, 100)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <Link
-                      href={`/drafts/${asset.id}`}
-                      className="px-4 py-2 rounded-xl bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 shrink-0 self-end sm:self-center"
-                    >
-                      <span>Review & Publish</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            )}
+            <span className="text-xs font-mono text-[#ff6b4a] font-bold bg-[#ff6b4a]/10 px-2 py-0.5 rounded border border-[#ff6b4a]/20">
+              {pendingReviewAssets.length} Draft{pendingReviewAssets.length === 1 ? "" : "s"} Waiting
+            </span>
           </div>
 
-          {/* OMNICHANNEL RECENT BROADCASTS */}
-          <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
-            <div className="flex items-center justify-between border-b border-[#1F2D3D] pb-3">
-              <div>
-                <h2 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-[#00C9A7]" />
-                  Live Omnichannel Broadcasts
-                </h2>
-                <p className="text-xs text-[#94A3B8]">Verified post permalinks across live distribution channels</p>
-              </div>
-              <Link href="/published" className="text-xs font-mono text-[#00C9A7] hover:underline flex items-center gap-1">
-                <span>View All Broadcasts →</span>
-              </Link>
+          {pendingReviewAssets.length === 0 ? (
+            <div className="p-8 text-center rounded-xl bg-[#161D26] border border-dashed border-[#1F2D3D] text-[#00C9A7]">
+              <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-[#00C9A7]" />
+              <p className="text-sm font-bold">All clear — no drafts waiting for review</p>
+              <p className="text-xs text-[#94A3B8] mt-1">Autonomous harvester is gathering fresh topics.</p>
             </div>
-
+          ) : (
             <div className="space-y-3">
-              {publishedAssets.map((asset) => (
+              {pendingReviewAssets.map((asset) => (
                 <div
                   key={asset.id}
-                  className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                  className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] hover:border-[#00C9A7]/40 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group"
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-[#00C9A7]"></span>
-                      <span className="text-xs font-bold text-[#F1F5F9]">{asset.title}</span>
-                      <span className="text-[10px] font-mono text-[#64748B]">({asset.audience})</span>
+                  <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                    {/* 48x48 Thumbnail */}
+                    <div className="w-12 h-12 rounded-lg bg-[#0F1419] border border-[#1F2D3D] shrink-0 overflow-hidden flex items-center justify-center">
+                      {asset.hero_image_url ? (
+                        <img 
+                          src={asset.hero_image_url} 
+                          alt={asset.title} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-[#0e5c63]/20 text-[#00C9A7] font-mono text-[10px] font-bold">
+                          {asset.id}
+                        </div>
+                      )}
                     </div>
-                    <div className="text-[11px] text-[#94A3B8] flex items-center gap-3 font-mono">
-                      <span>Published {new Date(asset.published_at || asset.updated_at).toLocaleDateString()}</span>
-                      <span>•</span>
-                      <span className="text-[#00C9A7]">3 Omnichannel Channels</span>
+
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#ff6b4a]/10 text-[#ff6b4a] border border-[#ff6b4a]/20">
+                          PENDING REVIEW
+                        </span>
+                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold ${
+                          asset.audience === "ICP" ? "bg-blue-500/10 text-blue-400" : "bg-purple-500/10 text-purple-400"
+                        }`}>
+                          {asset.audience}
+                        </span>
+                        <span className="text-[10px] font-mono text-[#64748B] hidden sm:inline">
+                          ID: {asset.id}
+                        </span>
+                      </div>
+                      <h3 className="text-sm font-bold text-[#F1F5F9] truncate group-hover:text-[#00C9A7] transition-colors">
+                        {asset.title}
+                      </h3>
+                      <p className="text-xs text-[#94A3B8] line-clamp-1">
+                        {asset.hook || asset.body_content?.slice(0, 100)}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <a
-                      href={asset.blog_url || `https://getminions.ai/blog/${asset.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-2.5 py-1.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-medium text-[#F1F5F9] hover:bg-[#1E2733] flex items-center gap-1.5 transition-colors"
+                  <div className="flex items-center gap-3 w-full sm:w-auto justify-end shrink-0">
+                    <Link
+                      href={`/drafts/${asset.id}`}
+                      className="px-4 py-2 rounded-xl bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold transition-all shadow-md shadow-[#00C9A7]/10 flex items-center gap-1.5"
                     >
-                      <Globe className="w-3 h-3 text-[#00C9A7]" />
-                      <span>Blog ↗</span>
-                    </a>
-                    <a
-                      href="https://linkedin.com/company/getminionsai"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-2.5 py-1.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-medium text-[#94A3B8] hover:text-[#0077b5] hover:bg-[#1E2733] flex items-center gap-1 transition-colors"
-                    >
-                      <span>LinkedIn ↗</span>
-                    </a>
-                    <a
-                      href="https://facebook.com/getminionsai"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-2.5 py-1.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-medium text-[#94A3B8] hover:text-[#1877f2] hover:bg-[#1E2733] flex items-center gap-1 transition-colors"
-                    >
-                      <span>Facebook ↗</span>
-                    </a>
+                      <span>Review & Publish</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </Link>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          )}
         </div>
 
-        {/* RIGHT COLUMN (1/3 WIDTH) */}
-        <div className="space-y-6">
-          {/* FLEET TELEMETRY STATUS */}
-          <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] shadow-sm space-y-4">
-            <div className="flex items-center justify-between border-b border-[#1F2D3D] pb-3">
-              <div className="flex items-center gap-2">
-                <Bot className="w-4 h-4 text-[#ff6b4a]" />
-                <h2 className="text-xs font-bold text-[#F1F5F9] uppercase tracking-wider font-mono">
-                  Active Content Fleet
-                </h2>
-              </div>
-              <span className="text-xs font-mono text-[#00C9A7]">● 4 Active</span>
+        {/* LIVE OMNICHANNEL BROADCASTS */}
+        <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
+          <div className="flex items-center justify-between border-b border-[#1F2D3D] pb-3">
+            <div>
+              <h2 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                <Globe className="w-4 h-4 text-[#00C9A7]" />
+                Live Omnichannel Broadcasts
+              </h2>
+              <p className="text-xs text-[#94A3B8]">Verified post permalinks across live distribution channels</p>
             </div>
-
-            <div className="space-y-2.5">
-              {fleet.slice(0, 4).map((worker) => (
-                <div
-                  key={worker.id}
-                  className="p-3 rounded-xl bg-[#161D26] border border-[#1F2D3D] flex items-center justify-between"
-                >
-                  <div className="space-y-0.5">
-                    <div className="text-xs font-semibold text-[#F1F5F9] flex items-center gap-2">
-                      <span>{worker.name}</span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#070B0F] text-[#00C9A7]">
-                        {worker.model}
-                      </span>
-                    </div>
-                    <div className="text-[10px] text-[#64748B] font-mono">
-                      {worker.last_active}
-                    </div>
-                  </div>
-                  <span className="w-2 h-2 rounded-full bg-[#00C9A7]"></span>
-                </div>
-              ))}
-            </div>
+            <Link
+              href="/published"
+              className="text-xs font-mono text-[#00C9A7] hover:underline flex items-center gap-1"
+            >
+              <span>View All 18 Broadcasts →</span>
+            </Link>
           </div>
 
-          {/* RECENT HARVESTED SIGNALS */}
-          <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] shadow-sm space-y-3">
-            <div className="flex items-center justify-between border-b border-[#1F2D3D] pb-2">
-              <h3 className="text-xs font-mono font-bold text-[#94A3B8] uppercase">Fresh Ideas Stream</h3>
-              <Link href="/ideas" className="text-xs text-[#00C9A7] hover:underline font-mono">
-                View All →
-              </Link>
-            </div>
-
-            <div className="space-y-2.5">
-              {ideas.slice(0, 3).map((idea) => (
-                <div key={idea.id} className="p-3 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono text-[#00C9A7]">{idea.target_trade || "General"}</span>
-                    <span className="text-[10px] font-mono text-[#64748B]">{idea.source}</span>
+          <div className="space-y-3">
+            {publishedAssets.map((asset) => (
+              <div
+                key={asset.id}
+                className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#00C9A7]"></span>
+                    <span className="text-xs font-bold text-[#F1F5F9]">{asset.title}</span>
+                    <span className="text-[10px] font-mono text-[#64748B]">({asset.audience})</span>
                   </div>
-                  <h4 className="text-xs font-semibold text-[#F1F5F9] line-clamp-1">{idea.raw_idea}</h4>
+                  <div className="text-[11px] text-[#94A3B8] flex items-center gap-3 font-mono">
+                    <span>Published {new Date(asset.published_at || asset.updated_at).toLocaleDateString()}</span>
+                    <span>•</span>
+                    <span className="text-[#00C9A7]">3 Omnichannel Channels</span>
+                  </div>
                 </div>
-              ))}
-            </div>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  <a
+                    href={asset.blog_url || `https://getminions.ai/blog/${asset.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-medium text-[#F1F5F9] hover:bg-[#1E2733] flex items-center gap-1.5 transition-colors"
+                  >
+                    <Globe className="w-3 h-3 text-[#00C9A7]" />
+                    <span>Blog ↗</span>
+                  </a>
+                  <a
+                    href="https://linkedin.com/company/getminionsai"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-medium text-[#94A3B8] hover:text-[#0077b5] hover:bg-[#1E2733] flex items-center gap-1 transition-colors"
+                  >
+                    <span>LinkedIn ↗</span>
+                  </a>
+                  <a
+                    href="https://facebook.com/getminionsai"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-medium text-[#94A3B8] hover:text-[#1877f2] hover:bg-[#1E2733] flex items-center gap-1 transition-colors"
+                  >
+                    <span>Facebook ↗</span>
+                  </a>
+                  <a
+                    href="https://twitter.com/getminionsai"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-medium text-[#94A3B8] hover:text-[#38bdf8] hover:bg-[#1E2733] flex items-center gap-1 transition-colors"
+                  >
+                    <span>Twitter ↗</span>
+                  </a>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

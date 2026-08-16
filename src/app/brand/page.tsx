@@ -591,70 +591,48 @@ export default function BrandStudioPage() {
         {/* Primary Tab Switcher */}
         <div className="flex flex-wrap items-center bg-[#0F1419] p-1 rounded-xl border border-[#1F2D3D] self-start md:self-auto gap-1 max-w-full overflow-x-auto">
           <button
-            onClick={() => setActiveTab("visuals")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "visuals"
-                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
-                : "text-[#94A3B8] hover:text-[#F1F5F9]"
-            }`}
-          >
-            <Palette className="w-3.5 h-3.5" />
-            Visuals & Logo Studio
-          </button>
-          <button
-            onClick={() => setActiveTab("mascots")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "mascots"
-                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
-                : "text-[#94A3B8] hover:text-[#F1F5F9]"
-            }`}
-          >
-            <Bot className="w-3.5 h-3.5" />
-            Mascot Squad (5)
-          </button>
-          <button
-            onClick={() => setActiveTab("social")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "social"
-                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
-                : "text-[#94A3B8] hover:text-[#F1F5F9]"
-            }`}
-          >
-            <Share2 className="w-3.5 h-3.5" />
-            Social Assets ({SOCIAL_TEMPLATES.length})
-          </button>
-          <button
             onClick={() => setActiveTab("directives")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "directives"
                 ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
                 : "text-[#94A3B8] hover:text-[#F1F5F9]"
             }`}
           >
             <BookOpen className="w-3.5 h-3.5" />
-            Directives ({directives.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("multi_brand")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "multi_brand"
-                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
-                : "text-[#94A3B8] hover:text-[#F1F5F9]"
-            }`}
-          >
-            <Send className="w-3.5 h-3.5" />
-            Instruct Fleet
+            Brand Directives ({directives.length})
           </button>
           <button
             onClick={() => setActiveTab("lexicon")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "lexicon"
                 ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
                 : "text-[#94A3B8] hover:text-[#F1F5F9]"
             }`}
           >
             <AlertTriangle className="w-3.5 h-3.5" />
-            Banned ({bannedWords.length})
+            Banned Buzzwords ({bannedWords.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("visuals")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === "visuals"
+                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
+                : "text-[#94A3B8] hover:text-[#F1F5F9]"
+            }`}
+          >
+            <Palette className="w-3.5 h-3.5" />
+            Logos & Mascots (5)
+          </button>
+          <button
+            onClick={() => setActiveTab("social")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === "social"
+                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
+                : "text-[#94A3B8] hover:text-[#F1F5F9]"
+            }`}
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            Social Cover Templates ({SOCIAL_TEMPLATES.length})
           </button>
         </div>
       </div>
@@ -1548,127 +1526,6 @@ export default function BrandStudioPage() {
         </div>
       )}
 
-      {/* ======================================================== */}
-      {/* TAB 5: INSTRUCT AGENTS / MULTI-BRAND INSTRUCTION */}
-      {/* ======================================================== */}
-      {activeTab === "multi_brand" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-5 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
-                    <Send className="w-4 h-4 text-[#00C9A7]" />
-                    Direct Brand & Mission Dispatcher
-                  </h3>
-                  <p className="text-xs text-[#94A3B8] mt-0.5">
-                    Write high-priority operator instructions injected into all autonomous agent reasoning prompts.
-                  </p>
-                </div>
-
-                <select
-                  value={selectedBrand}
-                  onChange={(e) => setSelectedBrand(e.target.value)}
-                  className="bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3 py-1.5 text-xs text-[#F1F5F9] font-medium"
-                >
-                  <option value="getminions.ai">getminions.ai (Primary Ops)</option>
-                  <option value="minions_voice_demo">Minions Voice AI Demo</option>
-                  <option value="minions_enterprise">Minions Enterprise Field Ops</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-[#F1F5F9] flex items-center justify-between">
-                  <span>Operator System Directive</span>
-                  <span className="text-[11px] font-mono text-[#00C9A7]">Injected before Stage 1 Reasoning</span>
-                </label>
-                <textarea
-                  rows={6}
-                  value={operatorPrompt}
-                  onChange={(e) => {
-                    setOperatorPrompt(e.target.value);
-                    setPromptSaved(false);
-                  }}
-                  className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-xl p-4 text-xs font-mono text-[#F1F5F9] leading-relaxed focus:outline-none focus:border-[#00C9A7] resize-none"
-                />
-              </div>
-
-              <div className="flex items-center justify-between pt-2">
-                <div className="text-xs text-[#94A3B8] flex items-center gap-2">
-                  {promptSaved ? (
-                    <span className="text-[#00C9A7] flex items-center gap-1 font-semibold">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      Synchronized to all 7 agent workers!
-                    </span>
-                  ) : (
-                    <span>Click save to broadcast new directives to the active agent fleet</span>
-                  )}
-                </div>
-
-                <button
-                  onClick={() => {
-                    setPromptSaved(true);
-                    setTimeout(() => setPromptSaved(false), 3000);
-                  }}
-                  className="bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2 rounded-xl shadow-sm flex items-center gap-2 transition-all"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  Save & Broadcast to Fleet
-                </button>
-              </div>
-            </div>
-
-            {/* Injected Context Preview */}
-            <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-3 shadow-sm">
-              <h4 className="text-xs font-mono font-bold text-[#94A3B8] uppercase flex items-center gap-2">
-                <Terminal className="w-3.5 h-3.5 text-[#00C9A7]" />
-                Live Agent Ingestion Preview (What the LLM Sees)
-              </h4>
-              <pre className="bg-[#070B0F] p-4 rounded-xl text-[11px] font-mono text-[#00C9A7] overflow-x-auto leading-relaxed border border-[#1F2D3D]">
-{`=== BRAND CONTEXT INJECTION [${selectedBrand.toUpperCase()}] ===
-Company Name: getminions.ai (lowercase, .ai suffix)
-Positioning: AI operations partner for US home-services businesses (1-10 techs)
-Primary Logo URL: "https://pub-13629069dfd74891bffc487ab4e135f5.r2.dev/minions_logo_primary.svg"
-Tone: Technical, tactile operator prose. 1-3 sentences per paragraph.
-Operator Directive: "${operatorPrompt}"
-Forbidden Words: [${bannedWords.slice(0, 8).join(", ")}...]
-Allowed Proof: Live callable demo number, RAG chatbot, deterministic Go schema.`}
-              </pre>
-            </div>
-          </div>
-
-          {/* Right sidebar: Persona Lanes */}
-          <div className="space-y-4">
-            <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-3 shadow-sm">
-              <h3 className="text-xs font-bold text-[#F1F5F9] uppercase font-mono tracking-wider">
-                Audience Persona Lanes
-              </h3>
-
-              <div className="space-y-2.5">
-                <div className="p-3.5 rounded-xl bg-[#161D26] border border-[#3B82F6]/30">
-                  <div className="flex items-center justify-between text-xs font-bold text-[#3B82F6] mb-1">
-                    <span>ICP: Operators</span>
-                    <span className="text-[10px] font-mono bg-[#3B82F6]/10 px-1.5 py-0.5 rounded">Primary</span>
-                  </div>
-                  <p className="text-[11px] text-[#94A3B8] leading-snug">
-                    US home service contractors (HVAC, plumbing, electrical) with 1–10 vans. Motivated by speed-to-lead, technician overtime reduction, and zero warranty callbacks.
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-[#161D26] border border-[#8B5CF6]/30">
-                  <div className="flex items-center justify-between text-xs font-bold text-[#8B5CF6] mb-1">
-                    <span>PEER: Systems Engineers</span>
-                    <span className="text-[10px] font-mono bg-[#8B5CF6]/10 px-1.5 py-0.5 rounded">Technical</span>
-                  </div>
-                  <p className="text-[11px] text-[#94A3B8] leading-snug">
-                    CTOs, AI architects, and multi-agent system developers. Motivated by deterministic schema validation, sub-1.8s audio latency, and production reliability.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ======================================================== */}
       {/* TAB 6: BANNED LEXICON & COMPLIANCE */}

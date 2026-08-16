@@ -465,42 +465,26 @@ export default function EditorialStudio({
               </div>
             </div>
 
-            {/* Copyable Cover Image URL Link Bar */}
+            {/* Clean Cover Image Action Bar */}
             {activeAsset.hero_image_url && (
-              <div className="flex items-center justify-between gap-3 bg-[#070B0F] border border-[#1F2D3D] rounded-xl px-3 py-2 text-xs">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-[10px] font-mono uppercase font-bold text-[#00C9A7] bg-[#00C9A7]/10 px-1.5 py-0.5 rounded shrink-0">
-                    Cover Image URL
-                  </span>
-                  <span className="font-mono text-[#94A3B8] text-[11px] truncate select-all">
-                    {activeAsset.hero_image_url}
+              <div className="flex items-center justify-between gap-3 bg-[#070B0F] border border-[#1F2D3D] rounded-xl px-4 py-2.5 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#00C9A7]"></span>
+                  <span className="text-xs font-semibold text-[#F1F5F9]">
+                    16:9 Commercial Studio Cover Art Staged
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <button
-                    onClick={() => copyToClipboard(activeAsset.hero_image_url || "", "cdn-url")}
-                    className="p-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-[#94A3B8] hover:text-[#00C9A7] transition-all flex items-center gap-1"
-                    title="Copy Cover Image CDN URL"
-                  >
-                    {copiedKey === "cdn-url" ? (
-                      <Check className="w-3.5 h-3.5 text-[#00C9A7]" />
-                    ) : (
-                      <Copy className="w-3.5 h-3.5" />
-                    )}
-                    <span className="text-[10px] font-medium hidden sm:inline">
-                      {copiedKey === "cdn-url" ? "Copied" : "Copy Link"}
-                    </span>
-                  </button>
-
+                <div className="flex items-center gap-2 shrink-0">
                   <a
                     href={activeAsset.hero_image_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-[#94A3B8] hover:text-[#F1F5F9] transition-all"
-                    title="Open cover image in new tab"
+                    className="px-2.5 py-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-xs font-medium text-[#00C9A7] border border-[#00C9A7]/30 hover:border-[#00C9A7] transition-all flex items-center gap-1.5"
+                    title="Open full resolution cover image"
                   >
-                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>View Full 2K Art</span>
+                    <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
               </div>
@@ -1253,30 +1237,33 @@ export default function EditorialStudio({
                         : "bg-[#070B0F] border-[#F59E0B]/40 hover:border-[#F59E0B]/80"
                     }`}
                   >
-                    {/* Header with Source & Confidence */}
+                    {/* Header with Source & Clean Badge */}
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                          className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
                             claim.source_type === "GO_BENCHMARK"
-                              ? "bg-[#00C9A7]/15 text-[#00C9A7]"
+                              ? "bg-[#00C9A7]/15 text-[#00C9A7] border border-[#00C9A7]/30"
                               : claim.source_type === "OPERATOR_DISPATCH_DATA"
-                                ? "bg-[#3B82F6]/15 text-[#3B82F6]"
+                                ? "bg-[#3B82F6]/15 text-[#3B82F6] border border-[#3B82F6]/30"
                                 : claim.source_type === "VOICE_PACKET_TRACE"
-                                  ? "bg-[#ff6b4a]/15 text-[#ff6b4a]"
-                                  : "bg-[#8B5CF6]/15 text-[#8B5CF6]"
+                                  ? "bg-[#ff6b4a]/15 text-[#ff6b4a] border border-[#ff6b4a]/30"
+                                  : "bg-[#8B5CF6]/15 text-[#8B5CF6] border border-[#8B5CF6]/30"
                           }`}
                         >
-                          {claim.source_type}
+                          {claim.source_type === "GO_BENCHMARK" 
+                            ? "Verified Benchmark" 
+                            : claim.source_type === "OPERATOR_DISPATCH_DATA" 
+                              ? "Field Dispatch Metric" 
+                              : claim.source_type === "VOICE_PACKET_TRACE"
+                                ? "Voice Telemetry"
+                                : "Contractor Ground Truth"}
                         </span>
-                        <span className="text-[10px] font-mono text-[#64748B]">{claim.id}</span>
                       </div>
 
-                      {claim.confidence_score && (
-                        <span className="text-[10px] font-mono text-[#94A3B8]">
-                          {Math.round(claim.confidence_score * 100)}% Confidence
-                        </span>
-                      )}
+                      <span className="text-[10px] font-mono text-[#00C9A7]">
+                        {isVerified ? "● Automated Gate Passed" : "● Manual Check Required"}
+                      </span>
                     </div>
 
                     {/* Claim Text */}

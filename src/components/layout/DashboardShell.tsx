@@ -439,7 +439,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             >
               <div className="flex items-center gap-2">
                 <Search className="w-3.5 h-3.5 text-[#00C9A7]" />
-                <span>Search ideas, drafts, agents, published links, or R2 assets...</span>
+                <span>Search ideas, drafts, agents, or published articles...</span>
               </div>
               <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono bg-[#0b0f14] border border-[#1f2b37] rounded text-[#94A3B8]">
                 ⌘K
@@ -456,11 +456,6 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             >
               <Search className="w-4 h-4 text-[#00C9A7]" />
             </button>
-
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-[#161d24] border border-[#1f2b37] text-[11px] font-mono text-[#94A3B8]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00C9A7]" />
-              <span>R2: Active</span>
-            </div>
 
             <a
               href="https://getminions.ai/blog"
