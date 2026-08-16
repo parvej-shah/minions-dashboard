@@ -243,10 +243,10 @@ export default function DashboardShell({ children }: DashboardShellProps) {
           <div className="flex items-center justify-between pb-3 border-b border-[#1f2b37]">
             <Link href="/" className="flex items-baseline group">
               <span className="font-extrabold text-2xl tracking-tight text-white group-hover:opacity-90 transition-opacity">
-                minions
+                Minions
               </span>
-              <span className="text-[#ff6b4a] font-mono font-bold text-2xl ml-0.5">
-                .ai
+              <span className="text-[#ff6b4a] font-bold text-2xl ml-0.5">
+                .AI
               </span>
             </Link>
           </div>
@@ -359,8 +359,8 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             <div className="space-y-6">
               <div className="flex items-center justify-between pb-4 border-b border-[#1f2b37]">
                 <div className="flex items-baseline">
-                  <span className="font-extrabold text-xl tracking-tight text-white">minions</span>
-                  <span className="text-[#ff6b4a] font-mono font-bold text-xl ml-0.5">.ai</span>
+                  <span className="font-extrabold text-xl tracking-tight text-white">Minions</span>
+                  <span className="text-[#ff6b4a] font-bold text-xl ml-0.5">.AI</span>
                 </div>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
@@ -458,8 +458,8 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             </button>
 
             <Link href="/" className="flex items-baseline">
-              <span className="font-extrabold text-base tracking-tight text-white">minions</span>
-              <span className="text-[#ff6b4a] font-mono font-bold text-base ml-0.5">.ai</span>
+              <span className="font-extrabold text-base tracking-tight text-white">Minions</span>
+              <span className="text-[#ff6b4a] font-bold text-base ml-0.5">.AI</span>
             </Link>
           </div>
 
