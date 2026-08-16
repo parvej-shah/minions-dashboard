@@ -31,22 +31,10 @@ export interface AdminUser {
 
 export const SUPABASE_ADMIN_USERS: { email: string; name: string; role: "MARKETING_DIRECTOR" | "SYSTEM_ADMIN"; desc: string }[] = [
   {
-    email: "parvejshahlabib007@gmail.com",
-    name: "Parvej Shah",
-    role: "MARKETING_DIRECTOR",
-    desc: "Primary Lead Director & Editorial Approver"
-  },
-  {
     email: "xpeedlab@gmail.com",
     name: "XpeedLab Admin",
     role: "SYSTEM_ADMIN",
     desc: "Cloud Infrastructure & Agent Pipeline Admin"
-  },
-  {
-    email: "xbitlab@gmail.com",
-    name: "Parvej Shah (Backup)",
-    role: "MARKETING_DIRECTOR",
-    desc: "Secondary Whitelisted Operator"
   }
 ];
 

@@ -465,12 +465,12 @@ export default function EditorialStudio({
               </div>
             </div>
 
-            {/* Copyable R2 URL Link Bar */}
+            {/* Copyable Cover Image URL Link Bar */}
             {activeAsset.hero_image_url && (
               <div className="flex items-center justify-between gap-3 bg-[#070B0F] border border-[#1F2D3D] rounded-xl px-3 py-2 text-xs">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="text-[10px] font-mono uppercase font-bold text-[#00C9A7] bg-[#00C9A7]/10 px-1.5 py-0.5 rounded shrink-0">
-                    R2 URL
+                    Cover Image URL
                   </span>
                   <span className="font-mono text-[#94A3B8] text-[11px] truncate select-all">
                     {activeAsset.hero_image_url}
@@ -479,17 +479,17 @@ export default function EditorialStudio({
 
                 <div className="flex items-center gap-1.5 shrink-0">
                   <button
-                    onClick={() => copyToClipboard(activeAsset.hero_image_url || "", "r2-url")}
+                    onClick={() => copyToClipboard(activeAsset.hero_image_url || "", "cdn-url")}
                     className="p-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-[#94A3B8] hover:text-[#00C9A7] transition-all flex items-center gap-1"
-                    title="Copy R2 Image URL"
+                    title="Copy Cover Image CDN URL"
                   >
-                    {copiedKey === "r2-url" ? (
+                    {copiedKey === "cdn-url" ? (
                       <Check className="w-3.5 h-3.5 text-[#00C9A7]" />
                     ) : (
                       <Copy className="w-3.5 h-3.5" />
                     )}
                     <span className="text-[10px] font-medium hidden sm:inline">
-                      {copiedKey === "r2-url" ? "Copied" : "Copy Link"}
+                      {copiedKey === "cdn-url" ? "Copied" : "Copy Link"}
                     </span>
                   </button>
 
@@ -498,7 +498,7 @@ export default function EditorialStudio({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-[#94A3B8] hover:text-[#F1F5F9] transition-all"
-                    title="Open R2 asset in new tab"
+                    title="Open cover image in new tab"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>

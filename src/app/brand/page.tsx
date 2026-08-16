@@ -581,7 +581,7 @@ export default function BrandStudioPage() {
             Brand Governance & Visual Asset Engine
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-[#F1F5F9]">
-            Brand Studio & Visual Assets
+            Brand & Directives
           </h1>
           <p className="text-sm text-[#94A3B8] mt-1">
             Real transparent logos, 3D Mascot Squad, official social avatars & covers, and live LLM prompt directives.
@@ -1628,7 +1628,7 @@ export default function BrandStudioPage() {
 {`=== BRAND CONTEXT INJECTION [${selectedBrand.toUpperCase()}] ===
 Company Name: getminions.ai (lowercase, .ai suffix)
 Positioning: AI operations partner for US home-services businesses (1-10 techs)
-Primary Logo URL: "${currentLogoSrc}"
+Primary Logo URL: "https://pub-13629069dfd74891bffc487ab4e135f5.r2.dev/minions_logo_primary.svg"
 Tone: Technical, tactile operator prose. 1-3 sentences per paragraph.
 Operator Directive: "${operatorPrompt}"
 Forbidden Words: [${bannedWords.slice(0, 8).join(", ")}...]

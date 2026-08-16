@@ -32,7 +32,13 @@ import {
   Lock,
   User
 } from "lucide-react";
-import AdminAuthModal, { AdminUser } from "@/components/auth/AdminAuthModal";
+// Auth types
+export interface AdminUser {
+  email: string;
+  name: string;
+  role: string;
+  authenticated_at: string;
+}
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -68,10 +74,10 @@ const navItems = [
     badgeColor: "bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/30",
   },
   {
-    name: "Brand Studio",
+    name: "Brand & Directives",
     href: "/brand",
     icon: Palette,
-    badge: "12 Rules",
+    badge: "12 Directives",
     badgeColor: "bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/30",
   },
   {
@@ -83,7 +89,7 @@ const navItems = [
     name: "Agent Fleet",
     href: "/fleet",
     icon: Bot,
-    badge: "7 Active",
+    badge: "4 Active",
     badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
   },
 ];
@@ -97,23 +103,12 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   // Mobile menu drawer state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Auth modal state
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<AdminUser | null>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const cached = localStorage.getItem("minions_admin_session");
-        if (cached) return JSON.parse(cached);
-      } catch {}
-    }
-    return {
-      email: "parvejshahlabib007@gmail.com",
-      name: "Parvej Shah",
-      role: "MARKETING_DIRECTOR",
-      authenticated_at: new Date().toISOString(),
-      supabase_project: "kneafaxwkopodiausljf.supabase.co"
-    };
-  });
+  const currentUser: AdminUser = {
+    email: "xpeedlab@gmail.com",
+    name: "XpeedLab Admin",
+    role: "MARKETING_DIRECTOR",
+    authenticated_at: new Date().toISOString()
+  };
 
   // Command palette state
   const [showPalette, setShowPalette] = useState(false);
@@ -160,30 +155,6 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
   return (
     <div className="flex min-h-screen bg-[#0a0d12] text-[#F1F5F9]">
-      {/* AUTHENTICATION MODAL */}
-      <AdminAuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        currentUser={currentUser}
-        onLogin={(user) => {
-          setCurrentUser(user);
-          if (typeof window !== "undefined") {
-            try {
-              localStorage.setItem("minions_admin_session", JSON.stringify(user));
-            } catch {}
-          }
-          setNotification(`Authenticated as ${user.email} (${user.role})`);
-        }}
-        onLogout={() => {
-          setCurrentUser(null);
-          if (typeof window !== "undefined") {
-            try {
-              localStorage.removeItem("minions_admin_session");
-            } catch {}
-          }
-          setNotification("Signed out of Minions.AI Cockpit");
-        }}
-      />
 
       {/* COMMAND PALETTE MODAL */}
       {showPalette && (
@@ -279,14 +250,13 @@ export default function DashboardShell({ children }: DashboardShellProps) {
               </span>
             </Link>
 
-            <button
-              onClick={() => setAuthModalOpen(true)}
-              className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#161d24] hover:bg-[#1e2631] text-[#00C9A7] border border-[#1f2b37] flex items-center gap-1 transition-colors cursor-pointer"
-              title="Admin Authentication Console"
+            <div
+              className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#161d24] text-[#00C9A7] border border-[#1f2b37] flex items-center gap-1.5"
+              title="Live Multi-Agent Cockpit"
             >
-              <Lock className="w-3 h-3 text-[#ff6b4a]" />
-              <span>ADMIN</span>
-            </button>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00C9A7] animate-pulse" />
+              <span>LIVE COCKPIT</span>
+            </div>
           </div>
 
           {/* QUICK TRIGGER BUTTON */}
@@ -349,7 +319,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
               <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-ping" />
             </div>
             <div className="flex items-center justify-between text-xs font-semibold text-[#F1F5F9]">
-              <span>7 Workers</span>
+              <span>4 Workers</span>
               <span className="text-[#00C9A7]">100% Health</span>
             </div>
             <div className="text-[10px] text-[#64748B] font-mono flex items-center justify-between pt-1 border-t border-[#1f2b37]">
@@ -358,22 +328,21 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             </div>
           </div>
 
-          <button
-            onClick={() => setAuthModalOpen(true)}
-            className="w-full flex items-center justify-between text-xs p-2 rounded-xl bg-[#161d24] hover:bg-[#1e2631] border border-[#1f2b37] text-[#94A3B8] transition-colors cursor-pointer"
+          <div
+            className="w-full flex items-center justify-between text-xs p-2 rounded-xl bg-[#161d24] border border-[#1f2b37] text-[#94A3B8]"
           >
             <div className="flex items-center gap-2 min-w-0">
-              <div className="w-6 h-6 rounded-full bg-[#ff6b4a]/20 text-[#ff6b4a] font-bold text-xs flex items-center justify-center border border-[#ff6b4a]/40 shrink-0">
-                P
+              <div className="w-6 h-6 rounded-full bg-[#00C9A7]/20 text-[#00C9A7] font-bold text-xs flex items-center justify-center border border-[#00C9A7]/40 shrink-0">
+                X
               </div>
               <div className="text-[11px] leading-tight text-left min-w-0">
-                <div className="font-semibold text-[#F1F5F9] truncate">{currentUser?.name || "Parvej Shah"}</div>
-                <div className="text-[10px] text-[#64748B] font-mono truncate">{currentUser?.email || "parvejshahlabib007@gmail.com"}</div>
+                <div className="font-semibold text-[#F1F5F9] truncate">XpeedLab Admin</div>
+                <div className="text-[10px] text-[#64748B] font-mono truncate">xpeedlab@gmail.com</div>
               </div>
             </div>
 
-            <Lock className="w-3.5 h-3.5 text-[#ff6b4a] shrink-0 ml-1" />
-          </button>
+            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/20">ADMIN</span>
+          </div>
         </div>
       </aside>
 
@@ -429,21 +398,15 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             </div>
 
             <div className="space-y-3 pt-4 border-t border-[#1f2b37]">
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setAuthModalOpen(true);
-                }}
-                className="w-full p-3 rounded-xl bg-[#161d24] border border-[#1f2b37] flex items-center justify-between text-xs"
-              >
+              <div className="w-full p-3 rounded-xl bg-[#161d24] border border-[#1f2b37] flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-6 h-6 rounded-full bg-[#ff6b4a]/20 text-[#ff6b4a] font-bold text-xs flex items-center justify-center shrink-0">
-                    {currentUser?.name ? currentUser.name[0] : "P"}
+                  <div className="w-6 h-6 rounded-full bg-[#00C9A7]/20 text-[#00C9A7] font-bold text-xs flex items-center justify-center shrink-0">
+                    X
                   </div>
-                  <span className="text-white font-mono text-[11px] truncate">{currentUser?.email || "parvejshahlabib007@gmail.com"}</span>
+                  <span className="text-white font-mono text-[11px] truncate">xpeedlab@gmail.com</span>
                 </div>
-                <span className="text-[#00C9A7] font-semibold text-[10px] shrink-0 ml-2">Auth Gate</span>
-              </button>
+                <span className="text-[#00C9A7] font-semibold text-[10px] shrink-0 ml-2">ADMIN</span>
+              </div>
             </div>
           </div>
         </div>

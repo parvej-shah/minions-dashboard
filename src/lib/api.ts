@@ -570,7 +570,7 @@ export const INITIAL_FLEET: AgentWorkerItem[] = [
     model: "qwen3.7-max",
     status: "ACTIVE",
     system_prompt: "You are the Lead Marketing Strategist for getminions.ai. Formulate high-entropy thesis angles for US home service operators (HVAC, plumbing, electrical) and systems engineers. Enforce zero AI cheerleading and strict 1–3 sentence prose.",
-    last_active: "6:44:12 PM",
+    last_active: "Active · Schedule Tue/Fri 06:00 Asia/Dhaka",
     total_runs: 48
   },
   {
@@ -581,7 +581,7 @@ export const INITIAL_FLEET: AgentWorkerItem[] = [
     model: "qwen-plus",
     status: "ACTIVE",
     system_prompt: "You are the Principal Content Writer for getminions.ai. Write 800–1200 word deep dives using the 5-stage Linear/Stripe cadence (Hook, Field Reality, Systems Teardown, Proof, Operator Takeaway). Strictly follow brand DO/DONT rules.",
-    last_active: "6:36:12 PM",
+    last_active: "Active · On Claim Trigger",
     total_runs: 42
   },
   {
@@ -592,7 +592,7 @@ export const INITIAL_FLEET: AgentWorkerItem[] = [
     model: "qwen3.7-flash",
     status: "ACTIVE",
     system_prompt: "You are the Senior Editor for getminions.ai. Enforce the Claims Verification Gate. Extract every factual/numeric assertion and classify against proven benchmarks. Ban prohibited buzzwords.",
-    last_active: "6:31:12 PM",
+    last_active: "Active · Automated Gate",
     total_runs: 45
   },
   {
@@ -603,41 +603,8 @@ export const INITIAL_FLEET: AgentWorkerItem[] = [
     model: "qwen-image-3.0",
     status: "ACTIVE",
     system_prompt: "Generate tactile commercial studio flat-lay photography for getminions.ai blog covers. Real stitched leather clipboards, metallic clips, dark slate tabletops, and crisp minimalist typography with [ARCHITECT] badges.",
-    last_active: "6:51:12 PM",
+    last_active: "Active · Multimodal Engine",
     total_runs: 38
-  },
-  {
-    id: "WORKER-005",
-    name: "Rex (Voice Dispatcher)",
-    role: "Sub-1.8s Emergency Call Intake & Booking",
-    type: "Voice & Real-Time Ops",
-    model: "qwen-max",
-    status: "ACTIVE",
-    system_prompt: "You are Rex, the primary emergency voice dispatcher for US home service contractors. Answer within 1.8s, filter noise, capture caller issue, lock calendar slots, and return strict JSON.",
-    last_active: "6:54:12 PM",
-    total_runs: 312
-  },
-  {
-    id: "WORKER-006",
-    name: "Pip (CRM & Lead Engager)",
-    role: "Speed-to-Lead Followup & SMS Rescheduling",
-    type: "CRM & Lifecycle",
-    model: "qwen-plus",
-    status: "ACTIVE",
-    system_prompt: "You are Pip, the automated lead engagement agent for getminions.ai. Re-engage missed calls and web leads via SMS within 45 seconds.",
-    last_active: "6:48:12 PM",
-    total_runs: 284
-  },
-  {
-    id: "WORKER-007",
-    name: "Zip (Dispatch & Scheduling)",
-    role: "Calendar Locks & Technician Routing",
-    type: "Logistics & Field Ops",
-    model: "qwen-plus",
-    status: "ACTIVE",
-    system_prompt: "You are Zip, the dispatch scheduling optimizer. Optimize drive times, lock appointment windows, and synchronize work orders into ServiceTitan and Housecall Pro.",
-    last_active: "6:41:12 PM",
-    total_runs: 198
   }
 ];
 

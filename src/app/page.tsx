@@ -224,12 +224,21 @@ export default function MissionControlPage() {
                   >
                     <div className="flex items-center gap-3.5 flex-1 min-w-0">
                       {/* 48x48 Thumbnail */}
-                      <div className="w-12 h-12 rounded-lg bg-black border border-[#1F2D3D] shrink-0 overflow-hidden">
-                        <img 
-                          src={asset.hero_image_url || "/images/social-covers/linkedin/linkedin_cover_dark.png"} 
-                          alt="Cover" 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
-                        />
+                      <div className="w-12 h-12 rounded-lg bg-[#0F1419] border border-[#1F2D3D] shrink-0 overflow-hidden flex items-center justify-center">
+                        {asset.hero_image_url ? (
+                          <img 
+                            src={asset.hero_image_url} 
+                            alt={asset.title} 
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-[#0e5c63]/20 text-[#00C9A7] font-mono text-[10px] font-bold">
+                            {asset.id}
+                          </div>
+                        )}
                       </div>
 
                       <div className="space-y-1 flex-1 min-w-0">
@@ -274,11 +283,10 @@ export default function MissionControlPage() {
                   <Globe className="w-4 h-4 text-[#00C9A7]" />
                   Live Omnichannel Broadcasts
                 </h2>
-                <p className="text-xs text-[#94A3B8]">Blog • LinkedIn • Facebook</p>
+                <p className="text-xs text-[#94A3B8]">Verified post permalinks across live distribution channels</p>
               </div>
               <Link href="/published" className="text-xs font-mono text-[#00C9A7] hover:underline flex items-center gap-1">
-                <span>View All (4)</span>
-                <ArrowRight className="w-3 h-3" />
+                <span>View All Broadcasts →</span>
               </Link>
             </div>
 
@@ -301,15 +309,31 @@ export default function MissionControlPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <a
                       href={asset.blog_url || `https://getminions.ai/blog/${asset.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-medium text-[#F1F5F9] hover:bg-[#1E2733] flex items-center gap-1.5"
+                      className="px-2.5 py-1.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-medium text-[#F1F5F9] hover:bg-[#1E2733] flex items-center gap-1.5 transition-colors"
                     >
                       <Globe className="w-3 h-3 text-[#00C9A7]" />
-                      <span>Blog</span>
+                      <span>Blog ↗</span>
+                    </a>
+                    <a
+                      href="https://linkedin.com/company/getminionsai"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-medium text-[#94A3B8] hover:text-[#0077b5] hover:bg-[#1E2733] flex items-center gap-1 transition-colors"
+                    >
+                      <span>LinkedIn ↗</span>
+                    </a>
+                    <a
+                      href="https://facebook.com/getminionsai"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-medium text-[#94A3B8] hover:text-[#1877f2] hover:bg-[#1E2733] flex items-center gap-1 transition-colors"
+                    >
+                      <span>Facebook ↗</span>
                     </a>
                   </div>
                 </div>
@@ -326,14 +350,14 @@ export default function MissionControlPage() {
               <div className="flex items-center gap-2">
                 <Bot className="w-4 h-4 text-[#ff6b4a]" />
                 <h2 className="text-xs font-bold text-[#F1F5F9] uppercase tracking-wider font-mono">
-                  Active Agent Fleet
+                  Active Content Fleet
                 </h2>
               </div>
-              <span className="text-xs font-mono text-[#00C9A7]">● 7 Active</span>
+              <span className="text-xs font-mono text-[#00C9A7]">● 4 Active</span>
             </div>
 
             <div className="space-y-2.5">
-              {fleet.map((worker) => (
+              {fleet.slice(0, 4).map((worker) => (
                 <div
                   key={worker.id}
                   className="p-3 rounded-xl bg-[#161D26] border border-[#1F2D3D] flex items-center justify-between"
@@ -346,7 +370,7 @@ export default function MissionControlPage() {
                       </span>
                     </div>
                     <div className="text-[10px] text-[#64748B] font-mono">
-                      Last active: {worker.last_active}
+                      {worker.last_active}
                     </div>
                   </div>
                   <span className="w-2 h-2 rounded-full bg-[#00C9A7]"></span>

@@ -25,28 +25,21 @@ const ROLE_BADGE_MAP: Record<string, string> = {
   "WORKER-001": "MARKETING_STRATEGIST",
   "WORKER-002": "CONTENT_WRITER",
   "WORKER-003": "EDITORIAL_REVIEWER",
-  "WORKER-004": "VISUAL_ART_DIRECTOR",
-  "WORKER-005": "VOICE_DISPATCHER",
-  "WORKER-006": "CRM_ENGAGER",
-  "WORKER-007": "LOGISTICS_DISPATCH"
+  "WORKER-004": "VISUAL_ART_DIRECTOR"
 };
 
 const WORKER_AVATAR_MAP: Record<string, string> = {
   "WORKER-001": "/images/social-avatars/ai-generated/linkedin_profile_avatar_ai.jpg",
   "WORKER-002": "/images/social-avatars/ai-generated/twitter_profile_avatar_ai.jpg",
   "WORKER-003": "/images/mascots/otto.png",
-  "WORKER-004": "/images/social-avatars/ai-generated/github_profile_avatar_ai.jpg",
-  "WORKER-005": "/images/mascots/rex.png",
-  "WORKER-006": "/images/mascots/pip.png",
-  "WORKER-007": "/images/mascots/zip.png",
+  "WORKER-004": "/images/social-avatars/ai-generated/github_profile_avatar_ai.jpg"
 };
 
 const QWEN_MODELS = [
   { value: "qwen3.7-max", label: "qwen3.7-max (High-reasoning strategist)" },
   { value: "qwen-plus", label: "qwen-plus (Fast long-form writer)" },
   { value: "qwen3.7-flash", label: "qwen3.7-flash (Low-latency editor)" },
-  { value: "qwen-image-3.0", label: "qwen-image-3.0 (2K Visual Studio)" },
-  { value: "qwen-max", label: "qwen-max (Sub-1.8s voice dispatch)" }
+  { value: "qwen-image-3.0", label: "qwen-image-3.0 (2K Visual Studio)" }
 ];
 
 export default function FleetPage() {
@@ -63,12 +56,14 @@ export default function FleetPage() {
   useEffect(() => {
     async function loadFleet() {
       const data = await fetchAgentFleet();
-      setFleet(data);
-      if (data.length > 0) {
-        setSelectedWorker(data[0]);
-        setEditModel(data[0].model);
-        setEditStatus(data[0].status);
-        setEditPrompt(data[0].system_prompt || "");
+      // Filter strictly to content pipeline workers per PRD AF-01
+      const contentFleet = data.filter(w => ["WORKER-001", "WORKER-002", "WORKER-003", "WORKER-004"].includes(w.id));
+      setFleet(contentFleet);
+      if (contentFleet.length > 0) {
+        setSelectedWorker(contentFleet[0]);
+        setEditModel(contentFleet[0].model);
+        setEditStatus(contentFleet[0].status);
+        setEditPrompt(contentFleet[0].system_prompt || "");
       }
     }
     loadFleet();
