@@ -1317,9 +1317,56 @@ export default function EditorialStudio({
               })}
             </div>
           </div>
-
         </div>
+      </div>
+
+      {/* MOBILE-FIRST STICKY ACTION BAR (VISIBLE ON PHONES) */}
+      <div className="lg:hidden fixed bottom-14 left-0 right-0 z-30 bg-[#0f1419]/95 backdrop-blur-md border-t border-[#1f2b37] p-3 px-4 flex items-center justify-between gap-3 shadow-2xl">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-mono font-bold text-[#ff6b4a]">
+              {activeAsset.id}
+            </span>
+            <span className="text-[10px] font-mono text-[#94A3B8]">
+              • {verifiedClaimsCount}/{totalClaims} Claims
+            </span>
+          </div>
+          <div className="text-xs font-bold text-white truncate">
+            {activeAsset.title}
+          </div>
+        </div>
+
+        {activeAsset.status === "PUBLISHED" || publishPhase === "DONE" ? (
+          <a
+            href={activeAsset.blog_url || `https://getminions.ai/blog/${activeAsset.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0"
+          >
+            <span>Live Blog</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        ) : (
+          <button
+            onClick={handleApproveAndPublish}
+            disabled={publishPhase !== "IDLE"}
+            className="px-4 py-2.5 bg-[#ff6b4a] hover:bg-[#ff522b] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-lg shadow-[#ff6b4a]/25 disabled:opacity-50"
+          >
+            {publishPhase !== "IDLE" ? (
+              <>
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                <span>Publishing...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Approve</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );
 }
+

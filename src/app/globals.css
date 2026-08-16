@@ -1,35 +1,47 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #070B0F;
-  --surface: #0F1419;
-  --surface-2: #161D26;
-  --surface-3: #1E2733;
-  --border: #1F2D3D;
-  --border-2: #2A3D52;
-  --teal: #00C9A7;
-  --teal-dim: #00A88A;
-  --teal-brand: #0e5c63;
-  --teal-muted: rgba(0, 201, 167, 0.12);
-  --teal-glow: rgba(0, 201, 167, 0.06);
+  /* Minions.AI Official Brand Palette from getminions.ai */
+  --bg: #0a0d12;
+  --surface: #0f1419;
+  --surface-2: #161d24;
+  --surface-3: #1e2631;
+  --border: #1f2b37;
+  --border-2: #2a3a4b;
+  
+  /* Primary Accents */
   --coral: #ff6b4a;
+  --coral-hover: #ff522b;
+  --coral-muted: rgba(255, 107, 74, 0.12);
+  --coral-glow: rgba(255, 107, 74, 0.08);
+
+  --teal-brand: #0e5c63;
+  --teal-light: #167a84;
+  --teal-muted: rgba(14, 92, 99, 0.15);
+
   --cream: #fff8f0;
   --ink: #12242a;
+  
+  /* Status & Accents */
+  --emerald: #10B981;
+  --emerald-muted: rgba(16, 185, 129, 0.12);
   --amber: #F59E0B;
   --red: #EF4444;
   --blue: #3B82F6;
   --purple: #8B5CF6;
-  --text: #F1F5F9;
+  
+  /* Text */
+  --text: #FFFFFF;
   --text-2: #94A3B8;
   --text-3: #64748B;
-  --code-bg: #0D1117;
+  --code-bg: #0b0f14;
 }
 
 @layer base {
   body {
     background-color: var(--bg);
     color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Display", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Display", -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -37,8 +49,8 @@
 
 /* Custom Sleek Dark Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -58,7 +70,7 @@
 .cockpit-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -70,14 +82,14 @@
 .cockpit-card-interactive {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cockpit-card-interactive:hover {
   background: var(--surface-2);
-  border-color: var(--teal);
-  box-shadow: 0 8px 24px -8px var(--teal-muted);
+  border-color: var(--coral);
+  box-shadow: 0 8px 24px -8px var(--coral-muted);
 }
 
 .prose-reading {

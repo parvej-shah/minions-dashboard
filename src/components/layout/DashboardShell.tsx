@@ -27,8 +27,12 @@ import {
   Send,
   BookOpen,
   AlertTriangle,
-  Globe
+  Globe,
+  Menu,
+  Lock,
+  User
 } from "lucide-react";
+import AdminAuthModal, { AdminUser } from "@/components/auth/AdminAuthModal";
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -90,6 +94,18 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   const [isHarvesting, setIsHarvesting] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
 
+  // Mobile menu drawer state
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Auth modal state
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<AdminUser | null>({
+    email: "xbitlab@gmail.com",
+    name: "Parvej Shah",
+    role: "MARKETING_DIRECTOR",
+    authenticated_at: new Date().toISOString()
+  });
+
   // Command palette state
   const [showPalette, setShowPalette] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -103,6 +119,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       }
       if (e.key === "Escape") {
         setShowPalette(false);
+        setMobileMenuOpen(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -121,17 +138,33 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
   const quickNav = (url: string) => {
     setShowPalette(false);
+    setMobileMenuOpen(false);
     setSearchQuery("");
     router.push(url);
   };
 
   return (
-    <div className="flex min-h-screen bg-[#070B0F] text-[#F1F5F9]">
+    <div className="flex min-h-screen bg-[#0a0d12] text-[#F1F5F9]">
+      {/* AUTHENTICATION MODAL */}
+      <AdminAuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        currentUser={currentUser}
+        onLogin={(user) => {
+          setCurrentUser(user);
+          setNotification(`Authenticated as ${user.email} (${user.role})`);
+        }}
+        onLogout={() => {
+          setCurrentUser(null);
+          setNotification("Signed out of Minions.AI Cockpit");
+        }}
+      />
+
       {/* COMMAND PALETTE MODAL */}
       {showPalette && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-start justify-center pt-24 px-4 animate-in fade-in duration-150">
-          <div className="bg-[#0F1419] text-[#F1F5F9] w-full max-w-2xl rounded-2xl border border-[#1F2D3D] shadow-2xl overflow-hidden space-y-3">
-            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[#1F2D3D]">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-start justify-center pt-20 px-4 animate-in fade-in duration-150">
+          <div className="bg-[#0f1419] text-[#F1F5F9] w-full max-w-2xl rounded-2xl border border-[#1f2b37] shadow-2xl overflow-hidden space-y-3">
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[#1f2b37]">
               <Search className="w-5 h-5 text-[#00C9A7]" />
               <input
                 type="text"
@@ -143,7 +176,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
               />
               <button 
                 onClick={() => setShowPalette(false)}
-                className="text-[10px] font-mono text-[#94A3B8] hover:text-white px-2 py-1 rounded bg-[#161D26] border border-[#1F2D3D]"
+                className="text-[10px] font-mono text-[#94A3B8] hover:text-white px-2 py-1 rounded bg-[#161d24] border border-[#1f2b37]"
               >
                 ESC
               </button>
@@ -157,14 +190,14 @@ export default function DashboardShell({ children }: DashboardShellProps) {
                 </div>
                 <button
                   onClick={() => quickNav("/drafts/ASSET-0003")}
-                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#161D26] flex items-center justify-between text-xs transition-colors group"
+                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#161d24] flex items-center justify-between text-xs transition-colors group"
                 >
                   <div className="flex items-center gap-2.5">
-                    <FileText className="w-4 h-4 text-[#00C9A7]" />
+                    <FileText className="w-4 h-4 text-[#ff6b4a]" />
                     <span className="font-semibold text-[#F1F5F9]">Raw JSON Over Agent Summaries</span>
-                    <span className="text-[10px] font-mono bg-[#00C9A7]/10 text-[#00C9A7] px-1.5 py-0.5 rounded">ASSET-0003</span>
+                    <span className="text-[10px] font-mono bg-[#ff6b4a]/10 text-[#ff6b4a] px-1.5 py-0.5 rounded">ASSET-0003</span>
                   </div>
-                  <span className="text-[11px] text-[#64748B] group-hover:text-[#00C9A7]">Review & Publish →</span>
+                  <span className="text-[11px] text-[#64748B] group-hover:text-[#ff6b4a]">Review & Publish →</span>
                 </button>
               </div>
 
@@ -175,7 +208,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
                 </div>
                 <button
                   onClick={() => quickNav("/published")}
-                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#161D26] flex items-center justify-between text-xs transition-colors group"
+                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#161d24] flex items-center justify-between text-xs transition-colors group"
                 >
                   <div className="flex items-center gap-2.5">
                     <Globe className="w-4 h-4 text-[#3B82F6]" />
@@ -192,67 +225,50 @@ export default function DashboardShell({ children }: DashboardShellProps) {
                 </div>
                 <button
                   onClick={() => quickNav("/ideas")}
-                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#161D26] flex items-center justify-between text-xs transition-colors group"
+                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#161d24] flex items-center justify-between text-xs transition-colors group"
                 >
                   <div className="flex items-center gap-2.5">
-                    <Sparkles className="w-4 h-4 text-[#ff6b4a]" />
+                    <Sparkles className="w-4 h-4 text-[#00C9A7]" />
                     <span className="font-semibold text-[#F1F5F9]">High-Temperature Attic Condenser Failures (HVAC)</span>
                     <span className="text-[10px] font-mono bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded">ICP</span>
                   </div>
-                  <span className="text-[11px] text-[#64748B] group-hover:text-[#ff6b4a]">Claim & Draft →</span>
+                  <span className="text-[11px] text-[#64748B] group-hover:text-[#00C9A7]">Claim & Draft →</span>
                 </button>
-              </div>
-
-              {/* Quick Navigation Links */}
-              <div className="space-y-1 pt-2 border-t border-[#1F2D3D]">
-                <div className="text-[10px] font-mono text-[#64748B] uppercase px-3">
-                  Navigation
-                </div>
-                <div className="grid grid-cols-2 gap-1 px-1">
-                  <button onClick={() => quickNav("/")} className="text-left px-2.5 py-1.5 rounded-lg hover:bg-[#161D26] text-xs text-[#94A3B8] hover:text-white">
-                    ⇥ Mission Control
-                  </button>
-                  <button onClick={() => quickNav("/brand")} className="text-left px-2.5 py-1.5 rounded-lg hover:bg-[#161D26] text-xs text-[#94A3B8] hover:text-white">
-                    ⇥ Brand & Visual Studio
-                  </button>
-                  <button onClick={() => quickNav("/fleet")} className="text-left px-2.5 py-1.5 rounded-lg hover:bg-[#161D26] text-xs text-[#94A3B8] hover:text-white">
-                    ⇥ Agent Fleet (7 Workers)
-                  </button>
-                  <button onClick={() => quickNav("/telemetry")} className="text-left px-2.5 py-1.5 rounded-lg hover:bg-[#161D26] text-xs text-[#94A3B8] hover:text-white">
-                    ⇥ Cost & Telemetry
-                  </button>
-                </div>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* SIDEBAR NAVIGATION */}
-      <aside className="w-64 bg-[#0F1419] border-r border-[#1F2D3D] flex flex-col justify-between p-4 shrink-0 hidden md:flex sticky top-0 h-screen overflow-y-auto">
+      {/* DESKTOP SIDEBAR NAVIGATION */}
+      <aside className="w-64 bg-[#0f1419] border-r border-[#1f2b37] flex-col justify-between p-4 shrink-0 hidden md:flex sticky top-0 h-screen overflow-y-auto">
         <div className="space-y-6">
-          {/* LOGO & SYSTEM BADGE */}
-          <div className="flex items-center justify-between pb-4 border-b border-[#1F2D3D]">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#00C9A7] to-[#0e5c63] flex items-center justify-center font-black text-[#070B0F] text-sm shadow-md group-hover:scale-105 transition-transform">
-                M
-              </div>
-              <div className="flex items-baseline">
-                <span className="font-bold text-base tracking-tight text-[#F1F5F9]">Minions</span>
-                <span className="text-[#00C9A7] font-mono text-sm font-semibold ml-0.5">.AI</span>
-              </div>
+          {/* LOGO & SYSTEM BADGE (WHITE MINIONS + CORAL .AI) */}
+          <div className="flex items-center justify-between pb-4 border-b border-[#1f2b37]">
+            <Link href="/" className="flex items-baseline group">
+              <span className="font-extrabold text-xl tracking-tight text-white group-hover:opacity-90 transition-opacity">
+                minions
+              </span>
+              <span className="text-[#ff6b4a] font-mono font-bold text-xl ml-0.5">
+                .ai
+              </span>
             </Link>
 
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#161D26] text-[#00C9A7] border border-[#1F2D3D]">
-              COCKPIT
-            </span>
+            <button
+              onClick={() => setAuthModalOpen(true)}
+              className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#161d24] hover:bg-[#1e2631] text-[#00C9A7] border border-[#1f2b37] flex items-center gap-1 transition-colors"
+              title="Admin Authentication Console"
+            >
+              <Lock className="w-3 h-3 text-[#ff6b4a]" />
+              <span>ADMIN</span>
+            </button>
           </div>
 
           {/* QUICK TRIGGER BUTTON */}
           <button
             onClick={triggerHarvest}
             disabled={isHarvesting}
-            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#00C9A7] to-[#00A88A] text-[#070B0F] hover:opacity-95 text-xs font-bold py-2.5 px-3 rounded-xl shadow-lg shadow-[#00C9A7]/10 transition-all cursor-pointer disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 bg-[#ff6b4a] hover:bg-[#ff522b] text-white text-xs font-bold py-2.5 px-3 rounded-xl shadow-lg shadow-[#ff6b4a]/20 transition-all cursor-pointer disabled:opacity-50"
           >
             <Zap className={`w-3.5 h-3.5 ${isHarvesting ? "animate-spin" : ""}`} />
             <span>{isHarvesting ? "Harvesting Signals..." : "Trigger Idea Harvester"}</span>
@@ -274,8 +290,8 @@ export default function DashboardShell({ children }: DashboardShellProps) {
                   href={item.href}
                   className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                     isActive
-                      ? "bg-[#161D26] text-[#00C9A7] font-bold border-l-2 border-[#00C9A7] shadow-xs"
-                      : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26]"
+                      ? "bg-[#161d24] text-[#00C9A7] font-bold border-l-2 border-[#00C9A7] shadow-xs"
+                      : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161d24]"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -288,7 +304,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
                       className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
                         isActive
                           ? "bg-[#00C9A7]/20 text-[#00C9A7] border-[#00C9A7]/40"
-                          : item.badgeColor || "bg-[#161D26] text-[#94A3B8] border-[#1F2D3D]"
+                          : item.badgeColor || "bg-[#161d24] text-[#94A3B8] border-[#1f2b37]"
                       }`}
                     >
                       {item.badge}
@@ -301,8 +317,8 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         </div>
 
         {/* SIDEBAR FOOTER (PERSISTENT AMBIENT STATUS) */}
-        <div className="pt-4 border-t border-[#1F2D3D] space-y-3">
-          <div className="p-3 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-1.5">
+        <div className="pt-4 border-t border-[#1f2b37] space-y-3">
+          <div className="p-3 rounded-xl bg-[#161d24] border border-[#1f2b37] space-y-1.5">
             <div className="flex items-center justify-between text-[11px]">
               <span className="text-[#94A3B8] font-mono">Fleet Operational</span>
               <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-ping" />
@@ -311,66 +327,154 @@ export default function DashboardShell({ children }: DashboardShellProps) {
               <span>7 Workers</span>
               <span className="text-[#00C9A7]">100% Health</span>
             </div>
-            <div className="text-[10px] text-[#64748B] font-mono flex items-center justify-between pt-1 border-t border-[#1F2D3D]">
+            <div className="text-[10px] text-[#64748B] font-mono flex items-center justify-between pt-1 border-t border-[#1f2b37]">
               <span>Avg Cost / Post:</span>
               <span className="text-[#00C9A7] font-semibold">$0.038</span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-xs px-1 text-[#94A3B8]">
+          <button
+            onClick={() => setAuthModalOpen(true)}
+            className="w-full flex items-center justify-between text-xs p-2 rounded-xl bg-[#161d24] hover:bg-[#1e2631] border border-[#1f2b37] text-[#94A3B8] transition-colors"
+          >
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-[#00C9A7]/20 text-[#00C9A7] font-bold text-xs flex items-center justify-center border border-[#00C9A7]/40">
+              <div className="w-6 h-6 rounded-full bg-[#ff6b4a]/20 text-[#ff6b4a] font-bold text-xs flex items-center justify-center border border-[#ff6b4a]/40">
                 P
               </div>
-              <div className="text-[11px] leading-tight">
-                <div className="font-semibold text-[#F1F5F9]">Parvej Shah</div>
-                <div className="text-[10px] text-[#64748B]">Admin / Lead</div>
+              <div className="text-[11px] leading-tight text-left">
+                <div className="font-semibold text-[#F1F5F9] truncate max-w-[120px]">{currentUser?.name || "Parvej Shah"}</div>
+                <div className="text-[10px] text-[#64748B] font-mono truncate max-w-[120px]">{currentUser?.email || "xbitlab@gmail.com"}</div>
               </div>
             </div>
 
-            <a
-              href="https://getminions.ai"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[#64748B] hover:text-[#00C9A7] transition-colors"
-              title="Open Public Site"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
+            <Lock className="w-3.5 h-3.5 text-[#ff6b4a]" />
+          </button>
         </div>
       </aside>
 
+      {/* MOBILE SLIDE-OVER NAVIGATION DRAWER */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md md:hidden flex animate-in fade-in duration-200">
+          <div className="w-4/5 max-w-sm bg-[#0f1419] h-full p-5 flex flex-col justify-between border-r border-[#1f2b37]">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-[#1f2b37]">
+                <div className="flex items-baseline">
+                  <span className="font-extrabold text-xl tracking-tight text-white">minions</span>
+                  <span className="text-[#ff6b4a] font-mono font-bold text-xl ml-0.5">.ai</span>
+                </div>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-1.5 rounded-lg text-[#94A3B8] hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-1">
+                {navItems.map((item) => {
+                  const isActive = pathname === item.href;
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.href}
+                      onClick={() => quickNav(item.href)}
+                      className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold ${
+                        isActive
+                          ? "bg-[#161d24] text-[#00C9A7] border-l-2 border-[#00C9A7]"
+                          : "text-[#94A3B8] hover:bg-[#161d24]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className="w-4 h-4" />
+                        <span>{item.name}</span>
+                      </div>
+                      {item.badge && (
+                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${item.badgeColor}`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-4 border-t border-[#1f2b37]">
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setAuthModalOpen(true);
+                }}
+                className="w-full p-3 rounded-xl bg-[#161d24] border border-[#1f2b37] flex items-center justify-between text-xs"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-[#ff6b4a]/20 text-[#ff6b4a] font-bold text-xs flex items-center justify-center">
+                    P
+                  </div>
+                  <span className="text-white font-mono text-[11px]">{currentUser?.email || "xbitlab@gmail.com"}</span>
+                </div>
+                <span className="text-[#00C9A7] font-semibold text-[10px]">Auth Gate</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col min-w-0 bg-[#070B0F]">
-        {/* TOPBAR */}
-        <header className="h-16 border-b border-[#1F2D3D] bg-[#0F1419]/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
-          <div className="flex items-center gap-3 flex-1 max-w-md">
+      <div className="flex-1 flex flex-col min-w-0 bg-[#0a0d12] pb-16 md:pb-0">
+        {/* TOPBAR (DESKTOP & MOBILE RESPONSIVE) */}
+        <header className="h-16 border-b border-[#1f2b37] bg-[#0f1419]/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
+          {/* Mobile Hamburger & Logo */}
+          <div className="flex items-center gap-3 md:hidden">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-2 rounded-xl bg-[#161d24] text-[#94A3B8] hover:text-white border border-[#1f2b37]"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+
+            <Link href="/" className="flex items-baseline">
+              <span className="font-extrabold text-base tracking-tight text-white">minions</span>
+              <span className="text-[#ff6b4a] font-mono font-bold text-base ml-0.5">.ai</span>
+            </Link>
+          </div>
+
+          {/* Desktop Search Bar */}
+          <div className="hidden md:flex items-center gap-3 flex-1 max-w-md">
             <button
               onClick={() => setShowPalette(true)}
-              className="w-full flex items-center justify-between px-3.5 py-1.5 rounded-xl bg-[#161D26] border border-[#1F2D3D] text-xs text-[#64748B] hover:border-[#00C9A7]/50 hover:text-[#94A3B8] transition-all cursor-pointer shadow-xs"
+              className="w-full flex items-center justify-between px-3.5 py-1.5 rounded-xl bg-[#161d24] border border-[#1f2b37] text-xs text-[#64748B] hover:border-[#00C9A7]/50 hover:text-[#94A3B8] transition-all cursor-pointer shadow-xs"
             >
               <div className="flex items-center gap-2">
                 <Search className="w-3.5 h-3.5 text-[#00C9A7]" />
                 <span>Search ideas, drafts, agents, published links, or R2 assets...</span>
               </div>
-              <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono bg-[#070B0F] border border-[#1F2D3D] rounded text-[#94A3B8]">
+              <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono bg-[#0b0f14] border border-[#1f2b37] rounded text-[#94A3B8]">
                 ⌘K
               </kbd>
             </button>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-[#161D26] border border-[#1F2D3D] text-[11px] font-mono text-[#94A3B8]">
+          {/* Right Action Icons & Badges */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => setShowPalette(true)}
+              className="md:hidden p-2 rounded-xl bg-[#161d24] text-[#94A3B8] hover:text-white border border-[#1f2b37]"
+              title="Search"
+            >
+              <Search className="w-4 h-4 text-[#00C9A7]" />
+            </button>
+
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-[#161d24] border border-[#1f2b37] text-[11px] font-mono text-[#94A3B8]">
               <span className="w-1.5 h-1.5 rounded-full bg-[#00C9A7]" />
-              <span>Cloudflare R2: Active</span>
+              <span>R2: Active</span>
             </div>
 
             <a
               href="https://getminions.ai/blog"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-[#070B0F] bg-[#00C9A7] hover:bg-[#00A88A] px-3.5 py-1.5 rounded-xl transition-all shadow-sm"
+              className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#ff6b4a] hover:bg-[#ff522b] px-3 sm:px-3.5 py-1.5 rounded-xl transition-all shadow-sm shadow-[#ff6b4a]/20"
             >
               <span>Live Blog</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -380,7 +484,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
         {/* NOTIFICATION TOAST */}
         {notification && (
-          <div className="bg-[#00C9A7]/20 border-b border-[#00C9A7]/40 px-6 py-2 text-xs font-medium text-[#00C9A7] flex items-center justify-between animate-in slide-in-from-top-2">
+          <div className="bg-[#00C9A7]/20 border-b border-[#00C9A7]/40 px-4 sm:px-6 py-2 text-xs font-medium text-[#00C9A7] flex items-center justify-between animate-in slide-in-from-top-2">
             <span>{notification}</span>
             <button onClick={() => setNotification(null)} className="hover:opacity-75">
               <X className="w-3.5 h-3.5" />
@@ -389,10 +493,65 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         )}
 
         {/* PAGE BODY */}
-        <main className="p-6 md:p-8 flex-1 max-w-7xl w-full mx-auto">
+        <main className="p-4 sm:p-6 md:p-8 flex-1 max-w-7xl w-full mx-auto">
           {children}
         </main>
       </div>
+
+      {/* MOBILE-FIRST FIXED BOTTOM NAVIGATION BAR */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0f1419]/95 backdrop-blur-lg border-t border-[#1f2b37] px-2 py-2 flex items-center justify-around">
+        <Link
+          href="/"
+          className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${
+            pathname === "/" ? "text-[#00C9A7]" : "text-[#94A3B8] hover:text-white"
+          }`}
+        >
+          <LayoutDashboard className="w-4 h-4" />
+          <span className="text-[10px] font-medium">Mission</span>
+        </Link>
+
+        <Link
+          href="/ideas"
+          className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${
+            pathname.startsWith("/ideas") ? "text-[#00C9A7]" : "text-[#94A3B8] hover:text-white"
+          }`}
+        >
+          <Sparkles className="w-4 h-4" />
+          <span className="text-[10px] font-medium">Ideas</span>
+        </Link>
+
+        <Link
+          href="/editorial"
+          className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${
+            pathname.startsWith("/editorial") || pathname.startsWith("/drafts")
+              ? "text-[#ff6b4a]"
+              : "text-[#94A3B8] hover:text-white"
+          }`}
+        >
+          <FileText className="w-4 h-4" />
+          <span className="text-[10px] font-medium">Editorial</span>
+        </Link>
+
+        <Link
+          href="/published"
+          className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${
+            pathname.startsWith("/published") ? "text-[#3B82F6]" : "text-[#94A3B8] hover:text-white"
+          }`}
+        >
+          <Globe className="w-4 h-4" />
+          <span className="text-[10px] font-medium">Published</span>
+        </Link>
+
+        <Link
+          href="/brand"
+          className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${
+            pathname.startsWith("/brand") ? "text-[#8B5CF6]" : "text-[#94A3B8] hover:text-white"
+          }`}
+        >
+          <Palette className="w-4 h-4" />
+          <span className="text-[10px] font-medium">Brand</span>
+        </Link>
+      </nav>
     </div>
   );
 }

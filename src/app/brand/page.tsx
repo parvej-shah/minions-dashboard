@@ -265,14 +265,13 @@ export default function BrandStudioPage() {
 
                 {/* Logo Preview Canvas */}
                 <div className="p-8 rounded-xl bg-[#070B0F] border border-[#1F2D3D] flex items-center justify-center min-h-[140px] shadow-inner relative group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0e5c63] to-[#ff6b4a] flex items-center justify-center font-black text-white text-base shadow-lg">
-                      M
-                    </div>
-                    <div className="flex items-baseline text-2xl font-bold tracking-tight text-white">
-                      <span>Minions</span>
-                      <span className="text-[#ff6b4a] font-mono text-lg ml-0.5">.AI</span>
-                    </div>
+                  <div className="flex items-baseline">
+                    <span className="text-4xl font-black tracking-tight text-white">
+                      minions
+                    </span>
+                    <span className="text-[#ff6b4a] font-mono font-black text-4xl ml-1">
+                      .ai
+                    </span>
                   </div>
 
                   <a
