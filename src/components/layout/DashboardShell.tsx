@@ -239,24 +239,16 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       {/* DESKTOP SIDEBAR NAVIGATION */}
       <aside className="w-72 lg:w-76 bg-[#0f1419] border-r border-[#1f2b37] flex flex-col justify-between p-4 shrink-0 hidden md:flex sticky top-0 h-screen overflow-y-auto z-40">
         <div className="space-y-6">
-          {/* LOGO & SYSTEM BADGE (WHITE MINIONS + CORAL .AI) */}
+          {/* LOGO (WHITE MINIONS + CORAL .AI) */}
           <div className="flex items-center justify-between pb-4 border-b border-[#1f2b37]">
             <Link href="/" className="flex items-baseline group">
-              <span className="font-extrabold text-xl tracking-tight text-white group-hover:opacity-90 transition-opacity">
+              <span className="font-extrabold text-2xl tracking-tight text-white group-hover:opacity-90 transition-opacity">
                 minions
               </span>
-              <span className="text-[#ff6b4a] font-mono font-bold text-xl ml-0.5">
+              <span className="text-[#ff6b4a] font-mono font-bold text-2xl ml-0.5">
                 .ai
               </span>
             </Link>
-
-            <div
-              className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#161d24] text-[#00C9A7] border border-[#1f2b37] flex items-center gap-1.5"
-              title="Live Multi-Agent Cockpit"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00C9A7] animate-pulse" />
-              <span>LIVE COCKPIT</span>
-            </div>
           </div>
 
           {/* QUICK TRIGGER BUTTON */}
@@ -283,14 +275,14 @@ export default function DashboardShell({ children }: DashboardShellProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all group ${
                     isActive
-                      ? "bg-[#161d24] text-[#00C9A7] font-bold border-l-2 border-[#00C9A7] shadow-xs"
-                      : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161d24]"
+                      ? "bg-[#161d24] text-[#00C9A7] border-l-2 border-[#00C9A7]"
+                      : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161d24]/60"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-[#00C9A7]" : "text-[#64748B]"}`} />
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-[#00C9A7]" : "text-[#64748B] group-hover:text-[#94A3B8]"}`} />
                     <span className="truncate whitespace-nowrap">{item.name}</span>
                   </div>
 
@@ -311,28 +303,13 @@ export default function DashboardShell({ children }: DashboardShellProps) {
           </div>
         </div>
 
-        {/* SIDEBAR FOOTER (PERSISTENT AMBIENT STATUS) */}
-        <div className="pt-4 border-t border-[#1f2b37] space-y-3">
-          <div className="p-3 rounded-xl bg-[#161d24] border border-[#1f2b37] space-y-1.5">
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="text-[#94A3B8] font-mono">Fleet Operational</span>
-              <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-ping" />
-            </div>
-            <div className="flex items-center justify-between text-xs font-semibold text-[#F1F5F9]">
-              <span>4 Workers</span>
-              <span className="text-[#00C9A7]">100% Health</span>
-            </div>
-            <div className="text-[10px] text-[#64748B] font-mono flex items-center justify-between pt-1 border-t border-[#1f2b37]">
-              <span>Avg Cost / Post:</span>
-              <span className="text-[#00C9A7] font-semibold">$0.038</span>
-            </div>
-          </div>
-
+        {/* SIDEBAR FOOTER (CLEAN USER PROFILE) */}
+        <div className="pt-4 border-t border-[#1f2b37]">
           <div
-            className="w-full flex items-center justify-between text-xs p-2 rounded-xl bg-[#161d24] border border-[#1f2b37] text-[#94A3B8]"
+            className="w-full flex items-center justify-between text-xs p-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] text-[#94A3B8]"
           >
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-6 h-6 rounded-full bg-[#00C9A7]/20 text-[#00C9A7] font-bold text-xs flex items-center justify-center border border-[#00C9A7]/40 shrink-0">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-7 h-7 rounded-full bg-[#00C9A7]/20 text-[#00C9A7] font-bold text-xs flex items-center justify-center border border-[#00C9A7]/40 shrink-0">
                 X
               </div>
               <div className="text-[11px] leading-tight text-left min-w-0">
