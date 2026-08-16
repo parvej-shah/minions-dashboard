@@ -8,7 +8,7 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const users = data.users.map((u) => ({
+    const users = (data.users as any[]).map((u: any) => ({
       id: u.id,
       email: u.email,
       name: u.user_metadata?.name || (u.email?.includes("parvej") ? "Parvej Shah" : "XpeedLab Admin"),

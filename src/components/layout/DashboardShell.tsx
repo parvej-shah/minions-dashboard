@@ -68,7 +68,7 @@ const navItems = [
     badgeColor: "bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/30",
   },
   {
-    name: "Brand & Directives",
+    name: "Brand Studio",
     href: "/brand",
     icon: Palette,
     badge: "12 Rules",

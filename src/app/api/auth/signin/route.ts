@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
     // Verify user in Supabase
     const { data: usersData, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-    let supabaseUser = usersData?.users?.find(u => u.email?.toLowerCase() === cleanEmail);
+    let supabaseUser = (usersData?.users as any[])?.find((u: any) => u.email?.toLowerCase() === cleanEmail);
 
     // If user does not exist in Supabase Auth, provision automatically
     if (!supabaseUser) {

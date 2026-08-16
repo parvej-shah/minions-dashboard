@@ -591,28 +591,30 @@ export default function EditorialStudio({
                     const trimmed = chunk.trim();
                     if (!trimmed) return null;
 
-                    // H2 Section Header
-                    if (trimmed.startsWith("## ")) {
+                    // H1 / H2 Section Header
+                    if (trimmed.startsWith("# ") || trimmed.startsWith("## ")) {
+                      const cleanTitle = trimmed.replace(/^#+\s*/, "");
                       return (
                         <h2
                           key={idx}
                           className="text-lg sm:text-xl font-bold text-[#F1F5F9] pt-4 pb-1 border-b border-[#1F2D3D]/60 flex items-center gap-2"
                         >
                           <span className="text-[#00C9A7] font-mono text-sm">#</span>
-                          <span>{trimmed.replace("## ", "")}</span>
+                          <span>{cleanTitle}</span>
                         </h2>
                       );
                     }
 
                     // H3 Subheader
                     if (trimmed.startsWith("### ")) {
+                      const cleanSub = trimmed.replace(/^###\s*/, "");
                       return (
                         <h3
                           key={idx}
                           className="text-sm sm:text-base font-bold text-[#00C9A7] pt-2 flex items-center gap-1.5"
                         >
                           <CornerDownRight className="w-3.5 h-3.5 text-[#00C9A7]" />
-                          <span>{trimmed.replace("### ", "")}</span>
+                          <span>{cleanSub}</span>
                         </h3>
                       );
                     }
