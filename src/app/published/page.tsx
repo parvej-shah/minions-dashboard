@@ -121,7 +121,7 @@ export default function PublishedPostsPage() {
             {feed.length} Omnichannel
           </div>
           <div className="text-[11px] text-[#94A3B8]">
-            Blog ({feed.filter(p => p.platform === "BLOG").length}) • LinkedIn ({feed.filter(p => p.platform === "LINKEDIN").length}) • Facebook ({feed.filter(p => p.platform === "FACEBOOK").length})
+            Blog ({feed.filter(p => p.platform === "BLOG").length}) • LinkedIn ({feed.filter(p => p.platform === "LINKEDIN").length}) • Facebook ({feed.filter(p => p.platform === "FACEBOOK").length}) • Twitter ({feed.filter(p => p.platform === "TWITTER").length})
           </div>
         </div>
 
@@ -156,7 +156,7 @@ export default function PublishedPostsPage() {
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
               <span className="text-[11px] font-mono text-[#64748B] shrink-0">Platform:</span>
-              {["ALL", "BLOG", "LINKEDIN", "FACEBOOK"].map((plat) => (
+              {["ALL", "BLOG", "LINKEDIN", "FACEBOOK", "TWITTER"].map((plat) => (
                 <button
                   key={plat}
                   onClick={() => setPlatformFilter(plat)}
@@ -197,6 +197,7 @@ export default function PublishedPostsPage() {
           const isBlog = post.platform === "BLOG";
           const isLinkedIn = post.platform === "LINKEDIN";
           const isFacebook = post.platform === "FACEBOOK";
+          const isTwitter = post.platform === "TWITTER";
 
           return (
             <div
@@ -212,11 +213,14 @@ export default function PublishedPostsPage() {
                         ? "bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/30"
                         : isLinkedIn
                           ? "bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/30"
-                          : "bg-[#8B5CF6]/10 text-[#8B5CF6] border border-[#8B5CF6]/30"
+                          : isFacebook
+                            ? "bg-[#8B5CF6]/10 text-[#8B5CF6] border border-[#8B5CF6]/30"
+                            : "bg-[#1DA1F2]/10 text-[#1DA1F2] border border-[#1DA1F2]/30"
                     }`}>
                       {isBlog && "🌐 Blog"}
                       {isLinkedIn && "💼 LinkedIn"}
                       {isFacebook && "👥 Facebook"}
+                      {isTwitter && "🐦 Twitter / X"}
                     </span>
 
                     <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
