@@ -16,6 +16,8 @@ import {
   Sparkles,
   ArrowUpRight,
   TrendingUp,
+  EyeOff,
+  Trash2,
 } from "lucide-react";
 import { PublishedPostRecord } from "@/lib/types";
 
@@ -42,6 +44,21 @@ export default function PublishedPostsPage() {
     } catch (e) {
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUnpublish = async (assetId: string) => {
+    if (!confirm("Are you sure you want to unpublish this post? It will immediately be taken down from getminions.ai/blog and returned to the review queue.")) return;
+
+    try {
+      const res = await fetch(`/api/assets/${assetId}?mode=unpublish`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setFeed(prev => prev.filter(p => p.asset_id !== assetId));
+      }
+    } catch (e) {
+      console.error("Failed to unpublish:", e);
     }
   };
 
@@ -265,22 +282,33 @@ export default function PublishedPostsPage() {
                 )}
               </div>
 
-              {/* Bottom Card Footer with Live Link */}
-              <div className="flex items-center justify-between pt-3 border-t border-[#1F2D3D]">
+              {/* Bottom Card Footer with Live Link & Unpublish Action */}
+              <div className="flex items-center justify-between pt-3 border-t border-[#1F2D3D] gap-2 flex-wrap">
                 <span className="text-[11px] font-mono text-[#64748B] flex items-center gap-1">
                   <Clock className="w-3 h-3" />
                   {new Date(post.published_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
 
-                <a
-                  href={post.published_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 bg-[#00C9A7]/10 hover:bg-[#00C9A7] text-[#00C9A7] hover:text-[#070B0F] border border-[#00C9A7]/30 text-xs font-bold px-3.5 py-1.5 rounded-xl transition-all shadow-xs"
-                >
-                  <span>View Live</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleUnpublish(post.asset_id)}
+                    title="Take down post from live blog and return to review queue"
+                    className="flex items-center gap-1 bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#EF4444] border border-[#EF4444]/30 text-xs font-semibold px-2.5 py-1.5 rounded-xl transition-all cursor-pointer"
+                  >
+                    <EyeOff className="w-3 h-3" />
+                    <span>Unpublish</span>
+                  </button>
+
+                  <a
+                    href={post.published_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 bg-[#00C9A7]/10 hover:bg-[#00C9A7] text-[#00C9A7] hover:text-[#070B0F] border border-[#00C9A7]/30 text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs cursor-pointer"
+                  >
+                    <span>View Live</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
               </div>
             </div>
           );

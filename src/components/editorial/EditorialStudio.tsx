@@ -39,7 +39,9 @@ import {
   CornerDownRight,
   Filter,
   Image as ImageIcon,
-  CheckCheck
+  CheckCheck,
+  Trash2,
+  EyeOff
 } from "lucide-react";
 import { AssetItem, ClaimCheckItem, SocialVariantItem, AssetStatus } from "@/lib/types";
 import { INITIAL_ASSETS } from "@/lib/api";
@@ -389,6 +391,32 @@ export default function EditorialStudio({
         }, 2400);
       }
     }, 2400);
+  };
+
+  // 1-Click Unpublish / Take Down Live Blog Post
+  const handleUnpublishDraft = async () => {
+    if (!confirm("Are you sure you want to unpublish this blog post? It will immediately be taken down from getminions.ai/blog and returned to your review queue.")) return;
+
+    try {
+      const res = await fetch(`/api/assets/${activeAsset.id}?mode=unpublish`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        setAssets(prev =>
+          prev.map(a =>
+            a.id === activeAsset.id
+              ? { ...a, status: "PENDING_REVIEW" as AssetStatus, published_at: undefined, blog_url: undefined }
+              : a
+          )
+        );
+        setPublishPhase("IDLE");
+        setPublishSuccess(false);
+        setSaveToast("Post taken down from live site and returned to review queue!");
+        setTimeout(() => setSaveToast(null), 3500);
+      }
+    } catch (e) {
+      console.error("Failed to unpublish post:", e);
+    }
   };
 
   // Handle Request Revision
@@ -1547,6 +1575,15 @@ export default function EditorialStudio({
                   <span>View Live Blog Post</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
+
+                <button
+                  onClick={handleUnpublishDraft}
+                  className="w-full bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/30 text-[#EF4444] text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  title="Take down post from live site and return to review queue"
+                >
+                  <EyeOff className="w-3.5 h-3.5" />
+                  <span>Unpublish & Return to Queue</span>
+                </button>
               </div>
             ) : (
               <div className="space-y-2 pt-1">

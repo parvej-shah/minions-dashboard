@@ -128,3 +128,54 @@ export async function PATCH(
     return NextResponse.json({ error: "Failed to update asset" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const mode = searchParams.get("mode") || "unpublish"; // "unpublish" or "permanent"
+
+    const asset = await prisma.asset.findFirst({
+      where: { OR: [{ id }, { slug: id }] },
+    });
+
+    if (!asset) {
+      return NextResponse.json({ error: "Asset not found" }, { status: 404 });
+    }
+
+    // 1. Remove from live blogs table (so it immediately disappears from getminions.ai/blog)
+    try {
+      await prisma.blog.deleteMany({
+        where: {
+          OR: [{ assetId: asset.id }, { slug: asset.slug }],
+        },
+      });
+    } catch (e) {
+      console.warn("Could not delete from blogs table:", e);
+    }
+
+    // 2. Either unpublish back to draft OR permanently delete
+    if (mode === "permanent") {
+      await prisma.claim.deleteMany({ where: { assetId: asset.id } });
+      await prisma.asset.delete({ where: { id: asset.id } });
+      return NextResponse.json({ success: true, message: "Asset and live blog permanently deleted" });
+    } else {
+      const updated = await prisma.asset.update({
+        where: { id: asset.id },
+        data: {
+          status: "PENDING_REVIEW",
+          publishedAt: null,
+          publishedUrls: null,
+          updatedAt: new Date(),
+        },
+      });
+      return NextResponse.json({ success: true, message: "Blog unpublished and reverted to review queue", asset: updated });
+    }
+  } catch (error) {
+    console.error("Error deleting/unpublishing asset:", error);
+    return NextResponse.json({ error: "Failed to delete/unpublish asset" }, { status: 500 });
+  }
+}
