@@ -16,6 +16,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientSecret: process.env.AUTH_GOOGLE_SECRET || process.env.GOOGLE_CLIENT_SECRET || "",
     }),
   ],
+  pages: {
+    signIn: "/login",
+    error: "/login",
+  },
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "minions-ai-production-auth-secret-key-2026",
   callbacks: {
     async signIn({ user }) {
