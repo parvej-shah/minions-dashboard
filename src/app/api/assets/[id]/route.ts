@@ -96,6 +96,32 @@ export async function PATCH(
       },
     });
 
+    // If this asset is PUBLISHED (or has a live blog entry), seamlessly sync changes to the live blogs table
+    try {
+      const existingBlog = await prisma.blog.findFirst({
+        where: {
+          OR: [{ assetId: id }, { slug: updated.slug }],
+        },
+      });
+
+      if (existingBlog) {
+        await prisma.blog.update({
+          where: { slug: existingBlog.slug },
+          data: {
+            ...(body.title !== undefined && { title: body.title }),
+            ...((body.content !== undefined || body.body_content !== undefined) && {
+              content: body.content ?? body.body_content,
+            }),
+            ...(body.hook !== undefined && { hook: body.hook }),
+            ...(body.core_argument !== undefined && { coreArgument: body.core_argument }),
+            updatedAt: new Date(),
+          },
+        });
+      }
+    } catch (blogSyncErr) {
+      console.warn("Non-fatal: could not sync updated asset to blogs table:", blogSyncErr);
+    }
+
     return NextResponse.json({ success: true, asset: updated });
   } catch (error) {
     console.error("Error updating dynamic asset:", error);

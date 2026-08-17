@@ -257,7 +257,7 @@ export default function EditorialStudio({
       });
 
       if (res.ok) {
-        setSaveToast("Changes saved successfully to database!");
+        setSaveToast(activeAsset.status === "PUBLISHED" ? "Live blog updated & synced to getminions.ai!" : "Changes saved successfully to database!");
       } else {
         setSaveToast("Saved locally in session");
       }
