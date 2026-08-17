@@ -44,6 +44,8 @@ interface DashboardShellProps {
   children: React.ReactNode;
 }
 
+import { useSession, signOut } from "next-auth/react";
+
 interface NavCounts {
   ideasReady: number;
   pendingReview: number;
@@ -149,10 +151,12 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
   const navItems = buildNavItems(navCounts);
 
+  const { data: session } = useSession();
+
   const currentUser: AdminUser = {
-    email: "xpeedlab@gmail.com",
-    name: "XpeedLab Admin",
-    role: "MARKETING_DIRECTOR",
+    email: session?.user?.email || "xpeedlab@gmail.com",
+    name: session?.user?.name || (session?.user?.email?.includes("parvej") ? "Parvej Shah" : "XpeedLab Admin"),
+    role: (session?.user as any)?.role || (session?.user?.email?.includes("parvej") ? "MARKETING_DIRECTOR" : "SYSTEM_ADMIN"),
     authenticated_at: new Date().toISOString()
   };
 

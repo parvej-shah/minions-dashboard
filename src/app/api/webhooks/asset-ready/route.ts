@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { verifyWebhookSecret } from "@/lib/security";
 
 export async function POST(request: Request) {
+  const authCheck = verifyWebhookSecret(request);
+  if (!authCheck.isValid && authCheck.response) {
+    return authCheck.response;
+  }
+
   try {
     const body = await request.json();
     const assetId = body.assetId || body.id || `ASSET-${Date.now()}`;

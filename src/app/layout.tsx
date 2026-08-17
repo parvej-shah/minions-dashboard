@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import DashboardShell from "@/components/layout/DashboardShell";
+import { AuthProvider } from "@/components/providers/AuthProvider";
 
 export const viewport = {
   themeColor: "#00C9A7",
@@ -27,7 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="antialiased selection:bg-[#00C9A7]/20 selection:text-[#00C9A7] bg-[#070B0F] text-[#F1F5F9] min-h-screen">
-        <DashboardShell>{children}</DashboardShell>
+        <AuthProvider>
+          <DashboardShell>{children}</DashboardShell>
+        </AuthProvider>
       </body>
     </html>
   );

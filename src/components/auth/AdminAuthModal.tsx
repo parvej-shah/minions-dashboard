@@ -18,6 +18,7 @@ import {
   Check
 } from "lucide-react";
 import { supabaseClient } from "@/lib/supabase";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 export interface AdminUser {
   id?: string;
@@ -60,28 +61,14 @@ export default function AdminAuthModal({
 
   if (!isOpen) return null;
 
-  // 1. Real Google OAuth via Supabase
+  // 1. Real Google OAuth via NextAuth
   const handleRealGoogleOAuth = async () => {
     setIsProcessing(true);
     setAuthError(null);
     try {
-      const { error } = await supabaseClient.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: typeof window !== "undefined" ? window.location.origin : "https://minions.getminions.ai",
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
-        },
-      });
-
-      if (error) {
-        setAuthError(`Supabase Google OAuth Error: ${error.message}`);
-        setIsProcessing(false);
-      }
+      await signIn("google", { callbackUrl: "/" });
     } catch (err: any) {
-      setAuthError(`OAuth initialization error: ${err.message}`);
+      setAuthError(`Google OAuth Error: ${err.message || "Failed to initialize Google OAuth"}`);
       setIsProcessing(false);
     }
   };
