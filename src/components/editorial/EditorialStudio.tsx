@@ -71,7 +71,7 @@ export default function EditorialStudio({
   const activeAsset = assets.find(a => a.id === selectedAssetId) || assets[0] || INITIAL_ASSETS[0];
 
   // List view filter tab
-  const [listFilter, setListFilter] = useState<"ALL" | "PENDING_REVIEW" | "PUBLISHED" | "DRAFT">("ALL");
+  const [listFilter, setListFilter] = useState<"ALL" | "PENDING_REVIEW" | "PUBLISHED" | "UNPUBLISHED" | "DRAFT">("ALL");
   const [showDrawer, setShowDrawer] = useState(false);
 
   // Editor states
@@ -393,29 +393,70 @@ export default function EditorialStudio({
     }, 2400);
   };
 
-  // 1-Click Unpublish / Take Down Live Blog Post
-  const handleUnpublishDraft = async () => {
-    if (!confirm("Are you sure you want to unpublish this blog post? It will immediately be taken down from getminions.ai/blog and returned to your review queue.")) return;
+  // 1-Click Toggle Live Visibility (Publish / Unpublish without loss)
+  const handleToggleLiveStatus = async () => {
+    const isCurrentlyPublished = activeAsset.status === "PUBLISHED";
+    const nextStatus: AssetStatus = isCurrentlyPublished ? "UNPUBLISHED" : "PUBLISHED";
+    const actionLabel = isCurrentlyPublished ? "unpublish and hide" : "publish live";
+
+    if (!confirm(`Are you sure you want to ${actionLabel} "${activeAsset.title}"?`)) return;
 
     try {
-      const res = await fetch(`/api/assets/${activeAsset.id}?mode=unpublish`, {
-        method: "DELETE"
+      const res = await fetch(`/api/assets/${activeAsset.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: nextStatus,
+          published_at: nextStatus === "PUBLISHED" ? new Date().toISOString() : undefined,
+        }),
       });
+
       if (res.ok) {
         setAssets(prev =>
           prev.map(a =>
             a.id === activeAsset.id
-              ? { ...a, status: "PENDING_REVIEW" as AssetStatus, published_at: undefined, blog_url: undefined }
+              ? {
+                  ...a,
+                  status: nextStatus,
+                  published_at: nextStatus === "PUBLISHED" ? new Date().toISOString() : undefined,
+                  blog_url: nextStatus === "PUBLISHED" ? `https://getminions.ai/blog/${a.slug}` : undefined,
+                }
               : a
           )
         );
-        setPublishPhase("IDLE");
-        setPublishSuccess(false);
-        setSaveToast("Post taken down from live site and returned to review queue!");
+        setPublishSuccess(nextStatus === "PUBLISHED");
+        setSaveToast(
+          nextStatus === "PUBLISHED"
+            ? "Post restored and published live on getminions.ai/blog!"
+            : "Post unpublished and hidden from public blog!"
+        );
         setTimeout(() => setSaveToast(null), 3500);
       }
     } catch (e) {
-      console.error("Failed to unpublish post:", e);
+      console.error("Failed to toggle live status:", e);
+    }
+  };
+
+  // Permanent Delete Action
+  const handlePermanentDelete = async () => {
+    if (!confirm(`⚠️ PERMANENT DELETE WARNING: Are you sure you want to permanently delete ${activeAsset.id}? This will permanently remove the blog post, draft content, and all claim verifications.`)) return;
+
+    try {
+      const res = await fetch(`/api/assets/${activeAsset.id}?mode=permanent`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        const remaining = assets.filter(a => a.id !== activeAsset.id);
+        setAssets(remaining);
+        if (remaining.length > 0) {
+          setSelectedAssetId(remaining[0].id);
+        }
+        setSaveToast("Asset and blog post permanently deleted.");
+        setTimeout(() => setSaveToast(null), 3500);
+      }
+    } catch (e) {
+      console.error("Failed to permanently delete asset:", e);
     }
   };
 
@@ -473,9 +514,12 @@ export default function EditorialStudio({
     ? assets.filter((a) => a.status === "PENDING_REVIEW")
     : listFilter === "PUBLISHED"
       ? assets.filter((a) => a.status === "PUBLISHED")
-      : assets;
+      : listFilter === "UNPUBLISHED"
+        ? assets.filter((a) => a.status === "UNPUBLISHED")
+        : assets;
 
   const currentQueueIndex = queueAssets.findIndex((a) => a.id === activeAsset.id);
+  const unpublishedCount = assets.filter((a) => a.status === "UNPUBLISHED").length;
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-32 lg:pb-16">
@@ -493,7 +537,7 @@ export default function EditorialStudio({
               </span>
             </div>
 
-            <div className="flex items-center gap-1.5 bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D]">
+            <div className="flex items-center gap-1.5 bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D] flex-wrap">
               <button
                 onClick={() => setListFilter("PENDING_REVIEW")}
                 className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
@@ -524,6 +568,18 @@ export default function EditorialStudio({
               >
                 Published ({assets.filter(a => a.status === "PUBLISHED").length})
               </button>
+              {unpublishedCount > 0 && (
+                <button
+                  onClick={() => setListFilter("UNPUBLISHED")}
+                  className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
+                    listFilter === "UNPUBLISHED"
+                      ? "bg-[#F59E0B] text-[#070B0F] font-bold shadow-sm"
+                      : "text-[#F59E0B] hover:bg-[#161D26]"
+                  }`}
+                >
+                  Offline ({unpublishedCount})
+                </button>
+              )}
             </div>
           </div>
 
@@ -1557,12 +1613,15 @@ export default function EditorialStudio({
               </kbd>
             </button>
 
-            {/* Main Publish Decision CTA */}
-            {activeAsset.status === "PUBLISHED" || publishPhase === "DONE" ? (
+            {/* Main Publish Decision & Live Visibility Hub */}
+            {activeAsset.status === "PUBLISHED" ? (
               <div className="space-y-2 pt-1">
-                <div className="w-full bg-[#00C9A7]/15 border border-[#00C9A7] text-[#00C9A7] p-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2">
-                  <CheckCheck className="w-4 h-4" />
-                  <span>Approved & Published Live</span>
+                <div className="w-full bg-[#00C9A7]/15 border border-[#00C9A7] text-[#00C9A7] p-2.5 rounded-xl font-bold text-xs flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCheck className="w-4 h-4" />
+                    <span>Live on getminions.ai</span>
+                  </div>
+                  <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
                 </div>
 
                 <a
@@ -1576,13 +1635,51 @@ export default function EditorialStudio({
                   <ExternalLink className="w-3 h-3" />
                 </a>
 
+                {/* 1-Click Reversible Unpublish Toggle */}
                 <button
-                  onClick={handleUnpublishDraft}
-                  className="w-full bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/30 text-[#EF4444] text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
-                  title="Take down post from live site and return to review queue"
+                  onClick={handleToggleLiveStatus}
+                  className="w-full bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 border border-[#F59E0B]/30 text-[#F59E0B] text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  title="Hide from public site without deleting content"
                 >
                   <EyeOff className="w-3.5 h-3.5" />
-                  <span>Unpublish & Return to Queue</span>
+                  <span>Unpublish (Hide from Public)</span>
+                </button>
+
+                <button
+                  onClick={handlePermanentDelete}
+                  className="w-full text-[#64748B] hover:text-[#EF4444] text-[11px] font-mono py-1 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  title="Permanently delete post and claim verifications"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  <span>Delete Permanently</span>
+                </button>
+              </div>
+            ) : activeAsset.status === "UNPUBLISHED" ? (
+              <div className="space-y-2 pt-1">
+                <div className="w-full bg-[#F59E0B]/15 border border-[#F59E0B]/40 text-[#F59E0B] p-2.5 rounded-xl font-bold text-xs flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <EyeOff className="w-4 h-4" />
+                    <span>Unpublished (Offline)</span>
+                  </div>
+                  <span className="text-[10px] font-mono font-normal">Hidden from public</span>
+                </div>
+
+                {/* 1-Click Restore to Live */}
+                <button
+                  onClick={handleToggleLiveStatus}
+                  className="w-full bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#00C9A7]/20 cursor-pointer"
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  <span>Republish (Put Live on Blog)</span>
+                </button>
+
+                <button
+                  onClick={handlePermanentDelete}
+                  className="w-full text-[#64748B] hover:text-[#EF4444] text-[11px] font-mono py-1 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  title="Permanently delete post and claim verifications"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  <span>Delete Permanently</span>
                 </button>
               </div>
             ) : (

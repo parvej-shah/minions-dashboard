@@ -96,27 +96,64 @@ export async function PATCH(
       },
     });
 
-    // If this asset is PUBLISHED (or has a live blog entry), seamlessly sync changes to the live blogs table
+    // Live blogs table synchronization based on status
     try {
-      const existingBlog = await prisma.blog.findFirst({
-        where: {
-          OR: [{ assetId: id }, { slug: updated.slug }],
-        },
-      });
-
-      if (existingBlog) {
-        await prisma.blog.update({
-          where: { slug: existingBlog.slug },
-          data: {
-            ...(body.title !== undefined && { title: body.title }),
-            ...((body.content !== undefined || body.body_content !== undefined) && {
-              content: body.content ?? body.body_content,
-            }),
-            ...(body.hook !== undefined && { hook: body.hook }),
-            ...(body.core_argument !== undefined && { coreArgument: body.core_argument }),
+      if (body.status === "UNPUBLISHED" || updated.status === "UNPUBLISHED") {
+        // Unpublishing: take down from public blogs table, but keep asset record 100% intact
+        await prisma.blog.deleteMany({
+          where: {
+            OR: [{ assetId: id }, { slug: updated.slug }],
+          },
+        });
+      } else if (body.status === "PUBLISHED" || updated.status === "PUBLISHED") {
+        // Publishing / Republishing: upsert into live blogs table
+        await prisma.blog.upsert({
+          where: { slug: updated.slug },
+          create: {
+            slug: updated.slug,
+            title: updated.title,
+            hook: updated.hook,
+            coreArgument: updated.coreArgument,
+            content: updated.content,
+            audience: updated.audience,
+            pillar: updated.pillar,
+            assetId: updated.id,
+            docUrl: updated.docUrl,
+            publishedAt: updated.publishedAt || new Date(),
+          },
+          update: {
+            title: updated.title,
+            hook: updated.hook,
+            coreArgument: updated.coreArgument,
+            content: updated.content,
+            audience: updated.audience,
+            pillar: updated.pillar,
+            publishedAt: updated.publishedAt || new Date(),
             updatedAt: new Date(),
           },
         });
+      } else {
+        // For other status edits, update existing blog if it exists
+        const existingBlog = await prisma.blog.findFirst({
+          where: {
+            OR: [{ assetId: id }, { slug: updated.slug }],
+          },
+        });
+
+        if (existingBlog) {
+          await prisma.blog.update({
+            where: { slug: existingBlog.slug },
+            data: {
+              ...(body.title !== undefined && { title: body.title }),
+              ...((body.content !== undefined || body.body_content !== undefined) && {
+                content: body.content ?? body.body_content,
+              }),
+              ...(body.hook !== undefined && { hook: body.hook }),
+              ...(body.core_argument !== undefined && { coreArgument: body.core_argument }),
+              updatedAt: new Date(),
+            },
+          });
+        }
       }
     } catch (blogSyncErr) {
       console.warn("Non-fatal: could not sync updated asset to blogs table:", blogSyncErr);

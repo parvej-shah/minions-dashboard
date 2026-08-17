@@ -77,6 +77,7 @@ export default function IdeaStreamPage() {
   // Claiming lock & loader state to prevent race conditions
   const [claimingIds, setClaimingIds] = useState<Set<string>>(new Set());
   const [justClaimedIds, setJustClaimedIds] = useState<Set<string>>(new Set());
+  const [draftError, setDraftError] = useState<string | null>(null);
 
   // Slide-over form state
   const [formTitle, setFormTitle] = useState("");
@@ -197,11 +198,30 @@ export default function IdeaStreamPage() {
     }
   };
 
-  const handleRefineAndDraft = (ideaId: string) => {
+  const handleRefineAndDraft = async (ideaId: string) => {
     // Immediately lock button to prevent double-click / claim race conditions
     setClaimingIds(prev => new Set(prev).add(ideaId));
+    setDraftError(null);
 
-    setTimeout(() => {
+    const idea = ideas.find(item => item.id === ideaId || item.ideaId === ideaId);
+
+    try {
+      const res = await fetch("/api/pipeline/draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          idea_id: idea?.ideaId || idea?.id || ideaId,
+          title: idea?.title || idea?.raw_idea,
+          audience: idea?.audience,
+          target_trade: idea?.target_trade
+        })
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || `Request failed (HTTP ${res.status})`);
+      }
+
       setIdeas(prev =>
         prev.map(item =>
           item.id === ideaId || item.ideaId === ideaId
@@ -209,13 +229,17 @@ export default function IdeaStreamPage() {
             : item
         )
       );
+      setJustClaimedIds(prev => new Set(prev).add(ideaId));
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Could not reach the drafting pipeline.";
+      setDraftError(message);
+    } finally {
       setClaimingIds(prev => {
         const next = new Set(prev);
         next.delete(ideaId);
         return next;
       });
-      setJustClaimedIds(prev => new Set(prev).add(ideaId));
-    }, 1200);
+    }
   };
 
   // Filtered Ideas calculation
@@ -447,6 +471,23 @@ export default function IdeaStreamPage() {
             })}
           </div>
         </div>
+
+        {/* Drafting Pipeline Error */}
+        {draftError && (
+          <div className="bg-[#2A1215] border border-[#7F1D1D] rounded-xl px-4 py-3 flex items-start gap-3">
+            <AlertCircle className="w-4 h-4 text-[#F87171] mt-0.5 shrink-0" />
+            <div className="flex-1 text-xs text-[#FCA5A5]">
+              <span className="font-semibold">Could not start drafting: </span>
+              {draftError}
+            </div>
+            <button
+              onClick={() => setDraftError(null)}
+              className="text-[#FCA5A5] hover:text-white cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
 
         {/* Empty State */}
         {filteredIdeas.length === 0 && (

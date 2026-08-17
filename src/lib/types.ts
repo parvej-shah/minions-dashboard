@@ -24,7 +24,7 @@ export interface IdeaItem {
   updated_at: string;
 }
 
-export type AssetStatus = "DRAFT" | "PENDING_REVIEW" | "APPROVED" | "PUBLISHED" | "BLOCKED" | "REJECTED";
+export type AssetStatus = "DRAFT" | "PENDING_REVIEW" | "APPROVED" | "PUBLISHED" | "UNPUBLISHED" | "BLOCKED" | "REJECTED";
 
 export interface ClaimCheckItem {
   id: string;
