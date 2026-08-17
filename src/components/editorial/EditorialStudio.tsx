@@ -1013,23 +1013,73 @@ export default function EditorialStudio({
                 </div>
 
                 {/* Live Formatted Column */}
-                <div className="bg-[#070B0F] border border-[#1F2D3D] rounded-xl p-4 overflow-y-auto max-h-[560px] space-y-4">
+                <div className="bg-[#070B0F] border border-[#1F2D3D] rounded-xl p-4 overflow-y-auto max-h-[560px] space-y-4 max-w-full">
                   <div className="border-b border-[#1F2D3D] pb-3">
-                    <h2 className="text-lg font-bold text-[#F1F5F9] leading-tight">{editedTitle}</h2>
-                    {editedHook && <p className="text-xs text-[#94A3B8] italic mt-1">{editedHook}</p>}
+                    <h2 className="text-lg font-bold text-[#F1F5F9] leading-tight break-words [overflow-wrap:anywhere]">{editedTitle}</h2>
+                    {editedHook && <p className="text-xs text-[#94A3B8] italic mt-1 break-words [overflow-wrap:anywhere]">{editedHook}</p>}
                   </div>
-                  <div className="space-y-3 text-xs text-[#E2E8F0] font-serif leading-relaxed">
-                    {editedBody.split("\n\n").map((chunk, idx) => {
-                      const trimmed = chunk.trim();
-                      if (!trimmed) return null;
-                      if (trimmed.startsWith("# ") || trimmed.startsWith("## ")) {
-                        return <h3 key={idx} className="font-bold text-[#F1F5F9] text-sm pt-2 text-[#00C9A7] font-sans">{trimmed.replace(/^#+\s*/, "")}</h3>;
-                      }
-                      if (trimmed.startsWith("> ")) {
-                        return <blockquote key={idx} className="border-l-2 border-[#ff6b4a] pl-2 italic text-[#94A3B8]">{trimmed.replace(/^>\s*/, "")}</blockquote>;
-                      }
-                      return <p key={idx}>{trimmed}</p>;
-                    })}
+                  <div className="space-y-3 text-xs text-[#E2E8F0] font-serif leading-relaxed max-w-full">
+                    {(() => {
+                      const normalized = (editedBody || "")
+                        .replace(/!\[([^\]]*)\]\s*\((https?:\/\/[^)\s]+)\)/g, "\n\n![$1]($2)\n\n")
+                        .replace(/\n{3,}/g, "\n\n");
+                      return normalized.split("\n\n").map((chunk, idx) => {
+                        const trimmed = chunk.trim();
+                        if (!trimmed) return null;
+
+                        // Markdown Image Match
+                        const imgMatch = trimmed.match(/^!\[(.*?)\]\((https?:\/\/[^)\s]+)\)$/) || trimmed.match(/!\[(.*?)\]\((https?:\/\/[^)\s]+)\)/);
+                        if (imgMatch) {
+                          const altText = imgMatch[1] || "Editorial Image";
+                          const imgSrc = imgMatch[2];
+                          return (
+                            <figure key={idx} className="my-3 space-y-1 w-full max-w-full">
+                              <div className="relative overflow-hidden rounded-xl border border-[#1F2D3D] bg-[#0F1419] aspect-[16/9] w-full max-w-full">
+                                <img
+                                  src={imgSrc}
+                                  alt={altText}
+                                  className="w-full h-full object-cover object-center"
+                                  loading="lazy"
+                                />
+                              </div>
+                              {altText && altText.trim() && (
+                                <figcaption className="text-center text-[10px] font-mono text-[#94A3B8] italic truncate">
+                                  {altText}
+                                </figcaption>
+                              )}
+                            </figure>
+                          );
+                        }
+
+                        // Standalone image URL or Pollinations URL
+                        if (/^\(?(https?:\/\/[^\s)]+\.(png|jpe?g|webp|svg|gif)(\?[^\s)]*)?)\)?$/i.test(trimmed) || /^\(?(https?:\/\/image\.pollinations\.ai\/[^\s)]+)\)?$/i.test(trimmed)) {
+                          const rawUrl = trimmed.replace(/^\(|\)$/g, "").trim();
+                          return (
+                            <figure key={idx} className="my-3 space-y-1 w-full max-w-full">
+                              <div className="relative overflow-hidden rounded-xl border border-[#1F2D3D] bg-[#0F1419] aspect-[16/9] w-full max-w-full">
+                                <img
+                                  src={rawUrl}
+                                  alt="Editorial Visual"
+                                  className="w-full h-full object-cover object-center"
+                                  loading="lazy"
+                                />
+                              </div>
+                            </figure>
+                          );
+                        }
+
+                        if (trimmed.startsWith("# ") || trimmed.startsWith("## ")) {
+                          return <h3 key={idx} className="font-bold text-[#F1F5F9] text-sm pt-2 text-[#00C9A7] font-sans break-words [overflow-wrap:anywhere]">{trimmed.replace(/^#+\s*/, "")}</h3>;
+                        }
+                        if (trimmed.startsWith("### ")) {
+                          return <h4 key={idx} className="font-bold text-[#00C9A7] text-xs pt-1.5 font-sans break-words [overflow-wrap:anywhere]">{trimmed.replace(/^###\s*/, "")}</h4>;
+                        }
+                        if (trimmed.startsWith("> ")) {
+                          return <blockquote key={idx} className="border-l-2 border-[#ff6b4a] pl-2 italic text-[#94A3B8] break-words [overflow-wrap:anywhere]">{trimmed.replace(/^>\s*/, "")}</blockquote>;
+                        }
+                        return <p key={idx} className="break-words [overflow-wrap:anywhere]">{trimmed}</p>;
+                      });
+                    })()}
                   </div>
                 </div>
               </div>
@@ -1037,128 +1087,176 @@ export default function EditorialStudio({
 
             {/* View Mode 3: Immersive Reading View */}
             {editorMode === "preview" && (
-              <div className="space-y-6 animate-in fade-in duration-150">
+              <div className="space-y-6 animate-in fade-in duration-150 max-w-full">
                 {/* Article Header */}
                 <div className="space-y-2 border-b border-[#1F2D3D]/60 pb-4">
-                  <div className="flex items-center gap-2 text-xs font-mono text-[#00C9A7]">
+                  <div className="flex items-center gap-2 text-xs font-mono text-[#00C9A7] flex-wrap">
                     <span>{activeAsset.pillar || "Contractor Realities"}</span>
                     <span>•</span>
                     <span>{readingTimeMinutes} min read</span>
                     <span>•</span>
                     <span className="text-[#94A3B8]">{wordCount} words</span>
                   </div>
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#F1F5F9] leading-tight">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-[#F1F5F9] leading-tight break-words [overflow-wrap:anywhere]">
                     {editedTitle}
                   </h1>
                   {(editedHook || activeAsset.hook) && (
-                    <p className="text-sm font-medium text-[#94A3B8] italic border-l-2 border-[#00C9A7] pl-3 py-0.5">
+                    <p className="text-xs sm:text-sm font-medium text-[#94A3B8] italic border-l-2 border-[#00C9A7] pl-3 py-0.5 break-words [overflow-wrap:anywhere]">
                       {editedHook || activeAsset.hook}
                     </p>
                   )}
                 </div>
 
                 {/* Body Paragraphs & Formatted Markdown */}
-                <div className="prose-container space-y-4 max-w-[780px]">
-                  {editedBody.split("\n\n").map((chunk, idx) => {
-                    const trimmed = chunk.trim();
-                    if (!trimmed) return null;
+                <div className="prose-container space-y-4 max-w-[780px] w-full">
+                  {(() => {
+                    const normalized = (editedBody || "")
+                      .replace(/!\[([^\]]*)\]\s*\((https?:\/\/[^)\s]+)\)/g, "\n\n![$1]($2)\n\n")
+                      .replace(/\n{3,}/g, "\n\n");
+                    return normalized.split("\n\n").map((chunk, idx) => {
+                      const trimmed = chunk.trim();
+                      if (!trimmed) return null;
 
-                    // H1 / H2 Section Header
-                    if (trimmed.startsWith("# ") || trimmed.startsWith("## ")) {
-                      const cleanTitle = trimmed.replace(/^#+\s*/, "");
-                      return (
-                        <h2
-                          key={idx}
-                          className="text-lg sm:text-xl font-bold text-[#F1F5F9] pt-4 pb-1 border-b border-[#1F2D3D]/60 flex items-center gap-2"
-                        >
-                          <span className="text-[#00C9A7] font-mono text-sm">#</span>
-                          <span>{cleanTitle}</span>
-                        </h2>
-                      );
-                    }
+                      // 1. Markdown Image Tag: `![alt](url)`
+                      const imgMatch = trimmed.match(/^!\[(.*?)\]\((https?:\/\/[^)\s]+)\)$/) || trimmed.match(/!\[(.*?)\]\((https?:\/\/[^)\s]+)\)/);
+                      if (imgMatch) {
+                        const altText = imgMatch[1] || "Editorial Image";
+                        const imgSrc = imgMatch[2];
+                        return (
+                          <figure key={idx} className="my-6 space-y-2 w-full max-w-full">
+                            <div className="relative overflow-hidden rounded-2xl border border-[#1F2D3D] bg-[#070B0F] aspect-[16/9] w-full max-w-full shadow-lg group">
+                              <img
+                                src={imgSrc}
+                                alt={altText}
+                                className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.01]"
+                                loading="lazy"
+                              />
+                              <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10 rounded-2xl" />
+                            </div>
+                            {altText && altText.trim() && (
+                              <figcaption className="text-center text-xs font-mono text-[#94A3B8] italic truncate px-2">
+                                {altText}
+                              </figcaption>
+                            )}
+                          </figure>
+                        );
+                      }
 
-                    // H3 Subheader
-                    if (trimmed.startsWith("### ")) {
-                      const cleanSub = trimmed.replace(/^###\s*/, "");
-                      return (
-                        <h3
-                          key={idx}
-                          className="text-sm sm:text-base font-bold text-[#00C9A7] pt-2 flex items-center gap-1.5"
-                        >
-                          <CornerDownRight className="w-3.5 h-3.5 text-[#00C9A7]" />
-                          <span>{cleanSub}</span>
-                        </h3>
-                      );
-                    }
+                      // 2. Standalone image URL wrapped in parens or raw url: e.g. `(https://image.pollinations.ai/...)` or `https://...png`
+                      if (/^\(?(https?:\/\/[^\s)]+\.(png|jpe?g|webp|svg|gif)(\?[^\s)]*)?)\)?$/i.test(trimmed) || /^\(?(https?:\/\/image\.pollinations\.ai\/[^\s)]+)\)?$/i.test(trimmed)) {
+                        const rawUrl = trimmed.replace(/^\(|\)$/g, "").trim();
+                        return (
+                          <figure key={idx} className="my-6 space-y-2 w-full max-w-full">
+                            <div className="relative overflow-hidden rounded-2xl border border-[#1F2D3D] bg-[#070B0F] aspect-[16/9] w-full max-w-full shadow-lg group">
+                              <img
+                                src={rawUrl}
+                                alt="Editorial Graphic"
+                                className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.01]"
+                                loading="lazy"
+                              />
+                              <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10 rounded-2xl" />
+                            </div>
+                          </figure>
+                        );
+                      }
 
-                    // Code snippet block
-                    if (trimmed.startsWith("```")) {
-                      const lines = trimmed.split("\n");
-                      const lang = lines[0].replace("```", "") || "json";
-                      const codeContent = lines.slice(1, -1).join("\n");
-                      return (
-                        <div
-                          key={idx}
-                          className="bg-[#070B0F] border border-[#1F2D3D] rounded-xl overflow-hidden my-3 shadow-inner"
-                        >
-                          <div className="flex items-center justify-between px-3 py-1.5 bg-[#161D26] border-b border-[#1F2D3D] text-[10px] font-mono text-[#94A3B8]">
-                            <span className="text-[#00C9A7] font-bold">{lang} wire format</span>
-                            <button
-                              onClick={() => copyToClipboard(codeContent, `code-${idx}`)}
-                              className="hover:text-[#F1F5F9] flex items-center gap-1"
-                            >
-                              {copiedKey === `code-${idx}` ? (
-                                <Check className="w-3 h-3 text-[#00C9A7]" />
-                              ) : (
-                                <Copy className="w-3 h-3" />
-                              )}
-                              <span>Copy</span>
-                            </button>
+                      // H1 / H2 Section Header
+                      if (trimmed.startsWith("# ") || trimmed.startsWith("## ")) {
+                        const cleanTitle = trimmed.replace(/^#+\s*/, "");
+                        return (
+                          <h2
+                            key={idx}
+                            className="text-lg sm:text-xl font-bold text-[#F1F5F9] pt-4 pb-1 border-b border-[#1F2D3D]/60 flex items-center gap-2 break-words [overflow-wrap:anywhere]"
+                          >
+                            <span className="text-[#00C9A7] font-mono text-sm shrink-0">#</span>
+                            <span>{cleanTitle}</span>
+                          </h2>
+                        );
+                      }
+
+                      // H3 Subheader
+                      if (trimmed.startsWith("### ")) {
+                        const cleanSub = trimmed.replace(/^###\s*/, "");
+                        return (
+                          <h3
+                            key={idx}
+                            className="text-sm sm:text-base font-bold text-[#00C9A7] pt-2 flex items-center gap-1.5 break-words [overflow-wrap:anywhere]"
+                          >
+                            <CornerDownRight className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
+                            <span>{cleanSub}</span>
+                          </h3>
+                        );
+                      }
+
+                      // Code snippet block
+                      if (trimmed.startsWith("```")) {
+                        const lines = trimmed.split("\n");
+                        const lang = lines[0].replace("```", "").trim() || "json";
+                        const codeContent = lines.slice(1, lines[lines.length - 1].startsWith("```") ? -1 : undefined).join("\n");
+                        return (
+                          <div
+                            key={idx}
+                            className="bg-[#070B0F] border border-[#1F2D3D] rounded-xl overflow-hidden my-3 shadow-inner max-w-full"
+                          >
+                            <div className="flex items-center justify-between px-3 py-1.5 bg-[#161D26] border-b border-[#1F2D3D] text-[10px] font-mono text-[#94A3B8]">
+                              <span className="text-[#00C9A7] font-bold">{lang} wire format</span>
+                              <button
+                                onClick={() => copyToClipboard(codeContent, `code-${idx}`)}
+                                className="hover:text-[#F1F5F9] flex items-center gap-1"
+                              >
+                                {copiedKey === `code-${idx}` ? (
+                                  <Check className="w-3 h-3 text-[#00C9A7]" />
+                                ) : (
+                                  <Copy className="w-3 h-3" />
+                                )}
+                                <span>Copy</span>
+                              </button>
+                            </div>
+                            <pre className="p-3 sm:p-4 text-xs font-mono text-[#00C9A7] overflow-x-auto leading-relaxed max-w-full">
+                              {codeContent}
+                            </pre>
                           </div>
-                          <pre className="p-4 text-xs font-mono text-[#00C9A7] overflow-x-auto leading-relaxed">
-                            {codeContent}
-                          </pre>
-                        </div>
-                      );
-                    }
+                        );
+                      }
 
-                    // Numbered or Bullet list
-                    if (trimmed.startsWith("1. ") || trimmed.startsWith("- ")) {
-                      const items = trimmed.split("\n");
-                      return (
-                        <ul key={idx} className="space-y-1.5 my-2 pl-2">
-                          {items.map((item, iIndex) => (
-                            <li key={iIndex} className="text-[16px] text-[#F1F5F9]/90 font-serif leading-relaxed flex items-start gap-2">
-                              <span className="text-[#00C9A7] font-mono font-bold text-xs mt-1">▸</span>
-                              <span>{item.replace(/^\d+\.\s+|^-\s+/, "")}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      );
-                    }
+                      // Numbered or Bullet list
+                      if (trimmed.startsWith("1. ") || trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+                        const items = trimmed.split("\n");
+                        return (
+                          <ul key={idx} className="space-y-1.5 my-2 pl-2 max-w-full">
+                            {items.map((item, iIndex) => (
+                              <li key={iIndex} className="text-[15px] sm:text-[16px] text-[#F1F5F9]/90 font-serif leading-relaxed flex items-start gap-2 break-words [overflow-wrap:anywhere]">
+                                <span className="text-[#00C9A7] font-mono font-bold text-xs mt-1 shrink-0">▸</span>
+                                <span>{item.replace(/^(\d+\.|\*|-)\s+/, "")}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        );
+                      }
 
-                    // Blockquote or Callout
-                    if (trimmed.startsWith("> ")) {
+                      // Blockquote or Callout
+                      if (trimmed.startsWith("> ")) {
+                        return (
+                          <blockquote
+                            key={idx}
+                            className="border-l-2 border-[#ff6b4a] bg-[#ff6b4a]/5 p-3 rounded-r-xl text-sm sm:text-[15px] font-serif italic text-[#F1F5F9]/90 my-2 break-words [overflow-wrap:anywhere]"
+                          >
+                            {trimmed.replace(/^>\s*/, "")}
+                          </blockquote>
+                        );
+                      }
+
+                      // Standard 17px Editorial Paragraph (1-3 sentences cadence)
                       return (
-                        <blockquote
+                        <p
                           key={idx}
-                          className="border-l-2 border-[#ff6b4a] bg-[#ff6b4a]/5 p-3 rounded-r-xl text-[15px] font-serif italic text-[#F1F5F9]/90 my-2"
+                          className="text-[15px] sm:text-[17px] text-[#E2E8F0] leading-[1.75] sm:leading-[1.8] font-serif tracking-normal selection:bg-[#00C9A7]/20 break-words [overflow-wrap:anywhere]"
                         >
-                          {trimmed.replace(/^>\s*/, "")}
-                        </blockquote>
+                          {trimmed}
+                        </p>
                       );
-                    }
-
-                    // Standard 17px Editorial Paragraph (1-3 sentences cadence)
-                    return (
-                      <p
-                        key={idx}
-                        className="text-[17px] text-[#E2E8F0] leading-[1.8] font-serif tracking-normal selection:bg-[#00C9A7]/20"
-                      >
-                        {trimmed}
-                      </p>
-                    );
-                  })}
+                    });
+                  })()}
                 </div>
               </div>
             )}
