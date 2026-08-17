@@ -33,6 +33,7 @@ import { INITIAL_IDEAS } from "@/lib/api";
 import CalendarView from "@/components/ideas/CalendarView";
 import ScheduleModal from "@/components/ideas/ScheduleModal";
 import QueueBuilderView from "@/components/ideas/QueueBuilderView";
+import DraftingProgressHUD, { DraftingJob } from "@/components/common/DraftingProgressHUD";
 
 const TRADES: TargetTrade[] = [
   "HVAC",
@@ -88,6 +89,9 @@ export default function IdeaStreamPage() {
   const [claimingIds, setClaimingIds] = useState<Set<string>>(new Set());
   const [justClaimedIds, setJustClaimedIds] = useState<Set<string>>(new Set());
   const [draftError, setDraftError] = useState<string | null>(null);
+
+  // Live Drafting Multi-Agent Progress HUD state
+  const [activeDraftingJob, setActiveDraftingJob] = useState<DraftingJob | null>(null);
 
   // View mode: Stream cards vs Drag & Drop Queue Builder vs Editorial Calendar
   const [viewMode, setViewMode] = useState<"stream" | "queue" | "calendar">("queue");
@@ -321,6 +325,15 @@ export default function IdeaStreamPage() {
     setDraftError(null);
 
     const idea = ideas.find(item => item.id === ideaId || item.ideaId === ideaId);
+
+    // Launch Live Multi-Agent Drafting HUD
+    setActiveDraftingJob({
+      ideaId: idea?.ideaId || idea?.id || ideaId,
+      title: idea?.title || idea?.raw_idea || "Untitled Strategic Topic",
+      audience: idea?.audience,
+      targetTrade: idea?.target_trade,
+      startedAt: Date.now()
+    });
 
     try {
       const res = await fetch("/api/pipeline/draft", {
@@ -1510,13 +1523,19 @@ export default function IdeaStreamPage() {
         }}
       />
 
-      {/* Floating Action Toast Notification */}
+      {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#00C9A7] text-[#070B0F] px-4 py-3 rounded-xl shadow-2xl font-bold text-xs flex items-center gap-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
+        <div className="fixed bottom-24 right-6 z-50 bg-[#00C9A7] text-[#070B0F] px-4 py-3 rounded-xl shadow-2xl font-bold text-xs flex items-center gap-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
           <CheckCircle2 className="w-4 h-4" />
           <span>{toastMessage}</span>
         </div>
       )}
+
+      {/* Live Multi-Agent Drafting Progress HUD */}
+      <DraftingProgressHUD
+        job={activeDraftingJob}
+        onDismiss={() => setActiveDraftingJob(null)}
+      />
     </div>
   );
 }
