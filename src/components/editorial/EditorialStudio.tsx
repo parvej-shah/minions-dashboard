@@ -155,6 +155,19 @@ export default function EditorialStudio({
     }
   }, [selectedAssetId, assets]);
 
+  // Auto-scroll the active draft card into the center spotlight in the queue rail
+  useEffect(() => {
+    if (!selectedAssetId) return;
+    const cardEl = document.getElementById(`queue-card-${selectedAssetId}`);
+    if (cardEl) {
+      cardEl.scrollIntoView({
+        behavior: "smooth",
+        inline: "center",
+        block: "nearest"
+      });
+    }
+  }, [selectedAssetId]);
+
   // Queue indices & navigation helpers
   const currentAssetIndex = assets.findIndex((a) => a.id === activeAsset.id);
   const pendingAssets = assets.filter((a) => a.status === "PENDING_REVIEW");
@@ -514,22 +527,25 @@ export default function EditorialStudio({
           </div>
         </div>
 
-        {/* Horizontal Queue Card Rail (Tactile 1-Click Draft Switcher) */}
-        <div className="flex items-center gap-2.5 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
+        {/* Horizontal Queue Card Rail (Tactile 1-Click Draft Switcher with Auto-Spotlight Scroll) */}
+        <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 pt-0.5 no-scrollbar scroll-smooth">
           {queueAssets.map((asset, idx) => {
             const isCurrent = asset.id === activeAsset.id;
             return (
               <button
                 key={asset.id}
+                id={`queue-card-${asset.id}`}
                 onClick={() => setSelectedAssetId(asset.id)}
-                className={`flex items-center gap-3 p-2.5 px-3 rounded-xl border text-left shrink-0 transition-all cursor-pointer min-w-[240px] max-w-[280px] ${
+                className={`flex items-center gap-3 p-2.5 px-3 rounded-xl border text-left shrink-0 transition-all duration-200 cursor-pointer min-w-[250px] max-w-[290px] relative ${
                   isCurrent
-                    ? "bg-[#161D26] border-[#00C9A7] shadow-md shadow-[#00C9A7]/15 ring-1 ring-[#00C9A7]/40"
-                    : "bg-[#070B0F] border-[#1F2D3D] hover:border-[#2A3D52] hover:bg-[#161D26]/70 opacity-75 hover:opacity-100"
+                    ? "bg-[#161D26] border-[#00C9A7] shadow-lg shadow-[#00C9A7]/20 ring-2 ring-[#00C9A7] scale-[1.02] z-10 opacity-100"
+                    : "bg-[#070B0F] border-[#1F2D3D] hover:border-[#2A3D52] hover:bg-[#161D26]/70 opacity-65 hover:opacity-100"
                 }`}
               >
                 {/* Micro Thumbnail */}
-                <div className="w-9 h-9 rounded-lg overflow-hidden bg-[#161D26] border border-[#1F2D3D] shrink-0 flex items-center justify-center">
+                <div className={`w-9 h-9 rounded-lg overflow-hidden bg-[#161D26] border shrink-0 flex items-center justify-center transition-all ${
+                  isCurrent ? "border-[#00C9A7] ring-1 ring-[#00C9A7]/50" : "border-[#1F2D3D]"
+                }`}>
                   {asset.hero_image_url ? (
                     <img
                       src={asset.hero_image_url}
@@ -549,18 +565,20 @@ export default function EditorialStudio({
                     </span>
                     <span
                       className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded ${
-                        asset.status === "PUBLISHED"
-                          ? "bg-[#00C9A7]/20 text-[#00C9A7]"
-                          : asset.status === "PENDING_REVIEW"
-                            ? "bg-[#F59E0B]/20 text-[#F59E0B]"
-                            : "bg-[#64748B]/20 text-[#94A3B8]"
+                        isCurrent
+                          ? "bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/40"
+                          : asset.status === "PUBLISHED"
+                            ? "bg-[#00C9A7]/20 text-[#00C9A7]"
+                            : asset.status === "PENDING_REVIEW"
+                              ? "bg-[#F59E0B]/20 text-[#F59E0B]"
+                              : "bg-[#64748B]/20 text-[#94A3B8]"
                       }`}
                     >
-                      {asset.status === "PENDING_REVIEW" ? "Needs Review" : asset.status}
+                      {isCurrent ? "● Spotlight" : asset.status === "PENDING_REVIEW" ? "Needs Review" : asset.status}
                     </span>
                   </div>
 
-                  <div className="text-xs font-semibold text-[#F1F5F9] truncate">
+                  <div className={`text-xs font-semibold truncate ${isCurrent ? "text-[#F1F5F9] font-bold" : "text-[#CBD5E1]"}`}>
                     {asset.title}
                   </div>
 
