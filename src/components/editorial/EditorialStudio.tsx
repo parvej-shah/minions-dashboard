@@ -1018,10 +1018,13 @@ export default function EditorialStudio({
                     <h2 className="text-lg font-bold text-[#F1F5F9] leading-tight break-words [overflow-wrap:anywhere]">{editedTitle}</h2>
                     {editedHook && <p className="text-xs text-[#94A3B8] italic mt-1 break-words [overflow-wrap:anywhere]">{editedHook}</p>}
                   </div>
-                  <div className="space-y-3 text-xs text-[#E2E8F0] font-serif leading-relaxed max-w-full">
+                  <div className="space-y-3 text-xs text-[#E2E8F0] font-sans leading-relaxed max-w-full">
                     {(() => {
                       const normalized = (editedBody || "")
+                        .replace(/^(\s*#{1,6}\s+[^\n]+)/gm, "\n\n$1\n\n")
                         .replace(/!\[([^\]]*)\]\s*\((https?:\/\/[^)\s]+)\)/g, "\n\n![$1]($2)\n\n")
+                        .replace(/(```[\s\S]*?```)/g, "\n\n$1\n\n")
+                        .replace(/^(\s*>[^\n]+)/gm, "\n\n$1\n\n")
                         .replace(/\n{3,}/g, "\n\n");
                       return normalized.split("\n\n").map((chunk, idx) => {
                         const trimmed = chunk.trim();
@@ -1068,16 +1071,29 @@ export default function EditorialStudio({
                           );
                         }
 
-                        if (trimmed.startsWith("# ") || trimmed.startsWith("## ")) {
-                          return <h3 key={idx} className="font-bold text-[#F1F5F9] text-sm pt-2 text-[#00C9A7] font-sans break-words [overflow-wrap:anywhere]">{trimmed.replace(/^#+\s*/, "")}</h3>;
+                        if (/^#{1,6}\s+/.test(trimmed)) {
+                          const lines = trimmed.split("\n");
+                          const firstLine = lines[0].trim();
+                          const restText = lines.slice(1).join("\n").trim();
+                          const isH3 = firstLine.startsWith("###");
+                          const cleanHeading = firstLine.replace(/^#{1,6}\s+/, "").trim();
+
+                          return (
+                            <div key={idx} className="space-y-1.5 pt-2">
+                              {isH3 ? (
+                                <h4 className="font-bold text-[#00C9A7] text-xs font-sans break-words [overflow-wrap:anywhere]">{cleanHeading}</h4>
+                              ) : (
+                                <h3 className="font-bold text-[#F1F5F9] text-sm text-[#00C9A7] font-sans break-words [overflow-wrap:anywhere]">{cleanHeading}</h3>
+                              )}
+                              {restText && <p className="text-xs text-[#CBD5E1] break-words [overflow-wrap:anywhere] leading-relaxed">{restText}</p>}
+                            </div>
+                          );
                         }
-                        if (trimmed.startsWith("### ")) {
-                          return <h4 key={idx} className="font-bold text-[#00C9A7] text-xs pt-1.5 font-sans break-words [overflow-wrap:anywhere]">{trimmed.replace(/^###\s*/, "")}</h4>;
-                        }
+
                         if (trimmed.startsWith("> ")) {
                           return <blockquote key={idx} className="border-l-2 border-[#ff6b4a] pl-2 italic text-[#94A3B8] break-words [overflow-wrap:anywhere]">{trimmed.replace(/^>\s*/, "")}</blockquote>;
                         }
-                        return <p key={idx} className="break-words [overflow-wrap:anywhere]">{trimmed}</p>;
+                        return <p key={idx} className="break-words [overflow-wrap:anywhere] leading-relaxed text-[#CBD5E1]">{trimmed}</p>;
                       });
                     })()}
                   </div>
@@ -1097,21 +1113,24 @@ export default function EditorialStudio({
                     <span>•</span>
                     <span className="text-[#94A3B8]">{wordCount} words</span>
                   </div>
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-[#F1F5F9] leading-tight break-words [overflow-wrap:anywhere]">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-[#F1F5F9] leading-tight break-words [overflow-wrap:anywhere] font-sans">
                     {editedTitle}
                   </h1>
                   {(editedHook || activeAsset.hook) && (
-                    <p className="text-xs sm:text-sm font-medium text-[#94A3B8] italic border-l-2 border-[#00C9A7] pl-3 py-0.5 break-words [overflow-wrap:anywhere]">
+                    <p className="text-xs sm:text-sm font-medium text-[#94A3B8] italic border-l-2 border-[#00C9A7] pl-3 py-0.5 break-words [overflow-wrap:anywhere] font-sans">
                       {editedHook || activeAsset.hook}
                     </p>
                   )}
                 </div>
 
                 {/* Body Paragraphs & Formatted Markdown */}
-                <div className="prose-container space-y-4 max-w-[780px] w-full">
+                <div className="prose-container space-y-5 max-w-[780px] w-full font-sans">
                   {(() => {
                     const normalized = (editedBody || "")
+                      .replace(/^(\s*#{1,6}\s+[^\n]+)/gm, "\n\n$1\n\n")
                       .replace(/!\[([^\]]*)\]\s*\((https?:\/\/[^)\s]+)\)/g, "\n\n![$1]($2)\n\n")
+                      .replace(/(```[\s\S]*?```)/g, "\n\n$1\n\n")
+                      .replace(/^(\s*>[^\n]+)/gm, "\n\n$1\n\n")
                       .replace(/\n{3,}/g, "\n\n");
                     return normalized.split("\n\n").map((chunk, idx) => {
                       const trimmed = chunk.trim();
@@ -1160,31 +1179,33 @@ export default function EditorialStudio({
                         );
                       }
 
-                      // H1 / H2 Section Header
-                      if (trimmed.startsWith("# ") || trimmed.startsWith("## ")) {
-                        const cleanTitle = trimmed.replace(/^#+\s*/, "");
-                        return (
-                          <h2
-                            key={idx}
-                            className="text-lg sm:text-xl font-bold text-[#F1F5F9] pt-4 pb-1 border-b border-[#1F2D3D]/60 flex items-center gap-2 break-words [overflow-wrap:anywhere]"
-                          >
-                            <span className="text-[#00C9A7] font-mono text-sm shrink-0">#</span>
-                            <span>{cleanTitle}</span>
-                          </h2>
-                        );
-                      }
+                      // Section Headings: H1 / H2 / H3
+                      if (/^#{1,6}\s+/.test(trimmed)) {
+                        const lines = trimmed.split("\n");
+                        const firstLine = lines[0].trim();
+                        const restText = lines.slice(1).join("\n").trim();
+                        const isH3 = firstLine.startsWith("###");
+                        const cleanTitle = firstLine.replace(/^#{1,6}\s+/, "").trim();
 
-                      // H3 Subheader
-                      if (trimmed.startsWith("### ")) {
-                        const cleanSub = trimmed.replace(/^###\s*/, "");
                         return (
-                          <h3
-                            key={idx}
-                            className="text-sm sm:text-base font-bold text-[#00C9A7] pt-2 flex items-center gap-1.5 break-words [overflow-wrap:anywhere]"
-                          >
-                            <CornerDownRight className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
-                            <span>{cleanSub}</span>
-                          </h3>
+                          <div key={idx} className="space-y-3 pt-4">
+                            {isH3 ? (
+                              <h3 className="text-base sm:text-lg font-bold text-[#00C9A7] pt-2 flex items-center gap-2 break-words [overflow-wrap:anywhere] font-sans">
+                                <CornerDownRight className="w-4 h-4 text-[#00C9A7] shrink-0" />
+                                <span>{cleanTitle}</span>
+                              </h3>
+                            ) : (
+                              <h2 className="text-lg sm:text-2xl font-extrabold text-[#F1F5F9] pb-2 border-b border-[#1F2D3D]/60 flex items-center gap-2.5 break-words [overflow-wrap:anywhere] font-sans tracking-tight">
+                                <span className="text-[#00C9A7] font-mono text-base font-bold shrink-0">#</span>
+                                <span>{cleanTitle}</span>
+                              </h2>
+                            )}
+                            {restText && (
+                              <p className="text-[15px] sm:text-[16px] text-[#E2E8F0] leading-[1.8] font-normal tracking-normal font-sans break-words [overflow-wrap:anywhere]">
+                                {restText}
+                              </p>
+                            )}
+                          </div>
                         );
                       }
 
@@ -1196,7 +1217,7 @@ export default function EditorialStudio({
                         return (
                           <div
                             key={idx}
-                            className="bg-[#070B0F] border border-[#1F2D3D] rounded-xl overflow-hidden my-3 shadow-inner max-w-full"
+                            className="bg-[#070B0F] border border-[#1F2D3D] rounded-xl overflow-hidden my-4 shadow-inner max-w-full"
                           >
                             <div className="flex items-center justify-between px-3 py-1.5 bg-[#161D26] border-b border-[#1F2D3D] text-[10px] font-mono text-[#94A3B8]">
                               <span className="text-[#00C9A7] font-bold">{lang} wire format</span>
@@ -1223,9 +1244,9 @@ export default function EditorialStudio({
                       if (trimmed.startsWith("1. ") || trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
                         const items = trimmed.split("\n");
                         return (
-                          <ul key={idx} className="space-y-1.5 my-2 pl-2 max-w-full">
+                          <ul key={idx} className="space-y-2 my-3 pl-2 max-w-full">
                             {items.map((item, iIndex) => (
-                              <li key={iIndex} className="text-[15px] sm:text-[16px] text-[#F1F5F9]/90 font-serif leading-relaxed flex items-start gap-2 break-words [overflow-wrap:anywhere]">
+                              <li key={iIndex} className="text-[15px] sm:text-[16px] text-[#F1F5F9]/90 font-sans leading-relaxed flex items-start gap-2.5 break-words [overflow-wrap:anywhere]">
                                 <span className="text-[#00C9A7] font-mono font-bold text-xs mt-1 shrink-0">▸</span>
                                 <span>{item.replace(/^(\d+\.|\*|-)\s+/, "")}</span>
                               </li>
@@ -1239,18 +1260,18 @@ export default function EditorialStudio({
                         return (
                           <blockquote
                             key={idx}
-                            className="border-l-2 border-[#ff6b4a] bg-[#ff6b4a]/5 p-3 rounded-r-xl text-sm sm:text-[15px] font-serif italic text-[#F1F5F9]/90 my-2 break-words [overflow-wrap:anywhere]"
+                            className="border-l-2 border-[#ff6b4a] bg-[#ff6b4a]/5 p-3.5 rounded-r-xl text-sm sm:text-[15px] font-sans italic text-[#F1F5F9]/90 my-3 break-words [overflow-wrap:anywhere]"
                           >
                             {trimmed.replace(/^>\s*/, "")}
                           </blockquote>
                         );
                       }
 
-                      // Standard 17px Editorial Paragraph (1-3 sentences cadence)
+                      // Standard Editorial Paragraph
                       return (
                         <p
                           key={idx}
-                          className="text-[15px] sm:text-[17px] text-[#E2E8F0] leading-[1.75] sm:leading-[1.8] font-serif tracking-normal selection:bg-[#00C9A7]/20 break-words [overflow-wrap:anywhere]"
+                          className="text-[15px] sm:text-[16px] text-[#E2E8F0] leading-[1.8] font-normal tracking-normal font-sans selection:bg-[#00C9A7]/20 break-words [overflow-wrap:anywhere]"
                         >
                           {trimmed}
                         </p>
