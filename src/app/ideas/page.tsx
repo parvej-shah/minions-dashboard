@@ -319,8 +319,8 @@ export default function IdeaStreamPage() {
         </button>
       </div>
 
-      {/* Filter Bar (Sticky Container) */}
-      <div className="sticky top-16 z-20 bg-[#0a0d12]/95 backdrop-blur-md pt-2 pb-4 space-y-3.5 border-b border-[#1F2D3D]/80">
+      {/* Filter Bar (Sticky Container with full-bleed backdrop & zero desktop gap) */}
+      <div className="sticky top-14 md:top-0 z-30 bg-[#0a0d12] -mx-4 sm:-mx-6 md:-mx-8 px-4 sm:px-6 md:px-8 pt-3 pb-3.5 space-y-3 border-b border-[#1F2D3D] shadow-xl shadow-black/40">
         {/* Row 1: Search & Audience Filters */}
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
             {/* Search Input */}
