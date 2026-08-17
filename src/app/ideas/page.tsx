@@ -83,6 +83,9 @@ export default function IdeaStreamPage() {
   const [justClaimedIds, setJustClaimedIds] = useState<Set<string>>(new Set());
   const [draftError, setDraftError] = useState<string | null>(null);
 
+  // Detail Idea Modal State
+  const [detailIdea, setDetailIdea] = useState<IdeaItem | null>(null);
+
   // Edit Idea Modal State
   const [editingIdea, setEditingIdea] = useState<IdeaItem | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -633,8 +636,12 @@ export default function IdeaStreamPage() {
             return (
               <div
                 key={idea.id || rawId}
-                className="bg-[#0F1419] hover:bg-[#161D26] border border-[#1F2D3D] hover:border-[#2A3D52] rounded-xl p-5 transition-all duration-200 flex flex-col justify-between space-y-4 group shadow-sm relative overflow-hidden"
+                onClick={() => setDetailIdea(idea)}
+                className="bg-[#0F1419] hover:bg-[#161D26] border border-[#1F2D3D] hover:border-[#00C9A7]/50 rounded-xl p-5 transition-all duration-200 flex flex-col justify-between space-y-4 group shadow-sm relative overflow-hidden cursor-pointer active:scale-[0.99]"
               >
+                {/* Hover Glow Accent */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C9A7]/5 blur-2xl pointer-events-none group-hover:bg-[#00C9A7]/10 transition-colors" />
+
                 {/* Top Badge Row */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-2">
@@ -670,7 +677,10 @@ export default function IdeaStreamPage() {
 
                       {/* Edit Button */}
                       <button
-                        onClick={() => openEditModal(idea)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditModal(idea);
+                        }}
                         className="p-1 rounded-md text-[#64748B] hover:text-[#00C9A7] hover:bg-[#161D26] border border-transparent hover:border-[#1F2D3D] transition-all cursor-pointer"
                         title="Edit Idea details"
                       >
@@ -680,7 +690,10 @@ export default function IdeaStreamPage() {
                       {/* Unlock Button (if claimed) */}
                       {isClaimed && (
                         <button
-                          onClick={() => handleResetClaim(idea.id || rawId)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleResetClaim(idea.id || rawId);
+                          }}
                           className="p-1 rounded-md text-[#F59E0B] hover:bg-[#F59E0B]/20 border border-[#F59E0B]/30 transition-all cursor-pointer"
                           title="Release Lock & Unclaim Idea"
                         >
@@ -690,7 +703,10 @@ export default function IdeaStreamPage() {
 
                       {/* Delete Button */}
                       <button
-                        onClick={() => handleDeleteIdea(idea.id || rawId, ideaTitle)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteIdea(idea.id || rawId, ideaTitle);
+                        }}
                         className="p-1 rounded-md text-[#64748B] hover:text-[#EF4444] hover:bg-[#EF4444]/10 border border-transparent hover:border-[#EF4444]/30 transition-all cursor-pointer"
                         title="Delete Idea"
                       >
@@ -726,14 +742,13 @@ export default function IdeaStreamPage() {
 
                 {/* Card Footer: Ingested Date & CTA Button */}
                 <div className="flex items-center justify-between pt-3.5 border-t border-[#1F2D3D] gap-2">
-                  {/* Bottom Left: Ingested Date (Relative Time) */}
                   <div className="flex items-center gap-1.5 text-xs font-mono text-[#64748B]">
                     <Clock className="w-3.5 h-3.5 text-[#64748B]" />
                     <span>Ingested {formatRelativeTime(idea.created_at)}</span>
                   </div>
 
                   {/* Bottom Right: Action CTA / Status Badge */}
-                  <div>
+                  <div onClick={(e) => e.stopPropagation()}>
                     {isPublished ? (
                       <Link
                         href="/published"
@@ -763,13 +778,12 @@ export default function IdeaStreamPage() {
                       <button
                         onClick={() => handleRefineAndDraft(idea.id || rawId)}
                         disabled={isClaiming}
-                        className="inline-flex items-center gap-1.5 bg-[#00C9A7]/10 hover:bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/30 hover:border-[#00C9A7]/50 text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
-                        title="Triggers n8n Workflow 02 to generate full article and social variants"
+                        className="inline-flex items-center gap-1.5 bg-[#00C9A7]/10 hover:bg-[#00C9A7] text-[#00C9A7] hover:text-[#070B0F] border border-[#00C9A7]/30 hover:border-[#00C9A7] text-xs font-bold px-3 py-1.5 rounded-lg transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                       >
                         {isClaiming ? (
                           <>
                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            Claiming & Locking...
+                            <span>Claiming...</span>
                           </>
                         ) : (
                           <>
@@ -1155,6 +1169,174 @@ export default function IdeaStreamPage() {
                     </>
                   )}
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* IDEA DETAIL MODAL & DRAWER */}
+      {detailIdea && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-[#0F1419] border border-[#1F2D3D] ring-1 ring-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-[#1F2D3D] flex items-start justify-between gap-4 bg-[#070B0F]/50">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`text-[10px] font-bold tracking-wider px-2.5 py-0.5 rounded-full border ${getAudienceBadgeClass(detailIdea.audience || "ICP")}`}>
+                    {detailIdea.audience || "ICP"}
+                  </span>
+                  <span className="text-[10px] font-medium bg-[#161D26] text-[#94A3B8] border border-[#1F2D3D] px-2.5 py-0.5 rounded-full">
+                    {detailIdea.target_trade || "HVAC"}
+                  </span>
+                  <span className={`text-[10px] font-medium px-2.5 py-0.5 rounded-full border ${getSourceTag(detailIdea.source || "MANUAL").className}`}>
+                    {getSourceTag(detailIdea.source || "MANUAL").label}
+                  </span>
+                  <span className="text-xs font-mono text-[#64748B]">
+                    {detailIdea.ideaId || detailIdea.id}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-[#64748B] font-mono">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Harvested {new Date(detailIdea.created_at).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setDetailIdea(null)}
+                className="p-1.5 rounded-xl text-[#94A3B8] hover:text-white hover:bg-[#161D26] border border-transparent hover:border-[#1F2D3D] transition-all cursor-pointer"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body: Scrollable Content */}
+            <div className="p-6 overflow-y-auto space-y-6 flex-1 text-[#F1F5F9]">
+              {/* Full Topic Headline */}
+              <div className="space-y-2">
+                <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#00C9A7]">
+                  Topic & Working Headline
+                </div>
+                <h2 className="text-xl sm:text-2xl font-extrabold leading-snug text-white">
+                  {detailIdea.title || detailIdea.raw_idea}
+                </h2>
+              </div>
+
+              {/* Full Strategic Angle / Rationale */}
+              <div className="space-y-2">
+                <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#94A3B8]">
+                  Strategic Angle & Real-World Thesis
+                </div>
+                <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-sm text-[#E2E8F0] leading-relaxed whitespace-pre-wrap">
+                  {detailIdea.excerpt || detailIdea.angle || "No extended strategic thesis recorded."}
+                </div>
+              </div>
+
+              {/* Metadata Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <div className="p-3.5 rounded-xl bg-[#161D26]/60 border border-[#1F2D3D] space-y-1">
+                  <div className="text-[10px] font-mono text-[#64748B] uppercase">Audience Objective</div>
+                  <div className="text-xs font-semibold text-white">
+                    {detailIdea.audience === "ICP" 
+                      ? "Direct to Home Service Operators (Contractors)"
+                      : detailIdea.audience === "PEER"
+                      ? "Technical & Systems Architecture Peers"
+                      : "Bridge / Strategic Market Investors"}
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-[#161D26]/60 border border-[#1F2D3D] space-y-1">
+                  <div className="text-[10px] font-mono text-[#64748B] uppercase">Pipeline Status</div>
+                  <div className="text-xs font-semibold text-[#00C9A7] flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
+                    <span>{detailIdea.status || "HARVESTED"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tags */}
+              {detailIdea.tags && detailIdea.tags.length > 0 && (
+                <div className="space-y-1.5">
+                  <div className="text-[10px] font-mono text-[#64748B] uppercase">Signal Keywords</div>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {detailIdea.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-xs text-[#94A3B8] bg-[#070B0F] border border-[#1F2D3D] px-2.5 py-1 rounded-lg font-mono"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer: Action Buttons */}
+            <div className="p-4 sm:p-6 border-t border-[#1F2D3D] bg-[#070B0F]/70 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const ideaToEdit = detailIdea;
+                    setDetailIdea(null);
+                    openEditModal(ideaToEdit);
+                  }}
+                  className="px-3.5 py-2 text-xs font-semibold text-[#94A3B8] hover:text-white bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Edit Signal</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const idToDelete = detailIdea.id || detailIdea.ideaId || "";
+                    const titleToDelete = detailIdea.title || detailIdea.raw_idea || "";
+                    setDetailIdea(null);
+                    handleDeleteIdea(idToDelete, titleToDelete);
+                  }}
+                  className="px-3.5 py-2 text-xs font-semibold text-[#EF4444] hover:bg-[#EF4444]/10 border border-transparent hover:border-[#EF4444]/30 rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete</span>
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {detailIdea.status === "PUBLISHED" ? (
+                  <Link
+                    href="/published"
+                    onClick={() => setDetailIdea(null)}
+                    className="inline-flex items-center justify-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/15 transition-all"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>View in Published Stream ↗</span>
+                  </Link>
+                ) : detailIdea.status === "DRAFTED" ? (
+                  <Link
+                    href="/editorial"
+                    onClick={() => setDetailIdea(null)}
+                    className="inline-flex items-center justify-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-[#3B82F6]/20 transition-all"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>Open in Editorial Studio →</span>
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => {
+                      const idToDraft = detailIdea.id || detailIdea.ideaId || "";
+                      setDetailIdea(null);
+                      handleRefineAndDraft(idToDraft);
+                    }}
+                    disabled={claimingIds.has(detailIdea.id) || claimingIds.has(detailIdea.ideaId || "")}
+                    className="inline-flex items-center justify-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] disabled:opacity-50 text-[#070B0F] text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/15 transition-all active:scale-95 cursor-pointer"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>Refine & Launch Draft Pipeline (Workflow 02)</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
