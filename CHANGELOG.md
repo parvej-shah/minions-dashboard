@@ -3,6 +3,45 @@
 All notable changes to the Minions content pipeline (n8n workflows: `01_idea_harvester`,
 `02_idea_to_asset`, `03_review_publisher`) and the Cockpit dashboard are logged here.
 
+## 2026-08-18 (asset/claim ID collision — content loss bug)
+
+### Fixed
+- **`02_idea_to_asset`: concurrent runs silently overwrote each other's drafted content.**
+  Root cause of the user-reported "workflow ran but I can't find the content, and the
+  idea's status reverted": `Parse Claims and Gate` generated the next `ASSET-XXXX` /
+  `CLM-XXXX` ID by reading `SELECT id ORDER BY id DESC LIMIT 1` from Supabase and adding
+  1, with no locking. Any two runs overlapping in time (a manual click racing the
+  `Schedule_Twice_Daily_Queue_Runner`, or two manual clicks close together — each run
+  takes ~2-3 min, so this is easy to hit) would both read the same max before either
+  wrote back, both compute the identical next ID, and the run that finished last would
+  silently clobber the other's row on the `on_conflict=id merge-duplicates` upsert.
+  - **Confirmed via n8n execution logs:** two real runs on 2026-08-17 (`IDEA-0038` and
+    `IDEA-0033`) both computed `ASSET-0031`. `IDEA-0033`'s write landed last, so its
+    content survived under `ASSET-0031` while `IDEA-0038`'s real generated draft (a
+    Wispr/voice-AI latency piece) was overwritten and vanished from the DB, even though
+    `IDEA-0038`'s row still pointed at `ASSET-0031`.
+  - **Fix (per user's call — IDs don't need to be human-readable, and aren't shown to
+    end users):** `assets.id` / `claims.id` have no format constraint in the schema, so
+    `Parse Claims and Gate` now generates a UUID locally for each asset and claim
+    instead of reading a shared counter from the DB. No DB round-trip means no two runs
+    can ever race for the same ID. Removed `Read Asset Watermark (DB)` and `Read Claim
+    Watermark (DB)` from the active path (disabled, left in place for reference).
+  - **Cockpit UI (`src/app/page.tsx`):** removed the two spots that rendered the raw
+    asset ID to the user (the "ID: ASSET-XXXX" label and the thumbnail-fallback
+    monogram) since UUIDs aren't meant to be human-facing; the thumbnail fallback now
+    shows the asset title's initials instead.
+  - **Data recovery:** `IDEA-0038`'s real Wispr-piece content was recovered from the
+    n8n execution log (`Parse Claims and Gate` / `Prepare Asset Row` output for
+    execution 2493, still had the full draft, claims, and social variants) and
+    reinserted as a new asset row, then `IDEA-0038.draft_asset_id` was repointed at it.
+    `IDEA-0033` / `ASSET-0031` were left untouched since that pairing was already correct.
+  - **Verified live:** fired two idea-draft requests at the exact same instant
+    (bypassing UI delay to force a true race). Both completed with distinct UUID asset
+    IDs, each correctly linked to its own idea, with no cross-contamination.
+    Test ideas/assets deleted afterward.
+  - Workflow re-validated: 0 errors, 4 warnings (all pre-existing/expected — the two
+    now-disabled watermark nodes still pointing at each other is new but harmless).
+
 ## 2026-08-18 (hero image generation activated)
 
 ### Added

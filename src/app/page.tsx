@@ -243,8 +243,8 @@ export default function MissionControlPage() {
                           }}
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-[#0e5c63]/20 text-[#00C9A7] font-mono text-[10px] font-bold">
-                          {asset.id}
+                        <div className="w-full h-full flex items-center justify-center bg-[#0e5c63]/20 text-[#00C9A7] font-mono text-sm font-bold">
+                          {(asset.title || "?").slice(0, 2).toUpperCase()}
                         </div>
                       )}
                     </div>
@@ -258,9 +258,6 @@ export default function MissionControlPage() {
                           asset.audience === "ICP" ? "bg-blue-500/10 text-blue-400" : "bg-purple-500/10 text-purple-400"
                         }`}>
                           {asset.audience}
-                        </span>
-                        <span className="text-[10px] font-mono text-[#64748B] hidden sm:inline">
-                          ID: {asset.id}
                         </span>
                       </div>
                       <h3 className="text-sm font-bold text-[#F1F5F9] truncate group-hover:text-[#00C9A7] transition-colors">
