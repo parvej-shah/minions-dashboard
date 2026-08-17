@@ -48,6 +48,16 @@ export default function MissionControlPage() {
 
   const pendingReviewAssets = assets.filter((a) => a.status === "PENDING_REVIEW");
   const publishedAssets = assets.filter((a) => a.status === "PUBLISHED");
+  const draftingIdeas = ideas.filter((i) => i.status === "CLAIMED" || i.status === "DRAFTING");
+
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const ideasToday = ideas.filter((i) => new Date(i.created_at).getTime() >= startOfToday.getTime());
+
+  const assetsWithCost = assets.filter((a) => typeof a.generation_cost === "number");
+  const avgUnitCost = assetsWithCost.length > 0
+    ? assetsWithCost.reduce((sum, a) => sum + (a.generation_cost || 0), 0) / assetsWithCost.length
+    : null;
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
@@ -80,7 +90,7 @@ export default function MissionControlPage() {
             className="flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/20 transition-all"
           >
             <FileText className="w-3.5 h-3.5" />
-            <span>Editorial Staging (1)</span>
+            <span>Editorial Staging ({pendingReviewAssets.length})</span>
           </Link>
         </div>
       </div>
@@ -94,8 +104,8 @@ export default function MissionControlPage() {
             <Sparkles className="w-4 h-4 text-[#00C9A7]" />
           </div>
           <div className="text-2xl font-bold text-[#F1F5F9] flex items-baseline gap-2">
-            <span>{ideas.length || 4}</span>
-            <span className="text-xs font-normal text-[#00C9A7] font-mono">+2 today</span>
+            <span>{ideas.length}</span>
+            <span className="text-xs font-normal text-[#00C9A7] font-mono">+{ideasToday.length} today</span>
           </div>
           <div className="text-[11px] text-[#64748B]">
             Google Trends & Trade Forum Signals
@@ -110,8 +120,10 @@ export default function MissionControlPage() {
             <span className="w-2 h-2 rounded-full bg-[#ff6b4a] animate-ping" />
           </div>
           <div className="text-2xl font-bold text-[#F1F5F9] flex items-baseline gap-2">
-            <span>{pendingReviewAssets.length || 1}</span>
-            <span className="text-xs font-semibold text-[#ff6b4a] bg-[#ff6b4a]/10 px-2 py-0.5 rounded">Action Required</span>
+            <span>{pendingReviewAssets.length}</span>
+            {pendingReviewAssets.length > 0 && (
+              <span className="text-xs font-semibold text-[#ff6b4a] bg-[#ff6b4a]/10 px-2 py-0.5 rounded">Action Required</span>
+            )}
           </div>
           <div className="text-[11px] text-[#94A3B8]">
             Staged & verified by Critic agent
@@ -125,11 +137,10 @@ export default function MissionControlPage() {
             <CheckCircle2 className="w-4 h-4 text-[#00C9A7]" />
           </div>
           <div className="text-2xl font-bold text-[#F1F5F9] flex items-baseline gap-2">
-            <span>{publishedAssets.length || 1}</span>
-            <span className="text-xs font-normal text-[#00C9A7] font-mono">100% Verified</span>
+            <span>{publishedAssets.length}</span>
           </div>
           <div className="text-[11px] text-[#64748B]">
-            Blog • LinkedIn • Facebook live
+            Blog • Facebook live
           </div>
         </div>
 
@@ -140,8 +151,7 @@ export default function MissionControlPage() {
             <DollarSign className="w-4 h-4 text-[#00C9A7]" />
           </div>
           <div className="text-2xl font-bold text-[#F1F5F9] flex items-baseline gap-2">
-            <span>$0.038</span>
-            <span className="text-xs font-normal text-[#00C9A7] font-mono">-92% vs humans</span>
+            <span>{avgUnitCost !== null ? `$${avgUnitCost.toFixed(3)}` : "—"}</span>
           </div>
           <div className="text-[11px] text-[#64748B]">
             Qwen3.7-max + Image3.0 tokens
@@ -164,28 +174,28 @@ export default function MissionControlPage() {
             <div className="text-xs font-bold text-[#F1F5F9] group-hover:text-[#00C9A7] flex items-center justify-center gap-1.5">
               <span>✨ Ingested</span>
             </div>
-            <div className="text-lg font-bold text-[#00C9A7] font-mono mt-1">{ideas.length || 4}</div>
+            <div className="text-lg font-bold text-[#00C9A7] font-mono mt-1">{ideas.length}</div>
           </Link>
 
-          <Link href="/drafts" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] transition-all group">
+          <Link href="/ideas" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] transition-all group">
             <div className="text-xs font-bold text-[#F1F5F9] group-hover:text-[#00C9A7] flex items-center justify-center gap-1.5">
               <span>✍️ Drafting</span>
             </div>
-            <div className="text-lg font-bold text-[#64748B] font-mono mt-1">0</div>
+            <div className="text-lg font-bold text-[#64748B] font-mono mt-1">{draftingIdeas.length}</div>
           </Link>
 
           <Link href="/drafts" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#ff6b4a]/40 transition-all group shadow-sm">
             <div className="text-xs font-bold text-[#ff6b4a] flex items-center justify-center gap-1.5">
               <span>🔍 Review</span>
             </div>
-            <div className="text-lg font-bold text-[#ff6b4a] font-mono mt-1">{pendingReviewAssets.length || 1}</div>
+            <div className="text-lg font-bold text-[#ff6b4a] font-mono mt-1">{pendingReviewAssets.length}</div>
           </Link>
 
           <Link href="/published" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#00C9A7]/40 transition-all group shadow-sm">
             <div className="text-xs font-bold text-[#00C9A7] flex items-center justify-center gap-1.5">
               <span>✅ Published</span>
             </div>
-            <div className="text-lg font-bold text-[#00C9A7] font-mono mt-1">{publishedAssets.length || 4}</div>
+            <div className="text-lg font-bold text-[#00C9A7] font-mono mt-1">{publishedAssets.length}</div>
           </Link>
         </div>
       </div>

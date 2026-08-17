@@ -371,9 +371,10 @@ export default function EditorialStudio({
           body: JSON.stringify({
             status: "PUBLISHED",
             published_at: new Date().toISOString(),
+            // LinkedIn/Twitter publish nodes are disabled in 02_idea_to_asset, so only
+            // list channels the pipeline actually posts to.
             published_urls: [
               `https://getminions.ai/blog/${activeAsset.slug}`,
-              `https://linkedin.com/company/getminionsai`,
               `https://facebook.com/getminionsai`
             ]
           })

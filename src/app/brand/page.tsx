@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Palette, 
   ShieldCheck, 
@@ -420,6 +420,22 @@ export default function BrandStudioPage() {
   const [selectedAudience, setSelectedAudience] = useState<string>("ALL");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
+  // Load real directives from the database on mount
+  useEffect(() => {
+    async function loadDirectives() {
+      try {
+        const res = await fetch("/api/brand/directives");
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) setDirectives(data);
+        }
+      } catch {
+        // Keep the local fallback list on failure
+      }
+    }
+    loadDirectives();
+  }, []);
+
   // Logo Studio State
   const [logoBgMode, setLogoBgMode] = useState<"dark" | "white" | "teal" | "checker">("dark");
   const [activeLogoVariant, setActiveLogoVariant] = useState<"inverted" | "primary" | "teal">("inverted");
@@ -511,33 +527,62 @@ export default function BrandStudioPage() {
     })));
   };
 
-  const handleAddDirective = (e: React.FormEvent) => {
+  const handleAddDirective = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newKey || !newContent) return;
 
-    const item: BrandDirectiveItem = {
-      id: `DIR-${String(Math.floor(Math.random() * 9000) + 1000)}`,
-      category: newCat,
-      key: newKey.toLowerCase().replace(/\s+/g, "_"),
-      content: newContent,
-      priority: newPriority,
-      audience_scope: newAudience,
-      is_active: true,
-      updated_at: new Date().toISOString()
-    };
-
-    setDirectives([item, ...directives]);
-    setShowAddModal(false);
-    setNewKey("");
-    setNewContent("");
+    try {
+      const res = await fetch("/api/brand/directives", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: newCat,
+          key: newKey,
+          content: newContent,
+          priority: newPriority,
+          audience_scope: newAudience
+        })
+      });
+      if (res.ok) {
+        const created: BrandDirectiveItem = await res.json();
+        setDirectives(prev => [created, ...prev]);
+      }
+    } catch {
+      // No local fallback: a directive that only exists client-side would silently
+      // never reach the pipeline's actual brand context query.
+    } finally {
+      setShowAddModal(false);
+      setNewKey("");
+      setNewContent("");
+    }
   };
 
-  const toggleDirective = (id: string) => {
-    setDirectives(directives.map(d => d.id === id ? { ...d, is_active: !d.is_active } : d));
+  const toggleDirective = async (id: string) => {
+    const target = directives.find(d => d.id === id);
+    if (!target) return;
+    const nextActive = !target.is_active;
+    setDirectives(directives.map(d => d.id === id ? { ...d, is_active: nextActive } : d));
+    try {
+      await fetch(`/api/brand/directives/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_active: nextActive })
+      });
+    } catch {
+      // Revert on failure so the UI never claims a state the DB doesn't have
+      setDirectives(directives.map(d => d.id === id ? { ...d, is_active: !nextActive } : d));
+    }
   };
 
-  const deleteDirective = (id: string) => {
+  const deleteDirective = async (id: string) => {
+    const previous = directives;
     setDirectives(directives.filter(d => d.id !== id));
+    try {
+      const res = await fetch(`/api/brand/directives/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Delete failed");
+    } catch {
+      setDirectives(previous);
+    }
   };
 
   const handleAddBannedWord = () => {

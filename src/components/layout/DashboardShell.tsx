@@ -44,55 +44,65 @@ interface DashboardShellProps {
   children: React.ReactNode;
 }
 
-const navItems = [
-  {
-    name: "Mission Control",
-    href: "/",
-    icon: LayoutDashboard,
-    badge: "Live",
-    badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
-  },
-  {
-    name: "Idea Stream",
-    href: "/ideas",
-    icon: Sparkles,
-    badge: "4 Ready",
-    badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
-  },
-  {
-    name: "Editorial Studio",
-    href: "/editorial",
-    icon: FileText,
-    badge: "1 Review",
-    badgeColor: "bg-[#ff6b4a]/10 text-[#ff6b4a] border-[#ff6b4a]/30",
-  },
-  {
-    name: "Published Posts",
-    href: "/published",
-    icon: Globe,
-    badge: "18 Live",
-    badgeColor: "bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/30",
-  },
-  {
-    name: "Brand & Directives",
-    href: "/brand",
-    icon: Palette,
-    badge: "12 Directives",
-    badgeColor: "bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/30",
-  },
-  {
-    name: "Cost & Telemetry",
-    href: "/telemetry",
-    icon: BarChart3,
-  },
-  {
-    name: "Agent Fleet",
-    href: "/fleet",
-    icon: Bot,
-    badge: "4 Active",
-    badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
-  },
-];
+interface NavCounts {
+  ideasReady: number;
+  pendingReview: number;
+  publishedLive: number;
+  directivesCount: number;
+  activeAgents: number;
+}
+
+function buildNavItems(counts: NavCounts | null) {
+  return [
+    {
+      name: "Mission Control",
+      href: "/",
+      icon: LayoutDashboard,
+      badge: "Live",
+      badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
+    },
+    {
+      name: "Idea Stream",
+      href: "/ideas",
+      icon: Sparkles,
+      badge: counts ? `${counts.ideasReady} Ready` : undefined,
+      badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
+    },
+    {
+      name: "Editorial Studio",
+      href: "/editorial",
+      icon: FileText,
+      badge: counts ? `${counts.pendingReview} Review` : undefined,
+      badgeColor: "bg-[#ff6b4a]/10 text-[#ff6b4a] border-[#ff6b4a]/30",
+    },
+    {
+      name: "Published Posts",
+      href: "/published",
+      icon: Globe,
+      badge: counts ? `${counts.publishedLive} Live` : undefined,
+      badgeColor: "bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/30",
+    },
+    {
+      name: "Brand & Directives",
+      href: "/brand",
+      icon: Palette,
+      badge: counts ? `${counts.directivesCount} Directives` : undefined,
+      badgeColor: "bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/30",
+    },
+    {
+      name: "Cost & Telemetry",
+      href: "/telemetry",
+      icon: BarChart3,
+    },
+    {
+      name: "Agent Fleet",
+      href: "/fleet",
+      icon: Bot,
+      badge: counts ? `${counts.activeAgents} Active` : undefined,
+      badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
+    },
+  ];
+}
 
 export default function DashboardShell({ children }: DashboardShellProps) {
   const pathname = usePathname();
@@ -102,6 +112,42 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
   // Mobile menu drawer state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Real nav badge counts, fetched from the DB. null until loaded, so badges
+  // stay hidden rather than showing a stale/fake number before data arrives.
+  const [navCounts, setNavCounts] = useState<NavCounts | null>(null);
+
+  useEffect(() => {
+    async function loadNavCounts() {
+      try {
+        const [ideasRes, assetsRes, directivesRes, agentsRes] = await Promise.all([
+          fetch("/api/ideas"),
+          fetch("/api/assets"),
+          fetch("/api/brand/directives"),
+          fetch("/api/agents"),
+        ]);
+        const [ideas, assets, directives, agents] = await Promise.all([
+          ideasRes.ok ? ideasRes.json() : [],
+          assetsRes.ok ? assetsRes.json() : [],
+          directivesRes.ok ? directivesRes.json() : [],
+          agentsRes.ok ? agentsRes.json() : [],
+        ]);
+
+        setNavCounts({
+          ideasReady: Array.isArray(ideas) ? ideas.filter((i: { status?: string }) => i.status === "HARVESTED" || i.status === "REFINED").length : 0,
+          pendingReview: Array.isArray(assets) ? assets.filter((a: { status?: string }) => a.status === "PENDING_REVIEW").length : 0,
+          publishedLive: Array.isArray(assets) ? assets.filter((a: { status?: string }) => a.status === "PUBLISHED").length : 0,
+          directivesCount: Array.isArray(directives) ? directives.length : 0,
+          activeAgents: Array.isArray(agents) ? agents.filter((a: { status?: string }) => a.status === "ACTIVE").length : (Array.isArray(agents) ? agents.length : 0),
+        });
+      } catch {
+        // Leave navCounts null: badges stay hidden rather than lying
+      }
+    }
+    loadNavCounts();
+  }, []);
+
+  const navItems = buildNavItems(navCounts);
 
   const currentUser: AdminUser = {
     email: "xpeedlab@gmail.com",
@@ -139,10 +185,11 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       setIsHarvesting(false);
       setNotification(data.message || "✅ 2 New High-Signal Signals Harvested into Stream!");
       setTimeout(() => setNotification(null), 6000);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setIsHarvesting(false);
-      setNotification("✅ Autonomous Harvester Cycle Completed: 2 New Ideas Staged.");
-      setTimeout(() => setNotification(null), 5000);
+      const message = e instanceof Error ? e.message : "Could not reach the harvester pipeline.";
+      setNotification(`⚠️ Harvest request failed: ${message}`);
+      setTimeout(() => setNotification(null), 6000);
     }
   };
 
