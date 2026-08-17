@@ -4,25 +4,35 @@ import { NextResponse } from "next/server";
 export default auth((req) => {
   const { pathname } = req.nextUrl;
 
-  // 1. Always allow auth endpoints, webhooks, login page, and public static assets
+  // 1. Always allow auth endpoints, webhooks, login page, and static public assets
   if (
     pathname.startsWith("/login") ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/webhooks") ||
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/images") ||
-    pathname.startsWith("/icons") ||
+    pathname.startsWith("/images/") ||
+    pathname.startsWith("/icons/") ||
     pathname === "/manifest.json" ||
     pathname === "/manifest.webmanifest" ||
     pathname === "/favicon.ico" ||
     pathname === "/icon.svg" ||
     pathname === "/sw.js" ||
-    pathname.includes(".")
+    pathname.endsWith(".png") ||
+    pathname.endsWith(".jpg") ||
+    pathname.endsWith(".svg") ||
+    pathname.endsWith(".ico")
   ) {
     return NextResponse.next();
   }
 
-  const isLoggedIn = !!req.auth;
+  // Check Auth.js session object OR session cookie token
+  const sessionToken =
+    req.cookies.get("authjs.session-token")?.value ||
+    req.cookies.get("__Secure-authjs.session-token")?.value ||
+    req.cookies.get("next-auth.session-token")?.value ||
+    req.cookies.get("__Secure-next-auth.session-token")?.value;
+
+  const isLoggedIn = !!req.auth || !!sessionToken;
 
   // 2. Protect API routes against unauthorized access
   if (pathname.startsWith("/api/")) {
@@ -57,5 +67,13 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg|images|icons).*)"],
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico, icon.svg, images, icons
+     */
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|images|icons).*)",
+  ],
 };
