@@ -646,7 +646,7 @@ export default function EditorialStudio({
                 <div className="min-w-0 flex-1 space-y-0.5">
                   <div className="flex items-center justify-between gap-1">
                     <span className={`text-[10px] font-mono font-bold ${isCurrent ? "text-[#00C9A7]" : "text-[#94A3B8]"}`}>
-                      {asset.id}
+                      Draft #{idx + 1}
                     </span>
                     <span
                       className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded ${
@@ -696,7 +696,7 @@ export default function EditorialStudio({
             <div className="flex items-center gap-2 text-xs font-mono flex-wrap">
               <span className="text-[#64748B] tracking-wider uppercase font-semibold">Active Review Target</span>
               <span className="text-[#2A3D52]">/</span>
-              <span className="text-[#00C9A7] font-bold">{activeAsset.id}</span>
+              <span className="text-[#00C9A7] font-bold">Draft {currentAssetIndex + 1} of {assets.length}</span>
               <span className="text-[#2A3D52]">•</span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/30">
                 v{activeAsset.version}.0
@@ -2059,7 +2059,7 @@ export default function EditorialStudio({
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0F1419]/95 backdrop-blur-lg border-t border-[#1F2D3D] p-3 px-4 flex items-center justify-between gap-3 shadow-2xl">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 text-[10px] font-mono">
-            <span className="font-bold text-[#00C9A7]">{activeAsset.id}</span>
+            <span className="font-bold text-[#00C9A7]">Draft {currentAssetIndex + 1}/{assets.length}</span>
             <span className="text-[#64748B]">•</span>
             <span className="text-[#94A3B8]">{wordCount}w</span>
             <span className="text-[#64748B]">•</span>

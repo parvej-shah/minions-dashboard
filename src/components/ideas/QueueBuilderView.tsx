@@ -398,9 +398,6 @@ export default function QueueBuilderView({
                         <span className="text-[10px] font-medium bg-[#070B0F] text-[#94A3B8] px-2 py-0.2 rounded border border-[#1F2D3D]">
                           {idea.target_trade || "HVAC"}
                         </span>
-                        <span className="text-[10px] font-mono text-[#64748B]">
-                          {idea.ideaId || idea.id}
-                        </span>
                       </div>
 
                       <div className="text-xs font-semibold text-white group-hover:text-[#00C9A7] line-clamp-1 transition-colors">
