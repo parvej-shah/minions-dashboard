@@ -272,7 +272,7 @@ export default function QueueBuilderView({
             )}
           </div>
           <p className="text-xs text-[#94A3B8] max-w-2xl">
-            Drag high-signal topics from the <strong className="text-white">Harvested Pool</strong> into the <strong className="text-[#00C9A7]">Production Queue</strong>. Every 30 minutes, Workflow 02 automatically drafts the <strong className="text-white">#1 item</strong> in line.
+            Drag high-signal topics from the <strong className="text-white">Harvested Pool</strong> into the <strong className="text-[#00C9A7]">Production Queue</strong>. Workflow 02 runs <strong className="text-white">twice daily (09:00 & 15:00 UTC)</strong>, autonomously drafting the <strong className="text-[#00C9A7]">#1 item</strong> from the queue on each run.
           </p>
         </div>
 
@@ -564,10 +564,10 @@ export default function QueueBuilderView({
           <div className="p-3 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-[11px] text-[#64748B] space-y-1">
             <div className="flex items-center justify-between text-white font-semibold">
               <span>Auto-Draft Schedule:</span>
-              <span className="text-[#00C9A7]">Every 30 mins</span>
+              <span className="text-[#00C9A7] font-mono font-bold">Twice Daily (09:00 & 15:00 UTC)</span>
             </div>
             <div>
-              When the timer runs, Workflow 02 locks item #1, generates the full article & cover art, and advances the queue.
+              On each run, Workflow 02 locks item #1, generates the full long-form article & cover art, and advances the remaining queue.
             </div>
           </div>
         </div>
