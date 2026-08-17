@@ -44,7 +44,8 @@ interface DashboardShellProps {
   children: React.ReactNode;
 }
 
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signIn, signOut } from "next-auth/react";
+import AdminAuthModal from "@/components/auth/AdminAuthModal";
 
 interface NavCounts {
   ideasReady: number;
@@ -114,6 +115,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
   // Mobile menu drawer state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   // Real nav badge counts, fetched from the DB. null until loaded, so badges
   // stay hidden rather than showing a stale/fake number before data arrives.
@@ -385,21 +387,47 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             </span>
           </a>
 
-          <div
-            className="w-full flex items-center justify-between text-xs p-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] text-[#94A3B8]"
-          >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-full bg-[#00C9A7]/20 text-[#00C9A7] font-bold text-xs flex items-center justify-center border border-[#00C9A7]/40 shrink-0">
-                X
-              </div>
-              <div className="text-[11px] leading-tight text-left min-w-0">
-                <div className="font-semibold text-[#F1F5F9] truncate">XpeedLab Admin</div>
-                <div className="text-[10px] text-[#64748B] font-mono truncate">xpeedlab@gmail.com</div>
+          {session ? (
+            <div className="w-full flex items-center justify-between text-xs p-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] text-[#94A3B8]">
+              <button
+                onClick={() => setAuthModalOpen(true)}
+                className="flex items-center gap-2.5 min-w-0 flex-1 text-left cursor-pointer hover:opacity-90 transition-opacity"
+                title="View Admin Auth Details"
+              >
+                {session.user?.image ? (
+                  <img src={session.user.image} alt={session.user.name || "User"} className="w-7 h-7 rounded-full border border-[#00C9A7]/40 shrink-0 object-cover" />
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-[#00C9A7]/20 text-[#00C9A7] font-bold text-xs flex items-center justify-center border border-[#00C9A7]/40 shrink-0">
+                    {session.user?.name ? session.user.name[0].toUpperCase() : (session.user?.email ? session.user.email[0].toUpperCase() : "A")}
+                  </div>
+                )}
+                <div className="text-[11px] leading-tight text-left min-w-0">
+                  <div className="font-semibold text-[#F1F5F9] truncate">{session.user?.name || "Admin"}</div>
+                  <div className="text-[10px] text-[#64748B] font-mono truncate">{session.user?.email}</div>
+                </div>
+              </button>
+
+              <div className="flex items-center gap-1 shrink-0 ml-1">
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/20">ADMIN</span>
+                <button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  title="Sign Out"
+                  className="p-1.5 rounded-lg text-[#64748B] hover:text-[#ff6b4a] hover:bg-[#ff6b4a]/10 transition-colors cursor-pointer"
+                  aria-label="Sign Out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
-
-            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/20">ADMIN</span>
-          </div>
+          ) : (
+            <button
+              onClick={() => signIn("google", { callbackUrl: "/" })}
+              className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#00C9A7]/10 hover:bg-[#00C9A7]/20 border border-[#00C9A7]/30 hover:border-[#00C9A7] text-xs font-bold text-[#00C9A7] transition-all cursor-pointer shadow-xs"
+            >
+              <Lock className="w-3.5 h-3.5" />
+              <span>Sign In with Google</span>
+            </button>
+          )}
         </div>
       </aside>
 
@@ -482,15 +510,44 @@ export default function DashboardShell({ children }: DashboardShellProps) {
                 <ArrowUpRight className="w-3.5 h-3.5" />
               </a>
 
-              <div className="w-full p-3 rounded-xl bg-[#161d24] border border-[#1f2b37] flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-6 h-6 rounded-full bg-[#00C9A7]/20 text-[#00C9A7] font-bold text-xs flex items-center justify-center shrink-0">
-                    X
+              {session ? (
+                <div className="w-full p-3 rounded-xl bg-[#161d24] border border-[#1f2b37] flex items-center justify-between text-xs">
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      setAuthModalOpen(true);
+                    }}
+                    className="flex items-center gap-2 min-w-0 flex-1 text-left"
+                  >
+                    {session.user?.image ? (
+                      <img src={session.user.image} alt={session.user.name || "User"} className="w-6 h-6 rounded-full border border-[#00C9A7]/40 shrink-0 object-cover" />
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-[#00C9A7]/20 text-[#00C9A7] font-bold text-xs flex items-center justify-center shrink-0">
+                        {session.user?.name ? session.user.name[0].toUpperCase() : "A"}
+                      </div>
+                    )}
+                    <span className="text-white font-mono text-[11px] truncate">{session.user?.email}</span>
+                  </button>
+                  <div className="flex items-center gap-1.5 ml-2">
+                    <span className="text-[#00C9A7] font-semibold text-[10px]">ADMIN</span>
+                    <button
+                      onClick={() => signOut({ callbackUrl: "/" })}
+                      className="p-1 text-[#64748B] hover:text-[#ff6b4a]"
+                      title="Sign Out"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                    </button>
                   </div>
-                  <span className="text-white font-mono text-[11px] truncate">xpeedlab@gmail.com</span>
                 </div>
-                <span className="text-[#00C9A7] font-semibold text-[10px] shrink-0 ml-2">ADMIN</span>
-              </div>
+              ) : (
+                <button
+                  onClick={() => signIn("google", { callbackUrl: "/" })}
+                  className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#00C9A7]/10 hover:bg-[#00C9A7]/20 border border-[#00C9A7]/30 text-xs font-bold text-[#00C9A7]"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>Sign In with Google</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -613,6 +670,23 @@ export default function DashboardShell({ children }: DashboardShellProps) {
           <span className="text-[10px] font-medium">Brand</span>
         </Link>
       </nav>
+
+      {/* ADMIN AUTH MODAL */}
+      <AdminAuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        currentUser={session?.user ? {
+          email: session.user.email || "",
+          name: session.user.name || "Admin",
+          role: ((session.user as any)?.role as any) || "SYSTEM_ADMIN",
+          authenticated_at: new Date().toISOString()
+        } : null}
+        onLogin={() => setAuthModalOpen(false)}
+        onLogout={() => {
+          setAuthModalOpen(false);
+          signOut({ callbackUrl: "/" });
+        }}
+      />
     </div>
   );
 }
