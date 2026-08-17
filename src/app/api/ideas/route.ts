@@ -37,8 +37,13 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const count = await prisma.idea.count();
-    const id = `IDEA-${String(count + 1).padStart(4, "0")}`;
+    const existingIds = await prisma.idea.findMany({ select: { id: true } });
+    const maxNum = existingIds.reduce((max, row) => {
+      const match = row.id.match(/^IDEA-(\d+)$/);
+      const num = match ? parseInt(match[1], 10) : 0;
+      return num > max ? num : max;
+    }, 0);
+    const id = `IDEA-${String(maxNum + 1).padStart(4, "0")}`;
     const rawIdea = body.title || body.raw_idea || "Untitled Signal";
     const angle = body.angle || body.excerpt || "Operational analysis and technical trade implications";
 

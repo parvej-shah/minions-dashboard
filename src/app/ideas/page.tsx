@@ -274,48 +274,23 @@ export default function IdeaStreamPage() {
       if (res.ok) {
         const created: IdeaItem = await res.json();
         setIdeas(prev => [created, ...prev]);
+        setIsInjectOpen(false);
+        setFormTitle("");
+        setFormExcerpt("");
+        setFormTags(["Manual", formTrade]);
+        setFormTagsInput("");
+        setToastMessage(`Idea ${created.id} injected into the live stream.`);
+        setTimeout(() => setToastMessage(null), 3000);
       } else {
-        const localCreated: IdeaItem = {
-          id: `IDEA-${String(Math.floor(Math.random() * 9000) + 1000)}`,
-          ideaId: `IDEA-${String(Math.floor(Math.random() * 9000) + 1000)}`,
-          title: payload.title,
-          raw_idea: payload.title,
-          excerpt: payload.excerpt,
-          angle: payload.angle,
-          audience: payload.audience,
-          target_trade: payload.trade,
-          source: "MANUAL",
-          status: "HARVESTED",
-          tags: payload.tags,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        setIdeas(prev => [localCreated, ...prev]);
+        const errBody = await res.json().catch(() => ({}));
+        setToastMessage(`Failed to inject idea: ${errBody.error || res.statusText}`);
+        setTimeout(() => setToastMessage(null), 5000);
       }
-    } catch {
-      const localCreated: IdeaItem = {
-        id: `IDEA-${String(Math.floor(Math.random() * 9000) + 1000)}`,
-        ideaId: `IDEA-${String(Math.floor(Math.random() * 9000) + 1000)}`,
-        title: payload.title,
-        raw_idea: payload.title,
-        excerpt: payload.excerpt,
-        angle: payload.angle,
-        audience: payload.audience,
-        target_trade: payload.trade,
-        source: "MANUAL",
-        status: "HARVESTED",
-        tags: payload.tags,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-      setIdeas(prev => [localCreated, ...prev]);
+    } catch (err) {
+      setToastMessage(`Failed to inject idea: ${err instanceof Error ? err.message : "network error"}`);
+      setTimeout(() => setToastMessage(null), 5000);
     } finally {
       setIsSubmitting(false);
-      setIsInjectOpen(false);
-      setFormTitle("");
-      setFormExcerpt("");
-      setFormTags(["Manual", formTrade]);
-      setFormTagsInput("");
     }
   };
 
