@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Download, X, Smartphone, Share, PlusSquare, Check } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -9,6 +10,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function InstallPrompt() {
+  const pathname = usePathname();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
@@ -101,7 +103,7 @@ export function InstallPrompt() {
     localStorage.setItem("minions_pwa_dismissed_until", (Date.now() + 7 * 24 * 60 * 60 * 1000).toString());
   };
 
-  if (isStandalone || !isVisible) {
+  if (isStandalone || !isVisible || pathname === "/login") {
     return null;
   }
 
