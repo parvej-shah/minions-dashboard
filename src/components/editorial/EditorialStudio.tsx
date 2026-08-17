@@ -28,6 +28,8 @@ import {
   BarChart2,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   X,
   Layers,
   CheckCircle,
@@ -153,17 +155,64 @@ export default function EditorialStudio({
     }
   }, [selectedAssetId, assets]);
 
-  // Global Keyboard Shortcut: Cmd+S / Ctrl+S to Save
+  // Queue indices & navigation helpers
+  const currentAssetIndex = assets.findIndex((a) => a.id === activeAsset.id);
+  const pendingAssets = assets.filter((a) => a.status === "PENDING_REVIEW");
+  const pendingCount = pendingAssets.length;
+
+  const handleNextDraft = () => {
+    if (assets.length <= 1) return;
+    const nextIndex = (currentAssetIndex + 1) % assets.length;
+    setSelectedAssetId(assets[nextIndex].id);
+  };
+
+  const handlePrevDraft = () => {
+    if (assets.length <= 1) return;
+    const prevIndex = (currentAssetIndex - 1 + assets.length) % assets.length;
+    setSelectedAssetId(assets[prevIndex].id);
+  };
+
+  // Global Keyboard Shortcuts: Cmd+S (Save), Cmd+Enter (Publish), [ / ] (Prev / Next Draft)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger navigation while typing inside textarea/input unless using Cmd/Ctrl modifier
+      const target = e.target as HTMLElement;
+      const isInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA";
+
       if ((e.metaKey || e.ctrlKey) && e.key === "s") {
         e.preventDefault();
         handleSaveDraft();
+        return;
+      }
+
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        if (publishPhase === "IDLE" && activeAsset.status !== "PUBLISHED") {
+          handleApproveAndPublish();
+        }
+        return;
+      }
+
+      // Quick navigation keys: '[' and ']' when not actively typing in an input
+      if (!isInput) {
+        if (e.key === "[" || (e.altKey && e.key === "ArrowLeft")) {
+          e.preventDefault();
+          handlePrevDraft();
+        } else if (e.key === "]" || (e.altKey && e.key === "ArrowRight")) {
+          e.preventDefault();
+          handleNextDraft();
+        } else if (e.key === "1") {
+          setEditorMode("preview");
+        } else if (e.key === "2") {
+          setEditorMode("edit");
+        } else if (e.key === "3") {
+          setEditorMode("split");
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [editedTitle, editedHook, editedBody, editedLinkedin, editedFacebook, editedTwitter, activeAsset]);
+  }, [editedTitle, editedHook, editedBody, editedLinkedin, editedFacebook, editedTwitter, activeAsset, currentAssetIndex, assets, publishPhase]);
 
   const copyToClipboard = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
@@ -317,6 +366,15 @@ export default function EditorialStudio({
       } catch (e) {
         console.error("Failed to persist publish status:", e);
       }
+
+      // Seamless Auto-Advance: if there are more pending drafts in queue, transition smoothly to next one
+      const otherPending = updatedAssets.filter((a) => a.id !== activeAsset.id && a.status === "PENDING_REVIEW");
+      if (otherPending.length > 0) {
+        setTimeout(() => {
+          setSelectedAssetId(otherPending[0].id);
+          setPublishPhase("IDLE");
+        }, 2400);
+      }
     }, 2400);
   };
 
@@ -369,29 +427,182 @@ export default function EditorialStudio({
   const facebookVariant = activeAsset.social_variants?.find((v) => v.platform === "FACEBOOK");
   const twitterVariant = activeAsset.social_variants?.find((v) => v.platform === "TWITTER");
 
+  // Filtered queue items based on active queue filter
+  const queueAssets = listFilter === "PENDING_REVIEW"
+    ? assets.filter((a) => a.status === "PENDING_REVIEW")
+    : listFilter === "PUBLISHED"
+      ? assets.filter((a) => a.status === "PUBLISHED")
+      : assets;
+
+  const currentQueueIndex = queueAssets.findIndex((a) => a.id === activeAsset.id);
+
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-32 lg:pb-16">
-      {/* ── Top Header & Draft Switcher ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-5">
-        <div className="flex items-center gap-3.5">
+      
+      {/* ── 1. ACTIVE REVIEW QUEUE RIBBON (Frictionless Queue Management) ── */}
+      <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-4 space-y-3 shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1F2D3D]/60 pb-3">
+          
+          {/* Left: Queue Title & Status Pills */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Layers className="w-4 h-4 text-[#00C9A7]" />
+              <span className="text-xs font-bold text-[#F1F5F9] uppercase tracking-wider font-mono">
+                Editorial Review Queue
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5 bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D]">
+              <button
+                onClick={() => setListFilter("PENDING_REVIEW")}
+                className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
+                  listFilter === "PENDING_REVIEW"
+                    ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
+                    : "text-[#94A3B8] hover:text-[#F1F5F9]"
+                }`}
+              >
+                Needs Review ({pendingCount})
+              </button>
+              <button
+                onClick={() => setListFilter("ALL")}
+                className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
+                  listFilter === "ALL"
+                    ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
+                    : "text-[#94A3B8] hover:text-[#F1F5F9]"
+                }`}
+              >
+                All Drafts ({assets.length})
+              </button>
+              <button
+                onClick={() => setListFilter("PUBLISHED")}
+                className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
+                  listFilter === "PUBLISHED"
+                    ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
+                    : "text-[#94A3B8] hover:text-[#F1F5F9]"
+                }`}
+              >
+                Published ({assets.filter(a => a.status === "PUBLISHED").length})
+              </button>
+            </div>
+          </div>
+
+          {/* Right: Quick Sequential Navigation & Keyboard Shortcuts Pill */}
+          <div className="flex items-center gap-2 self-end sm:self-auto">
+            <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono text-[#64748B] mr-1">
+              <kbd className="px-1.5 py-0.5 rounded bg-[#070B0F] border border-[#1F2D3D] text-[#94A3B8]">[</kbd>
+              <kbd className="px-1.5 py-0.5 rounded bg-[#070B0F] border border-[#1F2D3D] text-[#94A3B8]">]</kbd>
+              <span>Switch Draft</span>
+            </span>
+
+            <div className="flex items-center gap-1 bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D]">
+              <button
+                onClick={handlePrevDraft}
+                title="Previous Draft (Key: [ )"
+                className="px-2 py-1 rounded-lg text-xs font-bold text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] transition-all flex items-center gap-1 cursor-pointer"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Prev</span>
+              </button>
+
+              <span className="px-2 text-[11px] font-mono font-bold text-[#00C9A7] select-none">
+                {currentAssetIndex + 1} / {assets.length}
+              </span>
+
+              <button
+                onClick={handleNextDraft}
+                title="Next Draft (Key: ] )"
+                className="px-2 py-1 rounded-lg text-xs font-bold text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] transition-all flex items-center gap-1 cursor-pointer"
+              >
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Horizontal Queue Card Rail (Tactile 1-Click Draft Switcher) */}
+        <div className="flex items-center gap-2.5 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
+          {queueAssets.map((asset, idx) => {
+            const isCurrent = asset.id === activeAsset.id;
+            return (
+              <button
+                key={asset.id}
+                onClick={() => setSelectedAssetId(asset.id)}
+                className={`flex items-center gap-3 p-2.5 px-3 rounded-xl border text-left shrink-0 transition-all cursor-pointer min-w-[240px] max-w-[280px] ${
+                  isCurrent
+                    ? "bg-[#161D26] border-[#00C9A7] shadow-md shadow-[#00C9A7]/15 ring-1 ring-[#00C9A7]/40"
+                    : "bg-[#070B0F] border-[#1F2D3D] hover:border-[#2A3D52] hover:bg-[#161D26]/70 opacity-75 hover:opacity-100"
+                }`}
+              >
+                {/* Micro Thumbnail */}
+                <div className="w-9 h-9 rounded-lg overflow-hidden bg-[#161D26] border border-[#1F2D3D] shrink-0 flex items-center justify-center">
+                  {asset.hero_image_url ? (
+                    <img
+                      src={asset.hero_image_url}
+                      alt={asset.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <ImageIcon className="w-4 h-4 text-[#64748B]" />
+                  )}
+                </div>
+
+                {/* Info block */}
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className={`text-[10px] font-mono font-bold ${isCurrent ? "text-[#00C9A7]" : "text-[#94A3B8]"}`}>
+                      {asset.id}
+                    </span>
+                    <span
+                      className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded ${
+                        asset.status === "PUBLISHED"
+                          ? "bg-[#00C9A7]/20 text-[#00C9A7]"
+                          : asset.status === "PENDING_REVIEW"
+                            ? "bg-[#F59E0B]/20 text-[#F59E0B]"
+                            : "bg-[#64748B]/20 text-[#94A3B8]"
+                      }`}
+                    >
+                      {asset.status === "PENDING_REVIEW" ? "Needs Review" : asset.status}
+                    </span>
+                  </div>
+
+                  <div className="text-xs font-semibold text-[#F1F5F9] truncate">
+                    {asset.title}
+                  </div>
+
+                  <div className="flex items-center gap-2 text-[10px] text-[#64748B] font-mono">
+                    <span>{asset.audience}</span>
+                    <span>•</span>
+                    <span>{asset.claim_checks ? `${asset.claim_checks.filter(c => c.verified === 'Y').length}/${asset.claim_checks.length} Claims` : 'Draft'}</span>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── 2. Top Header / Active Draft Title ── */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-4">
+        <div className="flex items-center gap-3.5 min-w-0">
           {isStandaloneRoute && (
             <Link
               href="/editorial"
-              className="p-2.5 rounded-xl bg-[#0F1419] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] hover:border-[#2A3D52] transition-all"
+              className="p-2.5 rounded-xl bg-[#0F1419] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] hover:border-[#2A3D52] transition-all shrink-0"
               title="Return to Editorial Studio"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
           )}
 
-          <div>
-            <div className="flex items-center gap-2 text-xs font-mono">
-              <span className="text-[#64748B] tracking-wider uppercase font-semibold">Editorial Studio</span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-xs font-mono flex-wrap">
+              <span className="text-[#64748B] tracking-wider uppercase font-semibold">Active Review Target</span>
               <span className="text-[#2A3D52]">/</span>
               <span className="text-[#00C9A7] font-bold">{activeAsset.id}</span>
               <span className="text-[#2A3D52]">•</span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/30">
-                v{activeAsset.version}
+                v{activeAsset.version}.0
               </span>
               <span className="text-[#2A3D52]">•</span>
               <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
@@ -405,149 +616,33 @@ export default function EditorialStudio({
               </span>
             </div>
 
-            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-[#F1F5F9] mt-1 line-clamp-1">
+            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-[#F1F5F9] mt-1 truncate">
               {editedTitle}
             </h1>
           </div>
         </div>
 
-        {/* Action Controls & Draft Switcher Toggle */}
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <button
-            onClick={() => setShowDrawer(!showDrawer)}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all ${
-              showDrawer
-                ? "bg-[#00C9A7]/15 border-[#00C9A7] text-[#00C9A7]"
-                : "bg-[#0F1419] border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26]"
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5 text-[#00C9A7]" />
-            <span>Browse Drafts ({assets.length})</span>
-            {showDrawer ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-          </button>
-
+        {/* Live Status Badge or Link */}
+        <div className="flex items-center gap-2.5 shrink-0">
           {activeAsset.status === "PUBLISHED" ? (
             <a
               href={activeAsset.blog_url || `https://getminions.ai/blog/${activeAsset.slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 bg-[#00C9A7]/10 hover:bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/30 text-xs font-semibold px-3.5 py-2 rounded-xl transition-all shadow-sm"
+              className="flex items-center gap-1.5 bg-[#00C9A7]/10 hover:bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/30 text-xs font-semibold px-3.5 py-2 rounded-xl transition-all shadow-sm cursor-pointer"
             >
               <Globe className="w-3.5 h-3.5" />
-              <span>Live Post</span>
+              <span>Live on Blog</span>
               <ExternalLink className="w-3 h-3 ml-0.5" />
             </a>
           ) : (
             <span className="flex items-center gap-1.5 bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30 text-xs font-semibold px-3 py-1.5 rounded-xl">
               <span className="w-2 h-2 rounded-full bg-[#F59E0B] animate-pulse" />
-              Pending Review
+              Waiting for Review
             </span>
           )}
         </div>
       </div>
-
-      {/* ── Collapsible Drafts List View Drawer (Tabs: All · Pending Review · Published · Drafting) ── */}
-      {showDrawer && (
-        <div className="bg-[#0F1419] border border-[#1F2D3D] rounded-2xl p-5 space-y-4 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1F2D3D] pb-3">
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-[#00C9A7]" />
-              <span className="text-xs font-bold text-[#F1F5F9] uppercase tracking-wider font-mono">
-                Select Article Draft to Review
-              </span>
-            </div>
-
-            {/* List Filter Tabs */}
-            <div className="flex items-center gap-1.5 bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D]">
-              {(
-                [
-                  { label: "All", value: "ALL" },
-                  { label: "Pending Review", value: "PENDING_REVIEW" },
-                  { label: "Published", value: "PUBLISHED" },
-                  { label: "Drafting", value: "DRAFT" }
-                ] as const
-              ).map((tab) => (
-                <button
-                  key={tab.value}
-                  onClick={() => setListFilter(tab.value)}
-                  className={`px-3 py-1 text-xs font-medium rounded-lg transition-all ${
-                    listFilter === tab.value
-                      ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
-                      : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26]"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Draft Item Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[360px] overflow-y-auto pr-1">
-            {filteredAssets.map((asset) => {
-              const isCurrent = asset.id === activeAsset.id;
-              return (
-                <div
-                  key={asset.id}
-                  onClick={() => {
-                    setSelectedAssetId(asset.id);
-                    setShowDrawer(false);
-                  }}
-                  className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 text-left ${
-                    isCurrent
-                      ? "bg-[#161D26] border-[#00C9A7] shadow-lg shadow-[#00C9A7]/10"
-                      : "bg-[#070B0F] border-[#1F2D3D] hover:border-[#2A3D52] hover:bg-[#161D26]/70"
-                  }`}
-                >
-                  {/* 40x40 Thumbnail */}
-                  <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#161D26] border border-[#1F2D3D] shrink-0 flex items-center justify-center">
-                    {asset.hero_image_url ? (
-                      <img
-                        src={asset.hero_image_url}
-                        alt={asset.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <ImageIcon className="w-4 h-4 text-[#64748B]" />
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-center justify-between gap-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-mono font-bold text-[#00C9A7]">{asset.id}</span>
-                        <span className="text-[10px] font-mono text-[#64748B]">v{asset.version}</span>
-                      </div>
-                      <span
-                        className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
-                          asset.status === "PUBLISHED"
-                            ? "bg-[#00C9A7]/20 text-[#00C9A7]"
-                            : asset.status === "PENDING_REVIEW"
-                              ? "bg-[#F59E0B]/20 text-[#F59E0B]"
-                              : asset.status === "REJECTED"
-                                ? "bg-[#EF4444]/20 text-[#EF4444]"
-                                : "bg-[#64748B]/20 text-[#94A3B8]"
-                        }`}
-                      >
-                        {asset.status}
-                      </span>
-                    </div>
-
-                    <h4 className="text-xs font-semibold text-[#F1F5F9] line-clamp-1">
-                      {asset.title}
-                    </h4>
-
-                    <div className="flex items-center justify-between text-[10px] text-[#64748B] font-mono">
-                      <span>{asset.audience}</span>
-                      <span>{new Date(asset.created_at).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* ── Fresh Publish Success Notification Toast ── */}
       {publishPhase === "DONE" && (
@@ -1374,6 +1469,33 @@ export default function EditorialStudio({
                   {activeAsset.status}
                 </span>
               )}
+            </div>
+
+            {/* Quick Queue Navigation in Sticky Dock */}
+            <div className="flex items-center justify-between gap-2 text-xs">
+              <button
+                onClick={handlePrevDraft}
+                className="flex-1 py-1.5 px-2 rounded-lg bg-[#070B0F] hover:bg-[#161D26] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] text-[11px] font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer"
+                title="Previous Draft ( [ )"
+              >
+                <ChevronLeft className="w-3 h-3 text-[#00C9A7]" />
+                <span>Prev</span>
+                <kbd className="text-[9px] font-mono text-[#64748B]">[</kbd>
+              </button>
+
+              <span className="text-[10px] font-mono text-[#64748B] shrink-0 font-bold px-1">
+                {currentAssetIndex + 1} / {assets.length}
+              </span>
+
+              <button
+                onClick={handleNextDraft}
+                className="flex-1 py-1.5 px-2 rounded-lg bg-[#070B0F] hover:bg-[#161D26] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] text-[11px] font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer"
+                title="Next Draft ( ] )"
+              >
+                <span>Next</span>
+                <ChevronRight className="w-3 h-3 text-[#00C9A7]" />
+                <kbd className="text-[9px] font-mono text-[#64748B]">]</kbd>
+              </button>
             </div>
 
             {/* Quick Save Draft Button */}
