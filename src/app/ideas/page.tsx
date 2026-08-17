@@ -16,7 +16,6 @@ import {
   Tag,
   Layers,
   ArrowRight,
-  TrendingUp,
   Globe,
   MessageSquare,
   AlertCircle,
@@ -24,10 +23,15 @@ import {
   Trash2,
   Unlock,
   SlidersHorizontal,
-  Check
+  Check,
+  Calendar as CalendarIcon,
+  LayoutGrid,
+  CalendarDays
 } from "lucide-react";
 import { IdeaItem, AudienceLane, TargetTrade, IdeaSource, IdeaStatus } from "@/lib/types";
 import { INITIAL_IDEAS } from "@/lib/api";
+import CalendarView from "@/components/ideas/CalendarView";
+import ScheduleModal from "@/components/ideas/ScheduleModal";
 
 const TRADES: TargetTrade[] = [
   "HVAC",
@@ -45,6 +49,7 @@ const AUDIENCES: AudienceLane[] = ["ICP", "PEER", "BRIDGE"];
 const STATUS_FILTERS: Array<"ALL" | IdeaStatus> = [
   "ALL",
   "HARVESTED",
+  "QUEUED",
   "CLAIMED",
   "DRAFTED",
   "PUBLISHED",
@@ -82,6 +87,12 @@ export default function IdeaStreamPage() {
   const [claimingIds, setClaimingIds] = useState<Set<string>>(new Set());
   const [justClaimedIds, setJustClaimedIds] = useState<Set<string>>(new Set());
   const [draftError, setDraftError] = useState<string | null>(null);
+
+  // View mode: Stream cards vs Editorial Calendar
+  const [viewMode, setViewMode] = useState<"stream" | "calendar">("stream");
+
+  // Scheduling Modal State
+  const [schedulingIdea, setSchedulingIdea] = useState<IdeaItem | null>(null);
 
   // Detail Idea Modal State
   const [detailIdea, setDetailIdea] = useState<IdeaItem | null>(null);
@@ -439,13 +450,42 @@ export default function IdeaStreamPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => setIsInjectOpen(true)}
-          className="inline-flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/15 transition-all active:scale-95 self-start sm:self-auto cursor-pointer"
-        >
-          <Plus className="w-4 h-4 stroke-[2.5]" />
-          + Inject Manual Topic
-        </button>
+        <div className="flex items-center gap-3 self-start sm:self-auto flex-wrap">
+          {/* View Mode Toggle Switch */}
+          <div className="flex items-center p-1 bg-[#161D26] border border-[#1F2D3D] rounded-xl shadow-inner">
+            <button
+              onClick={() => setViewMode("stream")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                viewMode === "stream"
+                  ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
+                  : "text-[#94A3B8] hover:text-white"
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Stream</span>
+            </button>
+
+            <button
+              onClick={() => setViewMode("calendar")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                viewMode === "calendar"
+                  ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
+                  : "text-[#94A3B8] hover:text-white"
+              }`}
+            >
+              <CalendarDays className="w-3.5 h-3.5" />
+              <span>Calendar</span>
+            </button>
+          </div>
+
+          <button
+            onClick={() => setIsInjectOpen(true)}
+            className="inline-flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/15 transition-all active:scale-95 cursor-pointer"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <span>+ Inject Manual Topic</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter Bar (Sticky Container with full-bleed backdrop & zero desktop gap) */}
@@ -594,27 +634,36 @@ export default function IdeaStreamPage() {
           </div>
         )}
 
-        {/* Empty State */}
-        {filteredIdeas.length === 0 && (
-          <div className="bg-[#0F1419] border border-[#1F2D3D] rounded-2xl p-12 text-center space-y-3">
-            <AlertCircle className="w-8 h-8 text-[#64748B] mx-auto" />
-            <h3 className="text-base font-bold text-[#F1F5F9]">No ideas found matching filters</h3>
-            <p className="text-xs text-[#94A3B8] max-w-sm mx-auto">
-              Try adjusting your Audience, Trade, or Status filters, or inject a new manual editorial signal.
-            </p>
-            <button
-              onClick={() => {
-                setSelectedAudience("ALL");
-                setSelectedTrade("ALL");
-                setSelectedStatus("ALL");
-                setSearchQuery("");
-              }}
-              className="mt-2 text-xs font-semibold text-[#00C9A7] hover:underline cursor-pointer"
-            >
-              Clear all filters
-            </button>
-          </div>
-        )}
+      {/* Conditional Rendering: Stream View vs Calendar View */}
+      {viewMode === "calendar" ? (
+        <CalendarView
+          ideas={ideas}
+          onSelectIdea={(idea) => setDetailIdea(idea)}
+          onOpenSchedule={(idea) => setSchedulingIdea(idea)}
+        />
+      ) : (
+        <div className="space-y-6">
+          {/* Empty State */}
+          {filteredIdeas.length === 0 && (
+            <div className="bg-[#0F1419] border border-[#1F2D3D] rounded-2xl p-12 text-center space-y-3">
+              <AlertCircle className="w-8 h-8 text-[#64748B] mx-auto" />
+              <h3 className="text-base font-bold text-[#F1F5F9]">No ideas found matching filters</h3>
+              <p className="text-xs text-[#94A3B8] max-w-sm mx-auto">
+                Try adjusting your Audience, Trade, or Status filters, or inject a new manual editorial signal.
+              </p>
+              <button
+                onClick={() => {
+                  setSelectedAudience("ALL");
+                  setSelectedTrade("ALL");
+                  setSelectedStatus("ALL");
+                  setSearchQuery("");
+                }}
+                className="mt-2 text-xs font-semibold text-[#00C9A7] hover:underline cursor-pointer"
+              >
+                Clear all filters
+              </button>
+            </div>
+          )}
 
         {/* Card Grid (2 Columns on Desktop, 1 on Mobile) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -738,6 +787,16 @@ export default function IdeaStreamPage() {
                       ))}
                     </div>
                   )}
+
+                  {/* Scheduled For Banner / Badge (if scheduled) */}
+                  {idea.scheduled_for && (
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-xs font-mono text-[#00C9A7]">
+                      <CalendarDays className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate">
+                        Auto-Draft: {new Date(idea.scheduled_for).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Card Footer: Ingested Date & CTA Button */}
@@ -775,23 +834,34 @@ export default function IdeaStreamPage() {
                         Rejected
                       </div>
                     ) : (
-                      <button
-                        onClick={() => handleRefineAndDraft(idea.id || rawId)}
-                        disabled={isClaiming}
-                        className="inline-flex items-center gap-1.5 bg-[#00C9A7]/10 hover:bg-[#00C9A7] text-[#00C9A7] hover:text-[#070B0F] border border-[#00C9A7]/30 hover:border-[#00C9A7] text-xs font-bold px-3 py-1.5 rounded-lg transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
-                      >
-                        {isClaiming ? (
-                          <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            <span>Claiming...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Refine & Draft</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </>
-                        )}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setSchedulingIdea(idea)}
+                          className="inline-flex items-center gap-1 bg-[#161D26] hover:bg-[#1F2D3D] text-[#94A3B8] hover:text-white border border-[#1F2D3D] text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all cursor-pointer"
+                          title="Schedule Auto-Draft Date"
+                        >
+                          <CalendarIcon className="w-3.5 h-3.5 text-[#00C9A7]" />
+                          <span>Schedule</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleRefineAndDraft(idea.id || rawId)}
+                          disabled={isClaiming}
+                          className="inline-flex items-center gap-1.5 bg-[#00C9A7]/10 hover:bg-[#00C9A7] text-[#00C9A7] hover:text-[#070B0F] border border-[#00C9A7]/30 hover:border-[#00C9A7] text-xs font-bold px-3 py-1.5 rounded-lg transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                        >
+                          {isClaiming ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              <span>Claiming...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>Draft Now</span>
+                              <ArrowRight className="w-3.5 h-3.5" />
+                            </>
+                          )}
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -799,6 +869,8 @@ export default function IdeaStreamPage() {
             );
           })}
         </div>
+      </div>
+      )}
 
       {/* Slide-over / Modal for "+ Inject Manual Topic" */}
       {isInjectOpen && (
@@ -1286,7 +1358,20 @@ export default function IdeaStreamPage() {
                   className="px-3.5 py-2 text-xs font-semibold text-[#94A3B8] hover:text-white bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
-                  <span>Edit Signal</span>
+                  <span>Edit</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const ideaToSchedule = detailIdea;
+                    setDetailIdea(null);
+                    setSchedulingIdea(ideaToSchedule);
+                  }}
+                  className="px-3.5 py-2 text-xs font-semibold text-[#00C9A7] hover:text-[#070B0F] bg-[#00C9A7]/10 hover:bg-[#00C9A7] border border-[#00C9A7]/30 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <CalendarDays className="w-3.5 h-3.5" />
+                  <span>Schedule</span>
                 </button>
 
                 <button
@@ -1342,6 +1427,21 @@ export default function IdeaStreamPage() {
           </div>
         </div>
       )}
+
+      {/* SCHEDULE MODAL */}
+      <ScheduleModal
+        isOpen={!!schedulingIdea}
+        onClose={() => setSchedulingIdea(null)}
+        idea={schedulingIdea}
+        onScheduleSuccess={(updated) => {
+          setIdeas((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
+          if (detailIdea?.id === updated.id) {
+            setDetailIdea(updated);
+          }
+          setToastMessage(`📅 Successfully scheduled: ${updated.title || updated.raw_idea}`);
+          setTimeout(() => setToastMessage(null), 5000);
+        }}
+      />
 
       {/* Floating Action Toast Notification */}
       {toastMessage && (

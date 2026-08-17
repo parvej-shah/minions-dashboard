@@ -32,6 +32,8 @@ export async function GET(
       priority: idea.priority,
       tags: idea.tags,
       draft_asset_id: idea.draftAssetId,
+      scheduled_for: idea.scheduledFor ? idea.scheduledFor.toISOString() : null,
+      queue_order: idea.queueOrder,
       created_at: idea.createdAt.toISOString(),
       updated_at: idea.updatedAt.toISOString(),
     });
@@ -62,6 +64,10 @@ export async function PATCH(
         ...(body.pillar !== undefined && { pillar: body.pillar }),
         ...(body.priority !== undefined && { priority: body.priority }),
         ...(body.status !== undefined && { status: body.status }),
+        ...(body.scheduled_for !== undefined && {
+          scheduledFor: body.scheduled_for ? new Date(body.scheduled_for) : null,
+        }),
+        ...(body.queue_order !== undefined && { queueOrder: body.queue_order }),
         ...(body.tags !== undefined && { tags: Array.isArray(body.tags) ? body.tags : [body.tags] }),
         ...(body.reset_claim && {
           claimedByRunId: null,
@@ -87,6 +93,8 @@ export async function PATCH(
         status: updated.status,
         priority: updated.priority,
         tags: updated.tags,
+        scheduled_for: updated.scheduledFor ? updated.scheduledFor.toISOString() : null,
+        queue_order: updated.queueOrder,
         created_at: updated.createdAt.toISOString(),
         updated_at: updated.updatedAt.toISOString(),
       },

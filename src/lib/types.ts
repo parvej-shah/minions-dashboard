@@ -20,6 +20,8 @@ export interface IdeaItem {
   status: IdeaStatus;
   estimated_cost?: number;
   tags?: string[];
+  scheduled_for?: string | null;
+  queue_order?: number | null;
   created_at: string;
   updated_at: string;
 }

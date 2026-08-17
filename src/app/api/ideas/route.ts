@@ -22,6 +22,8 @@ export async function GET() {
         source: (idea.source || "MANUAL") as any,
         tags: idea.tags || [],
         status: (idea.status || "HARVESTED") as any,
+        scheduled_for: idea.scheduledFor ? idea.scheduledFor.toISOString() : null,
+        queue_order: idea.queueOrder,
         estimated_cost: 0.038,
         created_at: idea.createdAt.toISOString(),
         updated_at: idea.updatedAt.toISOString(),
