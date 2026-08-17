@@ -447,25 +447,29 @@ export default function IdeaStreamPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16 selection:bg-[#00C9A7]/30 selection:text-[#00C9A7]">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-6">
+      {/* Page Header - Clean, Executive & Compact */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-4">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold tracking-widest text-[#00C9A7] uppercase px-2.5 py-0.5 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/20">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold tracking-widest text-[#00C9A7] uppercase px-2 py-0.5 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/20">
               <span className="w-1.5 h-1.5 rounded-full bg-[#00C9A7] animate-pulse" />
               Workflow 01 · Signal Harvester
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#F1F5F9]">
-            Idea Stream
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#F1F5F9]">
+            {viewMode === "queue" ? "Production Draft Queue" : viewMode === "calendar" ? "Editorial Calendar" : "Idea Stream"}
           </h1>
-          <p className="text-sm text-[#94A3B8] mt-1 max-w-2xl">
-            Continuous intake stream of high-intent content opportunities harvested from search trends, technician forums, and operator telemetry.
+          <p className="text-xs text-[#94A3B8] mt-0.5 max-w-xl">
+            {viewMode === "queue" 
+              ? "Prioritize and re-order candidate topics for twice-daily automated drafting."
+              : viewMode === "calendar"
+              ? "Visual timeline of scheduled drafts and published playbooks."
+              : "Continuous intake stream of high-intent topics harvested across trade forums & search telemetry."}
           </p>
         </div>
 
-        <div className="flex items-center gap-3 self-start sm:self-auto flex-wrap">
-          {/* View Mode Toggle Switch: Stream vs Queue Builder vs Calendar */}
+        <div className="flex items-center gap-2.5 self-start sm:self-auto flex-wrap">
+          {/* View Mode Toggle Switch: Queue Builder vs Stream vs Calendar */}
           <div className="flex items-center p-1 bg-[#161D26] border border-[#1F2D3D] rounded-xl shadow-inner">
             <button
               onClick={() => setViewMode("queue")}
@@ -476,7 +480,7 @@ export default function IdeaStreamPage() {
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>Queue Builder</span>
+              <span>Queue</span>
               {ideas.filter(i => i.status === "QUEUED").length > 0 && (
                 <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full font-bold ${
                   viewMode === "queue" ? "bg-[#070B0F] text-[#00C9A7]" : "bg-[#00C9A7]/20 text-[#00C9A7]"
@@ -513,142 +517,162 @@ export default function IdeaStreamPage() {
 
           <button
             onClick={() => setIsInjectOpen(true)}
-            className="inline-flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/15 transition-all active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-1.5 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-3.5 py-2 rounded-xl shadow-md shadow-[#00C9A7]/15 transition-all active:scale-95 cursor-pointer"
           >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>+ Inject Manual Topic</span>
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Inject Topic</span>
           </button>
         </div>
       </div>
 
-      {/* Filter Bar (Sticky Container with full-bleed backdrop & zero desktop gap) */}
-      <div className="sticky top-14 md:top-0 z-30 bg-[#0a0d12] -mx-4 sm:-mx-6 md:-mx-8 px-4 sm:px-6 md:px-8 pt-3 pb-3.5 space-y-3 border-b border-[#1F2D3D] shadow-xl shadow-black/40">
-        {/* Row 1: Search & Audience Filters */}
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-            {/* Search Input */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-[#64748B] absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search ideas by title, keyword, ID, or trade..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#0F1419] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl pl-9 pr-8 py-2 text-xs text-[#F1F5F9] placeholder:text-[#64748B] outline-none transition-all"
-              />
-              {searchQuery && (
+      {/* Stream-Only Sticky Filter Bar */}
+      {viewMode === "stream" && (
+        <div className="sticky top-14 md:top-0 z-30 bg-[#0a0d12] -mx-4 sm:-mx-6 md:-mx-8 px-4 sm:px-6 md:px-8 pt-3 pb-3.5 space-y-3 border-b border-[#1F2D3D] shadow-xl shadow-black/40">
+          {/* Row 1: Search & Audience Filters */}
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+              {/* Search Input */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="w-4 h-4 text-[#64748B] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search ideas by title, keyword, ID, or trade..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-[#0F1419] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl pl-9 pr-8 py-2 text-xs text-[#F1F5F9] placeholder:text-[#64748B] outline-none transition-all"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#F1F5F9] text-xs p-1"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Audience Filter Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-[#64748B] mr-1 shrink-0">
+                  Audience:
+                </span>
                 <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#F1F5F9] text-xs p-1"
+                  onClick={() => setSelectedAudience("ALL")}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                    selectedAudience === "ALL"
+                      ? "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/40 shadow-sm"
+                      : "bg-[#0F1419] text-[#94A3B8] border-[#1F2D3D] hover:text-[#F1F5F9] hover:border-[#2A3D52]"
+                  }`}
                 >
-                  <X className="w-3.5 h-3.5" />
+                  All
                 </button>
-              )}
+                {AUDIENCES.map((aud) => {
+                  const isActive = selectedAudience === aud;
+                  let activeStyle = "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/40";
+                  if (aud === "ICP") activeStyle = "bg-[#3B82F6]/20 text-[#3B82F6] border-[#3B82F6]/50 shadow-sm";
+                  if (aud === "PEER") activeStyle = "bg-[#8B5CF6]/20 text-[#8B5CF6] border-[#8B5CF6]/50 shadow-sm";
+                  if (aud === "BRIDGE") activeStyle = "bg-[#F59E0B]/20 text-[#F59E0B] border-[#F59E0B]/50 shadow-sm";
+
+                  return (
+                    <button
+                      key={aud}
+                      onClick={() => setSelectedAudience(aud)}
+                      className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                        isActive
+                          ? activeStyle
+                          : "bg-[#0F1419] text-[#94A3B8] border-[#1F2D3D] hover:text-[#F1F5F9] hover:border-[#2A3D52]"
+                      }`}
+                    >
+                      {aud}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* Audience Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none">
+            {/* Row 2: Scrolling Trades Pill Row */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar border-t border-[#1F2D3D]/40">
               <span className="text-[11px] font-mono uppercase tracking-wider text-[#64748B] mr-1 shrink-0">
-                Audience:
+                Trade:
               </span>
               <button
-                onClick={() => setSelectedAudience("ALL")}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                  selectedAudience === "ALL"
-                    ? "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/40 shadow-sm"
+                onClick={() => setSelectedTrade("ALL")}
+                className={`px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+                  selectedTrade === "ALL"
+                    ? "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/40 font-bold"
                     : "bg-[#0F1419] text-[#94A3B8] border-[#1F2D3D] hover:text-[#F1F5F9] hover:border-[#2A3D52]"
                 }`}
               >
-                All
+                All Trades
               </button>
-              {AUDIENCES.map((aud) => {
-                const isActive = selectedAudience === aud;
-                let activeStyle = "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/40";
-                if (aud === "ICP") activeStyle = "bg-[#3B82F6]/20 text-[#3B82F6] border-[#3B82F6]/50 shadow-sm";
-                if (aud === "PEER") activeStyle = "bg-[#8B5CF6]/20 text-[#8B5CF6] border-[#8B5CF6]/50 shadow-sm";
-                if (aud === "BRIDGE") activeStyle = "bg-[#F59E0B]/20 text-[#F59E0B] border-[#F59E0B]/50 shadow-sm";
-
+              {TRADES.map((trade) => {
+                const isActive = selectedTrade === trade;
                 return (
                   <button
-                    key={aud}
-                    onClick={() => setSelectedAudience(aud)}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                    key={trade}
+                    onClick={() => setSelectedTrade(trade)}
+                    className={`px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                       isActive
-                        ? activeStyle
+                        ? "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/40 font-bold"
                         : "bg-[#0F1419] text-[#94A3B8] border-[#1F2D3D] hover:text-[#F1F5F9] hover:border-[#2A3D52]"
                     }`}
                   >
-                    {aud}
+                    {trade}
                   </button>
                 );
               })}
             </div>
-          </div>
 
-          {/* Row 2: Scrolling Trades Pill Row */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar border-t border-[#1F2D3D]/40">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#64748B] mr-1 shrink-0">
-              Trade:
-            </span>
-            <button
-              onClick={() => setSelectedTrade("ALL")}
-              className={`px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                selectedTrade === "ALL"
-                  ? "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/40 font-bold"
-                  : "bg-[#0F1419] text-[#94A3B8] border-[#1F2D3D] hover:text-[#F1F5F9] hover:border-[#2A3D52]"
-              }`}
-            >
-              All Trades
-            </button>
-            {TRADES.map((trade) => {
-              const isSelected = selectedTrade === trade;
-              return (
-                <button
-                  key={trade}
-                  onClick={() => setSelectedTrade(trade)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                    isSelected
-                      ? "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/40 font-bold"
-                      : "bg-[#0F1419] text-[#94A3B8] border-[#1F2D3D] hover:text-[#F1F5F9] hover:border-[#2A3D52]"
-                  }`}
-                >
-                  {trade}
-                </button>
-              );
-            })}
-          </div>
+            {/* Row 3: Status Filters */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 border-t border-[#1F2D3D]/40 scrollbar-none">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-[#64748B] mr-1 shrink-0">
+                Status:
+              </span>
+              <button
+                onClick={() => setSelectedStatus("ALL")}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
+                  selectedStatus === "ALL"
+                    ? "bg-[#161D26] text-[#F1F5F9] border border-[#00C9A7]/60 shadow-sm"
+                    : "bg-transparent text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#0F1419]"
+                }`}
+              >
+                <span>All</span>
+                <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${
+                  selectedStatus === "ALL" ? "bg-[#00C9A7]/20 text-[#00C9A7]" : "bg-[#161D26] text-[#64748B]"
+                }`}>
+                  {ideas.length}
+                </span>
+              </button>
 
-          {/* Row 3: Status Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 pt-1 border-t border-[#1F2D3D]/40">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#64748B] mr-1 shrink-0">
-              Status:
-            </span>
-            {STATUS_FILTERS.map((st) => {
-              const isSelected = selectedStatus === st;
-              const count = st === "ALL" 
-                ? ideas.length 
-                : ideas.filter(i => (i.status || "").toUpperCase() === st).length;
+              {STATUS_FILTERS.filter(st => st !== "ALL").map((st) => {
+                const isSelected = selectedStatus === st;
+                const count = ideas.filter(i => {
+                  const s = i.status ? i.status.toUpperCase() : "HARVESTED";
+                  return s === st;
+                }).length;
 
-              return (
-                <button
-                  key={st}
-                  onClick={() => setSelectedStatus(st)}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
-                    isSelected
-                      ? "bg-[#161D26] text-[#F1F5F9] border border-[#00C9A7]/60 shadow-sm"
-                      : "bg-transparent text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#0F1419]"
-                  }`}
-                >
-                  <span className="capitalize">{st.toLowerCase()}</span>
-                  <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${
-                    isSelected ? "bg-[#00C9A7]/20 text-[#00C9A7]" : "bg-[#161D26] text-[#64748B]"
-                  }`}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                return (
+                  <button
+                    key={st}
+                    onClick={() => setSelectedStatus(st)}
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
+                      isSelected
+                        ? "bg-[#161D26] text-[#F1F5F9] border border-[#00C9A7]/60 shadow-sm"
+                        : "bg-transparent text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#0F1419]"
+                    }`}
+                  >
+                    <span className="capitalize">{st.toLowerCase()}</span>
+                    <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${
+                      isSelected ? "bg-[#00C9A7]/20 text-[#00C9A7]" : "bg-[#161D26] text-[#64748B]"
+                    }`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
         </div>
+      )}
+
 
         {/* Drafting Pipeline Error */}
         {draftError && (

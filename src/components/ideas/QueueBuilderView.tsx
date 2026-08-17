@@ -253,51 +253,56 @@ export default function QueueBuilderView({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Overview Banner */}
-      <div className="bg-[#0F1419] p-5 rounded-2xl border border-[#1F2D3D] flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#00C9A7]/10 border border-[#00C9A7]/30 flex items-center justify-center text-[#00C9A7]">
-              <Layers className="w-4 h-4" />
-            </div>
-            <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
-              Production Draft Queue Builder
-            </h2>
-            {isSavingOrder && (
-              <span className="flex items-center gap-1 text-[11px] font-mono text-[#00C9A7]">
-                <Loader2 className="w-3 h-3 animate-spin" />
-                <span>Syncing...</span>
-              </span>
-            )}
+    <div className="space-y-4">
+      {/* Overview Banner - Slim & Modern */}
+      <div className="bg-[#0F1419] p-3 px-4 rounded-xl border border-[#1F2D3D] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-[#00C9A7]/10 border border-[#00C9A7]/30 flex items-center justify-center text-[#00C9A7] shrink-0">
+            <Layers className="w-4 h-4" />
           </div>
-          <p className="text-xs text-[#94A3B8] max-w-2xl">
-            Drag high-signal topics from the <strong className="text-white">Harvested Pool</strong> into the <strong className="text-[#00C9A7]">Production Queue</strong>. Workflow 02 runs <strong className="text-white">twice daily (09:00 & 15:00 UTC)</strong>, autonomously drafting the <strong className="text-[#00C9A7]">#1 item</strong> from the queue on each run.
-          </p>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-sm font-bold text-white tracking-tight">
+                Production Queue
+              </h2>
+              <span className="text-[10px] font-mono font-bold text-[#00C9A7] bg-[#00C9A7]/10 px-2 py-0.2 rounded-full border border-[#00C9A7]/20">
+                Twice Daily (09:00 & 15:00 UTC)
+              </span>
+              {isSavingOrder && (
+                <span className="flex items-center gap-1 text-[10px] font-mono text-[#00C9A7]">
+                  <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                  <span>Syncing...</span>
+                </span>
+              )}
+            </div>
+            <p className="text-[11px] text-[#94A3B8] truncate max-w-xl">
+              Drag candidate topics into the queue. Workflow 02 automatically drafts the top #1 item on schedule.
+            </p>
+          </div>
         </div>
 
         {/* Quick Execution Button for #1 Item */}
-        <div className="flex items-center gap-3 self-stretch sm:self-auto">
+        <div className="flex items-center gap-2 shrink-0 self-stretch sm:self-auto">
           {queuedIdeas.length > 0 ? (
             <button
               onClick={() => onDraftIdea(queuedIdeas[0].id || queuedIdeas[0].ideaId || "")}
               disabled={isDrafting}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] disabled:opacity-50 text-[#070B0F] text-xs font-extrabold px-5 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/20 transition-all active:scale-95 cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] disabled:opacity-50 text-[#070B0F] text-xs font-extrabold px-4 py-2 rounded-xl shadow-md shadow-[#00C9A7]/20 transition-all active:scale-95 cursor-pointer"
             >
               {isDrafting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   <span>Drafting #1 in Queue...</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4 fill-current" />
+                  <Sparkles className="w-3.5 h-3.5 fill-current" />
                   <span>Draft #1 Now: &quot;{queuedIdeas[0].title ? queuedIdeas[0].title.slice(0, 24) + '...' : queuedIdeas[0].id}&quot;</span>
                 </>
               )}
             </button>
           ) : (
-            <div className="text-xs text-[#64748B] italic bg-[#161D26] px-4 py-2.5 rounded-xl border border-[#1F2D3D]">
+            <div className="text-[11px] text-[#64748B] italic bg-[#161D26] px-3 py-1.5 rounded-lg border border-[#1F2D3D]">
               Queue is empty. Drag an idea below to queue it.
             </div>
           )}
@@ -305,7 +310,7 @@ export default function QueueBuilderView({
       </div>
 
       {/* Two-Column Drag and Drop Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         
         {/* LEFT COLUMN: Harvested Ideas Pool (7 Cols on desktop) */}
         <div 
