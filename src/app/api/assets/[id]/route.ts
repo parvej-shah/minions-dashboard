@@ -28,7 +28,7 @@ export async function GET(
       core_argument: asset.coreArgument || "",
       audience: asset.audience,
       pillar: asset.pillar,
-      target_trade: asset.targetTrade || "HVAC",
+      target_trade: asset.targetTrade || "UNSPECIFIED",
       status: asset.status,
       claims_ok: asset.claimsOk,
       hero_image_url: asset.heroImageUrl || "/images/social-covers/twitter/twitter_cover_dark.png",

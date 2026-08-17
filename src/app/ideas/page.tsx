@@ -96,11 +96,11 @@ export default function IdeaStreamPage() {
   // Slide-over form state
   const [formTitle, setFormTitle] = useState("");
   const [formExcerpt, setFormExcerpt] = useState("");
-  const [formTrade, setFormTrade] = useState<TargetTrade>("HVAC");
+  const [formTrade, setFormTrade] = useState<TargetTrade | "">("");
   const [formAudience, setFormAudience] = useState<AudienceLane>("ICP");
   const [formSource] = useState<IdeaSource>("MANUAL");
   const [formTagsInput, setFormTagsInput] = useState("");
-  const [formTags, setFormTags] = useState<string[]>(["Manual", "HVAC"]);
+  const [formTags, setFormTags] = useState<string[]>(["Manual"]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Load from API on mount if available
@@ -246,6 +246,11 @@ export default function IdeaStreamPage() {
   const handleInjectManualTopic = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitle.trim() || isSubmitting) return;
+    if (!formTrade) {
+      setToastMessage("Pick the actual Target Trade before injecting, it does not default to HVAC.");
+      setTimeout(() => setToastMessage(null), 4000);
+      return;
+    }
 
     setIsSubmitting(true);
     const newTags = formTagsInput.trim()
@@ -277,7 +282,8 @@ export default function IdeaStreamPage() {
         setIsInjectOpen(false);
         setFormTitle("");
         setFormExcerpt("");
-        setFormTags(["Manual", formTrade]);
+        setFormTrade("");
+        setFormTags(["Manual"]);
         setFormTagsInput("");
         setToastMessage(`Idea ${created.id} injected into the live stream.`);
         setTimeout(() => setToastMessage(null), 3000);
@@ -836,9 +842,10 @@ export default function IdeaStreamPage() {
                 {/* Field: Trade */}
                 <div>
                   <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
-                    Target Trade
+                    Target Trade <span className="text-[#00C9A7]">*</span>
                   </label>
                   <select
+                    required
                     value={formTrade}
                     onChange={(e) => {
                       const t = e.target.value as TargetTrade;
@@ -849,12 +856,18 @@ export default function IdeaStreamPage() {
                     }}
                     className="w-full bg-[#161D26] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3.5 py-2.5 text-xs text-[#F1F5F9] outline-none transition-all cursor-pointer"
                   >
+                    <option value="" disabled className="bg-[#0F1419]">
+                      Select the actual trade this topic is about...
+                    </option>
                     {TRADES.map((t) => (
                       <option key={t} value={t} className="bg-[#0F1419]">
                         {t}
                       </option>
                     ))}
                   </select>
+                  <p className="text-[11px] text-[#64748B] mt-1">
+                    This drives the asset's trade label end to end. It does not default to HVAC, pick the one that actually matches the topic.
+                  </p>
                 </div>
 
                 {/* Field: Audience */}
@@ -966,7 +979,7 @@ export default function IdeaStreamPage() {
               <button
                 type="submit"
                 form="inject-topic-form"
-                disabled={isSubmitting || !formTitle.trim()}
+                disabled={isSubmitting || !formTitle.trim() || !formTrade}
                 className="inline-flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] disabled:opacity-50 text-[#070B0F] text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/15 transition-all cursor-pointer"
               >
                 {isSubmitting ? (
