@@ -196,6 +196,19 @@ export async function DELETE(
 
     // 2. Either unpublish back to draft OR permanently delete
     if (mode === "permanent") {
+      // Release parent idea so it can be re-drafted
+      if (asset.ideaId) {
+        await prisma.idea.updateMany({
+          where: { id: asset.ideaId },
+          data: {
+            status: "REFINED",
+            draftAssetId: null,
+            claimedByRunId: null,
+            claimedAt: null,
+          },
+        });
+      }
+
       await prisma.claim.deleteMany({ where: { assetId: asset.id } });
       await prisma.asset.delete({ where: { id: asset.id } });
       return NextResponse.json({ success: true, message: "Asset and live blog permanently deleted" });

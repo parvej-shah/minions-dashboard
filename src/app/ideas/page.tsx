@@ -17,10 +17,14 @@ import {
   Layers,
   ArrowRight,
   TrendingUp,
-  Flame,
   Globe,
   MessageSquare,
-  AlertCircle
+  AlertCircle,
+  Edit3,
+  Trash2,
+  Unlock,
+  SlidersHorizontal,
+  Check
 } from "lucide-react";
 import { IdeaItem, AudienceLane, TargetTrade, IdeaSource, IdeaStatus } from "@/lib/types";
 import { INITIAL_IDEAS } from "@/lib/api";
@@ -79,6 +83,16 @@ export default function IdeaStreamPage() {
   const [justClaimedIds, setJustClaimedIds] = useState<Set<string>>(new Set());
   const [draftError, setDraftError] = useState<string | null>(null);
 
+  // Edit Idea Modal State
+  const [editingIdea, setEditingIdea] = useState<IdeaItem | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editExcerpt, setEditExcerpt] = useState("");
+  const [editTrade, setEditTrade] = useState<TargetTrade>("HVAC");
+  const [editAudience, setEditAudience] = useState<AudienceLane>("ICP");
+  const [editStatus, setEditStatus] = useState<IdeaStatus>("HARVESTED");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
   // Slide-over form state
   const [formTitle, setFormTitle] = useState("");
   const [formExcerpt, setFormExcerpt] = useState("");
@@ -120,6 +134,113 @@ export default function IdeaStreamPage() {
 
   const handleRemoveTag = (tagToRemove: string) => {
     setFormTags(formTags.filter(t => t !== tagToRemove));
+  };
+
+  const openEditModal = (idea: IdeaItem) => {
+    setEditingIdea(idea);
+    setEditTitle(idea.title || idea.raw_idea || "");
+    setEditExcerpt(idea.excerpt || idea.angle || "");
+    setEditTrade((idea.target_trade as TargetTrade) || "HVAC");
+    setEditAudience((idea.audience as AudienceLane) || "ICP");
+    setEditStatus((idea.status as IdeaStatus) || "HARVESTED");
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingIdea || !editTitle.trim() || isUpdating) return;
+    setIsUpdating(true);
+
+    const payload = {
+      title: editTitle.trim(),
+      raw_idea: editTitle.trim(),
+      excerpt: editExcerpt.trim(),
+      angle: editExcerpt.trim(),
+      target_trade: editTrade,
+      trade: editTrade,
+      audience: editAudience,
+      status: editStatus,
+    };
+
+    try {
+      const res = await fetch(`/api/ideas/${editingIdea.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        setIdeas(prev =>
+          prev.map(item =>
+            item.id === editingIdea.id
+              ? {
+                  ...item,
+                  title: payload.title,
+                  raw_idea: payload.raw_idea,
+                  excerpt: payload.excerpt,
+                  angle: payload.angle,
+                  target_trade: payload.trade,
+                  audience: payload.audience,
+                  status: payload.status,
+                }
+              : item
+          )
+        );
+        setToastMessage(`Idea ${editingIdea.id} updated successfully!`);
+      }
+    } catch (err) {
+      console.error("Failed to update idea:", err);
+    } finally {
+      setIsUpdating(false);
+      setEditingIdea(null);
+      setTimeout(() => setToastMessage(null), 3000);
+    }
+  };
+
+  const handleDeleteIdea = async (ideaId: string, ideaTitle: string) => {
+    if (!confirm(`Are you sure you want to delete idea "${ideaTitle}" (${ideaId})? Any drafted asset will remain safely decoupled.`)) return;
+
+    try {
+      const res = await fetch(`/api/ideas/${ideaId}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setIdeas(prev => prev.filter(i => (i.id !== ideaId && i.ideaId !== ideaId)));
+        setToastMessage(`Idea ${ideaId} deleted successfully.`);
+        setTimeout(() => setToastMessage(null), 3000);
+      }
+    } catch (err) {
+      console.error("Failed to delete idea:", err);
+    }
+  };
+
+  const handleResetClaim = async (ideaId: string) => {
+    try {
+      const res = await fetch(`/api/ideas/${ideaId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reset_claim: true, status: "REFINED" }),
+      });
+
+      if (res.ok) {
+        setIdeas(prev =>
+          prev.map(i =>
+            (i.id === ideaId || i.ideaId === ideaId)
+              ? { ...i, status: "REFINED" as IdeaStatus }
+              : i
+          )
+        );
+        setJustClaimedIds(prev => {
+          const next = new Set(prev);
+          next.delete(ideaId);
+          return next;
+        });
+        setToastMessage(`Idea ${ideaId} claim released & returned to REFINED status.`);
+        setTimeout(() => setToastMessage(null), 3000);
+      }
+    } catch (err) {
+      console.error("Failed to reset claim:", err);
+    }
   };
 
   const handleInjectManualTopic = async (e: React.FormEvent) => {
@@ -560,10 +681,41 @@ export default function IdeaStreamPage() {
                       </span>
                     </div>
 
-                    {/* Right: Idea ID (Mono, Muted) */}
-                    <span className="text-xs font-mono text-[#64748B] shrink-0 font-medium">
-                      {rawId}
-                    </span>
+                    {/* Right: Idea ID & Action Buttons */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-xs font-mono text-[#64748B] font-medium mr-1">
+                        {rawId}
+                      </span>
+
+                      {/* Edit Button */}
+                      <button
+                        onClick={() => openEditModal(idea)}
+                        className="p-1 rounded-md text-[#64748B] hover:text-[#00C9A7] hover:bg-[#161D26] border border-transparent hover:border-[#1F2D3D] transition-all cursor-pointer"
+                        title="Edit Idea details"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
+
+                      {/* Unlock Button (if claimed) */}
+                      {isClaimed && (
+                        <button
+                          onClick={() => handleResetClaim(idea.id || rawId)}
+                          className="p-1 rounded-md text-[#F59E0B] hover:bg-[#F59E0B]/20 border border-[#F59E0B]/30 transition-all cursor-pointer"
+                          title="Release Lock & Unclaim Idea"
+                        >
+                          <Unlock className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+
+                      {/* Delete Button */}
+                      <button
+                        onClick={() => handleDeleteIdea(idea.id || rawId, ideaTitle)}
+                        className="p-1 rounded-md text-[#64748B] hover:text-[#EF4444] hover:bg-[#EF4444]/10 border border-transparent hover:border-[#EF4444]/30 transition-all cursor-pointer"
+                        title="Delete Idea"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Title (Bold 16px, 2-line clamp) */}
@@ -856,6 +1008,176 @@ export default function IdeaStreamPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── 5. EDIT IDEA SLIDE-OVER DRAWER / MODAL ── */}
+      {editingIdea && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div
+            className="w-full max-w-lg bg-[#0F1419] border-l border-[#1F2D3D] h-full flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-300 overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
+          >
+            {/* Drawer Header */}
+            <div>
+              <div className="p-6 border-b border-[#1F2D3D] flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Edit3 className="w-5 h-5 text-[#00C9A7]" />
+                  <div>
+                    <h2 className="text-base font-bold text-[#F1F5F9]">
+                      Edit Strategy & Signal
+                    </h2>
+                    <p className="text-xs text-[#64748B] font-mono">
+                      {editingIdea.id || editingIdea.ideaId}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setEditingIdea(null)}
+                  className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Edit Form */}
+              <form id="edit-idea-form" onSubmit={handleSaveEdit} className="p-6 space-y-5">
+                {/* Title / Signal */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-[#94A3B8] flex items-center gap-1.5">
+                    <span>Topic Title / Core Signal</span>
+                    <span className="text-[#00C9A7]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    className="w-full bg-[#070B0F] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3.5 py-2.5 text-xs text-[#F1F5F9] outline-none transition-colors"
+                  />
+                </div>
+
+                {/* Excerpt / Angle */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-[#94A3B8]">
+                    Strategic Angle & Key Realities
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={editExcerpt}
+                    onChange={(e) => setEditExcerpt(e.target.value)}
+                    className="w-full bg-[#070B0F] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3.5 py-2.5 text-xs text-[#F1F5F9] outline-none transition-colors resize-none leading-relaxed"
+                  />
+                </div>
+
+                {/* Target Trade & Audience Lane */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-[#94A3B8]">
+                      Target Trade
+                    </label>
+                    <select
+                      value={editTrade}
+                      onChange={(e) => setEditTrade(e.target.value as TargetTrade)}
+                      className="w-full bg-[#070B0F] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3 py-2.5 text-xs text-[#F1F5F9] outline-none transition-colors cursor-pointer"
+                    >
+                      {TRADES.map((t) => (
+                        <option key={t} value={t} className="bg-[#0F1419] text-[#F1F5F9]">
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-[#94A3B8]">
+                      Audience Lane
+                    </label>
+                    <select
+                      value={editAudience}
+                      onChange={(e) => setEditAudience(e.target.value as AudienceLane)}
+                      className="w-full bg-[#070B0F] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3 py-2.5 text-xs text-[#F1F5F9] outline-none transition-colors cursor-pointer"
+                    >
+                      {AUDIENCES.map((a) => (
+                        <option key={a} value={a} className="bg-[#0F1419] text-[#F1F5F9]">
+                          {a} ({a === "ICP" ? "Contractor" : a === "PEER" ? "Engineer" : "Bridge"})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Status Selector */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-[#94A3B8]">
+                    Pipeline Status
+                  </label>
+                  <select
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value as IdeaStatus)}
+                    className="w-full bg-[#070B0F] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3 py-2.5 text-xs text-[#F1F5F9] outline-none transition-colors cursor-pointer"
+                  >
+                    <option value="HARVESTED" className="bg-[#0F1419]">HARVESTED (Ready)</option>
+                    <option value="REFINED" className="bg-[#0F1419]">REFINED (Ready for Writer)</option>
+                    <option value="CLAIMED" className="bg-[#0F1419]">CLAIMED (Locked)</option>
+                    <option value="DRAFTED" className="bg-[#0F1419]">DRAFTED (Asset Generated)</option>
+                    <option value="PUBLISHED" className="bg-[#0F1419]">PUBLISHED (Live)</option>
+                    <option value="REJECTED" className="bg-[#0F1419]">REJECTED (Archived)</option>
+                  </select>
+                </div>
+              </form>
+            </div>
+
+            {/* Edit Drawer Footer */}
+            <div className="p-6 border-t border-[#1F2D3D] bg-[#070B0F]/60 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => handleDeleteIdea(editingIdea.id || editingIdea.ideaId || "", editTitle)}
+                className="px-3 py-2 text-xs font-semibold text-[#EF4444] hover:bg-[#EF4444]/10 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete</span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingIdea(null)}
+                  disabled={isUpdating}
+                  className="px-4 py-2 text-xs font-semibold text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] rounded-xl transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  form="edit-idea-form"
+                  disabled={isUpdating || !editTitle.trim()}
+                  className="inline-flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] disabled:opacity-50 text-[#070B0F] text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/15 transition-all cursor-pointer"
+                >
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>Save Changes</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Action Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-[#00C9A7] text-[#070B0F] px-4 py-3 rounded-xl shadow-2xl font-bold text-xs flex items-center gap-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
+          <CheckCircle2 className="w-4 h-4" />
+          <span>{toastMessage}</span>
         </div>
       )}
     </div>
