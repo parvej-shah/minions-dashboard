@@ -32,6 +32,7 @@ import { IdeaItem, AudienceLane, TargetTrade, IdeaSource, IdeaStatus } from "@/l
 import { INITIAL_IDEAS } from "@/lib/api";
 import CalendarView from "@/components/ideas/CalendarView";
 import ScheduleModal from "@/components/ideas/ScheduleModal";
+import QueueBuilderView from "@/components/ideas/QueueBuilderView";
 
 const TRADES: TargetTrade[] = [
   "HVAC",
@@ -88,8 +89,8 @@ export default function IdeaStreamPage() {
   const [justClaimedIds, setJustClaimedIds] = useState<Set<string>>(new Set());
   const [draftError, setDraftError] = useState<string | null>(null);
 
-  // View mode: Stream cards vs Editorial Calendar
-  const [viewMode, setViewMode] = useState<"stream" | "calendar">("stream");
+  // View mode: Stream cards vs Drag & Drop Queue Builder vs Editorial Calendar
+  const [viewMode, setViewMode] = useState<"stream" | "queue" | "calendar">("queue");
 
   // Scheduling Modal State
   const [schedulingIdea, setSchedulingIdea] = useState<IdeaItem | null>(null);
@@ -451,8 +452,27 @@ export default function IdeaStreamPage() {
         </div>
 
         <div className="flex items-center gap-3 self-start sm:self-auto flex-wrap">
-          {/* View Mode Toggle Switch */}
+          {/* View Mode Toggle Switch: Stream vs Queue Builder vs Calendar */}
           <div className="flex items-center p-1 bg-[#161D26] border border-[#1F2D3D] rounded-xl shadow-inner">
+            <button
+              onClick={() => setViewMode("queue")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                viewMode === "queue"
+                  ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
+                  : "text-[#94A3B8] hover:text-white"
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Queue Builder</span>
+              {ideas.filter(i => i.status === "QUEUED").length > 0 && (
+                <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full font-bold ${
+                  viewMode === "queue" ? "bg-[#070B0F] text-[#00C9A7]" : "bg-[#00C9A7]/20 text-[#00C9A7]"
+                }`}>
+                  {ideas.filter(i => i.status === "QUEUED").length}
+                </span>
+              )}
+            </button>
+
             <button
               onClick={() => setViewMode("stream")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
@@ -634,8 +654,20 @@ export default function IdeaStreamPage() {
           </div>
         )}
 
-      {/* Conditional Rendering: Stream View vs Calendar View */}
-      {viewMode === "calendar" ? (
+      {/* Conditional Rendering: Queue Builder vs Calendar View vs Stream View */}
+      {viewMode === "queue" ? (
+        <QueueBuilderView
+          ideas={ideas}
+          onUpdateIdeas={setIdeas}
+          onSelectIdea={(idea) => setDetailIdea(idea)}
+          onDraftIdea={handleRefineAndDraft}
+          isDrafting={claimingIds.size > 0}
+          onToast={(msg) => {
+            setToastMessage(msg);
+            setTimeout(() => setToastMessage(null), 4000);
+          }}
+        />
+      ) : viewMode === "calendar" ? (
         <CalendarView
           ideas={ideas}
           onSelectIdea={(idea) => setDetailIdea(idea)}
@@ -835,14 +867,49 @@ export default function IdeaStreamPage() {
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setSchedulingIdea(idea)}
-                          className="inline-flex items-center gap-1 bg-[#161D26] hover:bg-[#1F2D3D] text-[#94A3B8] hover:text-white border border-[#1F2D3D] text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all cursor-pointer"
-                          title="Schedule Auto-Draft Date"
-                        >
-                          <CalendarIcon className="w-3.5 h-3.5 text-[#00C9A7]" />
-                          <span>Schedule</span>
-                        </button>
+                        {ideaStatus === "QUEUED" ? (
+                          <button
+                            onClick={async () => {
+                              try {
+                                await fetch(`/api/ideas/${idea.id || rawId}`, {
+                                  method: "PATCH",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ status: "HARVESTED", queue_order: null })
+                                });
+                                setIdeas(prev => prev.map(i => i.id === (idea.id || rawId) ? { ...i, status: "HARVESTED", queue_order: null } : i));
+                                setToastMessage(`Removed from Queue`);
+                                setTimeout(() => setToastMessage(null), 3000);
+                              } catch (e) {}
+                            }}
+                            className="inline-flex items-center gap-1 bg-[#00C9A7]/10 hover:bg-[#EF4444]/10 text-[#00C9A7] hover:text-[#EF4444] border border-[#00C9A7]/30 hover:border-[#EF4444]/30 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all cursor-pointer group"
+                            title="Click to remove from queue"
+                          >
+                            <span className="group-hover:hidden">Queued {idea.queue_order ? `#${idea.queue_order}` : ""}</span>
+                            <span className="hidden group-hover:inline">Remove</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={async () => {
+                              try {
+                                const queuedList = ideas.filter(i => i.status === "QUEUED");
+                                const nextOrder = queuedList.length + 1;
+                                await fetch(`/api/ideas/${idea.id || rawId}`, {
+                                  method: "PATCH",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ status: "QUEUED", queue_order: nextOrder })
+                                });
+                                setIdeas(prev => prev.map(i => i.id === (idea.id || rawId) ? { ...i, status: "QUEUED", queue_order: nextOrder } : i));
+                                setToastMessage(`Added to Production Queue (#${nextOrder})`);
+                                setTimeout(() => setToastMessage(null), 3000);
+                              } catch (e) {}
+                            }}
+                            className="inline-flex items-center gap-1 bg-[#161D26] hover:bg-[#1F2D3D] text-[#94A3B8] hover:text-white border border-[#1F2D3D] text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all cursor-pointer"
+                            title="Add to production queue"
+                          >
+                            <Plus className="w-3.5 h-3.5 text-[#00C9A7]" />
+                            <span>Queue</span>
+                          </button>
+                        )}
 
                         <button
                           onClick={() => handleRefineAndDraft(idea.id || rawId)}

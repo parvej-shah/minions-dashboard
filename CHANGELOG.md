@@ -3,6 +3,56 @@
 All notable changes to the Minions content pipeline (n8n workflows: `01_idea_harvester`,
 `02_idea_to_asset`, `03_review_publisher`) and the Cockpit dashboard are logged here.
 
+## 2026-08-18 (hero image generation activated)
+
+### Added
+- **`02_idea_to_asset`: activated auto hero image generation.** `Qwen Image 3.0 Pro
+  Generation` and `Upload Hero to R2` were wired but disabled since the workflow was
+  built; every published asset was shipping without a cover image.
+  - **Gap found before activating:** `Upload Hero to R2` posts to
+    `https://minions.getminions.ai/api/media/ingest`, which sits behind the Cockpit's
+    NextAuth middleware (the same gate that caused the earlier "Refine & Draft" 401).
+    The node had no auth header configured, so enabling it as-is would have 401'd on
+    every run and silently fallen back to the 24h-expiring DashScope signed URL (or the
+    pollinations.ai placeholder) instead of a permanent image.
+  - **Fix:** created an n8n `httpHeaderAuth` credential ("Minions Cockpit API (webhook
+    secret)") holding `x-webhook-secret`, matching the dashboard's `BLOG_API_SECRET`,
+    and wired it onto `Upload Hero to R2`. Then enabled both nodes.
+  - Deploy check: `/api/media/ingest` was already live in production (no dashboard
+    deploy needed) — confirmed via a direct authenticated curl before touching n8n.
+  - **Verified live end-to-end:** triggered a real run against `IDEA-0039`. Result:
+    `ASSET-0034` now has a permanent `heroImageUrl`
+    (`.../assets/asset-0034-hero-*.png`) confirmed as a real 823KB PNG served from R2
+    (not the expiring signed URL or the placeholder fallback).
+  - Workflow re-validated after activation: 0 errors, 3 warnings (down from 5 — the two
+    "connection to disabled node" warnings for this exact path are gone now that the
+    nodes are enabled; remaining 3 are pre-existing/unrelated).
+
+## 2026-08-18 (Refine & Draft targeting bug)
+
+### Fixed
+- **`02_idea_to_asset`: "Refine & Draft" ignored which idea you clicked.** The Cockpit's
+  `POST /api/pipeline/draft` correctly sends the clicked idea's `idea_id` in the webhook
+  payload, but two nodes discarded it entirely:
+  - `Generate run_id` only generated a run UUID and threw away the trigger's request body.
+  - `Select Target` re-read every eligible idea from the DB and always auto-picked the
+    highest-priority/oldest one, with no awareness of which idea was actually requested.
+  - **Symptom reported by user:** clicking "Refine & Draft" on `IDEA-0038` flipped the
+    Cockpit UI to "CLAIMED" (an optimistic local update on webhook 200, not a confirmed
+    DB write), but a different idea was silently claimed/drafted instead. On page
+    reload, `/api/ideas` returned the true DB state — `IDEA-0038` was still `REFINED`,
+    so the button reverted to "Refine & Draft" with no draft ever produced for it.
+  - **Fix:** `Generate run_id` now captures `idea_id` from the trigger body as
+    `requested_idea_id`. `Select Target` checks that value first — if the requested idea
+    is still eligible, it claims exactly that one; only falls back to the existing
+    priority/batch_rank/created_at auto-pick when no specific idea was requested (manual/
+    scheduled runs) or the requested one is no longer eligible.
+  - **Verified live:** triggered the test webhook with `idea_id: "IDEA-0038"` directly.
+    Confirmed via direct DB query that `IDEA-0038` (not some other idea) was claimed,
+    drafted, and moved to `REVIEW` with `draftAssetId: ASSET-0031`.
+  - Workflow re-validated after the patch: 0 errors, same 5 pre-existing/unrelated
+    warnings as before.
+
 ## 2026-08-18 (later)
 
 ### Audited

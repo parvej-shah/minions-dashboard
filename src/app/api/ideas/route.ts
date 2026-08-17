@@ -88,3 +88,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const body = await request.json();
+    if (body.queueItems && Array.isArray(body.queueItems)) {
+      await prisma.$transaction(
+        body.queueItems.map((item: { id: string; queue_order?: number | null; status?: string }) =>
+          prisma.idea.update({
+            where: { id: item.id },
+            data: {
+              ...(item.queue_order !== undefined && { queueOrder: item.queue_order }),
+              ...(item.status !== undefined && { status: item.status }),
+              updatedAt: new Date(),
+            },
+          })
+        )
+      );
+      return NextResponse.json({ success: true, count: body.queueItems.length });
+    }
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
