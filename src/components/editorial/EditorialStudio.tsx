@@ -486,14 +486,8 @@ export default function EditorialStudio({
             </div>
           </div>
 
-          {/* Right: Quick Sequential Navigation & Keyboard Shortcuts Pill */}
+          {/* Right: Quick Sequential Navigation */}
           <div className="flex items-center gap-2 self-end sm:self-auto">
-            <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono text-[#64748B] mr-1">
-              <kbd className="px-1.5 py-0.5 rounded bg-[#070B0F] border border-[#1F2D3D] text-[#94A3B8]">[</kbd>
-              <kbd className="px-1.5 py-0.5 rounded bg-[#070B0F] border border-[#1F2D3D] text-[#94A3B8]">]</kbd>
-              <span>Switch Draft</span>
-            </span>
-
             <div className="flex items-center gap-1 bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D]">
               <button
                 onClick={handlePrevDraft}
@@ -1479,8 +1473,7 @@ export default function EditorialStudio({
                 title="Previous Draft ( [ )"
               >
                 <ChevronLeft className="w-3 h-3 text-[#00C9A7]" />
-                <span>Prev</span>
-                <kbd className="text-[9px] font-mono text-[#64748B]">[</kbd>
+                <span>Prev Draft</span>
               </button>
 
               <span className="text-[10px] font-mono text-[#64748B] shrink-0 font-bold px-1">
@@ -1492,9 +1485,8 @@ export default function EditorialStudio({
                 className="flex-1 py-1.5 px-2 rounded-lg bg-[#070B0F] hover:bg-[#161D26] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] text-[11px] font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer"
                 title="Next Draft ( ] )"
               >
-                <span>Next</span>
+                <span>Next Draft</span>
                 <ChevronRight className="w-3 h-3 text-[#00C9A7]" />
-                <kbd className="text-[9px] font-mono text-[#64748B]">]</kbd>
               </button>
             </div>
 
