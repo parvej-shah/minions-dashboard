@@ -106,7 +106,17 @@ export async function PATCH(
           },
         });
       } else if (body.status === "PUBLISHED" || updated.status === "PUBLISHED") {
-        // Publishing / Republishing: upsert into live blogs table
+        // Publishing / Republishing: upsert into live blogs table.
+        // This is the dominant publish path (n8n's own direct blogs-table write only
+        // fires when claims_ok === 'Y' at draft time, which most drafts never hit),
+        // so the random founder byline has to be assigned here too, not just in n8n.
+        const FOUNDER_NAMES = ["Parvej", "Rakib"];
+        const author = {
+          name: FOUNDER_NAMES[Math.floor(Math.random() * FOUNDER_NAMES.length)],
+          role: "Co-Founder, Minions.AI",
+          avatar: "https://getminions.ai/images/minions_ai_logo_primary_transparent.png",
+        };
+
         await prisma.blog.upsert({
           where: { slug: updated.slug },
           create: {
@@ -117,6 +127,7 @@ export async function PATCH(
             content: updated.content,
             audience: updated.audience,
             pillar: updated.pillar,
+            author,
             assetId: updated.id,
             docUrl: updated.docUrl,
             publishedAt: updated.publishedAt || new Date(),
