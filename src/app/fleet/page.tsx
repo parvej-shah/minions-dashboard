@@ -58,9 +58,9 @@ const WORKER_DETAILS = [
   {
     id: "WORKER-004",
     name: "Visual Art Director",
-    simpleRole: "2K Cover Art Creator",
-    description: "Synthesizes tactile 2K commercial studio flat-lay cover images with stitched leather clipboards, metallic clips, and sleek typography tailored for each article topic.",
-    model: "qwen-image-3.0",
+    simpleRole: "Cover Art Creator",
+    description: "Synthesizes tactile commercial studio flat-lay cover images with stitched leather clipboards, metallic clips, and sleek typography tailored for each article topic.",
+    model: "qwen-image-3.0-pro",
     modelBadge: "Visual Studio",
     n8nStage: "Workflow 02 · Cover Synthesis",
     avatar: "/images/social-avatars/ai-generated/github_profile_avatar_ai.jpg",
@@ -89,7 +89,8 @@ export default function FleetPage() {
                   ...w,
                   status: remote.status || w.status,
                   model: remote.model || w.model,
-                  totalRuns: remote.total_runs || 42,
+                  totalRuns: typeof remote.total_runs === "number" ? remote.total_runs : 0,
+                  lastActive: remote.last_active,
                 };
               }
               return w;
@@ -224,7 +225,7 @@ export default function FleetPage() {
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-base font-bold text-[#F1F5F9]">{worker.name}</h3>
-                        <span className="w-2 h-2 rounded-full bg-[#00C9A7]"></span>
+                        <span className={`w-2 h-2 rounded-full ${worker.status === "ACTIVE" ? "bg-[#00C9A7]" : "bg-[#64748B]"}`}></span>
                       </div>
                       <p className="text-xs text-[#00C9A7] font-semibold">{worker.simpleRole}</p>
                     </div>
@@ -262,9 +263,11 @@ export default function FleetPage() {
               <div className="pt-3 border-t border-[#1F2D3D] flex items-center justify-between text-xs font-mono text-[#64748B]">
                 <div className="flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-[#00C9A7]" />
-                  <span>{worker.schedule}</span>
+                  <span>{"lastActive" in worker && worker.lastActive ? `Last run ${worker.lastActive}` : worker.schedule}</span>
                 </div>
-                <span className="text-[#00C9A7] font-semibold">● Online</span>
+                <span className={`font-semibold ${worker.status === "ACTIVE" ? "text-[#00C9A7]" : "text-[#64748B]"}`}>
+                  ● {worker.status === "ACTIVE" ? "Online" : "Idle"}
+                </span>
               </div>
             </div>
           ))}

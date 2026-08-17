@@ -1,11 +1,37 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+function formatRelative(date: Date | null): string {
+  if (!date) return "No runs yet";
+  const diffMs = Date.now() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / 60000);
+  if (diffMinutes < 1) return "Just now";
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays}d ago`;
+}
+
 export async function GET() {
   try {
+    // Every asset row represents one completed pass through Strategist -> Writer
+    // -> Editor -> Image (02_idea_to_asset runs them in a straight line, no branch
+    // skips any of the four before the claims-gate split), so the asset count is
+    // each agent's real, unpadded run total.
     const totalAssets = await prisma.asset.count();
-    const totalIdeas = await prisma.idea.count();
-    const publishedCount = await prisma.asset.count({ where: { status: "PUBLISHED" } });
+
+    const latestAsset = await prisma.asset.findFirst({
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
+    });
+    const lastRunAt = latestAsset?.createdAt ?? null;
+
+    // No per-run heartbeat is recorded, so "active" is inferred from recency of
+    // the last real pipeline run rather than hardcoded true.
+    const isRecentlyActive = lastRunAt ? Date.now() - lastRunAt.getTime() < 24 * 60 * 60 * 1000 : false;
+    const status = isRecentlyActive ? "ACTIVE" : "IDLE";
+    const lastActive = formatRelative(lastRunAt);
 
     const dynamicFleet = [
       {
@@ -14,10 +40,10 @@ export async function GET() {
         role: "Angle Formulation & Thesis Defense",
         type: "Autonomous Strategist",
         model: "qwen3.7-max",
-        status: "ACTIVE",
+        status,
         system_prompt: "You are the Lead Marketing Strategist for getminions.ai. Formulate high-entropy thesis angles for US home service operators (HVAC, plumbing, electrical) and systems engineers. Enforce zero AI cheerleading and strict 1–3 sentence prose.",
-        last_active: "Active · Ingestion Triggered",
-        total_runs: totalIdeas + 44,
+        last_active: lastActive,
+        total_runs: totalAssets,
       },
       {
         id: "WORKER-002",
@@ -25,10 +51,10 @@ export async function GET() {
         role: "Long-Form Deep Dives & Omnichannel Variants",
         type: "Content Engine",
         model: "qwen-plus",
-        status: "ACTIVE",
+        status,
         system_prompt: "You are the Principal Content Writer for getminions.ai. Write 800–1200 word deep dives using the 5-stage Linear/Stripe cadence (Hook, Field Reality, Systems Teardown, Proof, Operator Takeaway). Strictly follow brand DO/DONT rules.",
-        last_active: "Active · On Claim Trigger",
-        total_runs: totalAssets + 38,
+        last_active: lastActive,
+        total_runs: totalAssets,
       },
       {
         id: "WORKER-003",
@@ -36,21 +62,21 @@ export async function GET() {
         role: "Claims Gate & Style Enforcement",
         type: "Safety & Quality Gate",
         model: "qwen3.7-flash",
-        status: "ACTIVE",
+        status,
         system_prompt: "You are the Senior Editor for getminions.ai. Enforce the Claims Verification Gate. Extract every factual/numeric assertion and classify against proven benchmarks. Ban prohibited buzzwords.",
-        last_active: "Active · Automated Gate",
-        total_runs: totalAssets + 41,
+        last_active: lastActive,
+        total_runs: totalAssets,
       },
       {
         id: "WORKER-004",
         name: "Visual Art Director",
-        role: "2K Commercial Studio Flat-Lay Cover Art",
+        role: "Commercial Studio Flat-Lay Cover Art",
         type: "Multimodal Visual Engine",
-        model: "qwen-image-3.0",
-        status: "ACTIVE",
+        model: "qwen-image-3.0-pro",
+        status,
         system_prompt: "Generate tactile commercial studio flat-lay photography for getminions.ai blog covers. Real stitched leather clipboards, metallic clips, dark slate tabletops, and crisp minimalist typography with [ARCHITECT] badges.",
-        last_active: "Active · Multimodal Engine",
-        total_runs: publishedCount + 34,
+        last_active: lastActive,
+        total_runs: totalAssets,
       },
     ];
 
