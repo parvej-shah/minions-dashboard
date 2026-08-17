@@ -109,6 +109,12 @@ function buildNavItems(counts: NavCounts | null) {
 
 export default function DashboardShell({ children }: DashboardShellProps) {
   const pathname = usePathname();
+
+  // If on /login, render clean full-screen login view without sidebar or dashboard navigation
+  if (pathname === "/login") {
+    return <>{children}</>;
+  }
+
   const router = useRouter();
   const [isHarvesting, setIsHarvesting] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
