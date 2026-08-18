@@ -3,6 +3,22 @@
 All notable changes to the Minions content pipeline (n8n workflows: `01_idea_harvester`,
 `02_idea_to_asset`, `03_review_publisher`) and the Cockpit dashboard are logged here.
 
+## 2026-08-18 (every article ended with a rigid, identical "Rule 1/2/3" closer)
+
+### Fixed
+- **`02_idea_to_asset`: the writer prompt (`Build Writer Payload`) forced exactly 3
+  closing takeaways on every single article, each literally prefixed "Rule 1:",
+  "Rule 2:", "Rule 3:"**, regardless of how many actions the argument actually
+  supported. Both live posts ended with an identical structure, which reads as a
+  templated listicle rather than the Stripe/Linear-grade editorial voice the pipeline
+  is going for. Beat 5 now asks for 2-4 takeaways (whatever the argument earns, never
+  a forced quota), each opening with a short bolded action phrase specific to that
+  point instead of a repeated generic label.
+- **`minions-ai`: `components/blog/ArticleContent.tsx`'s takeaway-callout renderer only
+  recognized the literal "Rule N:" prefix.** Extended it to also detect the new
+  "**Action lead:** sentence" pattern (any count) while keeping the old "Rule N:"
+  detection so the 2 already-published posts still render correctly.
+
 ## 2026-08-18 (blog post title tags, canonical URLs, social share images, and headline quality)
 
 ### Fixed
