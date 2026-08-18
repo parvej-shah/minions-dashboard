@@ -1860,6 +1860,15 @@ export default function EditorialStudio({
                     <span>{copiedKey === "raw-markdown-btn" ? "Copied" : "Copy MD"}</span>
                   </button>
                 </div>
+
+                <button
+                  onClick={handlePermanentDelete}
+                  className="w-full text-[#64748B] hover:text-[#EF4444] text-[11px] font-mono py-1 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  title="Permanently delete this draft and its claim verifications"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  <span>Delete Draft</span>
+                </button>
               </div>
             )}
 
