@@ -3,6 +3,33 @@
 All notable changes to the Minions content pipeline (n8n workflows: `01_idea_harvester`,
 `02_idea_to_asset`, `03_review_publisher`) and the Cockpit dashboard are logged here.
 
+## 2026-08-18 (cover images always showed physical trade equipment, regardless of topic)
+
+### Fixed
+- **`02_idea_to_asset`: hero image generation had no awareness of what the article was
+  actually about, or its audience.** The strategist's own system prompt (`Assemble Brand
+  Context`) hardcoded Step 3 of its cover-art direction to always depict "real physical
+  trade tools, diagnostic sensors, or hardware components" — so even a Voice AI latency
+  piece or a pricing/economics piece got wrenches-and-gauges cover art. The downstream
+  fallback in `Parse Variants and Prepare Rows` (triggered whenever the strategist's own
+  `physical_scene` was missing or too short) made it worse: a pure keyword match over the
+  title/idea/trade text that always resolved to one of six hardcoded physical-hardware
+  prop lists, with no "not a hands-on trade" branch at all — Voice AI, Systems
+  Architecture, and Operations content fell through to a generic "diagnostic instruments
+  ... engineered for {trade} operations" line.
+  - **Fix:** the strategist now first decides a `visual_register` — `PHYSICAL_TRADE` (a
+    technician actually diagnosing/repairing equipment) or `ABSTRACT_DATA` (the piece is
+    really about software, AI systems, latency, dispatch, pricing, or strategy) — based on
+    the article's real subject, not the reader's job title, and returns it alongside
+    `physical_scene` in `thumbnail_card`.
+  - `Parse Variants and Prepare Rows`'s fallback now honors that register when present; when
+    absent, it only defaults to physical-hardware props for the five genuinely hands-on
+    trades (HVAC, Plumbing, Electrical, Roofing, Pest Control) — everything else (Voice AI,
+    Systems Architecture, Operations, or an abstract topic inside a physical trade) gets a
+    new topic-matched abstract composition (data dashboards, waveform/latency charts,
+    financial ledgers, architecture diagrams) instead of forced-in equipment.
+  - Workflow re-validated: 0 errors, same 4 pre-existing warnings.
+
 ## 2026-08-18 (Claim Idea Row silently claimed 0 rows on QUEUED/stale-PICKED ideas)
 
 ### Fixed
