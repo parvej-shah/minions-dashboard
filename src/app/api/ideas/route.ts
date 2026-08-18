@@ -94,24 +94,6 @@ export async function PATCH(request: Request) {
   try {
     const body = await request.json();
     if (body.queueItems && Array.isArray(body.queueItems)) {
-      const reQueuingIds = body.queueItems
-        .filter((item: { status?: string }) => item.status && ["QUEUED", "HARVESTED", "REFINED"].includes(item.status))
-        .map((item: { id: string }) => item.id);
-      if (reQueuingIds.length > 0) {
-        const alreadyDrafted = await prisma.idea.findMany({
-          where: { id: { in: reQueuingIds }, draftAssetId: { not: null } },
-          select: { id: true, draftAssetId: true },
-        });
-        if (alreadyDrafted.length > 0) {
-          return NextResponse.json(
-            {
-              error: `${alreadyDrafted.length} idea(s) already have a draft and cannot be re-queued: ${alreadyDrafted.map((i) => i.id).join(", ")}. Delete the existing asset first.`,
-              ideas: alreadyDrafted,
-            },
-            { status: 409 }
-          );
-        }
-      }
       await prisma.$transaction(
         body.queueItems.map((item: { id: string; queue_order?: number | null; status?: string }) =>
           prisma.idea.update({
