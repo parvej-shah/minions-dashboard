@@ -76,21 +76,21 @@ export default function MissionControlPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap w-full sm:w-auto">
           <Link
             href="/ideas"
-            className="flex items-center gap-2 bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-xs font-semibold text-[#F1F5F9] px-4 py-2.5 rounded-xl transition-all shadow-sm"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-xs font-semibold text-[#F1F5F9] px-4 py-2.5 rounded-xl transition-all shadow-sm active:scale-95"
           >
             <Sparkles className="w-3.5 h-3.5 text-[#00C9A7]" />
             <span>Discover Ideas</span>
           </Link>
 
           <Link
-            href="/drafts"
-            className="flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/20 transition-all"
+            href="/editorial"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/20 transition-all active:scale-95"
           >
             <FileText className="w-3.5 h-3.5" />
-            <span>Editorial Staging ({pendingReviewAssets.length})</span>
+            <span>Editorial Studio ({pendingReviewAssets.length})</span>
           </Link>
         </div>
       </div>
@@ -184,7 +184,7 @@ export default function MissionControlPage() {
             <div className="text-lg font-bold text-[#64748B] font-mono mt-1">{draftingIdeas.length}</div>
           </Link>
 
-          <Link href="/drafts" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#ff6b4a]/40 transition-all group shadow-sm">
+          <Link href="/editorial" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#ff6b4a]/40 transition-all group shadow-sm">
             <div className="text-xs font-bold text-[#ff6b4a] flex items-center justify-center gap-1.5">
               <span>🔍 Review</span>
             </div>
@@ -271,10 +271,10 @@ export default function MissionControlPage() {
 
                   <div className="flex items-center gap-3 w-full sm:w-auto justify-end shrink-0">
                     <Link
-                      href={`/drafts/${asset.id}`}
+                      href="/editorial"
                       className="px-4 py-2 rounded-xl bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold transition-all shadow-md shadow-[#00C9A7]/10 flex items-center gap-1.5"
                     >
-                      <span>Review & Publish</span>
+                      <span>Review in Studio</span>
                       <ChevronRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>

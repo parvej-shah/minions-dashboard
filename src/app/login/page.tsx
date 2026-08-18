@@ -3,6 +3,7 @@
 import React, { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import { 
   Sparkles, 
@@ -101,173 +102,134 @@ function LoginContent() {
       <div className="absolute -bottom-32 right-1/4 w-[600px] h-[500px] bg-gradient-to-bl from-[#3B82F6]/15 via-[#8B5CF6]/10 to-transparent blur-[140px] pointer-events-none rounded-full animate-pulse-glow" />
 
       {/* TOP HEADER / BRAND BAR */}
-      <header className="relative z-20 w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-        <div className="flex items-baseline group">
-          <span className="font-extrabold text-2xl sm:text-3xl tracking-tight text-white">
-            Minions
-          </span>
-          <span className="text-[#ff6b4a] font-extrabold text-2xl sm:text-3xl ml-0.5">
-            .AI
-          </span>
-        </div>
+      <header className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#12242a] to-[#0a0d12] border border-[#1F2D3D] flex items-center justify-center shadow-md shrink-0">
+            <img src="/icon.svg" alt="Minions Logo" className="w-6 h-6" />
+          </div>
+          <div className="flex items-baseline">
+            <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-white group-hover:opacity-90 transition-opacity">
+              Minions
+            </span>
+            <span className="text-[#ff6b4a] font-bold text-xl sm:text-2xl ml-0.5">
+              .AI
+            </span>
+          </div>
+        </Link>
 
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0D1520]/80 border border-[#1F2D3D] backdrop-blur-md shadow-inner text-xs font-mono text-[#94A3B8]">
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#0D1520]/80 border border-[#1F2D3D] backdrop-blur-md shadow-inner text-xs font-mono text-[#94A3B8]">
           <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
-          <span className="text-white font-semibold">Autonomous AI Fleet</span>
+          <span className="text-white font-semibold">Autonomous Cockpit</span>
         </div>
       </header>
 
       {/* MAIN VIEWPORT SPLIT */}
-      <main className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 flex-1 flex items-center">
-        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center">
+      <main className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-10 flex-1 flex items-center justify-center">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center max-w-5xl">
           
-          {/* LEFT COLUMN: 3D MASCOT SQUAD HERO SHOWCASE (DESKTOP & TABLET) */}
-          <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-6 lg:space-y-8">
+          {/* LEFT COLUMN: 3D MASCOT SQUAD (VISIBLE ON DESKTOP/TABLET, COMPACT ON MOBILE) */}
+          <div className="hidden lg:flex lg:col-span-6 flex-col items-start text-left space-y-6">
             
             {/* Tagline & Title */}
-            <div className="space-y-3 max-w-xl">
+            <div className="space-y-3 max-w-lg">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#ff6b4a]/10 border border-[#ff6b4a]/30 text-xs font-mono font-bold text-[#ff6b4a]">
                 <Zap className="w-3.5 h-3.5" />
-                <span>MEET YOUR 24/7 AI CREW</span>
+                <span>24/7 AUTONOMOUS CREW</span>
               </div>
-              <h1 className="text-3xl sm:text-5xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.15]">
-                Never miss another call. <br className="hidden sm:inline" />
-                <span className="bg-gradient-to-r from-[#00C9A7] via-[#38BDF8] to-[#ff6b4a] bg-clip-text text-transparent">
-                  Your AI workforce is ready.
-                </span>
+              <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.12]">
+                Your AI trade fleet is active.
               </h1>
-              <p className="text-sm sm:text-base text-[#94A3B8] leading-relaxed">
-                Log in to command your fleet of voice dispatchers, review real-time operations, and orchestrate omnichannel growth.
+              <p className="text-sm text-[#94A3B8] leading-relaxed">
+                Log in to command your autonomous voice agents, orchestrate speed-to-lead, and manage omnichannel editorial staging.
               </p>
             </div>
 
-            {/* MASCOT HERO STAGE */}
-            <div className="relative w-full max-w-lg flex flex-col items-center py-4">
-              
-              {/* Radial Glow Halo behind Mascot */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 sm:w-96 sm:h-96 bg-radial from-[#00C9A7]/20 via-[#ff6b4a]/10 to-transparent blur-3xl pointer-events-none rounded-full" />
+            {/* Mascot Trio Stage */}
+            <div className="relative w-full max-w-md flex flex-col items-center py-2">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-radial from-[#00C9A7]/20 via-[#ff6b4a]/10 to-transparent blur-3xl pointer-events-none rounded-full" />
 
-              {/* Trio Mascots Presentation on Mobile & Desktop */}
-              <div className="relative flex items-end justify-center gap-2 sm:gap-6 my-2 sm:my-4">
-                
-                {/* Flanking Mascot 1 (Gia - Left) */}
+              <div className="relative flex items-end justify-center gap-4 my-2">
+                {/* Gia */}
                 <div 
                   onClick={() => setActiveMascotIndex(1)}
                   className={`cursor-pointer transition-all duration-300 transform ${
-                    activeMascotIndex === 1 
-                      ? "scale-110 z-20 -translate-y-2 opacity-100" 
-                      : "scale-90 opacity-75 hover:opacity-100 hover:scale-95"
+                    activeMascotIndex === 1 ? "scale-105 z-20 opacity-100" : "scale-90 opacity-70 hover:opacity-100"
                   } animate-float-reverse`}
                 >
-                  <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-b from-[#00C9A7]/15 to-[#070B0F]/80 p-2 border border-[#00C9A7]/30 backdrop-blur-md shadow-xl flex items-center justify-center relative group">
-                    <img 
-                      src="/images/mascots/gia.png" 
-                      alt="Gia" 
-                      className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform" 
-                    />
-                    <span className="absolute -bottom-2 px-2 py-0.5 rounded-full bg-[#070B0F] border border-[#00C9A7]/40 text-[10px] font-mono text-[#00C9A7] font-bold">
+                  <div className="w-24 h-24 rounded-2xl bg-[#0D1520]/80 p-2 border border-[#00C9A7]/30 backdrop-blur-md shadow-xl flex items-center justify-center relative">
+                    <img src="/images/mascots/gia.png" alt="Gia" className="w-full h-full object-contain filter drop-shadow-md" />
+                    <span className="absolute -bottom-2 px-2 py-0.2 rounded-full bg-[#070B0F] border border-[#00C9A7]/40 text-[9px] font-mono text-[#00C9A7] font-bold">
                       Gia
                     </span>
                   </div>
                 </div>
 
-                {/* Center Lead Mascot (Rex - Primary Hero) */}
+                {/* Rex */}
                 <div 
                   onClick={() => setActiveMascotIndex(0)}
                   className={`cursor-pointer transition-all duration-300 transform ${
-                    activeMascotIndex === 0 
-                      ? "scale-115 z-30 -translate-y-4 opacity-100" 
-                      : "scale-95 opacity-80 hover:opacity-100"
+                    activeMascotIndex === 0 ? "scale-110 z-30 opacity-100" : "scale-95 opacity-80 hover:opacity-100"
                   } animate-float-slow`}
                 >
-                  <div className="w-28 h-28 sm:w-40 sm:h-40 rounded-3xl bg-gradient-to-b from-[#ff6b4a]/20 via-[#12242a]/60 to-[#070B0F] p-3 border-2 border-[#ff6b4a]/40 backdrop-blur-xl shadow-2xl shadow-[#ff6b4a]/20 flex items-center justify-center relative group">
-                    <img 
-                      src="/images/mascots/rex.png" 
-                      alt="Rex" 
-                      className="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-105 transition-transform" 
-                    />
-                    <span className="absolute -bottom-2.5 px-3 py-0.5 rounded-full bg-[#ff6b4a] text-white text-xs font-mono font-extrabold shadow-md">
+                  <div className="w-32 h-32 rounded-3xl bg-[#0D1520] p-2.5 border-2 border-[#ff6b4a]/40 backdrop-blur-xl shadow-2xl shadow-[#ff6b4a]/20 flex items-center justify-center relative">
+                    <img src="/images/mascots/rex.png" alt="Rex" className="w-full h-full object-contain filter drop-shadow-xl" />
+                    <span className="absolute -bottom-2.5 px-3 py-0.5 rounded-full bg-[#ff6b4a] text-white text-[10px] font-mono font-extrabold shadow-md">
                       Rex • Lead
                     </span>
                   </div>
                 </div>
 
-                {/* Flanking Mascot 2 (Otto - Right) */}
+                {/* Otto */}
                 <div 
                   onClick={() => setActiveMascotIndex(2)}
                   className={`cursor-pointer transition-all duration-300 transform ${
-                    activeMascotIndex === 2 
-                      ? "scale-110 z-20 -translate-y-2 opacity-100" 
-                      : "scale-90 opacity-75 hover:opacity-100 hover:scale-95"
+                    activeMascotIndex === 2 ? "scale-105 z-20 opacity-100" : "scale-90 opacity-70 hover:opacity-100"
                   } animate-float-slow`}
                 >
-                  <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-b from-[#3B82F6]/15 to-[#070B0F]/80 p-2 border border-[#3B82F6]/30 backdrop-blur-md shadow-xl flex items-center justify-center relative group">
-                    <img 
-                      src="/images/mascots/otto.png" 
-                      alt="Otto" 
-                      className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform" 
-                    />
-                    <span className="absolute -bottom-2 px-2 py-0.5 rounded-full bg-[#070B0F] border border-[#3B82F6]/40 text-[10px] font-mono text-[#3B82F6] font-bold">
+                  <div className="w-24 h-24 rounded-2xl bg-[#0D1520]/80 p-2 border border-[#3B82F6]/30 backdrop-blur-md shadow-xl flex items-center justify-center relative">
+                    <img src="/images/mascots/otto.png" alt="Otto" className="w-full h-full object-contain filter drop-shadow-md" />
+                    <span className="absolute -bottom-2 px-2 py-0.2 rounded-full bg-[#070B0F] border border-[#3B82F6]/40 text-[9px] font-mono text-[#3B82F6] font-bold">
                       Otto
                     </span>
                   </div>
                 </div>
-
               </div>
 
               {/* Active Mascot Role Pill */}
-              <div className="mt-4 px-4 py-2 rounded-2xl bg-[#0D1520]/80 border border-[#1F2D3D] backdrop-blur-md max-w-sm text-center animate-in fade-in duration-300">
-                <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-[#F1F5F9]">
-                  <span className={activeMascot.accent}>{activeMascot.name}</span>
-                  <span className="text-[#64748B]">•</span>
-                  <span className="text-[#94A3B8]">{activeMascot.role}</span>
-                </div>
-                <p className="text-[11px] text-[#64748B] mt-0.5 line-clamp-1">
-                  {activeMascot.description}
-                </p>
+              <div className="mt-3 px-3 py-1.5 rounded-xl bg-[#0D1520]/80 border border-[#1F2D3D] text-xs font-medium text-center">
+                <span className={activeMascot.accent}>{activeMascot.name}</span>
+                <span className="text-[#64748B] mx-1.5">•</span>
+                <span className="text-[#94A3B8]">{activeMascot.role}</span>
               </div>
-
-              {/* Mascot Mini Selector Dots */}
-              <div className="flex items-center gap-1.5 mt-3">
-                {MASCOTS.map((m, idx) => (
-                  <button
-                    key={m.id}
-                    onClick={() => setActiveMascotIndex(idx)}
-                    className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                      activeMascotIndex === idx 
-                        ? "w-6 bg-[#00C9A7]" 
-                        : "w-2 bg-[#1F2D3D] hover:bg-[#334155]"
-                    }`}
-                    title={m.name}
-                  />
-                ))}
-              </div>
-
             </div>
 
           </div>
 
-          {/* RIGHT COLUMN: AUTHENTICATION CARD (WORLD CLASS GLASSMORPHISM) */}
-          <div className="lg:col-span-5 flex justify-center lg:justify-end">
-            <div className="w-full max-w-md bg-[#0D1520]/90 backdrop-blur-3xl border border-[#1F2D3D] ring-1 ring-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/90 space-y-6 relative overflow-hidden">
+          {/* AUTHENTICATION CARD (CENTERED & CLEAN ON MOBILE) */}
+          <div className="lg:col-span-6 w-full flex justify-center lg:justify-end">
+            <div className="w-full max-w-md bg-[#0D1520]/95 backdrop-blur-3xl border border-[#1F2D3D] ring-1 ring-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/90 space-y-6 relative overflow-hidden">
               
-              {/* Subtle Card Inner Shimmer */}
+              {/* Card Ambient Glow */}
               <div className="absolute top-0 right-0 w-36 h-36 bg-[#00C9A7]/10 blur-3xl pointer-events-none rounded-full" />
               <div className="absolute bottom-0 left-0 w-36 h-36 bg-[#ff6b4a]/10 blur-3xl pointer-events-none rounded-full" />
 
-              {/* Card Header */}
-              <div className="space-y-1.5 text-center sm:text-left">
-                <div className="flex items-center justify-center sm:justify-start gap-2">
-                  <div className="w-7 h-7 rounded-xl bg-[#00C9A7]/10 border border-[#00C9A7]/30 flex items-center justify-center text-[#00C9A7]">
-                    <Shield className="w-4 h-4" />
-                  </div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                    Executive Portal
-                  </h2>
+              {/* Mobile Hero Logo (Centered) */}
+              <div className="flex flex-col items-center text-center space-y-3 pb-2">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#12242a] via-[#0D1520] to-[#070B0F] border-2 border-[#00C9A7]/40 flex items-center justify-center shadow-xl shadow-[#00C9A7]/10 relative group">
+                  <img src="/icon.svg" alt="Minions.AI" className="w-10 h-10 sm:w-12 sm:h-12" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-[#00C9A7]/30 to-[#ff6b4a]/30 rounded-2xl blur-lg opacity-40 -z-10" />
                 </div>
-                <p className="text-xs text-[#94A3B8]">
-                  Single Sign-On access for authorized Minions administrators.
-                </p>
+                
+                <div>
+                  <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight flex items-baseline justify-center">
+                    <span>Minions</span>
+                    <span className="text-[#ff6b4a] ml-0.5">.AI</span>
+                    <span className="text-[#00C9A7] text-sm ml-1.5 font-mono font-normal">Cockpit</span>
+                  </h1>
+                  <p className="text-xs text-[#94A3B8] mt-1">
+                    Autonomous Trade Marketing & Operations
+                  </p>
+                </div>
               </div>
 
               {/* Error Alert */}
@@ -286,11 +248,11 @@ function LoginContent() {
               )}
 
               {/* GOOGLE SIGN IN BUTTON */}
-              <div className="space-y-4 pt-1">
+              <div className="space-y-4">
                 <button
                   onClick={handleGoogleSignIn}
                   disabled={isLoading}
-                  className="w-full py-4 px-5 bg-white hover:bg-slate-100 text-[#070B0F] font-bold text-sm rounded-2xl transition-all shadow-xl hover:shadow-white/20 active:scale-[0.98] flex items-center justify-center gap-3.5 cursor-pointer disabled:opacity-60 group border border-slate-200"
+                  className="w-full py-4 px-5 bg-white hover:bg-slate-100 active:scale-[0.98] text-[#070B0F] font-bold text-sm rounded-2xl transition-all shadow-xl hover:shadow-white/20 flex items-center justify-center gap-3.5 cursor-pointer disabled:opacity-60 group border border-slate-200"
                 >
                   {isLoading ? (
                     <div className="w-5 h-5 border-2 border-[#070B0F] border-t-transparent rounded-full animate-spin" />
@@ -315,7 +277,7 @@ function LoginContent() {
                     </svg>
                   )}
                   <span className="text-sm font-bold">
-                    {isLoading ? "Connecting to Workspace..." : "Continue with Google"}
+                    {isLoading ? "Connecting..." : "Continue with Google"}
                   </span>
                   {!isLoading && (
                     <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-black group-hover:translate-x-0.5 transition-all ml-auto" />
@@ -323,18 +285,14 @@ function LoginContent() {
                 </button>
 
                 {/* Security Feature Highlights */}
-                <div className="p-4 rounded-2xl bg-[#070B0F]/60 border border-[#1F2D3D] space-y-2.5">
-                  <div className="flex items-center gap-2.5 text-xs text-[#94A3B8]">
-                    <CheckCircle2 className="w-4 h-4 text-[#00C9A7] shrink-0" />
-                    <span>Real-time agent telemetry & call transcripts</span>
+                <div className="p-3.5 rounded-2xl bg-[#070B0F]/60 border border-[#1F2D3D] space-y-2">
+                  <div className="flex items-center gap-2 text-xs text-[#94A3B8]">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
+                    <span>Real-time voice agent telemetry & operations</span>
                   </div>
-                  <div className="flex items-center gap-2.5 text-xs text-[#94A3B8]">
-                    <CheckCircle2 className="w-4 h-4 text-[#00C9A7] shrink-0" />
-                    <span>Instant 1-click editorial claims verification</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 text-xs text-[#94A3B8]">
-                    <CheckCircle2 className="w-4 h-4 text-[#00C9A7] shrink-0" />
-                    <span>End-to-end encrypted session management</span>
+                  <div className="flex items-center gap-2 text-xs text-[#94A3B8]">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
+                    <span>Editorial review & omnichannel broadcast command</span>
                   </div>
                 </div>
               </div>
@@ -345,7 +303,7 @@ function LoginContent() {
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
                   <span>Systems Operational</span>
                 </div>
-                <span className="font-mono text-[10px] text-[#475569]">v2.4.0 • Cockpit</span>
+                <span className="font-mono text-[10px] text-[#475569]">v2.4.0 • PWA Ready</span>
               </div>
 
             </div>

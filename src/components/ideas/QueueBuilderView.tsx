@@ -257,6 +257,8 @@ export default function QueueBuilderView({
     }
   };
 
+  const [mobileTab, setMobileTab] = useState<"queue" | "pool">("queue");
+
   return (
     <div className="space-y-4">
       {/* Overview Banner - Slim & Modern */}
@@ -314,6 +316,34 @@ export default function QueueBuilderView({
         </div>
       </div>
 
+      {/* Mobile Column Switcher (Visible only on mobile/tablet) */}
+      <div className="lg:hidden flex items-center p-1 bg-[#0F1419] border border-[#1F2D3D] rounded-xl shadow-md">
+        <button
+          type="button"
+          onClick={() => setMobileTab("queue")}
+          className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            mobileTab === "queue"
+              ? "bg-[#00C9A7] text-[#070B0F] shadow-sm"
+              : "text-[#94A3B8] hover:text-white"
+          }`}
+        >
+          <Layers className="w-3.5 h-3.5" />
+          <span>Queue ({queuedIdeas.length})</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileTab("pool")}
+          className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            mobileTab === "pool"
+              ? "bg-[#00C9A7] text-[#070B0F] shadow-sm"
+              : "text-[#94A3B8] hover:text-white"
+          }`}
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Candidate Pool ({poolIdeas.length})</span>
+        </button>
+      </div>
+
       {/* Two-Column Drag and Drop Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         
@@ -321,7 +351,9 @@ export default function QueueBuilderView({
         <div 
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDropOnPool}
-          className="lg:col-span-7 bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-5 space-y-4 shadow-lg flex flex-col max-h-[85vh]"
+          className={`lg:col-span-7 bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-4 sm:p-5 space-y-4 shadow-lg flex-col max-h-[85vh] ${
+            mobileTab === "pool" ? "flex" : "hidden lg:flex"
+          }`}
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1F2D3D] pb-3.5">
             <div className="flex items-center gap-2">
@@ -331,7 +363,7 @@ export default function QueueBuilderView({
               </h3>
             </div>
             <span className="text-[11px] font-mono text-[#64748B]">
-              Drag to Queue or click &quot;+ Add&quot;
+              Drag to Queue or tap &quot;+ Add&quot;
             </span>
           </div>
 
@@ -428,7 +460,7 @@ export default function QueueBuilderView({
                     title="Add to production queue"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Add</span>
+                    <span>Add</span>
                   </button>
                 </div>
               ))
@@ -441,7 +473,9 @@ export default function QueueBuilderView({
           onDragOver={handleDragOverQueue}
           onDragLeave={handleDragLeaveQueue}
           onDrop={handleDropOnQueue}
-          className={`lg:col-span-5 bg-[#0F1419] rounded-2xl border transition-all p-5 space-y-4 shadow-xl flex flex-col max-h-[85vh] ${
+          className={`lg:col-span-5 bg-[#0F1419] rounded-2xl border transition-all p-4 sm:p-5 space-y-4 shadow-xl flex-col max-h-[85vh] ${
+            mobileTab === "queue" ? "flex" : "hidden lg:flex"
+          } ${
             isDropTargetQueue
               ? "border-[#00C9A7] ring-2 ring-[#00C9A7]/20 bg-[#00C9A7]/5"
               : "border-[#1F2D3D]"

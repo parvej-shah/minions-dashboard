@@ -298,15 +298,20 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       {/* DESKTOP SIDEBAR NAVIGATION */}
       <aside className="w-72 lg:w-76 bg-[#0f1419] border-r border-[#1f2b37] flex flex-col justify-between p-4 shrink-0 hidden md:flex sticky top-0 h-screen overflow-y-auto z-40">
         <div className="space-y-4">
-          {/* LOGO (WHITE MINIONS + CORAL .AI) */}
+          {/* LOGO (ICON SQUIRCLE + WHITE MINIONS + CORAL .AI) */}
           <div className="flex items-center justify-between pb-3 border-b border-[#1f2b37]">
-            <Link href="/" className="flex items-baseline group">
-              <span className="font-extrabold text-2xl tracking-tight text-white group-hover:opacity-90 transition-opacity">
-                Minions
-              </span>
-              <span className="text-[#ff6b4a] font-bold text-2xl ml-0.5">
-                .AI
-              </span>
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#12242a] to-[#0a0d12] border border-[#1F2D3D] flex items-center justify-center shadow-md shrink-0">
+                <img src="/icon.svg" alt="Minions Logo" className="w-6 h-6" />
+              </div>
+              <div className="flex items-baseline">
+                <span className="font-extrabold text-xl tracking-tight text-white group-hover:opacity-90 transition-opacity">
+                  Minions
+                </span>
+                <span className="text-[#ff6b4a] font-bold text-xl ml-0.5">
+                  .AI
+                </span>
+              </div>
             </Link>
           </div>
 
@@ -443,13 +448,19 @@ export default function DashboardShell({ children }: DashboardShellProps) {
           <div className="w-4/5 max-w-sm bg-[#0f1419] h-full p-5 flex flex-col justify-between border-r border-[#1f2b37] overflow-y-auto">
             <div className="space-y-6">
               <div className="flex items-center justify-between pb-4 border-b border-[#1f2b37]">
-                <div className="flex items-baseline">
-                  <span className="font-extrabold text-xl tracking-tight text-white">Minions</span>
-                  <span className="text-[#ff6b4a] font-bold text-xl ml-0.5">.AI</span>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#12242a] to-[#0a0d12] border border-[#1F2D3D] flex items-center justify-center shadow-md shrink-0">
+                    <img src="/icon.svg" alt="Minions Logo" className="w-6 h-6" />
+                  </div>
+                  <div className="flex items-baseline">
+                    <span className="font-extrabold text-xl tracking-tight text-white">Minions</span>
+                    <span className="text-[#ff6b4a] font-bold text-xl ml-0.5">.AI</span>
+                  </div>
                 </div>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
                   className="p-1.5 rounded-lg text-[#94A3B8] hover:text-white"
+                  aria-label="Close menu"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -461,10 +472,10 @@ export default function DashboardShell({ children }: DashboardShellProps) {
                   setMobileMenuOpen(false);
                   setShowPalette(true);
                 }}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-[#161d24] border border-[#1f2b37] text-xs text-[#64748B]"
+                className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] text-xs text-[#64748B]"
               >
                 <div className="flex items-center gap-2">
-                  <Search className="w-3.5 h-3.5 text-[#00C9A7]" />
+                  <Search className="w-4 h-4 text-[#00C9A7]" />
                   <span>Search ideas, drafts...</span>
                 </div>
                 <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-[#0b0f14] border border-[#1f2b37] rounded text-[#94A3B8]">
@@ -560,20 +571,26 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       )}
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col min-w-0 bg-[#0a0d12] pb-20 md:pb-0">
-        {/* MOBILE HEADER ONLY (DESKTOP USES CLEAN FULL-HEIGHT SIDEBAR) */}
-        <header className="h-14 border-b border-[#1f2b37] bg-[#0f1419]/90 backdrop-blur-md px-4 flex items-center justify-between sticky top-0 z-30 md:hidden">
-          <div className="flex items-center gap-3">
+      <div className="flex-1 flex flex-col min-w-0 bg-[#0a0d12] pb-24 md:pb-0">
+        {/* MOBILE HEADER (DESKTOP USES FULL-HEIGHT SIDEBAR) */}
+        <header className="h-14 border-b border-[#1f2b37] bg-[#0f1419]/95 backdrop-blur-md px-4 flex items-center justify-between sticky top-0 z-30 md:hidden">
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="p-2 rounded-xl bg-[#161d24] text-[#94A3B8] hover:text-white border border-[#1f2b37]"
+              aria-label="Open menu"
             >
               <Menu className="w-4 h-4" />
             </button>
 
-            <Link href="/" className="flex items-baseline">
-              <span className="font-extrabold text-base tracking-tight text-white">Minions</span>
-              <span className="text-[#ff6b4a] font-bold text-base ml-0.5">.AI</span>
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#12242a] to-[#0a0d12] border border-[#1F2D3D] flex items-center justify-center shadow-sm shrink-0">
+                <img src="/icon.svg" alt="Minions Logo" className="w-5 h-5" />
+              </div>
+              <div className="flex items-baseline">
+                <span className="font-extrabold text-base tracking-tight text-white">Minions</span>
+                <span className="text-[#ff6b4a] font-bold text-base ml-0.5">.AI</span>
+              </div>
             </Link>
           </div>
 
@@ -582,6 +599,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
               onClick={() => setShowPalette(true)}
               className="p-2 rounded-xl bg-[#161d24] text-[#94A3B8] hover:text-white border border-[#1f2b37]"
               title="Search"
+              aria-label="Search"
             >
               <Search className="w-4 h-4 text-[#00C9A7]" />
             </button>
@@ -590,7 +608,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
               href="https://getminions.ai/blog"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-xs font-bold text-white bg-[#ff6b4a] px-2.5 py-1.5 rounded-lg"
+              className="flex items-center gap-1 text-xs font-bold text-white bg-[#ff6b4a] px-2.5 py-1.5 rounded-lg shadow-sm"
             >
               <span>Blog</span>
               <ArrowUpRight className="w-3 h-3" />
@@ -609,18 +627,18 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         )}
 
         {/* PAGE BODY */}
-        <main className="p-4 sm:p-6 md:p-8 flex-1 max-w-7xl w-full mx-auto">
+        <main className="p-3.5 sm:p-6 md:p-8 flex-1 max-w-7xl w-full mx-auto">
           {children}
         </main>
       </div>
 
       {/* MOBILE-FIRST FIXED BOTTOM NAVIGATION BAR */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0f1419]/95 backdrop-blur-lg border-t border-[#1f2b37] px-2 py-1.5 flex items-center justify-around">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0f1419]/95 backdrop-blur-xl border-t border-[#1f2b37] px-2 py-1.5 flex items-center justify-around pb-[max(0.65rem,env(safe-area-inset-bottom))] shadow-2xl shadow-black">
         <Link
           href="/"
-          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${
+          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-all ${
             pathname === "/"
-              ? "bg-[#161d24] text-[#00C9A7] font-bold"
+              ? "text-[#00C9A7] font-bold"
               : "text-[#94A3B8] hover:text-white"
           }`}
         >
@@ -630,51 +648,53 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
         <Link
           href="/ideas"
-          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${
+          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-all relative ${
             pathname.startsWith("/ideas")
-              ? "bg-[#161d24] text-[#00C9A7] font-bold"
+              ? "text-[#00C9A7] font-bold"
               : "text-[#94A3B8] hover:text-white"
           }`}
         >
           <Sparkles className="w-4 h-4" />
-          <span className="text-[10px] font-medium">Ideas</span>
+          <span className="text-[10px] font-medium">Queue</span>
+          {navCounts && navCounts.ideasReady > 0 && (
+            <span className="absolute top-1 right-2.5 w-1.5 h-1.5 rounded-full bg-[#00C9A7]" />
+          )}
         </Link>
 
         <Link
           href="/editorial"
-          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${
+          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-all relative ${
             pathname.startsWith("/editorial") || pathname.startsWith("/drafts")
-              ? "bg-[#161d24] text-[#ff6b4a] font-bold"
+              ? "text-[#ff6b4a] font-bold"
               : "text-[#94A3B8] hover:text-white"
           }`}
         >
           <FileText className="w-4 h-4" />
           <span className="text-[10px] font-medium">Editorial</span>
+          {navCounts && navCounts.pendingReview > 0 && (
+            <span className="absolute top-1 right-2.5 w-1.5 h-1.5 rounded-full bg-[#ff6b4a]" />
+          )}
         </Link>
 
         <Link
           href="/published"
-          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${
+          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-all ${
             pathname.startsWith("/published")
-              ? "bg-[#161d24] text-[#00C9A7] font-bold"
+              ? "text-[#3B82F6] font-bold"
               : "text-[#94A3B8] hover:text-white"
           }`}
         >
           <Globe className="w-4 h-4" />
-          <span className="text-[10px] font-medium">Published</span>
+          <span className="text-[10px] font-medium">Live</span>
         </Link>
 
-        <Link
-          href="/brand"
-          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${
-            pathname.startsWith("/brand")
-              ? "bg-[#161d24] text-[#00C9A7] font-bold"
-              : "text-[#94A3B8] hover:text-white"
-          }`}
+        <button
+          onClick={() => setMobileMenuOpen(true)}
+          className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[#94A3B8] hover:text-white transition-all cursor-pointer"
         >
-          <Palette className="w-4 h-4" />
-          <span className="text-[10px] font-medium">Brand</span>
-        </Link>
+          <Menu className="w-4 h-4" />
+          <span className="text-[10px] font-medium">Menu</span>
+        </button>
       </nav>
 
       {/* ADMIN AUTH MODAL */}
