@@ -61,6 +61,11 @@ export interface PublishedPostRecord {
   cost_usd: number;
   published_at: string;
   first_comment?: string;
+  variants?: {
+    linkedin?: string;
+    facebook?: string;
+    twitter?: string;
+  };
 }
 
 export interface AssetItem {

@@ -13,13 +13,16 @@ export interface PublishedPostRecord {
   cost_usd: number;
   published_at: string;
   first_comment?: string;
+  variants?: {
+    linkedin?: string;
+    facebook?: string;
+    twitter?: string;
+  };
 }
 
 export async function GET() {
   try {
     const allAssets = await prisma.asset.findMany();
-    const publishedAssets = allAssets.filter((a) => a.status === "PUBLISHED");
-
     const publishedBlogs = await prisma.blog.findMany({
       orderBy: {
         publishedAt: "desc",
@@ -28,7 +31,7 @@ export async function GET() {
 
     const feed: PublishedPostRecord[] = [];
 
-    // 1. Map dynamic blog posts from Supabase blogs table
+    // Map published blog posts with their omnichannel distribution channels
     for (let i = 0; i < publishedBlogs.length; i++) {
       const b = publishedBlogs[i];
       const matchedAsset = allAssets.find(
@@ -55,62 +58,12 @@ export async function GET() {
         cost_usd: cost,
         published_at: b.publishedAt ? b.publishedAt.toISOString() : matchedAsset?.publishedAt ? matchedAsset.publishedAt.toISOString() : new Date().toISOString(),
         first_comment: `Read the full engineering deep dive: https://www.getminions.ai/blog/${b.slug}`,
+        variants: {
+          linkedin: matchedAsset?.linkedinVariant || "",
+          facebook: matchedAsset?.facebookVariant || "",
+          twitter: matchedAsset?.xVariant || "",
+        },
       });
-    }
-
-    // 2. Map dynamic social variants from published assets in PostgreSQL
-    for (const a of publishedAssets) {
-      const cost = Number(a.generationCost) || 0.0386;
-      const pubDate = a.publishedAt ? a.publishedAt.toISOString() : a.createdAt.toISOString();
-      const heroCover = a.heroImageUrl || "/images/social-covers/linkedin/linkedin_cover_dark.png";
-
-      if (a.linkedinVariant) {
-        feed.push({
-          id: `PUB-LI-${a.id}`,
-          asset_id: a.id,
-          platform: "LINKEDIN",
-          title: a.title,
-          excerpt: a.linkedinVariant.slice(0, 180),
-          hero_image_url: heroCover,
-          published_url: "https://www.linkedin.com/company/getminionsai",
-          audience: (a.audience || "ICP") as "ICP" | "PEER" | "BRIDGE",
-          cost_usd: cost,
-          published_at: pubDate,
-          first_comment: `Read the full operational breakdown: https://www.getminions.ai/blog/${a.slug}`,
-        });
-      }
-
-      if (a.facebookVariant) {
-        feed.push({
-          id: `PUB-FB-${a.id}`,
-          asset_id: a.id,
-          platform: "FACEBOOK",
-          title: a.title,
-          excerpt: a.facebookVariant.slice(0, 180),
-          hero_image_url: heroCover,
-          published_url: "https://www.facebook.com/getminionsai",
-          audience: (a.audience || "ICP") as "ICP" | "PEER" | "BRIDGE",
-          cost_usd: cost,
-          published_at: pubDate,
-          first_comment: `Full case study on https://www.getminions.ai/blog/${a.slug}`,
-        });
-      }
-
-      if (a.xVariant) {
-        feed.push({
-          id: `PUB-X-${a.id}`,
-          asset_id: a.id,
-          platform: "TWITTER",
-          title: a.title,
-          excerpt: a.xVariant.slice(0, 180),
-          hero_image_url: heroCover,
-          published_url: "https://twitter.com/getminionsai",
-          audience: (a.audience || "ICP") as "ICP" | "PEER" | "BRIDGE",
-          cost_usd: cost,
-          published_at: pubDate,
-          first_comment: `Technical benchmark: https://www.getminions.ai/blog/${a.slug}`,
-        });
-      }
     }
 
     return NextResponse.json(feed);

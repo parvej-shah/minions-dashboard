@@ -23,6 +23,8 @@ import {
   Calendar,
   RotateCcw,
   Edit3,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { PublishedPostRecord } from "@/lib/types";
 import ConfirmModal from "@/components/common/ConfirmModal";
@@ -32,12 +34,12 @@ export const dynamic = "force-dynamic";
 export default function PublishedPostsPage() {
   const [feed, setFeed] = useState<PublishedPostRecord[]>([]);
   const [loading, setLoading] = useState(false);
-  const [platformFilter, setPlatformFilter] = useState<string>("ALL");
   const [audienceFilter, setAudienceFilter] = useState<string>("ALL");
   const [dateFilter, setDateFilter] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [expandedSocialId, setExpandedSocialId] = useState<string | null>(null);
 
   // Unpublish Modal State
   const [unpublishTarget, setUnpublishTarget] = useState<{ id: string; title: string } | null>(null);
@@ -71,7 +73,6 @@ export default function PublishedPostsPage() {
         setFeed(prev => prev.filter(p => p.asset_id !== unpublishTarget.id));
         setToastMessage(`Post "${unpublishTarget.title}" unpublished and returned to review queue.`);
         setTimeout(() => setToastMessage(null), 4000);
-        // Trigger sidebar nav counts reload
         window.dispatchEvent(new Event("minions-counts-updated"));
       }
     } catch (e) {
@@ -82,10 +83,10 @@ export default function PublishedPostsPage() {
     }
   };
 
-  const handleCopy = (text: string, id: string) => {
+  const handleCopy = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2500);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2500);
   };
 
   useEffect(() => {
@@ -95,7 +96,6 @@ export default function PublishedPostsPage() {
   const totalSpend = feed.reduce((acc, p) => acc + (p.cost_usd || 0.038), 0);
 
   const filteredPosts = feed.filter(post => {
-    if (platformFilter !== "ALL" && post.platform !== platformFilter) return false;
     if (audienceFilter !== "ALL" && post.audience !== audienceFilter) return false;
 
     if (dateFilter !== "ALL") {
@@ -107,9 +107,6 @@ export default function PublishedPostsPage() {
       } else if (dateFilter === "THIS_WEEK") {
         const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
         if (postDate < oneWeekAgo) return false;
-      } else if (dateFilter === "THIS_MONTH") {
-        const oneMonthAgo = now - 30 * 24 * 60 * 60 * 1000;
-        if (postDate < oneMonthAgo) return false;
       }
     }
 
@@ -125,7 +122,6 @@ export default function PublishedPostsPage() {
   });
 
   const resetFilters = () => {
-    setPlatformFilter("ALL");
     setAudienceFilter("ALL");
     setDateFilter("ALL");
     setSearchQuery("");
@@ -167,7 +163,7 @@ export default function PublishedPostsPage() {
             Published Posts & Omnichannel Distribution
           </h1>
           <p className="text-xs sm:text-sm text-[#94A3B8] mt-1">
-            Live verification feed for all broadcasts across the Blog, LinkedIn, and Facebook with direct links and cost tracking.
+            Live verification hub for all published articles across the Blog, LinkedIn, Facebook, and Twitter with direct links and cost tracking.
           </p>
         </div>
 
@@ -189,11 +185,11 @@ export default function PublishedPostsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-1.5 shadow-sm">
           <div className="flex items-center justify-between text-xs font-mono text-[#94A3B8]">
-            <span>TOTAL BROADCASTS</span>
+            <span>TOTAL POSTS LIVE</span>
             <CheckCircle2 className="w-4 h-4 text-[#00C9A7]" />
           </div>
           <div className="text-2xl font-bold text-[#F1F5F9]">
-            {feed.length} Posts Live
+            {feed.length} Articles Live
           </div>
           <div className="text-[11px] text-[#00C9A7] flex items-center gap-1 font-medium">
             <TrendingUp className="w-3 h-3" />
@@ -203,14 +199,14 @@ export default function PublishedPostsPage() {
 
         <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-1.5 shadow-sm">
           <div className="flex items-center justify-between text-xs font-mono text-[#94A3B8]">
-            <span>PLATFORM BREAKDOWN</span>
-            <Clock className="w-4 h-4 text-[#3B82F6]" />
+            <span>OMNICHANNEL CHANNELS</span>
+            <Layers className="w-4 h-4 text-[#3B82F6]" />
           </div>
           <div className="text-2xl font-bold text-[#F1F5F9]">
-            {feed.length} Omnichannel
+            {feed.length * 4} Broadcasts
           </div>
           <div className="text-[11px] text-[#94A3B8]">
-            Blog ({feed.filter(p => p.platform === "BLOG").length}) • LinkedIn ({feed.filter(p => p.platform === "LINKEDIN").length}) • Facebook ({feed.filter(p => p.platform === "FACEBOOK").length}) • Twitter ({feed.filter(p => p.platform === "TWITTER").length})
+            4 Channels / Post (Blog • LinkedIn • Facebook • X)
           </div>
         </div>
 
@@ -223,7 +219,7 @@ export default function PublishedPostsPage() {
             ${totalSpend.toFixed(4)}
           </div>
           <div className="text-[11px] text-[#94A3B8]">
-            Avg ${ (totalSpend / (feed.length || 1)).toFixed(3) } / post (Tokens + 2K Cover)
+            Avg ${ (totalSpend / (feed.length || 1)).toFixed(3) } / article (Tokens + 2K Cover)
           </div>
         </div>
       </div>
@@ -243,24 +239,6 @@ export default function PublishedPostsPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {/* Platform Filter */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-              <span className="text-[11px] font-mono text-[#64748B] shrink-0">Platform:</span>
-              {["ALL", "BLOG", "LINKEDIN", "FACEBOOK", "TWITTER"].map((plat) => (
-                <button
-                  key={plat}
-                  onClick={() => setPlatformFilter(plat)}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
-                    platformFilter === plat
-                      ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-xs"
-                      : "bg-[#161D26] text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#1E2733]"
-                  }`}
-                >
-                  {plat === "ALL" ? "All Platforms" : plat}
-                </button>
-              ))}
-            </div>
-
             {/* Audience Filter */}
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] font-mono text-[#64748B] shrink-0">Audience:</span>
@@ -312,7 +290,7 @@ export default function PublishedPostsPage() {
           </div>
           <h3 className="text-base font-bold text-[#F1F5F9]">No published posts match your filters</h3>
           <p className="text-xs text-[#94A3B8] max-w-sm mx-auto">
-            Try adjusting your search query, audience filters, or platform selectors.
+            Try adjusting your search query or audience filters.
           </p>
           <button
             onClick={resetFilters}
@@ -325,10 +303,8 @@ export default function PublishedPostsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredPosts.map((post) => {
-            const isBlog = post.platform === "BLOG";
-            const isLinkedIn = post.platform === "LINKEDIN";
-            const isFacebook = post.platform === "FACEBOOK";
-            const isTwitter = post.platform === "TWITTER";
+            const hasSocial = Boolean(post.variants?.linkedin || post.variants?.facebook || post.variants?.twitter);
+            const isExpanded = expandedSocialId === post.id;
 
             return (
               <div
@@ -339,19 +315,8 @@ export default function PublishedPostsPage() {
                   {/* Top Badge & Metadata */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
-                        isBlog 
-                          ? "bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/30"
-                          : isLinkedIn
-                            ? "bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/30"
-                            : isFacebook
-                              ? "bg-[#8B5CF6]/10 text-[#8B5CF6] border border-[#8B5CF6]/30"
-                              : "bg-[#1DA1F2]/10 text-[#1DA1F2] border border-[#1DA1F2]/30"
-                      }`}>
-                        {isBlog && "🌐 Blog"}
-                        {isLinkedIn && "💼 LinkedIn"}
-                        {isFacebook && "👥 Facebook"}
-                        {isTwitter && "🐦 Twitter / X"}
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/30">
+                        🌐 Live Blog
                       </span>
 
                       <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
@@ -394,24 +359,77 @@ export default function PublishedPostsPage() {
                     </p>
                   </div>
 
-                  {/* First Comment Link Anchor */}
-                  {post.first_comment && (
-                    <div className="p-2.5 rounded-xl bg-[#161D26] border border-[#1F2D3D] text-[11px] text-[#94A3B8] font-mono flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 truncate">
-                        <MessageSquare className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
-                        <span className="truncate">{post.first_comment}</span>
-                      </div>
+                  {/* Omnichannel Social Channels Hub */}
+                  {hasSocial && (
+                    <div className="space-y-2 pt-1">
                       <button
-                        onClick={() => handleCopy(post.first_comment || "", `comment-${post.id}`)}
-                        className="text-[#64748B] hover:text-[#00C9A7] p-1 shrink-0 transition-colors"
-                        title="Copy Comment"
+                        onClick={() => setExpandedSocialId(isExpanded ? null : post.id)}
+                        className="w-full flex items-center justify-between p-2 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[11px] font-mono text-[#94A3B8] transition-colors cursor-pointer"
                       >
-                        {copiedId === `comment-${post.id}` ? (
-                          <Check className="w-3 h-3 text-[#00C9A7]" />
-                        ) : (
-                          <Copy className="w-3 h-3" />
-                        )}
+                        <div className="flex items-center gap-1.5">
+                          <Share2 className="w-3.5 h-3.5 text-[#00C9A7]" />
+                          <span>Omnichannel Social Copy</span>
+                        </div>
+                        {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                       </button>
+
+                      {isExpanded && (
+                        <div className="space-y-2 p-3 bg-[#070B0F] border border-[#1F2D3D] rounded-xl animate-in fade-in duration-150">
+                          {post.variants?.linkedin && (
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between text-[10px] font-mono text-[#3B82F6]">
+                                <span>LinkedIn Variant</span>
+                                <button
+                                  onClick={() => handleCopy(post.variants?.linkedin || "", `li-${post.id}`)}
+                                  className="text-[#64748B] hover:text-[#3B82F6] flex items-center gap-1"
+                                >
+                                  {copiedKey === `li-${post.id}` ? <Check className="w-3 h-3 text-[#00C9A7]" /> : <Copy className="w-3 h-3" />}
+                                  <span>{copiedKey === `li-${post.id}` ? "Copied" : "Copy"}</span>
+                                </button>
+                              </div>
+                              <p className="text-[11px] text-[#94A3B8] line-clamp-2 font-mono bg-[#161D26] p-2 rounded-lg border border-[#1F2D3D]/50">
+                                {post.variants.linkedin}
+                              </p>
+                            </div>
+                          )}
+
+                          {post.variants?.facebook && (
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between text-[10px] font-mono text-[#8B5CF6]">
+                                <span>Facebook Variant</span>
+                                <button
+                                  onClick={() => handleCopy(post.variants?.facebook || "", `fb-${post.id}`)}
+                                  className="text-[#64748B] hover:text-[#8B5CF6] flex items-center gap-1"
+                                >
+                                  {copiedKey === `fb-${post.id}` ? <Check className="w-3 h-3 text-[#00C9A7]" /> : <Copy className="w-3 h-3" />}
+                                  <span>{copiedKey === `fb-${post.id}` ? "Copied" : "Copy"}</span>
+                                </button>
+                              </div>
+                              <p className="text-[11px] text-[#94A3B8] line-clamp-2 font-mono bg-[#161D26] p-2 rounded-lg border border-[#1F2D3D]/50">
+                                {post.variants.facebook}
+                              </p>
+                            </div>
+                          )}
+
+                          {post.variants?.twitter && (
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between text-[10px] font-mono text-[#1DA1F2]">
+                                <span>X / Twitter Variant</span>
+                                <button
+                                  onClick={() => handleCopy(post.variants?.twitter || "", `tw-${post.id}`)}
+                                  className="text-[#64748B] hover:text-[#1DA1F2] flex items-center gap-1"
+                                >
+                                  {copiedKey === `tw-${post.id}` ? <Check className="w-3 h-3 text-[#00C9A7]" /> : <Copy className="w-3 h-3" />}
+                                  <span>{copiedKey === `tw-${post.id}` ? "Copied" : "Copy"}</span>
+                                </button>
+                              </div>
+                              <p className="text-[11px] text-[#94A3B8] line-clamp-2 font-mono bg-[#161D26] p-2 rounded-lg border border-[#1F2D3D]/50">
+                                {post.variants.twitter}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
