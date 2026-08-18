@@ -103,11 +103,6 @@ export default function EditorialStudio({
   const [publishPhase, setPublishPhase] = useState<"IDLE" | "SYNCING" | "BROADCASTING" | "EMITTING" | "DONE">("IDLE");
   const [publishSuccess, setPublishSuccess] = useState(false);
 
-  // Revision request modal/state
-  const [showRevisionForm, setShowRevisionForm] = useState(false);
-  const [revisionNotes, setRevisionNotes] = useState("");
-  const [revisionPreset, setRevisionPreset] = useState<string | null>(null);
-
   // Cost breakdown accordion state
   const [showCostDetails, setShowCostDetails] = useState(false);
 
@@ -159,7 +154,6 @@ export default function EditorialStudio({
       setEditedTwitter(asset.variants?.twitter || "");
       setPublishSuccess(asset.status === "PUBLISHED");
       setPublishPhase("IDLE");
-      setShowRevisionForm(false);
       setIsEditingSocial(false);
     }
   }, [selectedAssetId, assets]);
@@ -469,29 +463,6 @@ export default function EditorialStudio({
       setIsDeleting(false);
       setDeleteConfirmOpen(false);
     }
-  };
-
-  // Handle Request Revision
-  const handleSubmitRevision = () => {
-    if (!revisionNotes.trim() && !revisionPreset) return;
-    const finalNote = revisionPreset 
-      ? `[${revisionPreset}] ${revisionNotes}`.trim() 
-      : revisionNotes;
-
-    const updatedAssets = assets.map((a) => {
-      if (a.id === activeAsset.id) {
-        return {
-          ...a,
-          status: "REJECTED" as AssetStatus
-        };
-      }
-      return a;
-    });
-
-    setAssets(updatedAssets);
-    setShowRevisionForm(false);
-    setRevisionNotes("");
-    setRevisionPreset(null);
   };
 
   // Metadata calculations
@@ -1768,7 +1739,7 @@ export default function EditorialStudio({
                 {/* 1-Click Reversible Unpublish Toggle */}
                 <button
                   onClick={() => setToggleLiveConfirmOpen(true)}
-                  className="w-full bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 border border-[#F59E0B]/30 text-[#F59E0B] text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  className="w-full bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 border border-[#F59E0B]/30 text-[#F59E0B] text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
                   title="Hide from public site without deleting content"
                 >
                   <EyeOff className="w-3.5 h-3.5" />
@@ -1777,15 +1748,15 @@ export default function EditorialStudio({
 
                 <button
                   onClick={() => setDeleteConfirmOpen(true)}
-                  className="w-full text-[#64748B] hover:text-[#EF4444] text-[11px] font-mono py-1 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  className="w-full bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/30 text-[#EF4444] text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
                   title="Permanently delete post and claim verifications"
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 className="w-3.5 h-3.5" />
                   <span>Delete Permanently</span>
                 </button>
               </div>
             ) : activeAsset.status === "UNPUBLISHED" ? (
-              <div className="space-y-2 pt-1">
+              <div className="space-y-2.5 pt-1">
                 <div className="w-full bg-[#F59E0B]/15 border border-[#F59E0B]/40 text-[#F59E0B] p-2.5 rounded-xl font-bold text-xs flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5">
                     <EyeOff className="w-4 h-4" />
@@ -1805,15 +1776,15 @@ export default function EditorialStudio({
 
                 <button
                   onClick={() => setDeleteConfirmOpen(true)}
-                  className="w-full text-[#64748B] hover:text-[#EF4444] text-[11px] font-mono py-1 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  className="w-full bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/30 text-[#EF4444] text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
                   title="Permanently delete post and claim verifications"
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 className="w-3.5 h-3.5" />
                   <span>Delete Permanently</span>
                 </button>
               </div>
             ) : (
-              <div className="space-y-2 pt-1">
+              <div className="space-y-2.5 pt-1">
                 <button
                   onClick={handleApproveAndPublish}
                   disabled={publishPhase !== "IDLE"}
@@ -1848,93 +1819,14 @@ export default function EditorialStudio({
                   )}
                 </button>
 
-                {/* Revision & Markdown Buttons */}
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => setShowRevisionForm(!showRevisionForm)}
-                    className="bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#ff6b4a] hover:border-[#ff6b4a]/40 text-xs font-semibold py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                  >
-                    <Edit3 className="w-3 h-3" />
-                    <span>Revision</span>
-                  </button>
-
-                  <button
-                    onClick={() => copyToClipboard(editedBody, "raw-markdown-btn")}
-                    className="bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] text-xs font-semibold py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                  >
-                    {copiedKey === "raw-markdown-btn" ? (
-                      <Check className="w-3 h-3 text-[#00C9A7]" />
-                    ) : (
-                      <Copy className="w-3 h-3" />
-                    )}
-                    <span>{copiedKey === "raw-markdown-btn" ? "Copied" : "Copy MD"}</span>
-                  </button>
-                </div>
-
                 <button
                   onClick={() => setDeleteConfirmOpen(true)}
-                  className="w-full text-[#64748B] hover:text-[#EF4444] text-[11px] font-mono py-1 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  className="w-full bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/30 text-[#EF4444] text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
                   title="Permanently delete this draft and its claim verifications"
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 className="w-3.5 h-3.5" />
                   <span>Delete Draft</span>
                 </button>
-              </div>
-            )}
-
-            {/* Request Revision Form Drawer */}
-            {showRevisionForm && (
-              <div className="bg-[#070B0F] border border-[#ff6b4a]/30 rounded-xl p-3.5 space-y-2.5 animate-in fade-in duration-200 mt-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-[#ff6b4a] font-mono uppercase flex items-center gap-1">
-                    <Edit3 className="w-3 h-3" />
-                    Revision Directives
-                  </span>
-                  <button
-                    onClick={() => setShowRevisionForm(false)}
-                    className="text-[#64748B] hover:text-[#F1F5F9]"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                <div className="flex flex-wrap gap-1">
-                  {[
-                    "Too conversational",
-                    "Missing benchmark citation",
-                    "Strengthen technical hook",
-                    "Trim introductory fluff"
-                  ].map((preset) => (
-                    <button
-                      key={preset}
-                      onClick={() => setRevisionPreset(revisionPreset === preset ? null : preset)}
-                      className={`text-[9px] font-mono px-2 py-0.5 rounded border transition-all ${
-                        revisionPreset === preset
-                          ? "bg-[#ff6b4a] text-[#070B0F] border-[#ff6b4a] font-bold"
-                          : "bg-[#161D26] text-[#94A3B8] border-[#1F2D3D] hover:text-[#F1F5F9]"
-                      }`}
-                    >
-                      {preset}
-                    </button>
-                  ))}
-                </div>
-
-                <textarea
-                  value={revisionNotes}
-                  onChange={(e) => setRevisionNotes(e.target.value)}
-                  placeholder="Feedback for Staff Writer..."
-                  rows={2}
-                  className="w-full bg-[#0F1419] border border-[#1F2D3D] rounded-lg p-2 text-xs text-[#F1F5F9] font-mono focus:outline-none focus:border-[#ff6b4a] resize-none"
-                />
-
-                <div className="flex justify-end gap-2">
-                  <button
-                    onClick={handleSubmitRevision}
-                    className="bg-[#ff6b4a] hover:bg-[#ff522c] text-[#070B0F] text-xs font-bold px-3 py-1 rounded-lg shadow-sm transition-all"
-                  >
-                    Submit Notes
-                  </button>
-                </div>
               </div>
             )}
 
