@@ -3,6 +3,31 @@
 All notable changes to the Minions content pipeline (n8n workflows: `01_idea_harvester`,
 `02_idea_to_asset`, `03_review_publisher`) and the Cockpit dashboard are logged here.
 
+## 2026-08-18 (blog post title tags, canonical URLs, social share images, and headline quality)
+
+### Fixed
+- **`minions-ai` (public blog): every post `<title>` rendered doubled — "X | Minions.AI |
+  Minions.AI".** `app/blog/[slug]/page.tsx` set `title: \`${post.title} | Minions.AI\`` on
+  top of the root layout's own `template: "%s | Minions.AI"`, so Next.js applied the
+  suffix twice. Now returns the bare `post.title` and lets the layout template apply once.
+- **No canonical URL on blog posts.** Added `alternates.canonical` pointing at the live
+  post URL in `generateMetadata`.
+- **Social shares of every post used the site-wide default image (a roofing photo),
+  never the article's actual hero image.** `BlogPost.og_image` / `featured_image` were
+  already populated (derived from the hero image embedded in the post content) but never
+  wired into `openGraph.images` / `twitter.images`. Now they are, with a fallback chain
+  (`og_image` → `featured_image`).
+- **`02_idea_to_asset`: generated article titles read like internal engineering tickets,
+  not headlines a human would click** (e.g. "Voice AI State Management vs Transcription
+  Accuracy", "Pest Control Recurring Revenue Staffing"). The strategist system prompt
+  (`Assemble Brand Context`) only asked for a title that contained the SEO keyword, with
+  no guidance on framing. Added a "Step 5 — Headline Craft" instruction requiring a
+  Stripe/Linear/Apple-grade headline that leads with the reader's problem, a sharp claim,
+  or a concrete stake, rather than a dry noun-phrase or "X vs Y" label, with before/after
+  examples; the SEO keyword now has to fit naturally inside that hook rather than being
+  the whole title. Applies to future drafts only — does not retroactively rename the 2
+  already-published posts.
+
 ## 2026-08-18 (cover images always showed physical trade equipment, regardless of topic)
 
 ### Fixed
