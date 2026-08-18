@@ -3,6 +3,32 @@
 All notable changes to the Minions content pipeline (n8n workflows: `01_idea_harvester`,
 `02_idea_to_asset`, `03_review_publisher`) and the Cockpit dashboard are logged here.
 
+## 2026-08-18 (rewrote live posts' takeaways; found and fixed a publish-date regression bug)
+
+### Changed
+- **Rewrote the closing takeaways on all 3 currently-live posts** (`hvac-dispatch-triage-protocol`,
+  `hvac-missed-call-recovery-protocol`, `voice-ai-state-management-vs-transcription-accuracy`)
+  from the rigid "Rule 1/2/3:" format to the new bolded-action-lead format, matching the
+  Writer prompt fix above. Updated both the live `blogs` table (source for getminions.ai)
+  and the matching row in the dashboard's `assets` table where one exists.
+- **Correction:** the earlier "2 published posts" count in this changelog and in
+  conversation was based on the dashboard's `assets.status = PUBLISHED` field only. The
+  actual live site is driven by a separate Supabase `blogs` table, which has 3 posts, two
+  of which (`hvac-dispatch-triage-protocol`, `hvac-missed-call-recovery-protocol`) predate
+  the `assets` table and have no matching row in it. Meanwhile `ASSET-0034` ("Pest Control
+  Recurring Revenue Staffing") is marked `PUBLISHED` in `assets` but was never actually
+  synced to `blogs` (`publishedUrls` is null there) and is not live on getminions.ai.
+
+### Fixed
+- **`minions-ai`: `savePost()` reset `published_at` to the current time on every
+  re-publish**, including edits to an already-live post. Triggering revalidation for the
+  takeaway rewrite above (via `POST /api/blog/publish`) exposed this: it silently bumped
+  all 3 posts' displayed publish dates to "now" and reordered the blog listing. Restored
+  the original dates from each row's `created_at` (the closest available proxy, since the
+  true original `published_at` wasn't captured before the bug fired) and fixed `savePost`
+  to look up and preserve an existing slug's `published_at` instead of always overwriting
+  it; only a genuinely new slug now gets "now".
+
 ## 2026-08-18 (every article ended with a rigid, identical "Rule 1/2/3" closer)
 
 ### Fixed
