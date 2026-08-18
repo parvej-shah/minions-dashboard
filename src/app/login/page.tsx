@@ -103,18 +103,13 @@ function LoginContent() {
 
       {/* TOP HEADER / BRAND BAR */}
       <header className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#12242a] to-[#0a0d12] border border-[#1F2D3D] flex items-center justify-center shadow-md shrink-0">
-            <img src="/icon.svg" alt="Minions Logo" className="w-6 h-6" />
-          </div>
-          <div className="flex items-baseline">
-            <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-white group-hover:opacity-90 transition-opacity">
-              Minions
-            </span>
-            <span className="text-[#ff6b4a] font-bold text-xl sm:text-2xl ml-0.5">
-              .AI
-            </span>
-          </div>
+        <Link href="/" className="flex items-baseline group">
+          <span className="font-extrabold text-2xl sm:text-3xl tracking-tight text-white group-hover:opacity-90 transition-opacity">
+            Minions
+          </span>
+          <span className="text-[#ff6b4a] font-bold text-2xl sm:text-3xl ml-0.5">
+            .AI
+          </span>
         </Link>
 
         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#0D1520]/80 border border-[#1F2D3D] backdrop-blur-md shadow-inner text-xs font-mono text-[#94A3B8]">

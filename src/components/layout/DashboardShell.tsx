@@ -298,20 +298,15 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       {/* DESKTOP SIDEBAR NAVIGATION */}
       <aside className="w-72 lg:w-76 bg-[#0f1419] border-r border-[#1f2b37] flex flex-col justify-between p-4 shrink-0 hidden md:flex sticky top-0 h-screen overflow-y-auto z-40">
         <div className="space-y-4">
-          {/* LOGO (ICON SQUIRCLE + WHITE MINIONS + CORAL .AI) */}
+          {/* LOGO (WHITE MINIONS + CORAL .AI) */}
           <div className="flex items-center justify-between pb-3 border-b border-[#1f2b37]">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#12242a] to-[#0a0d12] border border-[#1F2D3D] flex items-center justify-center shadow-md shrink-0">
-                <img src="/icon.svg" alt="Minions Logo" className="w-6 h-6" />
-              </div>
-              <div className="flex items-baseline">
-                <span className="font-extrabold text-xl tracking-tight text-white group-hover:opacity-90 transition-opacity">
-                  Minions
-                </span>
-                <span className="text-[#ff6b4a] font-bold text-xl ml-0.5">
-                  .AI
-                </span>
-              </div>
+            <Link href="/" className="flex items-baseline group">
+              <span className="font-extrabold text-2xl tracking-tight text-white group-hover:opacity-90 transition-opacity">
+                Minions
+              </span>
+              <span className="text-[#ff6b4a] font-bold text-2xl ml-0.5">
+                .AI
+              </span>
             </Link>
           </div>
 
@@ -448,15 +443,10 @@ export default function DashboardShell({ children }: DashboardShellProps) {
           <div className="w-4/5 max-w-sm bg-[#0f1419] h-full p-5 flex flex-col justify-between border-r border-[#1f2b37] overflow-y-auto">
             <div className="space-y-6">
               <div className="flex items-center justify-between pb-4 border-b border-[#1f2b37]">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#12242a] to-[#0a0d12] border border-[#1F2D3D] flex items-center justify-center shadow-md shrink-0">
-                    <img src="/icon.svg" alt="Minions Logo" className="w-6 h-6" />
-                  </div>
-                  <div className="flex items-baseline">
-                    <span className="font-extrabold text-xl tracking-tight text-white">Minions</span>
-                    <span className="text-[#ff6b4a] font-bold text-xl ml-0.5">.AI</span>
-                  </div>
-                </div>
+                <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-baseline">
+                  <span className="font-extrabold text-xl tracking-tight text-white">Minions</span>
+                  <span className="text-[#ff6b4a] font-bold text-xl ml-0.5">.AI</span>
+                </Link>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
                   className="p-1.5 rounded-lg text-[#94A3B8] hover:text-white"
@@ -583,14 +573,9 @@ export default function DashboardShell({ children }: DashboardShellProps) {
               <Menu className="w-4 h-4" />
             </button>
 
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#12242a] to-[#0a0d12] border border-[#1F2D3D] flex items-center justify-center shadow-sm shrink-0">
-                <img src="/icon.svg" alt="Minions Logo" className="w-5 h-5" />
-              </div>
-              <div className="flex items-baseline">
-                <span className="font-extrabold text-base tracking-tight text-white">Minions</span>
-                <span className="text-[#ff6b4a] font-bold text-base ml-0.5">.AI</span>
-              </div>
+            <Link href="/" className="flex items-baseline">
+              <span className="font-extrabold text-base tracking-tight text-white">Minions</span>
+              <span className="text-[#ff6b4a] font-bold text-base ml-0.5">.AI</span>
             </Link>
           </div>
 
