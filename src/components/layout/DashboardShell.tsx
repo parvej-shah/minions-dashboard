@@ -130,23 +130,29 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   useEffect(() => {
     async function loadNavCounts() {
       try {
-        const [ideasRes, assetsRes, directivesRes, agentsRes] = await Promise.all([
+        const [ideasRes, assetsRes, publishedRes, directivesRes, agentsRes] = await Promise.all([
           fetch("/api/ideas"),
           fetch("/api/assets"),
+          fetch("/api/published"),
           fetch("/api/brand/directives"),
           fetch("/api/agents"),
         ]);
-        const [ideas, assets, directives, agents] = await Promise.all([
+        const [ideas, assets, published, directives, agents] = await Promise.all([
           ideasRes.ok ? ideasRes.json() : [],
           assetsRes.ok ? assetsRes.json() : [],
+          publishedRes.ok ? publishedRes.json() : [],
           directivesRes.ok ? directivesRes.json() : [],
           agentsRes.ok ? agentsRes.json() : [],
         ]);
 
+        const publishedLiveCount = Array.isArray(published) && published.length > 0
+          ? (published.filter((p: { platform?: string }) => p.platform === "BLOG").length || published.length)
+          : (Array.isArray(assets) ? assets.filter((a: { status?: string }) => a.status === "PUBLISHED").length : 0);
+
         setNavCounts({
           ideasReady: Array.isArray(ideas) ? ideas.filter((i: { status?: string }) => i.status === "HARVESTED" || i.status === "REFINED").length : 0,
           pendingReview: Array.isArray(assets) ? assets.filter((a: { status?: string }) => a.status === "PENDING_REVIEW").length : 0,
-          publishedLive: Array.isArray(assets) ? assets.filter((a: { status?: string }) => a.status === "PUBLISHED").length : 0,
+          publishedLive: publishedLiveCount,
           directivesCount: Array.isArray(directives) ? directives.length : 0,
           activeAgents: Array.isArray(agents) ? agents.filter((a: { status?: string }) => a.status === "ACTIVE").length : (Array.isArray(agents) ? agents.length : 0),
         });
@@ -155,7 +161,15 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       }
     }
     loadNavCounts();
-  }, []);
+
+    // Re-sync on window focus or custom refresh event
+    window.addEventListener("focus", loadNavCounts);
+    window.addEventListener("minions-counts-updated", loadNavCounts);
+    return () => {
+      window.removeEventListener("focus", loadNavCounts);
+      window.removeEventListener("minions-counts-updated", loadNavCounts);
+    };
+  }, [pathname]);
 
   const navItems = buildNavItems(navCounts);
 
