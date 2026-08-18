@@ -64,14 +64,14 @@ export default function MissionControlPage() {
       {/* HERO / WELCOME HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#00C9A7] uppercase mb-1">
-            <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
-            Autonomous Marketing & Operations Cockpit
+          <div className="flex flex-wrap items-center gap-2 text-xs font-mono tracking-widest text-[#00C9A7] uppercase mb-1">
+            <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse shrink-0" />
+            <span className="break-words">Autonomous Marketing & Operations Cockpit</span>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-[#F1F5F9]">
+          <h1 className="text-3xl font-bold tracking-tight text-[#F1F5F9] break-words">
             Mission Control
           </h1>
-          <p className="text-sm text-[#94A3B8] mt-1">
+          <p className="text-sm text-[#94A3B8] mt-1 break-words max-w-xl">
             Real-time multi-agent orchestration, editorial staging, and omnichannel broadcast telemetry.
           </p>
         </div>
@@ -204,15 +204,15 @@ export default function MissionControlPage() {
       <div className="space-y-8">
         {/* PENDING REVIEW QUEUE */}
         <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
-          <div className="flex items-center justify-between border-b border-[#1F2D3D] pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1F2D3D] pb-3 gap-3">
             <div>
-              <h2 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
-                <FileText className="w-4 h-4 text-[#ff6b4a]" />
+              <h2 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2 break-words">
+                <FileText className="w-4 h-4 text-[#ff6b4a] shrink-0" />
                 Pending Editorial Review Queue
               </h2>
-              <p className="text-xs text-[#94A3B8]">Review claims, adjust social variants, and broadcast to live channels.</p>
+              <p className="text-xs text-[#94A3B8] break-words">Review claims, adjust social variants, and broadcast to live channels.</p>
             </div>
-            <span className="text-xs font-mono text-[#ff6b4a] font-bold bg-[#ff6b4a]/10 px-2 py-0.5 rounded border border-[#ff6b4a]/20">
+            <span className="text-xs font-mono text-[#ff6b4a] font-bold bg-[#ff6b4a]/10 px-2 py-0.5 rounded border border-[#ff6b4a]/20 shrink-0 self-start sm:self-auto">
               {pendingReviewAssets.length} Draft{pendingReviewAssets.length === 1 ? "" : "s"} Waiting
             </span>
           </div>
@@ -230,7 +230,7 @@ export default function MissionControlPage() {
                   key={asset.id}
                   className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] hover:border-[#00C9A7]/40 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group"
                 >
-                  <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                  <div className="flex items-center gap-3.5 flex-1 min-w-0 w-full">
                     {/* 48x48 Thumbnail */}
                     <div className="w-12 h-12 rounded-lg bg-[#0F1419] border border-[#1F2D3D] shrink-0 overflow-hidden flex items-center justify-center">
                       {asset.hero_image_url ? (
@@ -250,20 +250,20 @@ export default function MissionControlPage() {
                     </div>
 
                     <div className="space-y-1 flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#ff6b4a]/10 text-[#ff6b4a] border border-[#ff6b4a]/20">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#ff6b4a]/10 text-[#ff6b4a] border border-[#ff6b4a]/20 shrink-0">
                           PENDING REVIEW
                         </span>
-                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold ${
+                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold shrink-0 ${
                           asset.audience === "ICP" ? "bg-blue-500/10 text-blue-400" : "bg-purple-500/10 text-purple-400"
                         }`}>
                           {asset.audience}
                         </span>
                       </div>
-                      <h3 className="text-sm font-bold text-[#F1F5F9] truncate group-hover:text-[#00C9A7] transition-colors">
+                      <h3 className="text-sm font-bold text-[#F1F5F9] line-clamp-2 break-words group-hover:text-[#00C9A7] transition-colors">
                         {asset.title}
                       </h3>
-                      <p className="text-xs text-[#94A3B8] line-clamp-1">
+                      <p className="text-xs text-[#94A3B8] line-clamp-2 break-words">
                         {asset.hook || asset.body_content?.slice(0, 100)}
                       </p>
                     </div>
@@ -286,13 +286,13 @@ export default function MissionControlPage() {
 
         {/* LIVE OMNICHANNEL BROADCASTS */}
         <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
-          <div className="flex items-center justify-between border-b border-[#1F2D3D] pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1F2D3D] pb-3 gap-3">
             <div>
-              <h2 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
-                <Globe className="w-4 h-4 text-[#00C9A7]" />
+              <h2 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2 break-words">
+                <Globe className="w-4 h-4 text-[#00C9A7] shrink-0" />
                 Live Omnichannel Broadcasts
               </h2>
-              <p className="text-xs text-[#94A3B8]">Verified post permalinks across live distribution channels</p>
+              <p className="text-xs text-[#94A3B8] break-words">Verified post permalinks across live distribution channels</p>
             </div>
             <Link
               href="/published"
@@ -308,16 +308,16 @@ export default function MissionControlPage() {
                 key={asset.id}
                 className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
               >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#00C9A7]"></span>
-                    <span className="text-xs font-bold text-[#F1F5F9]">{asset.title}</span>
-                    <span className="text-[10px] font-mono text-[#64748B]">({asset.audience})</span>
+                <div className="space-y-1 min-w-0 flex-1">
+                  <div className="flex items-start sm:items-center gap-2 flex-wrap">
+                    <span className="w-2 h-2 rounded-full bg-[#00C9A7] mt-1 sm:mt-0 shrink-0"></span>
+                    <span className="text-xs font-bold text-[#F1F5F9] break-words line-clamp-2">{asset.title}</span>
+                    <span className="text-[10px] font-mono text-[#64748B] shrink-0">({asset.audience})</span>
                   </div>
-                  <div className="text-[11px] text-[#94A3B8] flex items-center gap-3 font-mono">
-                    <span>Published {new Date(asset.published_at || asset.updated_at).toLocaleDateString()}</span>
-                    <span>•</span>
-                    <span className="text-[#00C9A7]">3 Omnichannel Channels</span>
+                  <div className="text-[11px] text-[#94A3B8] flex items-center gap-2 flex-wrap font-mono">
+                    <span className="shrink-0">Published {new Date(asset.published_at || asset.updated_at).toLocaleDateString()}</span>
+                    <span className="hidden sm:inline">•</span>
+                    <span className="text-[#00C9A7] shrink-0">3 Omnichannel Channels</span>
                   </div>
                 </div>
 

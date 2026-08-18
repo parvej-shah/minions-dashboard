@@ -108,7 +108,7 @@ export function InstallPrompt() {
   }
 
   return (
-    <aside aria-label="Install App" className="fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto md:right-6 md:max-w-md z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
+    <aside aria-label="Install App" className="fixed bottom-24 md:bottom-6 right-4 left-4 md:left-auto md:right-6 md:max-w-md z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
       <div className="relative bg-[#0D1520]/95 backdrop-blur-xl border border-[#1F2D3D] ring-1 ring-white/10 rounded-2xl p-4 shadow-2xl shadow-black/80 flex flex-col gap-3">
         {/* Glow backdrop */}
         <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-10 bg-[#00C9A7]/20 blur-2xl pointer-events-none rounded-full" />
@@ -165,8 +165,8 @@ export function InstallPrompt() {
               onClick={handleInstallClick}
               className="flex-1 py-2 px-3.5 rounded-xl bg-gradient-to-r from-[#00C9A7] to-[#00A389] hover:from-[#00E5BE] hover:to-[#00C9A7] text-[#070B0F] font-semibold text-xs transition-all shadow-lg shadow-[#00C9A7]/20 active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              <Download className="w-3.5 h-3.5" />
-              {isIOS ? "Show iOS Install Guide" : "Install App to Mobile"}
+              <Download className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">{isIOS ? "Show iOS Install Guide" : "Install App to Mobile"}</span>
             </button>
             <button
               onClick={handleDismiss}

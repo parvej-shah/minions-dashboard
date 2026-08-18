@@ -470,10 +470,10 @@ export default function IdeaStreamPage() {
               Workflow 01 · Signal Harvester
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#F1F5F9]">
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#F1F5F9] break-words">
             {viewMode === "queue" ? "Production Draft Queue" : viewMode === "calendar" ? "Editorial Calendar" : "Idea Stream"}
           </h1>
-          <p className="text-xs text-[#94A3B8] mt-0.5 max-w-xl">
+          <p className="text-xs text-[#94A3B8] mt-0.5 max-w-xl break-words">
             {viewMode === "queue" 
               ? "Prioritize and re-order candidate topics for twice-daily automated drafting."
               : viewMode === "calendar"
@@ -851,12 +851,12 @@ export default function IdeaStreamPage() {
                   </div>
 
                   {/* Title (Bold 16px, 2-line clamp) */}
-                  <h3 className="text-[16px] font-bold leading-snug text-[#F1F5F9] line-clamp-2 group-hover:text-white transition-colors">
+                  <h3 className="text-[16px] font-bold leading-snug text-[#F1F5F9] line-clamp-2 break-words group-hover:text-white transition-colors">
                     {ideaTitle}
                   </h3>
 
                   {/* Excerpt (Muted 13px, 3-line clamp) */}
-                  <p className="text-[13px] text-[#94A3B8] leading-relaxed line-clamp-3">
+                  <p className="text-[13px] text-[#94A3B8] leading-relaxed line-clamp-3 break-words">
                     {ideaExcerpt}
                   </p>
 
@@ -1408,20 +1408,20 @@ export default function IdeaStreamPage() {
             <div className="p-6 overflow-y-auto space-y-6 flex-1 text-[#F1F5F9]">
               {/* Full Topic Headline */}
               <div className="space-y-2">
-                <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#00C9A7]">
+                <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#00C9A7] break-words">
                   Topic & Working Headline
                 </div>
-                <h2 className="text-xl sm:text-2xl font-extrabold leading-snug text-white">
+                <h2 className="text-xl sm:text-2xl font-extrabold leading-snug text-white break-words">
                   {detailIdea.title || detailIdea.raw_idea}
                 </h2>
               </div>
 
               {/* Full Strategic Angle / Rationale */}
               <div className="space-y-2">
-                <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#94A3B8]">
+                <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#94A3B8] break-words">
                   Strategic Angle & Real-World Thesis
                 </div>
-                <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-sm text-[#E2E8F0] leading-relaxed whitespace-pre-wrap">
+                <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-sm text-[#E2E8F0] leading-relaxed whitespace-pre-wrap break-words">
                   {detailIdea.excerpt || detailIdea.angle || "No extended strategic thesis recorded."}
                 </div>
               </div>

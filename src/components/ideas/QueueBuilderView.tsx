@@ -263,12 +263,12 @@ export default function QueueBuilderView({
     <div className="space-y-4">
       {/* Overview Banner - Slim & Modern */}
       <div className="bg-[#0F1419] p-3 px-4 rounded-xl border border-[#1F2D3D] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3 min-w-0 w-full">
           <div className="w-8 h-8 rounded-lg bg-[#00C9A7]/10 border border-[#00C9A7]/30 flex items-center justify-center text-[#00C9A7] shrink-0">
             <Layers className="w-4 h-4" />
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 mb-1">
               <h2 className="text-sm font-bold text-white tracking-tight">
                 Production Queue
               </h2>
@@ -282,7 +282,7 @@ export default function QueueBuilderView({
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-[#94A3B8] truncate max-w-xl">
+            <p className="text-[11px] text-[#94A3B8] break-words whitespace-normal mt-1">
               Drag candidate topics into the queue. Workflow 02 automatically drafts the top #1 item on schedule.
             </p>
           </div>
@@ -303,8 +303,8 @@ export default function QueueBuilderView({
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-3.5 h-3.5 fill-current" />
-                  <span>Draft #1 Now: &quot;{queuedIdeas[0].title ? queuedIdeas[0].title.slice(0, 24) + '...' : queuedIdeas[0].id}&quot;</span>
+                  <Sparkles className="w-4 h-4 shrink-0" />
+                  <span className="truncate max-w-[220px] sm:max-w-xs">Draft #1 Now: &quot;{queuedIdeas[0].title || queuedIdeas[0].raw_idea}&quot;</span>
                 </>
               )}
             </button>
@@ -547,14 +547,14 @@ export default function QueueBuilderView({
                     <div className="min-w-0 flex-1 cursor-pointer" onClick={() => onSelectIdea(idea)}>
                       <div className="flex items-center gap-1.5 mb-0.5">
                         {isFirst && (
-                          <span className="text-[9px] font-mono font-bold text-[#00C9A7] bg-[#00C9A7]/20 px-1.5 rounded uppercase">
+                          <span className="text-[9px] font-mono font-bold text-[#00C9A7] bg-[#00C9A7]/20 px-1.5 rounded uppercase whitespace-nowrap shrink-0">
                             Next Up
                           </span>
                         )}
-                        <span className={`text-[9px] font-bold px-1 rounded ${getAudienceColor(idea.audience)}`}>
+                        <span className={`text-[9px] font-bold px-1 rounded whitespace-nowrap shrink-0 ${getAudienceColor(idea.audience)}`}>
                           {idea.audience || "ICP"}
                         </span>
-                        <span className="text-[9px] font-mono text-[#64748B]">
+                        <span className="text-[9px] font-mono text-[#64748B] whitespace-nowrap shrink-0">
                           {idea.target_trade || "HVAC"}
                         </span>
                       </div>
@@ -570,29 +570,29 @@ export default function QueueBuilderView({
                         type="button"
                         onClick={() => moveQueueItem(index, "up")}
                         disabled={index === 0}
-                        className="p-1 rounded text-[#64748B] hover:text-white disabled:opacity-20 transition-colors cursor-pointer"
+                        className="p-2.5 sm:p-1.5 rounded text-[#64748B] hover:text-white disabled:opacity-20 transition-colors cursor-pointer"
                         title="Move up"
                       >
-                        <ArrowUp className="w-3.5 h-3.5" />
+                        <ArrowUp className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                       </button>
 
                       <button
                         type="button"
                         onClick={() => moveQueueItem(index, "down")}
                         disabled={index === queuedIdeas.length - 1}
-                        className="p-1 rounded text-[#64748B] hover:text-white disabled:opacity-20 transition-colors cursor-pointer"
+                        className="p-2.5 sm:p-1.5 rounded text-[#64748B] hover:text-white disabled:opacity-20 transition-colors cursor-pointer"
                         title="Move down"
                       >
-                        <ArrowDown className="w-3.5 h-3.5" />
+                        <ArrowDown className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                       </button>
 
                       <button
                         type="button"
                         onClick={() => removeFromQueue(idea.id)}
-                        className="p-1 rounded text-[#64748B] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors cursor-pointer ml-1"
+                        className="p-2.5 sm:p-1.5 rounded text-[#64748B] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors cursor-pointer ml-1"
                         title="Remove from queue"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                       </button>
                     </div>
                   </div>

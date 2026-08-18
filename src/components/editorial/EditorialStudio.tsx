@@ -574,9 +574,9 @@ export default function EditorialStudio({
               <button
                 onClick={handlePrevDraft}
                 title="Previous Draft (Key: [ )"
-                className="px-2 py-1 rounded-lg text-xs font-bold text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] transition-all flex items-center gap-1 cursor-pointer"
+                className="px-3 py-2 sm:px-2 sm:py-1 rounded-lg text-xs font-bold text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] transition-all flex items-center gap-1 cursor-pointer"
               >
-                <ChevronLeft className="w-3.5 h-3.5" />
+                <ChevronLeft className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                 <span className="hidden sm:inline">Prev</span>
               </button>
 
@@ -587,10 +587,10 @@ export default function EditorialStudio({
               <button
                 onClick={handleNextDraft}
                 title="Next Draft (Key: ] )"
-                className="px-2 py-1 rounded-lg text-xs font-bold text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] transition-all flex items-center gap-1 cursor-pointer"
+                className="px-3 py-2 sm:px-2 sm:py-1 rounded-lg text-xs font-bold text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] transition-all flex items-center gap-1 cursor-pointer"
               >
                 <span className="hidden sm:inline">Next</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
               </button>
             </div>
           </div>
@@ -647,7 +647,7 @@ export default function EditorialStudio({
                     </span>
                   </div>
 
-                  <div className={`text-xs font-semibold truncate ${isCurrent ? "text-[#F1F5F9] font-bold" : "text-[#CBD5E1]"}`}>
+                  <div className={`text-xs font-semibold line-clamp-2 break-words ${isCurrent ? "text-[#F1F5F9] font-bold" : "text-[#CBD5E1]"}`}>
                     {asset.title}
                   </div>
 
@@ -697,7 +697,7 @@ export default function EditorialStudio({
               </span>
             </div>
 
-            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-[#F1F5F9] mt-1 truncate">
+            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-[#F1F5F9] mt-1 break-words">
               {editedTitle}
             </h1>
           </div>
@@ -831,25 +831,25 @@ export default function EditorialStudio({
                 <div className="flex items-center bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D] text-xs">
                   <button
                     onClick={() => setEditorMode("preview")}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                    className={`flex items-center gap-1.5 px-4 py-2 sm:px-3 sm:py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                       editorMode === "preview"
                         ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
                         : "text-[#94A3B8] hover:text-[#F1F5F9]"
                     }`}
                   >
-                    <Eye className="w-3.5 h-3.5" />
-                    <span>Reading View</span>
+                    <Eye className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                    <span className="hidden sm:inline">Reading View</span>
                   </button>
                   <button
                     onClick={() => setEditorMode("edit")}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                    className={`flex items-center gap-1.5 px-4 py-2 sm:px-3 sm:py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                       editorMode === "edit"
                         ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
                         : "text-[#94A3B8] hover:text-[#F1F5F9]"
                     }`}
                   >
-                    <Edit3 className="w-3.5 h-3.5" />
-                    <span>Live Editor</span>
+                    <Edit3 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                    <span className="hidden sm:inline">Live Editor</span>
                   </button>
                   <button
                     onClick={() => setEditorMode("split")}
@@ -1366,9 +1366,9 @@ export default function EditorialStudio({
             {socialTab === "LINKEDIN" && (
               <div className="bg-[#070B0F] rounded-xl border border-[#1F2D3D] p-4 sm:p-5 space-y-4 font-sans">
                 {/* LinkedIn Author Header */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#00C9A7]/20 border border-[#00C9A7] flex items-center justify-center font-bold text-xs text-[#00C9A7]">
+                <div className="flex flex-col sm:flex-row sm:items-start md:items-center justify-between gap-3">
+                  <div className="flex items-start md:items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#00C9A7]/20 border border-[#00C9A7] flex items-center justify-center font-bold text-xs text-[#00C9A7] shrink-0">
                       M
                     </div>
                     <div>
@@ -1489,9 +1489,9 @@ export default function EditorialStudio({
             {socialTab === "FACEBOOK" && (
               <div className="bg-[#070B0F] rounded-xl border border-[#1F2D3D] p-4 sm:p-5 space-y-4 font-sans">
                 {/* Facebook Author Header */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#1877F2]/20 border border-[#1877F2] flex items-center justify-center font-bold text-xs text-[#1877F2]">
+                <div className="flex flex-col sm:flex-row sm:items-start md:items-center justify-between gap-3">
+                  <div className="flex items-start md:items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#1877F2]/20 border border-[#1877F2] flex items-center justify-center font-bold text-xs text-[#1877F2] shrink-0">
                       M
                     </div>
                     <div>
@@ -1596,9 +1596,9 @@ export default function EditorialStudio({
             {socialTab === "TWITTER" && (
               <div className="bg-[#070B0F] rounded-xl border border-[#1F2D3D] p-4 sm:p-5 space-y-4 font-sans">
                 {/* Twitter Author Header */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center font-bold text-xs text-white">
+                <div className="flex flex-col sm:flex-row sm:items-start md:items-center justify-between gap-3">
+                  <div className="flex items-start md:items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center font-bold text-xs text-white shrink-0">
                       𝕏
                     </div>
                     <div>

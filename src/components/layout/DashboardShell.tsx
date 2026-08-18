@@ -626,34 +626,34 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         )}
 
         {/* PAGE BODY */}
-        <main className="p-3.5 sm:p-6 md:p-8 flex-1 max-w-7xl w-full mx-auto">
+        <main className="p-3.5 pb-24 sm:p-6 md:p-8 md:pb-8 flex-1 max-w-7xl w-full mx-auto">
           {children}
         </main>
       </div>
 
       {/* MOBILE-FIRST FIXED BOTTOM NAVIGATION BAR */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0f1419]/95 backdrop-blur-xl border-t border-[#1f2b37] px-2 py-1.5 flex items-center justify-around pb-[max(0.65rem,env(safe-area-inset-bottom))] shadow-2xl shadow-black">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0f1419]/95 backdrop-blur-xl border-t border-[#1f2b37] px-1 py-1.5 flex items-center justify-between pb-[max(0.65rem,env(safe-area-inset-bottom))] shadow-2xl shadow-black">
         <Link
           href="/"
-          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-all ${
+          className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all ${
             pathname === "/"
               ? "text-[#00C9A7] font-bold"
               : "text-[#94A3B8] hover:text-white"
           }`}
         >
-          <LayoutDashboard className="w-4 h-4" />
+          <LayoutDashboard className="w-5 h-5" />
           <span className="text-[10px] font-medium">Mission</span>
         </Link>
 
         <Link
           href="/ideas"
-          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-all relative ${
+          className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all relative ${
             pathname.startsWith("/ideas")
               ? "text-[#00C9A7] font-bold"
               : "text-[#94A3B8] hover:text-white"
           }`}
         >
-          <Sparkles className="w-4 h-4" />
+          <Sparkles className="w-5 h-5" />
           <span className="text-[10px] font-medium">Queue</span>
           {navCounts && navCounts.ideasReady > 0 && (
             <span className="absolute top-1 right-2.5 w-1.5 h-1.5 rounded-full bg-[#00C9A7]" />
@@ -662,13 +662,13 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
         <Link
           href="/editorial"
-          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-all relative ${
+          className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all relative ${
             pathname.startsWith("/editorial") || pathname.startsWith("/drafts")
               ? "text-[#ff6b4a] font-bold"
               : "text-[#94A3B8] hover:text-white"
           }`}
         >
-          <FileText className="w-4 h-4" />
+          <FileText className="w-5 h-5" />
           <span className="text-[10px] font-medium">Editorial</span>
           {navCounts && navCounts.pendingReview > 0 && (
             <span className="absolute top-1 right-2.5 w-1.5 h-1.5 rounded-full bg-[#ff6b4a]" />
@@ -677,21 +677,21 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
         <Link
           href="/published"
-          className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-all ${
+          className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all ${
             pathname.startsWith("/published")
               ? "text-[#3B82F6] font-bold"
               : "text-[#94A3B8] hover:text-white"
           }`}
         >
-          <Globe className="w-4 h-4" />
+          <Globe className="w-5 h-5" />
           <span className="text-[10px] font-medium">Live</span>
         </Link>
 
         <button
           onClick={() => setMobileMenuOpen(true)}
-          className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[#94A3B8] hover:text-white transition-all cursor-pointer"
+          className="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-[#94A3B8] hover:text-white transition-all cursor-pointer"
         >
-          <Menu className="w-4 h-4" />
+          <Menu className="w-5 h-5" />
           <span className="text-[10px] font-medium">Menu</span>
         </button>
       </nav>
