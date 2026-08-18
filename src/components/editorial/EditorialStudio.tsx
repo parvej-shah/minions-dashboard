@@ -45,6 +45,7 @@ import {
 } from "lucide-react";
 import { AssetItem, ClaimCheckItem, SocialVariantItem, AssetStatus } from "@/lib/types";
 import { INITIAL_ASSETS } from "@/lib/api";
+import ConfirmModal from "@/components/common/ConfirmModal";
 
 interface EditorialStudioProps {
   initialDraftId?: string;
@@ -58,6 +59,12 @@ export default function EditorialStudio({
   // All assets available in editorial studio
   const [assets, setAssets] = useState<AssetItem[]>(INITIAL_ASSETS);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Custom confirmation modal states
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [toggleLiveConfirmOpen, setToggleLiveConfirmOpen] = useState(false);
+  const [isTogglingLive, setIsTogglingLive] = useState(false);
   
   // Active selected asset
   const [selectedAssetId, setSelectedAssetId] = useState<string>(() => {
@@ -396,11 +403,9 @@ export default function EditorialStudio({
 
   // 1-Click Toggle Live Visibility (Publish / Unpublish without loss)
   const handleToggleLiveStatus = async () => {
+    setIsTogglingLive(true);
     const isCurrentlyPublished = activeAsset.status === "PUBLISHED";
     const nextStatus: AssetStatus = isCurrentlyPublished ? "UNPUBLISHED" : "PUBLISHED";
-    const actionLabel = isCurrentlyPublished ? "unpublish and hide" : "publish live";
-
-    if (!confirm(`Are you sure you want to ${actionLabel} "${activeAsset.title}"?`)) return;
 
     try {
       const res = await fetch(`/api/assets/${activeAsset.id}`, {
@@ -435,13 +440,15 @@ export default function EditorialStudio({
       }
     } catch (e) {
       console.error("Failed to toggle live status:", e);
+    } finally {
+      setIsTogglingLive(false);
+      setToggleLiveConfirmOpen(false);
     }
   };
 
   // Permanent Delete Action
   const handlePermanentDelete = async () => {
-    if (!confirm(`⚠️ PERMANENT DELETE WARNING: Are you sure you want to permanently delete ${activeAsset.id}? This will permanently remove the blog post, draft content, and all claim verifications.`)) return;
-
+    setIsDeleting(true);
     try {
       const res = await fetch(`/api/assets/${activeAsset.id}?mode=permanent`, {
         method: "DELETE",
@@ -458,6 +465,9 @@ export default function EditorialStudio({
       }
     } catch (e) {
       console.error("Failed to permanently delete asset:", e);
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirmOpen(false);
     }
   };
 
@@ -1757,7 +1767,7 @@ export default function EditorialStudio({
 
                 {/* 1-Click Reversible Unpublish Toggle */}
                 <button
-                  onClick={handleToggleLiveStatus}
+                  onClick={() => setToggleLiveConfirmOpen(true)}
                   className="w-full bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 border border-[#F59E0B]/30 text-[#F59E0B] text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
                   title="Hide from public site without deleting content"
                 >
@@ -1766,7 +1776,7 @@ export default function EditorialStudio({
                 </button>
 
                 <button
-                  onClick={handlePermanentDelete}
+                  onClick={() => setDeleteConfirmOpen(true)}
                   className="w-full text-[#64748B] hover:text-[#EF4444] text-[11px] font-mono py-1 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   title="Permanently delete post and claim verifications"
                 >
@@ -1786,7 +1796,7 @@ export default function EditorialStudio({
 
                 {/* 1-Click Restore to Live */}
                 <button
-                  onClick={handleToggleLiveStatus}
+                  onClick={() => setToggleLiveConfirmOpen(true)}
                   className="w-full bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#00C9A7]/20 cursor-pointer"
                 >
                   <Globe className="w-3.5 h-3.5" />
@@ -1794,7 +1804,7 @@ export default function EditorialStudio({
                 </button>
 
                 <button
-                  onClick={handlePermanentDelete}
+                  onClick={() => setDeleteConfirmOpen(true)}
                   className="w-full text-[#64748B] hover:text-[#EF4444] text-[11px] font-mono py-1 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   title="Permanently delete post and claim verifications"
                 >
@@ -1862,7 +1872,7 @@ export default function EditorialStudio({
                 </div>
 
                 <button
-                  onClick={handlePermanentDelete}
+                  onClick={() => setDeleteConfirmOpen(true)}
                   className="w-full text-[#64748B] hover:text-[#EF4444] text-[11px] font-mono py-1 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   title="Permanently delete this draft and its claim verifications"
                 >
@@ -2126,6 +2136,35 @@ export default function EditorialStudio({
           )}
         </div>
       </div>
+
+      {/* ── CUSTOM CONFIRMATION MODALS (REPLACING BROWSER ALERTS) ── */}
+      <ConfirmModal
+        isOpen={deleteConfirmOpen}
+        title="Permanently Delete Asset"
+        description={`⚠️ Are you sure you want to permanently delete ${activeAsset.id}? This will permanently remove the blog post, draft content, and all claim verifications from the database.`}
+        confirmLabel="Delete Permanently"
+        cancelLabel="Cancel"
+        variant="danger"
+        isLoading={isDeleting}
+        onConfirm={handlePermanentDelete}
+        onClose={() => setDeleteConfirmOpen(false)}
+      />
+
+      <ConfirmModal
+        isOpen={toggleLiveConfirmOpen}
+        title={activeAsset.status === "PUBLISHED" ? "Unpublish Post" : "Republish Post Live"}
+        description={
+          activeAsset.status === "PUBLISHED"
+            ? `Are you sure you want to unpublish "${activeAsset.title}"? It will immediately be taken down from getminions.ai/blog and returned to the review queue without deleting any content.`
+            : `Are you sure you want to republish "${activeAsset.title}" live to getminions.ai/blog?`
+        }
+        confirmLabel={activeAsset.status === "PUBLISHED" ? "Unpublish Post" : "Republish Live"}
+        cancelLabel="Cancel"
+        variant={activeAsset.status === "PUBLISHED" ? "warning" : "primary"}
+        isLoading={isTogglingLive}
+        onConfirm={handleToggleLiveStatus}
+        onClose={() => setToggleLiveConfirmOpen(false)}
+      />
     </div>
   );
 }

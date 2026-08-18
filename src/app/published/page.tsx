@@ -20,6 +20,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { PublishedPostRecord } from "@/lib/types";
+import ConfirmModal from "@/components/common/ConfirmModal";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,10 @@ export default function PublishedPostsPage() {
   const [audienceFilter, setAudienceFilter] = useState<string>("ALL");
   const [dateFilter, setDateFilter] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Unpublish Modal State
+  const [unpublishTarget, setUnpublishTarget] = useState<{ id: string; title: string } | null>(null);
+  const [isUnpublishing, setIsUnpublishing] = useState(false);
 
   const loadFeed = async () => {
     try {
@@ -47,18 +52,21 @@ export default function PublishedPostsPage() {
     }
   };
 
-  const handleUnpublish = async (assetId: string) => {
-    if (!confirm("Are you sure you want to unpublish this post? It will immediately be taken down from getminions.ai/blog and returned to the review queue.")) return;
-
+  const handleUnpublish = async () => {
+    if (!unpublishTarget) return;
+    setIsUnpublishing(true);
     try {
-      const res = await fetch(`/api/assets/${assetId}?mode=unpublish`, {
+      const res = await fetch(`/api/assets/${unpublishTarget.id}?mode=unpublish`, {
         method: "DELETE",
       });
       if (res.ok) {
-        setFeed(prev => prev.filter(p => p.asset_id !== assetId));
+        setFeed(prev => prev.filter(p => p.asset_id !== unpublishTarget.id));
       }
     } catch (e) {
       console.error("Failed to unpublish:", e);
+    } finally {
+      setIsUnpublishing(false);
+      setUnpublishTarget(null);
     }
   };
 
@@ -291,7 +299,7 @@ export default function PublishedPostsPage() {
 
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handleUnpublish(post.asset_id)}
+                    onClick={() => setUnpublishTarget({ id: post.asset_id, title: post.title })}
                     title="Take down post from live blog and return to review queue"
                     className="flex items-center gap-1 bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#EF4444] border border-[#EF4444]/30 text-xs font-semibold px-2.5 py-1.5 rounded-xl transition-all cursor-pointer"
                   >
@@ -314,6 +322,19 @@ export default function PublishedPostsPage() {
           );
         })}
       </div>
+
+      {/* Unpublish Confirmation Modal */}
+      <ConfirmModal
+        isOpen={Boolean(unpublishTarget)}
+        title="Unpublish Broadcast"
+        description={`Are you sure you want to unpublish "${unpublishTarget?.title}"? It will immediately be taken down from getminions.ai/blog and returned to the review queue without deleting any content.`}
+        confirmLabel="Unpublish Post"
+        cancelLabel="Cancel"
+        variant="warning"
+        isLoading={isUnpublishing}
+        onConfirm={handleUnpublish}
+        onClose={() => setUnpublishTarget(null)}
+      />
     </div>
   );
 }

@@ -34,6 +34,7 @@ import CalendarView from "@/components/ideas/CalendarView";
 import ScheduleModal from "@/components/ideas/ScheduleModal";
 import QueueBuilderView from "@/components/ideas/QueueBuilderView";
 import DraftingProgressHUD, { DraftingJob } from "@/components/common/DraftingProgressHUD";
+import ConfirmModal from "@/components/common/ConfirmModal";
 
 const TRADES: TargetTrade[] = [
   "HVAC",
@@ -215,21 +216,34 @@ export default function IdeaStreamPage() {
     }
   };
 
-  const handleDeleteIdea = async (ideaId: string, ideaTitle: string) => {
-    if (!confirm(`Are you sure you want to delete idea "${ideaTitle}" (${ideaId})? Any drafted asset will remain safely decoupled.`)) return;
+  // Delete modal state
+  const [deleteIdeaTarget, setDeleteIdeaTarget] = useState<{ id: string; title: string } | null>(null);
+  const [isDeletingIdea, setIsDeletingIdea] = useState(false);
 
+  const handleConfirmDeleteIdea = async () => {
+    if (!deleteIdeaTarget) return;
+    setIsDeletingIdea(true);
     try {
-      const res = await fetch(`/api/ideas/${ideaId}`, {
+      const res = await fetch(`/api/ideas/${deleteIdeaTarget.id}`, {
         method: "DELETE",
       });
 
       if (res.ok) {
-        setIdeas(prev => prev.filter(i => (i.id !== ideaId && i.ideaId !== ideaId)));
-        setToastMessage(`Idea ${ideaId} deleted successfully.`);
+        setIdeas(prev => prev.filter(i => (i.id !== deleteIdeaTarget.id && i.ideaId !== deleteIdeaTarget.id)));
+        setToastMessage(`Idea ${deleteIdeaTarget.id} deleted successfully.`);
         setTimeout(() => setToastMessage(null), 3000);
+        if (editingIdea?.id === deleteIdeaTarget.id || editingIdea?.ideaId === deleteIdeaTarget.id) {
+          setEditingIdea(null);
+        }
+        if (detailIdea?.id === deleteIdeaTarget.id || detailIdea?.ideaId === deleteIdeaTarget.id) {
+          setDetailIdea(null);
+        }
       }
     } catch (err) {
       console.error("Failed to delete idea:", err);
+    } finally {
+      setIsDeletingIdea(false);
+      setDeleteIdeaTarget(null);
     }
   };
 
@@ -826,7 +840,7 @@ export default function IdeaStreamPage() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDeleteIdea(idea.id || rawId, ideaTitle);
+                          setDeleteIdeaTarget({ id: idea.id || rawId, title: ideaTitle });
                         }}
                         className="p-1 rounded-md text-[#64748B] hover:text-[#EF4444] hover:bg-[#EF4444]/10 border border-transparent hover:border-[#EF4444]/30 transition-all cursor-pointer"
                         title="Delete Idea"
@@ -1314,7 +1328,7 @@ export default function IdeaStreamPage() {
             <div className="p-6 border-t border-[#1F2D3D] bg-[#070B0F]/60 flex items-center justify-between gap-3">
               <button
                 type="button"
-                onClick={() => handleDeleteIdea(editingIdea.id || editingIdea.ideaId || "", editTitle)}
+                onClick={() => setDeleteIdeaTarget({ id: editingIdea.id || editingIdea.ideaId || "", title: editTitle })}
                 className="px-3 py-2 text-xs font-semibold text-[#EF4444] hover:bg-[#EF4444]/10 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -1487,7 +1501,7 @@ export default function IdeaStreamPage() {
                     const idToDelete = detailIdea.id || detailIdea.ideaId || "";
                     const titleToDelete = detailIdea.title || detailIdea.raw_idea || "";
                     setDetailIdea(null);
-                    handleDeleteIdea(idToDelete, titleToDelete);
+                    setDeleteIdeaTarget({ id: idToDelete, title: titleToDelete });
                   }}
                   className="px-3.5 py-2 text-xs font-semibold text-[#EF4444] hover:bg-[#EF4444]/10 border border-transparent hover:border-[#EF4444]/30 rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                 >
@@ -1562,6 +1576,19 @@ export default function IdeaStreamPage() {
       <DraftingProgressHUD
         job={activeDraftingJob}
         onDismiss={() => setActiveDraftingJob(null)}
+      />
+
+      {/* Delete Idea Confirmation Modal */}
+      <ConfirmModal
+        isOpen={Boolean(deleteIdeaTarget)}
+        title="Delete Harvested Signal"
+        description={`Are you sure you want to delete idea "${deleteIdeaTarget?.title}" (${deleteIdeaTarget?.id})? Any drafted asset will remain safely decoupled.`}
+        confirmLabel="Delete Idea"
+        cancelLabel="Cancel"
+        variant="danger"
+        isLoading={isDeletingIdea}
+        onConfirm={handleConfirmDeleteIdea}
+        onClose={() => setDeleteIdeaTarget(null)}
       />
     </div>
   );
