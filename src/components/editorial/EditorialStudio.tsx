@@ -449,13 +449,16 @@ export default function EditorialStudio({
       });
 
       if (res.ok) {
+        const deletedIndex = assets.findIndex(a => a.id === activeAsset.id);
         const remaining = assets.filter(a => a.id !== activeAsset.id);
         setAssets(remaining);
         if (remaining.length > 0) {
-          setSelectedAssetId(remaining[0].id);
+          const nextIndex = Math.max(0, Math.min(deletedIndex >= 0 ? deletedIndex : 0, remaining.length - 1));
+          setSelectedAssetId(remaining[nextIndex].id);
         }
-        setSaveToast("Asset and blog post permanently deleted.");
+        setSaveToast("Draft permanently deleted.");
         setTimeout(() => setSaveToast(null), 3500);
+        window.dispatchEvent(new Event("minions-counts-updated"));
       }
     } catch (e) {
       console.error("Failed to permanently delete asset:", e);
