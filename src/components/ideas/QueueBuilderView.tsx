@@ -64,6 +64,11 @@ export default function QueueBuilderView({
       if (i.status === "QUEUED" || i.status === "DRAFTED" || i.status === "PUBLISHED" || i.status === "REJECTED") {
         return false;
       }
+      // REVIEW/PICKED are the real statuses a drafted/in-flight idea actually carries;
+      // draftAssetId is the authoritative "already has a draft" signal regardless of status.
+      if (i.status === "REVIEW" || i.status === "PICKED" || i.draftAssetId) {
+        return false;
+      }
       // Apply filters
       if (selectedTrade !== "ALL" && i.target_trade !== selectedTrade) return false;
       if (selectedAudience !== "ALL" && i.audience !== selectedAudience) return false;

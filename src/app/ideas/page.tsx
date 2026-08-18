@@ -746,8 +746,11 @@ export default function IdeaStreamPage() {
             const ideaStatus = (idea.status || "HARVESTED").toUpperCase();
             const sourceInfo = getSourceTag(ideaSource);
             const isClaiming = claimingIds.has(idea.id) || claimingIds.has(rawId);
-            const isClaimed = ideaStatus === "CLAIMED" || justClaimedIds.has(idea.id) || justClaimedIds.has(rawId);
-            const isDrafted = ideaStatus === "DRAFTED";
+            const isClaimed = ideaStatus === "CLAIMED" || ideaStatus === "PICKED" || justClaimedIds.has(idea.id) || justClaimedIds.has(rawId);
+            // REVIEW is the real terminal status the pipeline writes once a draft exists;
+            // draftAssetId is the authoritative signal either way (status can be forced
+            // back to QUEUED/HARVESTED by mistake, draftAssetId can't).
+            const isDrafted = ideaStatus === "DRAFTED" || ideaStatus === "REVIEW" || Boolean(idea.draftAssetId);
             const isPublished = ideaStatus === "PUBLISHED";
             const isRejected = ideaStatus === "REJECTED";
 

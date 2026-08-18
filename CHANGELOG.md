@@ -3,6 +3,63 @@
 All notable changes to the Minions content pipeline (n8n workflows: `01_idea_harvester`,
 `02_idea_to_asset`, `03_review_publisher`) and the Cockpit dashboard are logged here.
 
+## 2026-08-18 (Claim Idea Row silently claimed 0 rows on QUEUED/stale-PICKED ideas)
+
+### Fixed
+- **`02_idea_to_asset`: `Claim Idea Row` could match 0 rows and silently do nothing.**
+  Found via execution 2512 (user report: "see it failed on claim idea row node??").
+  The PATCH's compare-and-set filter hardcoded `claimed_at=is.null`, but any row with a
+  non-null `claimed_at` — a `QUEUED` idea that retained an old `claimed_at` from a prior
+  claim cycle, or a genuinely stale `PICKED` row past the 30-minute reclaim window —
+  could never match `is.null`, so the claim updated 0 rows even though `Select Target`
+  had already reported `found: true`, making it look like the click did something when
+  nothing was actually claimed downstream.
+  - **Fix:** `Select Target` now threads the row's real current `claimed_at` through as
+    `orig_claimed_at` on all three branches. `Claim Idea Row`'s `claimed_at` query param
+    is now conditional: `eq.<orig_claimed_at>` when non-null, `is.null` otherwise.
+  - **Verified live** by re-triggering the exact idea from the failing execution
+    (`IDEA-0038`, run tag `CLAIM_FIX_VERIFY`): the claim succeeded, a fresh correctly-
+    linked draft was generated. (Its status briefly reverted to `QUEUED` afterward via
+    the Ideas-page "Queue" button — that specific loophole is what the next entry below
+    closes.)
+
+## 2026-08-18 (enforce one-asset-per-idea; close the re-drafting loophole)
+
+### Fixed
+- **Ideas could be drafted repeatedly, generating a second orphaned asset each time.**
+  Root cause: `02_idea_to_asset`'s `Select Target` decided eligibility purely from
+  `ideas.status`, and the Cockpit's Ideas page didn't recognize the pipeline's real
+  post-draft status (`REVIEW`) or in-flight status (`PICKED`) in its badge logic — so a
+  successfully-drafted idea fell through to the default card state and still showed a
+  live "Queue" button and "Refine & Draft" CTA. Clicking either PATCHed the idea back to
+  `QUEUED`/`HARVESTED`, making it eligible for another full draft run.
+  - **`02_idea_to_asset` (authoritative fix):** `Read Ideas` now also selects
+    `draft_asset_id`. `Select Target` refuses to select or return any idea whose
+    `draft_asset_id` is already set, in all three branches (explicit request, due-queue
+    auto-pick, harvested/refined fallback) — regardless of what `status` says. An
+    explicit request for an already-drafted idea now returns `found:false` with
+    `reason:'ALREADY_DRAFTED'` instead of silently drafting a different idea.
+    `Claim Idea Row`'s compare-and-set PATCH also now requires `draft_asset_id=is.null`
+    as a second guard. This makes the backend the source of truth: even if the
+    dashboard (or a manual DB edit) forces status back to `QUEUED`, the workflow will
+    not draft it again.
+  - **Cockpit dashboard (belt-and-suspenders + UX):** `IdeaItem` now carries
+    `draftAssetId`; `/api/ideas` (list) and `/api/ideas/[id]` (GET/PATCH) expose it.
+    `PATCH /api/ideas/[id]` and the bulk `PATCH /api/ideas` (queue reorder) both now
+    reject (`409`) any attempt to set `status` to `QUEUED`/`HARVESTED`/`REFINED` on an
+    idea that already has a `draftAssetId`. Ideas page card logic and the Queue Builder
+    pool filter now treat `status === "REVIEW"`, `status === "PICKED"`, and a truthy
+    `draftAssetId` as "already drafted" / "drafting in progress" — so the Queue/Refine
+    buttons no longer render for them, and the home page's "Currently Drafting" widget
+    now also matches `PICKED` (the real transient status; it previously only matched
+    `CLAIMED`/`DRAFTING`, values the pipeline never actually writes).
+  - **Re-drafting is still possible on purpose:** the asset `DELETE` endpoint (`mode=
+    permanent`) already clears `draftAssetId` and resets the idea to `REFINED` — so
+    deleting the asset is the one supported way to make an idea eligible for a fresh
+    draft again, per design.
+  - Workflow re-validated: 0 errors, 4 warnings (all pre-existing). `tsc --noEmit`
+    clean on the dashboard.
+
 ## 2026-08-18 (asset/claim ID collision — content loss bug)
 
 ### Fixed

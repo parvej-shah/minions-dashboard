@@ -4,7 +4,7 @@ export type AudienceLane = "ICP" | "PEER" | "BRIDGE";
 export type TargetTrade = "HVAC" | "Plumbing" | "Electrical" | "Roofing" | "Pest Control" | "Voice AI" | "Systems Architecture" | "Operations";
 export type ContentPillar = "Operations" | "Engineering" | "Revenue" | "Unit Economics" | "Field Playbook";
 export type IdeaSource = "GOOGLE_TRENDS" | "REDDIT" | "HACKER_NEWS" | "MANUAL" | "REDDIT_R_LOCALLAMA" | "TRADE_NEWS" | "MANUAL_INJECTION" | "COMPETITOR_INTEL";
-export type IdeaStatus = "HARVESTED" | "CLAIMED" | "DRAFTED" | "PUBLISHED" | "REJECTED" | "REFINED" | "PICKED" | "DRAFTING" | "QUEUED" | "FAILED" | "DISCARDED";
+export type IdeaStatus = "HARVESTED" | "CLAIMED" | "DRAFTED" | "PUBLISHED" | "REJECTED" | "REFINED" | "PICKED" | "REVIEW" | "DRAFTING" | "QUEUED" | "FAILED" | "DISCARDED";
 
 export interface IdeaItem {
   id: string;
@@ -22,6 +22,7 @@ export interface IdeaItem {
   tags?: string[];
   scheduled_for?: string | null;
   queue_order?: number | null;
+  draftAssetId?: string | null;
   created_at: string;
   updated_at: string;
 }

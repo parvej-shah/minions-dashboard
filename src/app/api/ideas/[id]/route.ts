@@ -51,6 +51,23 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
+    // One idea -> one live asset. Re-queuing/re-harvesting an idea that already has a
+    // draft would let the pipeline generate a second, orphaning asset for the same idea.
+    // Only the asset DELETE endpoint (permanent mode) is allowed to clear draftAssetId.
+    const wantsToBecomeAvailable =
+      body.status !== undefined && ["QUEUED", "HARVESTED", "REFINED"].includes(body.status);
+    if (wantsToBecomeAvailable) {
+      const current = await prisma.idea.findUnique({ where: { id }, select: { draftAssetId: true } });
+      if (current?.draftAssetId) {
+        return NextResponse.json(
+          {
+            error: `This idea already has a draft (asset ${current.draftAssetId}). Delete that asset first if you want to draft it again.`,
+          },
+          { status: 409 }
+        );
+      }
+    }
+
     const updated = await prisma.idea.update({
       where: { id },
       data: {
@@ -93,6 +110,7 @@ export async function PATCH(
         status: updated.status,
         priority: updated.priority,
         tags: updated.tags,
+        draftAssetId: updated.draftAssetId,
         scheduled_for: updated.scheduledFor ? updated.scheduledFor.toISOString() : null,
         queue_order: updated.queueOrder,
         created_at: updated.createdAt.toISOString(),

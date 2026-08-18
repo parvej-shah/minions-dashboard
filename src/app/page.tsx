@@ -48,7 +48,7 @@ export default function MissionControlPage() {
 
   const pendingReviewAssets = assets.filter((a) => a.status === "PENDING_REVIEW");
   const publishedAssets = assets.filter((a) => a.status === "PUBLISHED");
-  const draftingIdeas = ideas.filter((i) => i.status === "CLAIMED" || i.status === "DRAFTING");
+  const draftingIdeas = ideas.filter((i) => i.status === "CLAIMED" || i.status === "DRAFTING" || i.status === "PICKED");
 
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
