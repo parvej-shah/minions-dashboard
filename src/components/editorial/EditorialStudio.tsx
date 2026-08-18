@@ -1006,6 +1006,7 @@ export default function EditorialStudio({
                         .replace(/!\[([^\]]*)\]\s*\((https?:\/\/[^)\s]+)\)/g, "\n\n![$1]($2)\n\n")
                         .replace(/(```[\s\S]*?```)/g, "\n\n$1\n\n")
                         .replace(/^(\s*>[^\n]+)/gm, "\n\n$1\n\n")
+                        .replace(/(?:^|\n|\s+)(Rule\s+\d+:)/gi, "\n\n$1")
                         .replace(/\n{3,}/g, "\n\n");
                       return normalized.split("\n\n").map((chunk, idx) => {
                         const trimmed = chunk.trim();
@@ -1049,6 +1050,27 @@ export default function EditorialStudio({
                                 />
                               </div>
                             </figure>
+                          );
+                        }
+
+                        // Rule Callout Card
+                        if (/^Rule\s+\d+:/i.test(trimmed)) {
+                          const ruleMatch = trimmed.match(/^(Rule\s+\d+:)\s*([\s\S]*)$/i);
+                          const ruleHeader = ruleMatch ? ruleMatch[1] : "Rule";
+                          const ruleBody = ruleMatch ? ruleMatch[2] : trimmed;
+
+                          return (
+                            <div
+                              key={idx}
+                              className="my-3 rounded-xl border border-[#00C9A7]/30 bg-[#00C9A7]/5 p-3 border-l-4 border-l-[#00C9A7]"
+                            >
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wide bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/40 block w-fit mb-1.5">
+                                {ruleHeader}
+                              </span>
+                              <p className="text-xs text-[#CBD5E1] break-words [overflow-wrap:anywhere] leading-relaxed font-medium">
+                                {ruleBody}
+                              </p>
+                            </div>
                           );
                         }
 
@@ -1112,6 +1134,7 @@ export default function EditorialStudio({
                       .replace(/!\[([^\]]*)\]\s*\((https?:\/\/[^)\s]+)\)/g, "\n\n![$1]($2)\n\n")
                       .replace(/(```[\s\S]*?```)/g, "\n\n$1\n\n")
                       .replace(/^(\s*>[^\n]+)/gm, "\n\n$1\n\n")
+                      .replace(/(?:^|\n|\s+)(Rule\s+\d+:)/gi, "\n\n$1")
                       .replace(/\n{3,}/g, "\n\n");
                     return normalized.split("\n\n").map((chunk, idx) => {
                       const trimmed = chunk.trim();
@@ -1157,6 +1180,29 @@ export default function EditorialStudio({
                               <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10 rounded-2xl" />
                             </div>
                           </figure>
+                        );
+                      }
+
+                      // 3. Rule Callout Card (Rule 1: ..., Rule 2: ..., Rule 3: ...)
+                      if (/^Rule\s+\d+:/i.test(trimmed)) {
+                        const ruleMatch = trimmed.match(/^(Rule\s+\d+:)\s*([\s\S]*)$/i);
+                        const ruleHeader = ruleMatch ? ruleMatch[1] : "Rule";
+                        const ruleBody = ruleMatch ? ruleMatch[2] : trimmed;
+
+                        return (
+                          <div
+                            key={idx}
+                            className="my-6 rounded-2xl border border-[#00C9A7]/30 bg-[#00C9A7]/5 p-5 sm:p-6 border-l-4 border-l-[#00C9A7] shadow-sm"
+                          >
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold uppercase tracking-wide bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/40">
+                                {ruleHeader}
+                              </span>
+                            </div>
+                            <p className="text-base sm:text-lg leading-relaxed text-[#F1F5F9] font-medium">
+                              {ruleBody}
+                            </p>
+                          </div>
                         );
                       }
 
