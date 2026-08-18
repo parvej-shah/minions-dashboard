@@ -94,6 +94,34 @@ export async function PATCH(request: Request) {
   try {
     const body = await request.json();
     if (body.queueItems && Array.isArray(body.queueItems)) {
+      // 1. Strict Guard: An idea cannot be newly moved into QUEUED if it already has a drafted asset
+      const newlyQueuedIds = body.queueItems
+        .filter((item: { status?: string }) => item.status === "QUEUED")
+        .map((item: { id: string }) => item.id);
+
+      if (newlyQueuedIds.length > 0) {
+        const dbItems = await prisma.idea.findMany({
+          where: { id: { in: newlyQueuedIds } },
+          select: { id: true, status: true, draftAssetId: true, rawIdea: true },
+        });
+
+        // Block any item that is transitioning into QUEUED from a non-QUEUED state IF it already has a draft
+        const invalidDrafted = dbItems.filter(
+          (idea) => idea.draftAssetId !== null && idea.status !== "QUEUED"
+        );
+
+        if (invalidDrafted.length > 0) {
+          return NextResponse.json(
+            {
+              error: `${invalidDrafted.length} idea(s) already have a draft in Editorial Studio and cannot be re-queued: ${invalidDrafted.map((i) => i.id).join(", ")}.`,
+              ideas: invalidDrafted,
+            },
+            { status: 409 }
+          );
+        }
+      }
+
+      // 2. Perform atomic batch update
       await prisma.$transaction(
         body.queueItems.map((item: { id: string; queue_order?: number | null; status?: string }) =>
           prisma.idea.update({

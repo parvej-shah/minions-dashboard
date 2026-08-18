@@ -55,6 +55,18 @@ export async function POST(request: Request) {
       }
     });
 
+    if (body.ideaId) {
+      await prisma.idea.update({
+        where: { id: body.ideaId },
+        data: {
+          draftAssetId: asset.id,
+          status: "REVIEW",
+          queueOrder: null,
+          updatedAt: new Date()
+        }
+      }).catch((e) => console.warn(`Could not link idea ${body.ideaId}:`, e));
+    }
+
     return NextResponse.json({ success: true, asset }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
