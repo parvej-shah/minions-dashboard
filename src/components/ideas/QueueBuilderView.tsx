@@ -561,17 +561,6 @@ export default function QueueBuilderView({
               })
             )}
           </div>
-
-          {/* Queue Footer Info */}
-          <div className="p-3 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-[11px] text-[#64748B] space-y-1">
-            <div className="flex items-center justify-between text-white font-semibold">
-              <span>Auto-Draft Schedule:</span>
-              <span className="text-[#00C9A7] font-mono font-bold">Twice Daily (09:00 & 15:00 UTC)</span>
-            </div>
-            <div>
-              On each run, Workflow 02 locks item #1, generates the full long-form article & cover art, and advances the remaining queue.
-            </div>
-          </div>
         </div>
 
       </div>
