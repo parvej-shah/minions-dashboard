@@ -5,7 +5,16 @@ import { ADMIN_WHITELIST_EMAILS, resolveUserRole } from "@/constants/access";
 
 export { ADMIN_WHITELIST_EMAILS as WHITELIST_EMAILS };
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+/**
+ * The auth config is built per request, not at module load.
+ *
+ * NextAuth v5 accepts a factory as well as an object, and it has to be a
+ * factory here: `next build` evaluates every route module to collect page data,
+ * so reading the Google credentials eagerly made them a *build-time*
+ * requirement and broke CI at /api/auth/[...nextauth]. Compiling the app does
+ * not need the secrets; serving a request does.
+ */
+export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
   providers: [
     Google({
       clientId: requireOneOfEnv("AUTH_GOOGLE_ID", "GOOGLE_CLIENT_ID"),
@@ -43,4 +52,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
   },
-});
+}));

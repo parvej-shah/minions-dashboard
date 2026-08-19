@@ -1,7 +1,18 @@
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import type { NextFetchEvent, NextMiddleware, NextRequest } from "next/server";
 
-export default auth((req) => {
+/**
+ * The auth gate, wrapped once at module load.
+ *
+ * `lib/auth.ts` builds its config from a factory (so that `next build` does not
+ * need the Google secrets), and for a factory config next-auth's `auth()`
+ * wrapper is itself async — it returns a Promise of the middleware, not the
+ * middleware. Next requires the proxy's default export to be a function, so the
+ * promise is created once here and awaited per request; it resolves once and the
+ * per-request config resolution happens inside next-auth either way.
+ */
+const gateHandler = auth((req) => {
   const { pathname } = req.nextUrl;
 
   // 1. Always allow auth endpoints, webhooks, login page, and static public assets
@@ -65,6 +76,20 @@ export default auth((req) => {
 
   return NextResponse.next();
 });
+
+/**
+ * next-auth types `auth(handler)` as returning the middleware directly, which
+ * holds for an object config but not for the factory config this app uses — at
+ * runtime it is a Promise of the middleware. The cast states what actually comes
+ * back so the await below is honest rather than a type error.
+ */
+const gate = gateHandler as unknown as Promise<NextMiddleware>;
+
+/** Next requires the proxy default export to be a function, not a promise. */
+export default async function proxy(request: NextRequest, event: NextFetchEvent) {
+  const handler = await gate;
+  return handler(request, event);
+}
 
 export const config = {
   matcher: [
