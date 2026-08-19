@@ -1,143 +1,87 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { IdeaItem } from "@/lib/types";
+import { toIdeaDTO } from "@/lib/mappers/idea";
+import { apiError, apiFailure } from "@/lib/api-response";
 
 export async function GET() {
   try {
-    const dbIdeas = await prisma.idea.findMany({
-      orderBy: { createdAt: "desc" }
-    });
-
-    if (dbIdeas.length > 0) {
-      const formatted: IdeaItem[] = dbIdeas.map((idea) => ({
-        id: idea.id,
-        ideaId: idea.id,
-        title: idea.rawIdea,
-        raw_idea: idea.rawIdea,
-        excerpt: idea.angle || idea.why || "Strategic angle for editorial development.",
-        angle: idea.angle || "",
-        audience: (idea.audience || "ICP") as "ICP" | "PEER" | "BRIDGE",
-        target_trade: idea.targetTrade,
-        pillar: idea.pillar,
-        source: (idea.source || "MANUAL") as any,
-        tags: idea.tags || [],
-        status: (idea.status || "HARVESTED") as any,
-        scheduled_for: idea.scheduledFor ? idea.scheduledFor.toISOString() : null,
-        queue_order: idea.queueOrder,
-        draftAssetId: idea.draftAssetId,
-        estimated_cost: 0.038,
-        created_at: idea.createdAt.toISOString(),
-        updated_at: idea.updatedAt.toISOString(),
-      }));
-      return NextResponse.json(formatted);
-    }
-    return NextResponse.json([]);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const ideas = await prisma.idea.findMany({ orderBy: { createdAt: "desc" } });
+    return NextResponse.json(ideas.map(toIdeaDTO));
+  } catch (error) {
+    return apiError(error, "Failed to fetch ideas");
   }
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+
     const existingIds = await prisma.idea.findMany({ select: { id: true } });
-    const maxNum = existingIds.reduce((max, row) => {
-      const match = row.id.match(/^IDEA-(\d+)$/);
-      const num = match ? parseInt(match[1], 10) : 0;
-      return num > max ? num : max;
-    }, 0);
-    const id = `IDEA-${String(maxNum + 1).padStart(4, "0")}`;
-    const rawIdea = body.title || body.raw_idea || "Untitled Signal";
-    const angle = body.angle || body.excerpt || "Operational analysis and technical trade implications";
+    const nextNumber =
+      existingIds.reduce((max, row) => {
+        const parsed = Number.parseInt(row.id.replace(/\D/g, ""), 10);
+        return Number.isFinite(parsed) && parsed > max ? parsed : max;
+      }, 0) + 1;
 
     const created = await prisma.idea.create({
       data: {
-        id,
-        rawIdea,
-        angle,
-        audience: body.audience || "ICP",
-        targetTrade: body.trade || body.target_trade || "HVAC",
-        pillar: body.pillar || "Contractor Realities",
-        source: body.source || "MANUAL",
-        status: "HARVESTED",
-        priority: body.priority || "HIGH",
-        tags: Array.isArray(body.tags) ? body.tags : body.tags ? [body.tags] : [],
-        icpRelevance: 90
-      }
+        id: `IDEA-${String(nextNumber).padStart(4, "0")}`,
+        rawIdea: body.raw_idea ?? body.title ?? "Untitled idea",
+        angle: body.angle ?? null,
+        audience: body.audience ?? "ICP",
+        targetTrade: body.target_trade ?? "",
+        pillar: body.pillar ?? "Contractor Realities",
+        source: body.source ?? "MANUAL",
+        status: body.status ?? "HARVESTED",
+        why: body.why ?? null,
+        tags: Array.isArray(body.tags) ? body.tags : [],
+      },
     });
 
-    const newIdea: IdeaItem = {
-      id: created.id,
-      ideaId: created.id,
-      title: created.rawIdea,
-      raw_idea: created.rawIdea,
-      excerpt: created.angle || "Strategic angle",
-      angle: created.angle || "",
-      audience: (created.audience || "ICP") as "ICP" | "PEER" | "BRIDGE",
-      target_trade: created.targetTrade,
-      pillar: created.pillar,
-      source: (created.source || "MANUAL") as any,
-      tags: created.tags,
-      status: "HARVESTED",
-      estimated_cost: 0.038,
-      created_at: created.createdAt.toISOString(),
-      updated_at: created.updatedAt.toISOString(),
-    };
-
-    return NextResponse.json(newIdea, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(toIdeaDTO(created), { status: 201 });
+  } catch (error) {
+    return apiError(error, "Failed to create idea");
   }
 }
 
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
-    if (body.queueItems && Array.isArray(body.queueItems)) {
-      // 1. Strict Guard: An idea cannot be newly moved into QUEUED if it already has a drafted asset
-      const newlyQueuedIds = body.queueItems
-        .filter((item: { status?: string }) => item.status === "QUEUED")
-        .map((item: { id: string }) => item.id);
 
-      if (newlyQueuedIds.length > 0) {
-        const dbItems = await prisma.idea.findMany({
-          where: { id: { in: newlyQueuedIds } },
-          select: { id: true, status: true, draftAssetId: true, rawIdea: true },
-        });
-
-        // Block any item that is transitioning into QUEUED from a non-QUEUED state IF it already has a draft
-        const invalidDrafted = dbItems.filter(
-          (idea) => idea.draftAssetId !== null && idea.status !== "QUEUED"
-        );
-
-        if (invalidDrafted.length > 0) {
-          return NextResponse.json(
-            {
-              error: `${invalidDrafted.length} idea(s) already have a draft in Editorial Studio and cannot be re-queued: ${invalidDrafted.map((i) => i.id).join(", ")}.`,
-              ideas: invalidDrafted,
-            },
-            { status: 409 }
-          );
-        }
-      }
-
-      // 2. Perform atomic batch update
-      await prisma.$transaction(
-        body.queueItems.map((item: { id: string; queue_order?: number | null; status?: string }) =>
-          prisma.idea.update({
-            where: { id: item.id },
-            data: {
-              ...(item.queue_order !== undefined && { queueOrder: item.queue_order }),
-              ...(item.status !== undefined && { status: item.status }),
-              updatedAt: new Date(),
-            },
-          })
-        )
-      );
-      return NextResponse.json({ success: true, count: body.queueItems.length });
+    if (!Array.isArray(body.queueItems)) {
+      return apiFailure("Invalid payload: expected a queueItems array", 400);
     }
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+
+    const ids: string[] = body.queueItems.map((item: { id: string }) => item.id);
+    const alreadyDrafted = await prisma.idea.findMany({
+      where: { id: { in: ids }, NOT: { draftAssetId: null } },
+      select: { id: true },
+    });
+
+    if (alreadyDrafted.length > 0) {
+      return apiFailure(
+        `Cannot re-queue ideas that already have a draft: ${alreadyDrafted
+          .map((i) => i.id)
+          .join(", ")}`,
+        409
+      );
+    }
+
+    await prisma.$transaction(
+      body.queueItems.map((item: { id: string; queue_order: number; scheduled_for?: string }) =>
+        prisma.idea.update({
+          where: { id: item.id },
+          data: {
+            queueOrder: item.queue_order,
+            status: "QUEUED",
+            ...(item.scheduled_for ? { scheduledFor: new Date(item.scheduled_for) } : {}),
+          },
+        })
+      )
+    );
+
+    return NextResponse.json({ success: true, count: body.queueItems.length });
+  } catch (error) {
+    return apiError(error, "Failed to update idea queue");
   }
 }

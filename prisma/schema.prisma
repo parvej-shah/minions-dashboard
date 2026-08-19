@@ -14,62 +14,70 @@ enum AudienceLane {
 }
 
 model Idea {
-  id               String       @id // e.g. "IDEA-0001"
-  rawIdea          String       @map("raw_idea")
+  id               String    @id // e.g. "IDEA-0001"
+  rawIdea          String    @map("raw_idea")
   angle            String?
-  audience         String       @default("ICP")
-  targetTrade      String       @default("HVAC") @map("target_trade")
-  pillar           String       @default("Contractor Realities")
-  source           String       @default("GOOGLE_TRENDS")
-  status           String       @default("HARVESTED")
-  priority         String       @default("HIGH")
-  geoMetro         String?      @map("geo_metro")
+  audience         String    @default("ICP")
+  targetTrade      String    @default("HVAC") @map("target_trade")
+  pillar           String    @default("Contractor Realities")
+  source           String    @default("GOOGLE_TRENDS")
+  status           String    @default("HARVESTED")
+  priority         String    @default("HIGH")
+  geoMetro         String?   @map("geo_metro")
   why              String?
-  icpRelevance     Int          @default(90) @map("icp_relevance")
-  evidenceRequired String?      @map("evidence_required")
-  claimedByRunId   String?      @map("claimed_by_run_id")
-  claimedAt        DateTime?    @map("claimed_at")
-  draftAssetId     String?      @map("draft_asset_id")
-  rejectionReason  String?      @map("rejection_reason")
-  scheduledFor     DateTime?    @map("scheduled_for")
-  queueOrder       Int?         @map("queue_order")
-  tags             String[]     @default([])
-  createdAt        DateTime     @default(now()) @map("created_at")
-  updatedAt        DateTime     @default(now()) @updatedAt @map("updated_at")
+  icpRelevance     Int       @default(90) @map("icp_relevance")
+  evidenceRequired String?   @map("evidence_required")
+  claimedByRunId   String?   @map("claimed_by_run_id")
+  claimedAt        DateTime? @map("claimed_at")
+  draftAssetId     String?   @map("draft_asset_id")
+  rejectionReason  String?   @map("rejection_reason")
+  scheduledFor     DateTime? @map("scheduled_for")
+  queueOrder       Int?      @map("queue_order")
+  tags             String[]  @default([])
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
 
-  assets           Asset[]
+  assets Asset[]
 
   @@map("ideas")
 }
 
 model Asset {
-  id              String       @id // e.g. "ASSET-0001"
-  ideaId          String?      @map("idea_id")
-  title           String
-  slug            String       @unique
-  hook            String?
-  coreArgument    String?      @map("core_argument")
-  content         String       @db.Text
-  audience        String       @default("ICP")
-  pillar          String       @default("Contractor Realities")
-  targetTrade     String?      @default("HVAC") @map("target_trade")
-  status          String       @default("PENDING_REVIEW")
-  claimsOk        String       @default("BLOCKED_PENDING_REVIEW") @map("claims_ok")
-  heroImageUrl    String?      @map("hero_image_url")
-  docUrl          String?      @map("doc_url")
-  linkedinVariant String?      @map("linkedin_variant") @db.Text
-  facebookVariant String?      @map("facebook_variant") @db.Text
-  xVariant        String?      @map("x_variant") @db.Text
-  version         Int          @default(1)
-  generationCost  Decimal      @default(0.038) @map("generation_cost") @db.Decimal(10, 4)
-  publishedAt     DateTime?    @map("published_at")
-  publishedUrls   String?      @map("published_urls")
-  createdAt       DateTime     @default(now()) @map("created_at")
-  updatedAt       DateTime     @default(now()) @updatedAt @map("updated_at")
+  id                  String    @id // e.g. "ASSET-0001"
+  ideaId              String?   @map("idea_id")
+  title               String
+  slug                String    @unique
+  hook                String?
+  coreArgument        String?   @map("core_argument")
+  content             String    @db.Text
+  audience            String    @default("ICP")
+  pillar              String    @default("Contractor Realities")
+  targetTrade         String?   @default("HVAC") @map("target_trade")
+  status              String    @default("PENDING_REVIEW")
+  claimsOk            String    @default("BLOCKED_PENDING_REVIEW") @map("claims_ok")
+  heroImageUrl        String?   @map("hero_image_url")
+  docUrl              String?   @map("doc_url")
+  linkedinVariant     String?   @map("linkedin_variant") @db.Text
+  facebookVariant     String?   @map("facebook_variant") @db.Text
+  xVariant            String?   @map("x_variant") @db.Text
+  version             Int       @default(1)
+  generationCost      Decimal   @default(0.038) @map("generation_cost") @db.Decimal(10, 4)
+  publishedAt         DateTime? @map("published_at")
+  publishedUrls       String?   @map("published_urls")
+  facebookPostId      String?   @map("facebook_post_id")
+  facebookPublishedAt DateTime? @map("facebook_published_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at")
 
-  idea            Idea?        @relation(fields: [ideaId], references: [id], onDelete: SetNull)
-  claims          Claim[]
+  idea   Idea?   @relation(fields: [ideaId], references: [id], onDelete: SetNull)
+  claims Claim[]
 
+  // One idea produces at most one asset. Postgres allows many NULLs under a
+  // unique index, so assets with no idea are unaffected. This is the only layer
+  // that binds n8n: `02_idea_to_asset` writes assets straight to PostgREST
+  // (`POST /rest/v1/assets`), so an application check cannot stop it — a second
+  // insert for the same idea has to fail at the database.
+  @@unique([ideaId], map: "assets_idea_id_key")
   @@map("assets")
 }
 
@@ -84,7 +92,7 @@ model Claim {
   notes           String?
   createdAt       DateTime @default(now()) @map("created_at")
 
-  asset           Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
 
   @@map("claims")
 }

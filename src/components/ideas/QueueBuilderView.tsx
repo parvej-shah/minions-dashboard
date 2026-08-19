@@ -1,23 +1,20 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { IdeaItem, AudienceLane, TargetTrade } from "@/lib/types";
-import { 
-  GripVertical, 
-  Sparkles, 
-  ArrowRight, 
-  Plus, 
-  X, 
-  Search, 
-  ArrowUp, 
-  ArrowDown, 
-  Zap, 
-  CheckCircle2, 
-  Layers, 
-  Clock, 
+import {
+  IdeaItem,
+} from "@/types";
+import {
+  GripVertical,
+  Sparkles,
+  Plus,
+  X,
+  Search,
+  ArrowUp,
+  ArrowDown,
+  Layers,
   Loader2,
   AlertCircle,
-  HelpCircle
 } from "lucide-react";
 
 interface QueueBuilderViewProps {
@@ -113,7 +110,7 @@ export default function QueueBuilderView({
       if (!res.ok) {
         throw new Error("Failed to save queue changes to database");
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Queue sync error:", err);
       onToast("⚠️ Failed to sync queue changes to server");
     } finally {
@@ -124,7 +121,7 @@ export default function QueueBuilderView({
   // 1. Add item to queue (appends to bottom or specific index)
   const addToQueue = (idea: IdeaItem, targetIndex?: number) => {
     const existingIndex = queuedIdeas.findIndex((i) => i.id === idea.id);
-    let updatedQueue = [...queuedIdeas];
+    const updatedQueue = [...queuedIdeas];
 
     if (existingIndex >= 0) {
       // Already in queue, reorder

@@ -1,5 +1,6 @@
 "use client";
 
+import type { AssetItem } from "@/types";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
@@ -9,13 +10,13 @@ import {
   PenTool,
   ShieldCheck,
   Palette,
+  Share2,
   CheckCircle2,
   Loader2,
   ChevronDown,
   ChevronUp,
   X,
-  ExternalLink,
-  ArrowRight
+  ArrowRight,
 } from "lucide-react";
 
 export interface DraftingJob {
@@ -34,54 +35,56 @@ interface DraftingProgressHUDProps {
 interface AgentStage {
   id: string;
   name: string;
+  /** Exact model string the n8n node sends. */
   model: string;
   icon: React.ElementType;
   description: string;
-  activeDescription: string;
-  completedDescription: string;
-  estimatedDurationSeconds: number;
 }
 
+/**
+ * The stages of `02_idea_to_asset`, in the order n8n runs them.
+ *
+ * This is a description of the pipeline, not live progress: n8n reports nothing
+ * back until the asset row exists, so the HUD polls for that and never claims
+ * to know which stage is running right now. The per-stage timers that used to
+ * drive this ("0-12s strategist, 12-34s writer…") were pure invention, and the
+ * percentage they produced had no relationship to the run.
+ */
 const AGENT_STAGES: AgentStage[] = [
   {
     id: "strategist",
     name: "Strategist Minion",
     model: "qwen3.7-max",
     icon: Brain,
-    description: "Developing contrarian industry angle & strategic thesis",
-    activeDescription: "Synthesizing market signals & formulating contrarian angle...",
-    completedDescription: "Strategic thesis & tactical angles locked",
-    estimatedDurationSeconds: 12,
+    description: "Formulating the thesis angle and defending it",
   },
   {
     id: "writer",
     name: "Writer Minion",
     model: "qwen-plus",
     icon: PenTool,
-    description: "Authoring long-form technical article & social variants",
-    activeDescription: "Composing 800-word article, LinkedIn & Twitter copy...",
-    completedDescription: "Full article draft & omnichannel variants generated",
-    estimatedDurationSeconds: 22,
+    description: "Authoring the 800–1,200 word deep dive",
   },
   {
     id: "editor",
     name: "Editor / Critic Minion",
     model: "qwen3.7-flash",
     icon: ShieldCheck,
-    description: "Validating claims, voice guidelines & structural flow",
-    activeDescription: "Auditing tone, formatting & verifying claims...",
-    completedDescription: "Claims verified & tone approved",
-    estimatedDurationSeconds: 14,
+    description: "Extracting and classifying every factual claim",
+  },
+  {
+    id: "variants",
+    name: "Distribution Minion",
+    model: "qwen-flash",
+    icon: Share2,
+    description: "Writing the LinkedIn, Facebook and X variants",
   },
   {
     id: "artist",
     name: "Visual Artist Minion",
-    model: "DashScope / Flux",
+    model: "qwen-image-3.0-pro",
     icon: Palette,
-    description: "Synthesizing 16:9 2K cover illustration",
-    activeDescription: "Rendering 16:9 cinematic cover image...",
-    completedDescription: "Cover illustration synthesized & staged",
-    estimatedDurationSeconds: 12,
+    description: "Synthesizing the 16:9 1280×720 cover illustration",
   },
 ];
 
@@ -95,10 +98,13 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
   // Timer effect
   useEffect(() => {
     if (!job) {
-      setElapsedSeconds(0);
-      setIsCompleted(false);
-      setCompletedAssetId(null);
-      return;
+      // Deferred so the effect body performs no synchronous setState.
+      const reset = setTimeout(() => {
+        setElapsedSeconds(0);
+        setIsCompleted(false);
+        setCompletedAssetId(null);
+      }, 0);
+      return () => clearTimeout(reset);
     }
 
     const interval = setInterval(() => {
@@ -120,8 +126,8 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
         const assets = await res.json();
         
         // Find if an asset was created after job start matching title or recently created
-        const matchingAsset = assets.find((a: any) => {
-          const createdAt = new Date(a.createdAt || a.created_at).getTime();
+        const matchingAsset = (assets as AssetItem[]).find((a) => {
+          const createdAt = new Date(a.created_at).getTime();
           const isRecent = createdAt >= job.startedAt - 5000;
           const isTitleMatch = a.title && job.title && (
             a.title.toLowerCase().includes(job.title.toLowerCase().slice(0, 20)) ||
@@ -155,27 +161,8 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
 
   if (!job) return null;
 
-  // Calculate current stage
-  const getStageStatus = (stageIdx: number) => {
-    if (isCompleted) return "completed";
-    
-    // Cumulative thresholds: 0-12s, 12-34s, 34-48s, 48-60s
-    let cumulative = 0;
-    for (let i = 0; i < stageIdx; i++) {
-      cumulative += AGENT_STAGES[i].estimatedDurationSeconds;
-    }
-    const stageDuration = AGENT_STAGES[stageIdx].estimatedDurationSeconds;
-
-    if (elapsedSeconds < cumulative) return "pending";
-    if (elapsedSeconds < cumulative + stageDuration) return "active";
-    return "completed";
-  };
-
-  const totalEstimatedDuration = AGENT_STAGES.reduce((acc, s) => acc + s.estimatedDurationSeconds, 0);
-  const progressPercent = isCompleted 
-    ? 100 
-    : Math.min(Math.round((elapsedSeconds / totalEstimatedDuration) * 100), 96);
-
+  // Progress is binary, because that is all the pipeline actually reports:
+  // either the asset row has appeared (polled) or it has not.
   const formatTime = (secs: number) => {
     const mins = Math.floor(secs / 60);
     const remaining = secs % 60;
@@ -252,43 +239,42 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[11px] font-mono">
               <span className="text-[#94A3B8]">
-                {isCompleted ? "Pipeline Completed" : "4-Agent Generation Pipeline"}
+                {isCompleted ? "Pipeline completed" : "5-stage generation pipeline running"}
               </span>
-              <span className="font-bold text-[#00C9A7]">{progressPercent}%</span>
+              <span className="font-bold text-[#00C9A7]">
+                {isCompleted ? "Done" : formatTime(elapsedSeconds)}
+              </span>
             </div>
+            {/* Indeterminate while running: n8n does not report a percentage. */}
             <div className="w-full h-1.5 bg-[#161D26] rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-[#00C9A7] to-[#3B82F6] transition-all duration-700 rounded-full"
-                style={{ width: `${progressPercent}%` }}
-              />
+              {isCompleted ? (
+                <div className="h-full w-full bg-gradient-to-r from-[#00C9A7] to-[#3B82F6] rounded-full" />
+              ) : (
+                <div className="h-full w-1/3 bg-gradient-to-r from-[#00C9A7] to-[#3B82F6] rounded-full animate-pulse" />
+              )}
             </div>
           </div>
 
           {/* Stepper of 4 Agents */}
           <div className="space-y-2.5">
-            {AGENT_STAGES.map((stage, idx) => {
-              const status = getStageStatus(idx);
+            {AGENT_STAGES.map((stage) => {
               const Icon = stage.icon;
 
               return (
                 <div
                   key={stage.id}
                   className={`p-2.5 rounded-xl border transition-all flex items-center justify-between gap-3 ${
-                    status === "active"
-                      ? "bg-[#161D26] border-[#00C9A7]/40 shadow-sm ring-1 ring-[#00C9A7]/30"
-                      : status === "completed"
+                    isCompleted
                       ? "bg-[#0F1419]/60 border-[#1F2D3D]"
-                      : "bg-[#070B0F]/40 border-[#1F2D3D]/40 opacity-40"
+                      : "bg-[#161D26] border-[#1F2D3D]"
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div
                       className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
-                        status === "active"
-                          ? "bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/40"
-                          : status === "completed"
+                        isCompleted
                           ? "bg-[#00C9A7]/10 text-[#00C9A7]"
-                          : "bg-[#161D26] text-[#64748B]"
+                          : "bg-[#3B82F6]/10 text-[#3B82F6]"
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5" />
@@ -304,25 +290,17 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
                         </span>
                       </div>
                       <p className="text-[10px] text-[#94A3B8] truncate">
-                        {status === "active"
-                          ? stage.activeDescription
-                          : status === "completed"
-                          ? stage.completedDescription
-                          : stage.description}
+                        {stage.description}
                       </p>
                     </div>
                   </div>
 
                   {/* Stage Indicator Badge */}
                   <div className="shrink-0">
-                    {status === "active" && (
-                      <Loader2 className="w-3.5 h-3.5 text-[#00C9A7] animate-spin" />
-                    )}
-                    {status === "completed" && (
+                    {isCompleted ? (
                       <CheckCircle2 className="w-3.5 h-3.5 text-[#00C9A7]" />
-                    )}
-                    {status === "pending" && (
-                      <span className="w-2 h-2 rounded-full bg-[#334155] inline-block" />
+                    ) : (
+                      <Loader2 className="w-3.5 h-3.5 text-[#3B82F6] animate-spin" />
                     )}
                   </div>
                 </div>
@@ -348,8 +326,9 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
               </Link>
             </div>
           ) : (
-            <div className="text-[10px] text-[#64748B] text-center italic pt-1">
-              You can navigate freely while the agents draft in the background.
+            <div className="text-[10px] text-[#64748B] text-center italic pt-1 space-y-0.5">
+              <p>You can navigate freely while the agents draft in the background.</p>
+              <p>n8n reports no per-stage progress — the draft appears here when it lands.</p>
             </div>
           )}
 

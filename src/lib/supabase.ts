@@ -1,42 +1,51 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { assertServerOnly, requireEnv } from "./env";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://kneafaxwkopodiausljf.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuZWFmYXh3a29wb2RpYXVzbGpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY3NzIyMjQsImV4cCI6MjEwMjM0ODIyNH0.e8sB1Fv_L4a7Gg7E6o4D2v_m8X3_r";
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuZWFmYXh3a29wb2RpYXVzbGpmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4Njc3MjIyNCwiZXhwIjoyMTAyMzQ4MjI0fQ.J2gk4F_g38ZhgSEM4Ss0bhdaQDmeEOQoVIQDb39bXnw";
+/**
+ * Browser-safe Supabase client, built from the public anon key only.
+ *
+ * NEXT_PUBLIC_* variables are inlined at build time, so these are read
+ * directly rather than through requireEnv (which cannot see them client-side).
+ */
+let browserClient: SupabaseClient | null = null;
 
-// Client-side Supabase client singleton for browser authentication
-let browserClient: any = null;
+export function getSupabaseClient(): SupabaseClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export const getSupabaseClient = () => {
-  if (typeof window === "undefined") {
-    return createClient(supabaseUrl, supabaseAnonKey);
+  if (!url || !anonKey) {
+    throw new Error(
+      "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. Set both in .env.local."
+    );
   }
+
+  if (typeof window === "undefined") {
+    return createClient(url, anonKey);
+  }
+
   if (!browserClient) {
-    browserClient = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-      }
+    browserClient = createClient(url, anonKey, {
+      auth: { persistSession: true, autoRefreshToken: true },
     });
   }
   return browserClient;
-};
+}
 
-export const supabaseClient = getSupabaseClient();
+/**
+ * Service-role Supabase client. Server-only: it holds a key that bypasses RLS,
+ * so it is created lazily and guarded rather than instantiated at module load.
+ */
+let adminClient: SupabaseClient | null = null;
 
-// Server-side Admin client singleton for database queries and agent orchestration
-let adminClient: any = null;
+export function getSupabaseAdmin(): SupabaseClient {
+  assertServerOnly("getSupabaseAdmin");
 
-export const getSupabaseAdmin = () => {
   if (!adminClient) {
-    adminClient = createClient(supabaseUrl, supabaseServiceRoleKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    });
+    adminClient = createClient(
+      requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
+      requireEnv("SUPABASE_SERVICE_ROLE_KEY"),
+      { auth: { persistSession: false, autoRefreshToken: false } }
+    );
   }
   return adminClient;
-};
-
-export const supabaseAdmin = getSupabaseAdmin();
+}

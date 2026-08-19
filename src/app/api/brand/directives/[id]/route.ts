@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { apiError } from "@/lib/api-response";
 
 export async function PATCH(
   request: Request,
@@ -20,9 +21,8 @@ export async function PATCH(
     });
 
     return NextResponse.json({ success: true, id: updated.id, is_active: updated.isActive });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch (error) {
+    return apiError(error, "Failed to update brand directive");
   }
 }
 
@@ -34,8 +34,7 @@ export async function DELETE(
     const { id } = await params;
     await prisma.brandDirective.delete({ where: { id } });
     return NextResponse.json({ success: true });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch (error) {
+    return apiError(error, "Failed to delete brand directive");
   }
 }

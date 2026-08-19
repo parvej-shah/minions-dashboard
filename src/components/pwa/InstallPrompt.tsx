@@ -1,8 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Download, X, Smartphone, Share, PlusSquare, Check } from "lucide-react";
+import {
+  Download,
+  X,
+  Smartphone,
+  Share,
+  PlusSquare,
+} from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -16,7 +23,6 @@ export function InstallPrompt() {
   const [isIOS, setIsIOS] = useState(false);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
     // Check if already running in standalone mode (PWA installed)
@@ -34,15 +40,15 @@ export function InstallPrompt() {
       return;
     }
 
-    // Detect iOS
+    // Detect iOS. Deferred so the effect body performs no synchronous setState.
     const userAgent = window.navigator.userAgent.toLowerCase();
     const isAppleDevice = /iphone|ipad|ipod/.test(userAgent);
-    setIsIOS(isAppleDevice);
+    const iosTimer = setTimeout(() => setIsIOS(isAppleDevice), 0);
 
     // Check localStorage dismiss timestamp
     const dismissedUntil = localStorage.getItem("minions_pwa_dismissed_until");
     if (dismissedUntil && Date.now() < parseInt(dismissedUntil, 10)) {
-      return;
+      return () => clearTimeout(iosTimer);
     }
 
     // Handle Chromium / Android beforeinstallprompt
@@ -56,7 +62,6 @@ export function InstallPrompt() {
 
     // App installed event
     const handleAppInstalled = () => {
-      setIsInstalled(true);
       setIsVisible(false);
       setDeferredPrompt(null);
       console.log("[PWA] App successfully installed!");
@@ -65,14 +70,14 @@ export function InstallPrompt() {
     window.addEventListener("appinstalled", handleAppInstalled);
 
     // If iOS and not dismissed, show prompt after a short delay (3s)
-    if (isAppleDevice && !checkStandalone()) {
-      const timer = setTimeout(() => {
-        setIsVisible(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
+    const iosPromptTimer =
+      isAppleDevice && !checkStandalone()
+        ? setTimeout(() => setIsVisible(true), 3000)
+        : null;
 
     return () => {
+      clearTimeout(iosTimer);
+      if (iosPromptTimer) clearTimeout(iosPromptTimer);
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
@@ -90,7 +95,6 @@ export function InstallPrompt() {
     const choice = await deferredPrompt.userChoice;
     
     if (choice.outcome === "accepted") {
-      setIsInstalled(true);
       setIsVisible(false);
     }
     setDeferredPrompt(null);
@@ -116,7 +120,7 @@ export function InstallPrompt() {
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#12242a] to-[#0a0d12] border border-[#1F2D3D] flex items-center justify-center shadow-md shrink-0">
-              <img src="/icons/icon-192x192.png" alt="Minions Logo" className="w-7 h-7 rounded-lg" />
+              <Image src="/icons/icon-192x192.png" alt="Minions Logo" width={28} height={28} className="w-7 h-7 rounded-lg" />
             </div>
             <div>
               <h3 className="text-sm font-semibold text-[#F1F5F9] flex items-center gap-1.5">

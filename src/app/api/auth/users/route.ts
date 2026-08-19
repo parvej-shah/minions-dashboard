@@ -1,30 +1,16 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { listAdminUsers } from "@/services/users";
+import { apiError } from "@/lib/api-response";
 
 export async function GET() {
   try {
-    const { data, error } = await supabaseAdmin.auth.admin.listUsers();
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    const users = (data.users as any[]).map((u: any) => ({
-      id: u.id,
-      email: u.email,
-      name: u.user_metadata?.name || (u.email?.includes("parvej") ? "Parvej Shah" : "XpeedLab Admin"),
-      role: u.user_metadata?.role || (u.email?.includes("parvej") ? "MARKETING_DIRECTOR" : "SYSTEM_ADMIN"),
-      confirmed: !!u.email_confirmed_at,
-      created_at: u.created_at,
-      last_sign_in_at: u.last_sign_in_at || u.created_at
-    }));
-
+    const users = await listAdminUsers();
     return NextResponse.json({
-      supabase_project: "kneafaxwkopodiausljf.supabase.co",
       status: "CONNECTED",
       total_users: users.length,
-      users
+      users,
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (error) {
+    return apiError(error, "Failed to list admin users");
   }
 }

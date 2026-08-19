@@ -1,18 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { IdeaItem } from "@/lib/types";
-import { 
-  Calendar as CalendarIcon, 
-  Clock, 
-  X, 
-  Check, 
-  Sparkles, 
-  Zap, 
-  Layers, 
+import { IdeaItem } from "@/types";
+import {
+  X,
+  Check,
+  Zap,
   AlertCircle,
   CalendarDays,
-  Trash2
+  Trash2,
 } from "lucide-react";
 
 interface ScheduleModalProps {
@@ -28,8 +24,6 @@ export default function ScheduleModal({
   idea,
   onScheduleSuccess
 }: ScheduleModalProps) {
-  if (!isOpen || !idea) return null;
-
   // Compute default date/time (tomorrow at 09:00 AM in local time)
   const getTomorrowDefault = () => {
     const d = new Date();
@@ -38,13 +32,17 @@ export default function ScheduleModal({
     return d.toISOString().slice(0, 16);
   };
 
-  const initialDateTime = idea.scheduled_for 
+  const initialDateTime = idea?.scheduled_for
     ? new Date(idea.scheduled_for).toISOString().slice(0, 16)
     : getTomorrowDefault();
 
   const [selectedDateTime, setSelectedDateTime] = useState<string>(initialDateTime);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Every hook above this line runs on every render; the early return has to
+  // come after them or React sees a changing hook count between renders.
+  if (!isOpen || !idea) return null;
 
   // Quick preset helper
   const setPreset = (daysFromNow: number, hour: number, minute: number = 0) => {
@@ -77,8 +75,8 @@ export default function ScheduleModal({
 
       onScheduleSuccess(data.idea);
       onClose();
-    } catch (err: any) {
-      setError(err.message || "An error occurred while scheduling.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred while scheduling.");
       setIsSaving(false);
     }
   };

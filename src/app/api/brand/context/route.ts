@@ -1,55 +1,40 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { fetchBrandSettings } from "@/lib/api";
+import { toDirectiveDTO } from "@/lib/mappers/directive";
+import { DEFAULT_BRAND_SETTINGS } from "@/constants/brand";
+import { BLOG_BASE_URL, BRAND_POSITIONING, PRIMARY_LOGO_URL } from "@/constants/config";
+import { apiError } from "@/lib/api-response";
 
+/**
+ * Structured brand context for the n8n drafting pipeline to ingest.
+ * Values come from the shared brand constants so this cannot drift from /api/brand.
+ */
 export async function GET() {
-  const brand = await fetchBrandSettings();
-  
-  // Format structured brand context payload for n8n LLM ingestion directly from Supabase via Prisma
-  let activeDirectives: any[] = [];
   try {
-    const dbDirectives = await prisma.brandDirective.findMany({
+    const directives = await prisma.brandDirective.findMany({
       where: { isActive: true },
-      orderBy: { priority: "asc" }
+      orderBy: { priority: "asc" },
     });
-    activeDirectives = dbDirectives.map(d => ({
-      id: d.id,
-      category: d.category,
-      key: d.ruleKey,
-      content: d.instruction,
-      priority: d.priority,
-      audience_scope: d.audienceScope,
-      is_active: d.isActive
-    }));
-  } catch (e) {
-    activeDirectives = [];
-  }
-  
-  const contextPayload = {
-    company_name: "getminions.ai",
-    brand_domain: "https://getminions.ai",
-    positioning: "AI operations partner for US home-services businesses (1-10 techs)",
-    primary_logo_url: "https://pub-13629069dfd74891bffc487ab4e135f5.r2.dev/minions_logo_primary.svg",
-    colors: {
-      primary_ink: "#12242a",
-      brand_teal: "#0e5c63",
-      brand_coral: "#ff6b4a",
-      brand_cream: "#fff8f0"
-    },
-    voice_guidelines: {
-      cadence: "1-3 sentence paragraphs, zero marketing fluff, Stripe/Linear engineering rigor",
-      forbidden_lexicon: [
-        "delve", "testament", "tapestry", "seamless", "game-changing", 
-        "revolutionize", "unlock", "synergy", "in today's fast-paced world", "the future of", "🚀"
-      ],
-      allowed_proof: [
-        "Live callable AI voice demo number",
-        "Deterministic JSON schema validation pipeline",
-        "Sub-1.8s WebSocket voice turnaround latency"
-      ]
-    },
-    directives: activeDirectives
-  };
 
-  return NextResponse.json(contextPayload);
+    return NextResponse.json({
+      company_name: DEFAULT_BRAND_SETTINGS.brand_name,
+      brand_domain: BLOG_BASE_URL,
+      positioning: BRAND_POSITIONING,
+      primary_logo_url: PRIMARY_LOGO_URL,
+      colors: {
+        primary_ink: DEFAULT_BRAND_SETTINGS.primary_ink,
+        brand_teal: DEFAULT_BRAND_SETTINGS.brand_teal,
+        brand_coral: DEFAULT_BRAND_SETTINGS.brand_coral,
+        brand_cream: DEFAULT_BRAND_SETTINGS.brand_cream,
+      },
+      voice_guidelines: {
+        cadence: DEFAULT_BRAND_SETTINGS.tone_guidelines.cadence,
+        forbidden_lexicon: DEFAULT_BRAND_SETTINGS.tone_guidelines.banned_lexicon,
+        allowed_proof: DEFAULT_BRAND_SETTINGS.tone_guidelines.allowed_proof_claims,
+      },
+      directives: directives.map(toDirectiveDTO),
+    });
+  } catch (error) {
+    return apiError(error, "Failed to build brand context");
+  }
 }

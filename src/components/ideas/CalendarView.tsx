@@ -1,19 +1,15 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { IdeaItem, AudienceLane } from "@/lib/types";
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Calendar as CalendarIcon, 
-  Clock, 
-  Sparkles, 
-  Plus, 
-  ArrowRight,
+import {
+  IdeaItem,
+} from "@/types";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
   Zap,
-  CheckCircle2,
   CalendarDays,
-  Tag
 } from "lucide-react";
 
 interface CalendarViewProps {

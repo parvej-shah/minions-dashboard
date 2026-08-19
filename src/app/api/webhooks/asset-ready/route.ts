@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiError } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { verifyWebhookSecret } from "@/lib/security";
 
@@ -13,8 +14,26 @@ export async function POST(request: Request) {
     const assetId = body.assetId || body.id || `ASSET-${Date.now()}`;
     const slug = body.slug || (body.title || "untitled-post").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
+    // One idea -> one asset. If this idea already produced one, the run is
+    // either a retry or a lost claim race, and the existing asset is updated in
+    // place. Creating a second row here would put two articles for the same idea
+    // into the review queue, which is what happened to IDEA-0010 and IDEA-0038.
+    const ideaId = body.ideaId || body.idea_id || null;
+    const existingForIdea = ideaId
+      ? await prisma.asset.findFirst({ where: { ideaId }, select: { id: true } })
+      : null;
+
+    if (existingForIdea && existingForIdea.id !== assetId) {
+      console.warn(
+        `[asset-ready] idea ${ideaId} already has asset ${existingForIdea.id}; ` +
+          `updating it in place instead of creating ${assetId}`
+      );
+    }
+
+    const targetId = existingForIdea?.id ?? assetId;
+
     const asset = await prisma.asset.upsert({
-      where: { id: assetId },
+      where: { id: targetId },
       update: {
         title: body.title,
         slug,
@@ -34,8 +53,8 @@ export async function POST(request: Request) {
         version: body.version || 1
       },
       create: {
-        id: assetId,
-        ideaId: body.ideaId || null,
+        id: targetId,
+        ideaId,
         title: body.title || "Untitled Post",
         slug,
         hook: body.hook || "",
@@ -55,20 +74,29 @@ export async function POST(request: Request) {
       }
     });
 
-    if (body.ideaId) {
+    if (ideaId) {
       await prisma.idea.update({
-        where: { id: body.ideaId },
+        where: { id: ideaId },
         data: {
           draftAssetId: asset.id,
           status: "REVIEW",
           queueOrder: null,
           updatedAt: new Date()
         }
-      }).catch((e) => console.warn(`Could not link idea ${body.ideaId}:`, e));
+      }).catch((e) => console.warn(`Could not link idea ${ideaId}:`, e));
     }
 
-    return NextResponse.json({ success: true, asset }, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: true,
+        asset,
+        // Tells the caller its new id was ignored, rather than silently
+        // returning a row it did not expect.
+        duplicate_prevented: Boolean(existingForIdea && existingForIdea.id !== assetId),
+      },
+      { status: existingForIdea ? 200 : 201 }
+    );
+  } catch (error) {
+    return apiError(error, "Webhook processing failed");
   }
 }

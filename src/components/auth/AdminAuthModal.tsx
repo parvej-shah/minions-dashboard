@@ -1,24 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { 
-  ShieldCheck, 
-  Lock, 
-  User, 
-  CheckCircle2, 
-  AlertCircle, 
-  LogOut, 
-  Key, 
-  Mail, 
-  Sparkles,
+import React, { useState } from "react";
+import {
+  Lock,
+  AlertCircle,
+  LogOut,
   ExternalLink,
   X,
-  RefreshCw,
   Database,
-  Check
+  Check,
 } from "lucide-react";
-import { supabaseClient } from "@/lib/supabase";
-import { signIn, signOut, useSession } from "next-auth/react";
+import {
+  signIn,
+} from "next-auth/react";
 
 export interface AdminUser {
   id?: string;
@@ -67,8 +61,10 @@ export default function AdminAuthModal({
     setAuthError(null);
     try {
       await signIn("google", { callbackUrl: "/" });
-    } catch (err: any) {
-      setAuthError(`Google OAuth Error: ${err.message || "Failed to initialize Google OAuth"}`);
+    } catch (err) {
+      setAuthError(
+        `Google OAuth Error: ${err instanceof Error ? err.message : "Failed to initialize Google OAuth"}`
+      );
       setIsProcessing(false);
     }
   };
@@ -98,8 +94,8 @@ export default function AdminAuthModal({
       onLogin(data.user);
       setIsProcessing(false);
       onClose();
-    } catch (err: any) {
-      setAuthError(`Network error: ${err.message}`);
+    } catch (err) {
+      setAuthError(`Network error: ${err instanceof Error ? err.message : "request failed"}`);
       setIsProcessing(false);
     }
   };

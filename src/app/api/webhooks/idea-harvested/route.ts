@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiError } from "@/lib/api-response";
 import { prisma } from "@/lib/prisma";
 import { verifyWebhookSecret } from "@/lib/security";
 
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true, idea: created }, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return apiError(error, "Webhook processing failed");
   }
 }

@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import DashboardShell from "@/components/layout/DashboardShell";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { PwaRegister } from "@/components/pwa/PwaRegister";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
@@ -57,7 +56,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased selection:bg-[#00C9A7]/20 selection:text-[#00C9A7] bg-[#070B0F] text-[#F1F5F9] min-h-screen">
         <AuthProvider>
-          <DashboardShell>{children}</DashboardShell>
+          {children}
           <PwaRegister />
           <InstallPrompt />
         </AuthProvider>

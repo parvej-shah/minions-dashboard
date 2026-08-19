@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { toClaimDTO } from "@/lib/mappers/asset";
+import { apiError } from "@/lib/api-response";
 
 export async function PATCH(
   request: Request,
@@ -17,9 +19,8 @@ export async function PATCH(
       },
     });
 
-    return NextResponse.json({ success: true, claim: updated });
+    return NextResponse.json({ success: true, claim: toClaimDTO(updated) });
   } catch (error) {
-    console.error("Error updating claim in Prisma:", error);
-    return NextResponse.json({ error: "Failed to update claim" }, { status: 500 });
+    return apiError(error, "Failed to update claim");
   }
 }

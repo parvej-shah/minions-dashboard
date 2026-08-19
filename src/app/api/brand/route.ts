@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
-import { fetchBrandSettings } from "@/lib/api";
+import { getBrandSettings } from "@/services/brand";
+import { apiError } from "@/lib/api-response";
 
 export async function GET() {
-  const brand = await fetchBrandSettings();
-  return NextResponse.json(brand);
-}
-
-export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    return NextResponse.json({ success: true, ...body, updated_at: new Date().toISOString() });
+    return NextResponse.json(await getBrandSettings());
   } catch (error) {
-    return NextResponse.json({ error: "Failed to update brand settings" }, { status: 500 });
+    return apiError(error, "Failed to fetch brand settings");
   }
 }

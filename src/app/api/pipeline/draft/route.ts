@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-
-const DRAFT_WEBHOOK = "https://n8n.getminions.ai/webhook/test-idea-to-asset";
+import { prisma } from "@/lib/prisma";
+import { apiFailure } from "@/lib/api-response";
+import { triggerN8nWorkflow } from "@/services/pipeline";
 
 /**
  * Triggers the live 02_idea_to_asset workflow in n8n.
@@ -10,58 +11,62 @@ const DRAFT_WEBHOOK = "https://n8n.getminions.ai/webhook/test-idea-to-asset";
  * (roughly 150s later), so the caller should poll /api/assets for the result.
  */
 export async function POST(request: Request) {
-  let body: Record<string, unknown> = {};
-  try {
-    body = await request.json();
-  } catch {
-    // an empty body is valid: the workflow picks the next available idea itself
-  }
+  // An empty body is valid: the workflow picks the next available idea itself.
+  const body = await request.json().catch(() => ({} as Record<string, unknown>));
+  const ideaId = (body.idea_id as string | null) ?? null;
 
-  try {
-    const res = await fetch(DRAFT_WEBHOOK, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        idea_id: body.idea_id ?? null,
-        title: body.title ?? null,
-        audience: body.audience ?? null,
-        trade: body.target_trade ?? null,
-        trigger_source: "MINIONS_COCKPIT_EDITORIAL",
-        timestamp: new Date().toISOString()
-      })
-    });
+  // One idea -> one asset. n8n's own Select Target refuses an idea that already
+  // carries a draft_asset_id, but that check runs a minute into the workflow and
+  // only covers the ideas table. Refusing here means a double-click, a stale tab,
+  // or a retry never even starts a second run, and the operator gets told why.
+  if (ideaId) {
+    const [idea, existingAsset] = await Promise.all([
+      prisma.idea.findUnique({
+        where: { id: ideaId },
+        select: { id: true, draftAssetId: true, status: true },
+      }),
+      prisma.asset.findFirst({
+        where: { ideaId },
+        select: { id: true, title: true },
+      }),
+    ]);
 
-    if (!res.ok) {
-      const detail = await res.text().catch(() => "");
-      return NextResponse.json(
-        {
-          success: false,
-          n8n_connected: false,
-          n8n_endpoint: DRAFT_WEBHOOK,
-          message: `The drafting pipeline did not accept the request (HTTP ${res.status}). Check that 02_idea_to_asset is active in n8n.`,
-          detail: detail.slice(0, 500)
-        },
-        { status: 502 }
+    if (!idea) {
+      return apiFailure(`Idea ${ideaId} does not exist.`, 404);
+    }
+
+    const assetId = existingAsset?.id ?? idea.draftAssetId;
+    if (assetId) {
+      return apiFailure(
+        `This idea already has a draft (asset ${assetId}). Delete that asset first if you want to draft it again.`,
+        409
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      n8n_connected: true,
-      n8n_endpoint: DRAFT_WEBHOOK,
-      requested_idea_id: body.idea_id ?? null,
-      message: "Drafting run started. The finished draft appears in the Editorial Studio in about three minutes."
-    });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json(
-      {
-        success: false,
-        n8n_connected: false,
-        n8n_endpoint: DRAFT_WEBHOOK,
-        message: `Could not reach n8n: ${message}`
-      },
-      { status: 502 }
-    );
+    if (idea.status === "PICKED") {
+      return apiFailure(
+        "A drafting run already claimed this idea and is still working on it. Wait for it to finish, or reset the claim from the Idea Stream.",
+        409
+      );
+    }
   }
+
+  const { result, status } = await triggerN8nWorkflow(
+    "draft",
+    {
+      idea_id: ideaId,
+      title: body.title ?? null,
+      audience: body.audience ?? null,
+      trade: body.target_trade ?? null,
+      trigger_source: "MINIONS_COCKPIT_EDITORIAL",
+    },
+    {
+      failure:
+        "The drafting pipeline did not accept the request. Check that 02_idea_to_asset is active in n8n",
+      success:
+        "Drafting run started. The finished draft appears in the Editorial Studio in about three minutes.",
+    }
+  );
+
+  return NextResponse.json({ ...result, requested_idea_id: ideaId }, { status });
 }
