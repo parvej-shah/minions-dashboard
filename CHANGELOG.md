@@ -3,6 +3,25 @@
 All notable changes to the Minions content pipeline (n8n workflows: `01_idea_harvester`,
 `02_idea_to_asset`, `03_review_publisher`) and the Cockpit dashboard are logged here.
 
+## 2026-08-19 (made company info, voice guidelines, and colors editable and Supabase-synced)
+
+### Added
+- **New `brand_profile` Supabase table + Prisma model**, and a new **Brand Profile tab**
+  (now the default tab) on `/brand`. Company name, domain, positioning, primary logo URL,
+  voice guidelines (formality, cadence, allowed proof claims), and the 5 color tokens were
+  previously hardcoded constants in `lib/api.ts`/`constants/brand.ts` with a no-op `POST
+  /api/brand` stub that silently discarded edits. They're now a real singleton row,
+  editable from the dashboard and persisted through `GET/POST /api/brand`
+  (`getBrandSettings()` / `updateBrandSettings()` in `services/brand.ts`).
+- `api/brand/context` (the endpoint documented as feeding the n8n drafting pipeline) now
+  reads through the same `getBrandSettings()` service instead of the old hardcoded
+  constants, so it can no longer drift from what's edited in the Brand Profile tab. Note:
+  `02_idea_to_asset`'s "Read Brand" node still queries `brand_directives` directly via
+  Supabase REST and does not call this endpoint — directives were already live-synced;
+  only company info/voice/colors were newly wired up.
+- Out of scope for this pass (left as static hardcoded values, unchanged): the banned-word
+  lexicon list and the Logos & Mascots tab's mascot/social-template catalogues.
+
 ## 2026-08-18 (rewrote live posts' takeaways; found and fixed a publish-date regression bug)
 
 ### Changed

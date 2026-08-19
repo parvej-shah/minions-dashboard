@@ -97,6 +97,25 @@ model Claim {
   @@map("claims")
 }
 
+model BrandProfile {
+  id                 String   @id @default("BRAND-MINIONS-01")
+  brandName          String   @default("getminions.ai") @map("brand_name")
+  companyDomain      String   @default("getminions.ai") @map("company_domain")
+  positioning        String   @db.Text
+  primaryLogoUrl     String   @map("primary_logo_url")
+  primaryInk         String   @map("primary_ink")
+  brandTeal          String   @map("brand_teal")
+  brandCoral         String   @map("brand_coral")
+  brandCream         String   @map("brand_cream")
+  accentBlue         String   @map("accent_blue")
+  toneFormality      String   @default("tactile_operator") @map("tone_formality")
+  toneCadence        String   @db.Text @map("tone_cadence")
+  allowedProofClaims String[] @default([]) @map("allowed_proof_claims")
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("brand_profile")
+}
+
 model BrandDirective {
   id            String   @id // e.g. "DIR-001"
   category      String

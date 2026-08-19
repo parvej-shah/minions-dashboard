@@ -285,63 +285,19 @@ export default function VisualsTab({
         </div>
       </div>
 
-      {/* Official Brand Color Tokens */}
-      <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
-            <Palette className="w-4 h-4 text-[#00C9A7]" />
-            Official Brand Color Palette Tokens
-          </h3>
-          <span className="text-xs font-mono text-[#94A3B8]">Minions Design System Tokens</span>
+      {/* Color tokens moved to the editable Brand Profile tab */}
+      <button
+        onClick={() => setActiveTab("profile")}
+        className="w-full p-4 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] hover:border-[#00C9A7]/40 flex items-center justify-between text-left transition-all group"
+      >
+        <div className="flex items-center gap-2">
+          <Palette className="w-4 h-4 text-[#00C9A7]" />
+          <span className="text-sm font-bold text-[#F1F5F9] group-hover:text-[#00C9A7] transition-colors">
+            Color palette tokens are now editable in the Brand Profile tab
+          </span>
         </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-          <div className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-2">
-            <div className="h-12 rounded-lg bg-[#12242a] border border-[#1F2D3D] shadow-inner" />
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-[#F1F5F9]">Deep Slate Ink</span>
-              <code className="text-[#00C9A7] font-mono text-[11px]">#12242a</code>
-            </div>
-            <div className="text-[10px] text-[#64748B]">Primary Dark Background</div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-2">
-            <div className="h-12 rounded-lg bg-[#0e5c63] border border-[#1F2D3D] shadow-inner" />
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-[#F1F5F9]">Brand Teal</span>
-              <code className="text-[#00C9A7] font-mono text-[11px]">#0e5c63</code>
-            </div>
-            <div className="text-[10px] text-[#64748B]">Primary Brand Accent</div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-2">
-            <div className="h-12 rounded-lg bg-[#ff6b4a] border border-[#1F2D3D] shadow-inner" />
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-[#F1F5F9]">Vibrant Coral</span>
-              <code className="text-[#00C9A7] font-mono text-[11px]">#ff6b4a</code>
-            </div>
-            <div className="text-[10px] text-[#64748B]">.ai Domain Dot & CTAs</div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-2">
-            <div className="h-12 rounded-lg bg-[#fff8f0] border border-[#1F2D3D] shadow-inner" />
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-[#12242a] bg-white px-1.5 py-0.5 rounded">Cream Canvas</span>
-              <code className="text-[#00C9A7] font-mono text-[11px]">#fff8f0</code>
-            </div>
-            <div className="text-[10px] text-[#64748B]">Light Contrast Surfaces</div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-2">
-            <div className="h-12 rounded-lg bg-[#3a6ea5] border border-[#1F2D3D] shadow-inner" />
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-[#F1F5F9]">Electric Blue</span>
-              <code className="text-[#00C9A7] font-mono text-[11px]">#3a6ea5</code>
-            </div>
-            <div className="text-[10px] text-[#64748B]">Telemetry & Benchmarks</div>
-          </div>
-        </div>
-      </div>
+        <span className="text-xs font-mono text-[#00C9A7] font-bold">Edit Colors →</span>
+      </button>
     </div>
   );
 }

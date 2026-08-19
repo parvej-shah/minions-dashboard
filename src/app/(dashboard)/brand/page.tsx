@@ -12,8 +12,9 @@ import {
   Plus,
   Trash2,
   Share2,
+  Settings2,
 } from "lucide-react";
-import { BrandDirectiveItem, BrandCategory, AudienceScope } from "@/types";
+import { BrandDirectiveItem, BrandCategory, AudienceScope, BrandTab } from "@/types";
 import {
   CATEGORIES,
   SOCIAL_TEMPLATES,
@@ -23,11 +24,12 @@ import VisualsTab from "@/components/brand/VisualsTab";
 import MascotsTab from "@/components/brand/MascotsTab";
 import SocialTemplatesTab from "@/components/brand/SocialTemplatesTab";
 import LexiconTab from "@/components/brand/LexiconTab";
+import ProfileTab from "@/components/brand/ProfileTab";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 
 export default function BrandStudioPage() {
-  const [activeTab, setActiveTab] = useState<"visuals" | "mascots" | "social" | "directives" | "lexicon">("visuals");
+  const [activeTab, setActiveTab] = useState<BrandTab>("profile");
   const {
     data: directives,
     isLoading: directivesLoading,
@@ -167,6 +169,17 @@ export default function BrandStudioPage() {
         {/* Primary Tab Switcher */}
         <div className="flex flex-wrap items-center bg-[#0F1419] p-1 rounded-xl border border-[#1F2D3D] self-start md:self-auto gap-1 max-w-full overflow-x-auto">
           <button
+            onClick={() => setActiveTab("profile")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === "profile"
+                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
+                : "text-[#94A3B8] hover:text-[#F1F5F9]"
+            }`}
+          >
+            <Settings2 className="w-3.5 h-3.5" />
+            Brand Profile
+          </button>
+          <button
             onClick={() => setActiveTab("directives")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "directives"
@@ -212,6 +225,11 @@ export default function BrandStudioPage() {
           </button>
         </div>
       </div>
+
+      {/* ======================================================== */}
+      {/* TAB 0: BRAND PROFILE (company info, voice, colors, logo) */}
+      {/* ======================================================== */}
+      {activeTab === "profile" && <ProfileTab />}
 
       {/* ======================================================== */}
       {/* TAB 1: VISUALS & LOGO STUDIO */}

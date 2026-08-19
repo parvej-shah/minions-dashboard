@@ -28,6 +28,8 @@ export interface BrandSettings {
   id: string;
   brand_name: string;
   company_domain: string;
+  positioning: string;
+  primary_logo_url: string;
   primary_ink: string;
   brand_teal: string;
   brand_coral: string;
@@ -48,6 +50,22 @@ export interface BrandSettings {
   };
   directives?: BrandDirectiveItem[];
   updated_at: string;
+}
+
+/** Fields editable from the Brand Profile tab, persisted to `brand_profile`. */
+export interface BrandProfileInput {
+  brand_name: string;
+  company_domain: string;
+  positioning: string;
+  primary_logo_url: string;
+  primary_ink: string;
+  brand_teal: string;
+  brand_coral: string;
+  brand_cream: string;
+  accent_blue: string;
+  tone_formality: "technical_direct" | "tactile_operator" | "conversational_peer";
+  tone_cadence: string;
+  allowed_proof_claims: string[];
 }
 
 /** A mascot rendered on the Brand Studio mascots tab. */
@@ -78,4 +96,4 @@ export interface SocialTemplateItem {
 }
 
 /** Tabs of the Brand Studio. */
-export type BrandTab = "visuals" | "mascots" | "social" | "directives" | "lexicon";
+export type BrandTab = "visuals" | "mascots" | "social" | "directives" | "lexicon" | "profile";

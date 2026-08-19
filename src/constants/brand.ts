@@ -1,15 +1,38 @@
 import type { BrandSettings } from "@/types";
+import { BRAND_POSITIONING, PRIMARY_LOGO_URL } from "@/constants/config";
 
 /**
- * Brand settings served by /api/brand when no override is stored.
+ * Forbidden-word list for the drafting pipeline's voice prompt.
  *
- * These are configuration, not sample data: they describe the actual brand and
- * are the values the drafting pipeline reads.
+ * Not stored in `brand_profile` / not editable from the Brand Profile tab —
+ * out of scope until the Brand Studio Lexicon tab is wired to persist.
+ */
+export const STATIC_BANNED_LEXICON = [
+  "seamless",
+  "game-changing",
+  "revolutionize",
+  "unlock",
+  "synergy",
+  "delve",
+  "testament",
+  "tapestry",
+  "in today's fast-paced world",
+  "the future of",
+  "🚀",
+];
+
+/**
+ * Brand settings served by /api/brand when no `brand_profile` row is stored yet.
+ *
+ * Once a row exists in the database, these values are only the seed used to
+ * create it — the database is the source of truth from then on.
  */
 export const DEFAULT_BRAND_SETTINGS: Omit<BrandSettings, "directives" | "updated_at"> = {
   id: "BRAND-MINIONS-01",
   brand_name: "getminions.ai",
   company_domain: "getminions.ai",
+  positioning: BRAND_POSITIONING,
+  primary_logo_url: PRIMARY_LOGO_URL,
   primary_ink: "#12242A",
   brand_teal: "#0E5C63",
   brand_coral: "#FF6B4A",
@@ -19,19 +42,7 @@ export const DEFAULT_BRAND_SETTINGS: Omit<BrandSettings, "directives" | "updated
     formality: "tactile_operator",
     cadence:
       "1–3 sentence paragraphs, zero marketing fluff, Stripe/Linear engineering rigor",
-    banned_lexicon: [
-      "seamless",
-      "game-changing",
-      "revolutionize",
-      "unlock",
-      "synergy",
-      "delve",
-      "testament",
-      "tapestry",
-      "in today's fast-paced world",
-      "the future of",
-      "🚀",
-    ],
+    banned_lexicon: STATIC_BANNED_LEXICON,
     allowed_proof_claims: [
       "Live callable AI voice dispatcher demo",
       "Deterministic JSON schema validation pipeline",
