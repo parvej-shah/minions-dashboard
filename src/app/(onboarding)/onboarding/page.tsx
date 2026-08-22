@@ -45,11 +45,7 @@ export default function OnboardingLanding() {
         await update(); // force the JWT to pick up the new clientId
       }
 
-      const checkout = await apiClient.post<{ configured: boolean; redirect_url: string }>(
-        "/api/onboarding/checkout",
-        { plan_key: selectedPlan }
-      );
-      router.push(checkout.redirect_url);
+      router.push("/onboarding/setup");
     } catch (err) {
       setError(toErrorMessage(err, "Something went wrong. Try again."));
     } finally {

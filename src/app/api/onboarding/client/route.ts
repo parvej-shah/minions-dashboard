@@ -17,10 +17,13 @@ function slugify(name: string): string {
 /**
  * Creates the Client for a signed-in-but-unattached user (clientId: null —
  * only reachable via the onboarding wizard, see src/lib/auth.ts's signIn
- * callback). Client starts in TRIAL status; Stripe's webhook (once
- * configured) is what flips it to ACTIVE. The caller must call
- * useSession().update() after this succeeds so their JWT picks up the new
- * clientId — see the jwt callback's `trigger === "update"` branch.
+ * callback). No billing is wired up yet, so the Client goes straight to
+ * ACTIVE — plan_key is only validated here (must be a real PLANS entry),
+ * not persisted anywhere yet; a real billing integration will need its own
+ * Subscription row keyed by plan_key when that lands. The caller must call
+ * useSession().update()
+ * after this succeeds so their JWT picks up the new clientId — see the jwt
+ * callback's `trigger === "update"` branch.
  */
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -45,7 +48,7 @@ export async function POST(request: Request) {
     }
 
     const client = await prisma.client.create({
-      data: { name, slug, status: "TRIAL" },
+      data: { name, slug, status: "ACTIVE" },
     });
 
     await prisma.user.update({
