@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getBrandSettings } from "@/services/brand";
+import { getBrandSettings, getWriterVoiceConfig } from "@/services/brand";
 import { BLOG_BASE_URL } from "@/constants/config";
 import { apiError, apiFailure } from "@/lib/api-response";
 
@@ -20,7 +20,10 @@ export async function GET(request: Request) {
   }
 
   try {
-    const brand = await getBrandSettings(clientId);
+    const [brand, voiceConfig] = await Promise.all([
+      getBrandSettings(clientId),
+      getWriterVoiceConfig(clientId),
+    ]);
 
     return NextResponse.json({
       company_name: brand.brand_name,
@@ -41,6 +44,11 @@ export async function GET(request: Request) {
       directives: (brand.directives ?? [])
         .filter((d) => d.is_active)
         .sort((a, b) => a.priority - b.priority),
+      // Consumed by the Writer prompt (few-shot voice match) and the claims
+      // gate (per-tenant CUSTOMER_RESULT override) in 02_idea_to_asset.
+      tone_questionnaire: voiceConfig.toneQuestionnaire,
+      tone_examples: voiceConfig.toneExamples,
+      allow_customer_result_claims: voiceConfig.allowCustomerResultClaims,
     });
   } catch (error) {
     return apiError(error, "Failed to build brand context");

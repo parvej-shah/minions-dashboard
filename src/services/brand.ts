@@ -35,6 +35,35 @@ export async function getBrandSettings(clientId: string): Promise<BrandSettings>
   };
 }
 
+export interface WriterVoiceConfig {
+  toneQuestionnaire: unknown;
+  toneExamples: string[];
+  allowCustomerResultClaims: boolean;
+}
+
+/**
+ * The fields the n8n Writer/claims-gate steps need that the Brand Studio DTO
+ * doesn't carry: the structured tone questionnaire, raw few-shot example
+ * posts, and the claims-gate's CUSTOMER_RESULT override. Kept separate from
+ * `getBrandSettings()` / `BrandSettings` so the Brand Studio UI's contract
+ * doesn't have to grow fields it doesn't use yet.
+ */
+export async function getWriterVoiceConfig(clientId: string): Promise<WriterVoiceConfig> {
+  const [profile, examples] = await Promise.all([
+    prisma.brandProfile.findUnique({
+      where: { clientId },
+      select: { toneQuestionnaire: true, allowCustomerResultClaims: true },
+    }),
+    prisma.toneExample.findMany({ where: { clientId }, orderBy: { createdAt: "asc" } }),
+  ]);
+
+  return {
+    toneQuestionnaire: profile?.toneQuestionnaire ?? null,
+    toneExamples: examples.map((e) => e.content),
+    allowCustomerResultClaims: profile?.allowCustomerResultClaims ?? false,
+  };
+}
+
 /** Upserts the tenant's `brand_profile` row from the Brand Profile tab. */
 export async function updateBrandSettings(
   clientId: string,
