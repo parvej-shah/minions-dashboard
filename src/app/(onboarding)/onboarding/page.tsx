@@ -6,6 +6,26 @@ import { useRouter } from "next/navigation";
 import { PLANS, type PlanKey } from "@/constants/plans";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 
+const DRAFT_KEY = "minions_onboarding_draft";
+
+interface OnboardingDraft {
+  companyName?: string;
+  selectedPlan?: PlanKey;
+}
+
+/** Reads and clears the pre-redirect draft. Read once, at initial render — see the component doc comment. */
+function readAndClearDraft(): OnboardingDraft {
+  if (typeof window === "undefined") return {};
+  const saved = sessionStorage.getItem(DRAFT_KEY);
+  if (!saved) return {};
+  sessionStorage.removeItem(DRAFT_KEY);
+  try {
+    return JSON.parse(saved) as OnboardingDraft;
+  } catch {
+    return {};
+  }
+}
+
 /**
  * Onboarding landing + plan picker.
  *
@@ -13,12 +33,23 @@ import { apiClient, toErrorMessage } from "@/lib/api-client";
  * (proxy.ts redirects here mid-flow). Picking a plan while signed out
  * triggers Google sign-in first (via /api/onboarding/begin's pending-signup
  * cookie), then re-lands here already authenticated to create the Client.
+ *
+ * signIn() does a full-page navigation to Google and back — this component
+ * unmounts and remounts, so companyName/selectedPlan are saved to
+ * sessionStorage right before that redirect and restored on the next mount.
+ * Confirmed live before this fix: typing a name, picking a plan, and
+ * completing Google sign-in landed back here with both silently reset to
+ * blank/default, forcing a re-type for no reason.
  */
 export default function OnboardingLanding() {
   const { data: session, status, update } = useSession();
   const router = useRouter();
-  const [companyName, setCompanyName] = useState("");
-  const [selectedPlan, setSelectedPlan] = useState<PlanKey>("growth");
+  // Read once, on mount only — useState's lazy initializer never re-runs, and
+  // readAndClearDraft() clears sessionStorage as a side effect of reading it,
+  // so a second independent call here would find nothing.
+  const [draft] = useState(readAndClearDraft);
+  const [companyName, setCompanyName] = useState(draft.companyName ?? "");
+  const [selectedPlan, setSelectedPlan] = useState<PlanKey>(draft.selectedPlan ?? "growth");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,6 +63,7 @@ export default function OnboardingLanding() {
     setSubmitting(true);
     try {
       if (status !== "authenticated") {
+        sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ companyName, selectedPlan }));
         await fetch("/api/onboarding/begin", { method: "POST" });
         await signIn("google", { callbackUrl: "/onboarding" });
         return; // page reloads after OAuth round trip
