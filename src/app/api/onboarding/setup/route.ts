@@ -27,6 +27,11 @@ export async function POST(request: Request) {
     }
     const validChannels = channels.filter((c) => ["blog", "facebook", "linkedin", "x"].includes(c));
 
+    const client = await prisma.client.findUnique({
+      where: { id: ctx.clientId },
+      select: { name: true },
+    });
+
     await prisma.brandProfile.upsert({
       where: { clientId: ctx.clientId },
       update: { positioning: icpDescription },
@@ -46,10 +51,12 @@ export async function POST(request: Request) {
       },
     });
 
-    const existingCount = await prisma.brandDirective.count();
+    // Random ids, not a sequential count -- a global brand_directives count
+    // race-conditions across concurrent onboardings (two tenants signing up
+    // at once could compute the same next id and collide on the primary key).
     await prisma.brandDirective.create({
       data: {
-        id: `DIR-${String(existingCount + 1).padStart(3, "0")}`,
+        id: `DIR-${crypto.randomUUID()}`,
         clientId: ctx.clientId,
         category: "ICP_PROFILE",
         ruleKey: "icp_description",
@@ -59,6 +66,21 @@ export async function POST(request: Request) {
         isActive: true,
       },
     });
+
+    if (client?.name) {
+      await prisma.brandDirective.create({
+        data: {
+          id: `DIR-${crypto.randomUUID()}`,
+          clientId: ctx.clientId,
+          category: "IDENTITY",
+          ruleKey: "company_name",
+          instruction: client.name,
+          priority: 1,
+          audienceScope: "ALL",
+          isActive: true,
+        },
+      });
+    }
 
     await Promise.all(
       validChannels.map((channelKey) =>
