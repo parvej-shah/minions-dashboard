@@ -184,6 +184,8 @@ model Asset {
   publishedUrls       String?   @map("published_urls")
   facebookPostId      String?   @map("facebook_post_id")
   facebookPublishedAt DateTime? @map("facebook_published_at")
+  linkedinPostId      String?   @map("linkedin_post_id")
+  linkedinPublishedAt DateTime? @map("linkedin_published_at")
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at")
 
