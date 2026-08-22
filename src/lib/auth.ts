@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { requireOneOfEnv } from "./env";
 import { prisma } from "./prisma";
+import { consumePendingSignup } from "./onboarding";
 import type { UserRole } from "@/constants/access";
 
 /**
@@ -30,25 +31,41 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
       if (!user?.email) return false;
       const cleanEmail = user.email.trim().toLowerCase();
 
-      // Membership, not a whitelist: sign-in succeeds only for an email that
-      // already has a `User` row. Self-serve signup creates that row during
-      // onboarding (Stripe checkout success), not here — this callback must
-      // never auto-provision a tenant just because someone completed Google
-      // OAuth, or any Google account could silently become a new tenant.
+      // Membership, not a whitelist: sign-in succeeds for an email that
+      // already has a `User` row, OR for a brand new email arriving via the
+      // onboarding wizard specifically (src/lib/onboarding.ts's signed
+      // cookie, set only when the user clicked "Start free trial"). Without
+      // that cookie check, any Google account hitting /login could silently
+      // provision itself a bare User row.
       const dbUser = await prisma.user.findUnique({ where: { email: cleanEmail } });
-      if (!dbUser) {
+      if (dbUser) return true;
+
+      const isPendingSignup = await consumePendingSignup().catch(() => false);
+      if (!isPendingSignup) {
         console.warn(`[NextAuth] Sign-in blocked, no User row for: ${cleanEmail}`);
         return false;
       }
+
+      // clientId stays null until the onboarding wizard's plan-selection
+      // step creates a Client and attaches it — see /api/onboarding/client.
+      await prisma.user.create({
+        data: { email: cleanEmail, name: user.name ?? null, role: "MEMBER" },
+      });
       return true;
     },
-    async jwt({ token, user }) {
-      // `user` is only present on the sign-in request itself; every
-      // subsequent request just carries the token, so the DB lookup happens
-      // once per session, not once per request.
-      if (user?.email) {
+    async jwt({ token, user, trigger }) {
+      // `user` is only present on the sign-in request itself, so the DB
+      // lookup normally happens once per session, not once per request.
+      // `trigger === "update"` is the exception: the onboarding wizard calls
+      // the client-side `update()` from useSession() right after attaching a
+      // Client to this user (see /api/onboarding/client), specifically to
+      // force this callback to re-run and pick up the new clientId — without
+      // it the JWT would keep serving the stale clientId: null it was issued
+      // with at sign-in, for the rest of the session's lifetime.
+      const email = user?.email ?? (token.email as string | undefined);
+      if ((user?.email || trigger === "update") && email) {
         const dbUser = await prisma.user.findUnique({
-          where: { email: user.email.trim().toLowerCase() },
+          where: { email: email.trim().toLowerCase() },
         });
         if (dbUser) {
           token.id = dbUser.id;

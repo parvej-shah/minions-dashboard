@@ -15,9 +15,15 @@ import type { NextFetchEvent, NextMiddleware, NextRequest } from "next/server";
 const gateHandler = auth((req) => {
   const { pathname } = req.nextUrl;
 
-  // 1. Always allow auth endpoints, webhooks, login page, and static public assets
+  // 1. Always allow auth endpoints, webhooks, login page, static public
+  // assets, and the onboarding wizard. Onboarding has to be reachable by
+  // both a signed-out visitor (the signup landing) and a signed-in user with
+  // no clientId yet (mid-flow) — its own pages/routes handle whatever auth
+  // state they need, rather than the blanket gates below.
   if (
     pathname.startsWith("/login") ||
+    pathname.startsWith("/onboarding") ||
+    pathname.startsWith("/api/onboarding") ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/webhooks") ||
     pathname.startsWith("/_next") ||
@@ -75,17 +81,13 @@ const gateHandler = auth((req) => {
   }
 
   // 4. Tenant gate: a logged-in user with no clientId and who isn't platform
-  // staff has nowhere to go yet. Reachable today only if a User row somehow
-  // has clientId: null and role !== SYSTEM_ADMIN — signIn() in src/lib/auth.ts
-  // only allows emails that already have a User row, so this is a defensive
-  // check, not the normal path. Once Phase 4's self-serve onboarding wizard
-  // exists, this should redirect to /onboarding instead of blocking.
+  // staff hasn't finished onboarding yet (self-serve signup creates the User
+  // row with clientId: null; the onboarding wizard's plan-selection step is
+  // what attaches a Client). Send them there instead of into the dashboard.
   const sessionUser = req.auth?.user;
   const isPlatformStaff = sessionUser?.clientId === null && sessionUser?.role === "SYSTEM_ADMIN";
   if (sessionUser && !sessionUser.clientId && !isPlatformStaff) {
-    const loginUrl = new URL("/login", req.nextUrl.origin);
-    loginUrl.searchParams.set("error", "NoTenant");
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(new URL("/onboarding", req.nextUrl.origin));
   }
 
   return NextResponse.next();
