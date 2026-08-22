@@ -25,6 +25,7 @@ const gateHandler = auth(async (req) => {
     pathname.startsWith("/login") ||
     pathname.startsWith("/onboarding") ||
     pathname.startsWith("/api/onboarding") ||
+    pathname.startsWith("/api/admin/migrate-linkedin") ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/webhooks") ||
     pathname.startsWith("/_next") ||
