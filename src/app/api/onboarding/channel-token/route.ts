@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
     const { data: secretId, error } = await getSupabaseAdmin().rpc("create_channel_secret", {
       secret: token,
-      name: `${ctx.clientId}:${channel}`,
+      name: `${ctx.clientId}:${channel}:${Date.now()}`,
     });
     if (error) throw new Error(error.message);
 
