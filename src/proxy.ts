@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import type { NextFetchEvent, NextMiddleware, NextRequest } from "next/server";
 
@@ -12,7 +13,7 @@ import type { NextFetchEvent, NextMiddleware, NextRequest } from "next/server";
  * promise is created once here and awaited per request; it resolves once and the
  * per-request config resolution happens inside next-auth either way.
  */
-const gateHandler = auth((req) => {
+const gateHandler = auth(async (req) => {
   const { pathname } = req.nextUrl;
 
   // 1. Always allow auth endpoints, webhooks, login page, static public
@@ -84,10 +85,22 @@ const gateHandler = auth((req) => {
   // staff hasn't finished onboarding yet (self-serve signup creates the User
   // row with clientId: null; the onboarding wizard's plan-selection step is
   // what attaches a Client). Send them there instead of into the dashboard.
+  //
+  // The JWT's own clientId can be stale here: it's only refreshed on sign-in
+  // or an explicit client-side update() call, and that update() trigger
+  // proved unreliable in this NextAuth beta (confirmed live — a session
+  // could still read clientId: null well after the DB had the real value).
+  // A DB re-check only runs in this one branch, i.e. only for a session that
+  // looks tenant-less — everyone else's page loads stay JWT-only and fast.
   const sessionUser = req.auth?.user;
   const isPlatformStaff = sessionUser?.clientId === null && sessionUser?.role === "SYSTEM_ADMIN";
   if (sessionUser && !sessionUser.clientId && !isPlatformStaff) {
-    return NextResponse.redirect(new URL("/onboarding", req.nextUrl.origin));
+    const freshUser = await prisma.user
+      .findUnique({ where: { id: sessionUser.id }, select: { clientId: true } })
+      .catch(() => null);
+    if (!freshUser?.clientId) {
+      return NextResponse.redirect(new URL("/onboarding", req.nextUrl.origin));
+    }
   }
 
   return NextResponse.next();
