@@ -13,6 +13,12 @@ import { requireClientId } from "@/lib/tenant";
  * stored in Postgres — it's written into Supabase Vault (see
  * phase3_vault_setup.sql) and only the vault secret id is kept, as
  * ClientChannel.credentialRef.
+ *
+ * For channel="blog", "token" holds a webhook URL instead of an access
+ * token: 03_review_publisher POSTs the published asset there directly
+ * (their WordPress site, Zapier/Make hook, custom endpoint, etc.) instead
+ * of writing into our own hosted blogs table, so their content lands on
+ * their own domain, not ours.
  */
 export async function POST(request: Request) {
   const ctx = await requireClientId();
@@ -24,11 +30,14 @@ export async function POST(request: Request) {
     const token = (body.token || "").toString().trim();
     const externalId = (body.external_id || "").toString().trim() || null;
 
-    if (!["facebook", "linkedin", "x"].includes(channel)) {
-      return apiFailure("channel must be one of: facebook, linkedin, x", 400);
+    if (!["facebook", "linkedin", "x", "blog"].includes(channel)) {
+      return apiFailure("channel must be one of: facebook, linkedin, x, blog", 400);
     }
     if (!token) {
-      return apiFailure("token is required", 400);
+      return apiFailure(channel === "blog" ? "webhook URL is required" : "token is required", 400);
+    }
+    if (channel === "blog" && !/^https:\/\/.+/.test(token)) {
+      return apiFailure("webhook URL must start with https://", 400);
     }
 
     const { data: secretId, error } = await getSupabaseAdmin().rpc("create_channel_secret", {

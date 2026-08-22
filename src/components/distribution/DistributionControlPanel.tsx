@@ -20,12 +20,17 @@ interface DistributionControlPanelProps {
 }
 
 /**
- * Inline token-paste form for one non-blog channel.
+ * Inline token-paste form for one channel.
  *
  * Standing in for an OAuth "Connect" button until there's a verified
  * Facebook/LinkedIn developer app (see channel-token/route.ts). Lets an
  * *existing* tenant add or rotate a credential after onboarding — the
  * onboarding wizard only offers this once, at signup.
+ *
+ * Blog is a webhook URL, not an access token + page/org id — 03_review_publisher
+ * POSTs the published asset directly to the tenant's own site/CMS/Zapier hook
+ * instead of writing into our own hosted blogs table, so their content lands
+ * on their own domain.
  */
 function ChannelCredentialForm({
   channel,
@@ -34,6 +39,7 @@ function ChannelCredentialForm({
   channel: DistributionChannelConfig;
   onSaved: () => void;
 }) {
+  const isBlog = channel.key === "blog";
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState("");
   const [externalId, setExternalId] = useState(channel.external_id ?? "");
@@ -42,7 +48,7 @@ function ChannelCredentialForm({
 
   async function handleSave() {
     if (!token.trim()) {
-      setError("Paste a token first.");
+      setError(isBlog ? "Paste your webhook URL first." : "Paste a token first.");
       return;
     }
     setSaving(true);
@@ -78,17 +84,19 @@ function ChannelCredentialForm({
 
   return (
     <div className="space-y-2 pt-1" onClick={(e) => e.stopPropagation()}>
+      {!isBlog && (
+        <input
+          value={externalId}
+          onChange={(e) => setExternalId(e.target.value)}
+          placeholder="Page / org ID (e.g. Facebook Page ID)"
+          className="w-full rounded-lg bg-[#070B0F] border border-[#1F2D3D] px-3 py-1.5 text-[11px] font-mono text-[#F1F5F9] placeholder:text-[#475569] focus:outline-none focus:border-[#00C9A7]"
+        />
+      )}
       <input
-        value={externalId}
-        onChange={(e) => setExternalId(e.target.value)}
-        placeholder="Page / org ID (e.g. Facebook Page ID)"
-        className="w-full rounded-lg bg-[#070B0F] border border-[#1F2D3D] px-3 py-1.5 text-[11px] font-mono text-[#F1F5F9] placeholder:text-[#475569] focus:outline-none focus:border-[#00C9A7]"
-      />
-      <input
-        type="password"
+        type={isBlog ? "url" : "password"}
         value={token}
         onChange={(e) => setToken(e.target.value)}
-        placeholder="Access token"
+        placeholder={isBlog ? "https://yoursite.com/webhook/..." : "Access token"}
         className="w-full rounded-lg bg-[#070B0F] border border-[#1F2D3D] px-3 py-1.5 text-[11px] font-mono text-[#F1F5F9] placeholder:text-[#475569] focus:outline-none focus:border-[#00C9A7]"
       />
       {error && <p className="text-[11px] text-[#ff6b4a]">{error}</p>}
@@ -342,19 +350,25 @@ export function DistributionControlPanel({ compact = false, onChannelChange }: D
                 </span>
               </div>
 
-              {/* Credential connection (blog needs none — it publishes to our own site) */}
-              {ch.key !== "blog" && (
-                <div className="pt-2 border-t border-[#1F2D3D]/40">
-                  <div className="flex items-center justify-between mb-1">
-                    <span
-                      className={`text-[10px] font-mono ${ch.has_credential ? "text-[#00C9A7]" : "text-[#64748B]"}`}
-                    >
-                      {ch.has_credential ? "● Credential connected" : "○ No credential yet"}
-                    </span>
-                  </div>
-                  <ChannelCredentialForm channel={ch} onSaved={reload} />
+              {/* Credential connection. Blog defaults to our own hosted blogs
+                  table when nothing is connected — a webhook here redirects
+                  publishing to the tenant's own site instead. */}
+              <div className="pt-2 border-t border-[#1F2D3D]/40">
+                <div className="flex items-center justify-between mb-1">
+                  <span
+                    className={`text-[10px] font-mono ${ch.has_credential ? "text-[#00C9A7]" : "text-[#64748B]"}`}
+                  >
+                    {ch.has_credential
+                      ? ch.key === "blog"
+                        ? "● Publishing to your own site"
+                        : "● Credential connected"
+                      : ch.key === "blog"
+                        ? "○ Publishing to our hosted blog"
+                        : "○ No credential yet"}
+                  </span>
                 </div>
-              )}
+                <ChannelCredentialForm channel={ch} onSaved={reload} />
+              </div>
             </div>
           );
         })}
