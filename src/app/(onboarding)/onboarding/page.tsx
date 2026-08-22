@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { PLANS, type PlanKey } from "@/constants/plans";
-import { apiClient, toErrorMessage } from "@/lib/api-client";
+import { apiClient, ApiRequestError, toErrorMessage } from "@/lib/api-client";
 
 /**
  * Onboarding landing.
@@ -51,6 +51,18 @@ export default function OnboardingLanding() {
       }
       router.push("/onboarding/setup");
     } catch (err) {
+      // A 401 here means the session cookie is still valid (JWT decodes fine)
+      // but the User row it points to is gone from the DB -- e.g. an old
+      // session outliving a deleted test account. useSession() still reports
+      // "authenticated" in that case, so without this the form just sits
+      // there re-showing a raw "Unauthorized" forever with no way out. Sign
+      // out to clear the stale cookie and send them back through a real
+      // Google sign-in, which provisions (or re-finds) a live User row.
+      if (err instanceof ApiRequestError && err.status === 401) {
+        setError("Your session expired. Signing you out — please sign in again.");
+        await signOut({ callbackUrl: "/onboarding" });
+        return;
+      }
       setError(toErrorMessage(err, "Something went wrong. Try again."));
       setSubmitting(false);
     }
