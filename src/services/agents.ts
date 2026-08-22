@@ -17,16 +17,17 @@ const ACTIVE_WINDOW_MS = 24 * 60 * 60 * 1000;
  * The five `02_idea_to_asset` stages likewise run in a straight line per idea
  * claimed, so an asset row is one run of each of them.
  */
-export async function getPipelineFleet(): Promise<AgentWorkerItem[]> {
+export async function getPipelineFleet(clientId: string): Promise<AgentWorkerItem[]> {
   const [harvestedIdeas, totalAssets, latestIdea, latestAsset] = await Promise.all([
-    prisma.idea.count({ where: { source: { not: "MANUAL" } } }),
-    prisma.asset.count(),
+    prisma.idea.count({ where: { clientId, source: { not: "MANUAL" } } }),
+    prisma.asset.count({ where: { clientId } }),
     prisma.idea.findFirst({
-      where: { source: { not: "MANUAL" } },
+      where: { clientId, source: { not: "MANUAL" } },
       orderBy: { createdAt: "desc" },
       select: { createdAt: true },
     }),
     prisma.asset.findFirst({
+      where: { clientId },
       orderBy: { createdAt: "desc" },
       select: { createdAt: true },
     }),

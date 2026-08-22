@@ -2,12 +2,16 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { toPublishedDTO } from "@/lib/mappers/published";
 import { apiError } from "@/lib/api-response";
+import { requireClientId } from "@/lib/tenant";
 
 export async function GET() {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   try {
     const [assets, blogs] = await Promise.all([
-      prisma.asset.findMany(),
-      prisma.blog.findMany({ orderBy: { publishedAt: "desc" } }),
+      prisma.asset.findMany({ where: { clientId: ctx.clientId } }),
+      prisma.blog.findMany({ where: { clientId: ctx.clientId }, orderBy: { publishedAt: "desc" } }),
     ]);
 
     const assetsById = new Map(assets.map((a) => [a.id, a]));

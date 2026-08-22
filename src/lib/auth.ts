@@ -1,9 +1,8 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { requireOneOfEnv } from "./env";
-import { ADMIN_WHITELIST_EMAILS, resolveUserRole } from "@/constants/access";
-
-export { ADMIN_WHITELIST_EMAILS as WHITELIST_EMAILS };
+import { prisma } from "./prisma";
+import type { UserRole } from "@/constants/access";
 
 /**
  * The auth config is built per request, not at module load.
@@ -31,25 +30,41 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
       if (!user?.email) return false;
       const cleanEmail = user.email.trim().toLowerCase();
 
-      // Strict whitelist authorization
-      if (!ADMIN_WHITELIST_EMAILS.includes(cleanEmail)) {
-        console.warn(`[NextAuth] Unauthorized login attempt blocked for: ${cleanEmail}`);
+      // Membership, not a whitelist: sign-in succeeds only for an email that
+      // already has a `User` row. Self-serve signup creates that row during
+      // onboarding (Stripe checkout success), not here — this callback must
+      // never auto-provision a tenant just because someone completed Google
+      // OAuth, or any Google account could silently become a new tenant.
+      const dbUser = await prisma.user.findUnique({ where: { email: cleanEmail } });
+      if (!dbUser) {
+        console.warn(`[NextAuth] Sign-in blocked, no User row for: ${cleanEmail}`);
         return false;
       }
       return true;
     },
-    async session({ session, token }) {
-      if (session?.user?.email) {
-        session.user.role = resolveUserRole(session.user.email);
-        session.user.id = token.sub ?? "admin-user";
-      }
-      return session;
-    },
     async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
+      // `user` is only present on the sign-in request itself; every
+      // subsequent request just carries the token, so the DB lookup happens
+      // once per session, not once per request.
+      if (user?.email) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: user.email.trim().toLowerCase() },
+        });
+        if (dbUser) {
+          token.id = dbUser.id;
+          token.clientId = dbUser.clientId;
+          token.role = dbUser.role as UserRole;
+        }
       }
       return token;
+    },
+    async session({ session, token }) {
+      if (session?.user) {
+        session.user.id = (token.id as string | undefined) ?? "unknown-user";
+        session.user.clientId = (token.clientId as string | null | undefined) ?? null;
+        session.user.role = (token.role as UserRole | undefined) ?? "MEMBER";
+      }
+      return session;
     },
   },
 }));

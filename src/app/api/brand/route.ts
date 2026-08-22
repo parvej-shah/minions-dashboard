@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { getBrandSettings, updateBrandSettings } from "@/services/brand";
 import { apiError, apiFailure } from "@/lib/api-response";
+import { requireClientId } from "@/lib/tenant";
 import type { BrandProfileInput } from "@/types";
 
 export async function GET() {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   try {
-    return NextResponse.json(await getBrandSettings());
+    return NextResponse.json(await getBrandSettings(ctx.clientId));
   } catch (error) {
     return apiError(error, "Failed to fetch brand settings");
   }
@@ -29,6 +33,9 @@ const COLOR_FIELDS: (keyof BrandProfileInput)[] = [
 const TONE_FORMALITY_VALUES = ["technical_direct", "tactile_operator", "conversational_peer"];
 
 export async function POST(request: Request) {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   try {
     const body = await request.json();
 
@@ -64,7 +71,7 @@ export async function POST(request: Request) {
       allowed_proof_claims: body.allowed_proof_claims.map((c: string) => c.trim()).filter(Boolean),
     };
 
-    return NextResponse.json(await updateBrandSettings(input));
+    return NextResponse.json(await updateBrandSettings(ctx.clientId, input));
   } catch (error) {
     return apiError(error, "Failed to update brand settings");
   }

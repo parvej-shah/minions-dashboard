@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { toAssetDTO } from "@/lib/mappers/asset";
 import { apiError, apiFailure } from "@/lib/api-response";
+import { requireClientId } from "@/lib/tenant";
 import {
   releaseIdeaForRedraft,
   removeFromBlog,
@@ -13,10 +14,13 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   try {
     const { id } = await params;
     const asset = await prisma.asset.findFirst({
-      where: { OR: [{ id }, { slug: id }] },
+      where: { OR: [{ id }, { slug: id }], clientId: ctx.clientId },
       include: { claims: true },
     });
 
@@ -33,13 +37,24 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   try {
     const { id } = await params;
     const body = await request.json();
     const nextContent = body.content ?? body.body_content;
 
+    const owned = await prisma.asset.findFirst({
+      where: { OR: [{ id }, { slug: id }], clientId: ctx.clientId },
+      select: { id: true },
+    });
+    if (!owned) {
+      return apiFailure("Asset not found", 404);
+    }
+
     const updated = await prisma.asset.update({
-      where: { id },
+      where: { id: owned.id },
       data: {
         ...(body.title !== undefined && { title: body.title }),
         ...(nextContent !== undefined && { content: nextContent }),
@@ -82,11 +97,16 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   try {
     const { id } = await params;
     const mode = new URL(request.url).searchParams.get("mode") ?? "unpublish";
 
-    const asset = await prisma.asset.findFirst({ where: { OR: [{ id }, { slug: id }] } });
+    const asset = await prisma.asset.findFirst({
+      where: { OR: [{ id }, { slug: id }], clientId: ctx.clientId },
+    });
     if (!asset) {
       return apiFailure("Asset not found", 404);
     }

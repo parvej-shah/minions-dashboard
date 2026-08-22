@@ -2,10 +2,17 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { toIdeaDTO } from "@/lib/mappers/idea";
 import { apiError, apiFailure } from "@/lib/api-response";
+import { requireClientId } from "@/lib/tenant";
 
 export async function GET() {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   try {
-    const ideas = await prisma.idea.findMany({ orderBy: { createdAt: "desc" } });
+    const ideas = await prisma.idea.findMany({
+      where: { clientId: ctx.clientId },
+      orderBy: { createdAt: "desc" },
+    });
     return NextResponse.json(ideas.map(toIdeaDTO));
   } catch (error) {
     return apiError(error, "Failed to fetch ideas");
@@ -13,10 +20,16 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   try {
     const body = await request.json();
 
-    const existingIds = await prisma.idea.findMany({ select: { id: true } });
+    const existingIds = await prisma.idea.findMany({
+      where: { clientId: ctx.clientId },
+      select: { id: true },
+    });
     const nextNumber =
       existingIds.reduce((max, row) => {
         const parsed = Number.parseInt(row.id.replace(/\D/g, ""), 10);
@@ -26,6 +39,7 @@ export async function POST(request: Request) {
     const created = await prisma.idea.create({
       data: {
         id: `IDEA-${String(nextNumber).padStart(4, "0")}`,
+        clientId: ctx.clientId,
         rawIdea: body.raw_idea ?? body.title ?? "Untitled idea",
         angle: body.angle ?? null,
         audience: body.audience ?? "ICP",
@@ -45,6 +59,9 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   try {
     const body = await request.json();
 
@@ -54,7 +71,7 @@ export async function PATCH(request: Request) {
 
     const ids: string[] = body.queueItems.map((item: { id: string }) => item.id);
     const alreadyDrafted = await prisma.idea.findMany({
-      where: { id: { in: ids }, NOT: { draftAssetId: null } },
+      where: { id: { in: ids }, clientId: ctx.clientId, NOT: { draftAssetId: null } },
       select: { id: true },
     });
 
@@ -69,8 +86,8 @@ export async function PATCH(request: Request) {
 
     await prisma.$transaction(
       body.queueItems.map((item: { id: string; queue_order: number; scheduled_for?: string }) =>
-        prisma.idea.update({
-          where: { id: item.id },
+        prisma.idea.updateMany({
+          where: { id: item.id, clientId: ctx.clientId },
           data: {
             queueOrder: item.queue_order,
             status: "QUEUED",

@@ -74,6 +74,20 @@ const gateHandler = auth((req) => {
     return NextResponse.redirect(loginUrl);
   }
 
+  // 4. Tenant gate: a logged-in user with no clientId and who isn't platform
+  // staff has nowhere to go yet. Reachable today only if a User row somehow
+  // has clientId: null and role !== SYSTEM_ADMIN — signIn() in src/lib/auth.ts
+  // only allows emails that already have a User row, so this is a defensive
+  // check, not the normal path. Once Phase 4's self-serve onboarding wizard
+  // exists, this should redirect to /onboarding instead of blocking.
+  const sessionUser = req.auth?.user;
+  const isPlatformStaff = sessionUser?.clientId === null && sessionUser?.role === "SYSTEM_ADMIN";
+  if (sessionUser && !sessionUser.clientId && !isPlatformStaff) {
+    const loginUrl = new URL("/login", req.nextUrl.origin);
+    loginUrl.searchParams.set("error", "NoTenant");
+    return NextResponse.redirect(loginUrl);
+  }
+
   return NextResponse.next();
 });
 

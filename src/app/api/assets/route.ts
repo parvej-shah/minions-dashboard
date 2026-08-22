@@ -2,15 +2,20 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { toAssetDTO } from "@/lib/mappers/asset";
 import { apiError } from "@/lib/api-response";
+import { requireClientId } from "@/lib/tenant";
 
 export async function GET() {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   try {
     const [assets, blogs] = await Promise.all([
       prisma.asset.findMany({
+        where: { clientId: ctx.clientId },
         include: { claims: true },
         orderBy: { createdAt: "desc" },
       }),
-      prisma.blog.findMany({ select: { slug: true, assetId: true } }),
+      prisma.blog.findMany({ where: { clientId: ctx.clientId }, select: { slug: true, assetId: true } }),
     ]);
 
     // A blog row is the only record that a post is actually live; the asset's

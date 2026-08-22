@@ -1,33 +1,29 @@
-import { getSupabaseAdmin } from "@/lib/supabase";
-import { resolveUserRole } from "@/constants/access";
+import { prisma } from "@/lib/prisma";
 
 export interface AdminUserRecord {
   id: string;
   email: string;
   name: string;
   role: string;
-  confirmed: boolean;
-  created_at: string;
-  last_sign_in_at: string;
+  clientId: string | null;
+  createdAt: string;
 }
 
 /**
- * Lists Supabase auth users. Stays on the Supabase admin client because
- * `auth.admin.listUsers()` has no Prisma equivalent.
+ * Lists the app's own `User` rows (role/tenant membership now lives there,
+ * not in Supabase auth metadata — see src/lib/auth.ts). This is a
+ * platform-level listing; callers must confirm the caller is platform staff
+ * before exposing it, this function does not do that check itself.
  */
 export async function listAdminUsers(): Promise<AdminUserRecord[]> {
-  const { data, error } = await getSupabaseAdmin().auth.admin.listUsers();
-  if (error) throw new Error(error.message);
+  const users = await prisma.user.findMany({ orderBy: { createdAt: "asc" } });
 
-  return data.users.map((u) => ({
+  return users.map((u) => ({
     id: u.id,
-    email: u.email ?? "",
-    name:
-      (u.user_metadata?.name as string | undefined) ??
-      (u.email?.includes("parvej") ? "Parvej Shah" : "XpeedLab Admin"),
-    role: (u.user_metadata?.role as string | undefined) ?? resolveUserRole(u.email),
-    confirmed: !!u.email_confirmed_at,
-    created_at: u.created_at,
-    last_sign_in_at: u.last_sign_in_at ?? u.created_at,
+    email: u.email,
+    name: u.name ?? u.email,
+    role: u.role,
+    clientId: u.clientId,
+    createdAt: u.createdAt.toISOString(),
   }));
 }

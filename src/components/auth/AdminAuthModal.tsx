@@ -13,12 +13,13 @@ import {
 import {
   signIn,
 } from "next-auth/react";
+import type { UserRole } from "@/constants/access";
 
 export interface AdminUser {
   id?: string;
   email: string;
   name: string;
-  role: "MARKETING_DIRECTOR" | "SYSTEM_ADMIN" | "OPERATOR";
+  role: UserRole;
   avatar_url?: string;
   authenticated_at: string;
   supabase_project?: string;

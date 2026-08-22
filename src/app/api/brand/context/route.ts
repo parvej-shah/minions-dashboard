@@ -1,16 +1,26 @@
 import { NextResponse } from "next/server";
 import { getBrandSettings } from "@/services/brand";
 import { BLOG_BASE_URL } from "@/constants/config";
-import { apiError } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/lib/api-response";
 
 /**
  * Structured brand context for the n8n drafting pipeline to ingest.
  * Sourced from the same `getBrandSettings()` the /api/brand and Brand Profile
  * tab use, so this cannot drift from what an operator edits there.
+ *
+ * The caller here is n8n (a server-to-server webhook call, not a signed-in
+ * browser), so tenancy comes from a `clientId` query param rather than a
+ * session — n8n's Assemble Brand Context node passes the client_id it
+ * already carries from the workflow trigger payload.
  */
-export async function GET() {
+export async function GET(request: Request) {
+  const clientId = new URL(request.url).searchParams.get("clientId");
+  if (!clientId) {
+    return apiFailure("clientId query param is required", 400);
+  }
+
   try {
-    const brand = await getBrandSettings();
+    const brand = await getBrandSettings(clientId);
 
     return NextResponse.json({
       company_name: brand.brand_name,

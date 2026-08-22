@@ -54,6 +54,7 @@ export async function upsertToBlog(asset: Asset): Promise<void> {
     where: { slug: asset.slug },
     create: {
       slug: asset.slug,
+      clientId: asset.clientId,
       title: asset.title,
       hook: asset.hook,
       coreArgument: asset.coreArgument,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { apiError } from "@/lib/api-response";
+import { requireClientId } from "@/lib/tenant";
 import {
   TELEMETRY_RANGE_MS,
   TELEMETRY_RANGES,
@@ -22,13 +23,16 @@ function parseRange(value: string | null): TelemetryRange {
  * invented numbers look like measurements.
  */
 export async function GET(request: NextRequest) {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   try {
     const range = parseRange(request.nextUrl.searchParams.get("range"));
     const windowMs = TELEMETRY_RANGE_MS[range];
     const since = windowMs === null ? null : new Date(Date.now() - windowMs);
 
     const assets = await prisma.asset.findMany({
-      where: since ? { createdAt: { gte: since } } : undefined,
+      where: { clientId: ctx.clientId, ...(since ? { createdAt: { gte: since } } : {}) },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,

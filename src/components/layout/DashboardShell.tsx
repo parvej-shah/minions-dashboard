@@ -12,7 +12,6 @@ import { useNavCounts } from "@/hooks/useNavCounts";
 import { useToast } from "@/hooks/useToast";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { buildNavItems } from "@/constants/nav";
-import { resolveUserRole } from "@/constants/access";
 import type { PipelineTriggerResult } from "@/types";
 
 export interface DashboardShellProps {
@@ -160,7 +159,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             ? {
                 email: session.user.email ?? "",
                 name: session.user.name ?? "Admin",
-                role: resolveUserRole(session.user.email),
+                role: session.user.role,
                 authenticated_at: new Date().toISOString(),
               }
             : null

@@ -13,8 +13,123 @@ enum AudienceLane {
   BRIDGE
 }
 
+// ---------------------------------------------------------------------------
+// Multi-tenant SaaS models (Phase 1 draft, see
+// /home/parvej/.claude/plans/make-the-full-plan-breezy-river.md).
+//
+// clientId on the pre-existing models below is intentionally nullable at this
+// stage — the migration plan adds it additively first, backfills every
+// existing row to a "tenant zero" Client representing getminions.ai, then
+// flips the column to NOT NULL DEFAULT '<tenant-zero-id>' only once the
+// backfill and n8n's PostgREST writes are both confirmed sending client_id.
+// Do not make these NOT NULL until that backfill has run.
+// ---------------------------------------------------------------------------
+
+model Client {
+  id        String   @id @default(cuid())
+  slug      String   @unique // subdomain / URL segment, e.g. "acme-hvac"
+  name      String
+  status    String   @default("TRIAL") // TRIAL | ACTIVE | PAST_DUE | SUSPENDED | CANCELED
+  timezone  String   @default("America/New_York")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  users           User[]
+  brandProfile    BrandProfile?
+  brandDirectives BrandDirective[]
+  ideas           Idea[]
+  assets          Asset[]
+  blogs           Blog[]
+  channels        ClientChannel[]
+  toneExamples    ToneExample[]
+  subscription    Subscription?
+  usageEvents     UsageEvent[]
+
+  @@map("clients")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  clientId  String?  @map("client_id") // null = platform staff, not tied to a tenant
+  role      String   @default("MEMBER") // OWNER | MARKETING_DIRECTOR | MEMBER | SYSTEM_ADMIN
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  client Client? @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@map("users")
+}
+
+model ClientChannel {
+  id            String   @id @default(cuid())
+  clientId      String   @map("client_id")
+  channelKey    String   @map("channel_key") // "blog" | "facebook" | "linkedin" | "x"
+  isActive      Boolean  @default(false) @map("is_active")
+  credentialRef String?  @map("credential_ref") // secrets-store reference; never a raw token here
+  externalId    String?  @map("external_id") // e.g. FB Page ID, LinkedIn org URN
+  config        Json?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, channelKey])
+  @@map("client_channels")
+}
+
+model ToneExample {
+  id        String   @id @default(cuid())
+  clientId  String   @map("client_id")
+  content   String   @db.Text
+  source    String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("tone_examples")
+}
+
+model Subscription {
+  id                String    @id @default(cuid())
+  clientId          String    @unique @map("client_id")
+  stripeCustomerId  String    @unique @map("stripe_customer_id")
+  stripeSubId       String?   @unique @map("stripe_sub_id")
+  planKey           String    @map("plan_key") // e.g. "starter" | "growth" | "scale" — Stripe owns pricing
+  status            String    @default("TRIALING") // mirrors Stripe subscription.status
+  currentPeriodEnd  DateTime? @map("current_period_end")
+  cancelAtPeriodEnd Boolean   @default(false) @map("cancel_at_period_end")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model UsageEvent {
+  id        String   @id @default(cuid())
+  clientId  String   @map("client_id")
+  assetId   String?  @map("asset_id")
+  eventType String   @map("event_type") // "LLM_CALL" | "IMAGE_GEN" | "PUBLISH"
+  provider  String? // "dashscope", "cloudflare-r2", etc.
+  model     String? // "qwen-plus" etc.
+  costUsd   Decimal  @default(0) @map("cost_usd") @db.Decimal(10, 6)
+  quantity  Int      @default(1) // unit implied by eventType (tokens, images, publishes)
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId, createdAt])
+  @@map("usage_events")
+}
+
 model Idea {
   id               String    @id // e.g. "IDEA-0001"
+  clientId         String?   @map("client_id") // nullable until Phase 1 backfill lands, see note above
   rawIdea          String    @map("raw_idea")
   angle            String?
   audience         String    @default("ICP")
@@ -37,13 +152,16 @@ model Idea {
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
 
+  client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
   assets Asset[]
 
+  @@index([clientId])
   @@map("ideas")
 }
 
 model Asset {
   id                  String    @id // e.g. "ASSET-0001"
+  clientId            String?   @map("client_id") // nullable until Phase 1 backfill lands
   ideaId              String?   @map("idea_id")
   title               String
   slug                String    @unique
@@ -69,6 +187,7 @@ model Asset {
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at")
 
+  client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
   idea   Idea?   @relation(fields: [ideaId], references: [id], onDelete: SetNull)
   claims Claim[]
 
@@ -78,6 +197,7 @@ model Asset {
   // (`POST /rest/v1/assets`), so an application check cannot stop it — a second
   // insert for the same idea has to fail at the database.
   @@unique([ideaId], map: "assets_idea_id_key")
+  @@index([clientId])
   @@map("assets")
 }
 
@@ -98,26 +218,44 @@ model Claim {
 }
 
 model BrandProfile {
-  id                 String   @id @default("BRAND-MINIONS-01")
-  brandName          String   @default("getminions.ai") @map("brand_name")
-  companyDomain      String   @default("getminions.ai") @map("company_domain")
-  positioning        String   @db.Text
-  primaryLogoUrl     String   @map("primary_logo_url")
-  primaryInk         String   @map("primary_ink")
-  brandTeal          String   @map("brand_teal")
-  brandCoral         String   @map("brand_coral")
-  brandCream         String   @map("brand_cream")
-  accentBlue         String   @map("accent_blue")
-  toneFormality      String   @default("tactile_operator") @map("tone_formality")
-  toneCadence        String   @db.Text @map("tone_cadence")
-  allowedProofClaims String[] @default([]) @map("allowed_proof_claims")
-  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at")
+  // Was a hardcoded singleton (id defaulted to the literal "BRAND-MINIONS-01",
+  // see the two remaining readers of that literal: src/constants/brand.ts:31
+  // and src/services/brand.ts:7 BRAND_PROFILE_ID — both must move to a
+  // clientId-keyed lookup, findUnique({where:{clientId}}), before this ships).
+  id                        String   @id @default(cuid())
+  clientId                  String?  @unique @map("client_id") // nullable until Phase 1 backfill lands
+  brandName                 String   @default("getminions.ai") @map("brand_name")
+  companyDomain             String   @default("getminions.ai") @map("company_domain")
+  positioning               String   @db.Text
+  primaryLogoUrl            String   @map("primary_logo_url")
+  primaryInk                String   @map("primary_ink")
+  brandTeal                 String   @map("brand_teal")
+  brandCoral                String   @map("brand_coral")
+  brandCream                String   @map("brand_cream")
+  accentBlue                String   @map("accent_blue")
+  toneFormality             String   @default("tactile_operator") @map("tone_formality")
+  toneCadence               String   @map("tone_cadence") @db.Text
+  allowedProofClaims        String[] @default([]) @map("allowed_proof_claims")
+  // Structured voice-test questionnaire (formality, sentence length, humor,
+  // emoji use, signature phrases) — fixed-shape object per tenant, paired
+  // with the raw pasted examples in ToneExample for few-shot grounding.
+  toneQuestionnaire         Json?    @map("tone_questionnaire")
+  // Tenant-configurable claims-gate control. Was a hardcoded universal rule
+  // in 02_idea_to_asset's "Parse Claims and Gate" node (block all
+  // CUSTOMER_RESULT claims, justified by "we have zero paying clients") —
+  // other tenants WILL have real customer results to cite truthfully, so
+  // this becomes a typed boolean the gate code reads, not prose fed to an LLM.
+  allowCustomerResultClaims Boolean  @default(false) @map("allow_customer_result_claims")
+  updatedAt                 DateTime @default(now()) @updatedAt @map("updated_at")
+
+  client Client? @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@map("brand_profile")
 }
 
 model BrandDirective {
   id            String   @id // e.g. "DIR-001"
+  clientId      String?  @map("client_id") // nullable until Phase 1 backfill lands
   category      String
   ruleKey       String   @map("rule_key")
   instruction   String   @db.Text
@@ -127,11 +265,15 @@ model BrandDirective {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
 
+  client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
   @@map("brand_directives")
 }
 
 model Blog {
   slug               String   @id
+  clientId           String?  @map("client_id") // nullable until Phase 1 backfill lands
   title              String
   subtitle           String?
   hook               String?
@@ -149,5 +291,8 @@ model Blog {
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @default(now()) @updatedAt @map("updated_at")
 
+  client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
   @@map("blogs")
 }

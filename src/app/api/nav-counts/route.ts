@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getPipelineFleet } from "@/services/agents";
 import { apiError } from "@/lib/api-response";
+import { requireClientId } from "@/lib/tenant";
 import type { NavCounts } from "@/types";
 
 /**
@@ -12,14 +13,19 @@ import type { NavCounts } from "@/types";
  * navigation and counted the rows in the browser.
  */
 export async function GET() {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   try {
     const [ideasReady, pendingReview, publishedLive, directivesCount, fleet] =
       await Promise.all([
-        prisma.idea.count({ where: { status: { in: ["HARVESTED", "REFINED"] } } }),
-        prisma.asset.count({ where: { status: "PENDING_REVIEW" } }),
-        prisma.blog.count(),
-        prisma.brandDirective.count(),
-        getPipelineFleet().catch(() => []),
+        prisma.idea.count({
+          where: { clientId: ctx.clientId, status: { in: ["HARVESTED", "REFINED"] } },
+        }),
+        prisma.asset.count({ where: { clientId: ctx.clientId, status: "PENDING_REVIEW" } }),
+        prisma.blog.count({ where: { clientId: ctx.clientId } }),
+        prisma.brandDirective.count({ where: { clientId: ctx.clientId } }),
+        getPipelineFleet(ctx.clientId).catch(() => []),
       ]);
 
     const counts: NavCounts = {

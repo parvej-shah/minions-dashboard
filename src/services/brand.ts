@@ -4,20 +4,24 @@ import { toDirectiveDTO } from "@/lib/mappers/directive";
 import { toBrandSettingsDTO } from "@/lib/mappers/brandProfile";
 import type { BrandProfileInput, BrandSettings } from "@/types";
 
-const BRAND_PROFILE_ID = "BRAND-MINIONS-01";
-
 /**
- * Brand settings plus the live directive set.
+ * Brand settings plus the live directive set, scoped to one tenant.
  *
- * Company info, voice guidelines, and colors come from the `brand_profile`
- * row; if it has never been seeded, the hardcoded seed constant fills in so
- * the page still renders something editable instead of erroring.
+ * Company info, voice guidelines, and colors come from that tenant's
+ * `brand_profile` row; if it has never been seeded, the hardcoded seed
+ * constant fills in so the page still renders something editable instead of
+ * erroring. `brand_profile` used to be a single global singleton row keyed by
+ * a hardcoded id ("BRAND-MINIONS-01") — it is now one row per Client,
+ * looked up by the unique `client_id` column instead.
  */
-export async function getBrandSettings(): Promise<BrandSettings> {
+export async function getBrandSettings(clientId: string): Promise<BrandSettings> {
   const [profile, directives] = await Promise.all([
-    prisma.brandProfile.findUnique({ where: { id: BRAND_PROFILE_ID } }).catch(() => null),
+    prisma.brandProfile.findUnique({ where: { clientId } }).catch(() => null),
     prisma.brandDirective
-      .findMany({ where: { category: { not: "DISTRIBUTION" } }, orderBy: { createdAt: "asc" } })
+      .findMany({
+        where: { clientId, category: { not: "DISTRIBUTION" } },
+        orderBy: { createdAt: "asc" },
+      })
       .catch(() => []),
   ]);
 
@@ -31,8 +35,11 @@ export async function getBrandSettings(): Promise<BrandSettings> {
   };
 }
 
-/** Upserts the `brand_profile` singleton row from the Brand Profile tab. */
-export async function updateBrandSettings(input: BrandProfileInput): Promise<BrandSettings> {
+/** Upserts the tenant's `brand_profile` row from the Brand Profile tab. */
+export async function updateBrandSettings(
+  clientId: string,
+  input: BrandProfileInput
+): Promise<BrandSettings> {
   const data = {
     brandName: input.brand_name,
     companyDomain: input.company_domain,
@@ -49,13 +56,16 @@ export async function updateBrandSettings(input: BrandProfileInput): Promise<Bra
   };
 
   const profile = await prisma.brandProfile.upsert({
-    where: { id: BRAND_PROFILE_ID },
+    where: { clientId },
     update: data,
-    create: { id: BRAND_PROFILE_ID, ...data },
+    create: { clientId, ...data },
   });
 
   const directives = await prisma.brandDirective
-    .findMany({ where: { category: { not: "DISTRIBUTION" } }, orderBy: { createdAt: "asc" } })
+    .findMany({
+      where: { clientId, category: { not: "DISTRIBUTION" } },
+      orderBy: { createdAt: "asc" },
+    })
     .catch(() => []);
 
   return {

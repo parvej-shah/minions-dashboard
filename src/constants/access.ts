@@ -1,20 +1,9 @@
 /**
- * Who may sign in, and what role they get.
- *
- * Role derivation lives here alone so the auth callback and the UI cannot
- * drift apart (they previously computed it independently).
+ * Role vocabulary only. Role/tenant *derivation* used to live here as a
+ * hardcoded email whitelist + substring match (ADMIN_WHITELIST_EMAILS /
+ * resolveUserRole) — that could not survive self-serve signup, since it had
+ * no notion of "which tenant." It now happens in src/lib/auth.ts (reading the
+ * `User` table) and is exposed to the rest of the app via src/lib/tenant.ts.
  */
 
-export type UserRole = "MARKETING_DIRECTOR" | "SYSTEM_ADMIN";
-
-export const ADMIN_WHITELIST_EMAILS: readonly string[] = [
-  "parvejshahlabib007@gmail.com",
-  "xpeedlab@gmail.com",
-  "xbitlab@gmail.com",
-  "parvej@getminions.ai",
-  "rakib@getminions.ai",
-];
-
-export function resolveUserRole(email: string | null | undefined): UserRole {
-  return email?.toLowerCase().includes("parvej") ? "MARKETING_DIRECTOR" : "SYSTEM_ADMIN";
-}
+export type UserRole = "OWNER" | "MARKETING_DIRECTOR" | "MEMBER" | "SYSTEM_ADMIN";

@@ -6,28 +6,37 @@ import {
   findChannelByKey,
 } from "@/constants/channels";
 import { apiError, apiFailure } from "@/lib/api-response";
+import { requireClientId } from "@/lib/tenant";
 import type { DistributionChannelConfig, DistributionChannelsPayload } from "@/types";
 
+/**
+ * Distribution channels, one `client_channels` row per (tenant, channel).
+ *
+ * This used to be `brand_directives` rows with category "DISTRIBUTION" and a
+ * fixed global id per channel (e.g. "DIR-DIST-BLOG") — fine for one tenant,
+ * but every tenant would collide on the same primary key once more than one
+ * existed. `ClientChannel` is unique on (client_id, channel_key) instead, so
+ * each tenant gets its own row per channel with no shared id.
+ */
 export async function GET() {
-  try {
-    const existing = await prisma.brandDirective.findMany({
-      where: { category: "DISTRIBUTION" },
-    });
-    const byId = new Map(existing.map((row) => [row.id, row]));
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
 
-    // Seed any missing default channel directive
+  try {
+    const existing = await prisma.clientChannel.findMany({
+      where: { clientId: ctx.clientId },
+    });
+    const byKey = new Map(existing.map((row) => [row.channelKey, row]));
+
+    // Seed any missing default channel row for this tenant.
     for (const def of DISTRIBUTION_CHANNELS) {
-      if (!byId.has(def.id)) {
-        byId.set(
-          def.id,
-          await prisma.brandDirective.create({
+      if (!byKey.has(def.key)) {
+        byKey.set(
+          def.key,
+          await prisma.clientChannel.create({
             data: {
-              id: def.id,
-              category: "DISTRIBUTION",
-              ruleKey: def.ruleKey,
-              instruction: def.description,
-              priority: 1,
-              audienceScope: "ALL",
+              clientId: ctx.clientId,
+              channelKey: def.key,
               isActive: def.defaultActive,
             },
           })
@@ -41,7 +50,7 @@ export async function GET() {
       name: def.name,
       platform: def.platform,
       description: def.description,
-      is_active: byId.get(def.id)?.isActive ?? def.defaultActive,
+      is_active: byKey.get(def.key)?.isActive ?? def.defaultActive,
       target_destination: def.target_destination,
       badge: def.badge,
     }));
@@ -58,41 +67,38 @@ export async function GET() {
 
     return NextResponse.json(payload);
   } catch (error) {
-    return apiError(error, "Failed to fetch channel directives");
+    return apiError(error, "Failed to fetch channel settings");
   }
 }
 
 export async function PATCH(request: Request) {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   try {
     const { id, channel, is_active } = await request.json();
-    const targetId: string | undefined = id ?? (channel ? findChannelByKey(channel)?.id : undefined);
+    // The DistributionControlPanel UI sends the old-style `id` (e.g.
+    // "DIR-DIST-BLOG"); newer/direct callers can send `channel` (the key,
+    // e.g. "blog") instead. Either resolves to the same channel definition.
+    const def = channel ? findChannelByKey(channel) : id ? findChannelById(id) : undefined;
 
-    if (!targetId || typeof is_active !== "boolean") {
-      return apiFailure("Valid 'id' or 'channel' and boolean 'is_active' required.", 400);
+    if (!def || typeof is_active !== "boolean") {
+      return apiFailure("Valid 'id' or 'channel', and boolean 'is_active', required.", 400);
     }
 
-    const def = findChannelById(targetId);
-    const updated = await prisma.brandDirective.upsert({
-      where: { id: targetId },
+    const updated = await prisma.clientChannel.upsert({
+      where: { clientId_channelKey: { clientId: ctx.clientId, channelKey: def.key } },
       update: { isActive: is_active },
-      create: {
-        id: targetId,
-        category: "DISTRIBUTION",
-        ruleKey: def?.ruleKey ?? targetId,
-        instruction: def?.description ?? "Channel broadcast directive",
-        priority: 1,
-        audienceScope: "ALL",
-        isActive: is_active,
-      },
+      create: { clientId: ctx.clientId, channelKey: def.key, isActive: is_active },
     });
 
     return NextResponse.json({
       success: true,
-      id: updated.id,
+      id: def.id,
       is_active: updated.isActive,
-      rule_key: updated.ruleKey,
+      channel: updated.channelKey,
     });
   } catch (error) {
-    return apiError(error, "Failed to update channel directive");
+    return apiError(error, "Failed to update channel setting");
   }
 }

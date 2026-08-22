@@ -2,14 +2,18 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { toIdeaDTO } from "@/lib/mappers/idea";
 import { apiError, apiFailure } from "@/lib/api-response";
+import { requireClientId } from "@/lib/tenant";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   try {
     const { id } = await params;
-    const idea = await prisma.idea.findUnique({ where: { id } });
+    const idea = await prisma.idea.findFirst({ where: { id, clientId: ctx.clientId } });
 
     if (!idea) {
       return apiFailure("Idea not found", 404);
@@ -24,26 +28,31 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   try {
     const { id } = await params;
     const body = await request.json();
+
+    const owned = await prisma.idea.findFirst({
+      where: { id, clientId: ctx.clientId },
+      select: { draftAssetId: true },
+    });
+    if (!owned) {
+      return apiFailure("Idea not found", 404);
+    }
 
     // One idea -> one live asset. Re-queuing/re-harvesting an idea that already has a
     // draft would let the pipeline generate a second, orphaning asset for the same idea.
     // Only the asset DELETE endpoint (permanent mode) is allowed to clear draftAssetId.
     const wantsToBecomeAvailable =
       body.status !== undefined && ["QUEUED", "HARVESTED", "REFINED"].includes(body.status);
-    if (wantsToBecomeAvailable) {
-      const current = await prisma.idea.findUnique({
-        where: { id },
-        select: { draftAssetId: true },
-      });
-      if (current?.draftAssetId) {
-        return apiFailure(
-          `This idea already has a draft (asset ${current.draftAssetId}). Delete that asset first if you want to draft it again.`,
-          409
-        );
-      }
+    if (wantsToBecomeAvailable && owned.draftAssetId) {
+      return apiFailure(
+        `This idea already has a draft (asset ${owned.draftAssetId}). Delete that asset first if you want to draft it again.`,
+        409
+      );
     }
 
     const updated = await prisma.idea.update({
@@ -85,8 +94,16 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   try {
     const { id } = await params;
+
+    const owned = await prisma.idea.findFirst({ where: { id, clientId: ctx.clientId } });
+    if (!owned) {
+      return apiFailure("Idea not found", 404);
+    }
 
     // Decouple any assets that reference this idea to prevent foreign key errors,
     // then delete the idea itself.

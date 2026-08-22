@@ -53,7 +53,7 @@ export const DISTRIBUTION_CHANNELS: readonly DistributionChannelDefinition[] = [
     platform: "LINKEDIN",
     description:
       "Broadcasts formatted executive post to LinkedIn followers + automated first-comment link.",
-    target_destination: "linkedin.com/company/getminions",
+    target_destination: "linkedin.com/company/getminionsai",
     defaultActive: false,
     badge: "Community API",
   },
