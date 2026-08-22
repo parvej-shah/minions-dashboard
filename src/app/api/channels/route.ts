@@ -53,6 +53,8 @@ export async function GET() {
       is_active: byKey.get(def.key)?.isActive ?? def.defaultActive,
       target_destination: def.target_destination,
       badge: def.badge,
+      has_credential: !!byKey.get(def.key)?.credentialRef,
+      external_id: byKey.get(def.key)?.externalId ?? null,
     }));
 
     const payload: DistributionChannelsPayload = {

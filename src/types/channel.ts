@@ -11,6 +11,9 @@ export interface DistributionChannelConfig {
   is_active: boolean;
   target_destination: string;
   badge?: string;
+  /** True once a Vault-backed token has been pasted in for this channel (blog never needs one). */
+  has_credential?: boolean;
+  external_id?: string | null;
 }
 
 export interface DistributionChannelsPayload {
