@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
+import { DISTRIBUTION_CHANNELS } from "@/constants/channels";
 
 /**
  * ICP/industry/tone-formality/channel step of onboarding. Writes:
@@ -54,6 +55,14 @@ export async function POST(request: Request) {
     // Random ids, not a sequential count -- a global brand_directives count
     // race-conditions across concurrent onboardings (two tenants signing up
     // at once could compute the same next id and collide on the primary key).
+    // This route can be called more than once per tenant (the onboarding
+    // wizard's Back button makes re-submitting this step a normal path), so
+    // each rule is cleared by (clientId, ruleKey) before recreating it --
+    // otherwise every resubmit would pile up another duplicate directive
+    // feeding the AI prompts.
+    await prisma.brandDirective.deleteMany({
+      where: { clientId: ctx.clientId, ruleKey: "icp_description" },
+    });
     await prisma.brandDirective.create({
       data: {
         id: `DIR-${crypto.randomUUID()}`,
@@ -68,6 +77,9 @@ export async function POST(request: Request) {
     });
 
     if (client?.name) {
+      await prisma.brandDirective.deleteMany({
+        where: { clientId: ctx.clientId, ruleKey: "company_name" },
+      });
       await prisma.brandDirective.create({
         data: {
           id: `DIR-${crypto.randomUUID()}`,
@@ -82,12 +94,17 @@ export async function POST(request: Request) {
       });
     }
 
+    // Every catalogue channel gets a row here, not just the ones the tenant
+    // picked -- otherwise GET /api/channels' own seeding step would later
+    // fill in the unpicked ones using each channel's global defaultActive
+    // flag (facebook defaults to true), silently activating a channel this
+    // tenant never chose.
     await Promise.all(
-      validChannels.map((channelKey) =>
+      DISTRIBUTION_CHANNELS.map((def) =>
         prisma.clientChannel.upsert({
-          where: { clientId_channelKey: { clientId: ctx.clientId, channelKey } },
-          update: { isActive: true },
-          create: { clientId: ctx.clientId, channelKey, isActive: true },
+          where: { clientId_channelKey: { clientId: ctx.clientId, channelKey: def.key } },
+          update: { isActive: validChannels.includes(def.key) },
+          create: { clientId: ctx.clientId, channelKey: def.key, isActive: validChannels.includes(def.key) },
         })
       )
     );
