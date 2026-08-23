@@ -33,6 +33,11 @@ export interface SocialVariantTabsProps {
   onSave: () => void;
   onCopy: (text: string, key: string) => void;
   copiedKey: string | null;
+  /** Which of the three tabs to show. A tenant that only connected LinkedIn
+   *  has no reason to see Facebook/X review tabs for a post that will never
+   *  go there. Undefined means "not loaded yet" — show all three so nothing
+   *  flashes hidden and reappears once the real channel summary lands. */
+  enabledTabs?: { LINKEDIN: boolean; FACEBOOK: boolean; TWITTER: boolean };
 }
 
 /**
@@ -56,7 +61,12 @@ export default function SocialVariantTabs({
   onSave,
   onCopy,
   copiedKey,
+  enabledTabs,
 }: SocialVariantTabsProps) {
+  const showLinkedin = enabledTabs?.LINKEDIN ?? true;
+  const showFacebook = enabledTabs?.FACEBOOK ?? true;
+  const showTwitter = enabledTabs?.TWITTER ?? true;
+
   return (
         <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-5 space-y-4 shadow-xl">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1F2D3D] pb-3">
@@ -67,47 +77,53 @@ export default function SocialVariantTabs({
               </span>
             </div>
 
-            {/* Social Platform Tabs */}
+            {/* Social Platform Tabs — only channels this tenant actually connected */}
             <div className="flex items-center gap-1.5 bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D]">
-              <button
-                onClick={() => setSocialTab("LINKEDIN")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  socialTab === "LINKEDIN"
-                    ? "bg-[#0077B5] text-white shadow-md shadow-[#0077B5]/20"
-                    : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26]"
-                }`}
-              >
-                <span>LinkedIn Feed</span>
-              </button>
+              {showLinkedin && (
+                <button
+                  onClick={() => setSocialTab("LINKEDIN")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    socialTab === "LINKEDIN"
+                      ? "bg-[#0077B5] text-white shadow-md shadow-[#0077B5]/20"
+                      : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26]"
+                  }`}
+                >
+                  <span>LinkedIn Feed</span>
+                </button>
+              )}
 
-              <button
-                onClick={() => setSocialTab("FACEBOOK")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  socialTab === "FACEBOOK"
-                    ? "bg-[#1877F2] text-white shadow-md shadow-[#1877F2]/20"
-                    : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26]"
-                }`}
-              >
-                <span>Facebook Post</span>
-              </button>
+              {showFacebook && (
+                <button
+                  onClick={() => setSocialTab("FACEBOOK")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    socialTab === "FACEBOOK"
+                      ? "bg-[#1877F2] text-white shadow-md shadow-[#1877F2]/20"
+                      : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26]"
+                  }`}
+                >
+                  <span>Facebook Post</span>
+                </button>
+              )}
 
-              <button
-                onClick={() => setSocialTab("TWITTER")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  socialTab === "TWITTER"
-                    ? "bg-[#1DA1F2] text-white shadow-md shadow-[#1DA1F2]/20"
-                    : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26]"
-                }`}
-              >
-                <span>X / Twitter</span>
-              </button>
+              {showTwitter && (
+                <button
+                  onClick={() => setSocialTab("TWITTER")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    socialTab === "TWITTER"
+                      ? "bg-[#1DA1F2] text-white shadow-md shadow-[#1DA1F2]/20"
+                      : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26]"
+                  }`}
+                >
+                  <span>X / Twitter</span>
+                </button>
+              )}
             </div>
           </div>
 
           {/* Realistic Platform Cards */}
 
           {/* TAB A: LINKEDIN REALISTIC FEED MOCK & EDITOR */}
-          {socialTab === "LINKEDIN" && (
+          {showLinkedin && socialTab === "LINKEDIN" && (
             <div className="bg-[#070B0F] rounded-xl border border-[#1F2D3D] p-4 sm:p-5 space-y-4 font-sans">
               {/* LinkedIn Author Header */}
               <div className="flex flex-col sm:flex-row sm:items-start md:items-center justify-between gap-3">
@@ -229,7 +245,7 @@ export default function SocialVariantTabs({
           )}
 
           {/* TAB B: FACEBOOK REALISTIC POST MOCK & EDITOR */}
-          {socialTab === "FACEBOOK" && (
+          {showFacebook && socialTab === "FACEBOOK" && (
             <div className="bg-[#070B0F] rounded-xl border border-[#1F2D3D] p-4 sm:p-5 space-y-4 font-sans">
               {/* Facebook Author Header */}
               <div className="flex flex-col sm:flex-row sm:items-start md:items-center justify-between gap-3">
@@ -337,7 +353,7 @@ export default function SocialVariantTabs({
           )}
 
           {/* TAB C: TWITTER / X REALISTIC THREAD MOCK & EDITOR */}
-          {socialTab === "TWITTER" && (
+          {showTwitter && socialTab === "TWITTER" && (
             <div className="bg-[#070B0F] rounded-xl border border-[#1F2D3D] p-4 sm:p-5 space-y-4 font-sans">
               {/* Twitter Author Header */}
               <div className="flex flex-col sm:flex-row sm:items-start md:items-center justify-between gap-3">

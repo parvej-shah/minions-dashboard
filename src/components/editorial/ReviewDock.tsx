@@ -33,6 +33,10 @@ export interface ReviewDockProps {
   onPublish: () => void;
   setToggleLiveConfirmOpen: (v: boolean) => void;
   setDeleteConfirmOpen: (v: boolean) => void;
+  /** Whether this tenant has the blog channel switched on. Undefined means
+   *  "not loaded yet" — default to true so the panel doesn't flash blog copy
+   *  and then swap to generic copy once the real channel summary lands. */
+  blogEnabled?: boolean;
 }
 
 /**
@@ -61,9 +65,10 @@ export default function ReviewDock({
   onPublish,
   setToggleLiveConfirmOpen,
   setDeleteConfirmOpen,
+  blogEnabled = true,
 }: ReviewDockProps) {
   /** Live-ness comes from the blog table, not the asset's own status. */
-  const alreadyLive = Boolean(activeAsset.live_blog_url) && activeAsset.status !== "PUBLISHED";
+  const alreadyLive = blogEnabled && Boolean(activeAsset.live_blog_url) && activeAsset.status !== "PUBLISHED";
 
   return (
         <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-4 sm:p-5 space-y-4 shadow-xl">
@@ -135,21 +140,23 @@ export default function ReviewDock({
               <div className="w-full bg-[#00C9A7]/15 border border-[#00C9A7] text-[#00C9A7] p-2.5 rounded-xl font-bold text-xs flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5">
                   <CheckCheck className="w-4 h-4" />
-                  <span>Live on getminions.ai</span>
+                  <span>{blogEnabled ? "Live on getminions.ai" : "Approved & Published"}</span>
                 </div>
                 <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
               </div>
 
-              <a
-                href={activeAsset.doc_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#F1F5F9] text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
-              >
-                <Globe className="w-3.5 h-3.5 text-[#00C9A7]" />
-                <span>View Live Blog Post</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
+              {blogEnabled && (
+                <a
+                  href={activeAsset.doc_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#F1F5F9] text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                >
+                  <Globe className="w-3.5 h-3.5 text-[#00C9A7]" />
+                  <span>View Live Blog Post</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
 
               {/* 1-Click Reversible Unpublish Toggle */}
               <button
@@ -158,7 +165,7 @@ export default function ReviewDock({
                 title="Hide from public site without deleting content"
               >
                 <EyeOff className="w-3.5 h-3.5" />
-                <span>Unpublish (Hide from Public)</span>
+                <span>{blogEnabled ? "Unpublish (Hide from Public)" : "Unpublish"}</span>
               </button>
 
               <button
@@ -186,7 +193,7 @@ export default function ReviewDock({
                 className="w-full bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#00C9A7]/20 cursor-pointer"
               >
                 <Globe className="w-3.5 h-3.5" />
-                <span>Republish (Put Live on Blog)</span>
+                <span>{blogEnabled ? "Republish (Put Live on Blog)" : "Republish"}</span>
               </button>
 
               <button
@@ -238,7 +245,13 @@ export default function ReviewDock({
                 ) : (
                   <>
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>{alreadyLive ? "Republish (Overwrites the Live Post)" : "Approve & 1-Click Publish Live"}</span>
+                    <span>
+                      {alreadyLive
+                        ? "Republish (Overwrites the Live Post)"
+                        : blogEnabled
+                          ? "Approve & 1-Click Publish Live"
+                          : "Approve & Publish"}
+                    </span>
                   </>
                 )}
               </button>

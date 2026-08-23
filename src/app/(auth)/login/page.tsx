@@ -302,9 +302,8 @@ function LoginContent() {
       </main>
 
       {/* FOOTER */}
-      <footer className="relative z-20 w-full max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#64748B] border-t border-[#1F2D3D]/50">
+      <footer className="relative z-20 w-full max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-center gap-2 text-xs text-[#64748B] border-t border-[#1F2D3D]/50">
         <p>© 2026 Minions.AI Technologies Inc. All rights reserved.</p>
-        <p className="font-mono text-[11px] text-[#475569]">minions.getminions.ai • internal operations</p>
       </footer>
     </div>
   );

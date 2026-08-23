@@ -19,6 +19,7 @@ import { BLOG_BASE_URL } from "@/constants/config";
 import type { NavItem } from "@/constants/nav";
 import type { NavCounts } from "@/types";
 import type { Session } from "next-auth";
+import QuotaMeter from "./QuotaMeter";
 
 export interface MobileNavProps {
   navItems: NavItem[];
@@ -145,7 +146,6 @@ export function MobileDrawer({
                 <span className="text-white font-mono text-[11px] truncate">{session.user?.email}</span>
               </button>
               <div className="flex items-center gap-1.5 ml-2">
-                <span className="text-[#00C9A7] font-semibold text-[10px]">ADMIN</span>
                 <button
                   onClick={() => onSignOut()}
                   className="p-1 text-[#64748B] hover:text-[#ff6b4a]"
@@ -172,7 +172,11 @@ export function MobileDrawer({
   );
 }
 
-export function MobileTopBar({ onOpenPalette, setMobileMenuOpen }: Pick<MobileNavProps, "onOpenPalette" | "setMobileMenuOpen">) {
+export function MobileTopBar({
+  onOpenPalette,
+  setMobileMenuOpen,
+  navCounts,
+}: Pick<MobileNavProps, "onOpenPalette" | "setMobileMenuOpen" | "navCounts">) {
   return (
   <header className="h-14 border-b border-[#1f2b37] bg-[#0f1419]/95 backdrop-blur-md px-4 flex items-center justify-between sticky top-0 z-30 md:hidden">
     <div className="flex items-center gap-2.5">
@@ -191,6 +195,8 @@ export function MobileTopBar({ onOpenPalette, setMobileMenuOpen }: Pick<MobileNa
     </div>
 
     <div className="flex items-center gap-2">
+      {navCounts && <QuotaMeter quota={navCounts.quota} compact />}
+
       <button
         onClick={() => onOpenPalette()}
         className="p-2 rounded-xl bg-[#161d24] text-[#94A3B8] hover:text-white border border-[#1f2b37]"

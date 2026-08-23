@@ -10,6 +10,11 @@ export interface NavCounts {
   publishedLive: number;
   directivesCount: number;
   activeAgents: number;
+  quota: {
+    used: number;
+    limit: number;
+    planKey: string;
+  };
 }
 
 /** Response envelope returned by the /api/pipeline/* trigger routes. */

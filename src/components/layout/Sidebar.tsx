@@ -6,10 +6,13 @@ import Image from "next/image";
 import { ArrowUpRight, Lock, LogOut, Search, Zap } from "lucide-react";
 import { BLOG_BASE_URL } from "@/constants/config";
 import type { NavItem } from "@/constants/nav";
+import type { NavCounts } from "@/types";
 import type { Session } from "next-auth";
+import QuotaMeter from "./QuotaMeter";
 
 export interface SidebarProps {
   navItems: NavItem[];
+  navCounts: NavCounts | null;
   pathname: string;
   session: Session | null;
   isHarvesting: boolean;
@@ -23,6 +26,7 @@ export interface SidebarProps {
 /** Desktop sidebar: branding, search trigger, harvest action, nav, and account. */
 export default function Sidebar({
   navItems,
+  navCounts,
   pathname,
   session,
   isHarvesting,
@@ -46,6 +50,8 @@ export default function Sidebar({
           </span>
         </Link>
       </div>
+
+      {navCounts && <QuotaMeter quota={navCounts.quota} />}
 
       {/* SEARCH BAR (INTEGRATED IN SIDEBAR) */}
       <button
@@ -151,7 +157,6 @@ export default function Sidebar({
           </button>
 
           <div className="flex items-center gap-1 shrink-0 ml-1">
-            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/20">ADMIN</span>
             <button
               onClick={() => onSignOut()}
               title="Sign Out"

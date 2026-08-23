@@ -8,6 +8,7 @@ import EmptyState, { LoadingState } from "@/components/ui/EmptyState";
 import { useEditorialDraft } from "@/hooks/useEditorialDraft";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useToast } from "@/hooks/useToast";
+import { useChannelSummary } from "@/hooks/useChannelSummary";
 import QueueRibbon, { type QueueFilter } from "./QueueRibbon";
 import DraftHeader from "./DraftHeader";
 import CoverImageCard from "./CoverImageCard";
@@ -38,10 +39,26 @@ export default function EditorialStudio({
   const draft = useEditorialDraft(initialDraftId);
   const { copiedKey, copy } = useCopyToClipboard(2200);
   const toast = useToast(3000);
+  const channels = useChannelSummary();
 
   const [listFilter, setListFilter] = useState<QueueFilter>("ALL");
   const [editorMode, setEditorMode] = useState<EditorMode>("preview");
   const [socialTab, setSocialTab] = useState<SocialTab>("LINKEDIN");
+  const enabledSocialTabs = {
+    LINKEDIN: channels?.linkedin ?? true,
+    FACEBOOK: channels?.facebook ?? true,
+    TWITTER: channels?.x ?? true,
+  };
+  const anySocialChannelActive =
+    enabledSocialTabs.LINKEDIN || enabledSocialTabs.FACEBOOK || enabledSocialTabs.TWITTER;
+  const blogEnabled = channels?.blog ?? true;
+
+  // If the selected tab isn't one this tenant has connected (e.g. defaulted
+  // to LinkedIn but only Facebook is on), display the first one that is,
+  // without needing an effect to rewrite the underlying state.
+  const firstActiveSocialTab =
+    (Object.keys(enabledSocialTabs) as SocialTab[]).find((t) => enabledSocialTabs[t]) ?? "LINKEDIN";
+  const displayedSocialTab = enabledSocialTabs[socialTab] ? socialTab : firstActiveSocialTab;
   const [isEditingSocial, setIsEditingSocial] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [toggleLiveConfirmOpen, setToggleLiveConfirmOpen] = useState(false);
@@ -183,7 +200,7 @@ export default function EditorialStudio({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-8 space-y-6">
-          <CoverImageCard activeAsset={activeAsset} />
+          {blogEnabled && <CoverImageCard activeAsset={activeAsset} />}
 
           <ArticleEditor
             activeAsset={activeAsset}
@@ -203,21 +220,24 @@ export default function EditorialStudio({
             readingTimeMinutes={readingTimeMinutes}
           />
 
-          <SocialVariantTabs
-            activeAsset={activeAsset}
-            socialTab={socialTab}
-            setSocialTab={setSocialTab}
-            isEditingSocial={isEditingSocial}
-            setIsEditingSocial={setIsEditingSocial}
-            isSaving={draft.isSaving}
-            edited={edited}
-            setEditedLinkedin={draft.setEditedLinkedin}
-            setEditedFacebook={draft.setEditedFacebook}
-            setEditedTwitter={draft.setEditedTwitter}
-            onSave={handleSave}
-            onCopy={copy}
-            copiedKey={copiedKey}
-          />
+          {anySocialChannelActive && (
+            <SocialVariantTabs
+              activeAsset={activeAsset}
+              socialTab={displayedSocialTab}
+              setSocialTab={setSocialTab}
+              isEditingSocial={isEditingSocial}
+              setIsEditingSocial={setIsEditingSocial}
+              isSaving={draft.isSaving}
+              edited={edited}
+              setEditedLinkedin={draft.setEditedLinkedin}
+              setEditedFacebook={draft.setEditedFacebook}
+              setEditedTwitter={draft.setEditedTwitter}
+              onSave={handleSave}
+              onCopy={copy}
+              copiedKey={copiedKey}
+              enabledTabs={enabledSocialTabs}
+            />
+          )}
         </div>
 
         <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-6">
@@ -236,6 +256,7 @@ export default function EditorialStudio({
             onPublish={handlePublish}
             setToggleLiveConfirmOpen={setToggleLiveConfirmOpen}
             setDeleteConfirmOpen={setDeleteConfirmOpen}
+            blogEnabled={blogEnabled}
           />
 
           <ClaimsGate

@@ -112,6 +112,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
       <Sidebar
         navItems={navItems}
+        navCounts={navCounts}
         pathname={pathname}
         session={session}
         isHarvesting={isHarvesting}
@@ -129,6 +130,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         <MobileTopBar
           onOpenPalette={() => setShowPalette(true)}
           setMobileMenuOpen={setMobileMenuOpen}
+          navCounts={navCounts}
         />
 
         {notification && (

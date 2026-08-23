@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getPipelineFleet } from "@/services/agents";
 import { apiError } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
+import { findPlan } from "@/constants/plans";
 import type { NavCounts } from "@/types";
 
 /**
@@ -17,7 +18,11 @@ export async function GET() {
   if ("error" in ctx) return ctx.error;
 
   try {
-    const [ideasReady, pendingReview, publishedLive, directivesCount, fleet] =
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const [ideasReady, pendingReview, publishedLive, directivesCount, fleet, assetsThisMonth, subscription] =
       await Promise.all([
         prisma.idea.count({
           where: { clientId: ctx.clientId, status: { in: ["HARVESTED", "REFINED"] } },
@@ -26,7 +31,15 @@ export async function GET() {
         prisma.blog.count({ where: { clientId: ctx.clientId } }),
         prisma.brandDirective.count({ where: { clientId: ctx.clientId } }),
         getPipelineFleet(ctx.clientId).catch(() => []),
+        prisma.asset.count({ where: { clientId: ctx.clientId, createdAt: { gte: startOfMonth } } }),
+        prisma.subscription.findUnique({ where: { clientId: ctx.clientId }, select: { planKey: true } }),
       ]);
+
+    // No Subscription row yet (tenant-zero, or a trial that hasn't hit
+    // checkout) defaults to the lowest tier's limit rather than showing an
+    // unbounded meter.
+    const planKey = subscription?.planKey ?? "starter";
+    const plan = findPlan(planKey) ?? findPlan("starter")!;
 
     const counts: NavCounts = {
       ideasReady,
@@ -34,6 +47,11 @@ export async function GET() {
       publishedLive,
       directivesCount,
       activeAgents: fleet.filter((a) => a.status === "ACTIVE").length,
+      quota: {
+        used: assetsThisMonth,
+        limit: plan.limits.assetsPerMonth,
+        planKey: plan.key,
+      },
     };
 
     return NextResponse.json(counts);
