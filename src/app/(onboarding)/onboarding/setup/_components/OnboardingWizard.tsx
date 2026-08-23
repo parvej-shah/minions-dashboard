@@ -5,6 +5,7 @@ import { useOnboardingWizard, ONBOARDING_STEPS } from "@/hooks/useOnboardingWiza
 import StepIndustry from "./StepIndustry";
 import StepChannels from "./StepChannels";
 import StepVoice from "./StepVoice";
+import LivePreviewPanel from "./LivePreviewPanel";
 
 function ProgressHeader({ step }: { step: number }) {
   return (
@@ -61,8 +62,10 @@ export default function OnboardingWizard() {
     }
   }
 
+  const showPreview = wizard.industry.trim().length > 2 && wizard.icpDescription.trim().length > 15;
+
   return (
-    <div className="max-w-3xl mx-auto px-6 py-16">
+    <div className={`mx-auto px-6 py-16 ${showPreview ? "max-w-5xl" : "max-w-3xl"}`}>
       <div className="mb-10">
         <h1 className="text-3xl font-bold">Tell us who you write for</h1>
         <p className="mt-2 text-[#94A3B8]">This shapes every idea and draft the pipeline generates.</p>
@@ -70,35 +73,48 @@ export default function OnboardingWizard() {
 
       <ProgressHeader step={wizard.step} />
 
-      {wizard.step === 0 && <StepIndustry wizard={wizard} />}
-      {wizard.step === 1 && <StepChannels wizard={wizard} />}
-      {wizard.step === 2 && <StepVoice wizard={wizard} />}
+      <div className={`grid gap-8 ${showPreview ? "lg:grid-cols-[1fr_320px]" : "lg:grid-cols-1"}`}>
+        <div>
+          {wizard.step === 0 && <StepIndustry wizard={wizard} />}
+          {wizard.step === 1 && <StepChannels wizard={wizard} />}
+          {wizard.step === 2 && <StepVoice wizard={wizard} />}
 
-      {wizard.error && (
-        <div className="mt-6 rounded-lg border border-[#ff6b4a]/30 bg-[#ff6b4a]/10 px-4 py-3 text-sm text-[#ff6b4a]">
-          {wizard.error}
+          {wizard.error && (
+            <div className="mt-6 rounded-lg border border-[#ff6b4a]/30 bg-[#ff6b4a]/10 px-4 py-3 text-sm text-[#ff6b4a]">
+              {wizard.error}
+            </div>
+          )}
+
+          <div className="mt-8 flex items-center gap-3">
+            {wizard.step > 0 && (
+              <button
+                type="button"
+                onClick={wizard.goBack}
+                disabled={wizard.saving}
+                className="rounded-lg border border-[#1F2D3D] px-5 py-3 font-semibold text-[#94A3B8] hover:border-[#00C9A7] hover:text-[#F1F5F9] disabled:opacity-50"
+              >
+                Back
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={wizard.saving}
+              className="rounded-lg bg-[#00C9A7] px-6 py-3 font-semibold text-[#070B0F] hover:bg-[#00C9A7]/90 disabled:opacity-50"
+            >
+              {wizard.saving ? "Saving…" : wizard.step === 2 ? "Finish setup" : "Continue"}
+            </button>
+          </div>
         </div>
-      )}
 
-      <div className="mt-8 flex items-center gap-3">
-        {wizard.step > 0 && (
-          <button
-            type="button"
-            onClick={wizard.goBack}
-            disabled={wizard.saving}
-            className="rounded-lg border border-[#1F2D3D] px-5 py-3 font-semibold text-[#94A3B8] hover:border-[#00C9A7] hover:text-[#F1F5F9] disabled:opacity-50"
-          >
-            Back
-          </button>
+        {showPreview && (
+          <LivePreviewPanel
+            industry={wizard.industry}
+            icpDescription={wizard.icpDescription}
+            channels={wizard.channels}
+            formality={wizard.formality}
+          />
         )}
-        <button
-          type="button"
-          onClick={handleNext}
-          disabled={wizard.saving}
-          className="rounded-lg bg-[#00C9A7] px-6 py-3 font-semibold text-[#070B0F] hover:bg-[#00C9A7]/90 disabled:opacity-50"
-        >
-          {wizard.saving ? "Saving…" : wizard.step === 2 ? "Finish setup" : "Continue"}
-        </button>
       </div>
     </div>
   );
