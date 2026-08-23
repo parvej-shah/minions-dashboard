@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/useToast";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { buildNavItems } from "@/constants/nav";
 import type { PipelineTriggerResult } from "@/types";
+import ImpersonationBanner from "./ImpersonationBanner";
 
 export interface DashboardShellProps {
   children: React.ReactNode;
@@ -132,6 +133,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
       {/* MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col min-w-0">
+        <ImpersonationBanner />
         <MobileTopBar
           onOpenPalette={() => setShowPalette(true)}
           setMobileMenuOpen={setMobileMenuOpen}

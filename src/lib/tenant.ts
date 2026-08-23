@@ -50,7 +50,12 @@ export function isPlatformStaff(user: Pick<CurrentUser, "clientId" | "role">): b
  * For API routes: resolves the caller's clientId or returns a 401/403
  * response to return directly. Platform staff have no single tenant to scope
  * to, so they must not call routes that require one (they get a 403 rather
- * than silently reading every tenant's data).
+ * than silently reading every tenant's data) -- unless they've started a
+ * support "view as tenant" session (see /api/platform-admin/impersonate),
+ * in which case the impersonated clientId is used instead. Never mutates
+ * User.clientId to do this, so platform staff never actually lose their
+ * SYSTEM_ADMIN standing -- the impersonation cookie is the only thing that
+ * changes.
  */
 export async function requireClientId(): Promise<
   { clientId: string; user: CurrentUser } | { error: Response }
@@ -59,15 +64,42 @@ export async function requireClientId(): Promise<
   if (!user) {
     return { error: apiFailure("Unauthorized", 401) };
   }
-  if (!user.clientId) {
+  if (user.clientId) {
+    return { clientId: user.clientId, user };
+  }
+  if (isPlatformStaff(user)) {
+    const impersonating = await getImpersonatedClientId();
+    if (impersonating) return { clientId: impersonating, user };
     return {
-      error: apiFailure(
-        isPlatformStaff(user)
-          ? "Platform staff must use the platform-admin API, not tenant-scoped routes"
-          : "Account is not yet attached to a tenant",
-        403
-      ),
+      error: apiFailure("Platform staff must use the platform-admin API, or start a view-as-tenant session", 403),
     };
   }
-  return { clientId: user.clientId, user };
+  return { error: apiFailure("Account is not yet attached to a tenant", 403) };
 }
+
+/**
+ * For platform-admin-only API routes: 403s for anyone who isn't
+ * SYSTEM_ADMIN-with-no-tenant, so a route that lists every client's data
+ * can't accidentally be reached by a regular tenant user.
+ */
+export async function requirePlatformStaff(): Promise<
+  { user: CurrentUser } | { error: Response }
+> {
+  const user = await getCurrentUser();
+  if (!user) return { error: apiFailure("Unauthorized", 401) };
+  if (!isPlatformStaff(user)) {
+    return { error: apiFailure("Platform-admin access required", 403) };
+  }
+  return { user };
+}
+
+const IMPERSONATION_COOKIE = "pa_impersonate_client_id";
+
+/** Reads the active "view as tenant" cookie, if any -- see requireClientId(). */
+export async function getImpersonatedClientId(): Promise<string | null> {
+  const { cookies } = await import("next/headers");
+  const store = await cookies();
+  return store.get(IMPERSONATION_COOKIE)?.value ?? null;
+}
+
+export { IMPERSONATION_COOKIE };
