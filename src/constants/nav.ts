@@ -1,6 +1,7 @@
 import {
   BarChart3,
   Bot,
+  CalendarClock,
   CreditCard,
   FileText,
   Globe,
@@ -69,6 +70,11 @@ export function buildNavItems(counts: NavCounts | null): NavItem[] {
       icon: Bot,
       badge: counts ? `${counts.activeAgents} Active` : undefined,
       badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
+    },
+    {
+      name: "Schedule",
+      href: "/settings/schedule",
+      icon: CalendarClock,
     },
     {
       name: "Team",
