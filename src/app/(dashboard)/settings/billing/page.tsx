@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   CreditCard,
   ExternalLink,
@@ -8,10 +9,13 @@ import {
   CheckCircle2,
   ArrowUpRight,
   Gift,
+  RefreshCw,
 } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { LoadingState } from "@/components/ui/EmptyState";
-import { PLANS } from "@/constants/plans";
+import { useToast } from "@/hooks/useToast";
+import { apiClient, toErrorMessage } from "@/lib/api-client";
+import { PLANS, type PlanKey } from "@/constants/plans";
 import type { BillingPayload } from "@/types";
 
 const EMPTY_PAYLOAD: BillingPayload = {
@@ -33,6 +37,34 @@ export default function BillingPage() {
   const { data, isLoading } = useApiResource<BillingPayload>("/api/billing", EMPTY_PAYLOAD, {
     errorMessage: "Could not load billing details",
   });
+  const toast = useToast(4000);
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
+
+  function navigateTo(url: string) {
+    window.location.assign(url);
+  }
+
+  const openPortal = async () => {
+    setPendingAction("portal");
+    try {
+      const res = await apiClient.post<{ url: string }>("/api/billing/portal", {});
+      navigateTo(res.url);
+    } catch (err) {
+      toast.show(toErrorMessage(err, "Could not open the billing portal"));
+      setPendingAction(null);
+    }
+  };
+
+  const startCheckout = async (planKey: PlanKey) => {
+    setPendingAction(planKey);
+    try {
+      const res = await apiClient.post<{ url: string }>("/api/billing/checkout", { plan_key: planKey });
+      navigateTo(res.url);
+    } catch (err) {
+      toast.show(toErrorMessage(err, "Could not start checkout"));
+      setPendingAction(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -122,16 +154,21 @@ export default function BillingPage() {
           </div>
         </div>
 
-        {/* MANAGE SUBSCRIPTION — placeholder until Stripe is wired up */}
+        {/* MANAGE SUBSCRIPTION — live once Stripe is configured, placeholder until then */}
         <div className="pt-4 border-t border-[#1F2D3D]/60">
           {stripeConnected ? (
-            <a
-              href="#"
-              className="inline-flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2.5 rounded-xl transition-all"
+            <button
+              onClick={openPortal}
+              disabled={pendingAction === "portal"}
+              className="inline-flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2.5 rounded-xl transition-all disabled:opacity-60"
             >
+              {pendingAction === "portal" ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <ExternalLink className="w-3.5 h-3.5" />
+              )}
               <span>Manage Subscription</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+            </button>
           ) : (
             <div className="flex items-center gap-3">
               <button
@@ -154,31 +191,43 @@ export default function BillingPage() {
       <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
         <h3 className="text-sm font-bold text-[#F1F5F9]">Available Plans</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {PLANS.map((p) => (
-            <div
-              key={p.key}
-              className={`p-4 rounded-xl border space-y-2 ${
-                p.key === plan.key
-                  ? "border-[#00C9A7] bg-[#00C9A7]/5"
-                  : "border-[#1F2D3D] bg-[#161D26]"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-[#F1F5F9]">{p.name}</span>
-                {p.key === plan.key && <CheckCircle2 className="w-4 h-4 text-[#00C9A7]" />}
+          {PLANS.map((p) => {
+            const isCurrent = p.key === plan.key;
+            return (
+              <div
+                key={p.key}
+                className={`p-4 rounded-xl border space-y-2 ${
+                  isCurrent ? "border-[#00C9A7] bg-[#00C9A7]/5" : "border-[#1F2D3D] bg-[#161D26]"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-[#F1F5F9]">{p.name}</span>
+                  {isCurrent && <CheckCircle2 className="w-4 h-4 text-[#00C9A7]" />}
+                </div>
+                <p className="text-[11px] text-[#94A3B8] leading-relaxed">{p.description}</p>
+                <div className="text-[11px] font-mono text-[#64748B]">
+                  {p.limits.ideasPerWeek} ideas/wk · {p.limits.assetsPerMonth} posts/mo ·{" "}
+                  {p.limits.channels} channel{p.limits.channels > 1 ? "s" : ""}
+                </div>
+                {stripeConnected && !isCurrent && (
+                  <button
+                    onClick={() => startCheckout(p.key)}
+                    disabled={pendingAction === p.key}
+                    className="w-full mt-1 px-3 py-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#00C9A7] text-[11px] font-bold transition-all disabled:opacity-60"
+                  >
+                    {pendingAction === p.key ? "Redirecting…" : `Switch to ${p.name}`}
+                  </button>
+                )}
               </div>
-              <p className="text-[11px] text-[#94A3B8] leading-relaxed">{p.description}</p>
-              <div className="text-[11px] font-mono text-[#64748B]">
-                {p.limits.ideasPerWeek} ideas/wk · {p.limits.assetsPerMonth} posts/mo ·{" "}
-                {p.limits.channels} channel{p.limits.channels > 1 ? "s" : ""}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-        <p className="text-[11px] text-[#64748B] flex items-center gap-1.5">
-          <ArrowUpRight className="w-3 h-3 shrink-0" />
-          Plan changes will be available from the Manage Subscription portal once Stripe is connected.
-        </p>
+        {!stripeConnected && (
+          <p className="text-[11px] text-[#64748B] flex items-center gap-1.5">
+            <ArrowUpRight className="w-3 h-3 shrink-0" />
+            Plan changes will be available from the Manage Subscription portal once Stripe is connected.
+          </p>
+        )}
       </div>
 
       {/* INVOICE HISTORY — placeholder until Stripe is wired up */}
@@ -189,10 +238,18 @@ export default function BillingPage() {
         </h3>
         <div className="flex flex-col items-center justify-center text-center py-10 px-6 rounded-xl border border-dashed border-[#1F2D3D] bg-[#070B0F]/40">
           <p className="text-xs text-[#94A3B8] max-w-sm">
-            Invoices will appear here once Stripe billing is connected to this account.
+            {stripeConnected
+              ? "Manage invoices from the Stripe Billing Portal via “Manage Subscription” above."
+              : "Invoices will appear here once Stripe billing is connected to this account."}
           </p>
         </div>
       </div>
+
+      {toast.message && (
+        <div className="fixed bottom-6 right-6 z-50 bg-[#EF4444]/90 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold">
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 }

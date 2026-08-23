@@ -3,17 +3,18 @@ import { prisma } from "@/lib/prisma";
 import { apiError } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 import { findPlan } from "@/constants/plans";
+import { isStripeConfigured } from "@/lib/stripe";
 import type { BillingPayload } from "@/types";
 
 /**
  * Billing summary for the /settings/billing page.
  *
- * Stripe isn't wired up yet (Subscription's schema comment: "No billing is
- * wired up yet"), so `subscription` is null for every tenant today —
- * `stripeConnected: false` tells the page to render a placeholder instead of
- * a live "Manage Subscription" link and invoice list. The usage numbers are
- * real, reusing the same Asset-count-vs-plan-limit calculation /api/nav-counts
- * already does, so the two can never disagree.
+ * `stripeConnected` mirrors `isStripeConfigured()` (whether STRIPE_SECRET_KEY
+ * is set) rather than a hardcoded false, so the page starts rendering the
+ * real "Manage Subscription" / invoice-history UI the moment real keys land
+ * in `.env.local`, with no further code change. The usage numbers are real
+ * regardless, reusing the same Asset-count-vs-plan-limit calculation
+ * /api/nav-counts already does, so the two can never disagree.
  *
  * Business decision (2026-08-23): until real billing lands, every tenant
  * gets the Starter plan free for their first two months — there is nowhere
@@ -67,7 +68,7 @@ export async function GET() {
         : null,
       plan,
       quota: { used: assetsThisMonth, limit: plan.limits.assetsPerMonth },
-      stripeConnected: false,
+      stripeConnected: isStripeConfigured(),
       trialEndsAt,
       trialDaysLeft,
     };
