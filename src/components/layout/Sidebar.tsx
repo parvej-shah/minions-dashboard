@@ -21,6 +21,10 @@ export interface SidebarProps {
   onOpenAuthModal: () => void;
   onSignIn: () => void;
   onSignOut: () => void;
+  /** Whether this tenant has the blog channel switched on — a LinkedIn-only
+   *  tenant has nowhere for "View Live Blog" to send them. Undefined means
+   *  "not loaded yet"; defaults to true so the button doesn't flash away. */
+  blogEnabled?: boolean;
 }
 
 /** Desktop sidebar: branding, search trigger, harvest action, nav, and account. */
@@ -35,6 +39,7 @@ export default function Sidebar({
   onOpenAuthModal,
   onSignIn,
   onSignOut,
+  blogEnabled = true,
 }: SidebarProps) {
   return (
   <aside className="w-72 lg:w-76 bg-[#0f1419] border-r border-[#1f2b37] flex flex-col justify-between p-4 shrink-0 hidden md:flex sticky top-0 h-screen overflow-y-auto z-40">
@@ -121,20 +126,22 @@ export default function Sidebar({
 
     {/* SIDEBAR FOOTER (LIVE BLOG BUTTON + CLEAN USER PROFILE) */}
     <div className="pt-3 border-t border-[#1f2b37] space-y-2.5">
-      <a
-        href={`${BLOG_BASE_URL}/blog`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#ff6b4a]/10 hover:bg-[#ff6b4a]/20 border border-[#ff6b4a]/30 hover:border-[#ff6b4a] text-xs font-bold text-[#ff6b4a] transition-all group shadow-xs"
-      >
-        <div className="flex items-center gap-2 min-w-0">
-          <ArrowUpRight className="w-4 h-4 text-[#ff6b4a] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-          <span className="truncate">View Live Blog</span>
-        </div>
-        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#ff6b4a]/20 text-white">
-          getminions.ai ↗
-        </span>
-      </a>
+      {blogEnabled && (
+        <a
+          href={`${BLOG_BASE_URL}/blog`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#ff6b4a]/10 hover:bg-[#ff6b4a]/20 border border-[#ff6b4a]/30 hover:border-[#ff6b4a] text-xs font-bold text-[#ff6b4a] transition-all group shadow-xs"
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <ArrowUpRight className="w-4 h-4 text-[#ff6b4a] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <span className="truncate">View Live Blog</span>
+          </div>
+          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#ff6b4a]/20 text-white">
+            getminions.ai ↗
+          </span>
+        </a>
+      )}
 
       {session ? (
         <div className="w-full flex items-center justify-between text-xs p-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] text-[#94A3B8]">

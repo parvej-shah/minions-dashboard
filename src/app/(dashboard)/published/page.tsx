@@ -28,6 +28,7 @@ import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { channelOf, type SocialChannel } from "@/lib/channels";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useToast } from "@/hooks/useToast";
+import { useChannelSummary } from "@/hooks/useChannelSummary";
 
 export const dynamic = "force-dynamic";
 
@@ -42,7 +43,21 @@ export default function PublishedPostsPage() {
   } = useApiResource<PublishedPostRecord[]>("/api/published", [], {
     errorMessage: "Could not load the published feed",
   });
-  const [activeTab, setActiveTab] = useState<TabPlatform>("BLOG");
+  const channels = useChannelSummary();
+  const tabEnabled: Record<TabPlatform, boolean> = {
+    BLOG: channels?.blog ?? true,
+    LINKEDIN: channels?.linkedin ?? true,
+    FACEBOOK: channels?.facebook ?? true,
+    TWITTER: channels?.x ?? true,
+  };
+  const firstEnabledTab =
+    (Object.keys(tabEnabled) as TabPlatform[]).find((t) => tabEnabled[t]) ?? "BLOG";
+
+  const [rawActiveTab, setActiveTab] = useState<TabPlatform>("BLOG");
+  // If the selected tab isn't a channel this tenant connected (e.g. defaulted
+  // to Blog but only LinkedIn is on), fall back to the first one that is,
+  // without needing an effect to rewrite the underlying state.
+  const activeTab = tabEnabled[rawActiveTab] ? rawActiveTab : firstEnabledTab;
   const [audienceFilter, setAudienceFilter] = useState<string>("ALL");
   const [dateFilter, setDateFilter] = useState<string>("ALL");
   /**
@@ -205,12 +220,13 @@ export default function PublishedPostsPage() {
     0
   );
 
-  const tabs: { id: TabPlatform; label: string; count: number; icon: LucideIcon; color: string }[] = [
+  const allTabs: { id: TabPlatform; label: string; count: number; icon: LucideIcon; color: string }[] = [
     { id: "BLOG", label: "Blog Articles", count: feed.length, icon: Globe, color: "#00C9A7" },
     { id: "LINKEDIN", label: "LinkedIn Posts", count: linkedinReady, icon: Share2, color: "#3B82F6" },
     { id: "FACEBOOK", label: "Facebook Posts", count: facebookReady, icon: Share2, color: "#8B5CF6" },
     { id: "TWITTER", label: "X / Twitter Posts", count: twitterReady, icon: Share2, color: "#0EA5E9" },
   ];
+  const tabs = allTabs.filter((tab) => tabEnabled[tab.id]);
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
@@ -237,18 +253,20 @@ export default function PublishedPostsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3 self-start md:self-auto shrink-0">
-          <a
-            href="https://getminions.ai/blog"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/20 transition-all cursor-pointer"
-          >
-            <Globe className="w-3.5 h-3.5" />
-            <span>Open Live Blog</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
-          </a>
-        </div>
+        {tabEnabled.BLOG && (
+          <div className="flex items-center gap-3 self-start md:self-auto shrink-0">
+            <a
+              href="https://getminions.ai/blog"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/20 transition-all cursor-pointer"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>Open Live Blog</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </a>
+          </div>
+        )}
       </div>
 
       {/* Channel Switcher Tabs */}
@@ -386,7 +404,7 @@ export default function PublishedPostsPage() {
       ) : feed.length === 0 ? (
         <EmptyState
           title={error ? "Could not load the feed" : "No published posts yet"}
-          description={error ?? "Approved drafts appear here once they go live on the blog."}
+          description={error ?? "Approved drafts appear here once they go live."}
         />
       ) : filteredPosts.length === 0 ? (
         <div className="p-12 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] text-center space-y-3">

@@ -32,6 +32,9 @@ export interface MobileNavProps {
   onOpenAuthModal: () => void;
   onSignIn: () => void;
   onSignOut: () => void;
+  /** Whether this tenant has the blog channel switched on. Undefined means
+   *  "not loaded yet"; defaults to true so the blog links don't flash away. */
+  blogEnabled?: boolean;
 }
 
 /** The slide-over drawer, the compact top bar, and the fixed bottom tab bar. */
@@ -45,6 +48,7 @@ export function MobileDrawer({
   onOpenAuthModal,
   onSignIn,
   onSignOut,
+  blogEnabled = true,
 }: MobileNavProps) {
   return (
     <>
@@ -117,15 +121,17 @@ export function MobileDrawer({
         </div>
 
         <div className="space-y-3 pt-4 border-t border-[#1f2b37]">
-          <a
-            href={`${BLOG_BASE_URL}/blog`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#ff6b4a] text-white text-xs font-bold shadow-sm"
-          >
-            <span>View Live Blog</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
-          </a>
+          {blogEnabled && (
+            <a
+              href={`${BLOG_BASE_URL}/blog`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#ff6b4a] text-white text-xs font-bold shadow-sm"
+            >
+              <span>View Live Blog</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </a>
+          )}
 
           {session ? (
             <div className="w-full p-3 rounded-xl bg-[#161d24] border border-[#1f2b37] flex items-center justify-between text-xs">
@@ -176,7 +182,8 @@ export function MobileTopBar({
   onOpenPalette,
   setMobileMenuOpen,
   navCounts,
-}: Pick<MobileNavProps, "onOpenPalette" | "setMobileMenuOpen" | "navCounts">) {
+  blogEnabled = true,
+}: Pick<MobileNavProps, "onOpenPalette" | "setMobileMenuOpen" | "navCounts" | "blogEnabled">) {
   return (
   <header className="h-14 border-b border-[#1f2b37] bg-[#0f1419]/95 backdrop-blur-md px-4 flex items-center justify-between sticky top-0 z-30 md:hidden">
     <div className="flex items-center gap-2.5">
@@ -206,15 +213,17 @@ export function MobileTopBar({
         <Search className="w-4 h-4 text-[#00C9A7]" />
       </button>
 
-      <a
-        href={`${BLOG_BASE_URL}/blog`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-1 text-xs font-bold text-white bg-[#ff6b4a] px-2.5 py-1.5 rounded-lg shadow-sm"
-      >
-        <span>Blog</span>
-        <ArrowUpRight className="w-3 h-3" />
-      </a>
+      {blogEnabled && (
+        <a
+          href={`${BLOG_BASE_URL}/blog`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 text-xs font-bold text-white bg-[#ff6b4a] px-2.5 py-1.5 rounded-lg shadow-sm"
+        >
+          <span>Blog</span>
+          <ArrowUpRight className="w-3 h-3" />
+        </a>
+      )}
     </div>
   </header>
   );

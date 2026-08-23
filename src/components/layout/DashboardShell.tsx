@@ -9,6 +9,7 @@ import CommandPalette from "./CommandPalette";
 import Sidebar from "./Sidebar";
 import { MobileBottomNav, MobileDrawer, MobileTopBar } from "./MobileNav";
 import { useNavCounts } from "@/hooks/useNavCounts";
+import { useChannelSummary } from "@/hooks/useChannelSummary";
 import { useToast } from "@/hooks/useToast";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { buildNavItems } from "@/constants/nav";
@@ -40,6 +41,8 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
   const navCounts = useNavCounts();
   const navItems = buildNavItems(navCounts);
+  const channels = useChannelSummary();
+  const blogEnabled = channels?.blog ?? true;
   const { message: notification, show: notify, clear: clearNotification } = useToast(6000);
 
   const triggerHarvest = useCallback(async () => {
@@ -97,6 +100,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
     onOpenAuthModal: () => setAuthModalOpen(true),
     onSignIn: handleSignIn,
     onSignOut: handleSignOut,
+    blogEnabled,
   };
 
   return (
@@ -121,6 +125,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         onOpenAuthModal={() => setAuthModalOpen(true)}
         onSignIn={handleSignIn}
         onSignOut={handleSignOut}
+        blogEnabled={blogEnabled}
       />
 
       <MobileDrawer {...mobileNavProps} />
