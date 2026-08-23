@@ -15,12 +15,15 @@ function parseRange(value: string | null): TelemetryRange {
 }
 
 /**
- * Cost ledger for a time window, aggregated server-side over `assets.created_at`.
+ * Content ledger for a time window, aggregated server-side over `assets.created_at`.
  *
  * Every figure here comes from a real column. Token meters and latency traces
  * are deliberately absent: the schema records neither, and the previous version
  * of this route derived them from the word count and the row index, which made
- * invented numbers look like measurements.
+ * invented numbers look like measurements. The summary reports content-value
+ * metrics (words generated, claims verified, publishing velocity) instead of
+ * internal infra measurements, since those are what a tenant reviewing their
+ * own account actually cares about — not token counts or model latency.
  */
 export async function GET(request: NextRequest) {
   const ctx = await requireClientId();
@@ -40,6 +43,9 @@ export async function GET(request: NextRequest) {
         audience: true,
         generationCost: true,
         createdAt: true,
+        content: true,
+        publishedAt: true,
+        claims: { select: { verified: true } },
       },
     });
 
@@ -52,6 +58,24 @@ export async function GET(request: NextRequest) {
     }));
 
     const totalCost = ledger.reduce((acc, row) => acc + row.total_cost, 0);
+    const wordsGenerated = assets.reduce(
+      (acc, a) => acc + a.content.trim().split(/\s+/).filter(Boolean).length,
+      0
+    );
+    const allClaims = assets.flatMap((a) => a.claims);
+    const claimsVerified = allClaims.filter((c) => c.verified === "Y").length;
+    const publishedCount = assets.filter((a) => a.publishedAt !== null).length;
+
+    // Normalize published count to a per-week rate. "all" has no fixed
+    // window, so use the actual span from the oldest asset in this tenant's
+    // history to now instead of guessing a period length.
+    let windowDays: number | null = windowMs !== null ? windowMs / (24 * 60 * 60 * 1000) : null;
+    if (windowDays === null) {
+      const oldest = assets.length > 0 ? assets[assets.length - 1].createdAt : null;
+      windowDays = oldest ? (Date.now() - oldest.getTime()) / (24 * 60 * 60 * 1000) : null;
+    }
+    const publishingVelocityPerWeek =
+      windowDays && windowDays > 0 ? +((publishedCount / windowDays) * 7).toFixed(1) : null;
 
     const payload: TelemetryPayload = {
       range,
@@ -61,9 +85,11 @@ export async function GET(request: NextRequest) {
         avgCostPerAsset: ledger.length > 0 ? +(totalCost / ledger.length).toFixed(4) : null,
         totalPeriodSpend: ledger.length > 0 ? +totalCost.toFixed(4) : null,
         totalAssetsGenerated: ledger.length,
-        // No token or latency columns exist. Null, not an estimate.
-        totalFleetTokens: null,
-        pipelineLatencyMs: null,
+        wordsGenerated,
+        claimsVerified,
+        claimsTotal: allClaims.length,
+        publishedCount,
+        publishingVelocityPerWeek,
       },
     };
 

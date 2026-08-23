@@ -57,7 +57,7 @@ export function buildNavItems(counts: NavCounts | null): NavItem[] {
       badgeColor: "bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/30",
     },
     {
-      name: "Cost & Telemetry",
+      name: "Content Performance",
       href: "/telemetry",
       icon: BarChart3,
     },

@@ -1,5 +1,5 @@
 /**
- * One row of the generation cost ledger, as returned by /api/telemetry.
+ * One row of the content ledger, as returned by /api/telemetry.
  * This replaces the previously divergent `TelemetryRow` / `TelemetryItem` pair.
  *
  * Only fields that exist as real columns on `assets` appear here. The route
@@ -7,7 +7,9 @@
  * from the word count (`words * 1.35 * 6.2`, split 11/62/27) and `latency_ms`
  * from the row index (`1350 + idx * 45`), then present both as measurements.
  * The schema has no token or latency columns, so those are gone rather than
- * guessed. Reinstate them as real fields when the pipeline records them.
+ * guessed — the summary metrics instead report the content-value figures a
+ * tenant actually cares about (words generated, claims verified, publishing
+ * velocity), not internal infra measurements.
  */
 export interface TelemetryRow {
   asset_id: string;
@@ -23,10 +25,17 @@ export interface TelemetrySummary {
   avgCostPerAsset: number | null;
   totalPeriodSpend: number | null;
   totalAssetsGenerated: number;
-  /** Not recorded anywhere in the schema today; always null. */
-  totalFleetTokens: number | null;
-  /** Not recorded anywhere in the schema today; always null. */
-  pipelineLatencyMs: number | null;
+  /** Sum of word counts across every asset's content in the window. */
+  wordsGenerated: number;
+  /** Claims with verified = 'Y' out of every claim recorded on assets in the window. */
+  claimsVerified: number;
+  claimsTotal: number;
+  /** Assets with a non-null published_at in the window. */
+  publishedCount: number;
+  /** publishedCount normalized to a per-week rate. Null when the window has
+   *  no elapsed time to normalize against (a brand new tenant with no assets
+   *  yet, on the "all" range). */
+  publishingVelocityPerWeek: number | null;
 }
 
 export interface TelemetryPayload {

@@ -3,21 +3,18 @@
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  Activity,
   DollarSign,
-  Cpu,
-  Clock,
+  Type,
+  ShieldCheck,
+  Zap,
   Download,
   CheckCircle2,
-  BarChart3,
   FileSpreadsheet,
   ArrowUpRight,
-  Info,
 } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import EmptyState, { LoadingState } from "@/components/ui/EmptyState";
-import { formatCost, formatSpend, NOT_AVAILABLE } from "@/utils/format";
-import { MODEL_RATE_CARD } from "@/constants/config";
+import { formatCost, NOT_AVAILABLE } from "@/utils/format";
 import {
   TELEMETRY_RANGES,
   TELEMETRY_RANGE_LABELS,
@@ -33,8 +30,11 @@ const EMPTY_PAYLOAD: TelemetryPayload = {
     avgCostPerAsset: null,
     totalPeriodSpend: null,
     totalAssetsGenerated: 0,
-    totalFleetTokens: null,
-    pipelineLatencyMs: null,
+    wordsGenerated: 0,
+    claimsVerified: 0,
+    claimsTotal: 0,
+    publishedCount: 0,
+    publishingVelocityPerWeek: null,
   },
 };
 
@@ -105,13 +105,13 @@ export default function TelemetryPage() {
         <div>
           <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#00C9A7] uppercase mb-1">
             <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
-            Infrastructure &amp; Unit Economics
+            Content ROI &amp; Velocity
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-[#F1F5F9]">
-            Cost &amp; Generation Telemetry
+            Content Performance
           </h1>
           <p className="text-sm text-[#94A3B8] mt-1">
-            Auditable cost ledger aggregated from recorded generation runs.
+            What the pipeline has actually produced and published, aggregated from your account&apos;s runs.
           </p>
         </div>
 
@@ -152,8 +152,55 @@ export default function TelemetryPage() {
         </div>
       </div>
 
-      {/* KPI TILES — real columns only. Tokens and latency are not recorded. */}
+      {/* KPI TILES — content value a tenant actually cares about, not internal infra measurements. */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-2 shadow-sm">
+          <div className="flex items-center justify-between text-xs font-mono text-[#94A3B8]">
+            <span>WORDS GENERATED</span>
+            <Type className="w-4 h-4 text-[#3B82F6]" />
+          </div>
+          <div className="text-2xl font-bold text-[#F1F5F9]">
+            {isLoading ? NOT_AVAILABLE : summaryData.wordsGenerated.toLocaleString()}
+          </div>
+          <div className="text-[11px] text-[#64748B]">
+            Across {summaryData.totalAssetsGenerated} draft{summaryData.totalAssetsGenerated === 1 ? "" : "s"} {rangePhrase}
+          </div>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-2 shadow-sm">
+          <div className="flex items-center justify-between text-xs font-mono text-[#94A3B8]">
+            <span>CLAIMS VERIFIED</span>
+            <ShieldCheck className="w-4 h-4 text-[#00C9A7]" />
+          </div>
+          <div className="text-2xl font-bold text-[#F1F5F9]">
+            {isLoading
+              ? NOT_AVAILABLE
+              : summaryData.claimsTotal > 0
+                ? `${summaryData.claimsVerified} / ${summaryData.claimsTotal}`
+                : "—"}
+          </div>
+          <div className="text-[11px] text-[#64748B]">
+            {summaryData.claimsTotal > 0
+              ? `${Math.round((summaryData.claimsVerified / summaryData.claimsTotal) * 100)}% of factual claims sourced ${rangePhrase}`
+              : `No claims recorded ${rangePhrase}`}
+          </div>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-2 shadow-sm">
+          <div className="flex items-center justify-between text-xs font-mono text-[#94A3B8]">
+            <span>PUBLISHING VELOCITY</span>
+            <Zap className="w-4 h-4 text-[#F59E0B]" />
+          </div>
+          <div className="text-2xl font-bold text-[#F1F5F9]">
+            {isLoading || summaryData.publishingVelocityPerWeek === null
+              ? NOT_AVAILABLE
+              : `${summaryData.publishingVelocityPerWeek}/wk`}
+          </div>
+          <div className="text-[11px] text-[#64748B]">
+            {summaryData.publishedCount} published {rangePhrase}
+          </div>
+        </div>
+
         <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-2 shadow-sm">
           <div className="flex items-center justify-between text-xs font-mono text-[#94A3B8]">
             <span>AVG COST / ASSET</span>
@@ -162,77 +209,7 @@ export default function TelemetryPage() {
           <div className="text-2xl font-bold text-[#F1F5F9]">
             {isLoading ? NOT_AVAILABLE : formatCost(summaryData.avgCostPerAsset)}
           </div>
-          <div className="text-[11px] text-[#64748B]">
-            Recorded generation cost {rangePhrase}
-          </div>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-2 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-mono text-[#94A3B8]">
-            <span>TOTAL FLEET TOKENS</span>
-            <Cpu className="w-4 h-4 text-[#3B82F6]" />
-          </div>
-          <div className="text-2xl font-bold text-[#64748B]">{NOT_AVAILABLE}</div>
-          <div className="text-[11px] text-[#64748B]">
-            Not recorded — the pipeline does not report token counts
-          </div>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-2 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-mono text-[#94A3B8]">
-            <span>PIPELINE LATENCY</span>
-            <Clock className="w-4 h-4 text-[#F59E0B]" />
-          </div>
-          <div className="text-2xl font-bold text-[#64748B]">{NOT_AVAILABLE}</div>
-          <div className="text-[11px] text-[#64748B]">
-            Not recorded — no run duration is persisted
-          </div>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-2 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-mono text-[#94A3B8]">
-            <span>TOTAL PERIOD SPEND</span>
-            <Activity className="w-4 h-4 text-[#00C9A7]" />
-          </div>
-          <div className="text-2xl font-bold text-[#00C9A7] flex items-baseline gap-2">
-            <span>{isLoading ? NOT_AVAILABLE : formatSpend(summaryData.totalPeriodSpend)}</span>
-            <span className="text-xs font-mono text-[#64748B] font-normal">USD</span>
-          </div>
-          <div className="text-[11px] text-[#94A3B8]">{spendSubtext}</div>
-        </div>
-      </div>
-
-      {/* MODEL RATE CARD — operator-maintained list prices, not measurements. */}
-      <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <h3 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-[#00C9A7]" />
-            <span>Model Routing &amp; Published Unit Rates</span>
-          </h3>
-          <span className="text-[11px] font-mono text-[#64748B] flex items-center gap-1.5">
-            <Info className="w-3.5 h-3.5 shrink-0" />
-            Operator-maintained reference — not measured spend
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {MODEL_RATE_CARD.map((entry) => (
-            <div
-              key={entry.model}
-              className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-2"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold font-mono" style={{ color: entry.accent }}>
-                  {entry.model}
-                </span>
-                <span className="text-[10px] font-mono bg-[#1E2733] text-[#94A3B8] border border-[#1F2D3D] px-1.5 py-0.5 rounded shrink-0">
-                  {entry.stage}
-                </span>
-              </div>
-              <div className="text-xs font-mono text-[#F1F5F9] font-bold">{entry.rate}</div>
-              <p className="text-[11px] text-[#94A3B8] leading-relaxed">{entry.role}</p>
-            </div>
-          ))}
+          <div className="text-[11px] text-[#64748B]">{spendSubtext}</div>
         </div>
       </div>
 
