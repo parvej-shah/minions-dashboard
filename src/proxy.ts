@@ -46,11 +46,25 @@ const gateHandler = auth(async (req) => {
     return NextResponse.next();
   }
 
-  // 1.5 Redirect logged-in users with a clientId away from /onboarding and /login
-  if (pathname.startsWith("/login") || pathname.startsWith("/onboarding")) {
+  // 1.5 Redirect logged-in users with a clientId away from /login and the bare
+  // /onboarding landing page (sign-in + company/plan) -- but NOT away from
+  // /onboarding/setup or /onboarding/done. Those two pages are for a user who
+  // *just* got a clientId attached (the landing page's own "create client"
+  // step sets it) and are mid-flow or wrapping up, not someone who needs to
+  // be bounced back to the dashboard. Getting this wrong is a real bug that
+  // shipped once already: with pathname.startsWith("/onboarding") matching
+  // all three onboarding pages, and the jwt() callback now always re-reading
+  // clientId from the DB on every session check (see src/lib/auth.ts), the
+  // very next server round-trip after company creation would see the fresh
+  // clientId and immediately redirect the user out of setup/setup before
+  // they configured anything.
+  if (pathname === "/login" || pathname === "/onboarding") {
     if (isLoggedIn && sessionUser?.clientId) {
       return NextResponse.redirect(new URL("/", req.nextUrl.origin));
     }
+    return NextResponse.next();
+  }
+  if (pathname.startsWith("/onboarding")) {
     return NextResponse.next();
   }
 
@@ -88,12 +102,13 @@ const gateHandler = auth(async (req) => {
   // row with clientId: null; the onboarding wizard's plan-selection step is
   // what attaches a Client). Send them there instead of into the dashboard.
   //
-  // The JWT's own clientId can be stale here: it's only refreshed on sign-in
-  // or an explicit client-side update() call, and that update() trigger
-  // proved unreliable in this NextAuth beta (confirmed live — a session
-  // could still read clientId: null well after the DB had the real value).
-  // A DB re-check only runs in this one branch, i.e. only for a session that
-  // looks tenant-less — everyone else's page loads stay JWT-only and fast.
+  // src/lib/auth.ts's jwt() callback always re-reads clientId/role from the
+  // DB now, but middleware's req.auth may be decoding the session cookie
+  // without running that callback (this repo's own edge/middleware auth
+  // path has been observed to lag a fresh DB write before). This extra
+  // re-check costs one indexed lookup, only in this one branch -- i.e. only
+  // for a session that looks tenant-less -- so everyone else's page loads
+  // stay fast.
   const isPlatformStaff = sessionUser?.clientId === null && sessionUser?.role === "SYSTEM_ADMIN";
   if (sessionUser && !sessionUser.clientId && !isPlatformStaff) {
     const freshUser = await prisma.user
