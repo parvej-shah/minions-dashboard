@@ -8,10 +8,10 @@ export const TONE_FORMALITY_OPTIONS = [
 ] as const;
 export type ToneFormality = (typeof TONE_FORMALITY_OPTIONS)[number];
 
-export const ONBOARDING_STEPS = ["Audience", "Channels", "Voice"] as const;
+export const ONBOARDING_STEPS = ["Audience", "Channels", "Voice", "Plan"] as const;
 
 /**
- * All state for the 3-step onboarding wizard, plus the two save points.
+ * All state for the 4-step onboarding wizard, plus the two save points.
  *
  * Save-as-you-go, not batched at the end: step 2 (Channels) posts
  * industry+icp+channels together (matching /api/onboarding/setup's existing
@@ -21,6 +21,13 @@ export const ONBOARDING_STEPS = ["Audience", "Channels", "Voice"] as const;
  * /api/onboarding/setup's fix for the ICP_PROFILE/IDENTITY directive rows.
  * Back navigation itself never calls the API; only the next forward "Next"
  * re-saves.
+ *
+ * Step 4 (Plan) has no save point of its own -- plan_key was already fixed
+ * to "starter" at company creation (see onboarding/page.tsx) and isn't
+ * persisted anywhere yet regardless (nothing to send). It's a confirmation
+ * screen, placed last on purpose: asking someone to pick a tier before
+ * they've seen anything the product does is pure friction for a choice
+ * that doesn't functionally do anything today anyway.
  */
 export function useOnboardingWizard() {
   const [step, setStep] = useState(0);
@@ -74,12 +81,12 @@ export function useOnboardingWizard() {
     }
   }
 
-  async function submitVoice(): Promise<boolean> {
+  async function goNextFromVoice() {
     setError(null);
     const filledExamples = examples.map((e) => e.trim()).filter(Boolean);
     if (filledExamples.length > 0 && filledExamples.length < 3) {
       setError("Paste at least 3 example posts, or leave all of them blank.");
-      return false;
+      return;
     }
     setSaving(true);
     try {
@@ -87,10 +94,9 @@ export function useOnboardingWizard() {
         tone_questionnaire: { formality },
         examples: filledExamples.length >= 3 ? filledExamples : [],
       });
-      return true;
+      setStep(3);
     } catch (err) {
       setError(toErrorMessage(err, "Could not save that step. Try again."));
-      return false;
     } finally {
       setSaving(false);
     }
@@ -113,7 +119,7 @@ export function useOnboardingWizard() {
     goBack,
     goNextFromIndustry,
     goNextFromChannels,
-    submitVoice,
+    goNextFromVoice,
   };
 }
 

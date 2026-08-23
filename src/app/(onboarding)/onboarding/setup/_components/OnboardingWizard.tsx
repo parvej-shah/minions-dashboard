@@ -5,6 +5,7 @@ import { useOnboardingWizard, ONBOARDING_STEPS } from "@/hooks/useOnboardingWiza
 import StepIndustry from "./StepIndustry";
 import StepChannels from "./StepChannels";
 import StepVoice from "./StepVoice";
+import StepPlan from "./StepPlan";
 import LivePreviewPanel from "./LivePreviewPanel";
 
 function ProgressHeader({ step }: { step: number }) {
@@ -56,9 +57,10 @@ export default function OnboardingWizard() {
       await wizard.goNextFromIndustry();
     } else if (wizard.step === 1) {
       await wizard.goNextFromChannels();
+    } else if (wizard.step === 2) {
+      await wizard.goNextFromVoice();
     } else {
-      const ok = await wizard.submitVoice();
-      if (ok) router.push("/onboarding/done");
+      router.push("/onboarding/done");
     }
   }
 
@@ -78,6 +80,7 @@ export default function OnboardingWizard() {
           {wizard.step === 0 && <StepIndustry wizard={wizard} />}
           {wizard.step === 1 && <StepChannels wizard={wizard} />}
           {wizard.step === 2 && <StepVoice wizard={wizard} />}
+          {wizard.step === 3 && <StepPlan />}
 
           {wizard.error && (
             <div className="mt-6 rounded-lg border border-[#ff6b4a]/30 bg-[#ff6b4a]/10 px-4 py-3 text-sm text-[#ff6b4a]">
@@ -102,7 +105,7 @@ export default function OnboardingWizard() {
               disabled={wizard.saving}
               className="rounded-lg bg-[#00C9A7] px-6 py-3 font-semibold text-[#070B0F] hover:bg-[#00C9A7]/90 disabled:opacity-50"
             >
-              {wizard.saving ? "Saving…" : wizard.step === 2 ? "Finish setup" : "Continue"}
+              {wizard.saving ? "Saving…" : wizard.step === 3 ? "Finish setup" : "Continue"}
             </button>
           </div>
         </div>
