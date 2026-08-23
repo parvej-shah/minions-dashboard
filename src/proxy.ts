@@ -46,6 +46,19 @@ const gateHandler = auth(async (req) => {
     return NextResponse.next();
   }
 
+  // 1.6 n8n's own callback into a PipelineRun (server-to-server, no browser
+  // session to present) -- this blanket gate blocked it with a 401 for as
+  // long as the PipelineRun feature has existed: every harvest/draft run
+  // got stuck at RUNNING forever because n8n's "Callback Harvested"/
+  // "Callback Completed" node could never actually reach this route. GET
+  // stays behind the normal auth gate below (the route itself also calls
+  // requireClientId() for GET); only PATCH -- the callback -- is exempted,
+  // matching /api/webhooks' existing no-auth-required treatment of other
+  // n8n-initiated writes.
+  if (req.method === "PATCH" && /^\/api\/pipeline\/runs\/[^/]+$/.test(pathname)) {
+    return NextResponse.next();
+  }
+
   // 1.5 Redirect logged-in users with a clientId away from /login and the bare
   // /onboarding landing page (sign-in + company/plan) -- but NOT away from
   // /onboarding/setup or /onboarding/done. Those two pages are for a user who

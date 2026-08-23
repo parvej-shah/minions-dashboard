@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { apiFailure } from "@/lib/api-response";
 import { triggerN8nWorkflow } from "@/services/pipeline";
 import { requireClientId } from "@/lib/tenant";
+import { requireOneOfEnv } from "@/lib/env";
 
 /**
  * Triggers the live 02_idea_to_asset workflow in n8n.
@@ -68,7 +69,7 @@ export async function POST(request: Request) {
       trade: body.target_trade ?? null,
       trigger_source: "MINIONS_COCKPIT_EDITORIAL",
       run_id: run.id,
-      callback_url: `${process.env.NEXTAUTH_URL}/api/pipeline/runs/${run.id}`
+      callback_url: `${requireOneOfEnv("NEXT_PUBLIC_APP_URL", "NEXTAUTH_URL")}/api/pipeline/runs/${run.id}`
     },
     {
       failure:
