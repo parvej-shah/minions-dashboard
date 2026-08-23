@@ -7,6 +7,17 @@ export const metadata: Metadata = {
   description: "Executive Content Staging, Typography Reading Lane, Claims Gate & Omnichannel Broadcast Command",
 };
 
-export default function EditorialPage() {
-  return <EditorialStudio isStandaloneRoute={false} />;
+interface EditorialPageProps {
+  searchParams: Promise<{ id?: string }>;
+}
+
+/**
+ * `?id=` deep-links a specific draft (e.g. Published page's "Studio" link,
+ * and /drafts/[id]'s redirect here). Previously silently ignored — this page
+ * never read the param, so every deep link landed on whatever draft the
+ * queue happened to select first instead of the intended one.
+ */
+export default async function EditorialPage({ searchParams }: EditorialPageProps) {
+  const { id } = await searchParams;
+  return <EditorialStudio initialDraftId={id} isStandaloneRoute={false} />;
 }
