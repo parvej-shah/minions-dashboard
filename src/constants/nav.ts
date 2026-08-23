@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Palette,
   Sparkles,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 import type { NavCounts } from "@/types";
@@ -68,6 +69,11 @@ export function buildNavItems(counts: NavCounts | null): NavItem[] {
       icon: Bot,
       badge: counts ? `${counts.activeAgents} Active` : undefined,
       badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
+    },
+    {
+      name: "Team",
+      href: "/settings/team",
+      icon: Users,
     },
     {
       name: "Billing",

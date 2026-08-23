@@ -32,13 +32,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
       const cleanEmail = user.email.trim().toLowerCase();
 
       // Membership, not a whitelist: sign-in succeeds for an email that
-      // already has a `User` row, OR for a brand new email arriving via the
+      // already has a `User` row, for a brand new email arriving via the
       // onboarding wizard specifically (src/lib/onboarding.ts's signed
-      // cookie, set only when the user clicked "Start free trial"). Without
-      // that cookie check, any Google account hitting /login could silently
-      // provision itself a bare User row.
+      // cookie, set only when the user clicked "Start free trial"), or for
+      // an email with a pending team invite (a ClientMembership row with no
+      // userId yet — see /api/team/invite). Without one of those checks, any
+      // Google account hitting /login could silently provision itself a
+      // bare User row.
       const dbUser = await prisma.user.findUnique({ where: { email: cleanEmail } });
       if (dbUser) return true;
+
+      const pendingInvite = await prisma.clientMembership.findFirst({
+        where: { email: cleanEmail, userId: null },
+        orderBy: { invitedAt: "asc" },
+      });
+      if (pendingInvite) {
+        // Joining an existing tenant, not creating one: the invite's own
+        // clientId/role become this user's active workspace immediately,
+        // skipping the onboarding wizard entirely.
+        const newUser = await prisma.user.create({
+          data: {
+            email: cleanEmail,
+            name: user.name ?? null,
+            clientId: pendingInvite.clientId,
+            role: pendingInvite.role,
+          },
+        });
+        await prisma.clientMembership.update({
+          where: { id: pendingInvite.id },
+          data: { userId: newUser.id, acceptedAt: new Date() },
+        });
+        return true;
+      }
 
       const isPendingSignup = await consumePendingSignup().catch(() => false);
       if (!isPendingSignup) {

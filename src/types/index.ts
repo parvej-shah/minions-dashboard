@@ -6,4 +6,5 @@ export * from "./brand";
 export * from "./channel";
 export * from "./idea";
 export * from "./published";
+export * from "./team";
 export * from "./telemetry";

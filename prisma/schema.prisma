@@ -44,6 +44,7 @@ model Client {
   toneExamples    ToneExample[]
   subscription    Subscription?
   usageEvents     UsageEvent[]
+  memberships     ClientMembership[]
 
   @@map("clients")
 }
@@ -52,15 +53,50 @@ model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
-  clientId  String?  @map("client_id") // null = platform staff, not tied to a tenant
-  role      String   @default("MEMBER") // OWNER | MARKETING_DIRECTOR | MEMBER | SYSTEM_ADMIN
+  clientId  String?  @map("client_id") // the user's *active* workspace; null = platform staff or an invited member who hasn't accepted yet
+  role      String   @default("MEMBER") // OWNER | MARKETING_DIRECTOR | MEMBER | SYSTEM_ADMIN -- role within the active (clientId) workspace
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  client Client? @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client      Client?            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  memberships ClientMembership[]
 
   @@index([clientId])
   @@map("users")
+}
+
+/**
+ * Every (user, client, role) a person belongs to — the record a "workspace
+ * switcher" reads, distinct from `User.clientId`/`role` which are just
+ * *which one is currently active*. Phase 1 gave every user exactly one
+ * `clientId`; this is the minimal extension for one login managing several
+ * clients (an agency) without widening `User` itself, so the common
+ * single-tenant case (one row here per user) stays a simple lookup and only
+ * agency accounts pay the extra join.
+ *
+ * `userId` is nullable because an invite is written before the invitee has
+ * ever signed in — keyed by `email` until then. `auth.ts`'s signIn callback
+ * resolves it to a real `userId` (and sets `acceptedAt`) on their first
+ * matching sign-in, mirroring the existing "unknown email rejected at
+ * sign-in" rule with one exception: an email with a pending invite here is
+ * let through.
+ */
+model ClientMembership {
+  id         String    @id @default(cuid())
+  userId     String?   @map("user_id")
+  email      String // lowercase; the invite target before userId resolves, kept afterward for display
+  clientId   String    @map("client_id")
+  role       String    @default("MEMBER") // OWNER | MARKETING_DIRECTOR | MEMBER
+  invitedAt  DateTime  @default(now()) @map("invited_at")
+  acceptedAt DateTime? @map("accepted_at")
+
+  user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([email, clientId])
+  @@index([userId])
+  @@index([clientId])
+  @@map("client_memberships")
 }
 
 model ClientChannel {

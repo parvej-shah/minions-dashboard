@@ -51,10 +51,25 @@ export async function POST(request: Request) {
       data: { name, slug, status: "ACTIVE" },
     });
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { clientId: client.id, role: "OWNER" },
-    });
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: user.id },
+        data: { clientId: client.id, role: "OWNER" },
+      }),
+      // The owner's own ClientMembership row -- keeps them consistent with
+      // anyone invited later (see /api/team/invite), so /api/team lists them
+      // as a member of their own tenant and the workspace switcher (Phase
+      // 4.5) can find every client a user belongs to from one table.
+      prisma.clientMembership.create({
+        data: {
+          userId: user.id,
+          email: user.email,
+          clientId: client.id,
+          role: "OWNER",
+          acceptedAt: new Date(),
+        },
+      }),
+    ]);
 
     return NextResponse.json({ id: client.id, slug: client.slug, plan_key: plan.key }, { status: 201 });
   } catch (error) {

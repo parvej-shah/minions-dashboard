@@ -9,6 +9,7 @@ import type { NavItem } from "@/constants/nav";
 import type { NavCounts } from "@/types";
 import type { Session } from "next-auth";
 import QuotaMeter from "./QuotaMeter";
+import WorkspaceSwitcher from "./WorkspaceSwitcher";
 
 export interface SidebarProps {
   navItems: NavItem[];
@@ -55,6 +56,8 @@ export default function Sidebar({
           </span>
         </Link>
       </div>
+
+      {session && <WorkspaceSwitcher />}
 
       {navCounts && <QuotaMeter quota={navCounts.quota} />}
 
