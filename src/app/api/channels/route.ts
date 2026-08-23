@@ -8,6 +8,24 @@ import {
 import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 import type { DistributionChannelConfig, DistributionChannelsPayload } from "@/types";
+import type { ClientChannel } from "@prisma/client";
+
+/**
+ * Per-tenant, not the catalogue's static copy -- DISTRIBUTION_CHANNELS used
+ * to be served verbatim here, which meant every tenant's channel cards
+ * showed getminions.ai's own blog/social handles ("facebook.com/
+ * getminionsai") regardless of whose tenant it was. Blog has no readable
+ * destination to show even once connected (the webhook URL is vaulted, not
+ * stored in Postgres), so this only ever distinguishes "connected" from
+ * "not yet."
+ */
+function targetDestinationFor(key: string, row: ClientChannel | undefined): string {
+  if (key === "blog") {
+    return row?.credentialRef ? "Your own site (connected)" : "Shared hosted blog";
+  }
+  if (row?.externalId) return `Connected (${row.externalId})`;
+  return row?.credentialRef ? "Connected" : "Not connected yet";
+}
 
 /**
  * Distribution channels, one `client_channels` row per (tenant, channel).
@@ -44,18 +62,21 @@ export async function GET() {
       }
     }
 
-    const channels: DistributionChannelConfig[] = DISTRIBUTION_CHANNELS.map((def) => ({
-      id: def.id,
-      key: def.key,
-      name: def.name,
-      platform: def.platform,
-      description: def.description,
-      is_active: byKey.get(def.key)?.isActive ?? def.defaultActive,
-      target_destination: def.target_destination,
-      badge: def.badge,
-      has_credential: !!byKey.get(def.key)?.credentialRef,
-      external_id: byKey.get(def.key)?.externalId ?? null,
-    }));
+    const channels: DistributionChannelConfig[] = DISTRIBUTION_CHANNELS.map((def) => {
+      const row = byKey.get(def.key);
+      return {
+        id: def.id,
+        key: def.key,
+        name: def.name,
+        platform: def.platform,
+        description: def.description,
+        is_active: row?.isActive ?? def.defaultActive,
+        target_destination: targetDestinationFor(def.key, row),
+        badge: def.badge,
+        has_credential: !!row?.credentialRef,
+        external_id: row?.externalId ?? null,
+      };
+    });
 
     const payload: DistributionChannelsPayload = {
       channels,

@@ -20,16 +20,27 @@ export interface DistributionChannelDefinition {
   badge: string;
 }
 
+/**
+ * `target_destination` here is only the fallback shown before a tenant has
+ * connected anything -- /api/channels overrides it per-tenant at request
+ * time (their own site once a blog webhook is connected, or "Connected"
+ * once a real external_id is on file for a social channel) rather than
+ * serving this catalogue's copy verbatim. Keeping these tenant-neutral
+ * (no "getminions.ai", no "@getminionsai") matters even as a fallback --
+ * every tenant reads this same catalogue, and it used to hardcode this
+ * platform's own brand/handles, which read as "your content publishes to
+ * OUR accounts" to every other tenant.
+ */
 export const DISTRIBUTION_CHANNELS: readonly DistributionChannelDefinition[] = [
   {
     id: "DIR-DIST-BLOG",
     key: "blog",
     ruleKey: "auto_publish_blog",
-    name: "Minions Public Blog",
+    name: "Company Blog",
     platform: "BLOG",
     description:
-      "Publishes live long-form editorial breakdown directly to getminions.ai/blog with structured metadata.",
-    target_destination: "getminions.ai/blog",
+      "Publishes live long-form editorial breakdown to your blog with structured metadata.",
+    target_destination: "Shared hosted blog",
     defaultActive: true,
     badge: "Core Web",
   },
@@ -40,8 +51,8 @@ export const DISTRIBUTION_CHANNELS: readonly DistributionChannelDefinition[] = [
     name: "Facebook Business Page",
     platform: "FACEBOOK",
     description:
-      "Publishes high-res photo post to Minions.AI timeline + automated first-comment blog URL.",
-    target_destination: "facebook.com/getminionsai",
+      "Publishes high-res photo post to your Facebook Page timeline + automated first-comment blog URL.",
+    target_destination: "Not connected yet",
     defaultActive: true,
     badge: "Graph API v20",
   },
@@ -52,8 +63,8 @@ export const DISTRIBUTION_CHANNELS: readonly DistributionChannelDefinition[] = [
     name: "LinkedIn Company Page",
     platform: "LINKEDIN",
     description:
-      "Broadcasts formatted executive post to LinkedIn followers + automated first-comment link.",
-    target_destination: "linkedin.com/company/getminionsai",
+      "Broadcasts formatted executive post to your LinkedIn followers + automated first-comment link.",
+    target_destination: "Not connected yet",
     defaultActive: false,
     badge: "Community API",
   },
@@ -64,8 +75,8 @@ export const DISTRIBUTION_CHANNELS: readonly DistributionChannelDefinition[] = [
     name: "Twitter / X Feed",
     platform: "TWITTER",
     description:
-      "Broadcasts concise hook post to @getminionsai with hashtag tags + automated first-reply link.",
-    target_destination: "x.com/getminionsai",
+      "Broadcasts concise hook post to your X feed with hashtag tags + automated first-reply link.",
+    target_destination: "Not connected yet",
     defaultActive: false,
     badge: "OAuth 2.0",
   },
