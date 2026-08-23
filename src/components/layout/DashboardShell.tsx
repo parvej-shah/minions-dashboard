@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/useToast";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { buildNavItems } from "@/constants/nav";
 import type { PipelineTriggerResult } from "@/types";
+import HarvestingProgressHUD, { HarvestingJob } from "@/components/common/HarvestingProgressHUD";
 import ImpersonationBanner from "./ImpersonationBanner";
 
 export interface DashboardShellProps {
@@ -35,6 +36,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   const { data: session } = useSession();
 
   const [isHarvesting, setIsHarvesting] = useState(false);
+  const [activeHarvestJob, setActiveHarvestJob] = useState<HarvestingJob | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [showPalette, setShowPalette] = useState(false);
@@ -48,14 +50,17 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
   const triggerHarvest = useCallback(async () => {
     setIsHarvesting(true);
-    notify(
-      "Dispatching n8n Autonomous Harvester (Google Trends, Reddit & HVAC Signals)…"
-    );
+    const startedAt = Date.now();
+
     try {
-      const result = await apiClient.post<PipelineTriggerResult>("/api/pipeline/harvest");
-      notify(result.message);
+      const result = await apiClient.post<PipelineTriggerResult & { run_id: string }>("/api/pipeline/harvest");
+      if (!result.success) {
+        throw new Error(result.message || "Failed to start harvester");
+      }
+      setActiveHarvestJob({ startedAt, runId: result.run_id });
     } catch (error) {
       notify(`⚠️ Harvest request failed: ${toErrorMessage(error, "Could not reach the harvester pipeline.")}`);
+      setActiveHarvestJob(null);
     } finally {
       setIsHarvesting(false);
     }
@@ -158,6 +163,11 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         pathname={pathname}
         navCounts={navCounts}
         setMobileMenuOpen={setMobileMenuOpen}
+      />
+
+      <HarvestingProgressHUD 
+        job={activeHarvestJob} 
+        onDismiss={() => setActiveHarvestJob(null)} 
       />
 
       <AdminAuthModal

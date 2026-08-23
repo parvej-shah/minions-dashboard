@@ -7,22 +7,17 @@ import { requireClientId } from "@/lib/tenant";
 /**
  * Triggers the live 02_idea_to_asset workflow in n8n.
  *
- * This route does NOT synthesize an asset. The workflow claims an idea, drafts it,
- * runs the claims gate and syncs the finished asset into the `assets` table
- * (roughly 150s later), so the caller should poll /api/assets for the result.
+ * This route creates a PipelineRun row so the UI can track progress perfectly.
+ * The workflow claims an idea, drafts it, runs the claims gate and syncs the 
+ * finished asset into the `assets` table (roughly 150s later).
  */
 export async function POST(request: Request) {
   const ctx = await requireClientId();
   if ("error" in ctx) return ctx.error;
 
-  // An empty body is valid: the workflow picks the next available idea itself.
   const body = await request.json().catch(() => ({} as Record<string, unknown>));
   const ideaId = (body.idea_id as string | null) ?? null;
 
-  // One idea -> one asset. n8n's own Select Target refuses an idea that already
-  // carries a draft_asset_id, but that check runs a minute into the workflow and
-  // only covers the ideas table. Refusing here means a double-click, a stale tab,
-  // or a retry never even starts a second run, and the operator gets told why.
   if (ideaId) {
     const [idea, existingAsset] = await Promise.all([
       prisma.idea.findFirst({
@@ -55,6 +50,14 @@ export async function POST(request: Request) {
     }
   }
 
+  const run = await prisma.pipelineRun.create({
+    data: {
+      clientId: ctx.clientId,
+      type: "DRAFT",
+      status: "RUNNING",
+    },
+  });
+
   const { result, status } = await triggerN8nWorkflow(
     "draft",
     {
@@ -64,6 +67,8 @@ export async function POST(request: Request) {
       audience: body.audience ?? null,
       trade: body.target_trade ?? null,
       trigger_source: "MINIONS_COCKPIT_EDITORIAL",
+      run_id: run.id,
+      callback_url: `${process.env.NEXTAUTH_URL}/api/pipeline/runs/${run.id}`
     },
     {
       failure:
@@ -73,5 +78,12 @@ export async function POST(request: Request) {
     }
   );
 
-  return NextResponse.json({ ...result, requested_idea_id: ideaId }, { status });
+  if (!result.success) {
+    await prisma.pipelineRun.update({
+      where: { id: run.id },
+      data: { status: "FAILED" },
+    });
+  }
+
+  return NextResponse.json({ ...result, requested_idea_id: ideaId, run_id: run.id }, { status });
 }

@@ -348,15 +348,7 @@ export default function IdeaStreamPage() {
     setDraftError(null);
 
     const idea = ideas.find(item => item.id === ideaId || item.ideaId === ideaId);
-
-    // Launch Live Multi-Agent Drafting HUD
-    setActiveDraftingJob({
-      ideaId: idea?.ideaId || idea?.id || ideaId,
-      title: idea?.title || idea?.raw_idea || "Untitled Strategic Topic",
-      audience: idea?.audience,
-      targetTrade: idea?.target_trade,
-      startedAt: Date.now()
-    });
+    const startedAt = Date.now();
 
     try {
       const res = await fetch("/api/pipeline/draft", {
@@ -372,11 +364,18 @@ export default function IdeaStreamPage() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        // apiFailure sends { error }, the pipeline service sends { message } —
-        // a refusal ("this idea already has a draft") has to reach the operator
-        // either way, not surface as a bare HTTP code.
         throw new Error(data.error || data.message || `Request failed (HTTP ${res.status})`);
       }
+
+      // Launch Live Multi-Agent Drafting HUD
+      setActiveDraftingJob({
+        ideaId: idea?.ideaId || idea?.id || ideaId,
+        title: idea?.title || idea?.raw_idea || "Untitled Strategic Topic",
+        audience: idea?.audience,
+        targetTrade: idea?.target_trade,
+        startedAt,
+        runId: data.run_id
+      });
 
       setIdeas(prev =>
         prev.map(item =>
@@ -389,7 +388,6 @@ export default function IdeaStreamPage() {
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Could not reach the drafting pipeline.";
       setDraftError(message);
-      // No run started, so the HUD must not sit there claiming agents are working.
       setActiveDraftingJob(null);
     } finally {
       setClaimingIds(prev => {

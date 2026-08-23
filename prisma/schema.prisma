@@ -44,6 +44,7 @@ model Client {
   toneExamples    ToneExample[]
   subscription    Subscription?
   usageEvents     UsageEvent[]
+  pipelineRuns    PipelineRun[]
   memberships     ClientMembership[]
 
   @@map("clients")
@@ -333,4 +334,19 @@ model Blog {
 
   @@index([clientId])
   @@map("blogs")
+}
+
+model PipelineRun {
+  id        String   @id @default(cuid())
+  clientId  String?  @map("client_id")
+  type      String   
+  status    String   
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  client Client? @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@map("pipeline_runs")
 }

@@ -25,6 +25,7 @@ export interface DraftingJob {
   audience?: string;
   targetTrade?: string;
   startedAt: number;
+  runId: string;
 }
 
 interface DraftingProgressHUDProps {
@@ -35,8 +36,6 @@ interface DraftingProgressHUDProps {
 interface AgentStage {
   id: string;
   name: string;
-  /** Exact model string the n8n node sends. */
-  model: string;
   icon: React.ElementType;
   description: string;
 }
@@ -54,35 +53,30 @@ const AGENT_STAGES: AgentStage[] = [
   {
     id: "strategist",
     name: "Strategist Minion",
-    model: "qwen3.7-max",
     icon: Brain,
     description: "Formulating the thesis angle and defending it",
   },
   {
     id: "writer",
     name: "Writer Minion",
-    model: "qwen-plus",
     icon: PenTool,
     description: "Authoring the 800–1,200 word deep dive",
   },
   {
     id: "editor",
     name: "Editor / Critic Minion",
-    model: "qwen3.7-flash",
     icon: ShieldCheck,
     description: "Extracting and classifying every factual claim",
   },
   {
     id: "variants",
     name: "Distribution Minion",
-    model: "qwen-flash",
     icon: Share2,
     description: "Writing the LinkedIn, Facebook and X variants",
   },
   {
     id: "artist",
     name: "Visual Artist Minion",
-    model: "qwen-image-3.0-pro",
     icon: Palette,
     description: "Synthesizing the 16:9 1280×720 cover illustration",
   },
@@ -92,6 +86,7 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [hasFailed, setHasFailed] = useState(false);
   const [completedAssetId, setCompletedAssetId] = useState<string | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -102,6 +97,7 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
       const reset = setTimeout(() => {
         setElapsedSeconds(0);
         setIsCompleted(false);
+        setHasFailed(false);
         setCompletedAssetId(null);
       }, 0);
       return () => clearTimeout(reset);
@@ -117,28 +113,19 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
 
   // Polling for completed asset
   useEffect(() => {
-    if (!job || isCompleted) return;
+    if (!job || isCompleted || hasFailed) return;
 
     const checkDraftStatus = async () => {
       try {
-        const res = await fetch("/api/assets");
+        const res = await fetch(`/api/pipeline/runs/${job.runId}`);
         if (!res.ok) return;
-        const assets = await res.json();
+        const run = await res.json();
         
-        // Find if an asset was created after job start matching title or recently created
-        const matchingAsset = (assets as AssetItem[]).find((a) => {
-          const createdAt = new Date(a.created_at).getTime();
-          const isRecent = createdAt >= job.startedAt - 5000;
-          const isTitleMatch = a.title && job.title && (
-            a.title.toLowerCase().includes(job.title.toLowerCase().slice(0, 20)) ||
-            job.title.toLowerCase().includes(a.title.toLowerCase().slice(0, 20))
-          );
-          return isRecent && (isTitleMatch || a.status === "PENDING_REVIEW");
-        });
-
-        if (matchingAsset) {
+        if (run.status === "COMPLETED") {
           setIsCompleted(true);
-          setCompletedAssetId(matchingAsset.id);
+          setCompletedAssetId(run.metadata?.assetId || null);
+        } else if (run.status === "FAILED") {
+          setHasFailed(true);
         }
       } catch (err) {
         console.error("Error polling drafting status:", err);
@@ -148,16 +135,10 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
     // Poll every 3.5s
     pollIntervalRef.current = setInterval(checkDraftStatus, 3500);
 
-    // Auto-mark completed after 55s as fallback if backend completed
-    const fallbackTimer = setTimeout(() => {
-      setIsCompleted(true);
-    }, 58000);
-
     return () => {
       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-      clearTimeout(fallbackTimer);
     };
-  }, [job, isCompleted]);
+  }, [job, isCompleted, hasFailed]);
 
   if (!job) return null;
 
@@ -174,15 +155,17 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
       role="complementary"
       aria-label="Multi-agent drafting pipeline status"
       className={`fixed bottom-5 right-5 z-50 w-[420px] max-w-[calc(100vw-2.5rem)] rounded-2xl bg-[#0B0F14]/95 border ${
-        isCompleted ? "border-[#00C9A7]/60 shadow-[#00C9A7]/20" : "border-[#1F2D3D] shadow-black/80"
+        isCompleted ? "border-indigo-500/60 shadow-indigo-500/20" : hasFailed ? "border-[#EF4444]/60 shadow-[#EF4444]/20" : "border-[#1F2D3D] shadow-black/80"
       } shadow-2xl backdrop-blur-xl transition-all duration-300 overflow-hidden flex flex-col`}
     >
       {/* Top Ambient Glow Line */}
       <div 
         className={`h-1 w-full transition-all duration-500 ${
           isCompleted 
-            ? "bg-[#00C9A7]" 
-            : "bg-gradient-to-r from-[#00C9A7] via-[#3B82F6] to-[#8B5CF6] animate-pulse"
+            ? "bg-indigo-500" 
+            : hasFailed
+            ? "bg-[#EF4444]"
+            : "bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-pulse"
         }`} 
       />
 
@@ -191,23 +174,25 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
         <div className="flex items-center gap-2.5 min-w-0">
           <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
             isCompleted 
-              ? "bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/40" 
-              : "bg-[#3B82F6]/20 text-[#3B82F6] border border-[#3B82F6]/40 animate-pulse"
+              ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/40" 
+              : hasFailed
+              ? "bg-[#EF4444]/20 text-[#EF4444] border border-[#EF4444]/40"
+              : "bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 animate-pulse"
           }`}>
-            {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+            {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : hasFailed ? <X className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
           </div>
 
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-white tracking-wide font-mono uppercase">
-                {isCompleted ? "Draft Ready & Staged" : "Autonomous Crew Working"}
+                {isCompleted ? "Draft Complete" : hasFailed ? "Draft Failed" : "Drafting Active"}
               </span>
-              <span className="text-[10px] font-mono text-[#00C9A7] bg-[#00C9A7]/10 px-1.5 py-0.2 rounded border border-[#00C9A7]/20">
+              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded border ${hasFailed ? "text-[#EF4444] bg-[#EF4444]/10 border-[#EF4444]/20" : "text-indigo-400 bg-indigo-500/10 border-indigo-500/20"}`}>
                 {formatTime(elapsedSeconds)}
               </span>
             </div>
             <p className="text-[11px] text-[#94A3B8] truncate max-w-[220px]">
-              {job.title}
+              {job.title || "Synthesizing content..."}
             </p>
           </div>
         </div>
@@ -239,23 +224,25 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[11px] font-mono">
               <span className="text-[#94A3B8]">
-                {isCompleted ? "Pipeline completed" : "5-stage generation pipeline running"}
+                {isCompleted ? "Pipeline completed" : hasFailed ? "Pipeline stopped" : "5-stage drafting pipeline running"}
               </span>
-              <span className="font-bold text-[#00C9A7]">
-                {isCompleted ? "Done" : formatTime(elapsedSeconds)}
+              <span className={`font-bold ${hasFailed ? "text-[#EF4444]" : "text-indigo-400"}`}>
+                {isCompleted ? "Done" : hasFailed ? "Error" : formatTime(elapsedSeconds)}
               </span>
             </div>
             {/* Indeterminate while running: n8n does not report a percentage. */}
             <div className="w-full h-1.5 bg-[#161D26] rounded-full overflow-hidden">
               {isCompleted ? (
-                <div className="h-full w-full bg-gradient-to-r from-[#00C9A7] to-[#3B82F6] rounded-full" />
+                <div className="h-full w-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full" />
+              ) : hasFailed ? (
+                <div className="h-full w-full bg-[#EF4444] rounded-full" />
               ) : (
-                <div className="h-full w-1/3 bg-gradient-to-r from-[#00C9A7] to-[#3B82F6] rounded-full animate-pulse" />
+                <div className="h-full w-1/3 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-pulse" />
               )}
             </div>
           </div>
 
-          {/* Stepper of 4 Agents */}
+          {/* Stepper of 5 Agents */}
           <div className="space-y-2.5">
             {AGENT_STAGES.map((stage) => {
               const Icon = stage.icon;
@@ -264,7 +251,7 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
                 <div
                   key={stage.id}
                   className={`p-2.5 rounded-xl border transition-all flex items-center justify-between gap-3 ${
-                    isCompleted
+                    isCompleted || hasFailed
                       ? "bg-[#0F1419]/60 border-[#1F2D3D]"
                       : "bg-[#161D26] border-[#1F2D3D]"
                   }`}
@@ -273,8 +260,10 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
                     <div
                       className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
                         isCompleted
-                          ? "bg-[#00C9A7]/10 text-[#00C9A7]"
-                          : "bg-[#3B82F6]/10 text-[#3B82F6]"
+                          ? "bg-indigo-500/10 text-indigo-400"
+                          : hasFailed
+                          ? "bg-[#EF4444]/10 text-[#EF4444]"
+                          : "bg-indigo-500/10 text-indigo-400"
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5" />
@@ -284,9 +273,6 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
                       <div className="flex items-center gap-1.5">
                         <span className="text-xs font-semibold text-white truncate">
                           {stage.name}
-                        </span>
-                        <span className="text-[9px] font-mono text-[#64748B]">
-                          ({stage.model})
                         </span>
                       </div>
                       <p className="text-[10px] text-[#94A3B8] truncate">
@@ -298,9 +284,11 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
                   {/* Stage Indicator Badge */}
                   <div className="shrink-0">
                     {isCompleted ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#00C9A7]" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
+                    ) : hasFailed ? (
+                      <X className="w-3.5 h-3.5 text-[#EF4444]" />
                     ) : (
-                      <Loader2 className="w-3.5 h-3.5 text-[#3B82F6] animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 text-indigo-400 animate-spin" />
                     )}
                   </div>
                 </div>
