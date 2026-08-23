@@ -1,6 +1,7 @@
 export * from "./agent";
 export * from "./api";
 export * from "./asset";
+export * from "./billing";
 export * from "./brand";
 export * from "./channel";
 export * from "./idea";
