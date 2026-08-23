@@ -46,6 +46,7 @@ model Client {
   usageEvents     UsageEvent[]
   pipelineRuns    PipelineRun[]
   memberships     ClientMembership[]
+  postingSchedule PostingSchedule?
 
   @@map("clients")
 }
@@ -349,4 +350,31 @@ model PipelineRun {
 
   @@index([clientId])
   @@map("pipeline_runs")
+}
+
+/// Real per-tenant posting cadence config, one row per Client. Distinct from
+/// Idea.scheduledFor/queueOrder (a one-off manual per-idea override, unchanged
+/// by this model) -- this drives the recurring "when should this tenant post
+/// next" decision the 00b_posting_scheduler_dispatcher n8n workflow polls.
+model PostingSchedule {
+  id            String    @id @default(cuid())
+  clientId      String    @unique @map("client_id")
+  cadenceType   String    @default("EVERY_N_DAYS") @map("cadence_type") // "DAILY" | "EVERY_N_DAYS" | "DAYS_OF_WEEK"
+  intervalDays  Int?      @map("interval_days") // required when cadenceType = EVERY_N_DAYS
+  daysOfWeek    Int[]     @default([]) @map("days_of_week") // 0=Sun..6=Sat, required when cadenceType = DAYS_OF_WEEK
+  postsPerDay   Int       @default(1) @map("posts_per_day")
+  timesOfDay    String[]  @default(["09:00"]) @map("times_of_day") // "HH:mm", length == postsPerDay, interpreted in Client.timezone
+  // Safe default: even a draft that passes the automated claims gate still
+  // waits for a human's manual "Approve & Publish" click. Off restores the
+  // pipeline's original always-auto-publish-on-claims-pass behavior. Never
+  // affects claims-FAILING drafts -- those always require a human regardless.
+  requireReview Boolean   @default(true) @map("require_review")
+  isActive      Boolean   @default(true) @map("is_active") // lets a tenant pause the cadence without deleting config
+  lastRunAt     DateTime? @map("last_run_at") // idempotency guard: the dispatcher won't refire the same due slot twice
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("posting_schedules")
 }
