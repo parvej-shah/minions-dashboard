@@ -78,25 +78,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
       });
       return true;
     },
-    async jwt({ token, user, trigger }) {
-      // `user` is only present on the sign-in request itself, so the DB
-      // lookup normally happens once per session, not once per request.
-      // `trigger === "update"` is the exception: the onboarding wizard calls
-      // the client-side `update()` from useSession() right after attaching a
-      // Client to this user (see /api/onboarding/client), specifically to
-      // force this callback to re-run and pick up the new clientId — without
-      // it the JWT would keep serving the stale clientId: null it was issued
-      // with at sign-in, for the rest of the session's lifetime.
+    async jwt({ token, user }) {
+      // Always re-read the User row, not just at sign-in. clientId/role can
+      // change mid-session (onboarding attaches a Client, an invite gets
+      // accepted, a workspace switch flips the active tenant) and this app's
+      // rule everywhere else (see src/lib/tenant.ts) is to never trust a
+      // cached copy of those fields — the DB is the single source of truth.
+      // Same rule here: one extra indexed lookup whenever a session is read
+      // is a small, worthwhile price for the JWT never going stale.
       const email = user?.email ?? (token.email as string | undefined);
-      if ((user?.email || trigger === "update") && email) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: email.trim().toLowerCase() },
-        });
-        if (dbUser) {
-          token.id = dbUser.id;
-          token.clientId = dbUser.clientId;
-          token.role = dbUser.role as UserRole;
-        }
+      if (!email) return token;
+
+      const dbUser = await prisma.user.findUnique({
+        where: { email: email.trim().toLowerCase() },
+      });
+      if (dbUser) {
+        token.id = dbUser.id;
+        token.clientId = dbUser.clientId;
+        token.role = dbUser.role as UserRole;
       }
       return token;
     },

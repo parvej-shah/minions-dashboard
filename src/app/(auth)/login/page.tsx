@@ -228,9 +228,18 @@ function LoginContent() {
                   <div className="space-y-0.5">
                     <div className="font-semibold text-red-300">Access Restricted</div>
                     <div className="text-red-300/80 leading-relaxed text-[11px]">
-                      {error === "AccessDenied"
-                        ? "This Google account is not authorized to access the cockpit. Please switch to an authorized administrator account."
-                        : "Authentication failed. Please verify your credentials and try again."}
+                      {error === "AccessDenied" ? (
+                        <>
+                          We don&apos;t recognize this Google account yet. If you&apos;re joining an
+                          existing team, ask your workspace owner to invite you — otherwise,{" "}
+                          <Link href="/onboarding" className="underline hover:text-red-200">
+                            start a free trial
+                          </Link>{" "}
+                          to set up your own workspace.
+                        </>
+                      ) : (
+                        "Authentication failed. Please verify your credentials and try again."
+                      )}
                     </div>
                   </div>
                 </div>

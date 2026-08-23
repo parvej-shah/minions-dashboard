@@ -23,6 +23,8 @@ export async function markPendingSignup(): Promise<void> {
 export async function consumePendingSignup(): Promise<boolean> {
   const store = await cookies();
   const present = store.get(PENDING_SIGNUP_COOKIE)?.value === "1";
-  if (present) store.delete(PENDING_SIGNUP_COOKIE);
+  // NextAuth v5 may call signIn multiple times during the callback phase.
+  // We rely on the 10-minute maxAge to clear this instead of deleting it immediately,
+  // preventing false-negative rejections if it's checked twice.
   return present;
 }

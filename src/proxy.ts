@@ -16,17 +16,20 @@ import type { NextFetchEvent, NextMiddleware, NextRequest } from "next/server";
 const gateHandler = auth(async (req) => {
   const { pathname } = req.nextUrl;
 
-  // 1. Always allow auth endpoints, webhooks, login page, static public
-  // assets, and the onboarding wizard. Onboarding has to be reachable by
-  // both a signed-out visitor (the signup landing) and a signed-in user with
-  // no clientId yet (mid-flow) — its own pages/routes handle whatever auth
-  // state they need, rather than the blanket gates below.
+  const sessionToken =
+    req.cookies.get("authjs.session-token")?.value ||
+    req.cookies.get("__Secure-authjs.session-token")?.value ||
+    req.cookies.get("next-auth.session-token")?.value ||
+    req.cookies.get("__Secure-next-auth.session-token")?.value;
+
+  const isLoggedIn = !!req.auth || !!sessionToken;
+  const sessionUser = req.auth?.user;
+
+  // 1. Always allow auth endpoints, webhooks, static public assets
   if (
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/onboarding") ||
-    pathname.startsWith("/api/onboarding") ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/webhooks") ||
+    pathname.startsWith("/api/onboarding") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/images/") ||
     pathname.startsWith("/icons/") ||
@@ -43,14 +46,13 @@ const gateHandler = auth(async (req) => {
     return NextResponse.next();
   }
 
-  // Check Auth.js session object OR session cookie token
-  const sessionToken =
-    req.cookies.get("authjs.session-token")?.value ||
-    req.cookies.get("__Secure-authjs.session-token")?.value ||
-    req.cookies.get("next-auth.session-token")?.value ||
-    req.cookies.get("__Secure-next-auth.session-token")?.value;
-
-  const isLoggedIn = !!req.auth || !!sessionToken;
+  // 1.5 Redirect logged-in users with a clientId away from /onboarding and /login
+  if (pathname.startsWith("/login") || pathname.startsWith("/onboarding")) {
+    if (isLoggedIn && sessionUser?.clientId) {
+      return NextResponse.redirect(new URL("/", req.nextUrl.origin));
+    }
+    return NextResponse.next();
+  }
 
   // 2. Protect API routes against unauthorized access
   if (pathname.startsWith("/api/")) {
@@ -92,7 +94,6 @@ const gateHandler = auth(async (req) => {
   // could still read clientId: null well after the DB had the real value).
   // A DB re-check only runs in this one branch, i.e. only for a session that
   // looks tenant-less — everyone else's page loads stay JWT-only and fast.
-  const sessionUser = req.auth?.user;
   const isPlatformStaff = sessionUser?.clientId === null && sessionUser?.role === "SYSTEM_ADMIN";
   if (sessionUser && !sessionUser.clientId && !isPlatformStaff) {
     const freshUser = await prisma.user
