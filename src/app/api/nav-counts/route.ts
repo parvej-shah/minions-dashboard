@@ -22,7 +22,7 @@ export async function GET() {
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
-    const [ideasReady, pendingReview, publishedLive, directivesCount, fleet, assetsThisMonth, subscription] =
+    const [ideasReady, pendingReview, publishedLive, directivesCount, fleet, assetsThisMonth, subscription, client] =
       await Promise.all([
         prisma.idea.count({
           where: { clientId: ctx.clientId, status: { in: ["HARVESTED", "REFINED"] } },
@@ -33,6 +33,7 @@ export async function GET() {
         getPipelineFleet(ctx.clientId).catch(() => []),
         prisma.asset.count({ where: { clientId: ctx.clientId, createdAt: { gte: startOfMonth } } }),
         prisma.subscription.findUnique({ where: { clientId: ctx.clientId }, select: { planKey: true } }),
+        prisma.client.findUnique({ where: { id: ctx.clientId }, select: { assetsPerMonthOverride: true } }),
       ]);
 
     // No Subscription row yet (tenant-zero, or a trial that hasn't hit
@@ -40,6 +41,9 @@ export async function GET() {
     // unbounded meter.
     const planKey = subscription?.planKey ?? "starter";
     const plan = findPlan(planKey) ?? findPlan("starter")!;
+    // A maintainer-set override (platform-admin dashboard) beats the plan default --
+    // independent of billing entirely, see Client.assetsPerMonthOverride.
+    const assetsPerMonthLimit = client?.assetsPerMonthOverride ?? plan.limits.assetsPerMonth;
 
     const counts: NavCounts = {
       ideasReady,
@@ -49,7 +53,7 @@ export async function GET() {
       activeAgents: fleet.filter((a) => a.status === "ACTIVE").length,
       quota: {
         used: assetsThisMonth,
-        limit: plan.limits.assetsPerMonth,
+        limit: assetsPerMonthLimit,
         planKey: plan.key,
       },
     };

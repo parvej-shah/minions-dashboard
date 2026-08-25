@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { verifyWebhookSecret } from "@/lib/security";
 
 export async function POST(request: Request) {
-  const authCheck = verifyWebhookSecret(request);
+  const authCheck = await verifyWebhookSecret(request);
   if (!authCheck.isValid && authCheck.response) {
     return authCheck.response;
   }

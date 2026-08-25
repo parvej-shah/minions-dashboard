@@ -31,6 +31,9 @@ model Client {
   name      String
   status    String   @default("TRIAL") // TRIAL | ACTIVE | PAST_DUE | SUSPENDED | CANCELED
   timezone  String   @default("America/New_York")
+  // Maintainer-set manual usage-cap override (platform-admin dashboard), independent of
+  // Subscription/Stripe -- NULL means "use the plan default". See findPlan()/plans.ts.
+  assetsPerMonthOverride Int?     @map("assets_per_month_override")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -305,7 +308,12 @@ model BrandDirective {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
 
-  client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  // Cascade, not SetNull: a directive with clientId=null is unreachable
+  // through every tenant-scoped query (Prisma's exact-match filter never
+  // matches null), so SetNull just orphaned dead rows in the table forever
+  // instead of removing them when a client was deleted -- found via a stray
+  // NULL-client_id row (DIR-016) left behind by an already-deleted test tenant.
+  client Client? @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@index([clientId])
   @@map("brand_directives")
@@ -377,4 +385,17 @@ model PostingSchedule {
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@map("posting_schedules")
+}
+
+/// Fixed-window request counter backing src/lib/rate-limit.ts. bucketKey is an
+/// opaque string (a hash of a webhook secret, or a caller IP) -- never a raw
+/// secret. No FK to Client: buckets can be per-secret or per-IP, not always
+/// tenant-scoped.
+model RateLimitHit {
+  bucketKey   String   @map("bucket_key")
+  windowStart DateTime @map("window_start")
+  count       Int      @default(1)
+
+  @@id([bucketKey, windowStart])
+  @@map("rate_limit_hits")
 }

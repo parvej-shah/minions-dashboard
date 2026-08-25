@@ -63,35 +63,35 @@ export const SOCIAL_PROFILES = {
  */
 export const MODEL_RATE_CARD = [
   {
-    model: "qwen3.7-max",
+    model: "AI Core Max",
     stage: "01 Harvest · 02 Stage 1",
     rate: "$0.002 / 1k tokens",
     role: "Signal harvesting and strategist thesis defense",
     accent: "#00C9A7",
   },
   {
-    model: "qwen-flash",
+    model: "AI Core Flash",
     stage: "01 Refine · 02 Stage 4",
     rate: "$0.0001 / 1k tokens",
     role: "Idea refinement and omnichannel social variants",
     accent: "#8B5CF6",
   },
   {
-    model: "qwen-plus",
+    model: "AI Core Plus",
     stage: "02 Stage 2",
     rate: "$0.0004 / 1k tokens",
     role: "Staff Writer 800–1200w long-form prose",
     accent: "#F1F5F9",
   },
   {
-    model: "qwen3.7-flash",
+    model: "AI Core Flash",
     stage: "02 Stage 3",
     rate: "$0.0001 / 1k tokens",
     role: "Lead Editorial Reviewer claims classification",
     accent: "#3B82F6",
   },
   {
-    model: "qwen-image-3.0-pro",
+    model: "AI Image Generation",
     stage: "02 Cover Art",
     rate: "$0.025 / image",
     role: "1280×720 commercial studio cover generation",

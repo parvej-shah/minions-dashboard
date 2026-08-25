@@ -32,7 +32,10 @@ export async function GET() {
     startOfMonth.setHours(0, 0, 0, 0);
 
     const [client, subscription, assetsThisMonth] = await Promise.all([
-      prisma.client.findUnique({ where: { id: ctx.clientId }, select: { status: true, createdAt: true } }),
+      prisma.client.findUnique({
+        where: { id: ctx.clientId },
+        select: { status: true, createdAt: true, assetsPerMonthOverride: true },
+      }),
       prisma.subscription.findUnique({
         where: { clientId: ctx.clientId },
         select: { planKey: true, status: true, currentPeriodEnd: true, cancelAtPeriodEnd: true },
@@ -46,6 +49,9 @@ export async function GET() {
     // change needed here.
     const planKey = subscription?.planKey ?? "starter";
     const plan = findPlan(planKey) ?? findPlan("starter")!;
+    // A maintainer-set override (platform-admin dashboard) beats the plan default --
+    // independent of billing entirely, see Client.assetsPerMonthOverride.
+    const assetsPerMonthLimit = client?.assetsPerMonthOverride ?? plan.limits.assetsPerMonth;
 
     let trialEndsAt: string | null = null;
     let trialDaysLeft: number | null = null;
@@ -67,7 +73,7 @@ export async function GET() {
           }
         : null,
       plan,
-      quota: { used: assetsThisMonth, limit: plan.limits.assetsPerMonth },
+      quota: { used: assetsThisMonth, limit: assetsPerMonthLimit },
       stripeConnected: isStripeConfigured(),
       trialEndsAt,
       trialDaysLeft,

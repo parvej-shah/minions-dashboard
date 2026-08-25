@@ -80,7 +80,7 @@ export default function FleetPage() {
             Agent Fleet Status
           </h1>
           <p className="text-sm text-[#94A3B8] mt-1">
-            Seven model calls across two n8n workflows harvest ideas, refine them,
+            Seven model calls across two workflows harvest ideas, refine them,
             draft the article, gate its claims, write the social variants, and
             generate the cover art.
           </p>
@@ -116,7 +116,7 @@ export default function FleetPage() {
               Autonomous Content Pipeline Flow
             </h2>
           </div>
-          <span className="text-xs text-[#94A3B8] font-mono">Fully Automated via n8n</span>
+          <span className="text-xs text-[#94A3B8] font-mono">Fully Automated</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
@@ -217,7 +217,7 @@ export default function FleetPage() {
                   {worker.description}
                 </p>
 
-                {/* Operational Details, read off the n8n node */}
+                {/* Operational Details, read off the pipeline node */}
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#1F2D3D] text-[11px]">
                   <div className="space-y-0.5">
                     <span className="text-[#64748B] font-mono">AI Model:</span>
@@ -233,7 +233,7 @@ export default function FleetPage() {
                     </div>
                   </div>
                   <div className="space-y-0.5">
-                    <span className="text-[#64748B] font-mono">n8n Node:</span>
+                    <span className="text-[#64748B] font-mono">Node:</span>
                     <div className="text-[#94A3B8] font-mono truncate" title={`${worker.workflow} · ${worker.node}`}>
                       {worker.node}
                     </div>

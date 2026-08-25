@@ -27,6 +27,27 @@ export async function POST() {
     },
   });
 
+  // Without this, a self-served tenant is invisible to 00b_posting_scheduler_dispatcher
+  // (it only polls PostingSchedule rows with isActive:true) until someone separately
+  // visits /settings/schedule. Same safe defaults as that page's own DEFAULTS constant
+  // (src/app/api/schedule/route.ts) -- review-on, once every 3 days. Upsert, not create,
+  // so re-running onboarding (or a retry) never clobbers a schedule the tenant already
+  // customized.
+  await prisma.postingSchedule.upsert({
+    where: { clientId: ctx.clientId },
+    update: { isActive: true },
+    create: {
+      clientId: ctx.clientId,
+      cadenceType: "EVERY_N_DAYS",
+      intervalDays: 3,
+      daysOfWeek: [],
+      postsPerDay: 1,
+      timesOfDay: ["09:00"],
+      requireReview: true,
+      isActive: true,
+    },
+  });
+
   const { result, status } = await triggerN8nWorkflow(
     "harvest",
     {

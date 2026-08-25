@@ -17,7 +17,7 @@ import { computeDueSlot } from "@/lib/scheduling";
  * mirrored here exactly the same way).
  */
 export async function GET(request: Request) {
-  const check = verifyWebhookSecret(request);
+  const check = await verifyWebhookSecret(request);
   if (!check.isValid) return check.response!;
 
   try {
@@ -27,7 +27,17 @@ export async function GET(request: Request) {
 
     const schedules = await prisma.postingSchedule.findMany({
       where: { isActive: true, client: { status: "ACTIVE" } },
-      include: { client: { select: { id: true, slug: true, timezone: true, subscription: { select: { planKey: true } } } } },
+      include: {
+        client: {
+          select: {
+            id: true,
+            slug: true,
+            timezone: true,
+            assetsPerMonthOverride: true,
+            subscription: { select: { planKey: true } },
+          },
+        },
+      },
     });
 
     const now = new Date();
@@ -52,10 +62,13 @@ export async function GET(request: Request) {
 
       const planKey = schedule.client.subscription?.planKey ?? "starter";
       const plan = findPlan(planKey) ?? findPlan("starter")!;
+      // A maintainer-set override (platform-admin dashboard) beats the plan default --
+      // independent of billing entirely, see Client.assetsPerMonthOverride.
+      const assetsPerMonthLimit = schedule.client.assetsPerMonthOverride ?? plan.limits.assetsPerMonth;
       const assetsThisMonth = await prisma.asset.count({
         where: { clientId: schedule.client.id, createdAt: { gte: startOfMonth } },
       });
-      if (assetsThisMonth >= plan.limits.assetsPerMonth) continue; // over cap, skip silently
+      if (assetsThisMonth >= assetsPerMonthLimit) continue; // over cap, skip silently
 
       due.push({ client_id: schedule.client.id, slug: schedule.client.slug });
     }

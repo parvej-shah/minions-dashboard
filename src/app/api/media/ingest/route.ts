@@ -1,7 +1,30 @@
 import { NextResponse } from "next/server";
 import { uploadToR2 } from "@/lib/r2";
+import { assertSafeFetchTarget } from "@/lib/ssrf-guard";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const MAX_BYTES = 25 * 1024 * 1024;
+const MAX_REDIRECTS = 1;
+
+/**
+ * Fetches `url` after verifying it doesn't resolve to an internal address,
+ * following at most MAX_REDIRECTS hops -- each hop is itself re-validated
+ * before being followed, so a public URL can't redirect its way into an
+ * internal one.
+ */
+async function fetchSafely(url: string): Promise<Response> {
+  let current = url;
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    await assertSafeFetchTarget(current);
+    const res = await fetch(current, { redirect: "manual" });
+    if (res.status >= 300 && res.status < 400 && res.headers.get("location")) {
+      current = new URL(res.headers.get("location")!, current).toString();
+      continue;
+    }
+    return res;
+  }
+  throw new Error("Too many redirects.");
+}
 
 const EXT_BY_TYPE: Record<string, string> = {
   "image/png": "png",
@@ -43,18 +66,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "source_url is required." }, { status: 400 });
   }
 
-  let parsed: URL;
-  try {
-    parsed = new URL(sourceUrl);
-  } catch {
-    return NextResponse.json({ error: `source_url is not a valid URL: ${sourceUrl}` }, { status: 400 });
-  }
-  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-    return NextResponse.json({ error: "source_url must be http or https." }, { status: 400 });
+  // This route relies on src/proxy.ts's global gate (session or the internal
+  // webhook secret) for auth -- it has no per-route auth call of its own,
+  // consistent with a few other n8n-callback routes in this codebase. Rate
+  // limit by caller IP as a second line of defense against a leaked secret or
+  // compromised session being used to hammer this (SSRF-adjacent) endpoint.
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const { allowed } = await checkRateLimit(`media-ingest:${ip}`, 60, 60);
+  if (!allowed) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again shortly." }, { status: 429 });
   }
 
   try {
-    const upstream = await fetch(sourceUrl, { redirect: "follow" });
+    const upstream = await fetchSafely(sourceUrl);
     if (!upstream.ok) {
       return NextResponse.json(
         { error: `Could not download the image (HTTP ${upstream.status}). The signed URL may have expired.` },

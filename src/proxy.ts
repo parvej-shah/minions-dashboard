@@ -1,5 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { constantTimeEqual } from "@/lib/security";
+import { IMPERSONATION_COOKIE } from "@/lib/tenant";
 import { NextResponse } from "next/server";
 import type { NextFetchEvent, NextMiddleware, NextRequest } from "next/server";
 
@@ -90,8 +92,13 @@ const gateHandler = auth(async (req) => {
         req.headers.get("x-webhook-secret");
       const validSecret = process.env.BLOG_API_SECRET;
 
-      // Allow if valid internal secret is provided (for n8n pipelines & server-to-server calls)
-      if (validSecret && (authHeader === validSecret || authHeader === `Bearer ${validSecret}`)) {
+      // Allow if valid internal secret is provided (for n8n pipelines & server-to-server calls).
+      // Constant-time compare -- a plain `===` here is a timing side-channel on the secret.
+      if (
+        validSecret &&
+        authHeader &&
+        (constantTimeEqual(authHeader, validSecret) || constantTimeEqual(authHeader, `Bearer ${validSecret}`))
+      ) {
         return NextResponse.next();
       }
 
@@ -123,6 +130,15 @@ const gateHandler = auth(async (req) => {
   // for a session that looks tenant-less -- so everyone else's page loads
   // stay fast.
   const isPlatformStaff = sessionUser?.clientId === null && sessionUser?.role === "SYSTEM_ADMIN";
+
+  // 4.5 Platform staff have no tenant-scoped dashboard to land on -- DashboardShell's
+  // data hooks all assume a clientId. Send them to /platform-admin instead of letting
+  // "/" 403 underneath them, unless they've started a view-as-tenant session (in which
+  // case they want the normal dashboard, scoped to the impersonated tenant).
+  if (pathname === "/" && isPlatformStaff && !req.cookies.get(IMPERSONATION_COOKIE)) {
+    return NextResponse.redirect(new URL("/platform-admin", req.nextUrl.origin));
+  }
+
   if (sessionUser && !sessionUser.clientId && !isPlatformStaff) {
     const freshUser = await prisma.user
       .findUnique({ where: { id: sessionUser.id }, select: { clientId: true } })

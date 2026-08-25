@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Users, DollarSign, Eye, RefreshCw, Building2 } from "lucide-react";
+import Link from "next/link";
+import { Users, DollarSign, Eye, RefreshCw, Building2, ExternalLink } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { LoadingState } from "@/components/ui/EmptyState";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
@@ -106,7 +107,13 @@ export default function PlatformAdminPage() {
               {tenants.map((t) => (
                 <tr key={t.id} className="hover:bg-[#161D26]/70 transition-colors">
                   <td className="p-3">
-                    <div className="font-semibold text-[#F1F5F9]">{t.name}</div>
+                    <Link
+                      href={`/platform-admin/tenants/${t.id}`}
+                      className="font-semibold text-[#F1F5F9] hover:text-[#00C9A7] transition-colors inline-flex items-center gap-1.5"
+                    >
+                      {t.name}
+                      <ExternalLink className="w-3 h-3 opacity-50" />
+                    </Link>
                     <div className="text-[10px] text-[#64748B] font-mono">{t.slug}</div>
                   </td>
                   <td className="p-3">

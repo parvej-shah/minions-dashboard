@@ -54,7 +54,7 @@ export default function VisualsTab({
               </span>
             </div>
             <p className="text-xs text-[#94A3B8] leading-relaxed">
-              Real transparent brand logos rendered by the Visual Art Director (<code className="text-[#00C9A7] font-mono">qwen-image-3.0-pro</code>) for cover synthesis, social cards, and PDF technical teardowns.
+              Real transparent brand logos rendered by the Visual Art Director for cover synthesis, social cards, and PDF technical teardowns.
             </p>
 
             {/* Variant Switcher Buttons */}

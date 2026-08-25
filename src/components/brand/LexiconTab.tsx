@@ -4,18 +4,23 @@ import React from "react";
 import {
   AlertTriangle,
 } from "lucide-react";
+import { BrandDirectiveItem } from "@/types";
+import { LoadingState } from "@/components/ui/EmptyState";
 
 export interface LexiconTabProps {
-  bannedWords: string[];
+  bannedWords: BrandDirectiveItem[];
+  isLoading: boolean;
   newBannedWord: string;
   setNewBannedWord: (v: string) => void;
   onAddBannedWord: () => void;
-  onRemoveBannedWord: (word: string) => void;
+  onRemoveBannedWord: (id: string) => void;
 }
 
-/** The banned-lexicon list enforced on generated copy. */
+/** The banned-lexicon list enforced on generated copy -- backed by FORBIDDEN-category
+ * BrandDirective rows, the same data the Directives tab and the drafting pipeline use. */
 export default function LexiconTab({
   bannedWords,
+  isLoading,
   newBannedWord,
   setNewBannedWord,
   onAddBannedWord,
@@ -54,23 +59,27 @@ export default function LexiconTab({
         </div>
 
         {/* Tag Cloud */}
-        <div className="flex flex-wrap gap-2 pt-2">
-          {bannedWords.map((word) => (
-            <span
-              key={word}
-              className="inline-flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-mono px-3 py-1.5 rounded-xl"
-            >
-              <span>&quot;{word}&quot;</span>
-              <button
-                onClick={() => onRemoveBannedWord(word)}
-                className="text-red-400 hover:text-red-200 transition-colors ml-1"
-                title="Remove from blacklist"
+        {isLoading ? (
+          <LoadingState label="Loading banned lexicon…" />
+        ) : (
+          <div className="flex flex-wrap gap-2 pt-2">
+            {bannedWords.map((directive) => (
+              <span
+                key={directive.id}
+                className="inline-flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-mono px-3 py-1.5 rounded-xl"
               >
-                ✕
-              </button>
-            </span>
-          ))}
-        </div>
+                <span>&quot;{directive.content}&quot;</span>
+                <button
+                  onClick={() => onRemoveBannedWord(directive.id)}
+                  className="text-red-400 hover:text-red-200 transition-colors ml-1"
+                  title="Remove from blacklist"
+                >
+                  ✕
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -21,13 +21,23 @@ export default async function PlatformAdminLayout({ children }: { children: Reac
   return (
     <div className="min-h-screen bg-[#0a0d12] text-[#F1F5F9]">
       <header className="border-b border-[#1F2D3D] bg-[#0f1419] px-6 py-4 flex items-center justify-between">
-        <Link href="/platform-admin" className="flex items-baseline">
-          <span className="font-extrabold text-lg tracking-tight text-white">Minions</span>
-          <span className="text-[#ff6b4a] font-bold text-lg ml-0.5">.AI</span>
-          <span className="text-[#00C9A7] text-xs ml-2 font-mono font-semibold uppercase tracking-wider">
-            Platform Admin
-          </span>
-        </Link>
+        <div className="flex items-center gap-8">
+          <Link href="/platform-admin" className="flex items-baseline">
+            <span className="font-extrabold text-lg tracking-tight text-white">Minions</span>
+            <span className="text-[#ff6b4a] font-bold text-lg ml-0.5">.AI</span>
+            <span className="text-[#00C9A7] text-xs ml-2 font-mono font-semibold uppercase tracking-wider">
+              Platform Admin
+            </span>
+          </Link>
+          <nav className="flex items-center gap-5 text-xs font-mono font-semibold">
+            <Link href="/platform-admin" className="text-[#94A3B8] hover:text-[#F1F5F9] transition-colors">
+              Tenants
+            </Link>
+            <Link href="/platform-admin/users" className="text-[#94A3B8] hover:text-[#F1F5F9] transition-colors">
+              Users
+            </Link>
+          </nav>
+        </div>
         <Link href="/" className="text-xs text-[#94A3B8] hover:text-[#F1F5F9] transition-colors">
           ← Back to Cockpit
         </Link>

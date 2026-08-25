@@ -20,7 +20,7 @@ export default function CoverImageCard({ activeAsset }: CoverImageCardProps) {
         16:9 Studio Cover Image
       </span>
     </div>
-    <span className="text-[10px] font-mono text-[#64748B]">qwen-image-3.0-pro · 1280×720</span>
+    <span className="text-[10px] font-mono text-[#64748B]">AI Generated · 1280×720</span>
   </div>
 
   {/* 16:9 Aspect Ratio Frame */}

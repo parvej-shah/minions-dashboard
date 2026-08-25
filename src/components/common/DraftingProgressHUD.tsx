@@ -43,7 +43,7 @@ interface AgentStage {
 /**
  * The stages of `02_idea_to_asset`, in the order n8n runs them.
  *
- * This is a description of the pipeline, not live progress: n8n reports nothing
+ * This is a description of the pipeline, not live progress: System reports nothing
  * back until the asset row exists, so the HUD polls for that and never claims
  * to know which stage is running right now. The per-stage timers that used to
  * drive this ("0-12s strategist, 12-34s writer…") were pure invention, and the
@@ -316,7 +316,7 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
           ) : (
             <div className="text-[10px] text-[#64748B] text-center italic pt-1 space-y-0.5">
               <p>You can navigate freely while the agents draft in the background.</p>
-              <p>n8n reports no per-stage progress — the draft appears here when it lands.</p>
+              <p>System reports no per-stage progress — the draft appears here when it lands.</p>
             </div>
           )}
 

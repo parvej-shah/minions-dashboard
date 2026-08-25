@@ -58,12 +58,9 @@ export default function BrandStudioPage() {
   const [newPriority, setNewPriority] = useState<1 | 2 | 3>(1);
   const [newAudience, setNewAudience] = useState<"ALL" | "ICP" | "PEER" | "BRIDGE">("ALL");
 
-  // Banned lexicon list
-  const [bannedWords, setBannedWords] = useState([
-    "delve", "testament", "tapestry", "seamless", "game-changing", 
-    "revolutionize", "unlock", "synergy", "in today's fast-paced world", 
-    "the future of", "leverage", "supercharge", "🚀", "💡"
-  ]);
+  // Banned lexicon: derived from the same FORBIDDEN-category BrandDirective rows the
+  // Directives tab and the drafting pipeline use -- not a separate, disconnected list.
+  const forbiddenDirectives = directives.filter(d => d.category === "FORBIDDEN");
   const [newBannedWord, setNewBannedWord] = useState("");
 
   const handleAddDirective = async (e: React.FormEvent) => {
@@ -124,16 +121,34 @@ export default function BrandStudioPage() {
     }
   };
 
-  const handleAddBannedWord = () => {
-    if (newBannedWord && !bannedWords.includes(newBannedWord.trim().toLowerCase())) {
-      setBannedWords([...bannedWords, newBannedWord.trim().toLowerCase()]);
+  const handleAddBannedWord = async () => {
+    const word = newBannedWord.trim();
+    if (!word) return;
+    try {
+      const res = await fetch("/api/brand/directives", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: "FORBIDDEN",
+          key: word,
+          content: word,
+          priority: 1,
+          audience_scope: "ALL",
+        }),
+      });
+      if (res.ok) {
+        const created: BrandDirectiveItem = await res.json();
+        setDirectives(prev => [created, ...prev]);
+      }
+    } catch {
+      // No local fallback: a banned word that only exists client-side would silently
+      // never reach the pipeline's actual brand context query.
+    } finally {
       setNewBannedWord("");
     }
   };
 
-  const removeBannedWord = (word: string) => {
-    setBannedWords(bannedWords.filter(w => w !== word));
-  };
+  const removeBannedWord = (id: string) => deleteDirective(id);
 
   const filteredDirectives = directives.filter(d => {
     if (selectedCategory !== "ALL" && d.category !== selectedCategory) return false;
@@ -199,7 +214,7 @@ export default function BrandStudioPage() {
             }`}
           >
             <AlertTriangle className="w-3.5 h-3.5" />
-            Banned Buzzwords ({bannedWords.length})
+            Banned Buzzwords ({forbiddenDirectives.length})
           </button>
           <button
             onClick={() => setActiveTab("visuals")}
@@ -526,7 +541,8 @@ export default function BrandStudioPage() {
       {/* ======================================================== */}
       {activeTab === "lexicon" && (
         <LexiconTab
-          bannedWords={bannedWords}
+          bannedWords={forbiddenDirectives}
+          isLoading={directivesLoading}
           newBannedWord={newBannedWord}
           setNewBannedWord={setNewBannedWord}
           onAddBannedWord={handleAddBannedWord}

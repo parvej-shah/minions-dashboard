@@ -154,7 +154,7 @@ export default function MissionControlPage() {
             <Radio className="w-3.5 h-3.5 text-[#00C9A7]" />
             PIPELINE FLOW STATUS
           </span>
-          <span>Automated n8n Loop</span>
+          <span>Automated Logic Loop</span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
