@@ -13,6 +13,7 @@ import {
   Menu,
   Search,
   Sparkles,
+  ShieldAlert,
   X,
 } from "lucide-react";
 import { BLOG_BASE_URL } from "@/constants/config";
@@ -121,6 +122,22 @@ export function MobileDrawer({
         </div>
 
         <div className="space-y-3 pt-4 border-t border-[#1f2b37]">
+          {session?.user?.role === "SYSTEM_ADMIN" && (
+            <Link
+              href="/platform-admin"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-xs font-bold text-purple-400"
+            >
+              <div className="flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-purple-400" />
+                <span>Platform Admin</span>
+              </div>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300">
+                SaaS ↗
+              </span>
+            </Link>
+          )}
+
           {blogEnabled && (
             <a
               href={`${BLOG_BASE_URL}/blog`}

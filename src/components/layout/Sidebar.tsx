@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight, Lock, LogOut, Search, Zap } from "lucide-react";
+import { ArrowUpRight, Lock, LogOut, Search, Zap, ShieldAlert } from "lucide-react";
 import { BLOG_BASE_URL } from "@/constants/config";
 import type { NavItem } from "@/constants/nav";
 import type { NavCounts } from "@/types";
@@ -124,6 +124,23 @@ export default function Sidebar({
             </Link>
           );
         })}
+
+        {session?.user?.role === "SYSTEM_ADMIN" && (
+          <div className="pt-2">
+            <Link
+              href="/platform-admin"
+              className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-xs font-bold text-purple-400 transition-all group"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <ShieldAlert className="w-4 h-4 text-purple-400" />
+                <span className="truncate">Platform Admin</span>
+              </div>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300">
+                SaaS ↗
+              </span>
+            </Link>
+          </div>
+        )}
       </div>
     </div>
 

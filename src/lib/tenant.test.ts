@@ -23,12 +23,12 @@ beforeEach(() => {
 });
 
 describe("isPlatformStaff", () => {
-  it("is true only for a no-tenant SYSTEM_ADMIN", () => {
+  it("is true for a no-tenant SYSTEM_ADMIN", () => {
     expect(isPlatformStaff({ clientId: null, role: "SYSTEM_ADMIN" })).toBe(true);
   });
 
-  it("is false for a SYSTEM_ADMIN attached to a tenant", () => {
-    expect(isPlatformStaff({ clientId: "client-1", role: "SYSTEM_ADMIN" })).toBe(false);
+  it("is true for a SYSTEM_ADMIN attached to a tenant", () => {
+    expect(isPlatformStaff({ clientId: "client-1", role: "SYSTEM_ADMIN" })).toBe(true);
   });
 
   it("is false for a no-tenant non-admin", () => {
@@ -59,7 +59,7 @@ describe("requireClientId", () => {
     expect("clientId" in result && result.clientId).toBe("client-1");
   });
 
-  it("403s platform staff with no active impersonation session", async () => {
+  it("403s platform staff with no tenant and no active impersonation session", async () => {
     authMock.mockResolvedValue({ user: { id: "admin-1" } });
     findUniqueMock.mockResolvedValue(dbUser({ id: "admin-1", clientId: null, role: "SYSTEM_ADMIN" }));
     cookiesGetMock.mockReturnValue(undefined);

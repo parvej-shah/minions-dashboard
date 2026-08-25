@@ -129,13 +129,11 @@ const gateHandler = auth(async (req) => {
   // re-check costs one indexed lookup, only in this one branch -- i.e. only
   // for a session that looks tenant-less -- so everyone else's page loads
   // stay fast.
-  const isPlatformStaff = sessionUser?.clientId === null && sessionUser?.role === "SYSTEM_ADMIN";
+  const isPlatformStaff = sessionUser?.role === "SYSTEM_ADMIN";
 
-  // 4.5 Platform staff have no tenant-scoped dashboard to land on -- DashboardShell's
-  // data hooks all assume a clientId. Send them to /platform-admin instead of letting
-  // "/" 403 underneath them, unless they've started a view-as-tenant session (in which
-  // case they want the normal dashboard, scoped to the impersonated tenant).
-  if (pathname === "/" && isPlatformStaff && !req.cookies.get(IMPERSONATION_COOKIE)) {
+  // 4.5 Platform staff with no active tenant scope land on /platform-admin instead of letting
+  // "/" 403 underneath them, unless they have a clientId or an impersonation session.
+  if (pathname === "/" && isPlatformStaff && !sessionUser?.clientId && !req.cookies.get(IMPERSONATION_COOKIE)) {
     return NextResponse.redirect(new URL("/platform-admin", req.nextUrl.origin));
   }
 
