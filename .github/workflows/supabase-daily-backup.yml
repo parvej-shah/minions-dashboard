@@ -33,7 +33,7 @@ jobs:
       - name: Install PostgreSQL Client & Tools
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y postgresql-client-16 gzip awscli curl
+          sudo apt-get install -y postgresql-client gzip curl
 
       - name: Prepare Backup Directory & Filename
         id: vars
