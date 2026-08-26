@@ -30,10 +30,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install PostgreSQL Client & Tools
+      - name: Install PostgreSQL 17 Client & Tools
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y postgresql-client gzip curl
+          sudo apt-get install -y wget ca-certificates lsb-release gzip curl python3-pip
+          sudo install -d /etc/apt/keyrings
+          sudo wget --quiet -O /etc/apt/keyrings/pgdg.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/etc/apt/keyrings/pgdg.asc] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client-17
+          pg_dump --version
 
       - name: Prepare Backup Directory & Filename
         id: vars
@@ -55,19 +61,16 @@ jobs:
 
           echo "Starting database dump from Supabase..."
           
-          # Flags:
-          # --clean: Include DROP statements before CREATE
-          # --if-exists: Use IF EXISTS with DROP
-          # --no-owner: Skip owner assignment (avoids permission errors during restore)
-          # --no-privileges: Skip dump of privileges/grants
-          # --quote-all-identifiers: Prevent identifier issues
+          # Clean connection string (ensure port 5432 for session mode if coming from pooler)
+          CLEAN_URL=$(echo "$DB_URL" | sed 's/:6543\//:5432\//' | sed 's/?pgbouncer=true//')
+
           pg_dump \
             --clean \
             --if-exists \
             --no-owner \
             --no-privileges \
             --quote-all-identifiers \
-            --dbname="$DB_URL" \
+            --dbname="$CLEAN_URL" \
             | gzip -9 > "${{ steps.vars.outputs.backup_path }}"
 
           DUMP_SIZE=$(ls -lh "${{ steps.vars.outputs.backup_path }}" | awk '{print $5}')
@@ -78,27 +81,30 @@ jobs:
       - name: Upload Backup to Cloudflare R2 (S3-compatible)
         if: env.R2_ACCESS_KEY != '' && env.R2_SECRET_KEY != ''
         run: |
-          ENDPOINT="${R2_EP:-https://${R2_ACCOUNT}.r2.cloudflarestorage.com}"
-          echo "Uploading ${{ steps.vars.outputs.filename }} to Cloudflare R2 (bucket: ${R2_BUCKET}/backups/)..."
-          
-          mkdir -p ~/.aws
-          cat << 'EOF' > ~/.aws/config
-          [default]
-          s3 =
-            addressing_style = path
-            signature_version = s3v4
+          pip install --break-system-packages boto3
+          python3 - << 'EOF'
+          import os, boto3
+          from botocore.config import Config
+
+          account_id = os.environ.get('R2_ACCOUNT')
+          endpoint = os.environ.get('R2_EP') or (f"https://{account_id}.r2.cloudflarestorage.com" if account_id else "")
+          bucket = os.environ.get('R2_BUCKET', 'minions-assets')
+          filename = "${{ steps.vars.outputs.filename }}"
+          backup_path = "${{ steps.vars.outputs.backup_path }}"
+
+          s3 = boto3.client(
+              's3',
+              endpoint_url=endpoint,
+              aws_access_key_id=os.environ['R2_ACCESS_KEY'],
+              aws_secret_access_key=os.environ['R2_SECRET_KEY'],
+              region_name='auto',
+              config=Config(s3={'addressing_style': 'path'})
+          )
+
+          print(f"Uploading {filename} to Cloudflare R2 bucket {bucket}/backups/...")
+          s3.upload_file(backup_path, bucket, f"backups/{filename}")
+          print("Uploaded to Cloudflare R2 successfully!")
           EOF
-
-          export AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY"
-          export AWS_SECRET_ACCESS_KEY="$R2_SECRET_KEY"
-          export AWS_DEFAULT_REGION="auto"
-          export AWS_REGION="auto"
-
-          aws s3 cp "${{ steps.vars.outputs.backup_path }}" \
-            "s3://${R2_BUCKET}/backups/${{ steps.vars.outputs.filename }}" \
-            --endpoint-url "$ENDPOINT"
-
-          echo "Uploaded to Cloudflare R2 successfully!"
 
       - name: Save Backup as GitHub Action Artifact
         uses: actions/upload-artifact@v4
