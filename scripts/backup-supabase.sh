@@ -3,9 +3,8 @@
 # Supabase PostgreSQL Daily Backup Script (Free Tier Automated)
 # ==============================================================================
 # Usage:
+#   npm run db:backup
 #   ./scripts/backup-supabase.sh
-# Or via crontab:
-#   0 2 * * * /path/to/minions-dashboard/scripts/backup-supabase.sh >> /var/log/supabase_backup.log 2>&1
 # ==============================================================================
 
 set -euo pipefail
@@ -21,15 +20,17 @@ RETENTION_DAYS=14
 # Ensure backup directory exists
 mkdir -p "${BACKUP_DIR}"
 
-# Load environment variables if .env or .env.local exists
-if [ -f "${PROJECT_ROOT}/.env.local" ]; then
-  # export non-commented vars
-  export $(grep -v '^#' "${PROJECT_ROOT}/.env.local" | xargs -d '\n' 2>/dev/null || true)
-elif [ -f "${PROJECT_ROOT}/.env" ]; then
-  export $(grep -v '^#' "${PROJECT_ROOT}/.env" | xargs -d '\n' 2>/dev/null || true)
-fi
-
-DB_CONN="${SUPABASE_DB_URL:-${DATABASE_URL:-${DIRECT_URL:-}}}"
+# Extract DB connection string safely using Node
+DB_CONN=$(node -e '
+  const dotenv = require("dotenv");
+  const fs = require("fs");
+  let env = {};
+  if (fs.existsSync(".env.local")) Object.assign(env, dotenv.parse(fs.readFileSync(".env.local")));
+  if (fs.existsSync(".env")) Object.assign(env, dotenv.parse(fs.readFileSync(".env")));
+  let url = process.env.SUPABASE_DB_URL || env.SUPABASE_DB_URL || process.env.DATABASE_URL || env.DATABASE_URL || process.env.DIRECT_URL || env.DIRECT_URL || "";
+  url = url.replace(":6543/", ":5432/").replace("?pgbouncer=true", "");
+  console.log(url);
+' 2>/dev/null || echo "")
 
 if [ -z "${DB_CONN}" ]; then
   echo "[ERROR] No database connection string found."
@@ -52,17 +53,44 @@ pg_dump \
 FILE_SIZE=$(ls -lh "${BACKUP_FILE}" | awk '{print $5}')
 echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Backup completed successfully: ${BACKUP_FILE} (${FILE_SIZE})"
 
-# Optional: Upload to Cloudflare R2 if AWS CLI and R2 credentials are present
-if command -v aws >/dev/null 2>&1 && [ -n "${R2_ACCESS_KEY_ID:-}" ] && [ -n "${R2_SECRET_ACCESS_KEY:-}" ]; then
-  R2_BUCKET="${R2_BUCKET_NAME:-minions-assets}"
-  R2_EP="${R2_ENDPOINT:-https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com}"
+# Upload to Cloudflare R2 using AWS SDK via Node
+node -e '
+  const dotenv = require("dotenv");
+  const fs = require("fs");
+  const path = require("path");
+  const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
   
-  echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Uploading backup to Cloudflare R2 (bucket: ${R2_BUCKET}/backups)..."
-  AWS_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}" \
-  AWS_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}" \
-  aws s3 cp "${BACKUP_FILE}" "s3://${R2_BUCKET}/backups/$(basename "${BACKUP_FILE}")" --endpoint-url "${R2_EP}"
-  echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Successfully uploaded to Cloudflare R2."
-fi
+  let env = {};
+  if (fs.existsSync(".env.local")) Object.assign(env, dotenv.parse(fs.readFileSync(".env.local")));
+  if (fs.existsSync(".env")) Object.assign(env, dotenv.parse(fs.readFileSync(".env")));
+  
+  const accountId = env.CLOUDFLARE_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
+  const accessKeyId = env.R2_ACCESS_KEY_ID || process.env.R2_ACCESS_KEY_ID;
+  const secretAccessKey = env.R2_SECRET_ACCESS_KEY || process.env.R2_SECRET_ACCESS_KEY;
+  const bucketName = env.R2_BUCKET_NAME || process.env.R2_BUCKET_NAME || "minions-assets";
+  const r2Endpoint = env.R2_ENDPOINT || process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : "");
+  const backupFilePath = "'"${BACKUP_FILE}"'";
+  const fileName = path.basename(backupFilePath);
+
+  if (accessKeyId && secretAccessKey && r2Endpoint) {
+    console.log(`[${new Date().toISOString()}] Uploading to Cloudflare R2 (bucket: ${bucketName}/backups)...`);
+    const r2 = new S3Client({
+      region: "auto",
+      endpoint: r2Endpoint,
+      credentials: { accessKeyId, secretAccessKey },
+    });
+    r2.send(new PutObjectCommand({
+      Bucket: bucketName,
+      Key: `backups/${fileName}`,
+      Body: fs.readFileSync(backupFilePath),
+      ContentType: "application/gzip",
+    })).then(() => {
+      console.log(`[${new Date().toISOString()}] Successfully uploaded to Cloudflare R2!`);
+    }).catch(err => {
+      console.warn(`[WARNING] Cloudflare R2 upload failed:`, err.message);
+    });
+  }
+' 2>/dev/null || true
 
 # Retention Cleanup: Delete local backups older than RETENTION_DAYS
 echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Cleaning up local backups older than ${RETENTION_DAYS} days..."
