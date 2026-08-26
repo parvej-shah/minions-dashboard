@@ -16,6 +16,15 @@ jobs:
     name: Backup Supabase DB
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      DB_URL: ${{ secrets.SUPABASE_DB_URL || secrets.DATABASE_URL }}
+      R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET_NAME || 'minions-assets' }}
+      R2_EP: ${{ secrets.R2_ENDPOINT }}
+      TG_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TG_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
     steps:
       - name: Checkout repository
@@ -38,11 +47,9 @@ jobs:
           echo "date=${DATE_ONLY}" >> "$GITHUB_OUTPUT"
 
       - name: Execute pg_dump from Supabase
-        env:
-          DB_URL: ${{ secrets.SUPABASE_DB_URL || secrets.DATABASE_URL }}
         run: |
           if [ -z "$DB_URL" ]; then
-            echo "::error::SUPABASE_DB_URL or DATABASE_URL secret is missing. Please configure it in repository secrets."
+            echo "::error::SUPABASE_DB_URL or DATABASE_URL secret is missing in GitHub repository secrets."
             exit 1
           fi
 
@@ -69,20 +76,17 @@ jobs:
         id: dump
 
       - name: Upload Backup to Cloudflare R2 (S3-compatible)
-        if: ${{ secrets.R2_ACCESS_KEY_ID != '' && secrets.R2_SECRET_ACCESS_KEY != '' }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: auto
-          R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME || 'minions-assets' }}
-          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT || format('https://{0}.r2.cloudflarestorage.com', secrets.CLOUDFLARE_ACCOUNT_ID) }}
+        if: env.R2_ACCESS_KEY != '' && env.R2_SECRET_KEY != ''
         run: |
-          echo "Uploading ${{ steps.vars.outputs.filename }} to Cloudflare R2 (bucket: ${R2_BUCKET_NAME}/backups/)..."
+          ENDPOINT="${R2_EP:-https://${R2_ACCOUNT}.r2.cloudflarestorage.com}"
+          echo "Uploading ${{ steps.vars.outputs.filename }} to Cloudflare R2 (bucket: ${R2_BUCKET}/backups/)..."
           
+          AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY" \
+          AWS_SECRET_ACCESS_KEY="$R2_SECRET_KEY" \
+          AWS_DEFAULT_REGION="auto" \
           aws s3 cp "${{ steps.vars.outputs.backup_path }}" \
-            "s3://${R2_BUCKET_NAME}/backups/${{ steps.vars.outputs.filename }}" \
-            --endpoint-url "${R2_ENDPOINT}"
+            "s3://${R2_BUCKET}/backups/${{ steps.vars.outputs.filename }}" \
+            --endpoint-url "$ENDPOINT"
 
           echo "Uploaded to Cloudflare R2 successfully!"
 
@@ -95,10 +99,7 @@ jobs:
           if-no-files-found: error
 
       - name: Send Telegram Alert Notification
-        if: ${{ secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != '' }}
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        if: success() && env.TG_BOT_TOKEN != '' && env.TG_CHAT_ID != ''
         run: |
           MESSAGE="<b>Supabase Daily Backup Completed</b>%0A%0A"
           MESSAGE+="<b>Timestamp:</b> <code>${{ steps.vars.outputs.date }}</code>%0A"
@@ -107,23 +108,20 @@ jobs:
           MESSAGE+="<b>Destination:</b> Cloudflare R2 + GitHub Artifacts%0A"
           MESSAGE+="<b>Status:</b> Success"
 
-          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-            -d "chat_id=${TELEGRAM_CHAT_ID}" \
+          curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TG_CHAT_ID}" \
             -d "text=${MESSAGE}" \
             -d "parse_mode=HTML" > /dev/null || true
 
       - name: Notify on Failure
-        if: ${{ failure() && secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != '' }}
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        if: failure() && env.TG_BOT_TOKEN != '' && env.TG_CHAT_ID != ''
         run: |
           MESSAGE="<b>WARNING: Supabase Daily Backup FAILED!</b>%0A%0A"
           MESSAGE+="<b>Workflow:</b> Supabase Daily Database Backup%0A"
           MESSAGE+="<b>Run ID:</b> <code>${{ github.run_id }}</code>%0A"
           MESSAGE+="Please check GitHub Actions logs immediately."
 
-          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-            -d "chat_id=${TELEGRAM_CHAT_ID}" \
+          curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TG_CHAT_ID}" \
             -d "text=${MESSAGE}" \
             -d "parse_mode=HTML" > /dev/null || true
