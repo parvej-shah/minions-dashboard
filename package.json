@@ -7,6 +7,8 @@
     "build": "prisma generate && next build",
     "postinstall": "prisma generate",
     "start": "next start",
+    "db:backup": "bash scripts/backup-supabase.sh",
+    "db:restore": "bash scripts/restore-supabase.sh",
     "lint": "eslint",
     "test": "vitest run"
   },

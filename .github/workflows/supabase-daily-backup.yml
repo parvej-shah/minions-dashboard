@@ -1,0 +1,129 @@
+name: Supabase Daily Database Backup
+
+on:
+  schedule:
+    # Runs daily at 02:00 UTC (08:00 AM Asia/Dhaka)
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      retention_days:
+        description: 'Number of days of backups to retain in storage'
+        required: false
+        default: '30'
+
+jobs:
+  backup-supabase:
+    name: Backup Supabase DB
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL Client & Tools
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client-16 gzip awscli curl
+
+      - name: Prepare Backup Directory & Filename
+        id: vars
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%d_%H%M%SZ")
+          DATE_ONLY=$(date -u +"%Y-%m-%d")
+          BACKUP_FILENAME="supabase_backup_${TIMESTAMP}.sql.gz"
+          BACKUP_PATH="${RUNNER_TEMP}/${BACKUP_FILENAME}"
+          echo "filename=${BACKUP_FILENAME}" >> "$GITHUB_OUTPUT"
+          echo "backup_path=${BACKUP_PATH}" >> "$GITHUB_OUTPUT"
+          echo "date=${DATE_ONLY}" >> "$GITHUB_OUTPUT"
+
+      - name: Execute pg_dump from Supabase
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL || secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DB_URL" ]; then
+            echo "::error::SUPABASE_DB_URL or DATABASE_URL secret is missing. Please configure it in repository secrets."
+            exit 1
+          fi
+
+          echo "Starting database dump from Supabase..."
+          
+          # Flags:
+          # --clean: Include DROP statements before CREATE
+          # --if-exists: Use IF EXISTS with DROP
+          # --no-owner: Skip owner assignment (avoids permission errors during restore)
+          # --no-privileges: Skip dump of privileges/grants
+          # --quote-all-identifiers: Prevent identifier issues
+          pg_dump \
+            --clean \
+            --if-exists \
+            --no-owner \
+            --no-privileges \
+            --quote-all-identifiers \
+            --dbname="$DB_URL" \
+            | gzip -9 > "${{ steps.vars.outputs.backup_path }}"
+
+          DUMP_SIZE=$(ls -lh "${{ steps.vars.outputs.backup_path }}" | awk '{print $5}')
+          echo "Backup generated successfully. Compressed file size: ${DUMP_SIZE}"
+          echo "dump_size=${DUMP_SIZE}" >> "$GITHUB_OUTPUT"
+        id: dump
+
+      - name: Upload Backup to Cloudflare R2 (S3-compatible)
+        if: ${{ secrets.R2_ACCESS_KEY_ID != '' && secrets.R2_SECRET_ACCESS_KEY != '' }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME || 'minions-assets' }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT || format('https://{0}.r2.cloudflarestorage.com', secrets.CLOUDFLARE_ACCOUNT_ID) }}
+        run: |
+          echo "Uploading ${{ steps.vars.outputs.filename }} to Cloudflare R2 (bucket: ${R2_BUCKET_NAME}/backups/)..."
+          
+          aws s3 cp "${{ steps.vars.outputs.backup_path }}" \
+            "s3://${R2_BUCKET_NAME}/backups/${{ steps.vars.outputs.filename }}" \
+            --endpoint-url "${R2_ENDPOINT}"
+
+          echo "Uploaded to Cloudflare R2 successfully!"
+
+      - name: Save Backup as GitHub Action Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.vars.outputs.filename }}
+          path: ${{ steps.vars.outputs.backup_path }}
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Send Telegram Alert Notification
+        if: ${{ secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != '' }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          MESSAGE="<b>Supabase Daily Backup Completed</b>%0A%0A"
+          MESSAGE+="<b>Timestamp:</b> <code>${{ steps.vars.outputs.date }}</code>%0A"
+          MESSAGE+="<b>File:</b> <code>${{ steps.vars.outputs.filename }}</code>%0A"
+          MESSAGE+="<b>Size:</b> <code>${{ steps.dump.outputs.dump_size }}</code>%0A"
+          MESSAGE+="<b>Destination:</b> Cloudflare R2 + GitHub Artifacts%0A"
+          MESSAGE+="<b>Status:</b> Success"
+
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "text=${MESSAGE}" \
+            -d "parse_mode=HTML" > /dev/null || true
+
+      - name: Notify on Failure
+        if: ${{ failure() && secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != '' }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          MESSAGE="<b>WARNING: Supabase Daily Backup FAILED!</b>%0A%0A"
+          MESSAGE+="<b>Workflow:</b> Supabase Daily Database Backup%0A"
+          MESSAGE+="<b>Run ID:</b> <code>${{ github.run_id }}</code>%0A"
+          MESSAGE+="Please check GitHub Actions logs immediately."
+
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "text=${MESSAGE}" \
+            -d "parse_mode=HTML" > /dev/null || true
