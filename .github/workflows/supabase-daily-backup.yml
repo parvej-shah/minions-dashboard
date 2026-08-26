@@ -30,10 +30,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
       - name: Install PostgreSQL 17 Client & Tools
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y wget ca-certificates lsb-release gzip curl python3-pip
+          sudo apt-get install -y wget ca-certificates lsb-release gzip curl
           sudo install -d /etc/apt/keyrings
           sudo wget --quiet -O /etc/apt/keyrings/pgdg.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
           echo "deb [signed-by=/etc/apt/keyrings/pgdg.asc] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
@@ -78,33 +84,44 @@ jobs:
           echo "dump_size=${DUMP_SIZE}" >> "$GITHUB_OUTPUT"
         id: dump
 
-      - name: Upload Backup to Cloudflare R2 (S3-compatible)
+      - name: Upload Backup to Cloudflare R2
         if: env.R2_ACCESS_KEY != '' && env.R2_SECRET_KEY != ''
+        continue-on-error: true
         run: |
-          pip install --break-system-packages boto3
-          python3 - << 'EOF'
-          import os, boto3
-          from botocore.config import Config
+          npm ci
+          node -e '
+            const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+            const fs = require("fs");
 
-          account_id = os.environ.get('R2_ACCOUNT')
-          endpoint = os.environ.get('R2_EP') or (f"https://{account_id}.r2.cloudflarestorage.com" if account_id else "")
-          bucket = os.environ.get('R2_BUCKET', 'minions-assets')
-          filename = "${{ steps.vars.outputs.filename }}"
-          backup_path = "${{ steps.vars.outputs.backup_path }}"
+            const accountId = process.env.R2_ACCOUNT;
+            const endpoint = process.env.R2_EP || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : "");
+            const bucket = process.env.R2_BUCKET || "minions-assets";
+            const filename = "${{ steps.vars.outputs.filename }}";
+            const backupPath = "${{ steps.vars.outputs.backup_path }}";
 
-          s3 = boto3.client(
-              's3',
-              endpoint_url=endpoint,
-              aws_access_key_id=os.environ['R2_ACCESS_KEY'],
-              aws_secret_access_key=os.environ['R2_SECRET_KEY'],
-              region_name='auto',
-              config=Config(s3={'addressing_style': 'path'})
-          )
+            console.log(`Uploading ${filename} to Cloudflare R2 bucket ${bucket}/backups/...`);
 
-          print(f"Uploading {filename} to Cloudflare R2 bucket {bucket}/backups/...")
-          s3.upload_file(backup_path, bucket, f"backups/{filename}")
-          print("Uploaded to Cloudflare R2 successfully!")
-          EOF
+            const r2 = new S3Client({
+              region: "auto",
+              endpoint: endpoint,
+              credentials: {
+                accessKeyId: process.env.R2_ACCESS_KEY,
+                secretAccessKey: process.env.R2_SECRET_KEY,
+              },
+            });
+
+            r2.send(new PutObjectCommand({
+              Bucket: bucket,
+              Key: `backups/${filename}`,
+              Body: fs.readFileSync(backupPath),
+              ContentType: "application/gzip",
+            })).then(() => {
+              console.log("Uploaded to Cloudflare R2 successfully!");
+            }).catch(err => {
+              console.error("Cloudflare R2 upload failed:", err);
+              process.exit(1);
+            });
+          '
 
       - name: Save Backup as GitHub Action Artifact
         uses: actions/upload-artifact@v4
@@ -137,7 +154,7 @@ jobs:
           MESSAGE+="<b>Run ID:</b> <code>${{ github.run_id }}</code>%0A"
           MESSAGE+="Please check GitHub Actions logs immediately."
 
-          curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
+          curl -s -X POST "https://api.telegram.org/bot${TG_CHAT_ID}/sendMessage" \
             -d "chat_id=${TG_CHAT_ID}" \
             -d "text=${MESSAGE}" \
             -d "parse_mode=HTML" > /dev/null || true
