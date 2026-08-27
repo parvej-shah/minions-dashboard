@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 
+import { toDirectiveDTO } from "@/lib/mappers/directive";
+
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -26,13 +28,15 @@ export async function PATCH(
       where: { id },
       data: {
         ...(body.is_active !== undefined && { isActive: body.is_active }),
+        ...(body.category !== undefined && { category: body.category }),
+        ...(body.key !== undefined && { ruleKey: String(body.key).toLowerCase().replace(/\s+/g, "_") }),
         ...(body.content !== undefined && { instruction: body.content }),
-        ...(body.priority !== undefined && { priority: body.priority }),
+        ...(body.priority !== undefined && { priority: Number(body.priority) }),
         ...(body.audience_scope !== undefined && { audienceScope: body.audience_scope }),
       },
     });
 
-    return NextResponse.json({ success: true, id: updated.id, is_active: updated.isActive });
+    return NextResponse.json(toDirectiveDTO(updated));
   } catch (error) {
     return apiError(error, "Failed to update brand directive");
   }

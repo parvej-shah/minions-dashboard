@@ -29,6 +29,25 @@ export async function POST(request: Request) {
       return apiFailure("category, key, and content are required", 400);
     }
 
+    const isForbidden = body.category === "FORBIDDEN";
+    const MAX_DIRECTIVES = isForbidden ? 50 : 30;
+
+    const existingCount = await prisma.brandDirective.count({
+      where: {
+        clientId: ctx.clientId,
+        category: isForbidden ? "FORBIDDEN" : { not: "FORBIDDEN" },
+      },
+    });
+
+    if (existingCount >= MAX_DIRECTIVES) {
+      return apiFailure(
+        isForbidden
+          ? `You have reached the limit of ${MAX_DIRECTIVES} banned buzzwords. Please remove unused words before adding new ones.`
+          : `You have reached the maximum limit of ${MAX_DIRECTIVES} active brand directives. To keep AI prompt context sharp and prevent context drift, please edit, consolidate, or remove existing directives.`,
+        400
+      );
+    }
+
     // Global count, not per-tenant: brandDirective.id is a single global-unique
     // column, so two tenants both computing "their" count as 0 would otherwise
     // both try to create DIR-001 and the second insert would collide.

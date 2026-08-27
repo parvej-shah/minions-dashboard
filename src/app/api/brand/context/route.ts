@@ -43,7 +43,8 @@ export async function GET(request: Request) {
       },
       directives: (brand.directives ?? [])
         .filter((d) => d.is_active)
-        .sort((a, b) => a.priority - b.priority),
+        .sort((a, b) => a.priority - b.priority)
+        .slice(0, 30),
       // Consumed by the Writer prompt (few-shot voice match) and the claims
       // gate (per-tenant CUSTOMER_RESULT override) in 02_idea_to_asset.
       tone_questionnaire: voiceConfig.toneQuestionnaire,

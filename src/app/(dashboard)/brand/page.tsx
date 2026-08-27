@@ -14,6 +14,7 @@ import {
   Share2,
   Settings2,
   Sparkles,
+  Pencil,
 } from "lucide-react";
 import { BrandDirectiveItem, BrandCategory, AudienceScope, BrandTab } from "@/types";
 import {
@@ -66,8 +67,60 @@ export default function BrandStudioPage() {
   // Banned lexicon: derived from the same FORBIDDEN-category BrandDirective rows the
   // Directives tab and the drafting pipeline use -- not a separate, disconnected list.
   const forbiddenDirectives = directives.filter(d => d.category === "FORBIDDEN");
+  const nonForbiddenDirectives = directives.filter(d => d.category !== "FORBIDDEN");
+  const DIRECTIVE_LIMIT = 30;
+  const isLimitReached = nonForbiddenDirectives.length >= DIRECTIVE_LIMIT;
+
   const [newBannedWord, setNewBannedWord] = useState("");
   const [isAddingBannedWord, setIsAddingBannedWord] = useState(false);
+
+  // Edit Directive State
+  const [editingDirective, setEditingDirective] = useState<BrandDirectiveItem | null>(null);
+  const [editCat, setEditCat] = useState<BrandCategory>("VOICE_DO");
+  const [editKey, setEditKey] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [editPriority, setEditPriority] = useState<1 | 2 | 3>(1);
+  const [editAudience, setEditAudience] = useState<"ALL" | "ICP" | "PEER" | "BRIDGE">("ALL");
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  const handleOpenEdit = (directive: BrandDirectiveItem) => {
+    setEditingDirective(directive);
+    setEditCat(directive.category);
+    setEditKey(directive.key);
+    setEditContent(directive.content);
+    setEditPriority((directive.priority as 1 | 2 | 3) || 1);
+    setEditAudience((directive.audience_scope as "ALL" | "ICP" | "PEER" | "BRIDGE") || "ALL");
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingDirective || !editContent) return;
+    setSavingEdit(true);
+    try {
+      const res = await fetch(`/api/brand/directives/${editingDirective.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: editCat,
+          key: editKey.trim() || editingDirective.key,
+          content: editContent,
+          priority: editPriority,
+          audience_scope: editAudience,
+        }),
+      });
+      if (res.ok) {
+        const updated: BrandDirectiveItem = await res.json();
+        setDirectives((prev) =>
+          prev.map((d) => (d.id === updated.id ? updated : d))
+        );
+        setEditingDirective(null);
+      }
+    } catch (err) {
+      console.error("Failed to update directive:", err);
+    } finally {
+      setSavingEdit(false);
+    }
+  };
 
   const handleApplyPreset = async (presetId: string) => {
     setApplyingPreset(true);
@@ -230,7 +283,7 @@ export default function BrandStudioPage() {
             }`}
           >
             <BookOpen className="w-3.5 h-3.5" />
-            Brand Directives ({directives.length})
+            Brand Directives ({nonForbiddenDirectives.length} / {DIRECTIVE_LIMIT})
           </button>
           <button
             onClick={() => setActiveTab("lexicon")}
@@ -339,6 +392,14 @@ export default function BrandStudioPage() {
             </div>
 
             <div className="flex items-center gap-2">
+              <span className={`text-[11px] font-mono px-2.5 py-1 rounded-xl border ${
+                isLimitReached 
+                  ? "bg-amber-500/10 text-amber-300 border-amber-500/30 font-bold"
+                  : "bg-[#161D26] text-[#94A3B8] border-[#1F2D3D]"
+              }`}>
+                {nonForbiddenDirectives.length} / {DIRECTIVE_LIMIT} Directives Limit
+              </span>
+
               <button
                 type="button"
                 onClick={() => setShowPresetModal(true)}
@@ -350,13 +411,31 @@ export default function BrandStudioPage() {
 
               <button
                 onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-1.5 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-sm transition-all"
+                disabled={isLimitReached}
+                title={isLimitReached ? "Context limit reached (30/30). Edit or delete existing directives to keep AI context sharp." : "Add a new directive"}
+                className={`flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-sm transition-all ${
+                  isLimitReached
+                    ? "bg-[#161D26] text-[#64748B] border border-[#1F2D3D] cursor-not-allowed"
+                    : "bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F]"
+                }`}
               >
                 <Plus className="w-3.5 h-3.5" />
                 Add Brand Directive
               </button>
             </div>
           </div>
+
+          {/* Context Protection Limit Warning */}
+          {isLimitReached && (
+            <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-center justify-between shadow-sm">
+              <div className="flex items-center gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>
+                  <strong>Prompt Context Protection:</strong> You have reached the maximum limit of {DIRECTIVE_LIMIT} active brand directives. Keeping directives concise and focused prevents token bloat and ensures the AI doesn&apos;t experience context drift.
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Starter Pack Modal */}
           {showPresetModal && (
@@ -519,6 +598,104 @@ export default function BrandStudioPage() {
             </div>
           )}
 
+          {/* Edit Directive Modal */}
+          {editingDirective && (
+            <div className="bg-[#0F1419] p-6 rounded-2xl border border-[#00C9A7]/40 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex items-center justify-between border-b border-[#1F2D3D] pb-3">
+                <h3 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
+                  <Pencil className="w-4 h-4 text-[#00C9A7]" />
+                  Edit Brand Directive ({editingDirective.id})
+                </h3>
+                <button 
+                  type="button"
+                  onClick={() => setEditingDirective(null)}
+                  className="text-xs text-[#94A3B8] hover:text-[#F1F5F9]"
+                >
+                  ✕ Close
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveEdit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                  <div className="md:col-span-2">
+                    <CategorySelect
+                      value={editCat}
+                      onChange={(cat) => setEditCat(cat)}
+                      label="Directive Category"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-medium text-[#94A3B8] block mb-1">Key / Identifier</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. core_philosophy"
+                      value={editKey}
+                      onChange={(e) => setEditKey(e.target.value)}
+                      className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-medium text-[#94A3B8] block mb-1">Priority</label>
+                    <select
+                      value={editPriority}
+                      onChange={(e) => setEditPriority(Number(e.target.value) as 1 | 2 | 3)}
+                      className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
+                    >
+                      <option value={1}>Priority 1 (Always Loaded)</option>
+                      <option value={2}>Priority 2 (Category Match)</option>
+                      <option value={3}>Priority 3 (Contextual)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-medium text-[#94A3B8] block mb-1">Audience Scope</label>
+                    <select
+                      value={editAudience}
+                      onChange={(e) => setEditAudience(e.target.value as AudienceScope)}
+                      className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
+                    >
+                      <option value="ALL">ALL (Every Audience)</option>
+                      <option value="ICP">ICP (Contractors & Operators)</option>
+                      <option value="PEER">PEER (Systems & AI Engineers)</option>
+                      <option value="BRIDGE">BRIDGE</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-medium text-[#94A3B8] block mb-1">Instruction / Content</label>
+                  <textarea
+                    rows={4}
+                    placeholder="Enter the concrete brand instruction, rule, or example..."
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    required
+                    className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-xl p-3 text-xs text-[#F1F5F9] resize-none focus:outline-none focus:border-[#00C9A7]"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingDirective(null)}
+                    className="px-4 py-2 rounded-xl text-xs text-[#94A3B8] hover:bg-[#161D26]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingEdit}
+                    className="px-4 py-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] font-bold rounded-xl text-xs shadow-sm disabled:opacity-50"
+                  >
+                    {savingEdit ? "Saving Changes..." : "Save Changes"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
           {/* Directives Cards */}
           <div className="grid grid-cols-1 gap-3">
             {directivesLoading && <LoadingState label="Loading brand directives…" />}
@@ -597,6 +774,14 @@ export default function BrandStudioPage() {
                         }`}
                       >
                         {directive.is_active ? "● Active" : "○ Disabled"}
+                      </button>
+
+                      <button
+                        onClick={() => handleOpenEdit(directive)}
+                        className="text-[#94A3B8] hover:text-[#00C9A7] p-1 transition-colors"
+                        title="Edit directive"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
                       </button>
 
                       <button
