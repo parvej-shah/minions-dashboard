@@ -241,8 +241,8 @@ export default function ProfileTab() {
         
         <div className="bg-[#161D26] p-4 rounded-xl border border-[#1F2D3D] mb-4">
           <p className="text-xs text-[#94A3B8] leading-relaxed">
-            <strong className="text-[#F1F5F9]">How Colors Work:</strong> Our AI asset generators and n8n workflows rely on a specific semantic token system (e.g. "Primary Ink" for backgrounds, "Brand Teal" for primary accents) to ensure contrast and visual harmony across social covers, PDFs, and graphics.
-            While the semantic names below (like "Deep Slate Ink" or "Vibrant Coral") reflect our default palette structure, you can change the underlying HEX codes to match your brand's exact equivalents for each role.
+            <strong className="text-[#F1F5F9]">How Colors Work:</strong> Our automated visual design engines rely on a specific semantic token system (e.g. &ldquo;Primary Ink&rdquo; for backgrounds, &ldquo;Brand Teal&rdquo; for primary accents) to ensure contrast and visual harmony across social covers, PDFs, and graphics.
+            While the semantic names below (like &ldquo;Deep Slate Ink&rdquo; or &ldquo;Vibrant Coral&rdquo;) reflect our default palette structure, you can change the underlying HEX codes to match your brand&apos;s exact equivalents for each role.
           </p>
         </div>
 
