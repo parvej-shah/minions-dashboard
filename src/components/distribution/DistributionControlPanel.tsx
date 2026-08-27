@@ -176,7 +176,7 @@ export function DistributionControlPanel({
             <CheckCircle2 className="w-4 h-4 text-[#00C9A7] shrink-0" />
             <span>{notification}</span>
           </div>
-          <span className="text-[10px] text-[#00C9A7]/70 font-mono">Saved to Supabase</span>
+          <span className="text-[10px] text-[#00C9A7]/70 font-mono">Changes saved</span>
         </div>
       )}
 
