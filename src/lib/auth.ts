@@ -89,13 +89,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
       const email = user?.email ?? (token.email as string | undefined);
       if (!email) return token;
 
-      const dbUser = await prisma.user.findUnique({
-        where: { email: email.trim().toLowerCase() },
-      });
-      if (dbUser) {
-        token.id = dbUser.id;
-        token.clientId = dbUser.clientId;
-        token.role = dbUser.role as UserRole;
+      try {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: email.trim().toLowerCase() },
+        });
+        if (dbUser) {
+          token.id = dbUser.id;
+          token.clientId = dbUser.clientId;
+          token.role = dbUser.role as UserRole;
+        }
+      } catch (err) {
+        console.error("[NextAuth] Non-fatal DB lookup error in jwt callback, preserving token state:", err);
       }
       return token;
     },

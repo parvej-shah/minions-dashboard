@@ -138,11 +138,16 @@ const gateHandler = auth(async (req) => {
   }
 
   if (sessionUser && !sessionUser.clientId && !isPlatformStaff) {
-    const freshUser = await prisma.user
-      .findUnique({ where: { id: sessionUser.id }, select: { clientId: true } })
-      .catch(() => null);
-    if (!freshUser?.clientId) {
-      return NextResponse.redirect(new URL("/onboarding", req.nextUrl.origin));
+    try {
+      const freshUser = await prisma.user.findUnique({
+        where: { id: sessionUser.id },
+        select: { clientId: true },
+      });
+      if (freshUser && freshUser.clientId === null) {
+        return NextResponse.redirect(new URL("/onboarding", req.nextUrl.origin));
+      }
+    } catch {
+      // In case of transient DB connection error, do not bounce the user out
     }
   }
 
