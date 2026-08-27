@@ -289,6 +289,7 @@ model BrandProfile {
   // other tenants WILL have real customer results to cite truthfully, so
   // this becomes a typed boolean the gate code reads, not prose fed to an LLM.
   allowCustomerResultClaims Boolean  @default(false) @map("allow_customer_result_claims")
+  visualAssets              Json?    @default("{}") @map("visual_assets")
   updatedAt                 DateTime @default(now()) @updatedAt @map("updated_at")
 
   client Client? @relation(fields: [clientId], references: [id], onDelete: Cascade)

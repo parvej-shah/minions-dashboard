@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
+import { BRAND_PRESETS, type BrandPreset } from "@/constants/brandPresets";
 
 export const TONE_FORMALITY_OPTIONS = [
   "technical_direct",
@@ -12,26 +13,11 @@ export const ONBOARDING_STEPS = ["Audience", "Channels", "Voice", "Plan"] as con
 
 /**
  * All state for the 4-step onboarding wizard, plus the two save points.
- *
- * Save-as-you-go, not batched at the end: step 2 (Channels) posts
- * industry+icp+channels together (matching /api/onboarding/setup's existing
- * payload shape, so the API contract doesn't change), step 3 (Voice) posts
- * separately. Both routes are safe to call more than once (upsert /
- * delete-then-recreate), so Back-and-resubmit never duplicates data -- see
- * /api/onboarding/setup's fix for the ICP_PROFILE/IDENTITY directive rows.
- * Back navigation itself never calls the API; only the next forward "Next"
- * re-saves.
- *
- * Step 4 (Plan) has no save point of its own -- plan_key was already fixed
- * to "starter" at company creation (see onboarding/page.tsx) and isn't
- * persisted anywhere yet regardless (nothing to send). It's a confirmation
- * screen, placed last on purpose: asking someone to pick a tier before
- * they've seen anything the product does is pure friction for a choice
- * that doesn't functionally do anything today anyway.
  */
 export function useOnboardingWizard() {
   const [step, setStep] = useState(0);
 
+  const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
   const [industry, setIndustry] = useState("");
   const [icpDescription, setIcpDescription] = useState("");
   const [channels, setChannels] = useState<string[]>(["blog"]);
@@ -41,6 +27,16 @@ export function useOnboardingWizard() {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function applyPreset(preset: BrandPreset) {
+    setSelectedPresetId(preset.id);
+    setIndustry(preset.industry);
+    setIcpDescription(preset.icpDescription);
+    setFormality(preset.toneFormality);
+    if (preset.examplePosts && preset.examplePosts.length >= 3) {
+      setExamples([preset.examplePosts[0], preset.examplePosts[1], preset.examplePosts[2]]);
+    }
+  }
 
   function toggleChannel(key: string) {
     setChannels((prev) => (prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key]));
@@ -72,6 +68,7 @@ export function useOnboardingWizard() {
         industry: industry.trim(),
         icp_description: icpDescription.trim(),
         channels,
+        preset_id: selectedPresetId,
       });
       setStep(2);
     } catch (err) {
@@ -104,6 +101,9 @@ export function useOnboardingWizard() {
 
   return {
     step,
+    selectedPresetId,
+    setSelectedPresetId,
+    applyPreset,
     industry,
     setIndustry,
     icpDescription,

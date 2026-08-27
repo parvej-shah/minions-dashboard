@@ -82,6 +82,7 @@ export async function updateBrandSettings(
     toneFormality: input.tone_formality,
     toneCadence: input.tone_cadence,
     allowedProofClaims: input.allowed_proof_claims,
+    ...(input.visual_assets ? { visualAssets: input.visual_assets as import("@prisma/client").Prisma.InputJsonValue } : {}),
   };
 
   const profile = await prisma.brandProfile.upsert({

@@ -49,6 +49,7 @@ export async function GET(request: Request) {
       tone_questionnaire: voiceConfig.toneQuestionnaire,
       tone_examples: voiceConfig.toneExamples,
       allow_customer_result_claims: voiceConfig.allowCustomerResultClaims,
+      visual_assets: brand.visual_assets,
     });
   } catch (error) {
     return apiError(error, "Failed to build brand context");

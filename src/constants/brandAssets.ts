@@ -8,14 +8,18 @@ import type { BrandCategory, MascotItem, SocialTemplateItem } from "@/types";
 
 export const CATEGORIES: { label: string; value: BrandCategory; desc: string }[] = [
   { label: "Identity & Name", value: "IDENTITY", desc: "Core naming rules and company definition" },
-  { label: "Forbidden & Banned", value: "FORBIDDEN", desc: "Strictly banned phrases, fake accounts & words" },
-  { label: "Allowed Proof", value: "PROOF", desc: "Verifiable technical claims & live demos" },
-  { label: "ICP Pain Points", value: "ICP_PAIN", desc: "Real HVAC/Plumbing/Electrical field friction" },
-  { label: "Voice DOs", value: "VOICE_DO", desc: "Stripe/Linear cadence & operator examples" },
-  { label: "Voice DONTs", value: "VOICE_DONT", desc: "No AI cheerleading or fluff paragraphs" },
-  { label: "Peer Stance", value: "PEER_STANCE", desc: "Engineering positions on deterministic systems" },
-  { label: "Objections", value: "OBJECTION", desc: "Handling contractor skepticism" },
-  { label: "Calls to Action", value: "CTA", desc: "Approved closing actions & test line" }
+  { label: "Editorial Philosophy", value: "EDITORIAL_PHILOSOPHY", desc: "Guiding content beliefs and second-order analytical angle" },
+  { label: "Content Themes", value: "CONTENT_THEMES", desc: "Core topic pillars and focus areas" },
+  { label: "Audience Lanes", value: "AUDIENCE_LANES", desc: "Target personas (builders, operators, executives)" },
+  { label: "Voice DOs", value: "VOICE_DO", desc: "Style, rhythm, and cadence rules" },
+  { label: "Voice DONTs", value: "VOICE_DONT", desc: "No marketing fluff or vague claims" },
+  { label: "Forbidden & Banned", value: "FORBIDDEN", desc: "Strictly banned phrases and buzzwords" },
+  { label: "Allowed Proof", value: "PROOF", desc: "Verifiable technical claims & benchmarks" },
+  { label: "ICP Pain Points", value: "ICP_PAIN", desc: "Real day-to-day friction and field problems" },
+  { label: "Writing Style", value: "WRITING_STYLE", desc: "Formatting, sentence structure, and vocabulary" },
+  { label: "Peer Stance", value: "PEER_STANCE", desc: "Industry opinions & contrarian perspectives" },
+  { label: "Objections", value: "OBJECTION", desc: "Handling customer skepticism and objections" },
+  { label: "Calls to Action", value: "CTA", desc: "Approved closing actions and next steps" },
 ];
 
 // Mascot Squad Data

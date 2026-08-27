@@ -13,12 +13,14 @@ import {
   Trash2,
   Share2,
   Settings2,
+  Sparkles,
 } from "lucide-react";
 import { BrandDirectiveItem, BrandCategory, AudienceScope, BrandTab } from "@/types";
 import {
   CATEGORIES,
   SOCIAL_TEMPLATES,
 } from "@/constants/brandAssets";
+import { BRAND_PRESETS } from "@/constants/brandPresets";
 import EmptyState, { LoadingState } from "@/components/ui/EmptyState";
 import VisualsTab from "@/components/brand/VisualsTab";
 import MascotsTab from "@/components/brand/MascotsTab";
@@ -52,6 +54,8 @@ export default function BrandStudioPage() {
   // Cover Reference Templates
   // Directives Modal State
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showPresetModal, setShowPresetModal] = useState(false);
+  const [applyingPreset, setApplyingPreset] = useState(false);
   const [newCat, setNewCat] = useState<BrandCategory>("VOICE_DO");
   const [newKey, setNewKey] = useState("");
   const [newContent, setNewContent] = useState("");
@@ -63,9 +67,32 @@ export default function BrandStudioPage() {
   const forbiddenDirectives = directives.filter(d => d.category === "FORBIDDEN");
   const [newBannedWord, setNewBannedWord] = useState("");
 
+  const handleApplyPreset = async (presetId: string) => {
+    setApplyingPreset(true);
+    try {
+      const res = await fetch("/api/brand/directives/preset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ presetId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.directives) {
+          setDirectives(data.directives);
+        }
+      }
+    } catch {
+      // Direct error handling
+    } finally {
+      setApplyingPreset(false);
+      setShowPresetModal(false);
+    }
+  };
+
   const handleAddDirective = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newKey || !newContent) return;
+    if (!newContent) return;
+    const finalKey = newKey.trim() || newContent.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim().split(/\s+/).slice(0, 4).join("_") || "directive_rule";
 
     try {
       const res = await fetch("/api/brand/directives", {
@@ -73,7 +100,7 @@ export default function BrandStudioPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           category: newCat,
-          key: newKey,
+          key: finalKey,
           content: newContent,
           priority: newPriority,
           audience_scope: newAudience
@@ -158,11 +185,7 @@ export default function BrandStudioPage() {
   });
 
   // Current active logo path
-  const currentLogoSrc = activeLogoVariant === "inverted"
-    ? "/images/minions_ai_logo_inverted_transparent.png"
-    : activeLogoVariant === "primary"
-    ? "/images/minions_ai_logo_primary_transparent.png"
-    : "/images/minions_ai_logo_teal_transparent.png";
+  
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
@@ -177,7 +200,7 @@ export default function BrandStudioPage() {
             Brand & Directives
           </h1>
           <p className="text-sm text-[#94A3B8] mt-1">
-            Real transparent logos, 3D Mascot Squad, official social avatars & covers, and live LLM prompt directives.
+            Manage your brand identity, visual assets, social covers, and live LLM prompt directives.
           </p>
         </div>
 
@@ -225,7 +248,7 @@ export default function BrandStudioPage() {
             }`}
           >
             <Palette className="w-3.5 h-3.5" />
-            Logos & Mascots (5)
+            Visual Assets
           </button>
           <button
             onClick={() => setActiveTab("social")}
@@ -236,7 +259,7 @@ export default function BrandStudioPage() {
             }`}
           >
             <Share2 className="w-3.5 h-3.5" />
-            Social Cover Templates ({SOCIAL_TEMPLATES.length})
+            Social Covers
           </button>
         </div>
       </div>
@@ -250,37 +273,21 @@ export default function BrandStudioPage() {
       {/* TAB 1: VISUALS & LOGO STUDIO */}
       {/* ======================================================== */}
       {activeTab === "visuals" && (
-        <VisualsTab
-          logoBgMode={logoBgMode}
-          setLogoBgMode={setLogoBgMode}
-          activeLogoVariant={activeLogoVariant}
-          setActiveLogoVariant={setActiveLogoVariant}
-          currentLogoSrc={currentLogoSrc}
-          setActiveTab={setActiveTab}
-          copiedKey={copiedKey}
-          copyToClipboard={copyToClipboard}
-        />
+        <VisualsTab logoBgMode={logoBgMode} setLogoBgMode={setLogoBgMode} activeLogoVariant={activeLogoVariant} setActiveLogoVariant={setActiveLogoVariant} currentLogoSrc="" setActiveTab={setActiveTab} copiedKey={copiedKey} copyToClipboard={copyToClipboard} />
       )}
 
       {/* ======================================================== */}
       {/* TAB 2: THE MASCOT SQUAD SHOWCASE */}
       {/* ======================================================== */}
       {activeTab === "mascots" && (
-        <MascotsTab copiedKey={copiedKey} copyToClipboard={copyToClipboard} />
+        <MascotsTab />
       )}
 
       {/* ======================================================== */}
       {/* TAB 3: SOCIAL AVATARS & COVERS SELECTOR */}
       {/* ======================================================== */}
       {activeTab === "social" && (
-        <SocialTemplatesTab
-          socialPlatformFilter={socialPlatformFilter}
-          setSocialPlatformFilter={setSocialPlatformFilter}
-          socialTypeFilter={socialTypeFilter}
-          setSocialTypeFilter={setSocialTypeFilter}
-          copiedKey={copiedKey}
-          copyToClipboard={copyToClipboard}
-        />
+        <SocialTemplatesTab />
       )}
 
       {/* ======================================================== */}
@@ -325,14 +332,78 @@ export default function BrandStudioPage() {
               </select>
             </div>
 
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-1.5 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-sm transition-all"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              Add Brand Directive
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowPresetModal(true)}
+                className="flex items-center gap-1.5 bg-[#161D26] hover:bg-[#1E293B] border border-[#00C9A7]/40 text-[#00C9A7] text-xs font-semibold px-3.5 py-1.5 rounded-xl shadow-sm transition-all"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                Apply Starter Pack
+              </button>
+
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="flex items-center gap-1.5 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-sm transition-all"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Add Brand Directive
+              </button>
+            </div>
           </div>
+
+          {/* Starter Pack Modal */}
+          {showPresetModal && (
+            <div className="bg-[#0F1419] p-6 rounded-2xl border border-[#00C9A7]/40 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex items-center justify-between border-b border-[#1F2D3D] pb-3">
+                <div>
+                  <h3 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#00C9A7]" />
+                    Import Brand Starter Pack
+                  </h3>
+                  <p className="text-xs text-[#94A3B8] mt-0.5">
+                    Instantly load curated editorial philosophies, core themes, and audience lanes into your workspace.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowPresetModal(false)}
+                  className="text-xs text-[#94A3B8] hover:text-[#F1F5F9]"
+                >
+                  ✕ Close
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+                {BRAND_PRESETS.map((preset) => (
+                  <div
+                    key={preset.id}
+                    className="p-4 rounded-xl border border-[#1F2D3D] bg-[#070B0F] hover:border-[#00C9A7]/50 flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#161D26] text-[#00C9A7] border border-[#00C9A7]/30">
+                          {preset.badge}
+                        </span>
+                      </div>
+                      <h4 className="text-sm font-semibold text-[#F1F5F9] mb-1">{preset.name}</h4>
+                      <p className="text-[11px] text-[#94A3B8] line-clamp-3 mb-4 leading-relaxed">
+                        {preset.description}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={applyingPreset}
+                      onClick={() => handleApplyPreset(preset.id)}
+                      className="w-full py-2 bg-[#00C9A7]/10 hover:bg-[#00C9A7]/20 border border-[#00C9A7]/40 text-[#00C9A7] text-xs font-semibold rounded-lg transition-all text-center disabled:opacity-50"
+                    >
+                      {applyingPreset ? "Importing..." : "Load into Workspace"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Add Directive Modal */}
           {showAddModal && (
@@ -366,13 +437,12 @@ export default function BrandStudioPage() {
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-medium text-[#94A3B8] block mb-1">Key (Slug)</label>
+                    <label className="text-[11px] font-medium text-[#94A3B8] block mb-1">Key / Identifier</label>
                     <input
                       type="text"
-                      placeholder="e.g. attic_thermal_leak"
+                      placeholder="e.g. core_philosophy (optional)"
                       value={newKey}
                       onChange={(e) => setNewKey(e.target.value)}
-                      required
                       className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
                     />
                   </div>
@@ -411,7 +481,19 @@ export default function BrandStudioPage() {
                     rows={3}
                     placeholder="Enter the concrete brand instruction, rule, or example..."
                     value={newContent}
-                    onChange={(e) => setNewContent(e.target.value)}
+                    onChange={(e) => {
+                      setNewContent(e.target.value);
+                      if (!newKey) {
+                        const autoSlug = e.target.value
+                          .toLowerCase()
+                          .replace(/[^a-z0-9\s]/g, "")
+                          .trim()
+                          .split(/\s+/)
+                          .slice(0, 3)
+                          .join("_");
+                        if (autoSlug) setNewKey(autoSlug);
+                      }
+                    }}
                     required
                     className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-xl p-3 text-xs text-[#F1F5F9] resize-none"
                   />

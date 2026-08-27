@@ -13,11 +13,11 @@ const TONE_OPTIONS: { value: BrandProfileInput["tone_formality"]; label: string 
 ];
 
 const COLOR_FIELDS: { key: keyof BrandProfileInput; label: string; hint: string }[] = [
-  { key: "primary_ink", label: "Deep Slate Ink", hint: "Primary Dark Background" },
-  { key: "brand_teal", label: "Brand Teal", hint: "Primary Brand Accent" },
-  { key: "brand_coral", label: "Vibrant Coral", hint: ".ai Domain Dot & CTAs" },
-  { key: "brand_cream", label: "Cream Canvas", hint: "Light Contrast Surfaces" },
-  { key: "accent_blue", label: "Electric Blue", hint: "Telemetry & Benchmarks" },
+  { key: "primary_ink", label: "Primary Dark", hint: "Dark Backgrounds / Text" },
+  { key: "brand_teal", label: "Primary Accent", hint: "Main Brand Color" },
+  { key: "brand_coral", label: "Secondary Accent", hint: "CTAs & Highlights" },
+  { key: "brand_cream", label: "Light Canvas", hint: "Light Backgrounds" },
+  { key: "accent_blue", label: "Tertiary Accent", hint: "Data & Charts" },
 ];
 
 function toInput(settings: BrandSettings): BrandProfileInput {
@@ -232,12 +232,20 @@ export default function ProfileTab() {
         </div>
       </div>
 
-      {/* Colors */}
+            {/* Colors */}
       <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
         <div className="flex items-center gap-2">
           <Palette className="w-4 h-4 text-[#00C9A7]" />
           <h3 className="text-sm font-bold text-[#F1F5F9]">Color Palette Tokens</h3>
         </div>
+        
+        <div className="bg-[#161D26] p-4 rounded-xl border border-[#1F2D3D] mb-4">
+          <p className="text-xs text-[#94A3B8] leading-relaxed">
+            <strong className="text-[#F1F5F9]">How Colors Work:</strong> Our AI asset generators and n8n workflows rely on a specific semantic token system (e.g. "Primary Ink" for backgrounds, "Brand Teal" for primary accents) to ensure contrast and visual harmony across social covers, PDFs, and graphics.
+            While the semantic names below (like "Deep Slate Ink" or "Vibrant Coral") reflect our default palette structure, you can change the underlying HEX codes to match your brand's exact equivalents for each role.
+          </p>
+        </div>
+
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
           {COLOR_FIELDS.map(({ key, label, hint }) => (
             <div key={key} className="p-4 rounded-xl bg-[#161D26] border border-[#1F2D3D] space-y-2">

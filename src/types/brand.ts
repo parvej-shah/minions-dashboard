@@ -9,7 +9,13 @@ export type BrandCategory =
   | "VOICE_DONT"
   | "FORBIDDEN"
   | "CTA"
-  | "PEER_STANCE";
+  | "PEER_STANCE"
+  | "EDITORIAL_PHILOSOPHY"
+  | "CONTENT_THEMES"
+  | "AUDIENCE_LANES"
+  | "CONTENT_RULES"
+  | "WRITING_STYLE"
+  | "BRAND_PERSONA";
 
 export type AudienceScope = "ALL" | "ICP" | "PEER" | "BRIDGE";
 
@@ -18,57 +24,12 @@ export interface BrandDirectiveItem {
   category: BrandCategory;
   key: string;
   content: string;
-  priority: 1 | 2 | 3;
+  priority: 1 | 2 | 3 | number;
   audience_scope: AudienceScope;
   is_active: boolean;
   updated_at: string;
 }
 
-export interface BrandSettings {
-  id: string;
-  brand_name: string;
-  company_domain: string;
-  positioning: string;
-  primary_logo_url: string;
-  primary_ink: string;
-  brand_teal: string;
-  brand_coral: string;
-  brand_cream: string;
-  accent_blue: string;
-  tone_guidelines: {
-    formality: "technical_direct" | "tactile_operator" | "conversational_peer";
-    cadence: string;
-    banned_lexicon: string[];
-    allowed_proof_claims: string[];
-  };
-  thumbnail_layout: {
-    visual_style: string;
-    show_badge: boolean;
-    show_logo: boolean;
-    title_word_count_min: number;
-    title_word_count_max: number;
-  };
-  directives?: BrandDirectiveItem[];
-  updated_at: string;
-}
-
-/** Fields editable from the Brand Profile tab, persisted to `brand_profile`. */
-export interface BrandProfileInput {
-  brand_name: string;
-  company_domain: string;
-  positioning: string;
-  primary_logo_url: string;
-  primary_ink: string;
-  brand_teal: string;
-  brand_coral: string;
-  brand_cream: string;
-  accent_blue: string;
-  tone_formality: "technical_direct" | "tactile_operator" | "conversational_peer";
-  tone_cadence: string;
-  allowed_proof_claims: string[];
-}
-
-/** A mascot rendered on the Brand Studio mascots tab. */
 export interface MascotItem {
   id: string;
   name: string;
@@ -83,7 +44,6 @@ export interface MascotItem {
   skills: string[];
 }
 
-/** A downloadable social cover/avatar template. */
 export interface SocialTemplateItem {
   id: string;
   platform: string;
@@ -95,5 +55,54 @@ export interface SocialTemplateItem {
   description: string;
 }
 
-/** Tabs of the Brand Studio. */
+export interface VisualAssets {
+  socialCovers?: SocialTemplateItem[];
+  mascots?: MascotItem[];
+}
+
+export interface BrandSettings {
+  id: string;
+  brand_name: string;
+  company_domain: string;
+  positioning: string;
+  primary_logo_url: string;
+  primary_ink: string;
+  brand_teal: string;
+  brand_coral: string;
+  brand_cream: string;
+  accent_blue: string;
+  tone_guidelines: {
+    formality: "technical_direct" | "tactile_operator" | "conversational_peer" | string;
+    cadence: string;
+    banned_lexicon: string[];
+    allowed_proof_claims: string[];
+  };
+  thumbnail_layout: {
+    visual_style: string;
+    show_badge: boolean;
+    show_logo: boolean;
+    title_word_count_min: number;
+    title_word_count_max: number;
+  };
+  directives?: BrandDirectiveItem[];
+  visual_assets?: VisualAssets;
+  updated_at: string;
+}
+
+export interface BrandProfileInput {
+  brand_name: string;
+  company_domain: string;
+  positioning: string;
+  primary_logo_url: string;
+  primary_ink: string;
+  brand_teal: string;
+  brand_coral: string;
+  brand_cream: string;
+  accent_blue: string;
+  tone_formality: "technical_direct" | "tactile_operator" | "conversational_peer" | string;
+  tone_cadence: string;
+  allowed_proof_claims: string[];
+  visual_assets?: VisualAssets;
+}
+
 export type BrandTab = "visuals" | "mascots" | "social" | "directives" | "lexicon" | "profile";

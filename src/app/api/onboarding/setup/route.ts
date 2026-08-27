@@ -3,14 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 import { DISTRIBUTION_CHANNELS } from "@/constants/channels";
+import { BRAND_PRESETS } from "@/constants/brandPresets";
 
 /**
  * ICP/industry/tone-formality/channel step of onboarding. Writes:
  * - BrandProfile.positioning (upserted, the one-line "who we serve" pitch
  *   the pipeline's prompts read via /api/brand/context)
- * - BrandDirective rows, category ICP_PROFILE — reusing the same
- *   priority-tiered directive pattern 01_idea_harvester and
- *   02_idea_to_asset already read, instead of a parallel config table
+ * - BrandDirective rows: ICP_PROFILE, IDENTITY, EDITORIAL_PHILOSOPHY, CONTENT_THEMES, etc.
  * - ClientChannel rows, one per selected platform (blog/facebook/linkedin/x)
  */
 export async function POST(request: Request) {
@@ -21,12 +20,15 @@ export async function POST(request: Request) {
     const body = await request.json();
     const industry = (body.industry || "").toString().trim();
     const icpDescription = (body.icp_description || "").toString().trim();
+    const presetId = (body.preset_id || "").toString().trim();
     const channels: string[] = Array.isArray(body.channels) ? body.channels : [];
 
     if (!industry || !icpDescription) {
       return apiFailure("industry and icp_description are required", 400);
     }
     const validChannels = channels.filter((c) => ["blog", "facebook", "linkedin", "x"].includes(c));
+
+    const matchedPreset = BRAND_PRESETS.find((p) => p.id === presetId);
 
     const client = await prisma.client.findUnique({
       where: { id: ctx.clientId },
@@ -35,10 +37,15 @@ export async function POST(request: Request) {
 
     await prisma.brandProfile.upsert({
       where: { clientId: ctx.clientId },
-      update: { positioning: icpDescription },
+      update: {
+        positioning: icpDescription,
+        toneCadence: matchedPreset?.toneCadence ?? "1-3 sentence paragraphs, plain language, no filler.",
+        toneFormality: matchedPreset?.toneFormality ?? "conversational_peer",
+        allowedProofClaims: matchedPreset?.proofPoints ?? [],
+      },
       create: {
         clientId: ctx.clientId,
-        brandName: industry,
+        brandName: client?.name || industry,
         companyDomain: "",
         positioning: icpDescription,
         primaryLogoUrl: "",
@@ -47,52 +54,122 @@ export async function POST(request: Request) {
         brandCoral: "#FF6B4A",
         brandCream: "#FFF8F0",
         accentBlue: "#3A6EA5",
-        toneFormality: "conversational_peer",
-        toneCadence: "1-3 sentence paragraphs, plain language, no filler.",
+        toneFormality: matchedPreset?.toneFormality ?? "conversational_peer",
+        toneCadence: matchedPreset?.toneCadence ?? "1-3 sentence paragraphs, plain language, no filler.",
+        allowedProofClaims: matchedPreset?.proofPoints ?? [],
       },
     });
 
-    // Random ids, not a sequential count -- a global brand_directives count
-    // race-conditions across concurrent onboardings (two tenants signing up
-    // at once could compute the same next id and collide on the primary key).
-    // This route can be called more than once per tenant (the onboarding
-    // wizard's Back button makes re-submitting this step a normal path), so
-    // each rule is cleared by (clientId, ruleKey) before recreating it --
-    // otherwise every resubmit would pile up another duplicate directive
-    // feeding the AI prompts.
+    // Clean up previous setup-generated directives to avoid duplicates on re-submission
     await prisma.brandDirective.deleteMany({
-      where: { clientId: ctx.clientId, ruleKey: "icp_description" },
+      where: {
+        clientId: ctx.clientId,
+        ruleKey: {
+          in: [
+            "icp_description",
+            "company_name",
+            "core_philosophy",
+            "core_themes",
+            "lane_builders",
+            "lane_business",
+            "banned_buzzwords",
+          ],
+        },
+      },
     });
-    await prisma.brandDirective.create({
-      data: {
+
+    const directivesToCreate = [
+      {
         id: `DIR-${crypto.randomUUID()}`,
         clientId: ctx.clientId,
         category: "ICP_PROFILE",
         ruleKey: "icp_description",
-        instruction: `Industry: ${industry}. ${icpDescription}`,
+        instruction: `Industry: ${industry}. Target Audience: ${icpDescription}`,
         priority: 1,
         audienceScope: "ALL",
         isActive: true,
       },
-    });
+    ];
 
     if (client?.name) {
-      await prisma.brandDirective.deleteMany({
-        where: { clientId: ctx.clientId, ruleKey: "company_name" },
+      directivesToCreate.push({
+        id: `DIR-${crypto.randomUUID()}`,
+        clientId: ctx.clientId,
+        category: "IDENTITY",
+        ruleKey: "company_name",
+        instruction: client.name,
+        priority: 1,
+        audienceScope: "ALL",
+        isActive: true,
       });
-      await prisma.brandDirective.create({
-        data: {
+    }
+
+    if (matchedPreset) {
+      directivesToCreate.push({
+        id: `DIR-${crypto.randomUUID()}`,
+        clientId: ctx.clientId,
+        category: "EDITORIAL_PHILOSOPHY",
+        ruleKey: "core_philosophy",
+        instruction: matchedPreset.corePhilosophy,
+        priority: 1,
+        audienceScope: "ALL",
+        isActive: true,
+      });
+
+      directivesToCreate.push({
+        id: `DIR-${crypto.randomUUID()}`,
+        clientId: ctx.clientId,
+        category: "CONTENT_THEMES",
+        ruleKey: "core_themes",
+        instruction: matchedPreset.coreThemes,
+        priority: 2,
+        audienceScope: "ALL",
+        isActive: true,
+      });
+
+      if (matchedPreset.audienceLanes?.builders) {
+        directivesToCreate.push({
           id: `DIR-${crypto.randomUUID()}`,
           clientId: ctx.clientId,
-          category: "IDENTITY",
-          ruleKey: "company_name",
-          instruction: client.name,
+          category: "AUDIENCE_LANES",
+          ruleKey: "lane_builders",
+          instruction: matchedPreset.audienceLanes.builders,
+          priority: 3,
+          audienceScope: "ICP",
+          isActive: true,
+        });
+      }
+
+      if (matchedPreset.audienceLanes?.business) {
+        directivesToCreate.push({
+          id: `DIR-${crypto.randomUUID()}`,
+          clientId: ctx.clientId,
+          category: "AUDIENCE_LANES",
+          ruleKey: "lane_business",
+          instruction: matchedPreset.audienceLanes.business,
+          priority: 3,
+          audienceScope: "PEER",
+          isActive: true,
+        });
+      }
+
+      if (matchedPreset.forbiddenWords?.length) {
+        directivesToCreate.push({
+          id: `DIR-${crypto.randomUUID()}`,
+          clientId: ctx.clientId,
+          category: "FORBIDDEN",
+          ruleKey: "banned_buzzwords",
+          instruction: `Never use these words or phrases: ${matchedPreset.forbiddenWords.join(", ")}.`,
           priority: 1,
           audienceScope: "ALL",
           isActive: true,
-        },
-      });
+        });
+      }
     }
+
+    await prisma.brandDirective.createMany({
+      data: directivesToCreate,
+    });
 
     // Every catalogue channel gets a row here, not just the ones the tenant
     // picked -- otherwise GET /api/channels' own seeding step would later
