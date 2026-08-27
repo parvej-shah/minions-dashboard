@@ -6,20 +6,113 @@
  */
 import type { BrandCategory, MascotItem, SocialTemplateItem } from "@/types";
 
-export const CATEGORIES: { label: string; value: BrandCategory; desc: string }[] = [
-  { label: "Identity & Name", value: "IDENTITY", desc: "Core naming rules and company definition" },
-  { label: "Editorial Philosophy", value: "EDITORIAL_PHILOSOPHY", desc: "Guiding content beliefs and second-order analytical angle" },
-  { label: "Content Themes", value: "CONTENT_THEMES", desc: "Core topic pillars and focus areas" },
-  { label: "Audience Lanes", value: "AUDIENCE_LANES", desc: "Target personas (builders, operators, executives)" },
-  { label: "Voice DOs", value: "VOICE_DO", desc: "Style, rhythm, and cadence rules" },
-  { label: "Voice DONTs", value: "VOICE_DONT", desc: "No marketing fluff or vague claims" },
-  { label: "Forbidden & Banned", value: "FORBIDDEN", desc: "Strictly banned phrases and buzzwords" },
-  { label: "Allowed Proof", value: "PROOF", desc: "Verifiable technical claims & benchmarks" },
-  { label: "ICP Pain Points", value: "ICP_PAIN", desc: "Real day-to-day friction and field problems" },
-  { label: "Writing Style", value: "WRITING_STYLE", desc: "Formatting, sentence structure, and vocabulary" },
-  { label: "Peer Stance", value: "PEER_STANCE", desc: "Industry opinions & contrarian perspectives" },
-  { label: "Objections", value: "OBJECTION", desc: "Handling customer skepticism and objections" },
-  { label: "Calls to Action", value: "CTA", desc: "Approved closing actions and next steps" },
+export interface CategoryMeta {
+  label: string;
+  value: BrandCategory;
+  desc: string;
+  stage: string;
+  example: string;
+}
+
+export const CATEGORIES: CategoryMeta[] = [
+  {
+    label: "Identity & Name",
+    value: "IDENTITY",
+    desc: "Core brand identity, official naming rules, and positioning definitions.",
+    stage: "Strategist & Writer",
+    example: "Brand name is 'Minions AI' (with space), never lowercase or dot-com.",
+  },
+  {
+    label: "Editorial Philosophy",
+    value: "EDITORIAL_PHILOSOPHY",
+    desc: "Guiding thesis and analytical worldview used to evaluate and frame candidate topics.",
+    stage: "Harvester & Strategist",
+    example: "Never create content just because something happened; analyze second-order effects.",
+  },
+  {
+    label: "Content Themes",
+    value: "CONTENT_THEMES",
+    desc: "Core subject pillars and domain topics the AI is authorized to harvest.",
+    stage: "Harvester Agent",
+    example: "Multi-Agent Orchestration, ERP Migrations, Voice AI Latency.",
+  },
+  {
+    label: "Audience Lanes",
+    value: "AUDIENCE_LANES",
+    desc: "Target buyer personas and reader profiles (e.g. Builders vs Operators).",
+    stage: "Harvester & Strategist",
+    example: "Lane A: Senior Backend Engineers. Lane B: VPs of Operations.",
+  },
+  {
+    label: "Brand Persona",
+    value: "BRAND_PERSONA",
+    desc: "The author's posture, personality, tone of voice, and relationship with the reader.",
+    stage: "Strategist & Writer",
+    example: "Curious software engineer exploring tradeoffs ('Come explore with me', not a guru).",
+  },
+  {
+    label: "Voice DOs",
+    value: "VOICE_DO",
+    desc: "Sentence rhythm, vocabulary standards, and positive stylistic requirements.",
+    stage: "Writer & Editor",
+    example: "1-3 sentence paragraph cadence, grounded engineering observations.",
+  },
+  {
+    label: "Voice DONTs",
+    value: "VOICE_DONT",
+    desc: "Stylistic antipatterns, banned tone attitudes, and marketing fluff to avoid.",
+    stage: "Writer & Editor",
+    example: "Never use corporate jargon, exclamation marks, or fake urgency.",
+  },
+  {
+    label: "Forbidden & Banned",
+    value: "FORBIDDEN",
+    desc: "Strictly blacklisted words and buzzwords scanned and blocked by code.",
+    stage: "Deterministic Gate",
+    example: "'Dogma', 'Undeniable truth', 'Revolutionary', 'Seamless', 'DM me for template'.",
+  },
+  {
+    label: "Allowed Proof",
+    value: "PROOF",
+    desc: "Verifiable technical claims, customer results, and benchmark facts.",
+    stage: "Claims Gate",
+    example: "Native Odoo model inheritance eliminates custom Python regression risk.",
+  },
+  {
+    label: "Writing Style",
+    value: "WRITING_STYLE",
+    desc: "Formatting rules, structural subheadings, and markdown layout constraints.",
+    stage: "Writer & Editor",
+    example: "Use ## subheadings every 200 words, no em-dashes, clear bullet takeaways.",
+  },
+  {
+    label: "ICP Pain Points",
+    value: "ICP_PAIN",
+    desc: "Real operational friction and daily frustrations lived by your target reader.",
+    stage: "Strategist & Writer",
+    example: "14-hour migration script freezes due to dirty historical transaction schemas.",
+  },
+  {
+    label: "Peer Stance",
+    value: "PEER_STANCE",
+    desc: "Nuanced technical opinions and counterintuitive industry perspectives.",
+    stage: "Strategist Agent",
+    example: "Deterministic state machines outperform vector search in transactional agent loops.",
+  },
+  {
+    label: "Objections",
+    value: "OBJECTION",
+    desc: "Common reader skepticism and counter-arguments to dismantle in the body text.",
+    stage: "Strategist & Editor",
+    example: "'Isn't building custom code faster than adopting vanilla constraints?'",
+  },
+  {
+    label: "Calls to Action",
+    value: "CTA",
+    desc: "Approved closing invitations, discussion prompts, and conversion actions.",
+    stage: "Writer & Social",
+    example: "Invite readers to benchmark their ERP TCO or discuss architectural tradeoffs.",
+  },
 ];
 
 // Mascot Squad Data

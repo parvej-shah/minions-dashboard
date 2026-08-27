@@ -27,6 +27,7 @@ import MascotsTab from "@/components/brand/MascotsTab";
 import SocialTemplatesTab from "@/components/brand/SocialTemplatesTab";
 import LexiconTab from "@/components/brand/LexiconTab";
 import ProfileTab from "@/components/brand/ProfileTab";
+import CategorySelect from "@/components/brand/CategorySelect";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 
@@ -66,6 +67,7 @@ export default function BrandStudioPage() {
   // Directives tab and the drafting pipeline use -- not a separate, disconnected list.
   const forbiddenDirectives = directives.filter(d => d.category === "FORBIDDEN");
   const [newBannedWord, setNewBannedWord] = useState("");
+  const [isAddingBannedWord, setIsAddingBannedWord] = useState(false);
 
   const handleApplyPreset = async (presetId: string) => {
     setApplyingPreset(true);
@@ -151,6 +153,7 @@ export default function BrandStudioPage() {
   const handleAddBannedWord = async () => {
     const word = newBannedWord.trim();
     if (!word) return;
+    setIsAddingBannedWord(true);
     try {
       const res = await fetch("/api/brand/directives", {
         method: "POST",
@@ -172,6 +175,7 @@ export default function BrandStudioPage() {
       // never reach the pipeline's actual brand context query.
     } finally {
       setNewBannedWord("");
+      setIsAddingBannedWord(false);
     }
   };
 
@@ -305,7 +309,9 @@ export default function BrandStudioPage() {
               >
                 <option value="ALL">All Categories ({directives.length})</option>
                 {CATEGORIES.map(c => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
+                  <option key={c.value} value={c.value} title={`${c.label} (${c.stage}): ${c.desc}`}>
+                    {c.label}
+                  </option>
                 ))}
               </select>
 
@@ -422,25 +428,20 @@ export default function BrandStudioPage() {
               </div>
 
               <form onSubmit={handleAddDirective} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                  <div>
-                    <label className="text-[11px] font-medium text-[#94A3B8] block mb-1">Category</label>
-                    <select
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                  <div className="md:col-span-2">
+                    <CategorySelect
                       value={newCat}
-                      onChange={(e) => setNewCat(e.target.value as BrandCategory)}
-                      className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
-                    >
-                      {CATEGORIES.map(c => (
-                        <option key={c.value} value={c.value}>{c.label}</option>
-                      ))}
-                    </select>
+                      onChange={(cat) => setNewCat(cat)}
+                      label="Directive Category"
+                    />
                   </div>
 
                   <div>
                     <label className="text-[11px] font-medium text-[#94A3B8] block mb-1">Key / Identifier</label>
                     <input
                       type="text"
-                      placeholder="e.g. core_philosophy (optional)"
+                      placeholder="e.g. core_philosophy"
                       value={newKey}
                       onChange={(e) => setNewKey(e.target.value)}
                       className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
@@ -454,9 +455,9 @@ export default function BrandStudioPage() {
                       onChange={(e) => setNewPriority(Number(e.target.value) as 1 | 2 | 3)}
                       className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
                     >
-                      <option value={1}>1 (Always Loaded into Prompts)</option>
-                      <option value={2}>2 (Loaded for Matching Category)</option>
-                      <option value={3}>3 (Contextual / Edge Case)</option>
+                      <option value={1}>Priority 1 (Always Loaded)</option>
+                      <option value={2}>Priority 2 (Category Match)</option>
+                      <option value={3}>Priority 3 (Contextual)</option>
                     </select>
                   </div>
 
@@ -549,17 +550,29 @@ export default function BrandStudioPage() {
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
-                        isForbidden 
-                          ? "bg-red-500/20 text-red-400 border border-red-500/30"
-                          : isProof
-                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                            : isVoice
-                              ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
-                              : "bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/30"
-                      }`}>
-                        {directive.category}
-                      </span>
+                      {(() => {
+                        const catMeta = CATEGORIES.find(c => c.value === directive.category);
+                        const label = catMeta?.label || directive.category;
+                        const tooltipText = catMeta 
+                          ? `${catMeta.label} (${catMeta.stage}):\n${catMeta.desc}\n\nExample: "${catMeta.example}"` 
+                          : directive.category;
+                        return (
+                          <span 
+                            title={tooltipText}
+                            className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded cursor-help transition-all ${
+                              isForbidden 
+                                ? "bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30"
+                                : isProof
+                                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30"
+                                  : isVoice
+                                    ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/30"
+                                    : "bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/30 hover:bg-[#00C9A7]/30"
+                            }`}
+                          >
+                            {label}
+                          </span>
+                        );
+                      })()}
 
                       <span className="text-xs font-mono font-semibold text-[#F1F5F9]">
                         {directive.key}
@@ -625,6 +638,7 @@ export default function BrandStudioPage() {
         <LexiconTab
           bannedWords={forbiddenDirectives}
           isLoading={directivesLoading}
+          isSubmitting={isAddingBannedWord}
           newBannedWord={newBannedWord}
           setNewBannedWord={setNewBannedWord}
           onAddBannedWord={handleAddBannedWord}
