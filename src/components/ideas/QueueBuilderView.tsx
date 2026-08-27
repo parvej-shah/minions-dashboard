@@ -400,8 +400,8 @@ export default function QueueBuilderView({
                 className="w-full bg-[#070B0F] border border-[#1F2D3D] rounded-xl px-2 py-1.5 text-xs text-[#94A3B8] outline-none cursor-pointer"
               >
                 <option value="ALL">All Audiences</option>
-                <option value="ICP">ICP (Contractors)</option>
-                <option value="PEER">PEER (Engineers)</option>
+                <option value="ICP">ICP (Core Target)</option>
+                <option value="PEER">PEER (Industry)</option>
                 <option value="BRIDGE">BRIDGE (Investors)</option>
               </select>
             </div>

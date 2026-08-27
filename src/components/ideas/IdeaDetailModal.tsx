@@ -100,10 +100,10 @@ export default function IdeaDetailModal({
               <div className="text-[10px] font-mono text-[#64748B] uppercase">Audience Objective</div>
               <div className="text-xs font-semibold text-white">
                 {detailIdea.audience === "ICP" 
-                  ? "Direct to Home Service Operators (Contractors)"
+                  ? "Ideal Customer Profile (Core Target)"
                   : detailIdea.audience === "PEER"
-                  ? "Technical & Systems Architecture Peers"
-                  : "Bridge / Strategic Market Investors"}
+                  ? "Industry Peers & Practitioners"
+                  : "Strategic Market / Investors"}
               </div>
             </div>
 
