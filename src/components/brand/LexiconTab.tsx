@@ -10,6 +10,7 @@ import { LoadingState } from "@/components/ui/EmptyState";
 export interface LexiconTabProps {
   bannedWords: BrandDirectiveItem[];
   isLoading: boolean;
+  isSubmitting?: boolean;
   newBannedWord: string;
   setNewBannedWord: (v: string) => void;
   onAddBannedWord: () => void;
@@ -21,6 +22,7 @@ export interface LexiconTabProps {
 export default function LexiconTab({
   bannedWords,
   isLoading,
+  isSubmitting,
   newBannedWord,
   setNewBannedWord,
   onAddBannedWord,
@@ -46,14 +48,16 @@ export default function LexiconTab({
               placeholder="Add banned buzzword..."
               value={newBannedWord}
               onChange={(e) => setNewBannedWord(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && onAddBannedWord()}
+              onKeyDown={(e) => e.key === "Enter" && !isSubmitting && newBannedWord.trim() && onAddBannedWord()}
+              disabled={isSubmitting}
               className="bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3 py-1.5 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]"
             />
             <button
               onClick={onAddBannedWord}
-              className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/40 text-xs font-bold px-3 py-1.5 rounded-xl transition-all"
+              disabled={isSubmitting || !newBannedWord.trim()}
+              className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/40 text-xs font-bold px-3 py-1.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              + Ban Word
+              {isSubmitting ? "Saving..." : "+ Ban Word"}
             </button>
           </div>
         </div>
