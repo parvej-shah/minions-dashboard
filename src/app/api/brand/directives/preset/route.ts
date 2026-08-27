@@ -4,6 +4,7 @@ import { toDirectiveDTO } from "@/lib/mappers/directive";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 import { BRAND_PRESETS } from "@/constants/brandPresets";
+import { PRIMARY_LOGO_URL } from "@/constants/config";
 
 export async function POST(request: Request) {
   const ctx = await requireClientId();
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
         brandName: preset.industry,
         companyDomain: "",
         positioning: preset.icpDescription,
-        primaryLogoUrl: "",
+        primaryLogoUrl: PRIMARY_LOGO_URL,
         primaryInk: "#12242A",
         brandTeal: "#0E5C63",
         brandCoral: "#FF6B4A",

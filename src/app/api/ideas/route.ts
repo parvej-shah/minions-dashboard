@@ -27,7 +27,6 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     const existingIds = await prisma.idea.findMany({
-      where: { clientId: ctx.clientId },
       select: { id: true },
     });
     const nextNumber =
