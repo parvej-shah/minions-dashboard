@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { BLOG_BASE_URL } from "@/constants/config";
+import { useBrandSettings } from "@/hooks/useBrandSettings";
 import type { NavItem } from "@/constants/nav";
 import type { NavCounts } from "@/types";
 import type { Session } from "next-auth";
@@ -51,6 +52,11 @@ export function MobileDrawer({
   onSignOut,
   blogEnabled = true,
 }: MobileNavProps) {
+  const { brandSettings } = useBrandSettings();
+  const liveBlogUrl = brandSettings?.company_domain
+    ? (brandSettings.company_domain.startsWith("http") ? brandSettings.company_domain : `https://${brandSettings.company_domain}`)
+    : BLOG_BASE_URL;
+
   return (
     <>
   {mobileMenuOpen && (
@@ -140,7 +146,7 @@ export function MobileDrawer({
 
           {blogEnabled && (
             <a
-              href={`${BLOG_BASE_URL}/blog`}
+              href={liveBlogUrl === BLOG_BASE_URL ? `${liveBlogUrl}/blog` : liveBlogUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#ff6b4a] text-white text-xs font-bold shadow-sm"
@@ -232,7 +238,7 @@ export function MobileTopBar({
 
       {blogEnabled && (
         <a
-          href={`${BLOG_BASE_URL}/blog`}
+          href={liveBlogUrl === BLOG_BASE_URL ? `${liveBlogUrl}/blog` : liveBlogUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1 text-xs font-bold text-white bg-[#ff6b4a] px-2.5 py-1.5 rounded-lg shadow-sm"

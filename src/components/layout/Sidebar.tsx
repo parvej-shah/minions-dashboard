@@ -9,6 +9,7 @@ import type { NavItem } from "@/constants/nav";
 import type { NavCounts } from "@/types";
 import type { Session } from "next-auth";
 import QuotaMeter from "./QuotaMeter";
+import { useBrandSettings } from "@/hooks/useBrandSettings";
 import WorkspaceSwitcher from "./WorkspaceSwitcher";
 
 export interface SidebarProps {
@@ -42,6 +43,12 @@ export default function Sidebar({
   onSignOut,
   blogEnabled = true,
 }: SidebarProps) {
+  const { brandSettings } = useBrandSettings();
+  const liveBlogUrl = brandSettings?.company_domain
+    ? (brandSettings.company_domain.startsWith("http") ? brandSettings.company_domain : `https://${brandSettings.company_domain}`)
+    : BLOG_BASE_URL;
+  const liveBlogHostname = liveBlogUrl.replace(/^https?:\/\//, "").replace(/\/$/, "");
+
   return (
   <aside className="w-72 lg:w-76 bg-[#0f1419] border-r border-[#1f2b37] flex flex-col justify-between p-4 shrink-0 hidden md:flex sticky top-0 h-screen overflow-y-auto z-40">
     <div className="space-y-4">
@@ -148,7 +155,7 @@ export default function Sidebar({
     <div className="pt-3 border-t border-[#1f2b37] space-y-2.5">
       {blogEnabled && (
         <a
-          href={`${BLOG_BASE_URL}/blog`}
+          href={liveBlogUrl === BLOG_BASE_URL ? `${liveBlogUrl}/blog` : liveBlogUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#ff6b4a]/10 hover:bg-[#ff6b4a]/20 border border-[#ff6b4a]/30 hover:border-[#ff6b4a] text-xs font-bold text-[#ff6b4a] transition-all group shadow-xs"
@@ -158,7 +165,7 @@ export default function Sidebar({
             <span className="truncate">View Live Blog</span>
           </div>
           <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#ff6b4a]/20 text-white">
-            getminions.ai ↗
+            {liveBlogHostname} ↗
           </span>
         </a>
       )}
