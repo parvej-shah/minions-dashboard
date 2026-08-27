@@ -203,11 +203,11 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
     setPublishError(null);
 
     try {
-      // Mark claims OK so the publisher workflow picks the asset up, then set it live.
+      // Mark claims OK and status PUBLISHED so the publisher workflow picks the asset up and broadcasts to LinkedIn/Facebook.
       await apiClient.patch(`/api/assets/${activeAsset.id}`, {
         claims_ok: "Y",
         status: "PUBLISHED",
-        published_at: new Date().toISOString(),
+        published_at: null,
       });
       await apiClient.post("/api/pipeline/publish", { asset_id: activeAsset.id });
 
@@ -219,7 +219,7 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
       });
       setPublishState("success");
       window.dispatchEvent(new Event("minions-counts-updated"));
-      return "Published live to getminions.ai/blog";
+      return "Published live to LinkedIn & getminions.ai/blog";
     } catch (err) {
       const message = toErrorMessage(err, "Publish failed");
       setPublishState("error");
