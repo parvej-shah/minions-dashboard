@@ -29,6 +29,8 @@ const gateHandler = auth(async (req) => {
 
   // 1. Always allow auth endpoints, webhooks, static public assets
   if (
+    pathname.startsWith("/llms") ||
+    pathname.startsWith("/robots") ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/webhooks") ||
     pathname.startsWith("/api/onboarding") ||
@@ -40,9 +42,6 @@ const gateHandler = auth(async (req) => {
     pathname === "/favicon.ico" ||
     pathname === "/icon.svg" ||
     pathname === "/sw.js" ||
-    pathname === "/llms.txt" ||
-    pathname === "/llms-full.txt" ||
-    pathname === "/robots.txt" ||
     pathname.endsWith(".txt") ||
     pathname.endsWith(".png") ||
     pathname.endsWith(".jpg") ||
