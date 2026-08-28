@@ -27,17 +27,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "minions-ai-secret-key-fallback-32-chars",
   callbacks: {
     authorized({ auth, request }) {
-      const pathname = request?.nextUrl?.pathname || "";
+      const url = request?.nextUrl?.pathname || (request?.url ? new URL(request.url).pathname : "");
       if (
-        pathname.startsWith("/docs") ||
-        pathname.startsWith("/llms") ||
-        pathname.startsWith("/robots") ||
-        pathname.startsWith("/api/llms") ||
-        pathname.startsWith("/api/webhooks") ||
-        pathname.startsWith("/api/onboarding") ||
-        pathname.startsWith("/_next") ||
-        pathname.startsWith("/images") ||
-        pathname.startsWith("/icons")
+        url === "/docs" ||
+        url.startsWith("/docs") ||
+        url === "/llms.txt" ||
+        url === "/llms-full.txt" ||
+        url === "/robots.txt" ||
+        url.startsWith("/llms") ||
+        url.startsWith("/robots") ||
+        url.startsWith("/api/llms") ||
+        url.startsWith("/api/webhooks") ||
+        url.startsWith("/api/onboarding") ||
+        url.startsWith("/api/auth") ||
+        url.startsWith("/_next") ||
+        url.startsWith("/images") ||
+        url.startsWith("/icons") ||
+        url.endsWith(".txt") ||
+        url.endsWith(".png") ||
+        url.endsWith(".jpg") ||
+        url.endsWith(".svg") ||
+        url.endsWith(".ico")
       ) {
         return true;
       }
