@@ -56,7 +56,13 @@ export function middleware(request: NextRequest) {
   }
 
   // 2. Protect internal API routes
-  if (pathname.startsWith("/api/")) {
+  if (
+    pathname.startsWith("/api/") &&
+    !pathname.startsWith("/api/llms") &&
+    !pathname.startsWith("/api/auth") &&
+    !pathname.startsWith("/api/webhooks") &&
+    !pathname.startsWith("/api/onboarding")
+  ) {
     if (!isLoggedIn) {
       const authHeader =
         request.headers.get("authorization") ||

@@ -20,7 +20,7 @@ import {
   Globe,
 } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
 
 function DocsContent() {
   const searchParams = useSearchParams();
