@@ -3,11 +3,11 @@ import { NextResponse } from "next/server";
 import type { NextFetchEvent, NextRequest } from "next/server";
 
 /**
- * Clean deterministic proxy/middleware gate.
+ * Clean deterministic Edge Middleware gate.
  * Public routes (docs, llms.txt, webhooks, auth, static files) return immediately
- * without invoking authentication gates or importing NextAuth.
+ * without invoking authentication gates.
  */
-export default async function proxy(req: NextRequest, event: NextFetchEvent) {
+export default async function middleware(req: NextRequest, event: NextFetchEvent) {
   const { pathname } = req.nextUrl;
 
   // 1. PUBLIC ROUTES (Zero-Auth Required)
