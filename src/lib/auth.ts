@@ -26,10 +26,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "minions-ai-secret-key-fallback-32-chars",
   callbacks: {
-    authorized() {
-      // Always return true so NextAuth never executes automatic edge 307 redirects.
-      // Individual protected pages and API endpoints handle authentication explicitly.
-      return true;
+    authorized({ auth, request }) {
+      const url = new URL(request.url);
+      const publicPaths = [
+        "/docs",
+        "/api/llms",
+        "/api/version",
+        "/api/auth",
+        "/api/webhooks",
+        "/login"
+      ];
+      if (publicPaths.some(p => url.pathname.startsWith(p))) {
+        return true;
+      }
+      // For all other routes, require a valid session
+      return !!auth;
     },
     async signIn({ user }) {
       if (!user?.email) return false;
