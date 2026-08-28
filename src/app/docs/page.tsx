@@ -495,6 +495,9 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
                       <p className="text-sm text-[#94A3B8]">
                         Go to the <a href="https://developer.linkedin.com/" target="_blank" rel="noreferrer" className="text-[#00C9A7] hover:underline">LinkedIn Developer Portal</a> and click <strong>Create app</strong>. Fill in your App Name, link your Company Page, and provide a Privacy Policy URL.
                       </p>
+                      <div className="mt-4 rounded-xl overflow-hidden border border-[#1F2D3D]">
+                        <img src="/assets/docs/linkedin_create_app.png" alt="LinkedIn Create App Screen" className="w-full object-cover" />
+                      </div>
                     </div>
                   </div>
 
@@ -505,6 +508,9 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
                       <p className="text-sm text-[#94A3B8]">
                         Navigate to the <strong>Products</strong> tab in your new app and request access to <strong>Share on LinkedIn</strong> (and <strong>Sign In with LinkedIn v2</strong> if you need personal profile access). These are usually approved instantly.
                       </p>
+                      <div className="mt-4 rounded-xl overflow-hidden border border-[#1F2D3D]">
+                        <img src="/assets/docs/linkedin_products.png" alt="LinkedIn Products Tab" className="w-full object-cover" />
+                      </div>
                     </div>
                   </div>
 
@@ -517,6 +523,9 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
                         <br/><br/>
                         You will also need your Profile or Page URN. For a personal profile, it looks like <code className="text-[#00C9A7]">urn:li:person:ABC123xyz</code>. For a company page, it looks like <code className="text-[#00C9A7]">urn:li:organization:12345678</code>.
                       </p>
+                      <div className="mt-4 rounded-xl overflow-hidden border border-[#1F2D3D]">
+                        <img src="/assets/docs/linkedin_auth_token.png" alt="LinkedIn Auth Token Generator" className="w-full object-cover" />
+                      </div>
                     </div>
                   </div>
 

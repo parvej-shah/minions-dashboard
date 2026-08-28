@@ -57,6 +57,19 @@ export function ChannelCredentialForm({
   }
 
   if (!open) {
+    if (channel.key === "linkedin") {
+      return (
+        <a
+          href="/api/auth/linkedin/connect"
+          onClick={(e) => e.stopPropagation()}
+          className="flex items-center gap-1.5 text-[11px] font-mono px-3 py-1.5 rounded-lg bg-[#0077b5] text-white hover:bg-[#0077b5]/90 transition-colors w-fit"
+        >
+          <KeyRound className="w-3 h-3" />
+          {channel.has_credential ? "Reconnect with LinkedIn" : "Sign In with LinkedIn"}
+        </a>
+      );
+    }
+
     return (
       <button
         type="button"
