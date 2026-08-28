@@ -186,12 +186,6 @@ export default async function proxy(request: NextRequest, event: NextFetchEvent)
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico, icon.svg, images, icons, llms.txt, llms-full.txt, robots.txt
-     */
-    "/((?!_next/static|_next/image|favicon.ico|icon.svg|llms\\.txt|llms-full\\.txt|robots\\.txt|images|icons).*)",
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|images|icons|llms.txt|llms-full.txt|robots.txt).*)",
   ],
 };
