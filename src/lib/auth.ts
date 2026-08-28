@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+import { authConfig } from "./auth.config";
 import { requireOneOfEnv } from "./env";
 import { prisma } from "./prisma";
 import { consumePendingSignup } from "./onboarding";
@@ -15,6 +16,7 @@ import type { UserRole } from "@/constants/access";
  * not need the secrets; serving a request does.
  */
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID || process.env.GOOGLE_CLIENT_ID || "dummy",
@@ -26,22 +28,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "minions-ai-secret-key-fallback-32-chars",
   callbacks: {
-    authorized({ auth, request }) {
-      const url = new URL(request.url);
-      const publicPaths = [
-        "/docs",
-        "/api/llms",
-        "/api/version",
-        "/api/auth",
-        "/api/webhooks",
-        "/login"
-      ];
-      if (publicPaths.some(p => url.pathname.startsWith(p))) {
-        return true;
-      }
-      // For all other routes, require a valid session
-      return !!auth;
-    },
+    ...authConfig.callbacks,
     async signIn({ user }) {
       if (!user?.email) return false;
       const cleanEmail = user.email.trim().toLowerCase();
