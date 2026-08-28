@@ -29,6 +29,7 @@ const gateHandler = auth(async (req) => {
 
   // 1. Always allow auth endpoints, webhooks, static public assets
   if (
+    pathname.startsWith("/docs") ||
     pathname.startsWith("/llms") ||
     pathname.startsWith("/robots") ||
     pathname.startsWith("/api/llms") ||
@@ -170,6 +171,7 @@ const gate = gateHandler as unknown as Promise<NextMiddleware>;
 export default async function proxy(request: NextRequest, event: NextFetchEvent) {
   const { pathname } = request.nextUrl;
   if (
+    pathname.startsWith("/docs") ||
     pathname.startsWith("/llms") ||
     pathname.startsWith("/robots") ||
     pathname.startsWith("/api/llms") ||
@@ -190,6 +192,6 @@ export default async function proxy(request: NextRequest, event: NextFetchEvent)
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|icon.svg|images|icons|llms|robots).*)",
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|images|icons|llms|robots|docs).*)",
   ],
 };
