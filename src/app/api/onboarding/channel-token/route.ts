@@ -28,7 +28,10 @@ export async function POST(request: Request) {
     const body = await request.json();
     const channel = (body.channel || "").toString().trim();
     const token = (body.token || "").toString().trim();
-    const externalId = (body.external_id || "").toString().trim() || null;
+    let externalId = (body.external_id || "").toString().trim() || null;
+    if (channel === "linkedin" && externalId && !externalId.startsWith("urn:li:")) {
+      externalId = `urn:li:person:${externalId}`;
+    }
 
     if (!["facebook", "linkedin", "x", "blog"].includes(channel)) {
       return apiFailure("channel must be one of: facebook, linkedin, x, blog", 400);
