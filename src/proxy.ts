@@ -186,6 +186,6 @@ export default async function proxy(request: NextRequest, event: NextFetchEvent)
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|icon.svg|images|icons|llms.txt|llms-full.txt|robots.txt).*)",
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|images|icons|llms|robots).*)",
   ],
 };
