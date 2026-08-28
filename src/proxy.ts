@@ -40,6 +40,10 @@ const gateHandler = auth(async (req) => {
     pathname === "/favicon.ico" ||
     pathname === "/icon.svg" ||
     pathname === "/sw.js" ||
+    pathname === "/llms.txt" ||
+    pathname === "/llms-full.txt" ||
+    pathname === "/robots.txt" ||
+    pathname.endsWith(".txt") ||
     pathname.endsWith(".png") ||
     pathname.endsWith(".jpg") ||
     pathname.endsWith(".svg") ||
