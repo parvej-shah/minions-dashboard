@@ -168,6 +168,19 @@ const gate = gateHandler as unknown as Promise<NextMiddleware>;
 
 /** Next requires the proxy default export to be a function, not a promise. */
 export default async function proxy(request: NextRequest, event: NextFetchEvent) {
+  const { pathname } = request.nextUrl;
+  if (
+    pathname === "/llms.txt" ||
+    pathname === "/llms-full.txt" ||
+    pathname === "/robots.txt" ||
+    pathname.endsWith(".txt") ||
+    pathname.endsWith(".png") ||
+    pathname.endsWith(".jpg") ||
+    pathname.endsWith(".svg")
+  ) {
+    return NextResponse.next();
+  }
+
   const handler = await gate;
   return handler(request, event);
 }
@@ -178,8 +191,8 @@ export const config = {
      * Match all request paths except:
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico, icon.svg, images, icons
+     * - favicon.ico, icon.svg, images, icons, llms.txt, llms-full.txt, robots.txt
      */
-    "/((?!_next/static|_next/image|favicon.ico|icon.svg|images|icons).*)",
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|llms.txt|llms-full.txt|robots.txt|images|icons|.*\\.(?:txt|png|jpg|svg|ico)$).*)",
   ],
 };
