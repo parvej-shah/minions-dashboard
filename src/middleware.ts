@@ -7,8 +7,11 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
 
   // 1. PUBLIC ROUTES (Zero-Auth Required)
   if (
-    pathname === "/docs" ||
+    pathname.includes("docs") ||
+    pathname.includes("llms") ||
+    pathname.includes("robots") ||
     pathname.startsWith("/docs") ||
+    pathname === "/docs" ||
     pathname === "/llms.txt" ||
     pathname === "/llms-full.txt" ||
     pathname === "/robots.txt" ||
