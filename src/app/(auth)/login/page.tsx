@@ -6,68 +6,49 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Zap,
+  Sparkles,
   ArrowRight,
   AlertCircle,
   CheckCircle2,
+  Share2,
+  ShieldCheck,
+  Zap,
+  TrendingUp,
+  Layers,
+  Bot,
 } from "lucide-react";
 
-interface MascotInfo {
-  id: string;
-  name: string;
-  role: string;
-  image: string;
-  accent: string;
-  glowColor: string;
-  description: string;
-}
-
-const MASCOTS: MascotInfo[] = [
+const PIPELINE_STEPS = [
   {
-    id: "rex",
-    name: "Rex",
-    role: "Lead Voice Agent",
-    image: "/images/mascots/rex.png",
-    accent: "text-[#ff6b4a]",
-    glowColor: "from-[#ff6b4a]/25 via-[#ff6b4a]/5 to-transparent",
-    description: "Answers phone calls in <1s, speaks fluent trade context, and books jobs directly."
+    step: "01",
+    title: "AI Idea Harvester",
+    desc: "Scans industry news & trends to discover high-converting angles tailored to your brand.",
+    badge: "Automated 2x/week",
+    icon: TrendingUp,
+    color: "from-amber-500/20 to-amber-500/5",
+    border: "border-amber-500/30",
+    textAccent: "text-amber-400",
   },
   {
-    id: "gia",
-    name: "Gia",
-    role: "Speed-to-Lead & SMS",
-    image: "/images/mascots/gia.png",
-    accent: "text-[#00C9A7]",
-    glowColor: "from-[#00C9A7]/25 via-[#00C9A7]/5 to-transparent",
-    description: "Texts back missed calls in seconds, qualifies homeowner needs, and syncs to CRM."
+    step: "02",
+    title: "Writer & Claims Gate",
+    desc: "Drafts long-form copy + 16:9 studio cover art, then fact-checks every statistic for accuracy.",
+    badge: "100% Brand Safe",
+    icon: ShieldCheck,
+    color: "from-[#00C9A7]/20 to-[#00C9A7]/5",
+    border: "border-[#00C9A7]/30",
+    textAccent: "text-[#00C9A7]",
   },
   {
-    id: "otto",
-    name: "Otto",
-    role: "Fleet Sentinel & QA",
-    image: "/images/mascots/otto.png",
-    accent: "text-[#3B82F6]",
-    glowColor: "from-[#3B82F6]/25 via-[#3B82F6]/5 to-transparent",
-    description: "Monitors operations, verifies call recordings, and maintains strict quality standards."
+    step: "03",
+    title: "1-Click Omnichannel Sync",
+    desc: "Broadcasts formatted executive copy directly to LinkedIn, Company Blog, Facebook & X.",
+    badge: "Instant Publish",
+    icon: Share2,
+    color: "from-[#0077b5]/20 to-[#0077b5]/5",
+    border: "border-[#0077b5]/30",
+    textAccent: "text-[#0077b5]",
   },
-  {
-    id: "pip",
-    name: "Pip",
-    role: "Omnichannel Dispatch",
-    image: "/images/mascots/pip.png",
-    accent: "text-[#8B5CF6]",
-    glowColor: "from-[#8B5CF6]/25 via-[#8B5CF6]/5 to-transparent",
-    description: "Manages live web chat, answers customer inquiries, and routes priority leads."
-  },
-  {
-    id: "zip",
-    name: "Zip",
-    role: "Calendar Orchestrator",
-    image: "/images/mascots/zip.png",
-    accent: "text-[#F59E0B]",
-    glowColor: "from-[#F59E0B]/25 via-[#F59E0B]/5 to-transparent",
-    description: "Orchestrates technician availability, avoids double-bookings, and locks in estimates."
-  }
 ];
 
 function LoginContent() {
@@ -75,9 +56,7 @@ function LoginContent() {
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const error = searchParams.get("error");
   const [isLoading, setIsLoading] = useState(false);
-  const [activeMascotIndex, setActiveMascotIndex] = useState(0);
-
-  const activeMascot = MASCOTS[activeMascotIndex];
+  const [activeTab, setActiveTab] = useState<number>(0);
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -91,9 +70,9 @@ function LoginContent() {
 
   return (
     <div className="min-h-screen bg-[#070B0F] text-[#F1F5F9] flex flex-col justify-between relative overflow-hidden selection:bg-[#00C9A7]/20 selection:text-[#00C9A7]">
-      {/* Dynamic Ambient Background Aura */}
-      <div className="absolute -top-32 left-1/4 w-[600px] h-[500px] bg-gradient-to-tr from-[#00C9A7]/15 via-[#ff6b4a]/10 to-transparent blur-[140px] pointer-events-none rounded-full animate-pulse-glow" />
-      <div className="absolute -bottom-32 right-1/4 w-[600px] h-[500px] bg-gradient-to-bl from-[#3B82F6]/15 via-[#8B5CF6]/10 to-transparent blur-[140px] pointer-events-none rounded-full animate-pulse-glow" />
+      {/* Background Ambient Aura */}
+      <div className="absolute -top-32 left-1/4 w-[600px] h-[500px] bg-gradient-to-tr from-[#00C9A7]/15 via-[#0077b5]/10 to-transparent blur-[140px] pointer-events-none rounded-full animate-pulse" />
+      <div className="absolute -bottom-32 right-1/4 w-[600px] h-[500px] bg-gradient-to-bl from-[#ff6b4a]/15 via-[#8B5CF6]/10 to-transparent blur-[140px] pointer-events-none rounded-full animate-pulse" />
 
       {/* TOP HEADER / BRAND BAR */}
       <header className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between">
@@ -101,122 +80,139 @@ function LoginContent() {
           <span className="font-extrabold text-2xl sm:text-3xl tracking-tight text-white group-hover:opacity-90 transition-opacity">
             Minions
           </span>
-          <span className="text-[#ff6b4a] font-bold text-2xl sm:text-3xl ml-0.5">
+          <span className="text-[#00C9A7] font-bold text-2xl sm:text-3xl ml-0.5">
             .AI
           </span>
         </Link>
 
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#0D1520]/80 border border-[#1F2D3D] backdrop-blur-md shadow-inner text-xs font-mono text-[#94A3B8]">
-          <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
-          <span className="text-white font-semibold">Autonomous Cockpit</span>
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-[#0D1520]/80 border border-[#1F2D3D] backdrop-blur-md text-xs font-mono text-[#94A3B8]">
+            <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
+            <span className="text-white font-semibold">Autonomous Content Engine</span>
+          </div>
+
+          <Link
+            href="/onboarding"
+            className="px-3.5 py-1.5 rounded-xl border border-[#00C9A7]/40 bg-[#00C9A7]/10 hover:bg-[#00C9A7]/20 text-[#00C9A7] text-xs font-semibold transition-all flex items-center gap-1.5"
+          >
+            <span>Start Free Trial</span>
+            <ArrowRight className="w-3 h-3" />
+          </Link>
         </div>
       </header>
 
-      {/* MAIN VIEWPORT SPLIT */}
-      <main className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-10 flex-1 flex items-center justify-center">
-        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center max-w-5xl">
+      {/* MAIN VIEWPORT */}
+      <main className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 flex-1 flex items-center justify-center">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center max-w-6xl">
           
-          {/* LEFT COLUMN: 3D MASCOT SQUAD (VISIBLE ON DESKTOP/TABLET, COMPACT ON MOBILE) */}
-          <div className="hidden lg:flex lg:col-span-6 flex-col items-start text-left space-y-6">
+          {/* LEFT COLUMN: GRAPHICAL PRODUCT WORKFLOW EXPLAINER */}
+          <div className="lg:col-span-7 flex flex-col items-start text-left space-y-6">
             
-            {/* Tagline & Title */}
-            <div className="space-y-3 max-w-lg">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#ff6b4a]/10 border border-[#ff6b4a]/30 text-xs font-mono font-bold text-[#ff6b4a]">
+            {/* Tagline & Headline */}
+            <div className="space-y-3 max-w-xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-xs font-mono font-bold text-[#00C9A7]">
                 <Zap className="w-3.5 h-3.5" />
-                <span>24/7 AUTONOMOUS CREW</span>
+                <span>AUTONOMOUS MARKETING COCKPIT</span>
               </div>
-              <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.12]">
-                Your AI trade fleet is active.
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.12]">
+                Your content engine on autopilot.
               </h1>
-              <p className="text-sm text-[#94A3B8] leading-relaxed">
-                Log in to command your autonomous voice agents, orchestrate speed-to-lead, and manage omnichannel editorial staging.
+              <p className="text-sm sm:text-base text-[#94A3B8] leading-relaxed">
+                Minions researches industry trends, writes fact-checked thought-leadership posts, generates studio graphics, and broadcasts to your LinkedIn &amp; Blog in 1 click.
               </p>
             </div>
 
-            {/* Mascot Trio Stage */}
-            <div className="relative w-full max-w-md flex flex-col items-center py-2">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-radial from-[#00C9A7]/20 via-[#ff6b4a]/10 to-transparent blur-3xl pointer-events-none rounded-full" />
+            {/* GRAPHICAL PIPELINE VISUALIZATION (3 Connected Stages) */}
+            <div className="w-full space-y-3 pt-2">
+              {PIPELINE_STEPS.map((step, idx) => {
+                const IconComponent = step.icon;
+                const isSelected = activeTab === idx;
+                return (
+                  <div
+                    key={step.step}
+                    onClick={() => setActiveTab(idx)}
+                    className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start gap-4 relative overflow-hidden ${
+                      isSelected
+                        ? "bg-[#0D1520] border-[#00C9A7] ring-1 ring-[#00C9A7]/50 shadow-lg shadow-[#00C9A7]/10"
+                        : "bg-[#0D1520]/60 border-[#1F2D3D] hover:border-[#1F2D3D]/80 hover:bg-[#0D1520]"
+                    }`}
+                  >
+                    {/* Glow Bar */}
+                    {isSelected && (
+                      <div className="absolute top-0 left-0 bottom-0 w-1 bg-[#00C9A7]" />
+                    )}
 
-              <div className="relative flex items-end justify-center gap-4 my-2">
-                {/* Gia */}
-                <div 
-                  onClick={() => setActiveMascotIndex(1)}
-                  className={`cursor-pointer transition-all duration-300 transform ${
-                    activeMascotIndex === 1 ? "scale-105 z-20 opacity-100" : "scale-90 opacity-70 hover:opacity-100"
-                  } animate-float-reverse`}
-                >
-                  <div className="w-24 h-24 rounded-2xl bg-[#0D1520]/80 p-2 border border-[#00C9A7]/30 backdrop-blur-md shadow-xl flex items-center justify-center relative">
-                    <Image src="/images/mascots/gia.png" alt="Gia" width={96} height={96} className="w-full h-full object-contain filter drop-shadow-md" />
-                    <span className="absolute -bottom-2 px-2 py-0.2 rounded-full bg-[#070B0F] border border-[#00C9A7]/40 text-[9px] font-mono text-[#00C9A7] font-bold">
-                      Gia
-                    </span>
+                    {/* Step Icon */}
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${step.color} border ${step.border} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                      <IconComponent className={`w-5 h-5 ${step.textAccent}`} />
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <h3 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
+                          <span className="font-mono text-xs text-[#64748B]">{step.step}.</span>
+                          {step.title}
+                        </h3>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#161D26] text-[#00C9A7] border border-[#00C9A7]/30 flex-shrink-0">
+                          {step.badge}
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#94A3B8] leading-relaxed">
+                        {step.desc}
+                      </p>
+                    </div>
                   </div>
+                );
+              })}
+            </div>
+
+            {/* LIVE POST PREVIEW MOCKUP */}
+            <div className="w-full p-4 rounded-2xl bg-[#070B0F]/90 border border-[#1F2D3D] flex items-center justify-between gap-4 text-xs font-mono">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#0077b5] flex items-center justify-center text-white font-bold text-sm">
+                  in
                 </div>
-
-                {/* Rex */}
-                <div 
-                  onClick={() => setActiveMascotIndex(0)}
-                  className={`cursor-pointer transition-all duration-300 transform ${
-                    activeMascotIndex === 0 ? "scale-110 z-30 opacity-100" : "scale-95 opacity-80 hover:opacity-100"
-                  } animate-float-slow`}
-                >
-                  <div className="w-32 h-32 rounded-3xl bg-[#0D1520] p-2.5 border-2 border-[#ff6b4a]/40 backdrop-blur-xl shadow-2xl shadow-[#ff6b4a]/20 flex items-center justify-center relative">
-                    <Image src="/images/mascots/rex.png" alt="Rex" width={128} height={128} className="w-full h-full object-contain filter drop-shadow-xl" />
-                    <span className="absolute -bottom-2.5 px-3 py-0.5 rounded-full bg-[#ff6b4a] text-white text-[10px] font-mono font-extrabold shadow-md">
-                      Rex • Lead
-                    </span>
+                <div>
+                  <div className="text-[#F1F5F9] font-semibold text-xs flex items-center gap-1.5">
+                    <span>Executive Thought-Leadership</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                   </div>
-                </div>
-
-                {/* Otto */}
-                <div 
-                  onClick={() => setActiveMascotIndex(2)}
-                  className={`cursor-pointer transition-all duration-300 transform ${
-                    activeMascotIndex === 2 ? "scale-105 z-20 opacity-100" : "scale-90 opacity-70 hover:opacity-100"
-                  } animate-float-slow`}
-                >
-                  <div className="w-24 h-24 rounded-2xl bg-[#0D1520]/80 p-2 border border-[#3B82F6]/30 backdrop-blur-md shadow-xl flex items-center justify-center relative">
-                    <Image src="/images/mascots/otto.png" alt="Otto" width={96} height={96} className="w-full h-full object-contain filter drop-shadow-md" />
-                    <span className="absolute -bottom-2 px-2 py-0.2 rounded-full bg-[#070B0F] border border-[#3B82F6]/40 text-[9px] font-mono text-[#3B82F6] font-bold">
-                      Otto
-                    </span>
-                  </div>
+                  <div className="text-[11px] text-[#64748B]">Auto-synced to LinkedIn &amp; Blog</div>
                 </div>
               </div>
 
-              {/* Active Mascot Role Pill */}
-              <div className="mt-3 px-3 py-1.5 rounded-xl bg-[#0D1520]/80 border border-[#1F2D3D] text-xs font-medium text-center">
-                <span className={activeMascot.accent}>{activeMascot.name}</span>
-                <span className="text-[#64748B] mx-1.5">•</span>
-                <span className="text-[#94A3B8]">{activeMascot.role}</span>
+              <div className="flex items-center gap-2 text-[#00C9A7] text-[11px] font-semibold">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Claims Verified</span>
               </div>
             </div>
 
           </div>
 
-          {/* AUTHENTICATION CARD (CENTERED & CLEAN ON MOBILE) */}
-          <div className="lg:col-span-6 w-full flex justify-center lg:justify-end">
+          {/* RIGHT COLUMN: AUTHENTICATION & TRIAL CARD */}
+          <div className="lg:col-span-5 w-full flex justify-center lg:justify-end">
             <div className="w-full max-w-md bg-[#0D1520]/95 backdrop-blur-3xl border border-[#1F2D3D] ring-1 ring-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/90 space-y-6 relative overflow-hidden">
               
               {/* Card Ambient Glow */}
               <div className="absolute top-0 right-0 w-36 h-36 bg-[#00C9A7]/10 blur-3xl pointer-events-none rounded-full" />
-              <div className="absolute bottom-0 left-0 w-36 h-36 bg-[#ff6b4a]/10 blur-3xl pointer-events-none rounded-full" />
+              <div className="absolute bottom-0 left-0 w-36 h-36 bg-[#0077b5]/10 blur-3xl pointer-events-none rounded-full" />
 
-              {/* Mobile Hero Logo (Centered) */}
+              {/* Logo / Header */}
               <div className="flex flex-col items-center text-center space-y-3 pb-2">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#12242a] via-[#0D1520] to-[#070B0F] border-2 border-[#00C9A7]/40 flex items-center justify-center shadow-xl shadow-[#00C9A7]/10 relative group">
-                  <Image src="/icon.svg" alt="Minions.AI" width={48} height={48} className="w-10 h-10 sm:w-12 sm:h-12" />
-                  <div className="absolute -inset-1 bg-gradient-to-r from-[#00C9A7]/30 to-[#ff6b4a]/30 rounded-2xl blur-lg opacity-40 -z-10" />
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#12242a] via-[#0D1520] to-[#070B0F] border-2 border-[#00C9A7]/40 flex items-center justify-center shadow-xl shadow-[#00C9A7]/10 relative group">
+                  <Image src="/icon.svg" alt="Minions.AI" width={44} height={44} className="w-10 h-10" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-[#00C9A7]/30 to-[#0077b5]/30 rounded-2xl blur-lg opacity-40 -z-10" />
                 </div>
                 
                 <div>
-                  <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight flex items-baseline justify-center">
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight flex items-baseline justify-center">
                     <span>Minions</span>
-                    <span className="text-[#ff6b4a] ml-0.5">.AI</span>
-                    <span className="text-[#00C9A7] text-sm ml-1.5 font-mono font-normal">Cockpit</span>
-                  </h1>
+                    <span className="text-[#00C9A7] ml-0.5">.AI</span>
+                    <span className="text-slate-400 text-xs ml-2 font-mono font-normal">Cockpit</span>
+                  </h2>
                   <p className="text-xs text-[#94A3B8] mt-1">
-                    Autonomous Trade Marketing & Operations
+                    Sign in to manage your content fleet &amp; reviews
                   </p>
                 </div>
               </div>
@@ -232,10 +228,10 @@ function LoginContent() {
                         <>
                           We don&apos;t recognize this Google account yet. If you&apos;re joining an
                           existing team, ask your workspace owner to invite you — otherwise,{" "}
-                          <Link href="/onboarding" className="underline hover:text-red-200">
+                          <Link href="/onboarding" className="underline hover:text-red-200 font-semibold">
                             start a free trial
                           </Link>{" "}
-                          to set up your own workspace.
+                          to set up your own workspace in 2 minutes.
                         </>
                       ) : (
                         "Authentication failed. Please verify your credentials and try again."
@@ -250,7 +246,7 @@ function LoginContent() {
                 <button
                   onClick={handleGoogleSignIn}
                   disabled={isLoading}
-                  className="w-full py-4 px-5 bg-white hover:bg-slate-100 active:scale-[0.98] text-[#070B0F] font-bold text-sm rounded-2xl transition-all shadow-xl hover:shadow-white/20 flex items-center justify-center gap-3.5 cursor-pointer disabled:opacity-60 group border border-slate-200"
+                  className="w-full py-3.5 px-5 bg-white hover:bg-slate-100 active:scale-[0.98] text-[#070B0F] font-bold text-sm rounded-2xl transition-all shadow-xl hover:shadow-white/20 flex items-center justify-center gap-3.5 cursor-pointer disabled:opacity-60 group border border-slate-200"
                 >
                   {isLoading ? (
                     <div className="w-5 h-5 border-2 border-[#070B0F] border-t-transparent rounded-full animate-spin" />
@@ -282,26 +278,28 @@ function LoginContent() {
                   )}
                 </button>
 
-                {/* Security Feature Highlights */}
-                <div className="p-3.5 rounded-2xl bg-[#070B0F]/60 border border-[#1F2D3D] space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-[#94A3B8]">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
-                    <span>Real-time voice agent telemetry & operations</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-[#94A3B8]">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
-                    <span>Editorial review & omnichannel broadcast command</span>
-                  </div>
+                {/* Free Trial Banner for New Visitors */}
+                <div className="p-3.5 rounded-2xl bg-[#070B0F]/80 border border-[#1F2D3D] text-center space-y-1.5">
+                  <p className="text-xs text-[#94A3B8]">
+                    New to Minions? Start free in 2 minutes.
+                  </p>
+                  <Link
+                    href="/onboarding"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#00C9A7] hover:underline"
+                  >
+                    <span>Start 14-Day Trial &amp; Build First Draft</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
                 </div>
               </div>
 
-              {/* Status Indicator */}
+              {/* Security & System Operational Highlights */}
               <div className="pt-2 flex items-center justify-between text-[11px] text-[#64748B] border-t border-[#1F2D3D]">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span>Systems Operational</span>
+                  <span>Multi-Tenant Engine Live</span>
                 </div>
-                <span className="font-mono text-[10px] text-[#475569]">v2.4.0 • PWA Ready</span>
+                <span className="font-mono text-[10px] text-[#475569]">Supabase Vault Encrypted</span>
               </div>
 
             </div>
@@ -312,7 +310,7 @@ function LoginContent() {
 
       {/* FOOTER */}
       <footer className="relative z-20 w-full max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-center gap-2 text-xs text-[#64748B] border-t border-[#1F2D3D]/50">
-        <p>© 2026 Minions.AI Technologies Inc. All rights reserved.</p>
+        <p>© 2026 Minions.AI Technologies Inc. Autonomous Multi-Agent Systems.</p>
       </footer>
     </div>
   );
@@ -320,11 +318,13 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-[#070B0F] flex items-center justify-center text-white">
-        <div className="w-8 h-8 border-2 border-[#00C9A7] border-t-transparent rounded-full animate-spin" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#070B0F] flex items-center justify-center text-white">
+          <div className="w-8 h-8 border-2 border-[#00C9A7] border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
       <LoginContent />
     </Suspense>
   );
