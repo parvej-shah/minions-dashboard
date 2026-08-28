@@ -56,29 +56,71 @@ export function ChannelCredentialForm({
     }
   }
 
+  const [disconnecting, setDisconnecting] = useState(false);
+
+  async function handleDisconnect(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!confirm(`Disconnect ${channel.name}? Scheduled posts will skip this channel until reconnected.`)) {
+      return;
+    }
+    setDisconnecting(true);
+    try {
+      await apiClient.delete("/api/channels", { channel: channel.key });
+      onSaved();
+    } catch (err) {
+      setError(toErrorMessage(err, "Failed to disconnect channel."));
+    } finally {
+      setDisconnecting(false);
+    }
+  }
+
   if (!open) {
     if (channel.key === "linkedin") {
       return (
-        <a
-          href="/api/auth/linkedin/connect"
-          onClick={(e) => e.stopPropagation()}
-          className="flex items-center gap-1.5 text-[11px] font-mono px-3 py-1.5 rounded-lg bg-[#0077b5] text-white hover:bg-[#0077b5]/90 transition-colors w-fit"
-        >
-          <KeyRound className="w-3 h-3" />
-          {channel.has_credential ? "Reconnect with LinkedIn" : "Sign In with LinkedIn"}
-        </a>
+        <div className="flex items-center gap-2">
+          <a
+            href="/api/auth/linkedin/connect"
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center gap-1.5 text-[11px] font-mono px-3 py-1.5 rounded-lg bg-[#0077b5] text-white hover:bg-[#0077b5]/90 transition-colors w-fit"
+          >
+            <KeyRound className="w-3 h-3" />
+            {channel.has_credential ? "Reconnect with LinkedIn" : "Sign In with LinkedIn"}
+          </a>
+          {channel.has_credential && (
+            <button
+              type="button"
+              onClick={handleDisconnect}
+              disabled={disconnecting}
+              className="text-[11px] font-mono text-[#ff6b4a] hover:underline disabled:opacity-50"
+            >
+              {disconnecting ? "Disconnecting…" : "Disconnect"}
+            </button>
+          )}
+        </div>
       );
     }
 
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 text-[11px] font-mono text-[#64748B] hover:text-[#00C9A7] transition-colors"
-      >
-        <KeyRound className="w-3 h-3" />
-        {channel.has_credential ? "Rotate credential" : "Connect credential"}
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="flex items-center gap-1.5 text-[11px] font-mono text-[#64748B] hover:text-[#00C9A7] transition-colors"
+        >
+          <KeyRound className="w-3 h-3" />
+          {channel.has_credential ? "Rotate credential" : "Connect credential"}
+        </button>
+        {channel.has_credential && (
+          <button
+            type="button"
+            onClick={handleDisconnect}
+            disabled={disconnecting}
+            className="text-[11px] font-mono text-[#ff6b4a] hover:underline disabled:opacity-50"
+          >
+            {disconnecting ? "Disconnecting…" : "Disconnect"}
+          </button>
+        )}
+      </div>
     );
   }
 

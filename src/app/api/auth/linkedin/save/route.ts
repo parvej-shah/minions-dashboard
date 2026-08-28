@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { requireClientId } from "@/lib/tenant";
+import { requireRealTenantUser } from "@/lib/tenant";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { cookies } from "next/headers";
 
 export async function POST(request: Request) {
-  const ctx = await requireClientId();
+  const ctx = await requireRealTenantUser();
   if ("error" in ctx) return ctx.error;
 
   const cookieStore = await cookies();

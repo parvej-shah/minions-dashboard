@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { requireClientId } from "@/lib/tenant";
+import { requireRealTenantUser } from "@/lib/tenant";
 import { apiError } from "@/lib/api-response";
 
 export async function GET(request: Request) {
-  const ctx = await requireClientId();
+  const ctx = await requireRealTenantUser();
   if ("error" in ctx) return ctx.error;
 
   try {

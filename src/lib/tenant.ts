@@ -73,6 +73,37 @@ export async function requireClientId(): Promise<
 }
 
 /**
+ * For credential-linking and security-sensitive routes: blocks action if the
+ * caller is currently viewing via a platform-admin support/impersonation session.
+ * Prevents staff from accidentally connecting their personal third-party accounts
+ * (LinkedIn, Facebook, etc.) to a customer's workspace.
+ */
+export async function requireRealTenantUser(): Promise<
+  { clientId: string; user: CurrentUser } | { error: Response }
+> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { error: apiFailure("Unauthorized", 401) };
+  }
+
+  const impersonating = await getImpersonatedClientId();
+  if (impersonating && isPlatformStaff(user)) {
+    return {
+      error: apiFailure(
+        "Cannot link or modify third-party channel credentials while in a support/impersonation session. Please switch to your own workspace or have the tenant owner connect their account directly.",
+        403
+      ),
+    };
+  }
+
+  if (user.clientId) {
+    return { clientId: user.clientId, user };
+  }
+
+  return { error: apiFailure("Account is not yet attached to a tenant", 403) };
+}
+
+/**
  * For platform-admin-only API routes: 403s for anyone who isn't SYSTEM_ADMIN.
  */
 export async function requirePlatformStaff(): Promise<

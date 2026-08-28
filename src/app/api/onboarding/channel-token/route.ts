@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { apiError, apiFailure } from "@/lib/api-response";
-import { requireClientId } from "@/lib/tenant";
+import { requireRealTenantUser } from "@/lib/tenant";
 
 /**
  * Manual channel-token entry: a client pastes their own Facebook/LinkedIn
@@ -21,7 +21,7 @@ import { requireClientId } from "@/lib/tenant";
  * their own domain, not ours.
  */
 export async function POST(request: Request) {
-  const ctx = await requireClientId();
+  const ctx = await requireRealTenantUser();
   if ("error" in ctx) return ctx.error;
 
   try {

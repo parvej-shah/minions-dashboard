@@ -125,3 +125,31 @@ export async function PATCH(request: Request) {
     return apiError(error, "Failed to update channel setting");
   }
 }
+
+export async function DELETE(request: Request) {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
+  try {
+    const { channel } = await request.json();
+    const def = findChannelByKey(channel);
+
+    if (!def) {
+      return apiFailure("Valid 'channel' key required.", 400);
+    }
+
+    await prisma.clientChannel.upsert({
+      where: { clientId_channelKey: { clientId: ctx.clientId, channelKey: def.key } },
+      update: { isActive: false, credentialRef: null, externalId: null },
+      create: { clientId: ctx.clientId, channelKey: def.key, isActive: false, credentialRef: null, externalId: null },
+    });
+
+    return NextResponse.json({
+      success: true,
+      channel: def.key,
+      disconnected: true,
+    });
+  } catch (error) {
+    return apiError(error, "Failed to disconnect channel");
+  }
+}
