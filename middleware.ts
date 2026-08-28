@@ -23,6 +23,6 @@ export const config = {
      * - icon.svg (icon file)
      * - robots.txt, sitemap.xml, llms.txt, llms-full.txt
      */
-    "/((?!api/llms|api/version|api/auth|api/webhooks|docs|login|onboarding|_next/static|_next/image|favicon.ico|icon.svg|robots.txt|sitemap.xml|llms.txt|llms-full.txt).*)",
+    "/((?!api/llms|api/version|api/auth|api/webhooks|api/channels|api/brand/context|docs|login|onboarding|_next/static|_next/image|favicon.ico|icon.svg|robots.txt|sitemap.xml|llms.txt|llms-full.txt).*)",
   ],
 };

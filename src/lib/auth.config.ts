@@ -14,6 +14,8 @@ export const authConfig: NextAuthConfig = {
         "/api/version",
         "/api/auth",
         "/api/webhooks",
+        "/api/channels",
+        "/api/brand/context",
         "/login"
       ];
       if (publicPaths.some(p => url.pathname.startsWith(p))) {
