@@ -193,6 +193,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico, icon.svg, images, icons, llms.txt, llms-full.txt, robots.txt
      */
-    "/((?!_next/static|_next/image|favicon.ico|icon.svg|llms.txt|llms-full.txt|robots.txt|images|icons|.*\\.(?:txt|png|jpg|svg|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|llms\\.txt|llms-full\\.txt|robots\\.txt|images|icons).*)",
   ],
 };
