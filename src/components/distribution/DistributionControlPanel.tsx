@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useEffect } from "react";
+import Link from "next/link";
 import {
+  BookOpen,
   Globe,
   Radio,
   Share2,
@@ -164,6 +166,13 @@ export function DistributionControlPanel({
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/docs?tab=webhooks"
+            className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/30 hover:bg-[#00C9A7]/20 transition-colors flex items-center gap-1.5"
+          >
+            <BookOpen className="w-3 h-3" />
+            <span>Setup Guides</span>
+          </Link>
           <span className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-[#161D26] border border-[#1F2D3D] text-[#94A3B8]">
             {channels.filter((c) => c.is_active).length}/{channels.length} Channels Active
           </span>

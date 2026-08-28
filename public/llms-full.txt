@@ -1,0 +1,273 @@
+# Minions.AI — Complete Technical Integration Specification & Developer Manual
+
+Version: 2.4.0
+Interactive Portal: https://minions.getminions.ai/docs
+Cockpit Dashboard: https://minions.getminions.ai
+
+---
+
+## 1. System Architecture & Autonomous Workflow
+
+Minions.AI implements a deterministic multi-agent state machine operating across 4 automated phases:
+
+```
+[ Market & Trade Signals ]
+           │
+           ▼
+[ Phase 1: Idea Harvester ] ────> Generates structured angles (title, hook, ICP, conviction score)
+           │
+           ▼
+[ Phase 2: Asset Drafter ]  ────> Writes full technical markdown + 3 social variants + 16:8 Cover Art
+           │
+           ▼
+[ Phase 3: Editorial Studio] ────> Executive review dock, inline markdown edits, channel distribution toggles
+           │
+           ▼
+[ Phase 4: Omnichannel Pub ] ────> Concurrently dispatches to:
+                                  ├── Blog Webhook / Default Hosted Blog
+                                  ├── LinkedIn (Post + Automated First-Comment Link)
+                                  ├── Facebook Business Page
+                                  └── Twitter / X Feed
+```
+
+---
+
+## 2. Webhook Ingestion Payload Contract
+
+Minions.AI dispatches an HTTP POST request to your configured blog webhook endpoint whenever a draft is approved in Editorial Studio.
+
+### Headers Sent
+- `Content-Type: application/json`
+- `User-Agent: Minions-Publisher/2.4`
+- `Authorization: Bearer <CONFIGURED_SECRET_TOKEN>` (optional, if secret configured)
+- `X-Webhook-Secret: <CONFIGURED_SECRET_TOKEN>` (mirror header for easy middleware extraction)
+
+### Complete JSON Payload
+```json
+{
+  "asset_id": "bab02951-9cb5-4e46-b056-635c35b42c8c",
+  "title": "Why Browser Agents Fail in Production Without Semantic Layers",
+  "slug": "why-browser-agents-fail-in-production-without-semantic-layers",
+  "hook": "Browser agents do not fail because the model is bad. They fail because modern web applications render complex DOM trees with opaque elements and unstable class names that are hostile to machine parsers.",
+  "excerpt": "Browser agents do not fail because the model is bad. They fail because modern web applications render complex DOM trees with opaque elements and unstable class names that are hostile to machine parsers.",
+  "content": "## The Fragility of Machine Vision in Modern DOMs\n\nMaybe the next evolution of frontend engineering isn't just designing interfaces for humans. It is designing interfaces that machines can reliably understand too.\n\n```mermaid\ngraph TD\n  A[AI Browser Agent] -->|Fragile Visual OCR| B[Opaque Div Hierarchy]\n  A -->|Direct Deterministic Query| D[Semantic Schema & data-agent Attributes]\n```\n\n## Moving Beyond Ephemeral Selectors\n\nWe already treat accessibility as a contract between frontend and assistive tech. Why not extend that to AI agents?",
+  "hero_image_url": "https://pub-13629069dfd74891bffc487ab4e135f5.r2.dev/assets/bab02951-9cb5-4e46-b056-635c35b42c8c-hero-1787836780942.png",
+  "audience": "CTOs, Lead Frontend Engineers, Platform Architects",
+  "published_at": "2026-08-28T00:00:00.000Z"
+}
+```
+
+---
+
+## 3. Webhook Receiver Code Implementations
+
+### A. Next.js (App Router) — `app/api/webhooks/minions/route.ts`
+```typescript
+import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
+import crypto from "crypto";
+import { z } from "zod";
+import { db } from "@/lib/db";
+
+const webhookSchema = z.object({
+  title: z.string().min(1),
+  slug: z.string().min(1),
+  excerpt: z.string().optional().nullable(),
+  hook: z.string().optional().nullable(),
+  content: z.string().min(1),
+  hero_image_url: z.string().url().optional().nullable(),
+  coverImageUrl: z.string().url().optional().nullable(),
+  published_at: z.string().datetime().optional().nullable(),
+});
+
+function verifySecret(authHeader: string | null): boolean {
+  const secret = process.env.MINIONS_WEBHOOK_SECRET;
+  if (!secret) return true; // Allow if no secret configured
+  if (!authHeader) return false;
+  const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+  const tokenBuf = Buffer.from(token, "utf8");
+  const secretBuf = Buffer.from(secret, "utf8");
+  if (tokenBuf.length !== secretBuf.length) return false;
+  return crypto.timingSafeEqual(tokenBuf, secretBuf);
+}
+
+export async function POST(request: NextRequest) {
+  const authHeader = request.headers.get("authorization") || request.headers.get("x-webhook-secret");
+  if (!verifySecret(authHeader)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const rawBody = await request.json();
+  const parsed = webhookSchema.parse(rawBody);
+
+  const post = await db.post.upsert({
+    where: { slug: parsed.slug },
+    update: {
+      title: parsed.title,
+      excerpt: parsed.excerpt || parsed.hook || parsed.title,
+      content: parsed.content,
+      coverUrl: parsed.hero_image_url || parsed.coverImageUrl,
+      publishedAt: parsed.published_at ? new Date(parsed.published_at) : new Date(),
+    },
+    create: {
+      slug: parsed.slug,
+      title: parsed.title,
+      excerpt: parsed.excerpt || parsed.hook || parsed.title,
+      content: parsed.content,
+      coverUrl: parsed.hero_image_url || parsed.coverImageUrl,
+      publishedAt: parsed.published_at ? new Date(parsed.published_at) : new Date(),
+    },
+  });
+
+  revalidatePath("/blog");
+  revalidatePath(`/blog/${post.slug}`);
+
+  return NextResponse.json({ success: true, id: post.id, slug: post.slug });
+}
+```
+
+### B. Python (FastAPI) — `main.py`
+```python
+import hmac
+import os
+from datetime import datetime
+from typing import Optional
+from fastapi import FastAPI, Header, HTTPException, status
+from pydantic import BaseModel, HttpUrl
+
+app = FastAPI()
+
+class MinionsWebhookPayload(BaseModel):
+    title: str
+    slug: str
+    excerpt: Optional[str] = None
+    hook: Optional[str] = None
+    content: str
+    hero_image_url: Optional[HttpUrl] = None
+    published_at: Optional[datetime] = None
+
+@app.post("/api/webhooks/minions")
+async def receive_minions_post(
+    payload: MinionsWebhookPayload,
+    authorization: Optional[str] = Header(None),
+    x_webhook_secret: Optional[str] = Header(None),
+):
+    secret = os.getenv("MINIONS_WEBHOOK_SECRET")
+    if secret:
+        token = (authorization or x_webhook_secret or "").replace("Bearer ", "").strip()
+        if not hmac.compare_digest(token, secret):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid secret")
+
+    # Upsert to your database (SQLAlchemy, Tortoise, or Prisma Python)
+    print(f"Received article: {payload.title} ({payload.slug})")
+    
+    return {"success": True, "slug": payload.slug}
+```
+
+### C. Node.js (Express) — `server.js`
+```javascript
+const express = require("express");
+const crypto = require("crypto");
+const app = express();
+
+app.use(express.json({ limit: "10mb" }));
+
+function verifySecret(req) {
+  const secret = process.env.MINIONS_WEBHOOK_SECRET;
+  if (!secret) return true;
+  const header = req.headers.authorization || req.headers["x-webhook-secret"] || "";
+  const token = header.replace(/^Bearer\s+/i, "").trim();
+  if (token.length !== secret.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(token), Buffer.from(secret));
+}
+
+app.post("/api/webhooks/minions", async (req, res) => {
+  if (!verifySecret(req)) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const { title, slug, excerpt, hook, content, hero_image_url, published_at } = req.body;
+  
+  // Upsert into your database
+  console.log(`Publishing post: ${title} (${slug})`);
+
+  return res.status(200).json({ success: true, slug });
+});
+
+app.listen(3000, () => console.log("Server listening on port 3000"));
+```
+
+---
+
+## 4. No-Code CMS Integration (WordPress, Webflow, Ghost)
+
+### WordPress Setup via WP Webhooks Plugin
+1. Install and activate the free **WP Webhooks** plugin on your WordPress site.
+2. In WordPress Admin -> **Settings** -> **WP Webhooks** -> **Receive Data**.
+3. Create a webhook with Action **"Create Post"**.
+4. Map payload fields:
+   - `post_title` -> `{{title}}`
+   - `post_name` -> `{{slug}}`
+   - `post_content` -> `{{content}}`
+   - `post_excerpt` -> `{{excerpt}}`
+   - `featured_image` -> `{{hero_image_url}}`
+5. Copy the generated Webhook URL and paste it in Minions under **Fleet (`/fleet`)** -> **Blog Channel**.
+
+### Webflow Setup via Zapier / Make.com
+1. In Zapier or Make, create a **Webhooks by Zapier** trigger: **"Catch Hook"**.
+2. Add action: **Webflow** -> **"Create Live Item"** in your Blog Collection.
+3. Map `Name` -> `Title`, `Slug` -> `Slug`, `Post Body` -> `Content`, `Main Image` -> `Hero Image URL`.
+4. Copy the Zapier Webhook URL and paste it into Minions Cockpit.
+
+---
+
+## 5. LinkedIn & Social Broadcast Integration
+
+Minions.AI connects to LinkedIn via the LinkedIn Community API.
+
+### Personal Profile vs Company Page
+- **Personal Profiles (`urn:li:person:...`)**: Broadcasts executive thought-leadership articles directly to your personal network with your verified byline.
+- **Company Pages (`urn:li:organization:...`)**: Broadcasts to your company page followers.
+
+### Automated First-Comment Protocol
+To maximize LinkedIn algorithm reach, Minions automatically:
+1. Formats the post body with bold hook lines, structured line breaks, and hashtag tags without outbound links in the post body (preventing reach penalties).
+2. Within 60 seconds of post publication, Minions dispatches an automated first comment containing the canonical backlink to your blog post (`👉 Read the full operational field guide: https://yoursite.com/blog/...`).
+
+---
+
+## 6. AI Prompt Template: Generate Your 40-Point Brand Directives
+
+Users can copy and paste this exact prompt into ChatGPT (GPT-4o) or Claude (Claude 3.5 Sonnet) along with their company URL or executive bio to produce their customized Minions Brand Directives:
+
+```markdown
+You are an expert Executive Brand & Editorial Voice Architect for Minions.AI.
+Analyze my company and executive profile below to generate a tailored, comprehensive 40-point Brand Directives configuration.
+
+My Company & Profile:
+- Company Name: [YOUR COMPANY NAME]
+- Website / Elevator Pitch: [PASTE YOUR PITCH OR WEBSITE SUMMARY]
+- Primary Audience / ICP: [E.g., Senior Engineers, Contractors, Enterprise Sales Leaders, Founders]
+- Core Philosophy: [E.g., Production-first engineering, pragmatic ROI, anti-cliche]
+
+Generate the following 4 structured sections:
+
+### 1. TARGET AUDIENCE PERSONAS (3 Detailed ICPs)
+For each ICP, define:
+- Title & Role
+- Primary Technical / Operational Frustration
+- What Conviction & Proof Points They Value (e.g. real benchmarks, unit economics, production code)
+
+### 2. CORE EDITORIAL VOICE PILLARS (5 Uncompromising Rules)
+Formulate 5 explicit editorial rules that our AI writers must follow (e.g. "Always start with the concrete operational failure before proposing solutions", "Never cite speculative future trends without referencing present implementations").
+
+### 3. FORBIDDEN BUZZWORDS & PHRASES (Minimum 15 Words)
+Provide a strict blacklist of overused corporate and AI cliches that must NEVER appear in our drafts (e.g., "In today's fast-paced digital landscape", "Game-changing", "Seamlessly", "Delve", "Tapestry", "Beacon", "Unleash").
+
+### 4. 2 FEW-SHOT EXEMPLARY LINKEDIN POSTS
+Write 2 high-conviction, authentic LinkedIn posts demonstrating:
+- A strong, counter-intuitive opening hook
+- Concrete bulleted breakdown with numbers/code
+- A pragmatic takeaway
+- NO outbound links in the body (mention that the link is in the first comment)
+```

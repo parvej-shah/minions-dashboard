@@ -3,6 +3,7 @@
 import {
   useState,
 } from "react";
+import Link from "next/link";
 import {
   Palette,
   Check,
@@ -399,6 +400,14 @@ export default function BrandStudioPage() {
               }`}>
                 {nonForbiddenDirectives.length} / {DIRECTIVE_LIMIT} Directives Limit
               </span>
+
+              <Link
+                href="/docs?tab=brand"
+                className="flex items-center gap-1.5 bg-[#161D26] hover:bg-[#1E293B] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#00C9A7] text-xs font-semibold px-3 py-1.5 rounded-xl shadow-sm transition-all"
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>AI Prompt Guide</span>
+              </Link>
 
               <button
                 type="button"

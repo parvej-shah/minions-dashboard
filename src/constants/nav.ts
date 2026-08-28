@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  BookOpen,
   Bot,
   CalendarClock,
   CreditCard,
@@ -69,6 +70,13 @@ export function buildNavItems(counts: NavCounts | null): NavItem[] {
       href: "/fleet",
       icon: Bot,
       badge: counts ? `${counts.activeAgents} Active` : undefined,
+      badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
+    },
+    {
+      name: "Documentation",
+      href: "/docs",
+      icon: BookOpen,
+      badge: "Guides",
       badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
     },
     {
