@@ -170,9 +170,12 @@ const gate = gateHandler as unknown as Promise<NextMiddleware>;
 export default async function proxy(request: NextRequest, event: NextFetchEvent) {
   const { pathname } = request.nextUrl;
   if (
-    pathname === "/llms.txt" ||
-    pathname === "/llms-full.txt" ||
-    pathname === "/robots.txt" ||
+    pathname.startsWith("/llms") ||
+    pathname.startsWith("/robots") ||
+    pathname.startsWith("/api/llms") ||
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/webhooks") ||
+    pathname.startsWith("/api/onboarding") ||
     pathname.endsWith(".txt") ||
     pathname.endsWith(".png") ||
     pathname.endsWith(".jpg") ||
