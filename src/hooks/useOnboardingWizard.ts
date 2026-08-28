@@ -1,29 +1,77 @@
 import { useState } from "react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { BRAND_PRESETS, type BrandPreset } from "@/constants/brandPresets";
+import type { GeneratedDirective } from "@/app/api/onboarding/brand-copilot/route";
 
-export const TONE_FORMALITY_OPTIONS = [
-  "technical_direct",
-  "tactile_operator",
-  "conversational_peer",
-] as const;
-export type ToneFormality = (typeof TONE_FORMALITY_OPTIONS)[number];
+export const ONBOARDING_STEPS = ["Company", "LinkedIn Voice", "Brand Interview", "Review & Launch"] as const;
 
-export const ONBOARDING_STEPS = ["Audience", "Channels", "Voice", "Plan"] as const;
+export interface OnboardingWizardState {
+  step: number;
+  setStep: (step: number) => void;
+  // Step 1: Company Snapshot
+  businessName: string;
+  setBusinessName: (val: string) => void;
+  websiteUrl: string;
+  setWebsiteUrl: (val: string) => void;
+  industry: string;
+  setIndustry: (val: string) => void;
+  selectedPresetId: string | null;
+  setSelectedPresetId: (id: string | null) => void;
+  applyPreset: (preset: BrandPreset) => void;
 
-/**
- * All state for the 4-step onboarding wizard, plus the two save points.
- */
-export function useOnboardingWizard() {
+  // Step 2: LinkedIn & Channels
+  linkedInConnected: boolean;
+  setLinkedInConnected: (val: boolean) => void;
+  channels: string[];
+  toggleChannel: (key: string) => void;
+  importedVoiceCount: number;
+  importLinkedInVoice: () => Promise<void>;
+
+  // Step 3: Brand Interview (3 Questions)
+  mythAnswer: string;
+  setMythAnswer: (val: string) => void;
+  differentiatorAnswer: string;
+  setDifferentiatorAnswer: (val: string) => void;
+  avoidAnswer: string;
+  setAvoidAnswer: (val: string) => void;
+  isGeneratingDirectives: boolean;
+  generateDirectives: () => Promise<void>;
+
+  // Step 4: Review Directives & Finalize
+  directives: GeneratedDirective[];
+  setDirectives: React.Dispatch<React.SetStateAction<GeneratedDirective[]>>;
+  toggleDirective: (index: number) => void;
+  positioningSummary: string;
+  saving: boolean;
+  error: string | null;
+  setError: (err: string | null) => void;
+  goBack: () => void;
+  finalizeOnboarding: () => Promise<void>;
+}
+
+export function useOnboardingWizard(): OnboardingWizardState {
   const [step, setStep] = useState(0);
 
-  const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
-  const [industry, setIndustry] = useState("");
-  const [icpDescription, setIcpDescription] = useState("");
-  const [channels, setChannels] = useState<string[]>(["blog"]);
+  // Step 1
+  const [businessName, setBusinessName] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [industry, setIndustry] = useState("AI & Developer Tools");
+  const [selectedPresetId, setSelectedPresetId] = useState<string | null>("ai_tech_builders");
 
-  const [formality, setFormality] = useState<ToneFormality>("conversational_peer");
-  const [examples, setExamples] = useState(["", "", ""]);
+  // Step 2
+  const [linkedInConnected, setLinkedInConnected] = useState(false);
+  const [channels, setChannels] = useState<string[]>(["blog", "linkedin"]);
+  const [importedVoiceCount, setImportedVoiceCount] = useState(0);
+
+  // Step 3
+  const [mythAnswer, setMythAnswer] = useState("");
+  const [differentiatorAnswer, setDifferentiatorAnswer] = useState("");
+  const [avoidAnswer, setAvoidAnswer] = useState("");
+  const [isGeneratingDirectives, setIsGeneratingDirectives] = useState(false);
+
+  // Step 4
+  const [directives, setDirectives] = useState<GeneratedDirective[]>([]);
+  const [positioningSummary, setPositioningSummary] = useState("");
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,19 +79,54 @@ export function useOnboardingWizard() {
   function applyPreset(preset: BrandPreset) {
     setSelectedPresetId(preset.id);
     setIndustry(preset.industry);
-    setIcpDescription(preset.icpDescription);
-    setFormality(preset.toneFormality);
-    if (preset.examplePosts && preset.examplePosts.length >= 3) {
-      setExamples([preset.examplePosts[0], preset.examplePosts[1], preset.examplePosts[2]]);
-    }
   }
 
   function toggleChannel(key: string) {
     setChannels((prev) => (prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key]));
   }
 
-  function updateExample(index: number, value: string) {
-    setExamples((prev) => prev.map((v, i) => (i === index ? value : v)));
+  async function importLinkedInVoice() {
+    setError(null);
+    try {
+      const res: any = await apiClient.post("/api/onboarding/voice-import", {});
+      if (res?.success) {
+        setImportedVoiceCount(res.importedCount || 1);
+        setLinkedInConnected(true);
+      }
+    } catch (err) {
+      console.warn("Voice import error:", err);
+      setLinkedInConnected(true);
+    }
+  }
+
+  async function generateDirectives() {
+    setError(null);
+    setIsGeneratingDirectives(true);
+    try {
+      const res: any = await apiClient.post("/api/onboarding/brand-copilot", {
+        industry,
+        businessName: businessName.trim() || "Our Company",
+        websiteUrl: websiteUrl.trim(),
+        mythAnswer,
+        differentiatorAnswer,
+        avoidAnswer,
+        selectedPresetId,
+      });
+
+      if (res?.directives) {
+        setDirectives(res.directives);
+        setPositioningSummary(res.positioningSummary || "");
+        setStep(3); // Proceed to Review step
+      }
+    } catch (err) {
+      setError(toErrorMessage(err, "Failed to generate brand directives with Copilot."));
+    } finally {
+      setIsGeneratingDirectives(false);
+    }
+  }
+
+  function toggleDirective(index: number) {
+    setDirectives((prev) => prev.filter((_, i) => i !== index));
   }
 
   function goBack() {
@@ -51,76 +134,83 @@ export function useOnboardingWizard() {
     setStep((s) => Math.max(0, s - 1));
   }
 
-  async function goNextFromIndustry() {
-    setError(null);
-    if (!industry.trim() || !icpDescription.trim()) {
-      setError("Industry and who-you-write-for are both required.");
-      return;
-    }
-    setStep(1);
-  }
-
-  async function goNextFromChannels() {
+  async function finalizeOnboarding() {
     setError(null);
     setSaving(true);
     try {
       await apiClient.post("/api/onboarding/setup", {
-        industry: industry.trim(),
-        icp_description: icpDescription.trim(),
+        industry: industry.trim() || "General Business",
+        icp_description: positioningSummary || `${businessName} provides ${industry} solutions.`,
         channels,
         preset_id: selectedPresetId,
       });
-      setStep(2);
-    } catch (err) {
-      setError(toErrorMessage(err, "Could not save that step. Try again."));
-    } finally {
-      setSaving(false);
-    }
-  }
 
-  async function goNextFromVoice() {
-    setError(null);
-    const filledExamples = examples.map((e) => e.trim()).filter(Boolean);
-    if (filledExamples.length > 0 && filledExamples.length < 3) {
-      setError("Paste at least 3 example posts, or leave all of them blank.");
-      return;
-    }
-    setSaving(true);
-    try {
-      await apiClient.post("/api/onboarding/voice", {
-        tone_questionnaire: { formality },
-        examples: filledExamples.length >= 3 ? filledExamples : [],
-      });
-      setStep(3);
+      // Save custom directives into DB if any
+      if (directives.length > 0) {
+        for (const dir of directives) {
+          try {
+            await apiClient.post("/api/brand/directives", {
+              category: dir.category,
+              rule_key: dir.rule_key,
+              instruction: dir.instruction,
+              priority: dir.priority,
+              audience_scope: "ALL",
+            });
+          } catch (e) {
+            console.warn("Directive creation non-fatal:", e);
+          }
+        }
+      }
+
+      // Automatically trigger initial harvest run for instant gratification
+      try {
+        await apiClient.post("/api/pipeline/harvest", {});
+      } catch (harvestErr) {
+        console.warn("Initial harvest trigger non-fatal:", harvestErr);
+      }
+
+      // Redirect to onboarding done
+      window.location.href = "/onboarding/done";
     } catch (err) {
-      setError(toErrorMessage(err, "Could not save that step. Try again."));
-    } finally {
+      setError(toErrorMessage(err, "Could not finalize onboarding. Please try again."));
       setSaving(false);
     }
   }
 
   return {
     step,
+    setStep,
+    businessName,
+    setBusinessName,
+    websiteUrl,
+    setWebsiteUrl,
+    industry,
+    setIndustry,
     selectedPresetId,
     setSelectedPresetId,
     applyPreset,
-    industry,
-    setIndustry,
-    icpDescription,
-    setIcpDescription,
+    linkedInConnected,
+    setLinkedInConnected,
     channels,
     toggleChannel,
-    formality,
-    setFormality,
-    examples,
-    updateExample,
+    importedVoiceCount,
+    importLinkedInVoice,
+    mythAnswer,
+    setMythAnswer,
+    differentiatorAnswer,
+    setDifferentiatorAnswer,
+    avoidAnswer,
+    setAvoidAnswer,
+    isGeneratingDirectives,
+    generateDirectives,
+    directives,
+    setDirectives,
+    toggleDirective,
+    positioningSummary,
     saving,
     error,
+    setError,
     goBack,
-    goNextFromIndustry,
-    goNextFromChannels,
-    goNextFromVoice,
+    finalizeOnboarding,
   };
 }
-
-export type OnboardingWizardState = ReturnType<typeof useOnboardingWizard>;

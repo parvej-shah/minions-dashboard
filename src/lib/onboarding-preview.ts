@@ -1,4 +1,4 @@
-import type { ToneFormality } from "@/hooks/useOnboardingWizard";
+export type ToneFormality = "technical_direct" | "tactile_operator" | "conversational_peer";
 
 export interface PreviewInput {
   industry: string;

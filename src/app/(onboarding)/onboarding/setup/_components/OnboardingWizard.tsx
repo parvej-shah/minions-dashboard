@@ -1,16 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useOnboardingWizard, ONBOARDING_STEPS } from "@/hooks/useOnboardingWizard";
-import StepIndustry from "./StepIndustry";
-import StepChannels from "./StepChannels";
-import StepVoice from "./StepVoice";
-import StepPlan from "./StepPlan";
-import LivePreviewPanel from "./LivePreviewPanel";
+import StepCompanySnapshot from "./StepCompanySnapshot";
+import StepLinkedInVoice from "./StepLinkedInVoice";
+import StepBrandInterview from "./StepBrandInterview";
+import StepConfirmDirectives from "./StepConfirmDirectives";
+import { Sparkles } from "lucide-react";
 
 function ProgressHeader({ step }: { step: number }) {
   return (
-    <div className="flex items-center gap-2 mb-10">
+    <div className="flex items-center gap-2 mb-8 sm:mb-10">
       {ONBOARDING_STEPS.map((label, i) => {
         const isDone = i < step;
         const isActive = i === step;
@@ -18,19 +17,19 @@ function ProgressHeader({ step }: { step: number }) {
           <div key={label} className="flex items-center gap-2 flex-1 last:flex-none">
             <div className="flex items-center gap-2 shrink-0">
               <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-mono font-bold border transition-colors ${
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono font-bold border transition-all ${
                   isDone
-                    ? "bg-[#00C9A7] border-[#00C9A7] text-[#070B0F]"
+                    ? "bg-[#00C9A7] border-[#00C9A7] text-[#070B0F] shadow-sm shadow-[#00C9A7]/30"
                     : isActive
-                      ? "border-[#00C9A7] text-[#00C9A7]"
-                      : "border-[#1F2D3D] text-[#64748B]"
+                      ? "border-[#00C9A7] text-[#00C9A7] ring-2 ring-[#00C9A7]/20 bg-[#00C9A7]/5"
+                      : "border-[#1F2D3D] text-[#64748B] bg-[#070B0F]"
                 }`}
               >
                 {isDone ? "✓" : i + 1}
               </div>
               <span
-                className={`text-xs font-mono hidden sm:inline ${
-                  isActive ? "text-[#F1F5F9] font-semibold" : "text-[#64748B]"
+                className={`text-xs font-mono hidden md:inline ${
+                  isActive ? "text-[#F1F5F9] font-bold" : isDone ? "text-[#94A3B8]" : "text-[#64748B]"
                 }`}
               >
                 {label}
@@ -38,7 +37,7 @@ function ProgressHeader({ step }: { step: number }) {
             </div>
             {i < ONBOARDING_STEPS.length - 1 && (
               <div
-                className={`h-px flex-1 transition-colors ${isDone ? "bg-[#00C9A7]" : "bg-[#1F2D3D]"}`}
+                className={`h-0.5 flex-1 transition-colors ${isDone ? "bg-[#00C9A7]" : "bg-[#1F2D3D]"}`}
               />
             )}
           </div>
@@ -49,75 +48,35 @@ function ProgressHeader({ step }: { step: number }) {
 }
 
 export default function OnboardingWizard() {
-  const router = useRouter();
   const wizard = useOnboardingWizard();
 
-  async function handleNext() {
-    if (wizard.step === 0) {
-      await wizard.goNextFromIndustry();
-    } else if (wizard.step === 1) {
-      await wizard.goNextFromChannels();
-    } else if (wizard.step === 2) {
-      await wizard.goNextFromVoice();
-    } else {
-      router.push("/onboarding/done");
-    }
-  }
-
-  const showPreview = wizard.industry.trim().length > 2 && wizard.icpDescription.trim().length > 15;
-
   return (
-    <div className={`mx-auto px-6 py-16 ${showPreview ? "max-w-5xl" : "max-w-3xl"}`}>
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold">Tell us who you write for</h1>
-        <p className="mt-2 text-[#94A3B8]">This shapes every idea and draft the pipeline generates.</p>
-      </div>
-
-      <ProgressHeader step={wizard.step} />
-
-      <div className={`grid gap-8 ${showPreview ? "lg:grid-cols-[1fr_320px]" : "lg:grid-cols-1"}`}>
-        <div>
-          {wizard.step === 0 && <StepIndustry wizard={wizard} />}
-          {wizard.step === 1 && <StepChannels wizard={wizard} />}
-          {wizard.step === 2 && <StepVoice wizard={wizard} />}
-          {wizard.step === 3 && <StepPlan />}
-
-          {wizard.error && (
-            <div className="mt-6 rounded-lg border border-[#ff6b4a]/30 bg-[#ff6b4a]/10 px-4 py-3 text-sm text-[#ff6b4a]">
-              {wizard.error}
-            </div>
-          )}
-
-          <div className="mt-8 flex items-center gap-3">
-            {wizard.step > 0 && (
-              <button
-                type="button"
-                onClick={wizard.goBack}
-                disabled={wizard.saving}
-                className="rounded-lg border border-[#1F2D3D] px-5 py-3 font-semibold text-[#94A3B8] hover:border-[#00C9A7] hover:text-[#F1F5F9] disabled:opacity-50"
-              >
-                Back
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={handleNext}
-              disabled={wizard.saving}
-              className="rounded-lg bg-[#00C9A7] px-6 py-3 font-semibold text-[#070B0F] hover:bg-[#00C9A7]/90 disabled:opacity-50"
-            >
-              {wizard.saving ? "Saving…" : wizard.step === 3 ? "Finish setup" : "Continue"}
-            </button>
+    <div className="min-h-screen bg-[#070B0F] text-[#F1F5F9] px-4 sm:px-6 py-10 sm:py-16">
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="text-center sm:text-left space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-[#00C9A7] text-xs font-semibold">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Minions AI Autonomous Content Engine</span>
           </div>
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-[#F1F5F9] tracking-tight">
+            Let&apos;s personalize your content engine
+          </h1>
+          <p className="text-xs sm:text-sm text-[#94A3B8] max-w-2xl">
+            In under 2 minutes, we&apos;ll connect your channels, calibrate your writing style, and launch your first executive draft.
+          </p>
         </div>
 
-        {showPreview && (
-          <LivePreviewPanel
-            industry={wizard.industry}
-            icpDescription={wizard.icpDescription}
-            channels={wizard.channels}
-            formality={wizard.formality}
-          />
-        )}
+        {/* Progress Tracker */}
+        <ProgressHeader step={wizard.step} />
+
+        {/* Step Container */}
+        <div>
+          {wizard.step === 0 && <StepCompanySnapshot wizard={wizard} />}
+          {wizard.step === 1 && <StepLinkedInVoice wizard={wizard} />}
+          {wizard.step === 2 && <StepBrandInterview wizard={wizard} />}
+          {wizard.step === 3 && <StepConfirmDirectives wizard={wizard} />}
+        </div>
       </div>
     </div>
   );
