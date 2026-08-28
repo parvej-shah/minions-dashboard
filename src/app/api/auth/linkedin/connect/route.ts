@@ -15,8 +15,8 @@ export async function GET(request: Request) {
     linkedInAuthUrl.searchParams.append("response_type", "code");
     linkedInAuthUrl.searchParams.append("client_id", process.env.LINKEDIN_CLIENT_ID || "");
     linkedInAuthUrl.searchParams.append("redirect_uri", redirectUri);
-    // Request permissions for profile, email, and posting (member & organization)
-    linkedInAuthUrl.searchParams.append("scope", "openid profile email w_member_social w_organization_social rw_organization_admin");
+    // Request permissions for profile, email, and member posting
+    linkedInAuthUrl.searchParams.append("scope", "openid profile email w_member_social");
     
     // We pass the clientId in the state to ensure we attach it to the correct tenant on return,
     // although the session cookie should also be present.
