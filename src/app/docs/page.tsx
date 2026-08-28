@@ -430,8 +430,26 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
                   </div>
                 </div>
 
+                <div className="space-y-4 pt-4 border-t border-[#1F2D3D]">
+                  <h3 className="text-sm font-mono text-[#00C9A7] uppercase tracking-wider font-bold">3. Authentication & Security</h3>
+                  <p className="text-sm text-[#94A3B8] leading-relaxed">
+                    To prevent unauthorized actors from publishing to your blog, you should configure a <strong>Webhook Secret</strong> in the Minions Fleet dashboard. When configured, Minions will attach this secret to every POST request in the headers:
+                  </p>
+                  <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-3">
+                    <div className="text-sm font-mono text-[#94A3B8]">
+                      <span className="text-[#F1F5F9]">Authorization:</span> Bearer YOUR_SECRET_KEY
+                    </div>
+                    <div className="text-sm font-mono text-[#94A3B8]">
+                      <span className="text-[#F1F5F9]">x-webhook-secret:</span> YOUR_SECRET_KEY <span className="text-[#64748B] text-xs">(fallback)</span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-[#94A3B8]">
+                    Your API receiver should extract this token and use a constant-time string comparison (like <code className="text-[#00C9A7]">crypto.timingSafeEqual</code> in Node.js) to verify it matches your expected secret before saving the payload.
+                  </p>
+                </div>
+
                 <div className="space-y-3 pt-4 border-t border-[#1F2D3D]">
-                  <h3 className="text-sm font-mono text-[#00C9A7] uppercase tracking-wider font-bold">3. No-Code Integrations</h3>
+                  <h3 className="text-sm font-mono text-[#00C9A7] uppercase tracking-wider font-bold">4. No-Code Integrations</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-[#94A3B8]">
                     <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-2">
                       <h4 className="font-bold text-[#F1F5F9] text-sm">WordPress via WP Webhooks</h4>
