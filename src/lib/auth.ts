@@ -26,32 +26,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "minions-ai-secret-key-fallback-32-chars",
   callbacks: {
-    authorized({ auth, request }) {
-      const url = request?.nextUrl?.pathname || (request?.url ? new URL(request.url).pathname : "");
-      if (
-        url === "/docs" ||
-        url.startsWith("/docs") ||
-        url === "/llms.txt" ||
-        url === "/llms-full.txt" ||
-        url === "/robots.txt" ||
-        url.startsWith("/llms") ||
-        url.startsWith("/robots") ||
-        url.startsWith("/api/llms") ||
-        url.startsWith("/api/webhooks") ||
-        url.startsWith("/api/onboarding") ||
-        url.startsWith("/api/auth") ||
-        url.startsWith("/_next") ||
-        url.startsWith("/images") ||
-        url.startsWith("/icons") ||
-        url.endsWith(".txt") ||
-        url.endsWith(".png") ||
-        url.endsWith(".jpg") ||
-        url.endsWith(".svg") ||
-        url.endsWith(".ico")
-      ) {
-        return true;
-      }
-      return !!auth;
+    authorized() {
+      // Always return true so NextAuth never executes automatic edge 307 redirects.
+      // Individual protected pages and API endpoints handle authentication explicitly.
+      return true;
     },
     async signIn({ user }) {
       if (!user?.email) return false;
