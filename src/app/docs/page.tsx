@@ -175,8 +175,48 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
   ];
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-20">
-      {/* HEADER */}
+    <div className="min-h-screen bg-[#070B0F] text-[#F1F5F9] px-4 sm:px-6 lg:px-8 py-4">
+      <div className="space-y-8 max-w-7xl mx-auto pb-20">
+        {/* PUBLIC TOP NAVBAR */}
+        <nav className="flex items-center justify-between py-4 border-b border-[#1F2D3D]/60 mb-6">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00C9A7] to-[#008B74] flex items-center justify-center font-bold text-black text-sm shadow-md">
+              M
+            </div>
+            <div>
+              <div className="font-bold text-sm text-[#F1F5F9] group-hover:text-[#00C9A7] transition-colors flex items-center gap-2">
+                <span>Minions.AI</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/20">DOCS</span>
+              </div>
+            </div>
+          </Link>
+
+          <div className="flex items-center gap-3">
+            <Link
+              href="/llms.txt"
+              target="_blank"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-mono text-[#94A3B8] hover:text-[#00C9A7] hover:border-[#00C9A7]/40 transition-colors"
+            >
+              <Bot className="w-3.5 h-3.5" />
+              <span>llms.txt</span>
+            </Link>
+            <Link
+              href="/login"
+              className="px-3.5 py-1.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-mono text-[#F1F5F9] hover:border-[#00C9A7] transition-colors"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#00C9A7] text-black font-semibold text-xs hover:bg-[#00C9A7]/90 transition-colors shadow-sm"
+            >
+              <span>Open Cockpit</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </nav>
+
+        {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-6">
         <div>
           <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#00C9A7] uppercase mb-1">
@@ -592,6 +632,7 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
