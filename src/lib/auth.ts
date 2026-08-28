@@ -27,6 +27,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
   },
   secret: requireOneOfEnv("AUTH_SECRET", "NEXTAUTH_SECRET"),
   callbacks: {
+    authorized({ request, auth }) {
+      const pathname = request.nextUrl.pathname;
+      if (
+        pathname === "/llms.txt" ||
+        pathname === "/llms-full.txt" ||
+        pathname === "/robots.txt" ||
+        pathname.endsWith(".txt") ||
+        pathname.endsWith(".png") ||
+        pathname.endsWith(".jpg") ||
+        pathname.endsWith(".svg") ||
+        pathname.startsWith("/api/webhooks") ||
+        pathname.startsWith("/api/auth") ||
+        pathname.startsWith("/api/onboarding")
+      ) {
+        return true;
+      }
+      return !!auth;
+    },
     async signIn({ user }) {
       if (!user?.email) return false;
       const cleanEmail = user.email.trim().toLowerCase();
