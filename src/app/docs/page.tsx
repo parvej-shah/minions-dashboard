@@ -217,7 +217,7 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
         </nav>
 
         {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-6 mb-8">
         <div>
           <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#00C9A7] uppercase mb-1">
             <BookOpen className="w-3.5 h-3.5 text-[#00C9A7]" />
@@ -245,128 +245,176 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
         </div>
       </div>
 
-      {/* NAVIGATION TABS */}
-      <div className="flex items-center gap-2 overflow-x-auto border-b border-[#1F2D3D] pb-3 no-scrollbar">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-mono font-medium transition-all whitespace-nowrap ${
-                isActive
-                  ? "bg-[#00C9A7]/15 text-[#00C9A7] border border-[#00C9A7]/30 shadow-sm"
-                  : "bg-[#0F1419] text-[#94A3B8] border border-[#1F2D3D] hover:text-[#F1F5F9] hover:border-[#334155]"
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* TAB CONTENT: SYSTEM OVERVIEW */}
-      {activeTab === "overview" && (
-        <div className="space-y-8 animate-fadeIn">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-[#00C9A7]/10 border border-[#00C9A7]/20 flex items-center justify-center text-[#00C9A7]">
-                <Zap className="w-5 h-5" />
-              </div>
-              <h2 className="text-lg font-bold text-[#F1F5F9]">What is Minions.AI?</h2>
-              <p className="text-sm text-[#94A3B8] leading-relaxed">
-                Minions.AI is a multi-tenant autonomous content marketing engine. It replaces traditional manual writing cycles with an automated state machine that harvests market signals, crafts deep-dive technical articles, generates 16:8 cover art, and broadcasts directly to your blog and social channels.
-              </p>
-              <div className="space-y-2 pt-2">
-                <div className="flex items-start gap-2.5 text-xs text-[#94A3B8]">
-                  <Check className="w-4 h-4 text-[#00C9A7] shrink-0 mt-0.5" />
-                  <span><strong className="text-[#F1F5F9]">Zero Human Drafter Delay:</strong> Researches, writes, and formats production-ready case studies automatically.</span>
-                </div>
-                <div className="flex items-start gap-2.5 text-xs text-[#94A3B8]">
-                  <Check className="w-4 h-4 text-[#00C9A7] shrink-0 mt-0.5" />
-                  <span><strong className="text-[#F1F5F9]">Executive Voice Alignment:</strong> Calibrated against your strict brand directives to eliminate generic AI cliches.</span>
-                </div>
-                <div className="flex items-start gap-2.5 text-xs text-[#94A3B8]">
-                  <Check className="w-4 h-4 text-[#00C9A7] shrink-0 mt-0.5" />
-                  <span><strong className="text-[#F1F5F9]">Omnichannel Reach:</strong> Synchronously dispatches to Webhooks, LinkedIn, Facebook, and X.</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6]">
-                <Layers className="w-5 h-5" />
-              </div>
-              <h2 className="text-lg font-bold text-[#F1F5F9]">The 4-Stage Autonomous Pipeline</h2>
-              <div className="space-y-3 text-xs text-[#94A3B8]">
-                <div className="p-3 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-1">
-                  <div className="font-bold text-[#00C9A7] font-mono">1. Idea Harvester</div>
-                  <p>Monitors industry signals, GitHub releases, and competitor whitepapers to produce high-conviction editorial proposals.</p>
-                </div>
-                <div className="p-3 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-1">
-                  <div className="font-bold text-[#8B5CF6] font-mono">2. Asset Drafter & Visual Engine</div>
-                  <p>Drafts long-form markdown articles, tailored social hooks, and synthesizes 1200x630 branded widescreen cover art.</p>
-                </div>
-                <div className="p-3 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-1">
-                  <div className="font-bold text-[#ff6b4a] font-mono">3. Editorial Studio & Review Dock</div>
-                  <p>Executive review interface with 1-click approvals, inline markdown editing, and distribution toggles.</p>
-                </div>
-                <div className="p-3 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-1">
-                  <div className="font-bold text-[#3B82F6] font-mono">4. Omnichannel Broadcast Engine</div>
-                  <p>Broadcasts live to your blog webhook, LinkedIn (with auto-first comment link), Facebook, and X.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* QUICK LINKS */}
-          <div className="p-6 rounded-2xl bg-gradient-to-r from-[#0F1419] to-[#161D26] border border-[#1F2D3D] flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="space-y-1">
-              <h3 className="text-base font-bold text-[#F1F5F9]">Ready to connect your website?</h3>
-              <p className="text-xs text-[#94A3B8]">
-                Connect your custom blog webhook or LinkedIn account to start broadcasting live.
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* SIDEBAR NAVIGATION */}
+        <div className="w-full md:w-64 shrink-0 flex flex-col gap-1.5">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
               <button
-                onClick={() => setActiveTab("webhooks")}
-                className="px-4 py-2 rounded-xl bg-[#00C9A7] text-[#070B0F] text-xs font-mono font-bold hover:bg-[#00E5BE] transition-colors"
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-left w-full ${
+                  isActive
+                    ? "bg-[#00C9A7]/15 text-[#00C9A7] border border-[#00C9A7]/30 shadow-sm"
+                    : "bg-transparent text-[#94A3B8] border border-transparent hover:bg-[#0F1419] hover:text-[#F1F5F9] hover:border-[#1F2D3D]"
+                }`}
               >
-                View Webhook Guide →
+                <Icon className="w-4 h-4" />
+                <span>{tab.label}</span>
               </button>
-              <Link
-                href="/fleet"
-                className="px-4 py-2 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-xs font-mono text-[#F1F5F9] hover:border-[#00C9A7] transition-colors"
-              >
-                Go to Fleet (/fleet)
-              </Link>
-            </div>
-          </div>
+            );
+          })}
         </div>
-      )}
 
-      {/* TAB CONTENT: BLOG & WEBHOOKS */}
-      {activeTab === "webhooks" && (
-        <div className="space-y-8 animate-fadeIn">
-          <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-[#F1F5F9]">Custom Blog Webhook Specification</h2>
-                <p className="text-xs text-[#94A3B8] mt-0.5">
-                  When an article is approved in Editorial Studio, Minions POSTs a JSON payload to your custom endpoint.
-                </p>
+        {/* MAIN CONTENT AREA */}
+        <div className="flex-1 min-w-0">
+          {/* TAB CONTENT: SYSTEM OVERVIEW */}
+          {activeTab === "overview" && (
+            <div className="space-y-8 animate-fadeIn">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4">
+                  <div className="w-10 h-10 rounded-xl bg-[#00C9A7]/10 border border-[#00C9A7]/20 flex items-center justify-center text-[#00C9A7]">
+                    <Zap className="w-5 h-5" />
+                  </div>
+                  <h2 className="text-lg font-bold text-[#F1F5F9]">What is Minions.AI?</h2>
+                  <p className="text-sm text-[#94A3B8] leading-relaxed">
+                    Minions.AI is a multi-tenant autonomous content marketing engine. It replaces traditional manual writing cycles with an automated state machine that harvests market signals, crafts deep-dive technical articles, generates 16:8 cover art, and broadcasts directly to your blog and social channels.
+                  </p>
+                  <div className="space-y-2 pt-2">
+                    <div className="flex items-start gap-2.5 text-xs text-[#94A3B8]">
+                      <Check className="w-4 h-4 text-[#00C9A7] shrink-0 mt-0.5" />
+                      <span><strong className="text-[#F1F5F9]">Zero Human Drafter Delay:</strong> Researches, writes, and formats production-ready case studies automatically.</span>
+                    </div>
+                    <div className="flex items-start gap-2.5 text-xs text-[#94A3B8]">
+                      <Check className="w-4 h-4 text-[#00C9A7] shrink-0 mt-0.5" />
+                      <span><strong className="text-[#F1F5F9]">Executive Voice Alignment:</strong> Calibrated against your strict brand directives to eliminate generic AI cliches.</span>
+                    </div>
+                    <div className="flex items-start gap-2.5 text-xs text-[#94A3B8]">
+                      <Check className="w-4 h-4 text-[#00C9A7] shrink-0 mt-0.5" />
+                      <span><strong className="text-[#F1F5F9]">Omnichannel Reach:</strong> Synchronously dispatches to Webhooks, LinkedIn, Facebook, and X.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4">
+                  <div className="w-10 h-10 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6]">
+                    <Layers className="w-5 h-5" />
+                  </div>
+                  <h2 className="text-lg font-bold text-[#F1F5F9]">The 4-Stage Autonomous Pipeline</h2>
+                  <div className="space-y-3 text-xs text-[#94A3B8]">
+                    <div className="p-3 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-1">
+                      <div className="font-bold text-[#00C9A7] font-mono">1. Idea Harvester</div>
+                      <p>Monitors industry signals, GitHub releases, and competitor whitepapers to produce high-conviction editorial proposals.</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-1">
+                      <div className="font-bold text-[#8B5CF6] font-mono">2. Asset Drafter & Visual Engine</div>
+                      <p>Drafts long-form markdown articles, tailored social hooks, and synthesizes 1200x630 branded widescreen cover art.</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-1">
+                      <div className="font-bold text-[#ff6b4a] font-mono">3. Editorial Studio & Review Dock</div>
+                      <p>Executive review interface with 1-click approvals, inline markdown editing, and distribution toggles.</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-1">
+                      <div className="font-bold text-[#3B82F6] font-mono">4. Omnichannel Broadcast Engine</div>
+                      <p>Broadcasts live to your blog webhook, LinkedIn (with auto-first comment link), Facebook, and X.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <span className="text-xs font-mono px-3 py-1 rounded-full bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/20">
-                HTTP POST
-              </span>
-            </div>
 
-            <div className="space-y-4 pt-2">
-              <h3 className="text-xs font-mono text-[#00C9A7] uppercase tracking-wider font-bold">1. Payload JSON Contract</h3>
-              <div className="relative">
-                <pre className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-xs font-mono text-[#F1F5F9] overflow-x-auto">
+              {/* QUICK LINKS */}
+              <div className="p-6 rounded-2xl bg-gradient-to-r from-[#0F1419] to-[#161D26] border border-[#1F2D3D] flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <h3 className="text-base font-bold text-[#F1F5F9]">Ready to connect your website?</h3>
+                  <p className="text-xs text-[#94A3B8]">
+                    Connect your custom blog webhook or LinkedIn account to start broadcasting live.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setActiveTab("webhooks")}
+                    className="px-4 py-2 rounded-xl bg-[#00C9A7] text-[#070B0F] text-xs font-mono font-bold hover:bg-[#00E5BE] transition-colors"
+                  >
+                    View Webhook Guide →
+                  </button>
+                  <Link
+                    href="/fleet"
+                    className="px-4 py-2 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-xs font-mono text-[#F1F5F9] hover:border-[#00C9A7] transition-colors"
+                  >
+                    Go to Fleet (/fleet)
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB CONTENT: BLOG & WEBHOOKS */}
+          {activeTab === "webhooks" && (
+            <div className="space-y-8 animate-fadeIn">
+              <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-bold text-[#F1F5F9]">Custom Blog Webhook Specification</h2>
+                    <p className="text-sm text-[#94A3B8] mt-1">
+                      When an article is approved in Editorial Studio, Minions POSTs a JSON payload to your custom endpoint. Use this specification to build your receiver.
+                    </p>
+                  </div>
+                  <span className="text-xs font-mono px-3 py-1 rounded-full bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/20">
+                    HTTP POST
+                  </span>
+                </div>
+
+                <div className="space-y-4 pt-2">
+                  <h3 className="text-sm font-mono text-[#00C9A7] uppercase tracking-wider font-bold">1. Payload TypeScript Interface</h3>
+                  <p className="text-xs text-[#94A3B8]">
+                    This is the strict shape of the JSON data we will send to your webhook URL.
+                  </p>
+                  <div className="relative">
+                    <pre className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-sm font-mono text-[#F1F5F9] overflow-x-auto">
+{`interface MinionsWebhookPayload {
+  // A unique identifier for this specific article draft
+  asset_id: string;
+
+  // The title of the article
+  title: string;
+
+  // URL-friendly slug (e.g. "why-ai-is-good")
+  slug: string;
+
+  // The social media hook (used for LinkedIn/Twitter)
+  hook?: string | null;
+
+  // A short paragraph summarizing the article (for meta tags or blog index)
+  excerpt?: string | null;
+
+  // The full article content in standard Markdown format
+  content: string;
+
+  // Absolute URL to the generated 16:8 hero cover image
+  hero_image_url?: string | null;
+
+  // Target audience defined during generation
+  audience?: string | null;
+
+  // ISO-8601 timestamp of when it was published
+  published_at?: string | null;
+}`}
+                    </pre>
+                    <button
+                      onClick={() => copyCode(`interface MinionsWebhookPayload {\n  asset_id: string;\n  title: string;\n  slug: string;\n  hook?: string | null;\n  excerpt?: string | null;\n  content: string;\n  hero_image_url?: string | null;\n  audience?: string | null;\n  published_at?: string | null;\n}`, "ts-interface")}
+                      className="absolute top-3 right-3 p-2 rounded-lg bg-[#161D26] border border-[#1F2D3D] text-xs font-mono text-[#94A3B8] hover:text-[#00C9A7] transition-colors"
+                    >
+                      {copiedId === "ts-interface" ? <Check className="w-3.5 h-3.5 text-[#00C9A7]" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-2">
+                  <h3 className="text-sm font-mono text-[#00C9A7] uppercase tracking-wider font-bold">2. Example JSON Payload</h3>
+                  <div className="relative">
+                    <pre className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-sm font-mono text-[#F1F5F9] overflow-x-auto">
 {`{
   "asset_id": "bab02951-9cb5-4e46-b056-635c35b42c8c",
   "title": "Why Browser Agents Fail in Production Without Semantic Layers",
@@ -378,260 +426,241 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
   "audience": "CTOs, Lead Frontend Engineers, Platform Architects",
   "published_at": "2026-08-28T00:00:00.000Z"
 }`}
-                </pre>
-                <button
-                  onClick={() => copyCode(`{\n  "title": "Why Browser Agents Fail in Production Without Semantic Layers",\n  "slug": "why-browser-agents-fail-in-production-without-semantic-layers",\n  "excerpt": "Brief summary",\n  "content": "## Article content",\n  "hero_image_url": "https://...",\n  "published_at": "2026-08-28T00:00:00.000Z"\n}`, "json")}
-                  className="absolute top-3 right-3 p-2 rounded-lg bg-[#161D26] border border-[#1F2D3D] text-xs font-mono text-[#94A3B8] hover:text-[#00C9A7] transition-colors"
-                >
-                  {copiedId === "json" ? <Check className="w-3.5 h-3.5 text-[#00C9A7]" /> : <Copy className="w-3.5 h-3.5" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-4 pt-4">
-              <h3 className="text-xs font-mono text-[#00C9A7] uppercase tracking-wider font-bold">2. Next.js App Router Receiver (Copy-Paste)</h3>
-              <p className="text-xs text-[#94A3B8]">
-                Save this to <code className="text-[#00C9A7] font-mono">app/api/webhooks/minions/route.ts</code> in your Next.js project:
-              </p>
-              <div className="relative">
-                <pre className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-xs font-mono text-[#F1F5F9] overflow-x-auto max-h-[380px]">
-                  {nextJsWebhookSnippet}
-                </pre>
-                <button
-                  onClick={() => copyCode(nextJsWebhookSnippet, "nextjs")}
-                  className="absolute top-3 right-3 p-2 rounded-lg bg-[#161D26] border border-[#1F2D3D] text-xs font-mono text-[#94A3B8] hover:text-[#00C9A7] transition-colors"
-                >
-                  {copiedId === "nextjs" ? <Check className="w-3.5 h-3.5 text-[#00C9A7]" /> : <Copy className="w-3.5 h-3.5" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-4 pt-4">
-              <h3 className="text-xs font-mono text-[#00C9A7] uppercase tracking-wider font-bold">3. Python FastAPI Receiver (Copy-Paste)</h3>
-              <div className="relative">
-                <pre className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-xs font-mono text-[#F1F5F9] overflow-x-auto max-h-[300px]">
-                  {pythonFastApiSnippet}
-                </pre>
-                <button
-                  onClick={() => copyCode(pythonFastApiSnippet, "fastapi")}
-                  className="absolute top-3 right-3 p-2 rounded-lg bg-[#161D26] border border-[#1F2D3D] text-xs font-mono text-[#94A3B8] hover:text-[#00C9A7] transition-colors"
-                >
-                  {copiedId === "fastapi" ? <Check className="w-3.5 h-3.5 text-[#00C9A7]" /> : <Copy className="w-3.5 h-3.5" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-3 pt-4 border-t border-[#1F2D3D]">
-              <h3 className="text-xs font-mono text-[#00C9A7] uppercase tracking-wider font-bold">4. WordPress & Webflow (No-Code Setup)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-[#94A3B8]">
-                <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-2">
-                  <h4 className="font-bold text-[#F1F5F9]">WordPress via WP Webhooks</h4>
-                  <ol className="list-decimal pl-4 space-y-1">
-                    <li>Install free <strong>WP Webhooks</strong> plugin.</li>
-                    <li>Go to Settings → WP Webhooks → Receive Data.</li>
-                    <li>Create hook for <strong>Create Post</strong> action.</li>
-                    <li>Map <code className="text-[#00C9A7]">title</code>, <code className="text-[#00C9A7]">content</code>, <code className="text-[#00C9A7]">slug</code>.</li>
-                    <li>Paste the Webhook URL in Minions Cockpit.</li>
-                  </ol>
+                    </pre>
+                  </div>
                 </div>
-                <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-2">
-                  <h4 className="font-bold text-[#F1F5F9]">Webflow via Zapier / Make</h4>
-                  <ol className="list-decimal pl-4 space-y-1">
-                    <li>Create a <strong>Webhooks by Zapier</strong> Catch Hook.</li>
-                    <li>Add Action: <strong>Webflow Create Live Item</strong>.</li>
-                    <li>Map Title, Slug, Body, and Hero Image URL.</li>
-                    <li>Copy Zapier Catch URL and paste in Minions.</li>
-                  </ol>
+
+                <div className="space-y-3 pt-4 border-t border-[#1F2D3D]">
+                  <h3 className="text-sm font-mono text-[#00C9A7] uppercase tracking-wider font-bold">3. No-Code Integrations</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-[#94A3B8]">
+                    <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-2">
+                      <h4 className="font-bold text-[#F1F5F9] text-sm">WordPress via WP Webhooks</h4>
+                      <ol className="list-decimal pl-4 space-y-1.5">
+                        <li>Install the free <strong>WP Webhooks</strong> plugin on your WordPress site.</li>
+                        <li>Go to Settings → WP Webhooks → Receive Data.</li>
+                        <li>Create a new hook for the <strong>Create Post</strong> action.</li>
+                        <li>Map the incoming JSON fields: <code className="text-[#00C9A7]">title</code>, <code className="text-[#00C9A7]">content</code>, <code className="text-[#00C9A7]">slug</code>.</li>
+                        <li>Copy the generated Webhook URL and paste it into Minions Fleet.</li>
+                      </ol>
+                    </div>
+                    <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-2">
+                      <h4 className="font-bold text-[#F1F5F9] text-sm">Webflow / HubSpot via Zapier</h4>
+                      <ol className="list-decimal pl-4 space-y-1.5">
+                        <li>Create a new Zap with a <strong>Webhooks by Zapier</strong> (Catch Hook) trigger.</li>
+                        <li>Copy the Zapier Catch URL and paste it into Minions Fleet.</li>
+                        <li>Add an Action step: <strong>Webflow Create Live Item</strong> (or HubSpot Create Blog Post).</li>
+                        <li>Map the incoming Payload fields (Title, Body, Hero Image URL) to your CMS.</li>
+                      </ol>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
 
-      {/* TAB CONTENT: LINKEDIN & SOCIAL */}
-      {activeTab === "social" && (
-        <div className="space-y-8 animate-fadeIn">
-          <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4">
-            <h2 className="text-lg font-bold text-[#F1F5F9]">LinkedIn & Social Distribution</h2>
-            <p className="text-sm text-[#94A3B8] leading-relaxed">
-              Minions.AI connects to your LinkedIn profile or Company Page using the LinkedIn Community API.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-              <div className="p-5 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-3">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-[#00C9A7]" />
-                  <h3 className="text-sm font-bold text-[#F1F5F9]">Personal Profile Broadcasting</h3>
+          {/* TAB CONTENT: LINKEDIN & SOCIAL */}
+          {activeTab === "social" && (
+            <div className="space-y-8 animate-fadeIn">
+              <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-6">
+                <div>
+                  <h2 className="text-lg font-bold text-[#F1F5F9]">LinkedIn & Social Integration</h2>
+                  <p className="text-sm text-[#94A3B8] leading-relaxed mt-1">
+                    Follow this step-by-step tutorial to connect your LinkedIn Profile or Company Page so Minions can broadcast your thought leadership.
+                  </p>
                 </div>
-                <p className="text-xs text-[#94A3B8] leading-relaxed">
-                  Broadcasts executive thought-leadership articles directly to your personal network with your verified byline.
+
+                <div className="space-y-4">
+                  <div className="flex gap-4">
+                    <div className="w-8 h-8 rounded-full bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/20 flex items-center justify-center font-bold font-mono shrink-0">1</div>
+                    <div className="space-y-2">
+                      <h3 className="font-bold text-[#F1F5F9] text-base">Go to Fleet (/fleet)</h3>
+                      <p className="text-sm text-[#94A3B8]">
+                        In your Minions Dashboard, navigate to the <Link href="/fleet" className="text-[#00C9A7] hover:underline">Fleet</Link> page. This is where you manage all your omnichannel distribution routes.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="w-8 h-8 rounded-full bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/20 flex items-center justify-center font-bold font-mono shrink-0">2</div>
+                    <div className="space-y-2">
+                      <h3 className="font-bold text-[#F1F5F9] text-base">Locate the LinkedIn Card</h3>
+                      <p className="text-sm text-[#94A3B8]">
+                        Find the "LinkedIn" card under the "Omnichannel Broadcast Controls" section. Click the <strong>Connect Credential</strong> button.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="w-8 h-8 rounded-full bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/20 flex items-center justify-center font-bold font-mono shrink-0">3</div>
+                    <div className="space-y-2">
+                      <h3 className="font-bold text-[#F1F5F9] text-base">Authenticate via OAuth</h3>
+                      <p className="text-sm text-[#94A3B8]">
+                        A secure popup will appear asking you to log into LinkedIn. Minions will request permission to create posts on your behalf.
+                        <br/><br/>
+                        <em>Note: We use the official LinkedIn Community API. Your password is never shared with Minions.</em>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="w-8 h-8 rounded-full bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/20 flex items-center justify-center font-bold font-mono shrink-0">4</div>
+                    <div className="space-y-2">
+                      <h3 className="font-bold text-[#F1F5F9] text-base">Publish Successfully</h3>
+                      <p className="text-sm text-[#94A3B8]">
+                        Once connected, the badge on the Fleet page will turn green. Now, whenever you approve an article in <strong>Editorial Studio</strong>, Minions will automatically format the social hook and broadcast it directly to your LinkedIn feed.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-5 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-3 mt-4">
+                  <h3 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#00C9A7]" />
+                    <span>The Automated First-Comment Protocol</span>
+                  </h3>
+                  <p className="text-sm text-[#94A3B8] leading-relaxed">
+                    LinkedIn algorithms penalize posts with outbound links in the primary body text. Minions solves this automatically:
+                  </p>
+                  <ul className="list-disc pl-5 space-y-1 text-sm text-[#94A3B8]">
+                    <li>Formats the post body with bold hook lines, structured line breaks, and hashtags <strong>without</strong> external links.</li>
+                    <li>Within 60 seconds of publication, Minions dispatches an automated first comment containing the canonical backlink to your website blog post: <code className="text-[#00C9A7]">👉 Read the full operational field guide: https://yoursite.com/blog/...</code></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB CONTENT: BRAND DIRECTIVES & AI PROMPT */}
+          {activeTab === "brand" && (
+            <div className="space-y-8 animate-fadeIn">
+              <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4">
+                <h2 className="text-lg font-bold text-[#F1F5F9]">Brand Directives & Voice Calibration</h2>
+                <p className="text-sm text-[#94A3B8] leading-relaxed">
+                  Brand Directives are the core rules that guide the AI Strategist and Writer agents. They prevent generic corporate fluff and ensure every post reflects your authentic domain expertise.
                 </p>
-                <div className="text-xs font-mono p-3 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-[#94A3B8]">
-                  URN Format: <span className="text-[#00C9A7]">urn:li:person:YOUR_ID</span>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                  <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-1.5">
+                    <div className="text-xs font-mono text-[#00C9A7] font-bold">1. Audience ICPs</div>
+                    <p className="text-xs text-[#94A3B8]">Defines exact reader titles and what proof points they respect (e.g. unit economics, code snippets).</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-1.5">
+                    <div className="text-xs font-mono text-[#8B5CF6] font-bold">2. Voice Pillars</div>
+                    <p className="text-xs text-[#94A3B8]">Strict editorial philosophy (e.g. "Always start with the operational failure before the solution").</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-1.5">
+                    <div className="text-xs font-mono text-[#ff6b4a] font-bold">3. Forbidden Words</div>
+                    <p className="text-xs text-[#94A3B8]">Blacklist of overused AI cliches (e.g. "game-changer", "delve", "tapestry", "seamlessly").</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-1.5">
+                    <div className="text-xs font-mono text-[#3B82F6] font-bold">4. Few-Shot Posts</div>
+                    <p className="text-xs text-[#94A3B8]">2-3 authentic exemplary posts that the model mirrors for formatting, rhythm, and cadence.</p>
+                  </div>
+                </div>
+
+                {/* AI PROMPT GENERATOR */}
+                <div className="p-5 rounded-xl bg-[#070B0F] border border-[#00C9A7]/30 space-y-3 mt-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-[#00C9A7]" />
+                      <h3 className="text-sm font-bold text-[#F1F5F9]">AI Brand Directive Prompt Generator</h3>
+                    </div>
+                    <span className="text-[11px] font-mono text-[#00C9A7] hidden sm:inline">Copy & Paste into ChatGPT / Claude</span>
+                  </div>
+                  <p className="text-xs text-[#94A3B8]">
+                    Don&apos;t want to write directives from scratch? Copy this prompt, fill in your company details, and paste it into Claude or ChatGPT to generate your exact 40-point brand directive configuration:
+                  </p>
+
+                  <div className="relative mt-2">
+                    <pre className="p-4 rounded-xl bg-[#0F1419] border border-[#1F2D3D] text-xs font-mono text-[#F1F5F9] overflow-x-auto max-h-[340px] whitespace-pre-wrap">
+                      {aiDirectivePrompt}
+                    </pre>
+                    <button
+                      onClick={() => copyCode(aiDirectivePrompt, "prompt")}
+                      className="absolute top-3 right-3 px-3 py-1.5 rounded-lg bg-[#00C9A7] text-[#070B0F] text-xs font-mono font-bold hover:bg-[#00E5BE] transition-colors flex items-center gap-1.5"
+                    >
+                      {copiedId === "prompt" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span className="hidden sm:inline">{copiedId === "prompt" ? "Copied Prompt!" : "Copy Prompt"}</span>
+                    </button>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-end">
+                    <Link
+                      href="/brand"
+                      className="text-xs font-mono text-[#00C9A7] hover:underline flex items-center gap-1"
+                    >
+                      <span>Go to Brand & Directives to paste output</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </div>
                 </div>
               </div>
+            </div>
+          )}
 
-              <div className="p-5 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-3">
-                <div className="flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-[#3B82F6]" />
-                  <h3 className="text-sm font-bold text-[#F1F5F9]">Company Page Broadcasting</h3>
+          {/* TAB CONTENT: AI DEVELOPER (llms.txt) */}
+          {activeTab === "ai-agents" && (
+            <div className="space-y-8 animate-fadeIn">
+              <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4">
+                <div className="flex items-center gap-2 text-xs font-mono text-[#00C9A7] uppercase tracking-wider font-bold">
+                  <Bot className="w-4 h-4 text-[#00C9A7]" />
+                  <span>Machine-Readable Semantic Specification</span>
                 </div>
-                <p className="text-xs text-[#94A3B8] leading-relaxed">
-                  Publishes directly to your LinkedIn Company or Organization Page followers.
+                <h2 className="text-lg font-bold text-[#F1F5F9]">AI Coding Assistant Integration (`llms.txt`)</h2>
+                <p className="text-sm text-[#94A3B8] leading-relaxed">
+                  Minions.AI implements the standardized <code className="text-[#00C9A7] font-mono">/llms.txt</code> protocol. If you use AI developer tools like <strong>Cursor</strong>, <strong>Claude Code</strong>, <strong>Antigravity</strong>, or <strong>ChatGPT</strong>, you can prompt your AI to build your integrations directly.
                 </p>
-                <div className="text-xs font-mono p-3 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-[#94A3B8]">
-                  URN Format: <span className="text-[#3B82F6]">urn:li:organization:PAGE_ID</span>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                  <a
+                    href="/llms.txt"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] hover:border-[#00C9A7] transition-all block group"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="font-mono text-xs font-bold text-[#00C9A7]">/llms.txt</div>
+                      <ExternalLink className="w-3.5 h-3.5 text-[#64748B] group-hover:text-[#00C9A7]" />
+                    </div>
+                    <p className="text-xs text-[#94A3B8]">Compact machine-readable summary with endpoints, payload schemas, and quickstart code.</p>
+                  </a>
+
+                  <a
+                    href="/llms-full.txt"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] hover:border-[#00C9A7] transition-all block group"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="font-mono text-xs font-bold text-[#3B82F6]">/llms-full.txt</div>
+                      <ExternalLink className="w-3.5 h-3.5 text-[#64748B] group-hover:text-[#3B82F6]" />
+                    </div>
+                    <p className="text-xs text-[#94A3B8]">Exhaustive technical documentation, security verification, and framework templates.</p>
+                  </a>
                 </div>
-              </div>
-            </div>
 
-            <div className="p-5 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-3 mt-4">
-              <h3 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#00C9A7]" />
-                <span>The Automated First-Comment Protocol</span>
-              </h3>
-              <p className="text-xs text-[#94A3B8] leading-relaxed">
-                LinkedIn algorithm penalizes posts with outbound links in the primary body text. Minions solves this automatically:
-              </p>
-              <ul className="list-disc pl-5 space-y-1 text-xs text-[#94A3B8]">
-                <li>Formats the post body with bold hook lines, structured line breaks, and hashtag tags without external links.</li>
-                <li>Within 60 seconds of publication, Minions dispatches an automated first comment containing the canonical backlink to your website blog post: <code className="text-[#00C9A7]">👉 Read the full operational field guide: https://yoursite.com/blog/...</code></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB CONTENT: BRAND DIRECTIVES & AI PROMPT */}
-      {activeTab === "brand" && (
-        <div className="space-y-8 animate-fadeIn">
-          <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4">
-            <h2 className="text-lg font-bold text-[#F1F5F9]">Brand Directives & Voice Calibration</h2>
-            <p className="text-sm text-[#94A3B8] leading-relaxed">
-              Brand Directives are the core rules that guide the AI Strategist and Writer agents. They prevent generic corporate fluff and ensure every post reflects your authentic domain expertise.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
-              <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-1.5">
-                <div className="text-xs font-mono text-[#00C9A7] font-bold">1. Audience ICPs</div>
-                <p className="text-xs text-[#94A3B8]">Defines exact reader titles and what proof points they respect (e.g. unit economics, code snippets).</p>
-              </div>
-              <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-1.5">
-                <div className="text-xs font-mono text-[#8B5CF6] font-bold">2. Voice Pillars</div>
-                <p className="text-xs text-[#94A3B8]">Strict editorial philosophy (e.g. "Always start with the operational failure before the solution").</p>
-              </div>
-              <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-1.5">
-                <div className="text-xs font-mono text-[#ff6b4a] font-bold">3. Forbidden Words</div>
-                <p className="text-xs text-[#94A3B8]">Blacklist of overused AI cliches (e.g. "game-changer", "delve", "tapestry", "seamlessly").</p>
-              </div>
-              <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-1.5">
-                <div className="text-xs font-mono text-[#3B82F6] font-bold">4. Few-Shot Posts</div>
-                <p className="text-xs text-[#94A3B8]">2-3 authentic exemplary posts that the model mirrors for formatting, rhythm, and cadence.</p>
-              </div>
-            </div>
-
-            {/* AI PROMPT GENERATOR */}
-            <div className="p-5 rounded-xl bg-[#070B0F] border border-[#00C9A7]/30 space-y-3 mt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#00C9A7]" />
-                  <h3 className="text-sm font-bold text-[#F1F5F9]">AI Brand Directive Prompt Generator</h3>
-                </div>
-                <span className="text-[11px] font-mono text-[#00C9A7]">Copy & Paste into ChatGPT / Claude</span>
-              </div>
-              <p className="text-xs text-[#94A3B8]">
-                Don&apos;t want to write directives from scratch? Copy this prompt, fill in your company details, and paste it into Claude or ChatGPT to generate your exact 40-point brand directive configuration:
-              </p>
-
-              <div className="relative mt-2">
-                <pre className="p-4 rounded-xl bg-[#0F1419] border border-[#1F2D3D] text-xs font-mono text-[#F1F5F9] overflow-x-auto max-h-[340px] whitespace-pre-wrap">
-                  {aiDirectivePrompt}
-                </pre>
-                <button
-                  onClick={() => copyCode(aiDirectivePrompt, "prompt")}
-                  className="absolute top-3 right-3 px-3 py-1.5 rounded-lg bg-[#00C9A7] text-[#070B0F] text-xs font-mono font-bold hover:bg-[#00E5BE] transition-colors flex items-center gap-1.5"
-                >
-                  {copiedId === "prompt" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedId === "prompt" ? "Copied Prompt!" : "Copy Prompt"}</span>
-                </button>
-              </div>
-
-              <div className="pt-2 flex items-center justify-end">
-                <Link
-                  href="/brand"
-                  className="text-xs font-mono text-[#00C9A7] hover:underline flex items-center gap-1"
-                >
-                  <span>Go to Brand & Directives to paste output</span>
-                  <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB CONTENT: AI DEVELOPER (llms.txt) */}
-      {activeTab === "ai-agents" && (
-        <div className="space-y-8 animate-fadeIn">
-          <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4">
-            <div className="flex items-center gap-2 text-xs font-mono text-[#00C9A7] uppercase tracking-wider font-bold">
-              <Bot className="w-4 h-4 text-[#00C9A7]" />
-              <span>Machine-Readable Semantic Specification</span>
-            </div>
-            <h2 className="text-lg font-bold text-[#F1F5F9]">AI Coding Assistant Integration (`llms.txt`)</h2>
-            <p className="text-sm text-[#94A3B8] leading-relaxed">
-              Minions.AI implements the standardized <code className="text-[#00C9A7] font-mono">/llms.txt</code> protocol. If you use AI developer tools like <strong>Cursor</strong>, <strong>Claude Code</strong>, <strong>Antigravity</strong>, or <strong>ChatGPT</strong>, you can prompt your AI to build your integrations directly.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              <a
-                href="/llms.txt"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] hover:border-[#00C9A7] transition-all block group"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <div className="font-mono text-xs font-bold text-[#00C9A7]">/llms.txt</div>
-                  <ExternalLink className="w-3.5 h-3.5 text-[#64748B] group-hover:text-[#00C9A7]" />
-                </div>
-                <p className="text-xs text-[#94A3B8]">Compact machine-readable summary with endpoints, payload schemas, and quickstart code.</p>
-              </a>
-
-              <a
-                href="/llms-full.txt"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] hover:border-[#00C9A7] transition-all block group"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <div className="font-mono text-xs font-bold text-[#3B82F6]">/llms-full.txt</div>
-                  <ExternalLink className="w-3.5 h-3.5 text-[#64748B] group-hover:text-[#3B82F6]" />
-                </div>
-                <p className="text-xs text-[#94A3B8]">Exhaustive technical documentation, security verification, and framework templates.</p>
-              </a>
-            </div>
-
-            <div className="p-5 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-3 mt-4">
-              <h3 className="text-sm font-bold text-[#F1F5F9]">Sample Prompt for Your AI Coding Assistant</h3>
-              <p className="text-xs text-[#94A3B8]">
-                Paste this into Cursor Composer, Claude Code, or Antigravity to build a custom webhook handler instantly:
-              </p>
-              <div className="relative">
-                <pre className="p-3.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-mono text-[#F1F5F9] overflow-x-auto">
+                <div className="p-5 rounded-xl bg-[#070B0F] border border-[#1F2D3D] space-y-3 mt-4">
+                  <h3 className="text-sm font-bold text-[#F1F5F9]">Sample Prompt for Your AI Coding Assistant</h3>
+                  <p className="text-xs text-[#94A3B8]">
+                    Paste this into Cursor Composer, Claude Code, or Antigravity to build a custom webhook handler instantly:
+                  </p>
+                  <div className="relative">
+                    <pre className="p-3.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-mono text-[#F1F5F9] overflow-x-auto">
 {`Please read https://minions.getminions.ai/llms.txt and create a production-ready webhook receiver endpoint in my Next.js App Router project that saves published Minions articles into my database, verifies timing-safe authorization tokens, and triggers on-demand cache revalidation.`}
-                </pre>
-                <button
-                  onClick={() => copyCode(`Please read https://minions.getminions.ai/llms.txt and create a production-ready webhook receiver endpoint in my Next.js App Router project that saves published Minions articles into my database, verifies timing-safe authorization tokens, and triggers on-demand cache revalidation.`, "aiprompt")}
-                  className="absolute top-2.5 right-2.5 p-1.5 rounded-md bg-[#161D26] border border-[#1F2D3D] text-xs font-mono text-[#94A3B8] hover:text-[#00C9A7] transition-colors"
-                >
-                  {copiedId === "aiprompt" ? <Check className="w-3.5 h-3.5 text-[#00C9A7]" /> : <Copy className="w-3.5 h-3.5 text-[#94A3B8]" />}
-                </button>
+                    </pre>
+                    <button
+                      onClick={() => copyCode(`Please read https://minions.getminions.ai/llms.txt and create a production-ready webhook receiver endpoint in my Next.js App Router project that saves published Minions articles into my database, verifies timing-safe authorization tokens, and triggers on-demand cache revalidation.`, "aiprompt")}
+                      className="absolute top-2.5 right-2.5 p-1.5 rounded-md bg-[#161D26] border border-[#1F2D3D] text-xs font-mono text-[#94A3B8] hover:text-[#00C9A7] transition-colors"
+                    >
+                      {copiedId === "aiprompt" ? <Check className="w-3.5 h-3.5 text-[#00C9A7]" /> : <Copy className="w-3.5 h-3.5 text-[#94A3B8]" />}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
       </div>
     </div>
   );
