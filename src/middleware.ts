@@ -88,8 +88,18 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
     return NextResponse.next();
   }
 
-  // 3. Strict Gate for all Private Dashboard Pages
-  if (!isLoggedIn) {
+  // 3. Strict Gate for Private Dashboard Pages ONLY
+  const isDashboardRoute =
+    pathname === "/" ||
+    pathname.startsWith("/ideas") ||
+    pathname.startsWith("/editorial") ||
+    pathname.startsWith("/drafts") ||
+    pathname.startsWith("/fleet") ||
+    pathname.startsWith("/brand") ||
+    pathname.startsWith("/settings") ||
+    pathname.startsWith("/platform-admin");
+
+  if (isDashboardRoute && !isLoggedIn) {
     const loginUrl = new URL("/login", req.nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
