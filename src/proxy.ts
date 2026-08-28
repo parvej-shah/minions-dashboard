@@ -1,14 +1,11 @@
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { constantTimeEqual } from "@/lib/security";
-import { IMPERSONATION_COOKIE } from "@/lib/tenant";
 import { NextResponse } from "next/server";
 import type { NextFetchEvent, NextRequest } from "next/server";
 
 /**
  * Clean deterministic proxy/middleware gate.
  * Public routes (docs, llms.txt, webhooks, auth, static files) return immediately
- * without invoking authentication gates.
+ * without invoking authentication gates or importing NextAuth.
  */
 export default async function proxy(req: NextRequest, event: NextFetchEvent) {
   const { pathname } = req.nextUrl;
@@ -55,13 +52,11 @@ export default async function proxy(req: NextRequest, event: NextFetchEvent) {
     req.cookies.get("next-auth.session-token")?.value ||
     req.cookies.get("__Secure-next-auth.session-token")?.value;
 
-  const session = await auth();
-  const isLoggedIn = !!session?.user || !!sessionToken;
-  const sessionUser = session?.user;
+  const isLoggedIn = !!sessionToken;
 
   // 1.5 Redirect logged-in users away from /login
   if (pathname === "/login" || pathname === "/onboarding") {
-    if (isLoggedIn && sessionUser?.clientId) {
+    if (isLoggedIn) {
       return NextResponse.redirect(new URL("/", req.nextUrl.origin));
     }
     return NextResponse.next();
@@ -100,24 +95,6 @@ export default async function proxy(req: NextRequest, event: NextFetchEvent) {
     const loginUrl = new URL("/login", req.nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
-  }
-
-  // 4. Platform staff / tenant logic
-  const isPlatformStaff = sessionUser?.role === "SYSTEM_ADMIN";
-  if (pathname === "/" && isPlatformStaff && !sessionUser?.clientId && !req.cookies.get(IMPERSONATION_COOKIE)) {
-    return NextResponse.redirect(new URL("/platform-admin", req.nextUrl.origin));
-  }
-
-  if (sessionUser && !sessionUser.clientId && !isPlatformStaff) {
-    try {
-      const freshUser = await prisma.user.findUnique({
-        where: { id: sessionUser.id },
-        select: { clientId: true },
-      });
-      if (freshUser && freshUser.clientId === null) {
-        return NextResponse.redirect(new URL("/onboarding", req.nextUrl.origin));
-      }
-    } catch {}
   }
 
   return NextResponse.next();
