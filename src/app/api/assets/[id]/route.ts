@@ -62,7 +62,7 @@ export async function PATCH(
         ...(body.core_argument !== undefined && { coreArgument: body.core_argument }),
         ...(body.status !== undefined && { status: body.status }),
         ...(body.claims_ok !== undefined && { claimsOk: body.claims_ok }),
-        ...(body.published_at !== undefined && { publishedAt: new Date(body.published_at) }),
+        ...(body.published_at !== undefined && { publishedAt: body.published_at ? new Date(body.published_at) : null }),
         ...(body.published_urls !== undefined && {
           publishedUrls: Array.isArray(body.published_urls)
             ? body.published_urls.join(",")
