@@ -171,17 +171,29 @@ const gate = gateHandler as unknown as Promise<NextMiddleware>;
 export default async function proxy(request: NextRequest, event: NextFetchEvent) {
   const { pathname } = request.nextUrl;
   if (
+    pathname === "/docs" ||
     pathname.startsWith("/docs") ||
+    pathname === "/llms.txt" ||
+    pathname === "/llms-full.txt" ||
+    pathname === "/robots.txt" ||
     pathname.startsWith("/llms") ||
     pathname.startsWith("/robots") ||
     pathname.startsWith("/api/llms") ||
-    pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/webhooks") ||
     pathname.startsWith("/api/onboarding") ||
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/images/") ||
+    pathname.startsWith("/icons/") ||
+    pathname === "/manifest.json" ||
+    pathname === "/manifest.webmanifest" ||
+    pathname === "/favicon.ico" ||
+    pathname === "/icon.svg" ||
+    pathname === "/sw.js" ||
     pathname.endsWith(".txt") ||
     pathname.endsWith(".png") ||
     pathname.endsWith(".jpg") ||
-    pathname.endsWith(".svg")
+    pathname.endsWith(".svg") ||
+    pathname.endsWith(".ico")
   ) {
     return NextResponse.next();
   }
@@ -192,6 +204,6 @@ export default async function proxy(request: NextRequest, event: NextFetchEvent)
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|icon.svg|images|icons|llms|robots|docs).*)",
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|images|icons|llms|robots|docs|api/llms).*)",
   ],
 };
