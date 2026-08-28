@@ -2,11 +2,6 @@ import { constantTimeEqual } from "@/lib/security";
 import { NextResponse } from "next/server";
 import type { NextFetchEvent, NextRequest } from "next/server";
 
-/**
- * Clean deterministic Edge Middleware gate.
- * Public routes (docs, llms.txt, webhooks, auth, static files) return immediately
- * without invoking authentication gates.
- */
 export default async function middleware(req: NextRequest, event: NextFetchEvent) {
   const { pathname } = req.nextUrl;
 
@@ -102,6 +97,6 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|icon.svg|images|icons).*)",
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|images|icons|docs|llms|robots).*)",
   ],
 };
