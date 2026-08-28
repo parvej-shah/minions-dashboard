@@ -22,16 +22,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
     }),
   ],
   pages: {
-    signIn: "/login",
     error: "/login",
   },
   secret: requireOneOfEnv("AUTH_SECRET", "NEXTAUTH_SECRET"),
   callbacks: {
-    authorized() {
-      // Return true so NextAuth does not preemptively redirect public routes;
-      // proxy.ts handles granular authentication gates and redirects.
-      return true;
-    },
+    authorized: () => true,
     async signIn({ user }) {
       if (!user?.email) return false;
       const cleanEmail = user.email.trim().toLowerCase();
