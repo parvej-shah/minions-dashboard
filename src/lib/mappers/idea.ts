@@ -1,6 +1,6 @@
 import type { Idea } from "@prisma/client";
 import { DEFAULT_GENERATION_COST, UNSPECIFIED_TRADE } from "@/constants/config";
-import type { AudienceLane, IdeaItem, IdeaStatus } from "@/types";
+import type { AudienceLane, IdeaItem, IdeaSignal, IdeaStatus } from "@/types";
 
 /**
  * The single Prisma-row -> wire-shape conversion for an idea.
@@ -26,7 +26,7 @@ export function toIdeaDTO(idea: Idea): IdeaItem {
     source: idea.source || "MANUAL",
     source_url: idea.sourceUrl ?? null,
     source_title: idea.sourceTitle ?? null,
-    signals: Array.isArray(idea.signals) ? (idea.signals as unknown[]) : [],
+    signals: Array.isArray(idea.signals) ? (idea.signals as unknown as IdeaSignal[]) : [],
     why: idea.why ?? null,
     status: (idea.status || "HARVESTED") as IdeaStatus,
     priority: idea.priority ?? null,

@@ -207,6 +207,11 @@ export function MobileTopBar({
   navCounts,
   blogEnabled = true,
 }: Pick<MobileNavProps, "onOpenPalette" | "setMobileMenuOpen" | "navCounts" | "blogEnabled">) {
+  const { brandSettings } = useBrandSettings();
+  const liveBlogUrl = brandSettings?.company_domain
+    ? (brandSettings.company_domain.startsWith("http") ? brandSettings.company_domain : `https://${brandSettings.company_domain}`)
+    : BLOG_BASE_URL;
+
   return (
   <header className="h-14 border-b border-[#1f2b37] bg-[#0f1419]/95 backdrop-blur-md px-4 flex items-center justify-between sticky top-0 z-30 md:hidden">
     <div className="flex items-center gap-2.5">

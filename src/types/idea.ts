@@ -41,6 +41,14 @@ export type IdeaStatus =
   | "FAILED"
   | "DISCARDED";
 
+export interface IdeaSignal {
+  title?: string;
+  url?: string;
+  source?: string;
+  snippet?: string;
+  published_at?: string;
+}
+
 /**
  * The single wire shape for an idea, emitted by every /api/ideas endpoint.
  *
@@ -59,6 +67,10 @@ export interface IdeaItem {
   target_trade: TargetTrade | string;
   pillar: ContentPillar | string;
   source: IdeaSource | string;
+  source_url?: string | null;
+  source_title?: string | null;
+  signals?: IdeaSignal[] | null;
+  why?: string | null;
   status: IdeaStatus;
   priority: string | null;
   estimated_cost: number;

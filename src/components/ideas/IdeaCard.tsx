@@ -13,6 +13,8 @@ import {
   Trash2,
   Unlock,
   CalendarDays,
+  ExternalLink,
+  Radio,
 } from "lucide-react";
 import { formatRelativeTime } from "@/utils/date";
 import { getAudienceBadgeClass, getSourceTag } from "@/constants/ideaBadges";
@@ -94,12 +96,37 @@ export default function IdeaCard({
                       {ideaTrade}
                     </span>
 
-                    {/* Source Tag (Color Coded) */}
-                    <span
-                      className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${sourceInfo.className}`}
-                    >
-                      {sourceInfo.label}
-                    </span>
+                    {/* Source Tag (Color Coded with Link if available) */}
+                    {idea.source_url ? (
+                      <a
+                        href={idea.source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border hover:opacity-80 transition-opacity ${sourceInfo.className}`}
+                        title={`Verify original source: ${idea.source_url}`}
+                      >
+                        <span>{sourceInfo.label}</span>
+                        <ExternalLink className="w-2.5 h-2.5 opacity-80" />
+                      </a>
+                    ) : (
+                      <span
+                        className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${sourceInfo.className}`}
+                      >
+                        {sourceInfo.label}
+                      </span>
+                    )}
+
+                    {/* Signal Indicator if signals exist */}
+                    {idea.signals && idea.signals.length > 0 && (
+                      <span
+                        className="inline-flex items-center gap-1 text-[10px] font-mono text-[#94A3B8] bg-[#161D26] border border-[#1F2D3D] px-2 py-0.5 rounded-full"
+                        title={`${idea.signals.length} market signal(s) linked`}
+                      >
+                        <Radio className="w-2.5 h-2.5 text-[#00C9A7]" />
+                        <span>{idea.signals.length} {idea.signals.length === 1 ? 'signal' : 'signals'}</span>
+                      </span>
+                    )}
                   </div>
 
                   {/* Right: Idea ID & Action Buttons */}

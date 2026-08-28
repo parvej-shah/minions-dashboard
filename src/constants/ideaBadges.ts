@@ -20,27 +20,51 @@ export function getAudienceBadgeClass(aud: AudienceLane): string {
 
 /** Source badge label and colour. */
 export function getSourceTag(source: string): { label: string; className: string } {
-  const s = source.toUpperCase();
-  if (s.includes("GOOGLE_TRENDS")) {
+  const s = (source || "").toUpperCase();
+  if (s.includes("TECHCRUNCH")) {
     return {
-      label: "GOOGLE_TRENDS",
+      label: "TechCrunch AI",
+      className: "bg-[#10B981]/15 text-[#10B981] border-[#10B981]/30"
+    };
+  }
+  if (s.includes("HACKER") || s.includes("HN")) {
+    return {
+      label: "Hacker News",
+      className: "bg-[#F97316]/15 text-[#F97316] border-[#F97316]/30"
+    };
+  }
+  if (s.includes("N8N")) {
+    return {
+      label: "n8n Blog",
+      className: "bg-[#EA580C]/15 text-[#EA580C] border-[#EA580C]/30"
+    };
+  }
+  if (s.includes("HOME") || s.includes("SERVICE") || s.includes("GOOGLE") || s.includes("TRENDS")) {
+    return {
+      label: "Industry Signals",
       className: "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/30"
     };
   }
   if (s.includes("REDDIT")) {
     return {
-      label: "REDDIT",
-      className: "bg-[#F97316]/15 text-[#F97316] border-[#F97316]/30"
+      label: "Reddit",
+      className: "bg-[#F43F5E]/15 text-[#F43F5E] border-[#F43F5E]/30"
     };
   }
-  if (s.includes("HACKER_NEWS")) {
+  if (s.includes("HARVESTER")) {
     return {
-      label: "HACKER_NEWS",
-      className: "bg-[#EAB308]/15 text-[#EAB308] border-[#EAB308]/30"
+      label: "Signal Harvester",
+      className: "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/30"
+    };
+  }
+  if (s.includes("BRAND") || s.includes("PHILOSOPHY") || s.includes("CORE")) {
+    return {
+      label: "Brand Core",
+      className: "bg-[#8B5CF6]/15 text-[#8B5CF6] border-[#8B5CF6]/30"
     };
   }
   return {
-    label: "MANUAL",
+    label: source || "Manual",
     className: "bg-[#1E2733] text-[#94A3B8] border-[#2A3D52]"
   };
 }

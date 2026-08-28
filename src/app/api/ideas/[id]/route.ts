@@ -64,8 +64,13 @@ export async function PATCH(
         ...(body.excerpt !== undefined && { angle: body.excerpt }),
         ...(body.audience !== undefined && { audience: body.audience }),
         ...(body.target_trade !== undefined && { targetTrade: body.target_trade }),
-        ...(body.trade !== undefined && { targetTrade: body.trade }),
         ...(body.pillar !== undefined && { pillar: body.pillar }),
+        ...(body.source !== undefined && { source: body.source }),
+        ...(body.source_url !== undefined && { sourceUrl: body.source_url }),
+        ...(body.source_title !== undefined && { sourceTitle: body.source_title }),
+        ...(body.signals !== undefined && {
+          signals: Array.isArray(body.signals) ? body.signals : (body.signals ? [body.signals] : []),
+        }),
         ...(body.priority !== undefined && { priority: body.priority }),
         ...(body.status !== undefined && { status: body.status }),
         ...(body.scheduled_for !== undefined && {

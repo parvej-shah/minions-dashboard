@@ -101,6 +101,8 @@ export default function IdeaStreamPage() {
   // Slide-over form state
   const [formTitle, setFormTitle] = useState("");
   const [formExcerpt, setFormExcerpt] = useState("");
+  const [formSourceUrl, setFormSourceUrl] = useState("");
+  const [formSourceTitle, setFormSourceTitle] = useState("");
   const [formTrade, setFormTrade] = useState<TargetTrade | "">("");
   const [formAudience, setFormAudience] = useState<AudienceLane>("ICP");
   const [formTagsInput, setFormTagsInput] = useState("");
@@ -307,7 +309,18 @@ export default function IdeaStreamPage() {
       trade: formTrade,
       target_trade: formTrade,
       audience: formAudience,
-      source: "MANUAL",
+      source: formSourceUrl.trim() ? "MANUAL_REFERENCE" : "MANUAL",
+      source_url: formSourceUrl.trim() || null,
+      source_title: formSourceTitle.trim() || null,
+      signals: formSourceUrl.trim() ? [
+        {
+          title: formSourceTitle.trim() || formTitle.trim(),
+          url: formSourceUrl.trim(),
+          source: "Manual Reference",
+          snippet: formExcerpt.trim() || formTitle.trim(),
+          published_at: new Date().toISOString(),
+        }
+      ] : [],
       tags: newTags
     };
 
@@ -324,6 +337,8 @@ export default function IdeaStreamPage() {
         setIsInjectOpen(false);
         setFormTitle("");
         setFormExcerpt("");
+        setFormSourceUrl("");
+        setFormSourceTitle("");
         setFormTrade("");
         setFormTags(["Manual"]);
         setFormTagsInput("");
@@ -867,15 +882,32 @@ export default function IdeaStreamPage() {
                   </div>
                 </div>
 
-                {/* Field: Source (MANUAL) */}
-                <div>
-                  <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
-                    Source
-                  </label>
-                  <div className="flex items-center gap-2 bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3.5 py-2 text-xs text-[#94A3B8]">
-                    <span className="w-2 h-2 rounded-full bg-[#64748B]" />
-                    <span className="font-mono font-bold text-[#F1F5F9]">MANUAL</span>
-                    <span className="text-[11px] text-[#64748B]">— Operator manual signal injection</span>
+                {/* Field: Source & Verification URL */}
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
+                      Source URL / Reference Link <span className="text-[#64748B] font-normal">(Optional for human verification)</span>
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://news.ycombinator.com/... or https://techcrunch.com/..."
+                      value={formSourceUrl}
+                      onChange={(e) => setFormSourceUrl(e.target.value)}
+                      className="w-full bg-[#161D26] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3.5 py-2.5 text-xs text-[#F1F5F9] placeholder:text-[#64748B] outline-none transition-all font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
+                      Source Publication / Title <span className="text-[#64748B] font-normal">(Optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Hacker News Thread #4128, TechCrunch AI Dispatch"
+                      value={formSourceTitle}
+                      onChange={(e) => setFormSourceTitle(e.target.value)}
+                      className="w-full bg-[#161D26] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3.5 py-2.5 text-xs text-[#F1F5F9] placeholder:text-[#64748B] outline-none transition-all"
+                    />
                   </div>
                 </div>
 
