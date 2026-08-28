@@ -491,9 +491,9 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
                   <div className="flex gap-4">
                     <div className="w-8 h-8 rounded-full bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/20 flex items-center justify-center font-bold font-mono shrink-0">1</div>
                     <div className="space-y-2">
-                      <h3 className="font-bold text-[#F1F5F9] text-base">Go to Fleet (/fleet)</h3>
+                      <h3 className="font-bold text-[#F1F5F9] text-base">Create a LinkedIn Developer App</h3>
                       <p className="text-sm text-[#94A3B8]">
-                        In your Minions Dashboard, navigate to the <Link href="/fleet" className="text-[#00C9A7] hover:underline">Fleet</Link> page. This is where you manage all your omnichannel distribution routes.
+                        Go to the <a href="https://developer.linkedin.com/" target="_blank" rel="noreferrer" className="text-[#00C9A7] hover:underline">LinkedIn Developer Portal</a> and click <strong>Create app</strong>. Fill in your App Name, link your Company Page, and provide a Privacy Policy URL.
                       </p>
                     </div>
                   </div>
@@ -501,9 +501,9 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
                   <div className="flex gap-4">
                     <div className="w-8 h-8 rounded-full bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/20 flex items-center justify-center font-bold font-mono shrink-0">2</div>
                     <div className="space-y-2">
-                      <h3 className="font-bold text-[#F1F5F9] text-base">Locate the LinkedIn Card</h3>
+                      <h3 className="font-bold text-[#F1F5F9] text-base">Request the "Share on LinkedIn" Product</h3>
                       <p className="text-sm text-[#94A3B8]">
-                        Find the "LinkedIn" card under the "Omnichannel Broadcast Controls" section. Click the <strong>Connect Credential</strong> button.
+                        Navigate to the <strong>Products</strong> tab in your new app and request access to <strong>Share on LinkedIn</strong> (and <strong>Sign In with LinkedIn v2</strong> if you need personal profile access). These are usually approved instantly.
                       </p>
                     </div>
                   </div>
@@ -511,11 +511,11 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
                   <div className="flex gap-4">
                     <div className="w-8 h-8 rounded-full bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/20 flex items-center justify-center font-bold font-mono shrink-0">3</div>
                     <div className="space-y-2">
-                      <h3 className="font-bold text-[#F1F5F9] text-base">Authenticate via OAuth</h3>
+                      <h3 className="font-bold text-[#F1F5F9] text-base">Generate an Access Token & Find Your URN</h3>
                       <p className="text-sm text-[#94A3B8]">
-                        A secure popup will appear asking you to log into LinkedIn. Minions will request permission to create posts on your behalf.
+                        Go to the <strong>Auth</strong> tab. Scroll down to the <strong>OAuth 2.0 tools</strong> section and use the Token Generator to create a 60-day Access Token. 
                         <br/><br/>
-                        <em>Note: We use the official LinkedIn Community API. Your password is never shared with Minions.</em>
+                        You will also need your Profile or Page URN. For a personal profile, it looks like <code className="text-[#00C9A7]">urn:li:person:ABC123xyz</code>. For a company page, it looks like <code className="text-[#00C9A7]">urn:li:organization:12345678</code>.
                       </p>
                     </div>
                   </div>
@@ -523,9 +523,9 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
                   <div className="flex gap-4">
                     <div className="w-8 h-8 rounded-full bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/20 flex items-center justify-center font-bold font-mono shrink-0">4</div>
                     <div className="space-y-2">
-                      <h3 className="font-bold text-[#F1F5F9] text-base">Publish Successfully</h3>
+                      <h3 className="font-bold text-[#F1F5F9] text-base">Connect in Minions Fleet</h3>
                       <p className="text-sm text-[#94A3B8]">
-                        Once connected, the badge on the Fleet page will turn green. Now, whenever you approve an article in <strong>Editorial Studio</strong>, Minions will automatically format the social hook and broadcast it directly to your LinkedIn feed.
+                        In your Minions Dashboard, go to <Link href="/fleet" className="text-[#00C9A7] hover:underline">/fleet</Link>. Click <strong>Connect Credential</strong> on the LinkedIn card, and paste your URN and Access Token. Once saved, the badge will turn green and you are ready to publish!
                       </p>
                     </div>
                   </div>
