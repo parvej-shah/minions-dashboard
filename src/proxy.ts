@@ -31,6 +31,7 @@ const gateHandler = auth(async (req) => {
   if (
     pathname.startsWith("/llms") ||
     pathname.startsWith("/robots") ||
+    pathname.startsWith("/api/llms") ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/webhooks") ||
     pathname.startsWith("/api/onboarding") ||
