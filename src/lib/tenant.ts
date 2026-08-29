@@ -54,7 +54,13 @@ export async function requireClientId(): Promise<
   // 1. If viewing as a tenant via platform-admin impersonation cookie
   const impersonating = await getImpersonatedClientId();
   if (impersonating && isPlatformStaff(user)) {
-    return { clientId: impersonating, user };
+    const validClient = await prisma.client.findUnique({
+      where: { id: impersonating },
+      select: { id: true },
+    });
+    if (validClient) {
+      return { clientId: impersonating, user };
+    }
   }
 
   // 2. If user has an active workspace attached
