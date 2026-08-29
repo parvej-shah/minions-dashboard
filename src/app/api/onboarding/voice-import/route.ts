@@ -10,7 +10,7 @@ import { apiError, apiFailure } from "@/lib/api-response";
  * the tenant's tone and few-shot examples into Postgres.
  */
 export async function POST(request: Request) {
-  const ctx = await requireRealTenantUser();
+  const ctx = await requireRealTenantUser(true);
   if ("error" in ctx) return ctx.error;
 
   try {

@@ -6,7 +6,7 @@ import { apiError, apiFailure } from "@/lib/api-response";
 import { cookies } from "next/headers";
 
 export async function POST(request: Request) {
-  const ctx = await requireRealTenantUser();
+  const ctx = await requireRealTenantUser(true);
   if ("error" in ctx) return ctx.error;
 
   const cookieStore = await cookies();

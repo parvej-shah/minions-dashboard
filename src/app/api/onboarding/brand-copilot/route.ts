@@ -26,7 +26,7 @@ export interface GeneratedDirective {
  * combined with industry archetypes.
  */
 export async function POST(request: Request) {
-  const ctx = await requireRealTenantUser();
+  const ctx = await requireRealTenantUser(true);
   if ("error" in ctx) return ctx.error;
 
   try {

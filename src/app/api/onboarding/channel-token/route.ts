@@ -21,7 +21,7 @@ import { requireRealTenantUser } from "@/lib/tenant";
  * their own domain, not ours.
  */
 export async function POST(request: Request) {
-  const ctx = await requireRealTenantUser();
+  const ctx = await requireRealTenantUser(true);
   if ("error" in ctx) return ctx.error;
 
   try {

@@ -68,11 +68,44 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return true;
       }
 
-      // For any new Google user, provision a User row.
-      // If they have no clientId yet, the app automatically routes them into /onboarding/setup.
-      await prisma.user.create({
-        data: { email: cleanEmail, name: user.name ?? null, role: "MEMBER" },
+      // For any new Google user, provision a workspace and User row as OWNER immediately.
+      const clientName = `${user.name || cleanEmail.split("@")[0]}'s Workspace`;
+      const baseSlug = (user.name || cleanEmail.split("@")[0])
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/[\s_-]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 50) || "workspace";
+      const slug = `${baseSlug}-${Date.now().toString(36)}`;
+
+      const newClient = await prisma.client.create({
+        data: {
+          name: clientName,
+          slug,
+          status: "TRIAL",
+        },
       });
+
+      const newUser = await prisma.user.create({
+        data: {
+          email: cleanEmail,
+          name: user.name ?? null,
+          clientId: newClient.id,
+          role: "OWNER",
+        },
+      });
+
+      await prisma.clientMembership.create({
+        data: {
+          clientId: newClient.id,
+          userId: newUser.id,
+          email: cleanEmail,
+          role: "OWNER",
+          acceptedAt: new Date(),
+        },
+      });
+
       return true;
     },
     async jwt({ token, user }) {

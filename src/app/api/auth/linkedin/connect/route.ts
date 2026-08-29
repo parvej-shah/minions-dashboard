@@ -3,7 +3,7 @@ import { requireRealTenantUser } from "@/lib/tenant";
 import { apiError } from "@/lib/api-response";
 
 export async function GET(request: Request) {
-  const ctx = await requireRealTenantUser();
+  const ctx = await requireRealTenantUser(true);
   if ("error" in ctx) return ctx.error;
 
   try {
