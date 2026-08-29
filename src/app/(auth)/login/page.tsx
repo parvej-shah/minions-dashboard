@@ -15,6 +15,7 @@ import {
   Globe,
   Share2,
   Lock,
+  X,
 } from "lucide-react";
 
 function LoginContent() {
@@ -22,6 +23,32 @@ function LoginContent() {
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const error = searchParams.get("error");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (error) {
+      if (error === "SessionExpired") {
+        setErrorMessage("Your session expired. Please sign in to continue.");
+      } else if (error === "OAuthAccountNotLinked") {
+        setErrorMessage("Email already associated with another provider.");
+      } else {
+        setErrorMessage("Sign-in failed. Please try again.");
+      }
+
+      // Clean the URL query param so reloading the page does NOT show the error again
+      if (typeof window !== "undefined") {
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete("error");
+        window.history.replaceState({}, "", cleanUrl.pathname + (cleanUrl.searchParams.toString() ? `?${cleanUrl.searchParams.toString()}` : ""));
+      }
+
+      // Auto-dismiss after 5 seconds
+      const timer = setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -146,13 +173,21 @@ function LoginContent() {
                 </div>
               </div>
 
-              {/* Error Message */}
-              {error && (
-                <div className="p-3 bg-red-950/50 border border-red-800/60 rounded-xl text-xs text-red-200 flex items-start gap-2 animate-in fade-in duration-200">
-                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                  <div className="text-[11px] text-red-300/90 leading-relaxed">
-                    Sign-in failed. Please try again.
+              {/* Error Message Toast */}
+              {errorMessage && (
+                <div className="p-3 bg-red-950/60 border border-red-800/70 rounded-xl text-xs text-red-200 flex items-center justify-between gap-2 animate-in fade-in zoom-in-95 duration-200 shadow-lg shadow-red-950/40">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                    <span className="text-[11px] text-red-200 leading-snug">
+                      {errorMessage}
+                    </span>
                   </div>
+                  <button
+                    onClick={() => setErrorMessage(null)}
+                    className="p-1 rounded-lg text-red-400 hover:text-white hover:bg-red-900/50 transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               )}
 
