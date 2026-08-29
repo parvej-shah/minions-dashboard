@@ -214,15 +214,6 @@ function LoginContent() {
                 </div>
               </div>
 
-              {/* Trust & Security Footer */}
-              <div className="pt-2 border-t border-[#1F2D3D]/60 flex items-center justify-between text-[10px] font-mono text-[#64748B]">
-                <div className="flex items-center gap-1.5">
-                  <Lock className="w-3 h-3 text-[#00C9A7]" />
-                  <span>Vault Encrypted</span>
-                </div>
-                <span>Verified OAuth 2.0</span>
-              </div>
-
             </div>
           </div>
 
@@ -231,14 +222,11 @@ function LoginContent() {
 
       {/* CLEAN MINIMAL FOOTER */}
       <footer className="relative z-20 w-full max-w-6xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-[#64748B] border-t border-[#1F2D3D]/40">
-        <p>© 2026 Minions.AI Technologies Inc.</p>
-        <div className="flex items-center gap-4">
+        <p>© 2026 Minions.AI</p>
+        <div className="flex items-center gap-3">
           <Link href="/docs" className="hover:text-[#94A3B8] transition-colors">Documentation</Link>
           <span>•</span>
-          <span className="text-emerald-500 flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Systems Normal
-          </span>
+          <Link href="/onboarding" className="hover:text-[#94A3B8] transition-colors">Pricing</Link>
         </div>
       </footer>
     </div>
