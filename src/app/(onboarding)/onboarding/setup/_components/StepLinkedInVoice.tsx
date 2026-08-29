@@ -125,6 +125,24 @@ export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizard
           )}
         </div>
 
+        {/* Manual post paste box until API verification completes */}
+        {isConnected && (
+          <div className="pt-3 border-t border-[#0077b5]/20 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold text-[#94A3B8]">
+                Paste a sample post or profile bio <span className="text-[#64748B] font-normal">(optional until LinkedIn API review completes)</span>:
+              </label>
+            </div>
+            <textarea
+              rows={3}
+              value={wizard.customSampleText}
+              onChange={(e) => wizard.setCustomSampleText(e.target.value)}
+              placeholder='e.g. "Clear systems beat clever strategies every time..." — Paste any post or bio sample to calibrate your voice instantly.'
+              className="w-full rounded-xl bg-[#070B0F] border border-[#1F2D3D] p-3 text-[#F1F5F9] placeholder:text-[#475569] focus:outline-none focus:border-[#00C9A7] text-xs leading-relaxed"
+            />
+          </div>
+        )}
+
         {/* Profile preview card — shown after successful import */}
         {hasImported && profile && (
           <div className="rounded-xl bg-[#0D1520] border border-[#1F2D3D] p-3.5 space-y-3">

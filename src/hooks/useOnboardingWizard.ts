@@ -19,7 +19,9 @@ export interface OnboardingWizardState {
   linkedInProfile: LinkedInProfile | null;
   postSnippet: string | null;
   aiSuggestions: AiSuggestions | null;
-  importLinkedInVoice: () => Promise<void>;
+  customSampleText: string;
+  setCustomSampleText: (val: string) => void;
+  importLinkedInVoice: (overrideText?: string) => Promise<void>;
 
   // Step 1: Company Snapshot
   businessName: string;
@@ -151,10 +153,15 @@ export function useOnboardingWizard(): OnboardingWizardState {
     setChannels((prev) => (prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key]));
   }
 
-  async function importLinkedInVoice() {
+  const [customSampleText, setCustomSampleText] = useState("");
+
+  async function importLinkedInVoice(overrideText?: string) {
     setError(null);
     try {
-      const res: any = await apiClient.post("/api/onboarding/voice-import", {});
+      const textToPass = overrideText !== undefined ? overrideText : customSampleText;
+      const res: any = await apiClient.post("/api/onboarding/voice-import", {
+        customSampleText: textToPass,
+      });
       if (res?.success) {
         setImportedVoiceCount(res.importedCount || 1);
         setLinkedInConnected(true);
@@ -285,6 +292,8 @@ export function useOnboardingWizard(): OnboardingWizardState {
     linkedInProfile,
     postSnippet,
     aiSuggestions,
+    customSampleText,
+    setCustomSampleText,
     importLinkedInVoice,
     mythAnswer,
     setMythAnswer,

@@ -7,8 +7,9 @@ import { apiError, apiFailure } from "@/lib/api-response";
 /**
  * LinkedIn Voice & Profile Importer:
  * Pulls authentic profile info (name, email, picture) from LinkedIn OAuth token.
+ * Accepts an optional custom sample post / bio text pasted by the user for instant tone matching.
  * Generates personalized brand interview suggestions grounded in the user's authentic
- * engineering role and expertise — with ZERO fake post quotes or fake company names.
+ * engineering role and expertise.
  */
 
 export interface LinkedInProfile {
@@ -34,8 +35,8 @@ async function generateSuggestionsWithLLM(
 
   const postsContext =
     postSamples.length > 0
-      ? postSamples.slice(0, 3).map((p, i) => `Post ${i + 1}: "${p.slice(0, 300)}"`).join("\n")
-      : "No post history available.";
+      ? postSamples.slice(0, 3).map((p, i) => `Sample ${i + 1}: "${p.slice(0, 400)}"`).join("\n")
+      : "No sample post provided.";
 
   const prompt = `You are a world-class executive brand strategist calibrating a personalized content engine for an executive during onboarding.
 
@@ -45,11 +46,11 @@ Professional Profile:
 - Role / Headline: ${profile.headline || "Software Engineer & AI Systems Developer | Full-stack systems • Voice AI • Automation"}
 - Company: ${profile.company || "N/A"}
 
-Sample Content / Posts:
+User's Pasted Post / Writing Sample:
 ${postsContext}
 
 Task:
-Generate 3 highly relevant, non-generic suggestions for each of the 3 brand interview questions based on their software engineering, Voice AI, automation, and full-stack systems background.
+Generate 3 highly relevant, non-generic suggestions for each of the 3 brand interview questions based on their writing sample, software engineering, Voice AI, automation, and full-stack systems background.
 
 Return ONLY a single valid JSON object (no markdown, no explanation, no fake company names):
 {
@@ -108,6 +109,9 @@ export async function POST(request: Request) {
   if ("error" in ctx) return ctx.error;
 
   try {
+    const body = await request.json().catch(() => ({}));
+    const customSampleText = (body.customSampleText || "").trim();
+
     const channelRow = await prisma.clientChannel.findUnique({
       where: { clientId_channelKey: { clientId: ctx.clientId, channelKey: "linkedin" } },
     });
@@ -168,8 +172,14 @@ export async function POST(request: Request) {
       headline = "Software Engineer & AI Systems Developer | Full-stack systems • Voice AI • Automation";
     }
 
-    // 3. Sample posts if readable
-    const realPosts: string[] = [];
+    // 3. Sample posts if readable or if manually pasted by user
+    const samplePosts: string[] = [];
+
+    // Prioritise manually pasted custom sample text if provided
+    if (customSampleText.length > 10) {
+      samplePosts.push(customSampleText);
+    }
+
     try {
       if (channelRow.externalId) {
         const postsRes = await fetch(
@@ -190,7 +200,7 @@ export async function POST(request: Request) {
             for (const item of postsData.elements) {
               const text = item.text?.text || item.commentary;
               if (text && text.length > 30) {
-                realPosts.push(text.trim());
+                samplePosts.push(text.trim());
               }
             }
           }
@@ -200,9 +210,9 @@ export async function POST(request: Request) {
       console.warn("[VoiceImport] Post read skipped:", fetchErr);
     }
 
-    const isRealPostImported = realPosts.length > 0;
-    const toneSeeds = isRealPostImported
-      ? realPosts
+    const hasSampleText = samplePosts.length > 0;
+    const toneSeeds = hasSampleText
+      ? samplePosts
       : [
           `Clear systems beat clever strategies every time. When you focus on operational discipline and measurable outcomes, growth becomes predictable.`,
         ];
@@ -213,20 +223,20 @@ export async function POST(request: Request) {
       data: toneSeeds.slice(0, 3).map((content) => ({
         clientId: ctx.clientId,
         content,
-        source: isRealPostImported ? "LINKEDIN_IMPORT" : "DEFAULT_SEED",
+        source: customSampleText.length > 10 ? "MANUAL_PASTE" : hasSampleText ? "LINKEDIN_IMPORT" : "DEFAULT_SEED",
       })),
     });
 
     // 5. Call Qwen LLM over international endpoint
     const profileData: LinkedInProfile = { name: profileName, email: profileEmail, headline, company, profilePicture };
-    const aiSuggestions = await generateSuggestionsWithLLM(profileData, realPosts);
+    const aiSuggestions = await generateSuggestionsWithLLM(profileData, samplePosts);
 
     return NextResponse.json({
       success: true,
       profile: profileData,
-      importedCount: realPosts.length,
-      postSnippet: isRealPostImported ? realPosts[0].slice(0, 160) : null,
-      isRealPostImported,
+      importedCount: samplePosts.length,
+      postSnippet: hasSampleText ? samplePosts[0].slice(0, 160) : null,
+      isRealPostImported: hasSampleText,
       aiSuggestions,
     });
   } catch (error) {
