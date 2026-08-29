@@ -51,13 +51,14 @@ function LoginContent() {
         </Link>
 
         <div className="flex items-center gap-3">
-          <Link
-            href="/onboarding"
-            className="px-4 py-2 rounded-xl bg-[#00C9A7] hover:bg-[#00C9A7]/90 text-[#070B0F] text-xs font-bold transition-all shadow-md shadow-[#00C9A7]/20 flex items-center gap-1.5"
+          <button
+            onClick={handleGoogleSignIn}
+            disabled={isLoading}
+            className="px-4 py-2 rounded-xl bg-[#00C9A7] hover:bg-[#00C9A7]/90 text-[#070B0F] text-xs font-bold transition-all shadow-md shadow-[#00C9A7]/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
           >
-            <span>Start Free Trial</span>
+            <span>{isLoading ? "Connecting…" : "Start Free Trial"}</span>
             <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          </button>
         </div>
       </header>
 
@@ -140,7 +141,7 @@ function LoginContent() {
                     Welcome to Minions.AI
                   </h2>
                   <p className="text-xs text-[#94A3B8] mt-0.5">
-                    Sign in to your autonomous cockpit
+                    Sign in or start your 14-day free trial
                   </p>
                 </div>
               </div>
@@ -150,23 +151,13 @@ function LoginContent() {
                 <div className="p-3 bg-red-950/50 border border-red-800/60 rounded-xl text-xs text-red-200 flex items-start gap-2 animate-in fade-in duration-200">
                   <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
                   <div className="text-[11px] text-red-300/90 leading-relaxed">
-                    {error === "AccessDenied" ? (
-                      <>
-                        No account found for this email. Please{" "}
-                        <Link href="/onboarding" className="underline font-bold text-white">
-                          start a free trial
-                        </Link>{" "}
-                        first to setup your workspace.
-                      </>
-                    ) : (
-                      "Sign-in failed. Please try again."
-                    )}
+                    Sign-in failed. Please try again.
                   </div>
                 </div>
               )}
 
               {/* GOOGLE SIGN IN BUTTON */}
-              <div className="space-y-3">
+              <div className="space-y-3 pt-1">
                 <button
                   onClick={handleGoogleSignIn}
                   disabled={isLoading}
@@ -200,18 +191,9 @@ function LoginContent() {
                   )}
                 </button>
 
-                {/* Free Trial Conversion Box */}
-                <div className="p-3.5 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-center space-y-1">
-                  <p className="text-[11px] text-[#94A3B8]">
-                    New to Minions?
-                  </p>
-                  <Link
-                    href="/onboarding"
-                    className="inline-flex items-center gap-1 text-xs font-bold text-[#00C9A7] hover:underline"
-                  >
-                    <span>Start 14-Day Free Trial →</span>
-                  </Link>
-                </div>
+                <p className="text-[11px] text-center text-[#64748B] pt-1">
+                  Instant access • No credit card required
+                </p>
               </div>
 
             </div>

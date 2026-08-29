@@ -73,12 +73,55 @@ export async function requireClientId(): Promise<
 }
 
 /**
+ * Creates a new Client workspace for a fresh user and attaches it as OWNER.
+ */
+export async function getOrCreateTenant(user: CurrentUser, name?: string): Promise<string> {
+  if (user.clientId) return user.clientId;
+
+  const clientName = name || `${user.email.split("@")[0]}'s Workspace`;
+  const baseSlug = clientName
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 50) || "workspace";
+
+  const slug = `${baseSlug}-${Date.now().toString(36)}`;
+
+  const client = await prisma.client.create({
+    data: {
+      name: clientName,
+      slug,
+      status: "ACTIVE",
+    },
+  });
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { clientId: client.id, role: "OWNER" },
+  });
+
+  await prisma.clientMembership.create({
+    data: {
+      clientId: client.id,
+      userId: user.id,
+      email: user.email,
+      role: "OWNER",
+      acceptedAt: new Date(),
+    },
+  });
+
+  return client.id;
+}
+
+/**
  * For credential-linking and security-sensitive routes: blocks action if the
  * caller is currently viewing via a platform-admin support/impersonation session.
  * Prevents staff from accidentally connecting their personal third-party accounts
  * (LinkedIn, Facebook, etc.) to a customer's workspace.
  */
-export async function requireRealTenantUser(): Promise<
+export async function requireRealTenantUser(autoProvision = false): Promise<
   { clientId: string; user: CurrentUser } | { error: Response }
 > {
   const user = await getCurrentUser();
@@ -98,6 +141,11 @@ export async function requireRealTenantUser(): Promise<
 
   if (user.clientId) {
     return { clientId: user.clientId, user };
+  }
+
+  if (autoProvision) {
+    const clientId = await getOrCreateTenant(user);
+    return { clientId, user: { ...user, clientId, role: "OWNER" } };
   }
 
   return { error: apiFailure("Account is not yet attached to a tenant", 403) };

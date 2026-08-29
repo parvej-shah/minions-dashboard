@@ -68,14 +68,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return true;
       }
 
-      const isPendingSignup = await consumePendingSignup().catch(() => false);
-      if (!isPendingSignup) {
-        console.warn(`[NextAuth] Sign-in blocked, no User row for: ${cleanEmail}`);
-        return false;
-      }
-
-      // clientId stays null until the onboarding wizard's plan-selection
-      // step creates a Client and attaches it — see /api/onboarding/client.
+      // For any new Google user, provision a User row.
+      // If they have no clientId yet, the app automatically routes them into /onboarding/setup.
       await prisma.user.create({
         data: { email: cleanEmail, name: user.name ?? null, role: "MEMBER" },
       });

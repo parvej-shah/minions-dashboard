@@ -76,6 +76,13 @@ export default function DashboardShell({ children }: DashboardShellProps) {
     [router]
   );
 
+  // If a signed-in user has no tenant attached yet, direct them to onboarding setup
+  React.useEffect(() => {
+    if (session?.user && !session.user.clientId && !pathname.startsWith("/onboarding")) {
+      router.replace("/onboarding/setup");
+    }
+  }, [session, pathname, router]);
+
   // Keyboard shortcut: ⌘K opens the palette, Escape closes overlays.
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
