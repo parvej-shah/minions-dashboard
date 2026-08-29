@@ -10,38 +10,18 @@ import {
   ArrowRight,
   AlertCircle,
   CheckCircle2,
-  Share2,
   ShieldCheck,
   Zap,
-  FileText,
   Globe,
-  ImageIcon,
-  ThumbsUp,
-  MessageSquareText,
-  Repeat2,
-  Clock,
-  Flame,
+  Share2,
+  Lock,
 } from "lucide-react";
-
-interface ShowcaseTab {
-  id: "linkedin" | "blog" | "channels";
-  label: string;
-  badge: string;
-  icon: any;
-}
-
-const SHOWCASE_TABS: ShowcaseTab[] = [
-  { id: "linkedin", label: "LinkedIn Ghostwriting", badge: "Executive Voice", icon: Sparkles },
-  { id: "blog", label: "In-Depth Blog Articles", badge: "SEO & Authority", icon: FileText },
-  { id: "channels", label: "Omnichannel Sync", badge: "1-Click Live", icon: Share2 },
-];
 
 function LoginContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const error = searchParams.get("error");
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"linkedin" | "blog" | "channels">("linkedin");
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -55,30 +35,25 @@ function LoginContent() {
 
   return (
     <div className="min-h-screen bg-[#070B0F] text-[#F1F5F9] flex flex-col justify-between relative overflow-hidden selection:bg-[#00C9A7]/20 selection:text-[#00C9A7]">
-      {/* Background Ambient Glows */}
-      <div className="absolute -top-32 left-1/4 w-[650px] h-[500px] bg-gradient-to-tr from-[#00C9A7]/15 via-[#0077b5]/10 to-transparent blur-[140px] pointer-events-none rounded-full animate-pulse" />
-      <div className="absolute -bottom-32 right-1/4 w-[650px] h-[500px] bg-gradient-to-bl from-[#ff6b4a]/15 via-[#8B5CF6]/10 to-transparent blur-[140px] pointer-events-none rounded-full animate-pulse" />
+      {/* Dynamic Background Aura */}
+      <div className="absolute -top-40 left-1/4 w-[500px] h-[400px] bg-[#00C9A7]/10 blur-[130px] pointer-events-none rounded-full" />
+      <div className="absolute -bottom-40 right-1/4 w-[500px] h-[400px] bg-[#0077b5]/10 blur-[130px] pointer-events-none rounded-full" />
 
-      {/* TOP HEADER / BRAND BAR */}
-      <header className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between">
+      {/* NAVIGATION HEADER */}
+      <header className="relative z-20 w-full max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
         <Link href="/" className="flex items-baseline group">
-          <span className="font-extrabold text-2xl sm:text-3xl tracking-tight text-white group-hover:opacity-90 transition-opacity">
+          <span className="font-extrabold text-2xl tracking-tight text-white group-hover:opacity-90 transition-opacity">
             Minions
           </span>
-          <span className="text-[#00C9A7] font-bold text-2xl sm:text-3xl ml-0.5">
+          <span className="text-[#00C9A7] font-bold text-2xl ml-0.5">
             .AI
           </span>
         </Link>
 
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-[#0D1520]/80 border border-[#1F2D3D] backdrop-blur-md text-xs font-mono text-[#94A3B8]">
-            <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
-            <span className="text-white font-semibold">Autonomous Ghostwriter &amp; Content Engine</span>
-          </div>
-
           <Link
             href="/onboarding"
-            className="px-4 py-2 rounded-xl border border-[#00C9A7]/40 bg-[#00C9A7]/10 hover:bg-[#00C9A7]/20 text-[#00C9A7] text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm shadow-[#00C9A7]/20"
+            className="px-4 py-2 rounded-xl bg-[#00C9A7] hover:bg-[#00C9A7]/90 text-[#070B0F] text-xs font-bold transition-all shadow-md shadow-[#00C9A7]/20 flex items-center gap-1.5"
           >
             <span>Start Free Trial</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -86,288 +61,121 @@ function LoginContent() {
         </div>
       </header>
 
-      {/* MAIN VIEWPORT */}
-      <main className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 flex-1 flex items-center justify-center">
-        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center max-w-6xl">
+      {/* MAIN HERO SPLIT */}
+      <main className="relative z-10 w-full max-w-6xl mx-auto px-6 py-4 sm:py-8 flex-1 flex items-center justify-center">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           
-          {/* LEFT COLUMN: WHAT MINIONS ACTUALLY DELIVERS (THE PRODUCT) */}
-          <div className="lg:col-span-7 flex flex-col items-start text-left space-y-5">
+          {/* LEFT COLUMN: CLEAR PRODUCT VALUE PROP */}
+          <div className="lg:col-span-7 flex flex-col items-start space-y-6 text-left">
             
-            {/* Tagline & Core Value Prop */}
-            <div className="space-y-2.5 max-w-xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-xs font-mono font-bold text-[#00C9A7]">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>YOUR 24/7 EXECUTIVE GHOSTWRITER</span>
-              </div>
-              
+            {/* Pill Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-xs font-mono font-bold text-[#00C9A7]">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>YOUR 24/7 AI GHOSTWRITER</span>
+            </div>
+
+            {/* Main Headline */}
+            <div className="space-y-3">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.12]">
-                Never write a LinkedIn post from scratch again.
+                Turn your expertise into high-authority posts &amp; articles.
               </h1>
-              
-              <p className="text-sm sm:text-base text-[#94A3B8] leading-relaxed">
-                Minions turns 15 minutes of weekly review into a continuous stream of high-authority LinkedIn posts, long-form articles, and branded graphics — ghostwritten in your exact voice.
+              <p className="text-sm sm:text-base text-[#94A3B8] leading-relaxed max-w-xl">
+                Minions researches industry trends, ghostwrites fact-checked thought leadership in your exact voice, and broadcasts to your LinkedIn and Blog in 1 click.
               </p>
             </div>
 
-            {/* TAB SELECTOR: WHAT YOU GET */}
-            <div className="flex items-center gap-2 p-1 rounded-xl bg-[#0D1520] border border-[#1F2D3D] w-full sm:w-auto">
-              {SHOWCASE_TABS.map((tab) => {
-                const Icon = tab.icon;
-                const active = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                      active
-                        ? "bg-[#00C9A7] text-[#070B0F] shadow-md shadow-[#00C9A7]/20"
-                        : "text-[#94A3B8] hover:text-white"
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* PRODUCT ARTIFACT SHOWCASE MOCKUP */}
-            <div className="w-full rounded-2xl bg-[#0D1520] border border-[#1F2D3D] shadow-2xl p-5 space-y-4 relative overflow-hidden">
-              
-              {activeTab === "linkedin" && (
-                <div className="space-y-3.5 animate-in fade-in duration-200">
-                  {/* Author Header */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#0077b5] to-[#00C9A7] flex items-center justify-center font-bold text-white text-sm">
-                        PS
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-[#F1F5F9] flex items-center gap-1.5">
-                          <span>Parvej Shah</span>
-                          <span className="text-[10px] font-normal text-[#94A3B8]">• 1st</span>
-                          <span className="px-1.5 py-0.2 rounded bg-[#0077b5]/20 text-[#0077b5] text-[9px] font-mono font-bold">PRO</span>
-                        </div>
-                        <div className="text-[11px] text-[#94A3B8] line-clamp-1">
-                          Building Autonomous Multi-Agent Systems • Founder @ Minions
-                        </div>
-                        <div className="text-[10px] text-[#64748B] flex items-center gap-1 mt-0.5">
-                          <Clock className="w-2.5 h-2.5" /> 2h • 🌐 Public
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> Fact-Checked
-                    </div>
-                  </div>
-
-                  {/* Post Copy */}
-                  <div className="text-xs text-[#E2E8F0] space-y-2 leading-relaxed">
-                    <p className="font-semibold text-white">
-                      Stop Migrating History: The Data Forensics Protocol for High-Stakes Migrations.
-                    </p>
-                    <p className="text-[#94A3B8]">
-                      Most systems migrations fail not because the destination software is flawed, but because teams attempt to migrate 10 years of dirty transactional history.
-                    </p>
-                    <div className="p-3 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-[11px] font-mono space-y-1">
-                      <div className="text-[#00C9A7]">✦ Phase 1: Clean master data snapshot</div>
-                      <div className="text-[#00C9A7]">✦ Phase 2: Cut over active orders with verified schema</div>
-                      <div className="text-[#00C9A7]">✦ Phase 3: Archive legacy DB to cold read-only storage</div>
-                    </div>
-                  </div>
-
-                  {/* 16:9 Studio Cover Image Mockup */}
-                  <div className="relative rounded-xl overflow-hidden aspect-[16/8] bg-gradient-to-br from-[#121B27] via-[#070B0F] to-[#162736] border border-[#1F2D3D] flex flex-col justify-end p-4">
-                    <div className="absolute inset-0 bg-[radial-gradient(#00C9A7_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
-                    <div className="relative z-10 space-y-1">
-                      <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-[#00C9A7] text-[#070B0F] font-extrabold uppercase">
-                        Architecture Blueprint
-                      </span>
-                      <h4 className="text-xs sm:text-sm font-bold text-white">
-                        Deterministic Migration Pipeline • Zero Downtime
-                      </h4>
-                    </div>
-                  </div>
-
-                  {/* Social Engagement Stats */}
-                  <div className="pt-2 border-t border-[#1F2D3D]/60 flex items-center justify-between text-[11px] text-[#64748B]">
-                    <div className="flex items-center gap-4">
-                      <span className="flex items-center gap-1 hover:text-white cursor-pointer"><ThumbsUp className="w-3.5 h-3.5 text-[#0077b5]" /> 184 Likes</span>
-                      <span className="flex items-center gap-1 hover:text-white cursor-pointer"><MessageSquareText className="w-3.5 h-3.5 text-[#00C9A7]" /> 42 Comments</span>
-                      <span className="flex items-center gap-1 hover:text-white cursor-pointer"><Repeat2 className="w-3.5 h-3.5 text-amber-400" /> 19 Reposts</span>
-                    </div>
-                    <span className="text-[#00C9A7] font-semibold">1-Click Approved ✓</span>
-                  </div>
+            {/* 3 Clear Value Pillars */}
+            <div className="space-y-3.5 w-full pt-1">
+              <div className="flex items-start gap-3.5 p-3 rounded-xl bg-[#0D1520]/60 border border-[#1F2D3D]/80">
+                <div className="w-8 h-8 rounded-lg bg-[#00C9A7]/10 border border-[#00C9A7]/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Zap className="w-4 h-4 text-[#00C9A7]" />
                 </div>
-              )}
-
-              {activeTab === "blog" && (
-                <div className="space-y-3.5 animate-in fade-in duration-200">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono px-2.5 py-0.5 rounded bg-[#161D26] text-[#00C9A7] border border-[#00C9A7]/30">
-                      LONG-FORM TECHNICAL ARTICLE (1,200 WORDS)
-                    </span>
-                    <span className="text-[11px] text-[#94A3B8] font-mono">4 Min Read</span>
-                  </div>
-
-                  <h3 className="text-base sm:text-lg font-extrabold text-white">
-                    Why Deterministic Schema Validation Replaces Prompt Engineering in 2026
-                  </h3>
-
-                  <p className="text-xs text-[#94A3B8] leading-relaxed line-clamp-3">
-                    As LLMs grow in capability, the biggest engineering trap is attempting to guide complex multi-step agents using natural language prompts alone. When scale demands 99.9% uptime, compile-time schema contracts become mandatory.
+                <div>
+                  <h3 className="text-xs font-bold text-[#F1F5F9]">Ghostwritten in Your True Voice</h3>
+                  <p className="text-[11px] text-[#94A3B8] mt-0.5">
+                    Calibrates against your real writing habits, sentence cadence, and personal perspective.
                   </p>
-
-                  <div className="grid grid-cols-3 gap-2 pt-2">
-                    <div className="p-2.5 rounded-lg bg-[#070B0F] border border-[#1F2D3D] text-center">
-                      <div className="text-sm font-bold text-[#00C9A7]">100%</div>
-                      <div className="text-[10px] text-[#64748B]">Audited Sources</div>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-[#070B0F] border border-[#1F2D3D] text-center">
-                      <div className="text-sm font-bold text-amber-400">SEO Ready</div>
-                      <div className="text-[10px] text-[#64748B]">Meta Tags &amp; Slug</div>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-[#070B0F] border border-[#1F2D3D] text-center">
-                      <div className="text-sm font-bold text-[#0077b5]">Custom Hook</div>
-                      <div className="text-[10px] text-[#64748B]">Self-Hosted Blog</div>
-                    </div>
-                  </div>
                 </div>
-              )}
+              </div>
 
-              {activeTab === "channels" && (
-                <div className="space-y-3.5 animate-in fade-in duration-200">
-                  <div className="text-xs font-semibold text-white">
-                    Simultaneous 1-Click Broadcast Destinations
-                  </div>
-                  <p className="text-xs text-[#94A3B8]">
-                    Approve once in your Editorial Studio. Minions formats and publishes directly to all your active channels:
+              <div className="flex items-start gap-3.5 p-3 rounded-xl bg-[#0D1520]/60 border border-[#1F2D3D]/80">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-[#F1F5F9]">Deterministic Fact-Checking Gate</h3>
+                  <p className="text-[11px] text-[#94A3B8] mt-0.5">
+                    Every statistic, customer claim, and technical metric is strictly audited before review.
                   </p>
-
-                  <div className="grid grid-cols-2 gap-3 pt-1">
-                    <div className="p-3 rounded-xl bg-[#070B0F] border border-[#0077b5]/30 flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-[#0077b5] flex items-center justify-center text-white font-bold text-xs">in</div>
-                      <div>
-                        <div className="text-xs font-bold text-white">LinkedIn</div>
-                        <div className="text-[10px] text-emerald-400 font-mono">Personal + Page</div>
-                      </div>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-[#070B0F] border border-[#00C9A7]/30 flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-[#00C9A7] flex items-center justify-center text-[#070B0F] font-bold text-xs"><Globe className="w-4 h-4" /></div>
-                      <div>
-                        <div className="text-xs font-bold text-white">Company Blog</div>
-                        <div className="text-[10px] text-emerald-400 font-mono">Direct Webhook / CMS</div>
-                      </div>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-[#070B0F] border border-blue-500/30 flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xs">f</div>
-                      <div>
-                        <div className="text-xs font-bold text-white">Facebook</div>
-                        <div className="text-[10px] text-emerald-400 font-mono">Photo &amp; Timeline</div>
-                      </div>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-[#070B0F] border border-slate-700 flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white font-bold text-xs font-serif">𝕏</div>
-                      <div>
-                        <div className="text-xs font-bold text-white">X / Twitter</div>
-                        <div className="text-[10px] text-emerald-400 font-mono">Threads &amp; Hooks</div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
-              )}
+              </div>
 
-            </div>
-
-            {/* 4 CORE VALUE PILLS */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full text-[11px] font-mono">
-              <div className="p-2.5 rounded-xl bg-[#0D1520] border border-[#1F2D3D] flex items-center gap-2">
-                <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span className="text-[#94A3B8]">True Voice Match</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-[#0D1520] border border-[#1F2D3D] flex items-center gap-2">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span className="text-[#94A3B8]">Zero Hallucinations</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-[#0D1520] border border-[#1F2D3D] flex items-center gap-2">
-                <ImageIcon className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
-                <span className="text-[#94A3B8]">16:9 Cover Art</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-[#0D1520] border border-[#1F2D3D] flex items-center gap-2">
-                <Clock className="w-3.5 h-3.5 text-[#0077b5] shrink-0" />
-                <span className="text-[#94A3B8]">15 Mins / Week</span>
+              <div className="flex items-start gap-3.5 p-3 rounded-xl bg-[#0D1520]/60 border border-[#1F2D3D]/80">
+                <div className="w-8 h-8 rounded-lg bg-[#0077b5]/10 border border-[#0077b5]/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Share2 className="w-4 h-4 text-[#0077b5]" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-[#F1F5F9]">1-Click Omnichannel Broadcast</h3>
+                  <p className="text-[11px] text-[#94A3B8] mt-0.5">
+                    Publishes instantly to your LinkedIn Profile, Company Page, and self-hosted Blog.
+                  </p>
+                </div>
               </div>
             </div>
 
           </div>
 
-          {/* RIGHT COLUMN: AUTHENTICATION & TRIAL CARD */}
+          {/* RIGHT COLUMN: ELEVATED, CLEAN AUTH CARD */}
           <div className="lg:col-span-5 w-full flex justify-center lg:justify-end">
-            <div className="w-full max-w-md bg-[#0D1520]/95 backdrop-blur-3xl border border-[#1F2D3D] ring-1 ring-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/90 space-y-6 relative overflow-hidden">
+            <div className="w-full max-w-sm bg-[#0D1520] border border-[#1F2D3D] ring-1 ring-white/5 rounded-3xl p-6 sm:p-7 shadow-2xl shadow-black/80 space-y-5 relative">
               
-              {/* Card Ambient Glow */}
-              <div className="absolute top-0 right-0 w-36 h-36 bg-[#00C9A7]/10 blur-3xl pointer-events-none rounded-full" />
-              <div className="absolute bottom-0 left-0 w-36 h-36 bg-[#0077b5]/10 blur-3xl pointer-events-none rounded-full" />
-
-              {/* Logo / Header */}
-              <div className="flex flex-col items-center text-center space-y-3 pb-1">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#12242a] via-[#0D1520] to-[#070B0F] border-2 border-[#00C9A7]/40 flex items-center justify-center shadow-xl shadow-[#00C9A7]/10 relative group">
-                  <Image src="/icon.svg" alt="Minions.AI" width={44} height={44} className="w-10 h-10" />
-                  <div className="absolute -inset-1 bg-gradient-to-r from-[#00C9A7]/30 to-[#0077b5]/30 rounded-2xl blur-lg opacity-40 -z-10" />
+              {/* Header */}
+              <div className="flex flex-col items-center text-center space-y-2.5">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#12242a] via-[#0D1520] to-[#070B0F] border border-[#00C9A7]/40 flex items-center justify-center shadow-lg shadow-[#00C9A7]/10">
+                  <Image src="/icon.svg" alt="Minions.AI" width={36} height={36} className="w-8 h-8" />
                 </div>
                 
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight flex items-baseline justify-center">
-                    <span>Minions</span>
-                    <span className="text-[#00C9A7] ml-0.5">.AI</span>
-                    <span className="text-slate-400 text-xs ml-2 font-mono font-normal">Cockpit</span>
+                  <h2 className="text-lg font-bold text-white tracking-tight">
+                    Welcome to Minions.AI
                   </h2>
-                  <p className="text-xs text-[#94A3B8] mt-1">
-                    Sign in to command your content engine
+                  <p className="text-xs text-[#94A3B8] mt-0.5">
+                    Sign in to your autonomous cockpit
                   </p>
                 </div>
               </div>
 
-              {/* Error Alert */}
+              {/* Error Message */}
               {error && (
-                <div className="p-3.5 bg-red-950/50 border border-red-800/60 rounded-2xl text-xs text-red-200 flex items-start gap-2.5 animate-in fade-in duration-200">
+                <div className="p-3 bg-red-950/50 border border-red-800/60 rounded-xl text-xs text-red-200 flex items-start gap-2 animate-in fade-in duration-200">
                   <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                  <div className="space-y-0.5">
-                    <div className="font-semibold text-red-300">Access Restricted</div>
-                    <div className="text-red-300/80 leading-relaxed text-[11px]">
-                      {error === "AccessDenied" ? (
-                        <>
-                          We don&apos;t recognize this Google account yet. If you&apos;re joining an
-                          existing team, ask your workspace owner to invite you — otherwise,{" "}
-                          <Link href="/onboarding" className="underline hover:text-red-200 font-semibold">
-                            start a free trial
-                          </Link>{" "}
-                          to set up your own workspace in 2 minutes.
-                        </>
-                      ) : (
-                        "Authentication failed. Please verify your credentials and try again."
-                      )}
-                    </div>
+                  <div className="text-[11px] text-red-300/90 leading-relaxed">
+                    {error === "AccessDenied" ? (
+                      <>
+                        No account found for this email. Please{" "}
+                        <Link href="/onboarding" className="underline font-bold text-white">
+                          start a free trial
+                        </Link>{" "}
+                        first to setup your workspace.
+                      </>
+                    ) : (
+                      "Sign-in failed. Please try again."
+                    )}
                   </div>
                 </div>
               )}
 
               {/* GOOGLE SIGN IN BUTTON */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <button
                   onClick={handleGoogleSignIn}
                   disabled={isLoading}
-                  className="w-full py-4 px-5 bg-white hover:bg-slate-100 active:scale-[0.98] text-[#070B0F] font-bold text-sm rounded-2xl transition-all shadow-xl hover:shadow-white/20 flex items-center justify-center gap-3.5 cursor-pointer disabled:opacity-60 group border border-slate-200"
+                  className="w-full py-3.5 px-4 bg-white hover:bg-slate-100 active:scale-[0.98] text-[#070B0F] font-bold text-xs sm:text-sm rounded-xl transition-all shadow-lg hover:shadow-white/20 flex items-center justify-center gap-3 cursor-pointer disabled:opacity-60 group border border-slate-200"
                 >
                   {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-[#070B0F] border-t-transparent rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-[#070B0F] border-t-transparent rounded-full animate-spin" />
                   ) : (
-                    <svg className="w-5 h-5 shrink-0 group-hover:scale-105 transition-transform" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 shrink-0 group-hover:scale-105 transition-transform" viewBox="0 0 24 24">
                       <path
                         fill="#4285F4"
                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -386,36 +194,33 @@ function LoginContent() {
                       />
                     </svg>
                   )}
-                  <span className="text-sm font-bold">
-                    {isLoading ? "Connecting..." : "Continue with Google"}
-                  </span>
+                  <span>{isLoading ? "Connecting..." : "Continue with Google"}</span>
                   {!isLoading && (
-                    <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-black group-hover:translate-x-0.5 transition-all ml-auto" />
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-black group-hover:translate-x-0.5 transition-all ml-auto" />
                   )}
                 </button>
 
-                {/* Free Trial Banner for New Visitors */}
-                <div className="p-4 rounded-2xl bg-[#070B0F]/80 border border-[#1F2D3D] text-center space-y-2">
-                  <p className="text-xs text-[#94A3B8]">
-                    New to Minions? Try it free for 14 days.
+                {/* Free Trial Conversion Box */}
+                <div className="p-3.5 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-center space-y-1">
+                  <p className="text-[11px] text-[#94A3B8]">
+                    New to Minions?
                   </p>
                   <Link
                     href="/onboarding"
-                    className="inline-flex items-center gap-2 text-xs font-bold text-[#00C9A7] hover:underline"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#00C9A7] hover:underline"
                   >
-                    <span>Build Your Brand Engine in 2 Mins</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    <span>Start 14-Day Free Trial →</span>
                   </Link>
                 </div>
               </div>
 
-              {/* Security & System Highlights */}
-              <div className="pt-2 flex items-center justify-between text-[11px] text-[#64748B] border-t border-[#1F2D3D]">
+              {/* Trust & Security Footer */}
+              <div className="pt-2 border-t border-[#1F2D3D]/60 flex items-center justify-between text-[10px] font-mono text-[#64748B]">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span>Verified OAuth 2.0</span>
+                  <Lock className="w-3 h-3 text-[#00C9A7]" />
+                  <span>Vault Encrypted</span>
                 </div>
-                <span className="font-mono text-[10px] text-[#475569]">Supabase Vault Encrypted</span>
+                <span>Verified OAuth 2.0</span>
               </div>
 
             </div>
@@ -424,9 +229,17 @@ function LoginContent() {
         </div>
       </main>
 
-      {/* FOOTER */}
-      <footer className="relative z-20 w-full max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-center gap-2 text-xs text-[#64748B] border-t border-[#1F2D3D]/50">
-        <p>© 2026 Minions.AI Technologies Inc. Autonomous Ghostwriting &amp; Thought-Leadership.</p>
+      {/* CLEAN MINIMAL FOOTER */}
+      <footer className="relative z-20 w-full max-w-6xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-[#64748B] border-t border-[#1F2D3D]/40">
+        <p>© 2026 Minions.AI Technologies Inc.</p>
+        <div className="flex items-center gap-4">
+          <Link href="/docs" className="hover:text-[#94A3B8] transition-colors">Documentation</Link>
+          <span>•</span>
+          <span className="text-emerald-500 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Systems Normal
+          </span>
+        </div>
       </footer>
     </div>
   );
