@@ -1,21 +1,17 @@
+/**
+ * Collapsed from a 17-value taxonomy (IDENTITY/ICP_PROFILE/ICP_PAIN/POSITIONING/
+ * PROOF/OBJECTION/VOICE_DO/VOICE_DONT/CTA/PEER_STANCE/EDITORIAL_PHILOSOPHY/
+ * CONTENT_THEMES/AUDIENCE_LANES/CONTENT_RULES/WRITING_STYLE/BRAND_PERSONA) down
+ * to 5 plain buckets. Only FORBIDDEN is functionally special-cased anywhere
+ * (merged into tone_guidelines.banned_lexicon) -- every other category was
+ * just a display label, so consolidating them is a pure UI simplification.
+ */
 export type BrandCategory =
-  | "IDENTITY"
-  | "ICP_PROFILE"
-  | "ICP_PAIN"
   | "POSITIONING"
-  | "PROOF"
-  | "OBJECTION"
-  | "VOICE_DO"
-  | "VOICE_DONT"
-  | "FORBIDDEN"
-  | "CTA"
-  | "PEER_STANCE"
-  | "EDITORIAL_PHILOSOPHY"
-  | "CONTENT_THEMES"
-  | "AUDIENCE_LANES"
-  | "CONTENT_RULES"
-  | "WRITING_STYLE"
-  | "BRAND_PERSONA";
+  | "TOPICS"
+  | "AUDIENCE"
+  | "VOICE"
+  | "FORBIDDEN";
 
 export type AudienceScope = "ALL" | "ICP" | "PEER" | "BRIDGE";
 
@@ -105,4 +101,4 @@ export interface BrandProfileInput {
   visual_assets?: VisualAssets;
 }
 
-export type BrandTab = "visuals" | "mascots" | "social" | "directives" | "lexicon" | "profile";
+export type BrandTab = "overview" | "visuals" | "mascots" | "social" | "directives" | "lexicon" | "profile";

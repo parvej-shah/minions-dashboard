@@ -14,7 +14,7 @@ interface CopilotInput {
 }
 
 export interface GeneratedDirective {
-  category: "EDITORIAL_PILLARS" | "VOICE_AND_STYLE" | "SAFETY_GUARDRAILS";
+  category: "POSITIONING" | "VOICE" | "FORBIDDEN";
   rule_key: string;
   instruction: string;
   priority: number;
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
     // 1. Core Editorial Positioning Directive
     directives.push({
-      category: "EDITORIAL_PILLARS",
+      category: "POSITIONING",
       rule_key: "CORE_POSITIONING_PERSPECTIVE",
       instruction: `Position ${businessName} as an authoritative, grounded voice in ${industry}. Focus on practical realities and tangible outcomes over generic theory.`,
       priority: 1,
@@ -56,14 +56,14 @@ export async function POST(request: Request) {
     // 2. The Differentiator Directive (from user's real answer)
     if (differentiator) {
       directives.push({
-        category: "EDITORIAL_PILLARS",
+        category: "POSITIONING",
         rule_key: "UNIQUE_VALUE_PROPOSITION",
         instruction: `Highlight ${businessName}'s key differentiator: "${differentiator}". Anchor proof points and arguments around this operational strength.`,
         priority: 1,
       });
     } else {
       directives.push({
-        category: "EDITORIAL_PILLARS",
+        category: "POSITIONING",
         rule_key: "UNIQUE_VALUE_PROPOSITION",
         instruction: `Emphasize verifiable execution, fast turnaround times, and transparent communication in all case studies.`,
         priority: 1,
@@ -73,14 +73,14 @@ export async function POST(request: Request) {
     // 3. The Contrarian / Myth Directive (from user's real answer)
     if (myth) {
       directives.push({
-        category: "VOICE_AND_STYLE",
+        category: "VOICE",
         rule_key: "DEBUNK_INDUSTRY_MYTHS",
         instruction: `Actively challenge the common industry misconception: "${myth}". Contrast flawed traditional approaches with our proven modern methodology.`,
         priority: 2,
       });
     } else {
       directives.push({
-        category: "VOICE_AND_STYLE",
+        category: "VOICE",
         rule_key: "DEBUNK_INDUSTRY_MYTHS",
         instruction: `Call out low-quality industry shortcuts, hidden costs, and common pitfalls that clients frequently encounter.`,
         priority: 2,
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
 
     // 4. Voice & Tone Cadence Directive
     directives.push({
-      category: "VOICE_AND_STYLE",
+      category: "VOICE",
       rule_key: "PROSE_CADENCE_AND_RHYTHM",
       instruction: `Write in concise 1–3 sentence paragraphs. Keep the tone ${preset.toneFormality.replace("_", " ")}. Use punchy hooks and clear actionable takeaways.`,
       priority: 2,
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
     // 5. Safety & Forbidden Topics Directive (from user's red lines)
     if (avoid) {
       directives.push({
-        category: "SAFETY_GUARDRAILS",
+        category: "FORBIDDEN",
         rule_key: "STRICT_CONTENT_BOUNDARIES",
         instruction: `FORBIDDEN: Never mention, promise, or discuss: "${avoid}". Keep all statements strictly within verified capabilities.`,
         priority: 1,
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
     // 6. Universal Anti-Fluff & Buzzword Safety Directive
     const forbiddenList = preset.forbiddenWords.slice(0, 8).join(", ");
     directives.push({
-      category: "SAFETY_GUARDRAILS",
+      category: "FORBIDDEN",
       rule_key: "ANTI_FLUFF_VOCABULARY_FILTER",
       instruction: `FORBIDDEN BUZZWORDS: Never use empty marketing buzzwords such as: ${forbiddenList}. State facts directly with zero corporate filler.`,
       priority: 1,

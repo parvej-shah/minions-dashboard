@@ -14,55 +14,38 @@ export interface CategoryMeta {
   example: string;
 }
 
+/**
+ * Collapsed to 5 plain categories -- see the BrandCategory comment in
+ * src/types/brand.ts for why this is safe to consolidate.
+ */
 export const CATEGORIES: CategoryMeta[] = [
   {
-    label: "Identity & Name",
-    value: "IDENTITY",
-    desc: "Core brand identity, official naming rules, and positioning definitions.",
+    label: "Positioning",
+    value: "POSITIONING",
+    desc: "Who you are, your identity, differentiators, proof points, and brand persona.",
     stage: "Strategist & Writer",
-    example: "Brand name is 'Minions AI' (with space), never lowercase or dot-com.",
+    example: "Deterministic schema validation and sub-second multi-agent orchestration set us apart.",
   },
   {
-    label: "Editorial Philosophy",
-    value: "EDITORIAL_PHILOSOPHY",
-    desc: "Guiding thesis and analytical worldview used to evaluate and frame candidate topics.",
-    stage: "Harvester & Strategist",
-    example: "Never create content just because something happened; analyze second-order effects.",
-  },
-  {
-    label: "Content Themes",
-    value: "CONTENT_THEMES",
-    desc: "Core subject pillars and domain topics the AI is authorized to harvest.",
+    label: "Topics",
+    value: "TOPICS",
+    desc: "Core subject pillars and domain topics the AI is authorized to harvest and write about.",
     stage: "Harvester Agent",
     example: "Multi-Agent Orchestration, ERP Migrations, Voice AI Latency.",
   },
   {
-    label: "Audience Lanes",
-    value: "AUDIENCE_LANES",
-    desc: "Target buyer personas and reader profiles (e.g. Builders vs Operators).",
+    label: "Audience",
+    value: "AUDIENCE",
+    desc: "Who you're reaching -- target buyer personas and reader profiles.",
     stage: "Harvester & Strategist",
     example: "Lane A: Senior Backend Engineers. Lane B: VPs of Operations.",
   },
   {
-    label: "Brand Persona",
-    value: "BRAND_PERSONA",
-    desc: "The author's posture, personality, tone of voice, and relationship with the reader.",
-    stage: "Strategist & Writer",
-    example: "Curious software engineer exploring tradeoffs ('Come explore with me', not a guru).",
-  },
-  {
-    label: "Voice DOs",
-    value: "VOICE_DO",
-    desc: "Sentence rhythm, vocabulary standards, and positive stylistic requirements.",
+    label: "Voice",
+    value: "VOICE",
+    desc: "How you sound: editorial philosophy, sentence rhythm, style rules, and CTAs.",
     stage: "Writer & Editor",
-    example: "1-3 sentence paragraph cadence, grounded engineering observations.",
-  },
-  {
-    label: "Voice DONTs",
-    value: "VOICE_DONT",
-    desc: "Stylistic antipatterns, banned tone attitudes, and marketing fluff to avoid.",
-    stage: "Writer & Editor",
-    example: "Never use corporate jargon, exclamation marks, or fake urgency.",
+    example: "1-3 sentence paragraph cadence, grounded engineering observations, no corporate jargon.",
   },
   {
     label: "Forbidden & Banned",
@@ -70,48 +53,6 @@ export const CATEGORIES: CategoryMeta[] = [
     desc: "Strictly blacklisted words and buzzwords scanned and blocked by code.",
     stage: "Deterministic Gate",
     example: "'Dogma', 'Undeniable truth', 'Revolutionary', 'Seamless', 'DM me for template'.",
-  },
-  {
-    label: "Allowed Proof",
-    value: "PROOF",
-    desc: "Verifiable technical claims, customer results, and benchmark facts.",
-    stage: "Claims Gate",
-    example: "Native Odoo model inheritance eliminates custom Python regression risk.",
-  },
-  {
-    label: "Writing Style",
-    value: "WRITING_STYLE",
-    desc: "Formatting rules, structural subheadings, and markdown layout constraints.",
-    stage: "Writer & Editor",
-    example: "Use ## subheadings every 200 words, no em-dashes, clear bullet takeaways.",
-  },
-  {
-    label: "ICP Pain Points",
-    value: "ICP_PAIN",
-    desc: "Real operational friction and daily frustrations lived by your target reader.",
-    stage: "Strategist & Writer",
-    example: "14-hour migration script freezes due to dirty historical transaction schemas.",
-  },
-  {
-    label: "Peer Stance",
-    value: "PEER_STANCE",
-    desc: "Nuanced technical opinions and counterintuitive industry perspectives.",
-    stage: "Strategist Agent",
-    example: "Deterministic state machines outperform vector search in transactional agent loops.",
-  },
-  {
-    label: "Objections",
-    value: "OBJECTION",
-    desc: "Common reader skepticism and counter-arguments to dismantle in the body text.",
-    stage: "Strategist & Editor",
-    example: "'Isn't building custom code faster than adopting vanilla constraints?'",
-  },
-  {
-    label: "Calls to Action",
-    value: "CTA",
-    desc: "Approved closing invitations, discussion prompts, and conversion actions.",
-    stage: "Writer & Social",
-    example: "Invite readers to benchmark their ERP TCO or discuss architectural tradeoffs.",
   },
 ];
 

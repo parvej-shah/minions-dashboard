@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       {
         id: `DIR-${crypto.randomUUID()}`,
         clientId: ctx.clientId,
-        category: "EDITORIAL_PHILOSOPHY",
+        category: "VOICE",
         ruleKey: "core_philosophy",
         instruction: preset.corePhilosophy,
         priority: 1,
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       {
         id: `DIR-${crypto.randomUUID()}`,
         clientId: ctx.clientId,
-        category: "CONTENT_THEMES",
+        category: "TOPICS",
         ruleKey: "core_themes",
         instruction: preset.coreThemes,
         priority: 2,
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       directivesToCreate.push({
         id: `DIR-${crypto.randomUUID()}`,
         clientId: ctx.clientId,
-        category: "AUDIENCE_LANES",
+        category: "AUDIENCE",
         ruleKey: "lane_builders",
         instruction: preset.audienceLanes.builders,
         priority: 3,
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
       directivesToCreate.push({
         id: `DIR-${crypto.randomUUID()}`,
         clientId: ctx.clientId,
-        category: "AUDIENCE_LANES",
+        category: "AUDIENCE",
         ruleKey: "lane_business",
         instruction: preset.audienceLanes.business,
         priority: 3,

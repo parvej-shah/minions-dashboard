@@ -9,7 +9,7 @@ import { BRAND_PRESETS } from "@/constants/brandPresets";
  * ICP/industry/tone-formality/channel step of onboarding. Writes:
  * - BrandProfile.positioning (upserted, the one-line "who we serve" pitch
  *   the pipeline's prompts read via /api/brand/context)
- * - BrandDirective rows: ICP_PROFILE, IDENTITY, EDITORIAL_PHILOSOPHY, CONTENT_THEMES, etc.
+ * - BrandDirective rows: AUDIENCE, POSITIONING, VOICE, TOPICS, etc.
  * - ClientChannel rows, one per selected platform (blog/facebook/linkedin/x)
  */
 export async function POST(request: Request) {
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
       {
         id: `DIR-${crypto.randomUUID()}`,
         clientId: ctx.clientId,
-        category: "ICP_PROFILE",
+        category: "AUDIENCE",
         ruleKey: "icp_description",
         instruction: `Industry: ${industry}. Target Audience: ${icpDescription}`,
         priority: 1,
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
       directivesToCreate.push({
         id: `DIR-${crypto.randomUUID()}`,
         clientId: ctx.clientId,
-        category: "IDENTITY",
+        category: "POSITIONING",
         ruleKey: "company_name",
         instruction: client.name,
         priority: 1,
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
       directivesToCreate.push({
         id: `DIR-${crypto.randomUUID()}`,
         clientId: ctx.clientId,
-        category: "EDITORIAL_PHILOSOPHY",
+        category: "VOICE",
         ruleKey: "core_philosophy",
         instruction: matchedPreset.corePhilosophy,
         priority: 1,
@@ -119,7 +119,7 @@ export async function POST(request: Request) {
       directivesToCreate.push({
         id: `DIR-${crypto.randomUUID()}`,
         clientId: ctx.clientId,
-        category: "CONTENT_THEMES",
+        category: "TOPICS",
         ruleKey: "core_themes",
         instruction: matchedPreset.coreThemes,
         priority: 2,
@@ -131,7 +131,7 @@ export async function POST(request: Request) {
         directivesToCreate.push({
           id: `DIR-${crypto.randomUUID()}`,
           clientId: ctx.clientId,
-          category: "AUDIENCE_LANES",
+          category: "AUDIENCE",
           ruleKey: "lane_builders",
           instruction: matchedPreset.audienceLanes.builders,
           priority: 3,
@@ -144,7 +144,7 @@ export async function POST(request: Request) {
         directivesToCreate.push({
           id: `DIR-${crypto.randomUUID()}`,
           clientId: ctx.clientId,
-          category: "AUDIENCE_LANES",
+          category: "AUDIENCE",
           ruleKey: "lane_business",
           instruction: matchedPreset.audienceLanes.business,
           priority: 3,

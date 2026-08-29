@@ -18,7 +18,7 @@ import type { AgentWorkerItem, BrandDirectiveItem } from "@/types";
 export const DEMO_BRAND_DIRECTIVES: BrandDirectiveItem[] = [
   {
     id: "DIR-001",
-    category: "IDENTITY",
+    category: "POSITIONING",
     key: "company_name",
     content: "getminions.ai — one word, lowercase, .ai suffix. Never 'Geminions', 'GetMinions', 'Minions.AI' in body text, or 'MinionOps'.",
     priority: 1,
@@ -28,7 +28,7 @@ export const DEMO_BRAND_DIRECTIVES: BrandDirectiveItem[] = [
   },
   {
     id: "DIR-002",
-    category: "IDENTITY",
+    category: "POSITIONING",
     key: "what_we_are",
     content: "An AI operations partner for US home-services businesses with 1–10 techs. Not a generic software vendor. Not a chatbot company.",
     priority: 1,
@@ -68,7 +68,7 @@ export const DEMO_BRAND_DIRECTIVES: BrandDirectiveItem[] = [
   },
   {
     id: "DIR-006",
-    category: "PROOF",
+    category: "POSITIONING",
     key: "allowed_claims",
     content: "We may only claim: (1) a live callable AI voice demo number, (2) a working RAG chatbot on getminions.ai, (3) our own technical build experience. All framed as 'what we built', never client delivery.",
     priority: 1,
@@ -78,7 +78,7 @@ export const DEMO_BRAND_DIRECTIVES: BrandDirectiveItem[] = [
   },
   {
     id: "DIR-007",
-    category: "ICP_PAIN",
+    category: "AUDIENCE",
     key: "attic_thermal_leak",
     content: "Texas/Florida attics reach 130°F+ in summer. Dispatching techs without diagnostic telemetry results in 2.5-hour warranty callbacks and technician overtime burn.",
     priority: 2,
@@ -88,7 +88,7 @@ export const DEMO_BRAND_DIRECTIVES: BrandDirectiveItem[] = [
   },
   {
     id: "DIR-008",
-    category: "ICP_PAIN",
+    category: "AUDIENCE",
     key: "after_hours_voicemail",
     content: "78% of emergency HVAC/plumbing callers hang up on voicemail and call the next contractor on Google. Sub-1.8s automated voice pickup captures $3,000 emergency jobs.",
     priority: 2,
@@ -98,7 +98,7 @@ export const DEMO_BRAND_DIRECTIVES: BrandDirectiveItem[] = [
   },
   {
     id: "DIR-009",
-    category: "VOICE_DO",
+    category: "VOICE",
     key: "linear_stripe_cadence",
     content: "Short sentences (1–3 per paragraph). Tactile concrete operator details (gauges, R-410A refrigerant, ServiceTitan locks, WebSocket packet buffers). State assertions directly.",
     priority: 1,
@@ -108,7 +108,7 @@ export const DEMO_BRAND_DIRECTIVES: BrandDirectiveItem[] = [
   },
   {
     id: "DIR-010",
-    category: "VOICE_DONT",
+    category: "VOICE",
     key: "no_ai_cheerleading",
     content: "Never cheerlead AI. Do not use hyperbolic introductory paragraphs. Do not summarize with 'In conclusion'. Avoid conversational filler like 'Let's dive in'.",
     priority: 1,
@@ -118,7 +118,7 @@ export const DEMO_BRAND_DIRECTIVES: BrandDirectiveItem[] = [
   },
   {
     id: "DIR-011",
-    category: "PEER_STANCE",
+    category: "AUDIENCE",
     key: "deterministic_over_agentic",
     content: "Deterministic JSON schema validation with strict Go/Python binaries beats open-ended multi-hop agent summaries for enterprise reliability every single time.",
     priority: 2,
@@ -128,7 +128,7 @@ export const DEMO_BRAND_DIRECTIVES: BrandDirectiveItem[] = [
   },
   {
     id: "DIR-012",
-    category: "CTA",
+    category: "VOICE",
     key: "operator_voice_test",
     content: "Call our live dispatcher test line or inspect our open-source WebSocket audio streaming pipeline at getminions.ai.",
     priority: 1,

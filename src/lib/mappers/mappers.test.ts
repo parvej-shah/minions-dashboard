@@ -279,7 +279,7 @@ describe("toDirectiveDTO", () => {
   it("maps rule_key/instruction onto the client key/content pair", () => {
     const dto = toDirectiveDTO({
       id: "DIR-001",
-      category: "IDENTITY",
+      category: "POSITIONING",
       ruleKey: "company_name",
       instruction: "getminions.ai — one word",
       priority: 1,

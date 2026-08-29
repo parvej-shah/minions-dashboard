@@ -29,12 +29,14 @@ import MascotsTab from "@/components/brand/MascotsTab";
 import SocialTemplatesTab from "@/components/brand/SocialTemplatesTab";
 import LexiconTab from "@/components/brand/LexiconTab";
 import ProfileTab from "@/components/brand/ProfileTab";
+import OverviewTab from "@/components/brand/OverviewTab";
 import CategorySelect from "@/components/brand/CategorySelect";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 
 export default function BrandStudioPage() {
-  const [activeTab, setActiveTab] = useState<BrandTab>("profile");
+  const [activeTab, setActiveTab] = useState<BrandTab>("overview");
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const {
     data: directives,
     isLoading: directivesLoading,
@@ -59,7 +61,7 @@ export default function BrandStudioPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showPresetModal, setShowPresetModal] = useState(false);
   const [applyingPreset, setApplyingPreset] = useState(false);
-  const [newCat, setNewCat] = useState<BrandCategory>("VOICE_DO");
+  const [newCat, setNewCat] = useState<BrandCategory>("POSITIONING");
   const [newKey, setNewKey] = useState("");
   const [newContent, setNewContent] = useState("");
   const [newPriority, setNewPriority] = useState<1 | 2 | 3>(1);
@@ -67,17 +69,22 @@ export default function BrandStudioPage() {
 
   // Banned lexicon: derived from the same FORBIDDEN-category BrandDirective rows the
   // Directives tab and the drafting pipeline use -- not a separate, disconnected list.
+  // Banned words/phrases are intentionally uncapped -- a brand's blocklist can
+  // legitimately grow large, so only the 4 non-FORBIDDEN categories get a cap.
   const forbiddenDirectives = directives.filter(d => d.category === "FORBIDDEN");
   const nonForbiddenDirectives = directives.filter(d => d.category !== "FORBIDDEN");
-  const DIRECTIVE_LIMIT = 30;
-  const isLimitReached = nonForbiddenDirectives.length >= DIRECTIVE_LIMIT;
+  const PER_CATEGORY_LIMIT = 6;
+  const activeNonForbiddenCount = (cat: BrandCategory) =>
+    nonForbiddenDirectives.filter((d) => d.category === cat && d.is_active).length;
+  const isCategoryFull = (cat: BrandCategory) => activeNonForbiddenCount(cat) >= PER_CATEGORY_LIMIT;
+  const isLimitReached = isCategoryFull(newCat);
 
   const [newBannedWord, setNewBannedWord] = useState("");
   const [isAddingBannedWord, setIsAddingBannedWord] = useState(false);
 
   // Edit Directive State
   const [editingDirective, setEditingDirective] = useState<BrandDirectiveItem | null>(null);
-  const [editCat, setEditCat] = useState<BrandCategory>("VOICE_DO");
+  const [editCat, setEditCat] = useState<BrandCategory>("POSITIONING");
   const [editKey, setEditKey] = useState("");
   const [editContent, setEditContent] = useState("");
   const [editPriority, setEditPriority] = useState<1 | 2 | 3>(1);
@@ -145,9 +152,13 @@ export default function BrandStudioPage() {
     }
   };
 
+  const NON_FORBIDDEN_CATEGORIES: BrandCategory[] = ["POSITIONING", "TOPICS", "AUDIENCE", "VOICE"];
+  const allCategoriesFull = NON_FORBIDDEN_CATEGORIES.every((c) => isCategoryFull(c));
+
   const handleAddDirective = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newContent) return;
+    if (newCat !== "FORBIDDEN" && isCategoryFull(newCat)) return;
     const finalKey = newKey.trim() || newContent.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim().split(/\s+/).slice(0, 4).join("_") || "directive_rule";
 
     try {
@@ -255,15 +266,50 @@ export default function BrandStudioPage() {
             Brand Governance & Visual Asset Engine
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-[#F1F5F9]">
-            Brand & Directives
+            Brand
           </h1>
           <p className="text-sm text-[#94A3B8] mt-1">
-            Manage your brand identity, visual assets, social covers, and live LLM prompt directives.
+            Tell the AI who you are, what you post about, and how you sound.
           </p>
         </div>
 
         {/* Primary Tab Switcher */}
         <div className="flex flex-wrap items-center bg-[#0F1419] p-1 rounded-xl border border-[#1F2D3D] self-start md:self-auto gap-1 max-w-full overflow-x-auto">
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === "overview"
+                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
+                : "text-[#94A3B8] hover:text-[#F1F5F9]"
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveTab("lexicon")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === "lexicon"
+                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
+                : "text-[#94A3B8] hover:text-[#F1F5F9]"
+            }`}
+          >
+            <AlertTriangle className="w-3.5 h-3.5" />
+            Banned Words ({forbiddenDirectives.length})
+          </button>
+          <button
+            onClick={() => setShowAdvanced((v) => !v)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer text-[#94A3B8] hover:text-[#F1F5F9]"
+          >
+            <Settings2 className="w-3.5 h-3.5" />
+            Advanced{showAdvanced ? " ▲" : " ▼"}
+          </button>
+        </div>
+      </div>
+
+      {/* Advanced disclosure: the raw Profile/Directives/Visuals/Social tabs */}
+      {showAdvanced && (
+        <div className="flex flex-wrap items-center bg-[#0F1419] p-1 rounded-xl border border-[#1F2D3D] gap-1 max-w-full overflow-x-auto -mt-4">
           <button
             onClick={() => setActiveTab("profile")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
@@ -284,18 +330,7 @@ export default function BrandStudioPage() {
             }`}
           >
             <BookOpen className="w-3.5 h-3.5" />
-            Brand Directives ({nonForbiddenDirectives.length} / {DIRECTIVE_LIMIT})
-          </button>
-          <button
-            onClick={() => setActiveTab("lexicon")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "lexicon"
-                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
-                : "text-[#94A3B8] hover:text-[#F1F5F9]"
-            }`}
-          >
-            <AlertTriangle className="w-3.5 h-3.5" />
-            Banned Buzzwords ({forbiddenDirectives.length})
+            Brand Directives ({nonForbiddenDirectives.length})
           </button>
           <button
             onClick={() => setActiveTab("visuals")}
@@ -320,7 +355,14 @@ export default function BrandStudioPage() {
             Social Covers
           </button>
         </div>
-      </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* OVERVIEW: plain-language summary, the default landing view */}
+      {/* ======================================================== */}
+      {activeTab === "overview" && (
+        <OverviewTab directives={directives} setDirectives={setDirectives} />
+      )}
 
       {/* ======================================================== */}
       {/* TAB 0: BRAND PROFILE (company info, voice, colors, logo) */}
@@ -393,12 +435,8 @@ export default function BrandStudioPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className={`text-[11px] font-mono px-2.5 py-1 rounded-xl border ${
-                isLimitReached 
-                  ? "bg-amber-500/10 text-amber-300 border-amber-500/30 font-bold"
-                  : "bg-[#161D26] text-[#94A3B8] border-[#1F2D3D]"
-              }`}>
-                {nonForbiddenDirectives.length} / {DIRECTIVE_LIMIT} Directives Limit
+              <span className="text-[11px] font-mono px-2.5 py-1 rounded-xl border bg-[#161D26] text-[#94A3B8] border-[#1F2D3D]">
+                {nonForbiddenDirectives.length} directives · max {PER_CATEGORY_LIMIT} per category
               </span>
 
               <Link
@@ -420,10 +458,10 @@ export default function BrandStudioPage() {
 
               <button
                 onClick={() => setShowAddModal(true)}
-                disabled={isLimitReached}
-                title={isLimitReached ? "Context limit reached (30/30). Edit or delete existing directives to keep AI context sharp." : "Add a new directive"}
+                disabled={allCategoriesFull}
+                title={allCategoriesFull ? `Every category is at the ${PER_CATEGORY_LIMIT}-directive limit. Edit or delete existing directives to keep AI context sharp.` : "Add a new directive"}
                 className={`flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-sm transition-all ${
-                  isLimitReached
+                  allCategoriesFull
                     ? "bg-[#161D26] text-[#64748B] border border-[#1F2D3D] cursor-not-allowed"
                     : "bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F]"
                 }`}
@@ -434,13 +472,13 @@ export default function BrandStudioPage() {
             </div>
           </div>
 
-          {/* Context Protection Limit Warning */}
+          {/* Per-category Limit Warning */}
           {isLimitReached && (
             <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-center justify-between shadow-sm">
               <div className="flex items-center gap-2.5">
                 <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>
-                  <strong>Prompt Context Protection:</strong> You have reached the maximum limit of {DIRECTIVE_LIMIT} active brand directives. Keeping directives concise and focused prevents token bloat and ensures the AI doesn&apos;t experience context drift.
+                  <strong>Prompt Context Protection:</strong> The &quot;{CATEGORIES.find(c => c.value === newCat)?.label}&quot; category has reached its limit of {PER_CATEGORY_LIMIT} active directives. Pick a different category, or edit/delete an existing one first.
                 </span>
               </div>
             </div>
@@ -588,6 +626,12 @@ export default function BrandStudioPage() {
                   />
                 </div>
 
+                {newCat !== "FORBIDDEN" && isCategoryFull(newCat) && (
+                  <p className="text-[11px] text-amber-300">
+                    &quot;{CATEGORIES.find(c => c.value === newCat)?.label}&quot; is full ({PER_CATEGORY_LIMIT}/{PER_CATEGORY_LIMIT}). Pick a different category, or edit/delete an existing directive first.
+                  </p>
+                )}
+
                 <div className="flex justify-end gap-2">
                   <button
                     type="button"
@@ -598,7 +642,8 @@ export default function BrandStudioPage() {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] font-bold rounded-xl text-xs shadow-sm"
+                    disabled={newCat !== "FORBIDDEN" && isCategoryFull(newCat)}
+                    className="px-4 py-2 bg-[#00C9A7] hover:bg-[#00A88A] disabled:opacity-40 disabled:cursor-not-allowed text-[#070B0F] font-bold rounded-xl text-xs shadow-sm"
                   >
                     Save Directive
                   </button>
@@ -716,21 +761,18 @@ export default function BrandStudioPage() {
             )}
             {filteredDirectives.map((directive) => {
               const isForbidden = directive.category === "FORBIDDEN";
-              const isProof = directive.category === "PROOF";
-              const isVoice = directive.category === "VOICE_DO" || directive.category === "VOICE_DONT";
+              const isVoice = directive.category === "VOICE";
 
               return (
                 <div
                   key={directive.id}
                   className={`p-4 rounded-xl border transition-all ${
-                    directive.is_active 
-                      ? isForbidden 
-                        ? "bg-red-500/5 border-red-500/30" 
-                        : isProof
-                          ? "bg-emerald-500/5 border-emerald-500/30"
-                          : isVoice
-                            ? "bg-cyan-500/5 border-cyan-500/30"
-                            : "bg-[#0F1419] border-[#1F2D3D] hover:border-[#00C9A7]/40"
+                    directive.is_active
+                      ? isForbidden
+                        ? "bg-red-500/5 border-red-500/30"
+                        : isVoice
+                          ? "bg-cyan-500/5 border-cyan-500/30"
+                          : "bg-[#0F1419] border-[#1F2D3D] hover:border-[#00C9A7]/40"
                       : "bg-[#0F1419]/40 border-[#1F2D3D]/30 opacity-50"
                   }`}
                 >
@@ -739,20 +781,18 @@ export default function BrandStudioPage() {
                       {(() => {
                         const catMeta = CATEGORIES.find(c => c.value === directive.category);
                         const label = catMeta?.label || directive.category;
-                        const tooltipText = catMeta 
-                          ? `${catMeta.label} (${catMeta.stage}):\n${catMeta.desc}\n\nExample: "${catMeta.example}"` 
+                        const tooltipText = catMeta
+                          ? `${catMeta.label} (${catMeta.stage}):\n${catMeta.desc}\n\nExample: "${catMeta.example}"`
                           : directive.category;
                         return (
-                          <span 
+                          <span
                             title={tooltipText}
                             className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded cursor-help transition-all ${
-                              isForbidden 
+                              isForbidden
                                 ? "bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30"
-                                : isProof
-                                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30"
-                                  : isVoice
-                                    ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/30"
-                                    : "bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/30 hover:bg-[#00C9A7]/30"
+                                : isVoice
+                                  ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/30"
+                                  : "bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/30 hover:bg-[#00C9A7]/30"
                             }`}
                           >
                             {label}
