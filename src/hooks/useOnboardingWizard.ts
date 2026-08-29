@@ -1,14 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { BRAND_PRESETS, type BrandPreset } from "@/constants/brandPresets";
 import type { GeneratedDirective } from "@/app/api/onboarding/brand-copilot/route";
 
-export const ONBOARDING_STEPS = ["Company", "LinkedIn Voice", "Brand Interview", "Review & Launch"] as const;
+export const ONBOARDING_STEPS = ["Connect LinkedIn", "Company Profile", "Brand Interview", "Review & Launch"] as const;
 
 export interface OnboardingWizardState {
   step: number;
   setStep: (step: number) => void;
-  // Step 1: Company Snapshot
+  // Step 2 (now Step 0): LinkedIn & Channels
+  linkedInConnected: boolean;
+  setLinkedInConnected: (val: boolean) => void;
+  channels: string[];
+  toggleChannel: (key: string) => void;
+  importedVoiceCount: number;
+  importLinkedInVoice: () => Promise<void>;
+
+  // Step 1 (now Step 1): Company Snapshot
   businessName: string;
   setBusinessName: (val: string) => void;
   websiteUrl: string;
@@ -19,15 +27,7 @@ export interface OnboardingWizardState {
   setSelectedPresetId: (id: string | null) => void;
   applyPreset: (preset: BrandPreset) => void;
 
-  // Step 2: LinkedIn & Channels
-  linkedInConnected: boolean;
-  setLinkedInConnected: (val: boolean) => void;
-  channels: string[];
-  toggleChannel: (key: string) => void;
-  importedVoiceCount: number;
-  importLinkedInVoice: () => Promise<void>;
-
-  // Step 3: Brand Interview (3 Questions)
+  // Step 3 (now Step 2): Brand Interview (3 Questions)
   mythAnswer: string;
   setMythAnswer: (val: string) => void;
   differentiatorAnswer: string;
@@ -37,7 +37,7 @@ export interface OnboardingWizardState {
   isGeneratingDirectives: boolean;
   generateDirectives: () => Promise<void>;
 
-  // Step 4: Review Directives & Finalize
+  // Step 4 (now Step 3): Review Directives & Finalize
   directives: GeneratedDirective[];
   setDirectives: React.Dispatch<React.SetStateAction<GeneratedDirective[]>>;
   toggleDirective: (index: number) => void;
@@ -49,32 +49,73 @@ export interface OnboardingWizardState {
   finalizeOnboarding: () => Promise<void>;
 }
 
+const STORAGE_KEY = "minions_onboarding_draft";
+
 export function useOnboardingWizard(): OnboardingWizardState {
   const [step, setStep] = useState(0);
 
-  // Step 1
+  // Step 1: Company
   const [businessName, setBusinessName] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [industry, setIndustry] = useState("AI & Developer Tools");
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>("ai_tech_builders");
 
-  // Step 2
+  // Step 0: LinkedIn & Channels (Default: ONLY LinkedIn)
   const [linkedInConnected, setLinkedInConnected] = useState(false);
-  const [channels, setChannels] = useState<string[]>(["blog", "linkedin"]);
+  const [channels, setChannels] = useState<string[]>(["linkedin"]);
   const [importedVoiceCount, setImportedVoiceCount] = useState(0);
 
-  // Step 3
+  // Step 2: Brand Interview
   const [mythAnswer, setMythAnswer] = useState("");
   const [differentiatorAnswer, setDifferentiatorAnswer] = useState("");
   const [avoidAnswer, setAvoidAnswer] = useState("");
   const [isGeneratingDirectives, setIsGeneratingDirectives] = useState(false);
 
-  // Step 4
+  // Step 3: Review Directives
   const [directives, setDirectives] = useState<GeneratedDirective[]>([]);
   const [positioningSummary, setPositioningSummary] = useState("");
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Restore draft state from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.businessName) setBusinessName(parsed.businessName);
+        if (parsed.websiteUrl) setWebsiteUrl(parsed.websiteUrl);
+        if (parsed.industry) setIndustry(parsed.industry);
+        if (parsed.selectedPresetId) setSelectedPresetId(parsed.selectedPresetId);
+        if (parsed.channels && Array.isArray(parsed.channels)) setChannels(parsed.channels);
+        if (parsed.mythAnswer) setMythAnswer(parsed.mythAnswer);
+        if (parsed.differentiatorAnswer) setDifferentiatorAnswer(parsed.differentiatorAnswer);
+        if (parsed.avoidAnswer) setAvoidAnswer(parsed.avoidAnswer);
+        if (typeof parsed.step === "number") setStep(parsed.step);
+      }
+    } catch (e) {}
+  }, []);
+
+  // Save draft state to localStorage on changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          businessName,
+          websiteUrl,
+          industry,
+          selectedPresetId,
+          channels,
+          mythAnswer,
+          differentiatorAnswer,
+          avoidAnswer,
+          step,
+        })
+      );
+    } catch (e) {}
+  }, [businessName, websiteUrl, industry, selectedPresetId, channels, mythAnswer, differentiatorAnswer, avoidAnswer, step]);
 
   function applyPreset(preset: BrandPreset) {
     setSelectedPresetId(preset.id);
@@ -140,7 +181,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
     try {
       await apiClient.post("/api/onboarding/setup", {
         industry: industry.trim() || "General Business",
-        icp_description: positioningSummary || `${businessName} provides ${industry} solutions.`,
+        icp_description: positioningSummary || `${businessName || "My Brand"} provides ${industry} solutions.`,
         channels,
         preset_id: selectedPresetId,
       });
@@ -168,6 +209,11 @@ export function useOnboardingWizard(): OnboardingWizardState {
       } catch (harvestErr) {
         console.warn("Initial harvest trigger non-fatal:", harvestErr);
       }
+
+      // Clear draft storage
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {}
 
       // Redirect to onboarding done
       window.location.href = "/onboarding/done";

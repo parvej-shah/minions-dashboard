@@ -72,8 +72,8 @@ export default function OnboardingWizard() {
 
         {/* Step Container */}
         <div>
-          {wizard.step === 0 && <StepCompanySnapshot wizard={wizard} />}
-          {wizard.step === 1 && <StepLinkedInVoice wizard={wizard} />}
+          {wizard.step === 0 && <StepLinkedInVoice wizard={wizard} />}
+          {wizard.step === 1 && <StepCompanySnapshot wizard={wizard} />}
           {wizard.step === 2 && <StepBrandInterview wizard={wizard} />}
           {wizard.step === 3 && <StepConfirmDirectives wizard={wizard} />}
         </div>

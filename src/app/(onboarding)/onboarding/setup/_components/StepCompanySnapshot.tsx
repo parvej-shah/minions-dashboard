@@ -1,6 +1,6 @@
 import type { OnboardingWizardState } from "@/hooks/useOnboardingWizard";
 import { BRAND_PRESETS } from "@/constants/brandPresets";
-import { Globe, Building2, Sparkles, CheckCircle2, ArrowRight } from "lucide-react";
+import { Globe, Building2, Sparkles, CheckCircle2, ArrowRight, ArrowLeft } from "lucide-react";
 
 const inputClass =
   "w-full rounded-lg bg-[#070B0F] border border-[#1F2D3D] px-4 py-3 text-[#F1F5F9] placeholder:text-[#475569] focus:outline-none focus:border-[#00C9A7] text-sm";
@@ -101,18 +101,22 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
         </div>
       </div>
 
-      <div className="flex justify-end pt-4">
+      <div className="flex items-center justify-between pt-4 border-t border-[#1F2D3D]/60">
         <button
           type="button"
-          onClick={() => {
-            if (!wizard.businessName.trim()) {
-              wizard.setBusinessName("My Brand");
-            }
-            wizard.setStep(1);
-          }}
+          onClick={() => wizard.setStep(0)}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:text-[#F1F5F9] transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => wizard.setStep(2)}
           className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#00C9A7] hover:bg-[#00C9A7]/90 text-[#070B0F] font-semibold text-sm transition-colors shadow-lg shadow-[#00C9A7]/20"
         >
-          <span>Next: Voice &amp; Channels</span>
+          <span>Next: 2-Minute Brand Interview</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

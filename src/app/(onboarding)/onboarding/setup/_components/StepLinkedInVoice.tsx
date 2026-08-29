@@ -125,22 +125,13 @@ export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizard
       </div>
 
       {/* Navigation Buttons */}
-      <div className="flex items-center justify-between pt-4 border-t border-[#1F2D3D]/60">
+      <div className="flex items-center justify-end pt-4 border-t border-[#1F2D3D]/60">
         <button
           type="button"
-          onClick={wizard.goBack}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:text-[#F1F5F9] transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => wizard.setStep(2)}
+          onClick={() => wizard.setStep(1)}
           className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#00C9A7] hover:bg-[#00C9A7]/90 text-[#070B0F] font-semibold text-sm transition-colors shadow-lg shadow-[#00C9A7]/20"
         >
-          <span>Next: 2-Minute Brand Interview</span>
+          <span>Next: Company Profile</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
