@@ -2,23 +2,29 @@ import { useState, useEffect } from "react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { BRAND_PRESETS, type BrandPreset } from "@/constants/brandPresets";
 import type { GeneratedDirective } from "@/app/api/onboarding/brand-copilot/route";
+import type { LinkedInProfile, AiSuggestions } from "@/app/api/onboarding/voice-import/route";
 
 export const ONBOARDING_STEPS = ["Connect LinkedIn", "Company Profile", "Brand Interview", "Review & Launch"] as const;
 
 export interface OnboardingWizardState {
   step: number;
   setStep: (step: number) => void;
-  // Step 2 (now Step 0): LinkedIn & Channels
+
+  // Step 0: LinkedIn & Channels
   linkedInConnected: boolean;
   setLinkedInConnected: (val: boolean) => void;
   channels: string[];
   toggleChannel: (key: string) => void;
   importedVoiceCount: number;
+  linkedInProfile: LinkedInProfile | null;
+  postSnippet: string | null;
+  aiSuggestions: AiSuggestions | null;
   importLinkedInVoice: () => Promise<void>;
 
-  // Step 1 (now Step 1): Company Snapshot
+  // Step 1: Company Snapshot
   businessName: string;
   setBusinessName: (val: string) => void;
+  businessNameFromLinkedIn: boolean;
   websiteUrl: string;
   setWebsiteUrl: (val: string) => void;
   industry: string;
@@ -27,7 +33,7 @@ export interface OnboardingWizardState {
   setSelectedPresetId: (id: string | null) => void;
   applyPreset: (preset: BrandPreset) => void;
 
-  // Step 3 (now Step 2): Brand Interview (3 Questions)
+  // Step 2: Brand Interview
   mythAnswer: string;
   setMythAnswer: (val: string) => void;
   differentiatorAnswer: string;
@@ -37,7 +43,7 @@ export interface OnboardingWizardState {
   isGeneratingDirectives: boolean;
   generateDirectives: () => Promise<void>;
 
-  // Step 4 (now Step 3): Review Directives & Finalize
+  // Step 3: Review Directives & Finalize
   directives: GeneratedDirective[];
   setDirectives: React.Dispatch<React.SetStateAction<GeneratedDirective[]>>;
   toggleDirective: (index: number) => void;
@@ -55,7 +61,8 @@ export function useOnboardingWizard(): OnboardingWizardState {
   const [step, setStep] = useState(0);
 
   // Step 1: Company
-  const [businessName, setBusinessName] = useState("");
+  const [businessName, setBusinessNameRaw] = useState("");
+  const [businessNameFromLinkedIn, setBusinessNameFromLinkedIn] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [industry, setIndustry] = useState("AI & Developer Tools");
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>("ai_tech_builders");
@@ -64,6 +71,9 @@ export function useOnboardingWizard(): OnboardingWizardState {
   const [linkedInConnected, setLinkedInConnected] = useState(false);
   const [channels, setChannels] = useState<string[]>(["linkedin"]);
   const [importedVoiceCount, setImportedVoiceCount] = useState(0);
+  const [linkedInProfile, setLinkedInProfile] = useState<LinkedInProfile | null>(null);
+  const [postSnippet, setPostSnippet] = useState<string | null>(null);
+  const [aiSuggestions, setAiSuggestions] = useState<AiSuggestions | null>(null);
 
   // Step 2: Brand Interview
   const [mythAnswer, setMythAnswer] = useState("");
@@ -78,13 +88,19 @@ export function useOnboardingWizard(): OnboardingWizardState {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  function setBusinessName(val: string) {
+    setBusinessNameRaw(val);
+    setBusinessNameFromLinkedIn(false); // user manually edited — clear flag
+  }
+
   // Restore draft state from localStorage on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.businessName) setBusinessName(parsed.businessName);
+        if (parsed.businessName) setBusinessNameRaw(parsed.businessName);
+        if (parsed.businessNameFromLinkedIn) setBusinessNameFromLinkedIn(parsed.businessNameFromLinkedIn);
         if (parsed.websiteUrl) setWebsiteUrl(parsed.websiteUrl);
         if (parsed.industry) setIndustry(parsed.industry);
         if (parsed.selectedPresetId) setSelectedPresetId(parsed.selectedPresetId);
@@ -93,6 +109,10 @@ export function useOnboardingWizard(): OnboardingWizardState {
         if (parsed.differentiatorAnswer) setDifferentiatorAnswer(parsed.differentiatorAnswer);
         if (parsed.avoidAnswer) setAvoidAnswer(parsed.avoidAnswer);
         if (typeof parsed.step === "number") setStep(parsed.step);
+        if (parsed.linkedInProfile) setLinkedInProfile(parsed.linkedInProfile);
+        if (parsed.postSnippet) setPostSnippet(parsed.postSnippet);
+        if (parsed.aiSuggestions) setAiSuggestions(parsed.aiSuggestions);
+        if (parsed.importedVoiceCount) setImportedVoiceCount(parsed.importedVoiceCount);
       }
     } catch (e) {}
   }, []);
@@ -104,6 +124,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         STORAGE_KEY,
         JSON.stringify({
           businessName,
+          businessNameFromLinkedIn,
           websiteUrl,
           industry,
           selectedPresetId,
@@ -112,10 +133,14 @@ export function useOnboardingWizard(): OnboardingWizardState {
           differentiatorAnswer,
           avoidAnswer,
           step,
+          linkedInProfile,
+          postSnippet,
+          aiSuggestions,
+          importedVoiceCount,
         })
       );
     } catch (e) {}
-  }, [businessName, websiteUrl, industry, selectedPresetId, channels, mythAnswer, differentiatorAnswer, avoidAnswer, step]);
+  }, [businessName, businessNameFromLinkedIn, websiteUrl, industry, selectedPresetId, channels, mythAnswer, differentiatorAnswer, avoidAnswer, step, linkedInProfile, postSnippet, aiSuggestions, importedVoiceCount]);
 
   function applyPreset(preset: BrandPreset) {
     setSelectedPresetId(preset.id);
@@ -133,6 +158,23 @@ export function useOnboardingWizard(): OnboardingWizardState {
       if (res?.success) {
         setImportedVoiceCount(res.importedCount || 1);
         setLinkedInConnected(true);
+
+        // Store full profile data for display
+        if (res.profile) {
+          setLinkedInProfile(res.profile);
+
+          // Auto-fill company name if LinkedIn returned it and not already set
+          if (res.profile.company && !businessName.trim()) {
+            setBusinessNameRaw(res.profile.company);
+            setBusinessNameFromLinkedIn(true);
+          }
+        }
+
+        // Store first post snippet for preview
+        if (res.postSnippet) setPostSnippet(res.postSnippet);
+
+        // Store AI-generated suggestions for brand interview chips
+        if (res.aiSuggestions) setAiSuggestions(res.aiSuggestions);
       }
     } catch (err) {
       console.warn("Voice import error:", err);
@@ -157,7 +199,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
       if (res?.directives) {
         setDirectives(res.directives);
         setPositioningSummary(res.positioningSummary || "");
-        setStep(3); // Proceed to Review step
+        setStep(3);
       }
     } catch (err) {
       setError(toErrorMessage(err, "Failed to generate brand directives with Copilot."));
@@ -186,7 +228,6 @@ export function useOnboardingWizard(): OnboardingWizardState {
         preset_id: selectedPresetId,
       });
 
-      // Save custom directives into DB if any
       if (directives.length > 0) {
         for (const dir of directives) {
           try {
@@ -203,19 +244,16 @@ export function useOnboardingWizard(): OnboardingWizardState {
         }
       }
 
-      // Automatically trigger initial harvest run for instant gratification
       try {
         await apiClient.post("/api/pipeline/harvest", {});
       } catch (harvestErr) {
         console.warn("Initial harvest trigger non-fatal:", harvestErr);
       }
 
-      // Clear draft storage
       try {
         localStorage.removeItem(STORAGE_KEY);
       } catch (e) {}
 
-      // Redirect to onboarding done
       window.location.href = "/onboarding/done";
     } catch (err) {
       setError(toErrorMessage(err, "Could not finalize onboarding. Please try again."));
@@ -228,6 +266,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
     setStep,
     businessName,
     setBusinessName,
+    businessNameFromLinkedIn,
     websiteUrl,
     setWebsiteUrl,
     industry,
@@ -240,6 +279,9 @@ export function useOnboardingWizard(): OnboardingWizardState {
     channels,
     toggleChannel,
     importedVoiceCount,
+    linkedInProfile,
+    postSnippet,
+    aiSuggestions,
     importLinkedInVoice,
     mythAnswer,
     setMythAnswer,

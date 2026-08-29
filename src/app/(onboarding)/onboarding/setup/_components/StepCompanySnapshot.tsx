@@ -52,12 +52,17 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
           <label className="block text-xs font-semibold text-[#94A3B8] mb-1.5 flex items-center gap-1.5">
             <Building2 className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
             Business Name
+            {wizard.businessNameFromLinkedIn && (
+              <span className="ml-1 inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#0077b5]/10 border border-[#0077b5]/30 text-[#0077b5]">
+                ✓ From LinkedIn
+              </span>
+            )}
           </label>
           <input
             type="text"
             value={wizard.businessName}
             onChange={(e) => wizard.setBusinessName(e.target.value)}
-            placeholder="e.g. Acme Air Conditioning"
+            placeholder="e.g. Brain Station 23"
             className={inputClass}
           />
         </div>

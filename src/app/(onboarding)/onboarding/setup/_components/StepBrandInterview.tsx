@@ -83,17 +83,29 @@ const INDUSTRY_SUGGESTIONS: Record<string, SuggestionSet> = {
 
 export default function StepBrandInterview({ wizard }: { wizard: OnboardingWizardState }) {
   const presetKey = wizard.selectedPresetId || "ai_tech_builders";
-  const suggestions = INDUSTRY_SUGGESTIONS[presetKey] || INDUSTRY_SUGGESTIONS.ai_tech_builders;
+  const presetFallback = INDUSTRY_SUGGESTIONS[presetKey] || INDUSTRY_SUGGESTIONS.ai_tech_builders;
+  // Prefer AI-generated suggestions from LinkedIn import; fall back to hardcoded preset chips
+  const suggestions = wizard.aiSuggestions ?? presetFallback;
+  const isAiPowered = !!wizard.aiSuggestions;
 
   return (
-    <section className="rounded-2xl border border-[#1F2D3D] bg-[#0D1520] p-6 sm:p-8 space-y-6 shadow-xl">
+    <section className="rounded-2xl border border-[#1F2D3D] bg-[#0D1520] p-4 sm:p-8 space-y-5 sm:space-y-6 shadow-xl">
       <div>
-        <div className="flex items-center gap-2 mb-1.5">
-          <MessageSquare className="w-5 h-5 text-[#00C9A7]" />
-          <h2 className="text-xl font-bold text-[#F1F5F9]">2-Minute Brand Interview</h2>
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-[#00C9A7] shrink-0" />
+            <h2 className="text-lg sm:text-xl font-bold text-[#F1F5F9] leading-snug">2-Minute Brand Interview</h2>
+          </div>
+          {isAiPowered && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-[#00C9A7] shrink-0">
+              <Sparkles className="w-3 h-3" /> AI from LinkedIn
+            </span>
+          )}
         </div>
-        <p className="text-xs sm:text-sm text-[#94A3B8]">
-          Tap a suggestion or type your own perspective. Our AI Copilot will turn your answers into sharp, high-converting editorial guardrails.
+        <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
+          {isAiPowered
+            ? "Suggestions below are personalised from your LinkedIn posts. Tap to use or type your own."
+            : "Tap a suggestion or type your own perspective. Our AI Copilot will turn your answers into sharp, high-converting editorial guardrails."}
         </p>
       </div>
 
