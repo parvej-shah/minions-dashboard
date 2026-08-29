@@ -94,12 +94,21 @@ export default function DashboardShell({ children }: DashboardShellProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // If tenant has not completed onboarding yet and visits root dashboard, route them to onboarding setup
+  // Handle onboarding success toast and un-onboarded tenant routing
   React.useEffect(() => {
     if (!brandLoading && brandSettings && !brandSettings.positioning && pathname === "/") {
       router.replace("/onboarding/setup");
+      return;
     }
-  }, [brandLoading, brandSettings, pathname, router]);
+
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("onboarding_success") === "true") {
+        notify("🎉 Setup complete! Minions AI is harvesting ideas & drafting your post in the background.");
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, [brandLoading, brandSettings, pathname, router, notify]);
 
   const handleSignIn = useCallback(() => signIn("google", { callbackUrl: "/onboarding/setup" }), []);
   const handleSignOut = useCallback(() => signOut({ callbackUrl: "/login" }), []);
