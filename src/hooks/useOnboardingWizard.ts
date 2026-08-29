@@ -257,7 +257,8 @@ export function useOnboardingWizard(): OnboardingWizardState {
         localStorage.removeItem(STORAGE_KEY);
       } catch (e) {}
 
-      window.location.href = "/onboarding/done";
+      // Redirect directly to dashboard with success toast
+      window.location.href = "/?onboarding_success=true";
     } catch (err) {
       setError(toErrorMessage(err, "Could not finalize onboarding. Please try again."));
       setSaving(false);
