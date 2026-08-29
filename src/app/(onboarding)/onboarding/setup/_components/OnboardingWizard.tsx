@@ -9,15 +9,15 @@ import { Sparkles } from "lucide-react";
 
 function ProgressHeader({ step }: { step: number }) {
   return (
-    <div className="flex items-center gap-2 mb-8 sm:mb-10">
+    <div className="flex items-center gap-1.5 sm:gap-2 mb-6 sm:mb-10">
       {ONBOARDING_STEPS.map((label, i) => {
         const isDone = i < step;
         const isActive = i === step;
         return (
-          <div key={label} className="flex items-center gap-2 flex-1 last:flex-none">
-            <div className="flex items-center gap-2 shrink-0">
+          <div key={label} className="flex items-center gap-1.5 sm:gap-2 flex-1 last:flex-none">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono font-bold border transition-all ${
+                className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[11px] sm:text-xs font-mono font-bold border transition-all ${
                   isDone
                     ? "bg-[#00C9A7] border-[#00C9A7] text-[#070B0F] shadow-sm shadow-[#00C9A7]/30"
                     : isActive
@@ -51,19 +51,19 @@ export default function OnboardingWizard() {
   const wizard = useOnboardingWizard();
 
   return (
-    <div className="min-h-screen bg-[#070B0F] text-[#F1F5F9] px-4 sm:px-6 py-10 sm:py-16">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#070B0F] text-[#F1F5F9] px-3.5 sm:px-6 py-6 sm:py-16">
+      <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8">
         {/* Header */}
         <div className="text-center sm:text-left space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-[#00C9A7] text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Minions AI Autonomous Content Engine</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-[#00C9A7] text-xs font-semibold">
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            <span>Minions Autonomous Content Engine</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-[#F1F5F9] tracking-tight">
+          <h1 className="text-xl sm:text-3xl font-extrabold text-[#F1F5F9] tracking-tight leading-tight">
             Let&apos;s personalize your content engine
           </h1>
-          <p className="text-xs sm:text-sm text-[#94A3B8] max-w-2xl">
-            In under 2 minutes, we&apos;ll connect your channels, calibrate your writing style, and launch your first executive draft.
+          <p className="text-xs sm:text-sm text-[#94A3B8] max-w-2xl leading-relaxed">
+            In under 2 minutes, connect your channels, calibrate your writing style, and launch your first executive draft.
           </p>
         </div>
 
