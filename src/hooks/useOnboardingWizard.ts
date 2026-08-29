@@ -169,10 +169,9 @@ export function useOnboardingWizard(): OnboardingWizardState {
           setAiSuggestions(res.aiSuggestions);
         }
 
-        // Auto-fill company/business name if returned and not already typed
-        const inferredName = res.aiSuggestions?.inferredBusinessName || res?.profile?.company;
-        if (inferredName && !businessName.trim()) {
-          setBusinessNameRaw(inferredName);
+        // Auto-fill company/business name ONLY if explicitly returned by LinkedIn API
+        if (res.profile?.company && !businessName.trim()) {
+          setBusinessNameRaw(res.profile.company);
           setBusinessNameFromLinkedIn(true);
         }
 

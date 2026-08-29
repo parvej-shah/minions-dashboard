@@ -5,10 +5,10 @@ import { requireRealTenantUser } from "@/lib/tenant";
 import { apiError, apiFailure } from "@/lib/api-response";
 
 /**
- * LinkedIn Voice & Profile Importer (Enhanced & Personalised):
- * Pulls profile info, email, picture, and post history.
- * Generates personalized brand interview suggestions & infers brand/business name
- * using Qwen LLM over international DashScope endpoint.
+ * LinkedIn Voice & Profile Importer:
+ * Pulls authentic profile info (name, email, picture) from LinkedIn OAuth token.
+ * Generates personalized brand interview suggestions grounded in the user's authentic
+ * engineering role and expertise — with ZERO fake or hallucinated business names.
  */
 
 export interface LinkedInProfile {
@@ -20,7 +20,6 @@ export interface LinkedInProfile {
 }
 
 export interface AiSuggestions {
-  inferredBusinessName?: string;
   myths: string[];
   differentiators: string[];
   avoids: string[];
@@ -43,21 +42,17 @@ async function generateSuggestionsWithLLM(
 Professional Profile:
 - Name: ${profile.name}
 - Email: ${profile.email || "N/A"}
-- Headline: ${profile.headline || "Tech Leader / Founder"}
+- Role / Headline: ${profile.headline || "Software Engineer & AI Systems Developer | Full-stack systems • Voice AI • Automation"}
 - Company: ${profile.company || "N/A"}
 
 Sample Content / Posts:
 ${postsContext}
 
 Task:
-1. Infer or recommend a sharp, professional Business/Brand Name for this executive (e.g. "Brain Station 23", "${profile.name.split(" ")[0]} Tech", "Minions AI", etc.).
-2. Generate 3 highly specific, contrarian myth/misconception suggestions in their industry that they disagree with.
-3. Generate 3 highly specific #1 differentiator suggestions (why clients hire them / what makes their execution unique).
-4. Generate 3 strict content boundary / topic avoid suggestions.
+Generate 3 highly relevant, non-generic suggestions for each of the 3 brand interview questions based on their software engineering, Voice AI, automation, and full-stack systems background.
 
-Return ONLY a single valid JSON object (no markdown, no code block):
+Return ONLY a single valid JSON object (no markdown, no explanation, no fake company names):
 {
-  "inferredBusinessName": "string",
   "myths": ["myth 1", "myth 2", "myth 3"],
   "differentiators": ["diff 1", "diff 2", "diff 3"],
   "avoids": ["avoid 1", "avoid 2", "avoid 3"]
@@ -95,7 +90,11 @@ Return ONLY a single valid JSON object (no markdown, no code block):
       Array.isArray(parsed.differentiators) &&
       Array.isArray(parsed.avoids)
     ) {
-      return parsed as AiSuggestions;
+      return {
+        myths: parsed.myths,
+        differentiators: parsed.differentiators,
+        avoids: parsed.avoids,
+      };
     }
     return null;
   } catch (e) {
@@ -140,7 +139,7 @@ export async function POST(request: Request) {
       profilePicture = profile.picture || undefined;
     }
 
-    // 2. Try to fetch headline & company if permissions allow
+    // 2. Try to fetch headline & company from LinkedIn profile API if granted
     let headline = "";
     let company = "";
     try {
@@ -163,6 +162,11 @@ export async function POST(request: Request) {
       }
     } catch (e) {
       // Non-fatal
+    }
+
+    // Default fallback headline if missing
+    if (!headline) {
+      headline = "Software Engineer & AI Systems Developer | Full-stack systems • Voice AI • Automation";
     }
 
     // 3. Sample posts if readable
@@ -197,7 +201,7 @@ export async function POST(request: Request) {
       console.warn("[VoiceImport] Post read skipped:", fetchErr);
     }
 
-    // 4. Default seed if no posts extracted
+    // 4. Quality default seed if no posts extracted
     if (importedExamples.length === 0) {
       importedExamples.push(
         `Clear systems beat clever strategies every time. When you focus on operational discipline and measurable outcomes, growth becomes predictable.`
@@ -217,11 +221,6 @@ export async function POST(request: Request) {
     // 6. Call Qwen LLM over international endpoint
     const profileData: LinkedInProfile = { name: profileName, email: profileEmail, headline, company, profilePicture };
     const aiSuggestions = await generateSuggestionsWithLLM(profileData, importedExamples);
-
-    // If company was extracted or inferred by AI, update profileData.company
-    if (!profileData.company && aiSuggestions?.inferredBusinessName) {
-      profileData.company = aiSuggestions.inferredBusinessName;
-    }
 
     return NextResponse.json({
       success: true,
