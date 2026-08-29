@@ -10,9 +10,7 @@ import type { BrandProfileInput, BrandSettings } from "@/types";
  * Company info, voice guidelines, and colors come from that tenant's
  * `brand_profile` row; if it has never been seeded, the hardcoded seed
  * constant fills in so the page still renders something editable instead of
- * erroring. `brand_profile` used to be a single global singleton row keyed by
- * a hardcoded id ("BRAND-MINIONS-01") — it is now one row per Client,
- * looked up by the unique `client_id` column instead.
+ * erroring.
  */
 export async function getBrandSettings(clientId: string): Promise<BrandSettings> {
   const [profile, directives, client] = await Promise.all([
@@ -28,6 +26,15 @@ export async function getBrandSettings(clientId: string): Promise<BrandSettings>
 
   const clientName = client?.name || "My Brand";
 
+  const forbiddenWords = directives
+    .filter((d) => d.category === "FORBIDDEN")
+    .map((d) => d.instruction.trim())
+    .filter(Boolean);
+
+  const dynamicBannedLexicon = Array.from(
+    new Set([...forbiddenWords, ...STATIC_BANNED_LEXICON])
+  );
+
   const settings = profile
     ? toBrandSettingsDTO(profile)
     : {
@@ -36,15 +43,15 @@ export async function getBrandSettings(clientId: string): Promise<BrandSettings>
         company_domain: "",
         positioning: "",
         primary_logo_url: "",
-        primary_ink: "#12242A",
-        brand_teal: "#00C9A7",
+        primary_ink: "#0B0F14",
+        brand_teal: "#00D4AA",
         brand_coral: "#FF6B4A",
-        brand_cream: "#FFF8F0",
-        accent_blue: "#3A6EA5",
+        brand_cream: "#F5F7FA",
+        accent_blue: "#7C8CFF",
         tone_guidelines: {
-          formality: "conversational_peer",
-          cadence: "1–3 sentence paragraphs, direct language, zero marketing fluff",
-          banned_lexicon: STATIC_BANNED_LEXICON,
+          formality: "Technical & Direct",
+          cadence: "Concise, structured paragraphs with clear technical reasoning.",
+          banned_lexicon: dynamicBannedLexicon,
           allowed_proof_claims: [],
         },
         thumbnail_layout: {
@@ -56,6 +63,8 @@ export async function getBrandSettings(clientId: string): Promise<BrandSettings>
         },
         updated_at: new Date().toISOString(),
       };
+
+  settings.tone_guidelines.banned_lexicon = dynamicBannedLexicon;
 
   return {
     ...settings,
@@ -72,9 +81,7 @@ export interface WriterVoiceConfig {
 /**
  * The fields the n8n Writer/claims-gate steps need that the Brand Studio DTO
  * doesn't carry: the structured tone questionnaire, raw few-shot example
- * posts, and the claims-gate's CUSTOMER_RESULT override. Kept separate from
- * `getBrandSettings()` / `BrandSettings` so the Brand Studio UI's contract
- * doesn't have to grow fields it doesn't use yet.
+ * posts, and the claims-gate's CUSTOMER_RESULT override.
  */
 export async function getWriterVoiceConfig(clientId: string): Promise<WriterVoiceConfig> {
   const [profile, examples] = await Promise.all([
@@ -126,8 +133,20 @@ export async function updateBrandSettings(
     })
     .catch(() => []);
 
+  const forbiddenWords = directives
+    .filter((d) => d.category === "FORBIDDEN")
+    .map((d) => d.instruction.trim())
+    .filter(Boolean);
+
+  const dynamicBannedLexicon = Array.from(
+    new Set([...forbiddenWords, ...STATIC_BANNED_LEXICON])
+  );
+
+  const dto = toBrandSettingsDTO(profile);
+  dto.tone_guidelines.banned_lexicon = dynamicBannedLexicon;
+
   return {
-    ...toBrandSettingsDTO(profile),
+    ...dto,
     directives: directives.map(toDirectiveDTO),
   };
 }
