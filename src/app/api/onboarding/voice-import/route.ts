@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { requireRealTenantUser } from "@/lib/tenant";
 import { apiError, apiFailure } from "@/lib/api-response";
+import { generateBrandSuggestionsWithLLM, type AiSuggestions } from "@/lib/ai/brandCopilot";
 
 /**
  * LinkedIn Voice & Profile Importer:
@@ -20,89 +21,7 @@ export interface LinkedInProfile {
   profilePicture?: string;
 }
 
-export interface AiSuggestions {
-  myths: string[];
-  differentiators: string[];
-  avoids: string[];
-}
-
-async function generateSuggestionsWithLLM(
-  profile: LinkedInProfile,
-  postSamples: string[]
-): Promise<AiSuggestions | null> {
-  const apiKey = process.env.DASHSCOPE_API_KEY;
-  if (!apiKey) return null;
-
-  const postsContext =
-    postSamples.length > 0
-      ? postSamples.slice(0, 3).map((p, i) => `Sample ${i + 1}: "${p.slice(0, 400)}"`).join("\n")
-      : "No sample post provided.";
-
-  const prompt = `You are a world-class executive brand strategist calibrating a personalized content engine for an executive during onboarding.
-
-Professional Profile:
-- Name: ${profile.name}
-- Email: ${profile.email || "N/A"}
-- Role / Headline: ${profile.headline || "Software Engineer & AI Systems Developer | Full-stack systems • Voice AI • Automation"}
-- Company: ${profile.company || "N/A"}
-
-User's Pasted Post / Writing Sample:
-${postsContext}
-
-Task:
-Generate 3 highly relevant, non-generic suggestions for each of the 3 brand interview questions based on their writing sample, software engineering, Voice AI, automation, and full-stack systems background.
-
-Return ONLY a single valid JSON object (no markdown, no explanation, no fake company names):
-{
-  "myths": ["myth 1", "myth 2", "myth 3"],
-  "differentiators": ["diff 1", "diff 2", "diff 3"],
-  "avoids": ["avoid 1", "avoid 2", "avoid 3"]
-}`;
-
-  try {
-    const res = await fetch("https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "qwen-plus",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-        max_tokens: 800,
-      }),
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      console.warn("[VoiceImport] LLM non-200 response:", res.status, errText);
-      return null;
-    }
-
-    const data = await res.json();
-    const raw = data.choices?.[0]?.message?.content?.trim();
-    if (!raw) return null;
-
-    const cleaned = raw.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
-    const parsed = JSON.parse(cleaned);
-    if (
-      Array.isArray(parsed.myths) &&
-      Array.isArray(parsed.differentiators) &&
-      Array.isArray(parsed.avoids)
-    ) {
-      return {
-        myths: parsed.myths,
-        differentiators: parsed.differentiators,
-        avoids: parsed.avoids,
-      };
-    }
-    return null;
-  } catch (e) {
-    console.warn("[VoiceImport] LLM suggestion generation failed:", e);
-    return null;
-  }
-}
+export type { AiSuggestions };
 
 export async function POST(request: Request) {
   const ctx = await requireRealTenantUser(true);
@@ -229,7 +148,12 @@ export async function POST(request: Request) {
 
     // 5. Call Qwen LLM over international endpoint
     const profileData: LinkedInProfile = { name: profileName, email: profileEmail, headline, company, profilePicture };
-    const aiSuggestions = await generateSuggestionsWithLLM(profileData, samplePosts);
+    const aiSuggestions = await generateBrandSuggestionsWithLLM({
+      businessName: company || profileName,
+      industry: headline,
+      headline,
+      postSamples: samplePosts,
+    });
 
     return NextResponse.json({
       success: true,

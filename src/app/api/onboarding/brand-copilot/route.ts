@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireRealTenantUser } from "@/lib/tenant";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { BRAND_PRESETS, type BrandPreset } from "@/constants/brandPresets";
+import { generateBrandDirectivesWithLLM, type GeneratedDirective } from "@/lib/ai/brandCopilot";
 
 interface CopilotInput {
   industry?: string;
@@ -13,17 +14,14 @@ interface CopilotInput {
   selectedPresetId?: string;
 }
 
-export interface GeneratedDirective {
-  category: "POSITIONING" | "VOICE" | "FORBIDDEN";
-  rule_key: string;
-  instruction: string;
-  priority: number;
-}
+export type { GeneratedDirective };
 
 /**
  * Intelligent Brand Copilot:
  * Synthesizes 5-7 sharp, customized Brand Directives from 3 simple conversational answers
- * combined with industry archetypes.
+ * combined with industry archetypes. Tries a real LLM call first, grounded in the user's
+ * own answers; if that's unavailable or fails, falls back to the template logic below so
+ * onboarding never blocks or breaks.
  */
 export async function POST(request: Request) {
   const ctx = await requireRealTenantUser(true);
@@ -36,6 +34,24 @@ export async function POST(request: Request) {
     const myth = (body.mythAnswer || "").trim();
     const differentiator = (body.differentiatorAnswer || "").trim();
     const avoid = (body.avoidAnswer || "").trim();
+
+    const llmResult = await generateBrandDirectivesWithLLM({
+      businessName,
+      industry,
+      mythAnswer: myth,
+      differentiatorAnswer: differentiator,
+      avoidAnswer: avoid,
+    });
+
+    if (llmResult) {
+      return NextResponse.json({
+        success: true,
+        businessName,
+        industry,
+        positioningSummary: llmResult.positioningSummary,
+        directives: llmResult.directives,
+      });
+    }
 
     // Find best matching preset
     const preset: BrandPreset =

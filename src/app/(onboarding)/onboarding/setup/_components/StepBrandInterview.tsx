@@ -98,13 +98,13 @@ export default function StepBrandInterview({ wizard }: { wizard: OnboardingWizar
           </div>
           {isAiPowered && (
             <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-[#00C9A7] shrink-0">
-              <Sparkles className="w-3 h-3" /> AI from LinkedIn
+              <Sparkles className="w-3 h-3" /> AI Personalized
             </span>
           )}
         </div>
         <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
           {isAiPowered
-            ? "Suggestions below are personalised from your LinkedIn posts. Tap to use or type your own."
+            ? "Suggestions below are personalized for your brand. Tap to use or type your own."
             : "Tap a suggestion or type your own perspective. Our AI Copilot will turn your answers into sharp, high-converting editorial guardrails."}
         </p>
       </div>

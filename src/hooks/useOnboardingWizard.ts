@@ -34,6 +34,8 @@ export interface OnboardingWizardState {
   selectedPresetId: string | null;
   setSelectedPresetId: (id: string | null) => void;
   applyPreset: (preset: BrandPreset) => void;
+  isGeneratingSuggestions: boolean;
+  goToBrandInterview: () => Promise<void>;
 
   // Step 2: Brand Interview
   mythAnswer: string;
@@ -149,6 +151,30 @@ export function useOnboardingWizard(): OnboardingWizardState {
     setIndustry(preset.industry);
   }
 
+  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
+
+  // Personalizes the Brand Interview chips for users who skip LinkedIn --
+  // the aiSuggestions from importLinkedInVoice already cover the connected
+  // path. Never blocks the transition: any failure just leaves aiSuggestions
+  // unset, and StepBrandInterview falls back to the static preset chips.
+  async function goToBrandInterview() {
+    if (!aiSuggestions && businessName.trim() && industry.trim()) {
+      setIsGeneratingSuggestions(true);
+      try {
+        const res = await apiClient.post<{ success: boolean; aiSuggestions: AiSuggestions | null }>(
+          "/api/onboarding/brand-suggestions",
+          { businessName: businessName.trim(), industry: industry.trim() }
+        );
+        if (res?.aiSuggestions) setAiSuggestions(res.aiSuggestions);
+      } catch (err) {
+        console.warn("Brand suggestion generation non-fatal:", err);
+      } finally {
+        setIsGeneratingSuggestions(false);
+      }
+    }
+    setStep(2);
+  }
+
   function toggleChannel(key: string) {
     setChannels((prev) => (prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key]));
   }
@@ -238,18 +264,23 @@ export function useOnboardingWizard(): OnboardingWizardState {
       });
 
       if (directives.length > 0) {
+        const failures: string[] = [];
         for (const dir of directives) {
           try {
             await apiClient.post("/api/brand/directives", {
               category: dir.category,
-              rule_key: dir.rule_key,
-              instruction: dir.instruction,
+              key: dir.rule_key,
+              content: dir.instruction,
               priority: dir.priority,
               audience_scope: "ALL",
             });
           } catch (e) {
+            failures.push(dir.rule_key);
             console.warn("Directive creation non-fatal:", e);
           }
+        }
+        if (failures.length > 0) {
+          console.warn(`${failures.length} onboarding directive(s) failed to save: ${failures.join(", ")}`);
         }
       }
 
@@ -284,6 +315,8 @@ export function useOnboardingWizard(): OnboardingWizardState {
     selectedPresetId,
     setSelectedPresetId,
     applyPreset,
+    isGeneratingSuggestions,
+    goToBrandInterview,
     linkedInConnected,
     setLinkedInConnected,
     channels,

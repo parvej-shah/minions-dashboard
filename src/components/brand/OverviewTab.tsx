@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User, Hash, Users2, Mic, Plus, X, Loader2, Pencil, Sparkles, Check } from "lucide-react";
+import { User, Hash, Users2, Mic, Plus, X, Loader2, Pencil, Sparkles, Check, Palette } from "lucide-react";
 import type { BrandDirectiveItem, BrandCategory, BrandSettings, BrandProfileInput } from "@/types";
 import { useApiResource } from "@/hooks/useApiResource";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
@@ -14,6 +14,19 @@ const TONE_LABELS: Record<string, string> = {
   tactile_operator: "Tactile Operator",
   conversational_peer: "Conversational Peer",
 };
+
+const LOOK_COLOR_FIELDS: { key: "primary_ink" | "brand_teal" | "brand_coral" | "brand_cream" | "accent_blue"; label: string }[] = [
+  { key: "primary_ink", label: "Ink" },
+  { key: "brand_teal", label: "Accent" },
+  { key: "brand_coral", label: "Coral" },
+  { key: "brand_cream", label: "Cream" },
+  { key: "accent_blue", label: "Blue" },
+];
+
+type LookDraft = Pick<
+  BrandProfileInput,
+  "primary_logo_url" | "primary_ink" | "brand_teal" | "brand_coral" | "brand_cream" | "accent_blue"
+>;
 
 function toProfileInput(settings: BrandSettings): BrandProfileInput {
   return {
@@ -38,7 +51,7 @@ interface OverviewTabProps {
 }
 
 /**
- * Plain-language default view of Brand Studio: four cards (About you / Topics
+ * Plain-language default view of Brand Studio: four cards (Positioning / Topics
  * / Audience / Voice), one per non-FORBIDDEN BrandCategory, backed by the
  * exact same BrandDirective rows the Advanced Directives tab and the
  * drafting pipeline (/api/brand/context) read -- this is a presentation
@@ -60,6 +73,10 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
   const [regenerating, setRegenerating] = useState(false);
   const [regenError, setRegenError] = useState<string | null>(null);
 
+  const [editingLook, setEditingLook] = useState(false);
+  const [lookDraft, setLookDraft] = useState<LookDraft | null>(null);
+  const [savingLook, setSavingLook] = useState(false);
+
   const activeByCategory = (cat: BrandCategory) => directives.filter((d) => d.category === cat && d.is_active);
 
   const addToCategory = async (cat: BrandCategory, text: string) => {
@@ -73,20 +90,17 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
         .split(/\s+/)
         .slice(0, 4)
         .join("_") || "directive_rule";
-    try {
-      const res = await fetch("/api/brand/directives", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ category: cat, key, content, priority: 1, audience_scope: "ALL" }),
-      });
-      if (res.ok) {
-        const created: BrandDirectiveItem = await res.json();
-        setDirectives((prev) => [created, ...prev]);
-      }
-    } catch {
-      // No local fallback: a directive that only exists client-side would
-      // silently never reach the pipeline's actual brand context query.
+    const res = await fetch("/api/brand/directives", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ category: cat, key, content, priority: 1, audience_scope: "ALL" }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      throw new Error(body?.error || "Could not add that — please try again.");
     }
+    const created: BrandDirectiveItem = await res.json();
+    setDirectives((prev) => [created, ...prev]);
   };
 
   const removeDirective = async (id: string) => {
@@ -118,6 +132,34 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
       setEditingPositioning(false);
     } finally {
       setSavingPositioning(false);
+    }
+  };
+
+  const openLookEdit = () => {
+    if (!profile) return;
+    setLookDraft({
+      primary_logo_url: profile.primary_logo_url,
+      primary_ink: profile.primary_ink,
+      brand_teal: profile.brand_teal,
+      brand_coral: profile.brand_coral,
+      brand_cream: profile.brand_cream,
+      accent_blue: profile.accent_blue,
+    });
+    setEditingLook(true);
+  };
+
+  const saveLook = async () => {
+    if (!profile || !lookDraft) return;
+    setSavingLook(true);
+    try {
+      const updated = await apiClient.post<BrandSettings>("/api/brand", {
+        ...toProfileInput(profile),
+        ...lookDraft,
+      });
+      setProfile(updated);
+      setEditingLook(false);
+    } finally {
+      setSavingLook(false);
     }
   };
 
@@ -193,12 +235,12 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* About You */}
+        {/* Positioning */}
         <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-3 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-[#00C9A7]" />
-              <h3 className="text-sm font-bold text-[#F1F5F9]">About you</h3>
+              <h3 className="text-sm font-bold text-[#F1F5F9]">Positioning</h3>
             </div>
             {!editingPositioning && (
               <button onClick={openPositioningEdit} className="text-[#94A3B8] hover:text-[#00C9A7] p-1" title="Edit">
@@ -298,6 +340,92 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
             placeholder="Add a voice rule (e.g. no corporate jargon)…"
           />
         </div>
+
+        {/* Brand Look: logo + colors, used for thumbnail/cover generation only */}
+        <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-3 shadow-sm md:col-span-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Palette className="w-4 h-4 text-[#00C9A7]" />
+              <h3 className="text-sm font-bold text-[#F1F5F9]">Brand look</h3>
+            </div>
+            {!editingLook && (
+              <button onClick={openLookEdit} className="text-[#94A3B8] hover:text-[#00C9A7] p-1" title="Edit">
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+          <p className="text-xs text-[#94A3B8]">Logo and colors used on generated thumbnails and covers.</p>
+
+          {editingLook && lookDraft ? (
+            <div className="space-y-3">
+              <div>
+                <label className="text-[11px] font-medium text-[#94A3B8] block mb-1">Logo URL</label>
+                <input
+                  type="text"
+                  value={lookDraft.primary_logo_url}
+                  onChange={(e) => setLookDraft({ ...lookDraft, primary_logo_url: e.target.value })}
+                  className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-lg px-3 py-1.5 text-xs text-[#F1F5F9] font-mono focus:outline-none focus:border-[#00C9A7]"
+                />
+              </div>
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                {LOOK_COLOR_FIELDS.map(({ key, label }) => (
+                  <div key={key} className="space-y-1">
+                    <label
+                      className="h-10 rounded-lg border border-[#1F2D3D] block cursor-pointer relative overflow-hidden"
+                      style={{ backgroundColor: lookDraft[key] }}
+                    >
+                      <input
+                        type="color"
+                        value={lookDraft[key]}
+                        onChange={(e) => setLookDraft({ ...lookDraft, [key]: e.target.value.toUpperCase() })}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                    </label>
+                    <div className="text-[10px] text-[#64748B] text-center">{label}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setEditingLook(false)}
+                  className="px-3 py-1.5 rounded-lg text-xs text-[#94A3B8] hover:bg-[#161D26]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveLook}
+                  disabled={savingLook}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] font-bold rounded-lg text-xs disabled:opacity-50"
+                >
+                  {savingLook ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                  Save
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              {profile &&
+                [profile.primary_ink, profile.brand_teal, profile.brand_coral, profile.brand_cream, profile.accent_blue].map(
+                  (color, i) => (
+                    <span
+                      key={i}
+                      className="w-8 h-8 rounded-lg border border-[#1F2D3D]"
+                      style={{ backgroundColor: color }}
+                      title={color}
+                    />
+                  )
+                )}
+              {profile?.primary_logo_url && (
+                <span className="text-[11px] text-[#94A3B8] font-mono ml-2 truncate max-w-[240px]">
+                  {profile.primary_logo_url}
+                </span>
+              )}
+              {profile && !profile.primary_logo_url && (
+                <span className="text-[11px] text-[#64748B] ml-2">No logo set yet.</span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -318,14 +446,18 @@ function TagList({
 }) {
   const [draft, setDraft] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const isFull = items.length >= PER_CATEGORY_LIMIT;
 
   const submit = async () => {
     if (!draft.trim() || isFull) return;
     setSubmitting(true);
+    setError(null);
     try {
       await onAdd(category, draft);
       setDraft("");
+    } catch (err) {
+      setError(toErrorMessage(err, "Could not add that — please try again."));
     } finally {
       setSubmitting(false);
     }
@@ -350,7 +482,10 @@ function TagList({
         <input
           type="text"
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => {
+            setDraft(e.target.value);
+            if (error) setError(null);
+          }}
           onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), submit())}
           disabled={isFull}
           placeholder={isFull ? `Limit reached (${PER_CATEGORY_LIMIT})` : placeholder}
@@ -364,6 +499,7 @@ function TagList({
           {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
         </button>
       </div>
+      {error && <p className="text-[11px] text-red-400">{error}</p>}
     </div>
   );
 }

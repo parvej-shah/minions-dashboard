@@ -1,5 +1,6 @@
 import type { OnboardingWizardState } from "@/hooks/useOnboardingWizard";
 import { Sparkles, CheckCircle2, X, ArrowLeft, Loader2, Rocket, ShieldCheck } from "lucide-react";
+import { CATEGORIES } from "@/constants/brandAssets";
 
 export default function StepConfirmDirectives({ wizard }: { wizard: OnboardingWizardState }) {
   return (
@@ -45,7 +46,7 @@ export default function StepConfirmDirectives({ wizard }: { wizard: OnboardingWi
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-[#161D26] text-[#00C9A7] border border-[#00C9A7]/30 uppercase">
-                  {dir.category.replace("_", " ")}
+                  {CATEGORIES.find((c) => c.value === dir.category)?.label || dir.category.replace("_", " ")}
                 </span>
                 <span className="text-[10px] font-mono text-[#64748B]">{dir.rule_key}</span>
               </div>

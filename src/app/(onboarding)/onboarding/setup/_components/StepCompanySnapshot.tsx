@@ -1,6 +1,6 @@
 import type { OnboardingWizardState } from "@/hooks/useOnboardingWizard";
 import { BRAND_PRESETS } from "@/constants/brandPresets";
-import { Globe, Building2, Sparkles, CheckCircle2, ArrowRight, ArrowLeft } from "lucide-react";
+import { Globe, Building2, Sparkles, CheckCircle2, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 
 const inputClass =
   "w-full rounded-xl bg-[#070B0F] border border-[#1F2D3D] px-3.5 py-2.5 sm:px-4 sm:py-3 text-[#F1F5F9] placeholder:text-[#475569] focus:outline-none focus:border-[#00C9A7] text-sm";
@@ -118,11 +118,21 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
 
         <button
           type="button"
-          onClick={() => wizard.setStep(2)}
-          className="flex items-center gap-2 px-5 sm:px-6 py-2.5 rounded-xl bg-[#00C9A7] hover:bg-[#00C9A7]/90 text-[#070B0F] font-bold text-xs sm:text-sm transition-colors shadow-lg shadow-[#00C9A7]/20 cursor-pointer"
+          onClick={wizard.goToBrandInterview}
+          disabled={wizard.isGeneratingSuggestions}
+          className="flex items-center gap-2 px-5 sm:px-6 py-2.5 rounded-xl bg-[#00C9A7] hover:bg-[#00C9A7]/90 text-[#070B0F] font-bold text-xs sm:text-sm transition-colors shadow-lg shadow-[#00C9A7]/20 cursor-pointer disabled:opacity-60"
         >
-          <span>Next: Brand Interview</span>
-          <ArrowRight className="w-4 h-4" />
+          {wizard.isGeneratingSuggestions ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Personalizing…</span>
+            </>
+          ) : (
+            <>
+              <span>Next: Brand Interview</span>
+              <ArrowRight className="w-4 h-4" />
+            </>
+          )}
         </button>
       </div>
     </section>

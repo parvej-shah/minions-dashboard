@@ -101,4 +101,4 @@ export interface BrandProfileInput {
   visual_assets?: VisualAssets;
 }
 
-export type BrandTab = "overview" | "visuals" | "mascots" | "social" | "directives" | "lexicon" | "profile";
+export type BrandTab = "overview" | "lexicon";
