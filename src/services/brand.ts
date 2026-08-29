@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { DEFAULT_BRAND_SETTINGS } from "@/constants/brand";
+import { DEFAULT_BRAND_SETTINGS, STATIC_BANNED_LEXICON } from "@/constants/brand";
 import { toDirectiveDTO } from "@/lib/mappers/directive";
 import { toBrandSettingsDTO } from "@/lib/mappers/brandProfile";
 import type { BrandProfileInput, BrandSettings } from "@/types";
@@ -15,7 +15,7 @@ import type { BrandProfileInput, BrandSettings } from "@/types";
  * looked up by the unique `client_id` column instead.
  */
 export async function getBrandSettings(clientId: string): Promise<BrandSettings> {
-  const [profile, directives] = await Promise.all([
+  const [profile, directives, client] = await Promise.all([
     prisma.brandProfile.findUnique({ where: { clientId } }).catch(() => null),
     prisma.brandDirective
       .findMany({
@@ -23,11 +23,39 @@ export async function getBrandSettings(clientId: string): Promise<BrandSettings>
         orderBy: { createdAt: "asc" },
       })
       .catch(() => []),
+    prisma.client.findUnique({ where: { id: clientId } }).catch(() => null),
   ]);
+
+  const clientName = client?.name || "My Brand";
 
   const settings = profile
     ? toBrandSettingsDTO(profile)
-    : { ...DEFAULT_BRAND_SETTINGS, updated_at: new Date().toISOString() };
+    : {
+        id: `BRAND-${clientId}`,
+        brand_name: clientName,
+        company_domain: "",
+        positioning: "",
+        primary_logo_url: "",
+        primary_ink: "#12242A",
+        brand_teal: "#00C9A7",
+        brand_coral: "#FF6B4A",
+        brand_cream: "#FFF8F0",
+        accent_blue: "#3A6EA5",
+        tone_guidelines: {
+          formality: "conversational_peer",
+          cadence: "1–3 sentence paragraphs, direct language, zero marketing fluff",
+          banned_lexicon: STATIC_BANNED_LEXICON,
+          allowed_proof_claims: [],
+        },
+        thumbnail_layout: {
+          visual_style: "Executive Studio Lighting (Dark slate background, subtle rim lighting)",
+          show_badge: true,
+          show_logo: false,
+          title_word_count_min: 3,
+          title_word_count_max: 6,
+        },
+        updated_at: new Date().toISOString(),
+      };
 
   return {
     ...settings,
