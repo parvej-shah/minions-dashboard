@@ -10,6 +10,7 @@ import Sidebar from "./Sidebar";
 import { MobileBottomNav, MobileDrawer, MobileTopBar } from "./MobileNav";
 import { useNavCounts } from "@/hooks/useNavCounts";
 import { useChannelSummary } from "@/hooks/useChannelSummary";
+import { useBrandSettings } from "@/hooks/useBrandSettings";
 import { useToast } from "@/hooks/useToast";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { buildNavItems } from "@/constants/nav";
@@ -45,6 +46,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   const navCounts = useNavCounts();
   const navItems = buildNavItems(navCounts);
   const channels = useChannelSummary();
+  const { brandSettings, isLoading: brandLoading } = useBrandSettings();
   const blogEnabled = channels?.blog ?? true;
   const { message: notification, show: notify, clear: clearNotification } = useToast(6000);
 
@@ -92,8 +94,15 @@ export default function DashboardShell({ children }: DashboardShellProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const handleSignIn = useCallback(() => signIn("google", { callbackUrl: "/" }), []);
-  const handleSignOut = useCallback(() => signOut({ callbackUrl: "/" }), []);
+  // If tenant has not completed onboarding yet and visits root dashboard, route them to onboarding setup
+  React.useEffect(() => {
+    if (!brandLoading && brandSettings && !brandSettings.positioning && pathname === "/") {
+      router.replace("/onboarding/setup");
+    }
+  }, [brandLoading, brandSettings, pathname, router]);
+
+  const handleSignIn = useCallback(() => signIn("google", { callbackUrl: "/onboarding/setup" }), []);
+  const handleSignOut = useCallback(() => signOut({ callbackUrl: "/login" }), []);
 
   const mobileNavProps = {
     navItems,
