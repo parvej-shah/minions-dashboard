@@ -24,6 +24,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   pages: {
+    signIn: "/login",
     error: "/login",
   },
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "minions-ai-secret-key-fallback-32-chars",
