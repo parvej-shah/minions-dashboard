@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, User, Building, AlertCircle } from "lucide-react";
 
 type LinkedInOption = {
@@ -12,8 +12,11 @@ type LinkedInOption = {
   picture?: string;
 };
 
-export default function LinkedInSelectPage() {
+function LinkedInSelectContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get("return_to") || "/fleet?success=linkedin-connected";
+
   const [options, setOptions] = useState<LinkedInOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -26,7 +29,7 @@ export default function LinkedInSelectPage() {
         if (data.error) {
           setError(data.error);
         } else {
-          setOptions(data.options);
+          setOptions(data.options || []);
         }
       })
       .catch((err) => setError(err.message))
@@ -44,7 +47,7 @@ export default function LinkedInSelectPage() {
       });
       const data = await res.json();
       if (data.success) {
-        router.push("/fleet?success=linkedin-connected");
+        router.push(returnTo);
       } else {
         setError(data.error || "Failed to save selection");
         setSaving(false);
@@ -72,10 +75,10 @@ export default function LinkedInSelectPage() {
         </div>
         <p className="text-red-400 font-medium">{error}</p>
         <button 
-          onClick={() => router.push("/fleet")}
+          onClick={() => router.push(returnTo.startsWith("/onboarding") ? returnTo : "/fleet")}
           className="px-4 py-2 text-sm font-medium rounded-lg border border-[#1F2D3D] text-[#F1F5F9] hover:bg-[#1F2D3D]"
         >
-          Return to Fleet
+          {returnTo.startsWith("/onboarding") ? "Return to Onboarding" : "Return to Fleet"}
         </button>
       </div>
     );
@@ -132,5 +135,20 @@ export default function LinkedInSelectPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function LinkedInSelectPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+          <Loader2 className="w-8 h-8 text-[#00C9A7] animate-spin" />
+          <p className="text-[#94A3B8]">Loading...</p>
+        </div>
+      }
+    >
+      <LinkedInSelectContent />
+    </Suspense>
   );
 }

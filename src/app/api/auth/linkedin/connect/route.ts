@@ -18,10 +18,8 @@ export async function GET(request: Request) {
     // Request permissions for profile, email, and member posting
     linkedInAuthUrl.searchParams.append("scope", "openid profile email w_member_social");
     
-    // We pass the clientId in the state to ensure we attach it to the correct tenant on return,
-    // although the session cookie should also be present.
-    // In a real prod app, we should HMAC this state to prevent CSRF, but this suffices for MVP.
-    const state = Buffer.from(JSON.stringify({ clientId: ctx.clientId, ts: Date.now() })).toString("base64");
+    const returnTo = url.searchParams.get("return_to") || "/fleet";
+    const state = Buffer.from(JSON.stringify({ clientId: ctx.clientId, returnTo, ts: Date.now() })).toString("base64");
     linkedInAuthUrl.searchParams.append("state", state);
 
     return NextResponse.redirect(linkedInAuthUrl.toString());

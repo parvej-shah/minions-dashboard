@@ -47,9 +47,22 @@ export async function GET(request: Request) {
     const accessToken = tokenData.access_token;
     const expiresIn = tokenData.expires_in;
 
+    const rawState = url.searchParams.get("state");
+    let returnTo = "/fleet";
+    if (rawState) {
+      try {
+        const parsed = JSON.parse(Buffer.from(rawState, "base64").toString("utf-8"));
+        if (parsed.returnTo) returnTo = parsed.returnTo;
+      } catch (e) {}
+    }
+
     // We have the token! Now we need the user to select which page/profile to use.
     // We will store the token temporarily in an HttpOnly cookie and redirect them to the selection UI.
-    const response = NextResponse.redirect(new URL("/fleet/linkedin/select", request.url));
+    const selectUrl = new URL("/fleet/linkedin/select", request.url);
+    if (returnTo) {
+      selectUrl.searchParams.set("return_to", returnTo);
+    }
+    const response = NextResponse.redirect(selectUrl);
     
     // Store token securely in an HttpOnly cookie for the next step.
     // In production, encrypting this cookie is recommended, but HttpOnly + Secure prevents XSS extraction.

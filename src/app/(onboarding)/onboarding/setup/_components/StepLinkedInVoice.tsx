@@ -83,7 +83,7 @@ export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizard
           </button>
         ) : (
           <a
-            href="/api/auth/linkedin/connect"
+            href="/api/auth/linkedin/connect?return_to=/onboarding/setup"
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0077b5] hover:bg-[#0077b5]/90 text-white text-xs font-semibold transition-colors flex-shrink-0 shadow-md shadow-[#0077b5]/20"
           >
             <KeyRound className="w-3.5 h-3.5" />
