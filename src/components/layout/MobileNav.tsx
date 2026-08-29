@@ -99,8 +99,9 @@ export function MobileDrawer({
               const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
               const Icon = item.icon;
               return (
-                <button
+                <Link
                   key={item.href}
+                  href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                     isActive
@@ -121,7 +122,7 @@ export function MobileDrawer({
                       {item.badge}
                     </span>
                   )}
-                </button>
+                </Link>
               );
             })}
           </div>
