@@ -5,20 +5,22 @@ import { requireRealTenantUser } from "@/lib/tenant";
 import { apiError, apiFailure } from "@/lib/api-response";
 
 /**
- * LinkedIn Voice & Profile Importer (Enhanced):
- * Pulls profile info, headline, company, and post history.
- * Generates personalised brand interview suggestions using LLM (DashScope/Qwen)
- * or falls back to smart preset-based suggestions if key is unavailable.
+ * LinkedIn Voice & Profile Importer (Enhanced & Personalised):
+ * Pulls profile info, email, picture, and post history.
+ * Generates personalized brand interview suggestions & infers brand/business name
+ * using Qwen LLM over international DashScope endpoint.
  */
 
 export interface LinkedInProfile {
   name: string;
+  email?: string;
   headline: string;
   company: string;
   profilePicture?: string;
 }
 
 export interface AiSuggestions {
+  inferredBusinessName?: string;
   myths: string[];
   differentiators: string[];
   avoids: string[];
@@ -34,32 +36,35 @@ async function generateSuggestionsWithLLM(
   const postsContext =
     postSamples.length > 0
       ? postSamples.slice(0, 3).map((p, i) => `Post ${i + 1}: "${p.slice(0, 300)}"`).join("\n")
-      : "No posts available.";
+      : "No post history available.";
 
-  const prompt = `You are a brand voice strategist. Based on this LinkedIn professional's profile and sample posts, generate 3 tailored suggestions for each of these brand interview questions. Return ONLY valid JSON.
+  const prompt = `You are a world-class executive brand strategist calibrating a personalized content engine for an executive during onboarding.
 
-Profile:
+Professional Profile:
 - Name: ${profile.name}
-- Headline: ${profile.headline || "Executive / Professional"}
-- Company: ${profile.company || "Their Company"}
+- Email: ${profile.email || "N/A"}
+- Headline: ${profile.headline || "Tech Leader / Founder"}
+- Company: ${profile.company || "N/A"}
 
-Sample LinkedIn Posts:
+Sample Content / Posts:
 ${postsContext}
 
-Return this exact JSON structure (no markdown, no explanation):
-{
-  "myths": ["myth suggestion 1", "myth suggestion 2", "myth suggestion 3"],
-  "differentiators": ["differentiator 1", "differentiator 2", "differentiator 3"],
-  "avoids": ["avoid topic 1", "avoid topic 2", "avoid topic 3"]
-}
+Task:
+1. Infer or recommend a sharp, professional Business/Brand Name for this executive (e.g. "Brain Station 23", "${profile.name.split(" ")[0]} Tech", "Minions AI", etc.).
+2. Generate 3 highly specific, contrarian myth/misconception suggestions in their industry that they disagree with.
+3. Generate 3 highly specific #1 differentiator suggestions (why clients hire them / what makes their execution unique).
+4. Generate 3 strict content boundary / topic avoid suggestions.
 
-Where:
-- myths = common misconceptions or bad advice in their industry they likely disagree with, based on their post style
-- differentiators = what makes them or their company uniquely valuable, inferred from posts
-- avoids = topics, claims, or content styles they should steer clear of based on their professional voice`;
+Return ONLY a single valid JSON object (no markdown, no code block):
+{
+  "inferredBusinessName": "string",
+  "myths": ["myth 1", "myth 2", "myth 3"],
+  "differentiators": ["diff 1", "diff 2", "diff 3"],
+  "avoids": ["avoid 1", "avoid 2", "avoid 3"]
+}`;
 
   try {
-    const res = await fetch("https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions", {
+    const res = await fetch("https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -73,12 +78,16 @@ Where:
       }),
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const errText = await res.text();
+      console.warn("[VoiceImport] LLM non-200 response:", res.status, errText);
+      return null;
+    }
+
     const data = await res.json();
     const raw = data.choices?.[0]?.message?.content?.trim();
     if (!raw) return null;
 
-    // Strip markdown code fences if present
     const cleaned = raw.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
     const parsed = JSON.parse(cleaned);
     if (
@@ -116,8 +125,9 @@ export async function POST(request: Request) {
       return apiFailure("Failed to retrieve LinkedIn token from vault.", 500);
     }
 
-    // 1. Fetch Profile Userinfo (name, picture)
+    // 1. Fetch Profile Userinfo (name, email, picture)
     let profileName = "Executive";
+    let profileEmail = "";
     let profilePicture: string | undefined;
     const profileRes = await fetch("https://api.linkedin.com/v2/userinfo", {
       headers: { Authorization: `Bearer ${token}` },
@@ -125,11 +135,12 @@ export async function POST(request: Request) {
 
     if (profileRes.ok) {
       const profile = await profileRes.json();
-      profileName = `${profile.given_name || ""} ${profile.family_name || ""}`.trim() || profileName;
+      profileName = `${profile.given_name || ""} ${profile.family_name || ""}`.trim() || profile.name || profileName;
+      profileEmail = profile.email || "";
       profilePicture = profile.picture || undefined;
     }
 
-    // 2. Try to get headline + company from LinkedIn profile API
+    // 2. Try to fetch headline & company if permissions allow
     let headline = "";
     let company = "";
     try {
@@ -151,19 +162,20 @@ export async function POST(request: Request) {
         }
       }
     } catch (e) {
-      // Non-fatal — headline / company just won't auto-fill
+      // Non-fatal
     }
 
-    // 3. Fetch recent posts
+    // 3. Sample posts if readable
     const importedExamples: string[] = [];
     try {
       if (channelRow.externalId) {
         const postsRes = await fetch(
-          `https://api.linkedin.com/rest/posts?author=${encodeURIComponent(channelRow.externalId)}&q=author&count=5`,
+          `https://api.linkedin.com/v2/shares?q=owners&owners=${encodeURIComponent(
+            channelRow.externalId.startsWith("urn:li:") ? channelRow.externalId : `urn:li:person:${channelRow.externalId}`
+          )}&count=5`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              "LinkedIn-Version": "202401",
               "X-Restli-Protocol-Version": "2.0.0",
             },
           }
@@ -173,8 +185,8 @@ export async function POST(request: Request) {
           const postsData = await postsRes.json();
           if (postsData.elements && Array.isArray(postsData.elements)) {
             for (const item of postsData.elements) {
-              const text = item.commentary || item.text?.text;
-              if (text && text.length > 40) {
+              const text = item.text?.text || item.commentary;
+              if (text && text.length > 30) {
                 importedExamples.push(text.trim());
               }
             }
@@ -182,17 +194,17 @@ export async function POST(request: Request) {
         }
       }
     } catch (fetchErr) {
-      console.warn("[VoiceImport] LinkedIn post read skipped/failed:", fetchErr);
+      console.warn("[VoiceImport] Post read skipped:", fetchErr);
     }
 
-    // 4. If no posts extracted, add a quality default seed
+    // 4. Default seed if no posts extracted
     if (importedExamples.length === 0) {
       importedExamples.push(
         `Clear systems beat clever strategies every time. When you focus on operational discipline and measurable outcomes, growth becomes predictable.`
       );
     }
 
-    // 5. Save tone examples to DB
+    // 5. Save tone examples in DB
     await prisma.toneExample.deleteMany({ where: { clientId: ctx.clientId } });
     await prisma.toneExample.createMany({
       data: importedExamples.slice(0, 3).map((content) => ({
@@ -202,16 +214,21 @@ export async function POST(request: Request) {
       })),
     });
 
-    // 6. Generate AI suggestions from post content + profile
-    const profileData: LinkedInProfile = { name: profileName, headline, company, profilePicture };
+    // 6. Call Qwen LLM over international endpoint
+    const profileData: LinkedInProfile = { name: profileName, email: profileEmail, headline, company, profilePicture };
     const aiSuggestions = await generateSuggestionsWithLLM(profileData, importedExamples);
+
+    // If company was extracted or inferred by AI, update profileData.company
+    if (!profileData.company && aiSuggestions?.inferredBusinessName) {
+      profileData.company = aiSuggestions.inferredBusinessName;
+    }
 
     return NextResponse.json({
       success: true,
       profile: profileData,
       importedCount: importedExamples.length,
       postSnippet: importedExamples[0]?.slice(0, 160) || null,
-      aiSuggestions, // null if LLM not configured — client falls back to preset chips
+      aiSuggestions,
     });
   } catch (error) {
     return apiError(error, "Failed to import LinkedIn voice profile");

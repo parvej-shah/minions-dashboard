@@ -162,19 +162,22 @@ export function useOnboardingWizard(): OnboardingWizardState {
         // Store full profile data for display
         if (res.profile) {
           setLinkedInProfile(res.profile);
+        }
 
-          // Auto-fill company name if LinkedIn returned it and not already set
-          if (res.profile.company && !businessName.trim()) {
-            setBusinessNameRaw(res.profile.company);
-            setBusinessNameFromLinkedIn(true);
-          }
+        // Store AI-generated suggestions for brand interview chips
+        if (res.aiSuggestions) {
+          setAiSuggestions(res.aiSuggestions);
+        }
+
+        // Auto-fill company/business name if returned and not already typed
+        const inferredName = res.aiSuggestions?.inferredBusinessName || res?.profile?.company;
+        if (inferredName && !businessName.trim()) {
+          setBusinessNameRaw(inferredName);
+          setBusinessNameFromLinkedIn(true);
         }
 
         // Store first post snippet for preview
         if (res.postSnippet) setPostSnippet(res.postSnippet);
-
-        // Store AI-generated suggestions for brand interview chips
-        if (res.aiSuggestions) setAiSuggestions(res.aiSuggestions);
       }
     } catch (err) {
       console.warn("Voice import error:", err);
