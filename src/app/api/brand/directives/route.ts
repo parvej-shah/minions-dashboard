@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { toDirectiveDTO } from "@/lib/mappers/directive";
 import { apiError, apiFailure } from "@/lib/api-response";
@@ -30,36 +31,35 @@ export async function POST(request: Request) {
     }
 
     const isForbidden = body.category === "FORBIDDEN";
-    const MAX_DIRECTIVES = isForbidden ? 50 : 30;
+    const PER_CATEGORY_LIMIT = 6;
 
-    const existingCount = await prisma.brandDirective.count({
-      where: {
-        clientId: ctx.clientId,
-        category: isForbidden ? "FORBIDDEN" : { not: "FORBIDDEN" },
-      },
-    });
+    if (!isForbidden) {
+      const categoryCount = await prisma.brandDirective.count({
+        where: {
+          clientId: ctx.clientId,
+          category: body.category,
+          isActive: true,
+        },
+      });
 
-    if (existingCount >= MAX_DIRECTIVES) {
-      return apiFailure(
-        isForbidden
-          ? `You have reached the limit of ${MAX_DIRECTIVES} banned buzzwords. Please remove unused words before adding new ones.`
-          : `You have reached the maximum limit of ${MAX_DIRECTIVES} active brand directives. To keep AI prompt context sharp and prevent context drift, please edit, consolidate, or remove existing directives.`,
-        400
-      );
+      if (categoryCount >= PER_CATEGORY_LIMIT) {
+        return apiFailure(
+          `You have reached the limit of ${PER_CATEGORY_LIMIT} active directives for "${body.category}". Please edit or remove existing directives in this category.`,
+          400
+        );
+      }
     }
 
-    // Global count, not per-tenant: brandDirective.id is a single global-unique
-    // column, so two tenants both computing "their" count as 0 would otherwise
-    // both try to create DIR-001 and the second insert would collide.
-    const count = await prisma.brandDirective.count();
+    // Generate unique ID without collision risks
+    const uniqueId = `DIR-${Date.now().toString(36)}-${randomUUID().slice(0, 6)}`;
 
     const created = await prisma.brandDirective.create({
       data: {
-        id: `DIR-${String(count + 1).padStart(3, "0")}`,
+        id: uniqueId,
         clientId: ctx.clientId,
         category: body.category,
         ruleKey: String(body.key).toLowerCase().replace(/\s+/g, "_"),
-        instruction: body.content,
+        instruction: String(body.content).trim(),
         priority: body.priority || 1,
         audienceScope: body.audience_scope || "ALL",
         isActive: true,
