@@ -8,7 +8,7 @@ import { apiError, apiFailure } from "@/lib/api-response";
  * LinkedIn Voice & Profile Importer:
  * Pulls authentic profile info (name, email, picture) from LinkedIn OAuth token.
  * Generates personalized brand interview suggestions grounded in the user's authentic
- * engineering role and expertise — with ZERO fake or hallucinated business names.
+ * engineering role and expertise — with ZERO fake post quotes or fake company names.
  */
 
 export interface LinkedInProfile {
@@ -164,13 +164,12 @@ export async function POST(request: Request) {
       // Non-fatal
     }
 
-    // Default fallback headline if missing
     if (!headline) {
       headline = "Software Engineer & AI Systems Developer | Full-stack systems • Voice AI • Automation";
     }
 
     // 3. Sample posts if readable
-    const importedExamples: string[] = [];
+    const realPosts: string[] = [];
     try {
       if (channelRow.externalId) {
         const postsRes = await fetch(
@@ -191,7 +190,7 @@ export async function POST(request: Request) {
             for (const item of postsData.elements) {
               const text = item.text?.text || item.commentary;
               if (text && text.length > 30) {
-                importedExamples.push(text.trim());
+                realPosts.push(text.trim());
               }
             }
           }
@@ -201,32 +200,33 @@ export async function POST(request: Request) {
       console.warn("[VoiceImport] Post read skipped:", fetchErr);
     }
 
-    // 4. Quality default seed if no posts extracted
-    if (importedExamples.length === 0) {
-      importedExamples.push(
-        `Clear systems beat clever strategies every time. When you focus on operational discipline and measurable outcomes, growth becomes predictable.`
-      );
-    }
+    const isRealPostImported = realPosts.length > 0;
+    const toneSeeds = isRealPostImported
+      ? realPosts
+      : [
+          `Clear systems beat clever strategies every time. When you focus on operational discipline and measurable outcomes, growth becomes predictable.`,
+        ];
 
-    // 5. Save tone examples in DB
+    // 4. Save tone examples in DB
     await prisma.toneExample.deleteMany({ where: { clientId: ctx.clientId } });
     await prisma.toneExample.createMany({
-      data: importedExamples.slice(0, 3).map((content) => ({
+      data: toneSeeds.slice(0, 3).map((content) => ({
         clientId: ctx.clientId,
         content,
-        source: "LINKEDIN_IMPORT",
+        source: isRealPostImported ? "LINKEDIN_IMPORT" : "DEFAULT_SEED",
       })),
     });
 
-    // 6. Call Qwen LLM over international endpoint
+    // 5. Call Qwen LLM over international endpoint
     const profileData: LinkedInProfile = { name: profileName, email: profileEmail, headline, company, profilePicture };
-    const aiSuggestions = await generateSuggestionsWithLLM(profileData, importedExamples);
+    const aiSuggestions = await generateSuggestionsWithLLM(profileData, realPosts);
 
     return NextResponse.json({
       success: true,
       profile: profileData,
-      importedCount: importedExamples.length,
-      postSnippet: importedExamples[0]?.slice(0, 160) || null,
+      importedCount: realPosts.length,
+      postSnippet: isRealPostImported ? realPosts[0].slice(0, 160) : null,
+      isRealPostImported,
       aiSuggestions,
     });
   } catch (error) {
