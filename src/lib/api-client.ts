@@ -28,6 +28,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (!res.ok) {
+    if (res.status === 401 && typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+      window.location.href = `/login?error=SessionExpired&callbackUrl=${encodeURIComponent(window.location.pathname)}`;
+    }
     const body = (await res.json().catch(() => null)) as ApiErrorBody | null;
     throw new ApiRequestError(body?.error ?? `Request failed (HTTP ${res.status})`, res.status);
   }
