@@ -12,6 +12,7 @@ interface CopilotInput {
   differentiatorAnswer?: string;
   avoidAnswer?: string;
   selectedPresetId?: string;
+  headline?: string;
 }
 
 export type { GeneratedDirective };
@@ -41,6 +42,7 @@ export async function POST(request: Request) {
       mythAnswer: myth,
       differentiatorAnswer: differentiator,
       avoidAnswer: avoid,
+      headline: (body.headline || "").trim() || undefined,
     });
 
     if (llmResult) {

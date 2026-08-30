@@ -104,6 +104,22 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
             );
           })}
         </div>
+
+        <div className="mt-3">
+          <label className="block text-[11px] font-medium text-[#94A3B8] mb-1">
+            Not one of these? Describe your own industry
+          </label>
+          <input
+            type="text"
+            value={wizard.selectedPresetId ? "" : wizard.industry}
+            onChange={(e) => {
+              wizard.setIndustry(e.target.value);
+              wizard.setSelectedPresetId(null);
+            }}
+            placeholder="e.g. Landscaping, Legal Services, Boutique Retail"
+            className={inputClass}
+          />
+        </div>
       </div>
 
       <div className="flex items-center justify-between pt-4 border-t border-[#1F2D3D]/60">

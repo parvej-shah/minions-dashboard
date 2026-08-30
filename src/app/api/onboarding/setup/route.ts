@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     const industry = (body.industry || "").toString().trim();
     const icpDescription = (body.icp_description || "").toString().trim();
     const presetId = (body.preset_id || "").toString().trim();
+    const logoUrl = (body.logo_url || "").toString().trim();
     const channels: string[] = Array.isArray(body.channels) ? body.channels : [];
 
     if (!industry || !icpDescription) {
@@ -42,13 +43,15 @@ export async function POST(request: Request) {
         toneCadence: matchedPreset?.toneCadence ?? "1-3 sentence paragraphs, plain language, no filler.",
         toneFormality: matchedPreset?.toneFormality ?? "conversational_peer",
         allowedProofClaims: matchedPreset?.proofPoints ?? [],
+        // Only set on a fresh LinkedIn import -- never clobber a logo the user already set.
+        ...(logoUrl ? { primaryLogoUrl: logoUrl } : {}),
       },
       create: {
         clientId: ctx.clientId,
         brandName: client?.name || industry,
         companyDomain: "",
         positioning: icpDescription,
-        primaryLogoUrl: "",
+        primaryLogoUrl: logoUrl,
         primaryInk: "#12242A",
         brandTeal: "#0E5C63",
         brandCoral: "#FF6B4A",

@@ -229,6 +229,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         differentiatorAnswer,
         avoidAnswer,
         selectedPresetId,
+        headline: linkedInProfile?.headline || undefined,
       });
 
       if (res?.directives) {
@@ -261,6 +262,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         icp_description: positioningSummary || `${businessName || "My Brand"} provides ${industry} solutions.`,
         channels,
         preset_id: selectedPresetId,
+        logo_url: linkedInProfile?.profilePicture || undefined,
       });
 
       if (directives.length > 0) {

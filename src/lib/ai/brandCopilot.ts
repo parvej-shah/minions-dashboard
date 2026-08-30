@@ -132,6 +132,8 @@ export interface BrandDirectiveInput {
   mythAnswer: string;
   differentiatorAnswer: string;
   avoidAnswer: string;
+  /** LinkedIn headline, when the user connected LinkedIn -- extra grounding signal. */
+  headline?: string;
 }
 
 const VALID_CATEGORIES = new Set(["POSITIONING", "VOICE", "FORBIDDEN"]);
@@ -149,7 +151,7 @@ export async function generateBrandDirectivesWithLLM(
 
 Business: ${input.businessName}
 Industry: ${input.industry}
-Myth they disagree with: ${input.mythAnswer || "(not specified)"}
+${input.headline ? `Founder/operator's professional headline: ${input.headline}\n` : ""}Myth they disagree with: ${input.mythAnswer || "(not specified)"}
 Their #1 differentiator: ${input.differentiatorAnswer || "(not specified)"}
 Topics/claims to strictly avoid: ${input.avoidAnswer || "(not specified)"}
 
