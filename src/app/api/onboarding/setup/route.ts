@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { apiError, apiFailure } from "@/lib/api-response";
-import { requireRealTenantUser } from "@/lib/tenant";
+import { requireTenantAccess } from "@/lib/tenant";
 import { DISTRIBUTION_CHANNELS } from "@/constants/channels";
 import { BRAND_PRESETS } from "@/constants/brandPresets";
 
@@ -13,7 +13,7 @@ import { BRAND_PRESETS } from "@/constants/brandPresets";
  * - ClientChannel rows, one per selected platform (blog/facebook/linkedin/x)
  */
 export async function POST(request: Request) {
-  const ctx = await requireRealTenantUser(true);
+  const ctx = await requireTenantAccess(true);
   if ("error" in ctx) return ctx.error;
 
   try {

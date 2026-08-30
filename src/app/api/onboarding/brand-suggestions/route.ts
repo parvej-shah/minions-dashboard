@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireRealTenantUser } from "@/lib/tenant";
+import { requireTenantAccess } from "@/lib/tenant";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { generateBrandSuggestionsWithLLM } from "@/lib/ai/brandCopilot";
 
@@ -12,7 +12,7 @@ import { generateBrandSuggestionsWithLLM } from "@/lib/ai/brandCopilot";
  * LinkedIn-connected path already does.
  */
 export async function POST(request: Request) {
-  const ctx = await requireRealTenantUser(true);
+  const ctx = await requireTenantAccess(true);
   if ("error" in ctx) return ctx.error;
 
   try {

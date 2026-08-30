@@ -158,6 +158,51 @@ export async function requireRealTenantUser(autoProvision = false): Promise<
 }
 
 /**
+ * For onboarding routes that write tenant data (BrandProfile, BrandDirective,
+ * channel activation flags) but never touch third-party credentials --
+ * unlike requireRealTenantUser, this allows a platform-admin impersonation
+ * session through (support staff can run onboarding/AI-generation on a
+ * tenant's behalf), while still auto-provisioning a fresh Client for a
+ * genuinely new signup. Same shape as requireClientId, plus autoProvision.
+ */
+export async function requireTenantAccess(autoProvision = false): Promise<
+  { clientId: string; user: CurrentUser } | { error: Response }
+> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { error: apiFailure("Unauthorized", 401) };
+  }
+
+  const impersonating = await getImpersonatedClientId();
+  if (impersonating && isPlatformStaff(user)) {
+    const validClient = await prisma.client.findUnique({
+      where: { id: impersonating },
+      select: { id: true },
+    });
+    if (validClient) {
+      return { clientId: impersonating, user };
+    }
+  }
+
+  if (user.clientId) {
+    return { clientId: user.clientId, user };
+  }
+
+  if (autoProvision) {
+    const clientId = await getOrCreateTenant(user);
+    return { clientId, user: { ...user, clientId, role: "OWNER" } };
+  }
+
+  if (isPlatformStaff(user)) {
+    return {
+      error: apiFailure("Platform staff must use the platform-admin API, or start a view-as-tenant session", 403),
+    };
+  }
+
+  return { error: apiFailure("Account is not yet attached to a tenant", 403) };
+}
+
+/**
  * For platform-admin-only API routes: 403s for anyone who isn't SYSTEM_ADMIN.
  */
 export async function requirePlatformStaff(): Promise<

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireRealTenantUser } from "@/lib/tenant";
+import { requireTenantAccess } from "@/lib/tenant";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { BRAND_PRESETS, type BrandPreset } from "@/constants/brandPresets";
 import { generateBrandDirectivesWithLLM, type GeneratedDirective } from "@/lib/ai/brandCopilot";
@@ -25,7 +25,7 @@ export type { GeneratedDirective };
  * onboarding never blocks or breaks.
  */
 export async function POST(request: Request) {
-  const ctx = await requireRealTenantUser(true);
+  const ctx = await requireTenantAccess(true);
   if ("error" in ctx) return ctx.error;
 
   try {
