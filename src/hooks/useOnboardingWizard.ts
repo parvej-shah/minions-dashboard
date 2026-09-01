@@ -153,12 +153,15 @@ export function useOnboardingWizard(): OnboardingWizardState {
 
   const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
 
-  // Personalizes the Brand Interview chips for users who skip LinkedIn --
-  // the aiSuggestions from importLinkedInVoice already cover the connected
-  // path. Never blocks the transition: any failure just leaves aiSuggestions
-  // unset, and StepBrandInterview falls back to the static preset chips.
+  // Personalizes the Brand Interview chips for users who skip LinkedIn, and
+  // re-personalizes them for users whose LinkedIn import only produced an
+  // ungrounded guess (no writing sample, so no real industry signal yet) --
+  // otherwise that guess (made with industry: "") silently outlives the
+  // real industry the user is about to pick right here, and the interview
+  // chips end up describing a business the user never selected. Never
+  // blocks the transition: any failure just leaves aiSuggestions as-is.
   async function goToBrandInterview() {
-    if (!aiSuggestions && businessName.trim() && industry.trim()) {
+    if (!aiSuggestions?.groundedIn && businessName.trim() && industry.trim()) {
       setIsGeneratingSuggestions(true);
       try {
         const res = await apiClient.post<{ success: boolean; aiSuggestions: AiSuggestions | null }>(
