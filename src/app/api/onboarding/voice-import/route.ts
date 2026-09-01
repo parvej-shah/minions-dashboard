@@ -51,15 +51,38 @@ export async function POST(request: Request) {
     let profileName = "Executive";
     let profileEmail = "";
     let profilePicture: string | undefined;
-    const profileRes = await fetch("https://api.linkedin.com/v2/userinfo", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    let tokenExpired = false;
+    try {
+      const profileRes = await fetch("https://api.linkedin.com/v2/userinfo", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    if (profileRes.ok) {
-      const profile = await profileRes.json();
-      profileName = `${profile.given_name || ""} ${profile.family_name || ""}`.trim() || profile.name || profileName;
-      profileEmail = profile.email || "";
-      profilePicture = profile.picture || undefined;
+      if (profileRes.ok) {
+        const profile = await profileRes.json();
+        profileName = `${profile.given_name || ""} ${profile.family_name || ""}`.trim() || profile.name || profileName;
+        profileEmail = profile.email || "";
+        profilePicture = profile.picture || undefined;
+      } else {
+        const errBody = await profileRes.text();
+        console.error("[VoiceImport] LinkedIn userinfo fetch failed:", profileRes.status, errBody);
+        if (profileRes.status === 401 || profileRes.status === 403) tokenExpired = true;
+      }
+    } catch (e) {
+      console.error("[VoiceImport] LinkedIn userinfo fetch threw:", e);
+    }
+
+    // A dead/expired token means the whole import is stale -- clear the stored
+    // credential so the UI drops back to "Connect with 1-Click" instead of
+    // looping forever on "Re-sync Voice" against a token that will never work.
+    if (tokenExpired) {
+      await prisma.clientChannel.update({
+        where: { clientId_channelKey: { clientId: ctx.clientId, channelKey: "linkedin" } },
+        data: { isActive: false, credentialRef: null, externalId: null },
+      });
+      // Not 401: apiClient treats any 401 response as this app's OWN session
+      // expiring and force-redirects to /login. This is LinkedIn's token
+      // expiring, not ours, so use 409 to avoid kicking the user out of onboarding.
+      return apiFailure("Your LinkedIn connection has expired. Please reconnect your LinkedIn account.", 409);
     }
 
     // 2. Try to fetch headline & company from LinkedIn profile API if granted

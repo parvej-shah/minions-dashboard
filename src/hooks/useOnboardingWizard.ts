@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { apiClient, toErrorMessage } from "@/lib/api-client";
+import { apiClient, toErrorMessage, ApiRequestError } from "@/lib/api-client";
 import { BRAND_PRESETS, type BrandPreset } from "@/constants/brandPresets";
 import type { GeneratedDirective } from "@/app/api/onboarding/brand-copilot/route";
 import type { LinkedInProfile, AiSuggestions } from "@/app/api/onboarding/voice-import/route";
@@ -213,7 +213,15 @@ export function useOnboardingWizard(): OnboardingWizardState {
       }
     } catch (err) {
       console.warn("Voice import error:", err);
-      setLinkedInConnected(true);
+      // A 409 here means the stored LinkedIn token itself expired (the backend
+      // already cleared the credential) -- drop back to "Connect with 1-Click"
+      // instead of pretending the import succeeded.
+      if (err instanceof ApiRequestError && err.status === 409) {
+        setLinkedInConnected(false);
+        setError(err.message);
+      } else {
+        setError(toErrorMessage(err, "Couldn't import your LinkedIn voice. Please try again."));
+      }
     }
   }
 

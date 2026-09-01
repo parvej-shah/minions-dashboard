@@ -59,10 +59,14 @@ export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizard
   const handleImport = async () => {
     setImporting(true);
     await wizard.importLinkedInVoice();
+    // A stale/expired token gets cleared server-side during the import --
+    // drop the locally-cached "connected" flag so the UI falls back to the
+    // "Connect with 1-Click" button instead of a dead "Re-sync Voice" loop.
+    if (!wizard.linkedInConnected) setLinkedInDetails(null);
     setImporting(false);
   };
 
-  const isConnected = linkedInDetails?.connected || wizard.linkedInConnected;
+  const isConnected = wizard.linkedInConnected || linkedInDetails?.connected;
   const profile = wizard.linkedInProfile;
   const hasImported = wizard.importedVoiceCount > 0 || !!profile;
 
@@ -77,6 +81,12 @@ export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizard
           Connect your LinkedIn profile so Minions can match your natural writing voice and schedule posts on your behalf.
         </p>
       </div>
+
+      {wizard.error && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-xs text-red-400">
+          {wizard.error}
+        </div>
+      )}
 
       {/* LinkedIn Connection Card */}
       <div className="p-4 sm:p-5 rounded-xl border border-[#0077b5]/30 bg-[#0077b5]/5 space-y-4">
