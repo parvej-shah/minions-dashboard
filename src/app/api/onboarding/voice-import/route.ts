@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import { requireRealTenantUser } from "@/lib/tenant";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { generateBrandSuggestionsWithLLM, type AiSuggestions } from "@/lib/ai/brandCopilot";
+import { fetchWebsiteContext } from "@/lib/ai/websiteContext";
 
 /**
  * LinkedIn Voice & Profile Importer:
@@ -30,6 +31,11 @@ export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
     const customSampleText = (body.customSampleText || "").trim();
+    // Company Website is collected one step later (Step 2), so this is only
+    // populated if the user filled it in, then came back to re-sync voice.
+    // Best-effort, never blocks: a dead site or missing URL just means no
+    // extra grounding signal here.
+    const websiteUrl = (body.websiteUrl || "").trim();
 
     const channelRow = await prisma.clientChannel.findUnique({
       where: { clientId_channelKey: { clientId: ctx.clientId, channelKey: "linkedin" } },
@@ -155,18 +161,23 @@ export async function POST(request: Request) {
 
     // 5. Call Qwen LLM over international endpoint
     const profileData: LinkedInProfile = { name: profileName, email: profileEmail, headline, company, profilePicture };
+    const website = websiteUrl ? await fetchWebsiteContext(websiteUrl) : null;
     const rawSuggestions = await generateBrandSuggestionsWithLLM({
       businessName: company || profileName,
       industry: headline || "",
       headline,
       postSamples: samplePosts,
+      websiteContext: website?.summary,
     });
-    // Only claim "personalized" when we actually had real writing to ground
-    // it in -- a name alone isn't a personalization signal, it's a mail-merge
-    // field. Without hasSampleText the LLM output is a generic industry
+    // Only claim "personalized" when we actually had real writing or a real
+    // site to ground it in -- a name alone isn't a personalization signal,
+    // it's a mail-merge field. Without either, the LLM output is a generic
     // guess, so the UI should present it as a draft, not a personalized read.
+    const groundingParts = [website?.domain, hasSampleText ? "your LinkedIn writing sample" : null].filter(
+      (p): p is string => !!p
+    );
     const aiSuggestions = rawSuggestions
-      ? { ...rawSuggestions, groundedIn: hasSampleText ? "your LinkedIn writing sample" : undefined }
+      ? { ...rawSuggestions, groundedIn: groundingParts.length ? groundingParts.join(" · ") : undefined }
       : null;
 
     return NextResponse.json({

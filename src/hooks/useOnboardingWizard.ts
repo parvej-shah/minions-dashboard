@@ -190,6 +190,9 @@ export function useOnboardingWizard(): OnboardingWizardState {
       const textToPass = overrideText !== undefined ? overrideText : customSampleText;
       const res: any = await apiClient.post("/api/onboarding/voice-import", {
         customSampleText: textToPass,
+        // Only non-empty if the user already filled in Step 2 and came back
+        // to re-sync -- fine either way, the route treats it as optional.
+        websiteUrl: websiteUrl.trim(),
       });
       if (res?.success) {
         setImportedVoiceCount(res.importedCount || 1);
