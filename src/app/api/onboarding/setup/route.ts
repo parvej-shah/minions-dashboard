@@ -23,6 +23,13 @@ export async function POST(request: Request) {
     const presetId = (body.preset_id || "").toString().trim();
     const logoUrl = (body.logo_url || "").toString().trim();
     const channels: string[] = Array.isArray(body.channels) ? body.channels : [];
+    // When the Brand Interview already produced real, grounded directives
+    // (Step 3), don't also lay down this preset's generic template content --
+    // the two used to coexist and directly contradict each other (e.g. a
+    // preset's stock "core_themes" sitting next to an AI directive naming
+    // the actual product). The preset's tone/voice fields on BrandProfile
+    // below are harmless defaults either way, so only the directive rows are gated.
+    const hasAiDirectives = body.hasAiDirectives === true;
 
     if (!industry || !icpDescription) {
       return apiFailure("industry and icp_description are required", 400);
@@ -107,7 +114,7 @@ export async function POST(request: Request) {
       });
     }
 
-    if (matchedPreset) {
+    if (matchedPreset && !hasAiDirectives) {
       directivesToCreate.push({
         id: `DIR-${crypto.randomUUID()}`,
         clientId: ctx.clientId,

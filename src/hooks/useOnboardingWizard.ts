@@ -277,6 +277,10 @@ export function useOnboardingWizard(): OnboardingWizardState {
         channels,
         preset_id: selectedPresetId,
         logo_url: linkedInProfile?.profilePicture || undefined,
+        // Tell the route to skip writing the preset's generic template
+        // directives -- the Brand Interview already produced real ones
+        // grounded in this business, and the two used to contradict each other.
+        hasAiDirectives: directives.length > 0,
       });
 
       if (directives.length > 0) {
