@@ -16,8 +16,8 @@ import { generateBrandSuggestionsWithLLM, type AiSuggestions } from "@/lib/ai/br
 export interface LinkedInProfile {
   name: string;
   email?: string;
-  headline: string;
-  company: string;
+  headline?: string;
+  company?: string;
   profilePicture?: string;
 }
 
@@ -85,34 +85,18 @@ export async function POST(request: Request) {
       return apiFailure("Your LinkedIn connection has expired. Please reconnect your LinkedIn account.", 409);
     }
 
-    // 2. Try to fetch headline & company from LinkedIn profile API if granted
-    let headline = "";
-    let company = "";
-    try {
-      const basicRes = await fetch(
-        "https://api.linkedin.com/v2/me?projection=(headline,positions)",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "LinkedIn-Version": "202401",
-          },
-        }
-      );
-      if (basicRes.ok) {
-        const basic = await basicRes.json();
-        headline = basic.headline || "";
-        const currentPosition = basic.positions?.values?.[0];
-        if (currentPosition) {
-          company = currentPosition.company?.name || "";
-        }
-      }
-    } catch (e) {
-      // Non-fatal
-    }
-
-    if (!headline) {
-      headline = "Software Engineer & AI Systems Developer | Full-stack systems • Voice AI • Automation";
-    }
+    // 2. Headline & company are deliberately NOT fetched here: LinkedIn's
+    // legacy /v2/me endpoint that carries them requires the r_liteprofile
+    // scope, which this app never requests (see connect/route.ts's scope:
+    // "openid profile email w_member_social") and cannot get without a
+    // LinkedIn Marketing Developer Platform partnership. Calling it always
+    // 403s. Previously this silently substituted a fake hardcoded persona
+    // ("Software Engineer & AI Systems Developer...") and fed it to the LLM
+    // as if it were the user's real headline -- worse than no data at all.
+    // Leave both undefined; the UI and AI prompts already treat a missing
+    // headline/company as optional rather than fabricating one.
+    const headline: string | undefined = undefined;
+    const company: string | undefined = undefined;
 
     // 3. Sample posts if readable or if manually pasted by user
     const samplePosts: string[] = [];
@@ -173,7 +157,7 @@ export async function POST(request: Request) {
     const profileData: LinkedInProfile = { name: profileName, email: profileEmail, headline, company, profilePicture };
     const aiSuggestions = await generateBrandSuggestionsWithLLM({
       businessName: company || profileName,
-      industry: headline,
+      industry: headline || "",
       headline,
       postSamples: samplePosts,
     });
