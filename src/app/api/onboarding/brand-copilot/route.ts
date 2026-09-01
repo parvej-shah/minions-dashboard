@@ -3,6 +3,7 @@ import { requireTenantAccess } from "@/lib/tenant";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { BRAND_PRESETS, type BrandPreset } from "@/constants/brandPresets";
 import { generateBrandDirectivesWithLLM, type GeneratedDirective } from "@/lib/ai/brandCopilot";
+import { fetchWebsiteContext } from "@/lib/ai/websiteContext";
 
 interface CopilotInput {
   industry?: string;
@@ -35,6 +36,11 @@ export async function POST(request: Request) {
     const myth = (body.mythAnswer || "").trim();
     const differentiator = (body.differentiatorAnswer || "").trim();
     const avoid = (body.avoidAnswer || "").trim();
+    const websiteUrl = (body.websiteUrl || "").trim();
+
+    // Was accepted on the request body but never actually used -- collected
+    // in Step 2, then silently dropped. Best-effort only, never blocks.
+    const website = websiteUrl ? await fetchWebsiteContext(websiteUrl) : null;
 
     const llmResult = await generateBrandDirectivesWithLLM({
       businessName,
@@ -43,6 +49,7 @@ export async function POST(request: Request) {
       differentiatorAnswer: differentiator,
       avoidAnswer: avoid,
       headline: (body.headline || "").trim() || undefined,
+      websiteContext: website?.summary,
     });
 
     if (llmResult) {

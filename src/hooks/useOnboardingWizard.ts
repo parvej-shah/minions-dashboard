@@ -166,7 +166,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
       try {
         const res = await apiClient.post<{ success: boolean; aiSuggestions: AiSuggestions | null }>(
           "/api/onboarding/brand-suggestions",
-          { businessName: businessName.trim(), industry: industry.trim() }
+          { businessName: businessName.trim(), industry: industry.trim(), websiteUrl: websiteUrl.trim() }
         );
         if (res?.aiSuggestions) setAiSuggestions(res.aiSuggestions);
       } catch (err) {

@@ -84,6 +84,8 @@ export interface BrandSuggestionInput {
   industry: string;
   headline?: string;
   postSamples?: string[];
+  /** Plain-text summary of the business's own website, when available -- the strongest grounding signal we have before the user types anything. */
+  websiteContext?: string;
 }
 
 /**
@@ -103,7 +105,7 @@ export async function generateBrandSuggestionsWithLLM(input: BrandSuggestionInpu
 Business: ${input.businessName}
 Industry: ${input.industry}
 ${input.headline ? `Role / Headline: ${input.headline}` : ""}
-
+${input.websiteContext ? `Their Website (real content, use this as your primary source of truth):\n${input.websiteContext}\n` : ""}
 User's Pasted Post / Writing Sample:
 ${postsContext}
 
@@ -147,6 +149,8 @@ export interface BrandDirectiveInput {
   avoidAnswer: string;
   /** LinkedIn headline, when the user connected LinkedIn -- extra grounding signal. */
   headline?: string;
+  /** Plain-text summary of the business's own website, when available. */
+  websiteContext?: string;
 }
 
 const VALID_CATEGORIES = new Set(["POSITIONING", "VOICE", "FORBIDDEN"]);
@@ -164,7 +168,7 @@ export async function generateBrandDirectivesWithLLM(
 
 Business: ${input.businessName}
 Industry: ${input.industry}
-${input.headline ? `Founder/operator's professional headline: ${input.headline}\n` : ""}Myth they disagree with: ${input.mythAnswer || "(not specified)"}
+${input.headline ? `Founder/operator's professional headline: ${input.headline}\n` : ""}${input.websiteContext ? `Their website (real content, use this as your primary source of truth):\n${input.websiteContext}\n\n` : ""}Myth they disagree with: ${input.mythAnswer || "(not specified)"}
 Their #1 differentiator: ${input.differentiatorAnswer || "(not specified)"}
 Topics/claims to strictly avoid: ${input.avoidAnswer || "(not specified)"}
 
