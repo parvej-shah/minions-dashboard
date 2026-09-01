@@ -24,7 +24,10 @@ export async function POST(request: Request) {
       return apiFailure("businessName and industry are required", 400);
     }
 
-    const aiSuggestions = await generateBrandSuggestionsWithLLM({ businessName, industry });
+    const rawSuggestions = await generateBrandSuggestionsWithLLM({ businessName, industry });
+    // businessName + industry here were typed by the user in Step 1, so
+    // unlike the LinkedIn-import path this genuinely is personalized input.
+    const aiSuggestions = rawSuggestions ? { ...rawSuggestions, groundedIn: `${businessName} · ${industry}` } : null;
     return NextResponse.json({ success: true, aiSuggestions });
   } catch (error) {
     return apiError(error, "Failed to generate brand suggestions");

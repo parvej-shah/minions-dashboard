@@ -13,6 +13,14 @@ export interface AiSuggestions {
   myths: string[];
   differentiators: string[];
   avoids: string[];
+  /**
+   * Human-readable label naming the *real* signal these suggestions were
+   * grounded in (e.g. "your LinkedIn post", "Veterinary Clinic · Acme Vet").
+   * Set by the route handler, never by the LLM itself -- the UI only shows
+   * an "AI Personalized" claim when this is present, so the claim is never
+   * stronger than the actual input we had.
+   */
+  groundedIn?: string;
 }
 
 export interface GeneratedDirective {
@@ -104,6 +112,11 @@ Generate 3 highly relevant, non-generic suggestions for each of the 3 brand inte
 1. A common myth or bad advice in their industry they might disagree with.
 2. Their likely #1 differentiator (why clients would hire them).
 3. Topics or claims they should strictly avoid.
+
+Style rules -- these are short tap-to-use suggestions shown as UI chips, not essays:
+- Each suggestion is ONE plain-language sentence, 6-14 words.
+- Write like a sharp human colleague talking, not a press release. No jargon, no buzzwords ("seamless", "revolutionize", "game-changing"), no filler adjectives.
+- Be concrete and specific to the business/industry given -- a suggestion that could apply to any company is a failure.
 
 Return ONLY a single valid JSON object (no markdown, no explanation, no fake company names):
 {

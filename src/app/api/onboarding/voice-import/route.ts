@@ -155,12 +155,19 @@ export async function POST(request: Request) {
 
     // 5. Call Qwen LLM over international endpoint
     const profileData: LinkedInProfile = { name: profileName, email: profileEmail, headline, company, profilePicture };
-    const aiSuggestions = await generateBrandSuggestionsWithLLM({
+    const rawSuggestions = await generateBrandSuggestionsWithLLM({
       businessName: company || profileName,
       industry: headline || "",
       headline,
       postSamples: samplePosts,
     });
+    // Only claim "personalized" when we actually had real writing to ground
+    // it in -- a name alone isn't a personalization signal, it's a mail-merge
+    // field. Without hasSampleText the LLM output is a generic industry
+    // guess, so the UI should present it as a draft, not a personalized read.
+    const aiSuggestions = rawSuggestions
+      ? { ...rawSuggestions, groundedIn: hasSampleText ? "your LinkedIn writing sample" : undefined }
+      : null;
 
     return NextResponse.json({
       success: true,

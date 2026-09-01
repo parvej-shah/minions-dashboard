@@ -187,12 +187,15 @@ export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizard
               </div>
             )}
 
-            {/* AI suggestions ready badge */}
+            {/* AI suggestions ready badge -- copy matches whether we actually
+                had a writing sample to ground it in, not just that a call succeeded */}
             {wizard.aiSuggestions && (
               <div className="flex items-center gap-2 pt-2 border-t border-[#1F2D3D]/60">
                 <Sparkles className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
                 <p className="text-[11px] text-[#00C9A7]">
-                  AI-generated brand interview suggestions ready based on your posts
+                  {wizard.aiSuggestions.groundedIn
+                    ? "Brand interview suggestions personalized from your writing sample"
+                    : "Draft brand interview suggestions ready — add a writing sample above to personalize them"}
                 </p>
               </div>
             )}

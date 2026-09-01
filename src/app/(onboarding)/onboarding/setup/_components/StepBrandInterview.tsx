@@ -87,6 +87,11 @@ export default function StepBrandInterview({ wizard }: { wizard: OnboardingWizar
   // Prefer AI-generated suggestions from LinkedIn import; fall back to hardcoded preset chips
   const suggestions = wizard.aiSuggestions ?? presetFallback;
   const isAiPowered = !!wizard.aiSuggestions;
+  // Only claim "personalized" when the backend actually had a real signal to
+  // ground it in (see voice-import/route.ts) -- otherwise this is a
+  // reasonable industry-level draft, and saying "personalized" over-promises
+  // in a way that undermines trust the moment the user notices it's generic.
+  const groundedIn = wizard.aiSuggestions?.groundedIn;
 
   return (
     <section className="rounded-2xl border border-[#1F2D3D] bg-[#0D1520] p-4 sm:p-8 space-y-5 sm:space-y-6 shadow-xl">
@@ -97,15 +102,27 @@ export default function StepBrandInterview({ wizard }: { wizard: OnboardingWizar
             <h2 className="text-lg sm:text-xl font-bold text-[#F1F5F9] leading-snug">2-Minute Brand Interview</h2>
           </div>
           {isAiPowered && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-[#00C9A7] shrink-0">
-              <Sparkles className="w-3 h-3" /> AI Personalized
+            <span
+              className={`inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full border shrink-0 ${
+                groundedIn
+                  ? "bg-[#00C9A7]/10 border-[#00C9A7]/30 text-[#00C9A7]"
+                  : "bg-[#94A3B8]/10 border-[#94A3B8]/30 text-[#94A3B8]"
+              }`}
+            >
+              <Sparkles className="w-3 h-3" /> {groundedIn ? "AI Personalized" : "AI Draft"}
             </span>
           )}
         </div>
         <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-          {isAiPowered
-            ? "Suggestions below are personalized for your brand. Tap to use or type your own."
-            : "Tap a suggestion or type your own perspective. Our AI Copilot will turn your answers into sharp, high-converting editorial guardrails."}
+          {groundedIn ? (
+            <>
+              Based on <span className="text-[#F1F5F9] font-medium">{groundedIn}</span>. Tap to use or type your own.
+            </>
+          ) : isAiPowered ? (
+            "A first-pass draft based on your industry — edit freely, or paste a writing sample on the previous step for suggestions matched to your voice."
+          ) : (
+            "Tap a suggestion or type your own perspective. Our AI Copilot will turn your answers into sharp, high-converting editorial guardrails."
+          )}
         </p>
       </div>
 
@@ -135,7 +152,7 @@ export default function StepBrandInterview({ wizard }: { wizard: OnboardingWizar
                 key={i}
                 type="button"
                 onClick={() => wizard.setMythAnswer(text)}
-                className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all text-left ${
+                className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all text-left max-w-[260px] ${
                   wizard.mythAnswer === text
                     ? "bg-[#00C9A7]/15 border-[#00C9A7] text-[#00C9A7]"
                     : "bg-[#0D1520] border-[#1F2D3D] text-[#94A3B8] hover:border-[#00C9A7]/50 hover:text-white"
@@ -166,7 +183,7 @@ export default function StepBrandInterview({ wizard }: { wizard: OnboardingWizar
                 key={i}
                 type="button"
                 onClick={() => wizard.setDifferentiatorAnswer(text)}
-                className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all text-left ${
+                className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all text-left max-w-[260px] ${
                   wizard.differentiatorAnswer === text
                     ? "bg-[#00C9A7]/15 border-[#00C9A7] text-[#00C9A7]"
                     : "bg-[#0D1520] border-[#1F2D3D] text-[#94A3B8] hover:border-[#00C9A7]/50 hover:text-white"
@@ -197,7 +214,7 @@ export default function StepBrandInterview({ wizard }: { wizard: OnboardingWizar
                 key={i}
                 type="button"
                 onClick={() => wizard.setAvoidAnswer(text)}
-                className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all text-left ${
+                className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all text-left max-w-[260px] ${
                   wizard.avoidAnswer === text
                     ? "bg-rose-500/15 border-rose-500 text-rose-300"
                     : "bg-[#0D1520] border-[#1F2D3D] text-[#94A3B8] hover:border-rose-500/50 hover:text-white"
