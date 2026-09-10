@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, Mic2, Sparkles } from "lucide-react";
+import { AlertTriangle, Mic2, Sparkles , Rss} from "lucide-react";
 import { BrandDirectiveItem, BrandTab } from "@/types";
 import LexiconTab from "@/components/brand/LexiconTab";
 import OverviewTab from "@/components/brand/OverviewTab";
 import VoiceProofTab from "@/components/brand/VoiceProofTab";
+import SourcesTab from "@/components/brand/SourcesTab";
 import { useApiResource } from "@/hooks/useApiResource";
 
 export default function BrandStudioPage() {
@@ -109,6 +110,17 @@ export default function BrandStudioPage() {
             Overview
           </button>
           <button
+            onClick={() => setActiveTab("sources")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === "sources"
+                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
+                : "text-[#94A3B8] hover:text-[#F1F5F9]"
+            }`}
+          >
+            <Rss className="w-3.5 h-3.5" />
+            Idea Sources
+          </button>
+          <button
             onClick={() => setActiveTab("lexicon")}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "lexicon"
@@ -130,6 +142,11 @@ export default function BrandStudioPage() {
       )}
 
       {activeTab === "voice-proof" && <VoiceProofTab />}
+
+      {/* ======================================================== */}
+      {/* IDEA SOURCES: the feeds the harvester reads, per tenant   */}
+      {/* ======================================================== */}
+      {activeTab === "sources" && <SourcesTab />}
 
       {/* ======================================================== */}
       {/* BANNED LEXICON & COMPLIANCE */}

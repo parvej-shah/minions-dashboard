@@ -4,8 +4,10 @@ import { apiError, apiFailure } from "@/lib/api-response";
 import { BRAND_PRESETS, type BrandPreset } from "@/constants/brandPresets";
 import { generateBrandDirectivesWithLLM, type GeneratedDirective } from "@/lib/ai/brandCopilot";
 import { fetchWebsiteContext } from "@/lib/ai/websiteContext";
+import { expertisePromptGuidance } from "@/constants/audienceExpertise";
 
 interface CopilotInput {
+  audienceExpertise?: string;
   industry?: string;
   businessName?: string;
   websiteUrl?: string;
@@ -63,6 +65,7 @@ export async function POST(request: Request) {
       voiceSample,
       headline: (body.headline || "").trim() || undefined,
       websiteContext: website?.summary,
+      audienceExpertiseGuidance: expertisePromptGuidance(body.audienceExpertise),
     });
 
     if (llmResult) {

@@ -4,6 +4,7 @@ import { apiError, apiFailure } from "@/lib/api-response";
 import { requireTenantAccess } from "@/lib/tenant";
 import { DISTRIBUTION_CHANNELS } from "@/constants/channels";
 import { BRAND_PRESETS } from "@/constants/brandPresets";
+import { resolveAudienceExpertise } from "@/constants/audienceExpertise";
 
 /**
  * ICP/industry/tone-formality/channel step of onboarding. Writes:
@@ -23,6 +24,9 @@ export async function POST(request: Request) {
     const contentFocus = (body.content_focus || "").toString().trim();
     const presetId = (body.preset_id || "").toString().trim();
     const logoUrl = (body.logo_url || "").toString().trim();
+    // Falls back to OPERATOR for any unrecognized value, so an older client
+    // that doesn't send the field still writes a valid level.
+    const audienceExpertise = resolveAudienceExpertise(body.audience_expertise);
     const channels: string[] = Array.isArray(body.channels) ? body.channels : [];
     // When the Brand Interview already produced real, grounded directives
     // (Step 3), don't also lay down this preset's generic template content --
@@ -51,6 +55,7 @@ export async function POST(request: Request) {
         toneCadence: matchedPreset?.toneCadence ?? "1-3 sentence paragraphs, plain language, no filler.",
         toneFormality: matchedPreset?.toneFormality ?? "conversational_peer",
         allowedProofClaims: matchedPreset?.proofPoints ?? [],
+        audienceExpertise,
         // Only set on a fresh LinkedIn import -- never clobber a logo the user already set.
         ...(logoUrl ? { primaryLogoUrl: logoUrl } : {}),
       },
@@ -68,6 +73,7 @@ export async function POST(request: Request) {
         toneFormality: matchedPreset?.toneFormality ?? "conversational_peer",
         toneCadence: matchedPreset?.toneCadence ?? "1-3 sentence paragraphs, plain language, no filler.",
         allowedProofClaims: matchedPreset?.proofPoints ?? [],
+        audienceExpertise,
       },
     });
 

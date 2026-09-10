@@ -1,6 +1,7 @@
 import type { OnboardingWizardState } from "@/hooks/useOnboardingWizard";
 import { BRAND_PRESETS } from "@/constants/brandPresets";
-import { Globe, Building2, Sparkles, CheckCircle2, ArrowRight } from "lucide-react";
+import { AUDIENCE_EXPERTISE_OPTIONS } from "@/constants/audienceExpertise";
+import { Globe, Building2, Sparkles, CheckCircle2, ArrowRight, GraduationCap } from "lucide-react";
 
 // Onboarding needs only a broad starting lane. The two required prompts above
 // provide the actual audience and subject specificity; detailed industry
@@ -64,6 +65,40 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
           placeholder="For example: operations leaders at growing B2B companies who need a clearer way to adopt AI."
           className={`${ideaInputClass} min-h-20 resize-y`}
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-[#94A3B8] mb-1.5 flex items-center gap-1.5">
+          <GraduationCap className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
+          How much does your audience already know?
+        </label>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {AUDIENCE_EXPERTISE_OPTIONS.map((option) => {
+            const isSelected = wizard.audienceExpertise === option.id;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => wizard.setAudienceExpertise(option.id)}
+                aria-pressed={isSelected}
+                className={`text-left rounded-lg border px-3 py-2.5 transition-all ${
+                  isSelected
+                    ? "bg-[#00C9A7]/10 border-[#00C9A7] shadow-sm shadow-[#00C9A7]/20 ring-1 ring-[#00C9A7]"
+                    : "bg-[#070B0F] border-[#1F2D3D] hover:border-[#00C9A7]/50 hover:bg-[#121B27]"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-1">
+                  <h4 className="text-xs font-semibold leading-snug text-[#F1F5F9]">{option.label}</h4>
+                  {isSelected && <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[#00C9A7]" />}
+                </div>
+                <p className="mt-1 text-[11px] leading-snug text-[#64748B]">{option.blurb}</p>
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-1.5 text-xs text-[#64748B]">
+          Sets how deep every idea and draft goes. You can change this later in Brand.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
