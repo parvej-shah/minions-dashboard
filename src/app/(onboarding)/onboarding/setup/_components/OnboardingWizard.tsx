@@ -50,19 +50,19 @@ export default function OnboardingWizard() {
   const wizard = useOnboardingWizard();
 
   return (
-    <div className="min-h-screen bg-[#070B0F] px-3.5 py-4 text-[#F1F5F9] sm:px-6 sm:py-8">
-      <div className="mx-auto max-w-3xl space-y-4 sm:space-y-5">
+    <div className="min-h-screen bg-[#070B0F] px-3.5 py-4 text-[#F1F5F9] sm:px-6 sm:py-5">
+      <div className="mx-auto max-w-3xl space-y-3 sm:space-y-4">
         {/* Header */}
-        <div className="text-center sm:text-left space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-[#00C9A7] text-xs font-semibold">
+        <div className="text-center sm:text-left space-y-1.5">
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-[#00C9A7] text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5 shrink-0" />
             <span>Minions Brand Brief</span>
           </div>
-          <h1 className="text-xl sm:text-3xl font-extrabold text-[#F1F5F9] tracking-tight leading-tight">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#F1F5F9] tracking-tight leading-tight">
             Let&apos;s capture how you want to be known
           </h1>
           <p className="text-xs sm:text-sm text-[#94A3B8] max-w-2xl leading-relaxed">
-            Give Minions the context behind your work. We&apos;ll turn it into relevant ideas, then you choose what becomes your first draft.
+            Give Minions context for relevant ideas, then choose what becomes your first draft.
           </p>
         </div>
 

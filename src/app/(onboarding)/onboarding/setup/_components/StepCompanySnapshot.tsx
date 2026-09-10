@@ -10,6 +10,9 @@ const ONBOARDING_PRESET_IDS = ["ai_tech_builders", "b2b_saas_growth"];
 const inputClass =
   "w-full rounded-xl bg-[#070B0F] border border-[#1F2D3D] px-3.5 py-2.5 sm:px-4 sm:py-3 text-[#F1F5F9] placeholder:text-[#475569] focus:outline-none focus:border-[#00C9A7] text-sm";
 
+const ideaInputClass =
+  "w-full min-h-14 rounded-xl bg-[#070B0F] border border-[#1F2D3D] px-3.5 py-3 sm:px-4 text-[#F1F5F9] placeholder:text-[#475569] focus:outline-none focus:border-[#00C9A7] text-sm leading-relaxed";
+
 export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWizardState }) {
   const hasIdeaContext = wizard.audienceDescription.trim().length >= 3 && wizard.contentFocus.trim().length >= 3;
   const handleUrlBlur = () => {
@@ -27,7 +30,7 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
   };
 
   return (
-    <section className="rounded-2xl border border-[#1F2D3D] bg-[#0D1520] p-4 sm:p-6 space-y-4 shadow-xl">
+    <section className="rounded-2xl border border-[#1F2D3D] bg-[#0D1520] p-4 sm:p-5 space-y-3 shadow-xl">
       <div>
         <div className="flex items-center gap-2 mb-1.5">
           <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#00C9A7] shrink-0" />
@@ -45,7 +48,7 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
           value={wizard.contentFocus}
           onChange={(e) => wizard.setContentFocus(e.target.value)}
           placeholder="e.g. Practical AI tools, developer workflows, and real-world use cases"
-          className={inputClass}
+          className={ideaInputClass}
         />
         <p className="mt-1.5 text-[11px] text-[#64748B]">This gives Minions a clear territory for your first ideas.</p>
       </div>
@@ -55,11 +58,11 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
           Who do you want your content to reach? <span className="text-[#00C9A7]">*</span>
         </label>
         <textarea
-          rows={1}
+          rows={2}
           value={wizard.audienceDescription}
           onChange={(e) => wizard.setAudienceDescription(e.target.value)}
           placeholder="For example: operations leaders at growing B2B companies who need a clearer way to adopt AI."
-          className={`${inputClass} resize-y leading-relaxed`}
+          className={`${ideaInputClass} min-h-20 resize-y`}
         />
       </div>
 
