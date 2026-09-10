@@ -3,7 +3,7 @@ import { getBrandSettings, updateBrandSettings } from "@/services/brand";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 import type { BrandProfileInput } from "@/types";
-import { resolveAudienceExpertise } from "@/constants/audienceExpertise";
+import { resolveWriterExpertise } from "@/constants/writerExpertise";
 
 export async function GET() {
   const ctx = await requireClientId();
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       allowed_proof_claims: Array.isArray(body.allowed_proof_claims)
         ? body.allowed_proof_claims.map((c: unknown) => String(c).trim()).filter(Boolean)
         : [],
-      audience_expertise: resolveAudienceExpertise(body.audience_expertise),
+      writer_expertise: resolveWriterExpertise(body.writer_expertise),
     };
 
     return NextResponse.json(await updateBrandSettings(ctx.clientId, input));

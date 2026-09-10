@@ -4,7 +4,7 @@ import { apiError, apiFailure } from "@/lib/api-response";
 import { requireTenantAccess, isPlaceholderTenantName } from "@/lib/tenant";
 import { DISTRIBUTION_CHANNELS } from "@/constants/channels";
 import { BRAND_PRESETS } from "@/constants/brandPresets";
-import { resolveAudienceExpertise } from "@/constants/audienceExpertise";
+import { resolveWriterExpertise } from "@/constants/writerExpertise";
 import { normalizeDomain } from "@/constants/config";
 
 /**
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const websiteUrl = normalizeDomain((body.website_url || "").toString()) || "";
     // Falls back to OPERATOR for any unrecognized value, so an older client
     // that doesn't send the field still writes a valid level.
-    const audienceExpertise = resolveAudienceExpertise(body.audience_expertise);
+    const writerExpertise = resolveWriterExpertise(body.writer_expertise);
     const channels: string[] = Array.isArray(body.channels) ? body.channels : [];
     // When the Brand Interview already produced real, grounded directives
     // (Step 3), don't also lay down this preset's generic template content --
@@ -80,8 +80,16 @@ export async function POST(request: Request) {
         ...(businessName ? { brandName: businessName } : {}),
         toneCadence: matchedPreset?.toneCadence ?? "1-3 sentence paragraphs, plain language, no filler.",
         toneFormality: matchedPreset?.toneFormality ?? "conversational_peer",
-        allowedProofClaims: matchedPreset?.proofPoints ?? [],
-        audienceExpertise,
+        // Deliberately NOT seeded from the preset. allowedProofClaims is the
+        // list of claims the writer treats as VERIFIED and may cite, and the
+        // preset's are invented illustrations ("Sub-2s response latency in
+        // production", "100+ analyzed SaaS onboarding funnels") that belong to
+        // no real tenant. Seeding them handed every new account a set of
+        // fabricated metrics to publish. The tenant adds their own in
+        // Brand > Voice; empty means the writer must ground claims in the
+        // source material instead.
+        allowedProofClaims: [],
+        writerExpertise,
         // Only set on a fresh LinkedIn import -- never clobber a logo the user already set.
         ...(logoUrl ? { primaryLogoUrl: logoUrl } : {}),
       },
@@ -98,8 +106,8 @@ export async function POST(request: Request) {
         accentBlue: "#3A6EA5",
         toneFormality: matchedPreset?.toneFormality ?? "conversational_peer",
         toneCadence: matchedPreset?.toneCadence ?? "1-3 sentence paragraphs, plain language, no filler.",
-        allowedProofClaims: matchedPreset?.proofPoints ?? [],
-        audienceExpertise,
+        allowedProofClaims: [],
+        writerExpertise,
       },
     });
 
@@ -161,6 +169,20 @@ export async function POST(request: Request) {
       });
     }
 
+    // The preset's stock AUDIENCE lanes are deliberately NOT written.
+    //
+    // They describe the preset's archetypal reader ("Lane A -- Builders:
+    // software engineers, AI engineers, and technical founders"), which
+    // silently overrode the audience the user typed one field earlier. A user
+    // who picks the AI industry but writes "SMB owners who want AI explained
+    // without jargon" got both statements injected into the same prompt, and
+    // the model had no way to know which one was authoritative.
+    //
+    // icp_description (written above, priority 1, from the user's own words)
+    // is now the single source of truth for who the reader is. Tone, themes,
+    // philosophy and forbidden words still come from the preset -- those
+    // describe the brand's register, not its audience, so they compose with
+    // the user's answer instead of contradicting it.
     if (matchedPreset && !hasAiDirectives) {
       directivesToCreate.push({
         id: `DIR-${crypto.randomUUID()}`,
@@ -184,31 +206,7 @@ export async function POST(request: Request) {
         isActive: true,
       });
 
-      if (matchedPreset.audienceLanes?.builders) {
-        directivesToCreate.push({
-          id: `DIR-${crypto.randomUUID()}`,
-          clientId: ctx.clientId,
-          category: "AUDIENCE",
-          ruleKey: "lane_builders",
-          instruction: matchedPreset.audienceLanes.builders,
-          priority: 3,
-          audienceScope: "ICP",
-          isActive: true,
-        });
-      }
 
-      if (matchedPreset.audienceLanes?.business) {
-        directivesToCreate.push({
-          id: `DIR-${crypto.randomUUID()}`,
-          clientId: ctx.clientId,
-          category: "AUDIENCE",
-          ruleKey: "lane_business",
-          instruction: matchedPreset.audienceLanes.business,
-          priority: 3,
-          audienceScope: "PEER",
-          isActive: true,
-        });
-      }
 
       if (matchedPreset.forbiddenWords?.length) {
         directivesToCreate.push({

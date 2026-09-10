@@ -337,13 +337,14 @@ model BrandProfile {
   // other tenants WILL have real customer results to cite truthfully, so
   // this becomes a typed boolean the gate code reads, not prose fed to an LLM.
   allowCustomerResultClaims Boolean  @default(false) @map("allow_customer_result_claims")
-  // How deep the audience already is in this subject, set during onboarding.
-  // PRACTITIONER = assumes fundamentals, goes technical fast.
-  // OPERATOR     = mixed room, explain the why before the how (default).
-  // EXECUTIVE    = outcomes, cost and risk; little implementation detail.
-  // Read by /api/brand/context so the harvester and the writer calibrate
-  // depth and jargon to the same level instead of each guessing.
-  audienceExpertise         String   @default("OPERATOR") @map("audience_expertise")
+  // How deep the AUTHOR is in this subject, set during onboarding.
+  // EXPLORER     = newer to the field; cite sources, never claim experience.
+  // PRACTITIONER = hands-on; may speak from their own projects (default).
+  // AUTHORITY    = deep expertise; may make strong, definitive calls.
+  // Read by /api/brand/context. Governs what a draft may claim as EVIDENCE
+  // and how assertive it may be -- reading level is a separate axis and comes
+  // from the audience/positioning directives.
+  writerExpertise           String   @default("PRACTITIONER") @map("writer_expertise")
   visualAssets              Json?    @default("{}") @map("visual_assets")
   updatedAt                 DateTime @default(now()) @updatedAt @map("updated_at")
 

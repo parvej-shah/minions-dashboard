@@ -3,7 +3,7 @@ import { getBrandSettings, getWriterVoiceConfig, getHarvestContext } from "@/ser
 import { BLOG_BASE_URL, normalizeDomain } from "@/constants/config";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { verifyWebhookSecret } from "@/lib/security";
-import { expertisePromptGuidance } from "@/constants/audienceExpertise";
+import { writerExpertisePromptGuidance } from "@/constants/writerExpertise";
 
 /**
  * Structured brand context for the n8n drafting pipeline to ingest.
@@ -61,10 +61,13 @@ export async function GET(request: Request) {
       tone_examples: voiceConfig.toneExamples,
       allow_customer_result_claims: voiceConfig.allowCustomerResultClaims,
       visual_assets: brand.visual_assets,
-      // Audience depth, set once in onboarding. Both the harvester and the
-      // writer read this so idea depth and draft depth cannot drift apart.
-      audience_expertise: harvest.audienceExpertise,
-      audience_expertise_guidance: expertisePromptGuidance(harvest.audienceExpertise),
+      // The AUTHOR's standing in their field, set once in onboarding. Governs
+      // what a draft may claim as evidence (lived experience vs. cited work)
+      // and how assertive it may be. Reading level is a separate axis and
+      // comes from the audience/positioning directives, so a beginner writing
+      // for specialists stays expressible.
+      writer_expertise: harvest.writerExpertise,
+      writer_expertise_guidance: writerExpertisePromptGuidance(harvest.writerExpertise),
       // Per-tenant harvest feeds, replacing the four URLs 01_idea_harvester
       // used to hardcode for every tenant regardless of industry.
       idea_sources: harvest.sources,

@@ -1,4 +1,4 @@
-import type { AudienceExpertise } from "@/constants/audienceExpertise";
+import type { WriterExpertise } from "@/constants/writerExpertise";
 
 /**
  * Collapsed from a 17-value taxonomy (IDENTITY/ICP_PROFILE/ICP_PAIN/POSITIONING/
@@ -84,8 +84,8 @@ export interface BrandSettings {
   };
   directives?: BrandDirectiveItem[];
   visual_assets?: VisualAssets;
-  /** How deep the audience already is; drives idea and draft depth. */
-  audience_expertise: AudienceExpertise;
+  /** How deep the AUTHOR is in the field; drives evidence and assertiveness, not reading level. */
+  writer_expertise: WriterExpertise;
   updated_at: string;
 }
 
@@ -103,7 +103,7 @@ export interface BrandProfileInput {
   tone_cadence: string;
   allowed_proof_claims: string[];
   visual_assets?: VisualAssets;
-  audience_expertise?: AudienceExpertise;
+  writer_expertise?: WriterExpertise;
 }
 
 export interface BrandVoiceQuestionnaire {

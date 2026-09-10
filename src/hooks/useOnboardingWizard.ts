@@ -4,7 +4,7 @@ import { apiClient, toErrorMessage, ApiRequestError } from "@/lib/api-client";
 import type { BrandPreset } from "@/constants/brandPresets";
 import type { GeneratedDirective } from "@/app/api/onboarding/brand-copilot/route";
 import type { LinkedInProfile, AiSuggestions } from "@/app/api/onboarding/voice-import/route";
-import { DEFAULT_AUDIENCE_EXPERTISE, type AudienceExpertise } from "@/constants/audienceExpertise";
+import { DEFAULT_WRITER_EXPERTISE, type WriterExpertise } from "@/constants/writerExpertise";
 
 export const ONBOARDING_STEPS = ["Your brand", "Your voice", "Start creating"] as const;
 
@@ -47,8 +47,8 @@ export interface OnboardingWizardState {
   setAudienceDescription: (val: string) => void;
   contentFocus: string;
   setContentFocus: (val: string) => void;
-  audienceExpertise: AudienceExpertise;
-  setAudienceExpertise: (val: AudienceExpertise) => void;
+  writerExpertise: WriterExpertise;
+  setWriterExpertise: (val: WriterExpertise) => void;
   industry: string;
   setIndustry: (val: string) => void;
   selectedPresetId: string | null;
@@ -91,8 +91,8 @@ export function useOnboardingWizard(): OnboardingWizardState {
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [audienceDescription, setAudienceDescription] = useState("");
   const [contentFocus, setContentFocus] = useState("");
-  const [audienceExpertise, setAudienceExpertise] =
-    useState<AudienceExpertise>(DEFAULT_AUDIENCE_EXPERTISE);
+  const [writerExpertise, setWriterExpertise] =
+    useState<WriterExpertise>(DEFAULT_WRITER_EXPERTISE);
   const [industry, setIndustry] = useState("");
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
 
@@ -139,7 +139,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         if (parsed.websiteUrl) setWebsiteUrl(parsed.websiteUrl);
         if (parsed.audienceDescription) setAudienceDescription(parsed.audienceDescription);
         if (parsed.contentFocus) setContentFocus(parsed.contentFocus);
-        if (parsed.audienceExpertise) setAudienceExpertise(parsed.audienceExpertise);
+        if (parsed.writerExpertise) setWriterExpertise(parsed.writerExpertise);
         if (parsed.industry) setIndustry(parsed.industry);
         if (parsed.selectedPresetId) setSelectedPresetId(parsed.selectedPresetId);
         if (parsed.channels && Array.isArray(parsed.channels)) setChannels(parsed.channels);
@@ -183,7 +183,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
           websiteUrl,
           audienceDescription,
           contentFocus,
-          audienceExpertise,
+          writerExpertise,
           industry,
           selectedPresetId,
           channels,
@@ -203,7 +203,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         })
       );
     } catch {}
-  }, [businessName, businessNameFromLinkedIn, websiteUrl, audienceDescription, contentFocus, audienceExpertise, industry, selectedPresetId, channels, publishingMode, mythAnswer, differentiatorAnswer, avoidAnswer, selectedVoice, customSampleText, step, linkedInProfile, postSnippet, aiSuggestions, importedVoiceCount, directives, positioningSummary, hasRestoredDraft]);
+  }, [businessName, businessNameFromLinkedIn, websiteUrl, audienceDescription, contentFocus, writerExpertise, industry, selectedPresetId, channels, publishingMode, mythAnswer, differentiatorAnswer, avoidAnswer, selectedVoice, customSampleText, step, linkedInProfile, postSnippet, aiSuggestions, importedVoiceCount, directives, positioningSummary, hasRestoredDraft]);
 
   function applyPreset(preset: BrandPreset) {
     setSelectedPresetId(preset.id);
@@ -303,7 +303,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         websiteUrl: websiteUrl.trim(),
         audienceDescription: audienceDescription.trim(),
         contentFocus: contentFocus.trim(),
-        audienceExpertise,
+        writerExpertise,
         voiceSample,
         mythAnswer,
         differentiatorAnswer,
@@ -363,7 +363,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         industry: industry.trim() || "General Business",
         icp_description: positioningSummary || `${businessName || "My Brand"} provides ${industry} solutions.`,
         content_focus: contentFocus.trim(),
-        audience_expertise: audienceExpertise,
+        writer_expertise: writerExpertise,
         channels,
         preset_id: selectedPresetId,
         logo_url: linkedInProfile?.profilePicture || undefined,
@@ -441,8 +441,8 @@ export function useOnboardingWizard(): OnboardingWizardState {
     setAudienceDescription,
     contentFocus,
     setContentFocus,
-    audienceExpertise,
-    setAudienceExpertise,
+    writerExpertise,
+    setWriterExpertise,
     industry,
     setIndustry,
     selectedPresetId,

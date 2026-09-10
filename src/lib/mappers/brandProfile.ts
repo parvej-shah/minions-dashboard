@@ -1,7 +1,7 @@
 import type { BrandProfile } from "@prisma/client";
 import type { BrandSettings, VisualAssets } from "@/types";
 import { STATIC_BANNED_LEXICON } from "@/constants/brand";
-import { resolveAudienceExpertise } from "@/constants/audienceExpertise";
+import { resolveWriterExpertise } from "@/constants/writerExpertise";
 
 export function toBrandSettingsDTO(
   row: BrandProfile
@@ -32,7 +32,7 @@ export function toBrandSettingsDTO(
       title_word_count_max: 6,
     },
     visual_assets: (row.visualAssets as VisualAssets | null) || { socialCovers: [], mascots: [] },
-    audience_expertise: resolveAudienceExpertise(row.audienceExpertise),
+    writer_expertise: resolveWriterExpertise(row.writerExpertise),
     updated_at: row.updatedAt.toISOString(),
   };
 }

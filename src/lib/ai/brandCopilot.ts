@@ -89,11 +89,11 @@ export interface BrandSuggestionInput {
   /** The subject-matter territory the user wants their content to own. */
   contentFocus?: string;
   /**
-   * Prose describing how deep the audience already is (see
-   * constants/audienceExpertise). Injected so the directives this call
+   * Prose describing the author's own standing in the field (see
+   * constants/writerExpertise). Injected so the directives this call
    * produces are calibrated to the same level the harvester and writer use.
    */
-  audienceExpertiseGuidance?: string;
+  writerExpertiseGuidance?: string;
 }
 
 /**
@@ -165,11 +165,11 @@ export interface BrandDirectiveInput {
   /** The subject-matter territory the user wants their content to own. */
   contentFocus?: string;
   /**
-   * Prose describing how deep the audience already is (see
-   * constants/audienceExpertise). Injected so the directives this call
+   * Prose describing the author's own standing in the field (see
+   * constants/writerExpertise). Injected so the directives this call
    * produces are calibrated to the same level the harvester and writer use.
    */
-  audienceExpertiseGuidance?: string;
+  writerExpertiseGuidance?: string;
 }
 
 const VALID_CATEGORIES = new Set(["POSITIONING", "VOICE", "FORBIDDEN", "TOPICS"]);
@@ -193,7 +193,7 @@ ${input.headline ? `Founder/operator's professional headline: ${input.headline}\
 Their #1 differentiator: ${input.differentiatorAnswer || "(not specified)"}
 Topics/claims to strictly avoid: ${input.avoidAnswer || "(not specified)"}
 Writing sample to match, if present: ${input.voiceSample ? input.voiceSample.slice(0, 1000) : "(not provided)"}
-${input.audienceExpertiseGuidance ? `\nAudience depth (calibrate every directive to this):\n${input.audienceExpertiseGuidance}\n` : ""}
+${input.writerExpertiseGuidance ? `\nAuthor standing (governs what the directives may claim as evidence, NOT how technical they are -- reading level comes from the audience above):\n${input.writerExpertiseGuidance}\n` : ""}
 Task:
 Write 5-6 sharp, specific brand directives grounded in the answers above (do not invent facts not implied by them), plus a 1-2 sentence positioning summary. Each directive's "instruction" must be a concrete, actionable rule for an AI writer -- not vague marketing language.
 

@@ -3,7 +3,7 @@ import { DEFAULT_BRAND_SETTINGS, STATIC_BANNED_LEXICON } from "@/constants/brand
 import { toDirectiveDTO } from "@/lib/mappers/directive";
 import { toBrandSettingsDTO } from "@/lib/mappers/brandProfile";
 import type { BrandProfileInput, BrandSettings } from "@/types";
-import { resolveAudienceExpertise, DEFAULT_AUDIENCE_EXPERTISE, type AudienceExpertise } from "@/constants/audienceExpertise";
+import { resolveWriterExpertise, DEFAULT_WRITER_EXPERTISE, type WriterExpertise } from "@/constants/writerExpertise";
 import { resolveSourceFeedUrl } from "@/constants/ideaSources";
 import { selectAnglesForRun } from "@/constants/contentAngles";
 import { thesisKey, restemKey } from "@/lib/thesis";
@@ -58,7 +58,7 @@ export async function getBrandSettings(clientId: string): Promise<BrandSettings>
           banned_lexicon: dynamicBannedLexicon,
           allowed_proof_claims: [],
         },
-        audience_expertise: DEFAULT_AUDIENCE_EXPERTISE,
+        writer_expertise: DEFAULT_WRITER_EXPERTISE,
         thumbnail_layout: {
           visual_style: "Executive Studio Lighting (Dark slate background, subtle rim lighting)",
           show_badge: true,
@@ -122,7 +122,7 @@ export async function updateBrandSettings(
     toneFormality: input.tone_formality,
     toneCadence: input.tone_cadence,
     allowedProofClaims: input.allowed_proof_claims,
-    ...(input.audience_expertise ? { audienceExpertise: input.audience_expertise } : {}),
+    ...(input.writer_expertise ? { writerExpertise: input.writer_expertise } : {}),
     ...(input.visual_assets ? { visualAssets: input.visual_assets as import("@prisma/client").Prisma.InputJsonValue } : {}),
   };
 
@@ -177,7 +177,7 @@ export interface HarvestSource {
 }
 
 export interface HarvestContext {
-  audienceExpertise: AudienceExpertise;
+  writerExpertise: WriterExpertise;
   sources: HarvestSource[];
   recentTheses: string[];
   pillarRotation: { id: string; pillar: string; brief: string }[];
@@ -201,7 +201,7 @@ export interface HarvestContext {
 export async function getHarvestContext(clientId: string): Promise<HarvestContext> {
   const [profile, sourceRows, recentIdeas, runCount] = await Promise.all([
     prisma.brandProfile
-      .findUnique({ where: { clientId }, select: { audienceExpertise: true } })
+      .findUnique({ where: { clientId }, select: { writerExpertise: true } })
       .catch(() => null),
     prisma.ideaSource
       .findMany({ where: { clientId, isActive: true }, orderBy: { createdAt: "asc" } })
@@ -237,7 +237,7 @@ export async function getHarvestContext(clientId: string): Promise<HarvestContex
     .filter(Boolean);
 
   return {
-    audienceExpertise: resolveAudienceExpertise(profile?.audienceExpertise),
+    writerExpertise: resolveWriterExpertise(profile?.writerExpertise),
     sources,
     recentTheses: Array.from(new Set(recentTheses)),
     pillarRotation: selectAnglesForRun(runCount),

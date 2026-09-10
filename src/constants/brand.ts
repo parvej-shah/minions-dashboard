@@ -1,4 +1,4 @@
-import { DEFAULT_AUDIENCE_EXPERTISE } from "@/constants/audienceExpertise";
+import { DEFAULT_WRITER_EXPERTISE } from "@/constants/writerExpertise";
 import type { BrandSettings } from "@/types";
 import { BRAND_POSITIONING, PRIMARY_LOGO_URL } from "@/constants/config";
 
@@ -51,7 +51,7 @@ export const DEFAULT_BRAND_SETTINGS: Omit<BrandSettings, "directives" | "updated
       "Direct team engineering logs from Dhaka",
     ],
   },
-  audience_expertise: DEFAULT_AUDIENCE_EXPERTISE,
+  writer_expertise: DEFAULT_WRITER_EXPERTISE,
   thumbnail_layout: {
     visual_style:
       "Tactile Commercial Studio Flat-Lay (Stitched leather clipboard, metallic mechanical clip, dark slate tabletop, volumetric rim lighting)",

@@ -1,6 +1,6 @@
 import type { OnboardingWizardState } from "@/hooks/useOnboardingWizard";
 import { BRAND_PRESETS } from "@/constants/brandPresets";
-import { AUDIENCE_EXPERTISE_OPTIONS } from "@/constants/audienceExpertise";
+import { WRITER_EXPERTISE_OPTIONS } from "@/constants/writerExpertise";
 import { Globe, Building2, Sparkles, CheckCircle2, ArrowRight, GraduationCap } from "lucide-react";
 
 // Onboarding needs only a broad starting lane. The two required prompts above
@@ -70,16 +70,16 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
       <div>
         <label className="block text-sm font-semibold text-[#94A3B8] mb-1.5 flex items-center gap-1.5">
           <GraduationCap className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
-          How much does your audience already know?
+          How deep is your experience in this field?
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          {AUDIENCE_EXPERTISE_OPTIONS.map((option) => {
-            const isSelected = wizard.audienceExpertise === option.id;
+          {WRITER_EXPERTISE_OPTIONS.map((option) => {
+            const isSelected = wizard.writerExpertise === option.id;
             return (
               <button
                 key={option.id}
                 type="button"
-                onClick={() => wizard.setAudienceExpertise(option.id)}
+                onClick={() => wizard.setWriterExpertise(option.id)}
                 aria-pressed={isSelected}
                 className={`text-left rounded-lg border px-3 py-2.5 transition-all ${
                   isSelected
@@ -97,7 +97,7 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
           })}
         </div>
         <p className="mt-1.5 text-xs text-[#64748B]">
-          Sets how deep every idea and draft goes. You can change this later in Brand.
+          Sets what your posts can claim as proof — cited research vs. your own projects. How technical they get comes from your audience answer above. Change it later in Brand.
         </p>
       </div>
 
