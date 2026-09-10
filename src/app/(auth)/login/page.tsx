@@ -53,6 +53,9 @@ function LoginContent() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
+      if (callbackUrl.startsWith("/onboarding")) {
+        await fetch("/api/onboarding/begin", { method: "POST" });
+      }
       await signIn("google", { callbackUrl });
     } catch (err) {
       console.error("Sign in error:", err);

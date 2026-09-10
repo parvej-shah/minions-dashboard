@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient, toErrorMessage, ApiRequestError } from "@/lib/api-client";
-import { BRAND_PRESETS, type BrandPreset } from "@/constants/brandPresets";
+import type { BrandPreset } from "@/constants/brandPresets";
 import type { GeneratedDirective } from "@/app/api/onboarding/brand-copilot/route";
 import type { LinkedInProfile, AiSuggestions } from "@/app/api/onboarding/voice-import/route";
 
-export const ONBOARDING_STEPS = ["Your brand", "Your perspective", "Your voice", "Start creating"] as const;
+export const ONBOARDING_STEPS = ["Your brand", "Your perspective", "Channels", "Start creating"] as const;
 
 export interface OnboardingWizardState {
   step: number;
@@ -278,6 +278,10 @@ export function useOnboardingWizard(): OnboardingWizardState {
 
   async function generateDirectives() {
     setError(null);
+    if (customSampleText.trim().length < 20) {
+      setError("Add a short description of your natural writing voice so we can make the first drafts sound like you.");
+      return;
+    }
     setIsGeneratingDirectives(true);
     try {
       const res: any = await apiClient.post("/api/onboarding/brand-copilot", {
@@ -285,6 +289,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         businessName: businessName.trim() || "Our Company",
         websiteUrl: websiteUrl.trim(),
         audienceDescription: audienceDescription.trim(),
+        voiceSample: customSampleText.trim(),
         mythAnswer,
         differentiatorAnswer,
         avoidAnswer,
@@ -317,6 +322,18 @@ export function useOnboardingWizard(): OnboardingWizardState {
     setError(null);
     setSaving(true);
     try {
+      const sample = customSampleText.trim();
+      if (sample.length >= 20 && importedVoiceCount === 0) {
+        try {
+          const res = await apiClient.post<{ success: boolean; examples_saved: number }>("/api/onboarding/voice", {
+            examples: [sample],
+          });
+          if (res.success) setImportedVoiceCount(res.examples_saved);
+        } catch (voiceErr) {
+          console.warn("Onboarding voice sample save non-fatal:", voiceErr);
+        }
+      }
+
       await apiClient.post("/api/onboarding/setup", {
         industry: industry.trim() || "General Business",
         icp_description: positioningSummary || `${businessName || "My Brand"} provides ${industry} solutions.`,

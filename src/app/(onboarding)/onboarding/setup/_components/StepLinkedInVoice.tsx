@@ -80,10 +80,10 @@ export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizard
       <div>
         <div className="flex items-center gap-2 mb-1.5">
           <KeyRound className="w-4 h-4 sm:w-5 sm:h-5 text-[#00C9A7] shrink-0" />
-          <h2 className="text-lg sm:text-xl font-bold text-[#F1F5F9] leading-snug">Make it sound like you <span className="text-sm font-medium text-[#94A3B8]">(optional)</span></h2>
+          <h2 className="text-lg sm:text-xl font-bold text-[#F1F5F9] leading-snug">Connect LinkedIn <span className="text-sm font-medium text-[#94A3B8]">(optional)</span></h2>
         </div>
         <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-          Paste a post you&apos;re proud of or connect LinkedIn. This improves voice matching, but you can start creating without it.
+          Your writing sample is already part of your brand brief. Connect LinkedIn now to publish there or import more voice context; you can also do this later from the dashboard.
         </p>
       </div>
 
@@ -146,41 +146,6 @@ export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizard
             </Link>
           )}
         </div>
-
-        {/* A real sample must not be gated behind OAuth: it is the dependable
-            voice-calibration path while LinkedIn's post API is unavailable. */}
-        <div className="pt-3 border-t border-[#0077b5]/20 space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-semibold text-[#94A3B8]">
-                Paste a post, email, or profile bio <span className="text-[#64748B] font-normal">(optional)</span>:
-              </label>
-            </div>
-            <textarea
-              rows={3}
-              value={wizard.customSampleText}
-              onChange={(e) => wizard.setCustomSampleText(e.target.value)}
-              placeholder='e.g. "Clear systems beat clever strategies every time..." — Paste any post or bio sample to calibrate your voice instantly.'
-              className="w-full rounded-xl bg-[#070B0F] border border-[#1F2D3D] p-3 text-[#F1F5F9] placeholder:text-[#475569] focus:outline-none focus:border-[#00C9A7] text-xs leading-relaxed"
-            />
-            {!isConnected && (
-              <button
-                type="button"
-                onClick={wizard.saveManualVoice}
-                disabled={wizard.customSampleText.trim().length < 20}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#00C9A7]/30 bg-[#00C9A7]/10 text-xs font-semibold text-[#00C9A7] hover:bg-[#00C9A7]/20 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                Save writing sample
-              </button>
-            )}
-        </div>
-
-        {wizard.importedVoiceCount > 0 && !profile && (
-          <div className="flex items-center gap-2 text-[11px] text-[#00C9A7]">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Writing sample saved. Your next drafts will use it as voice guidance.</span>
-          </div>
-        )}
 
         {/* Profile preview card — shown after successful import */}
         {hasImported && profile && (

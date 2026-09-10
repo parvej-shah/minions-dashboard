@@ -119,7 +119,7 @@ export default function StepBrandInterview({ wizard }: { wizard: OnboardingWizar
               Based on <span className="text-[#F1F5F9] font-medium">{groundedIn}</span>. Tap to use or type your own.
             </>
           ) : isAiPowered ? (
-            "A first-pass draft based on your industry — edit freely, then add a writing sample on the next step so your drafts sound more like you."
+            "A first-pass draft based on your industry. Add one writing sample below if you want the first rules to sound closer to you."
           ) : (
             "Tap a suggestion or type your own perspective. Minions will turn it into a clear writing playbook for your ideas and drafts."
           )}
@@ -133,6 +133,23 @@ export default function StepBrandInterview({ wizard }: { wizard: OnboardingWizar
       )}
 
       <div className="space-y-4">
+        <div className="p-4 rounded-xl border border-[#1F2D3D] bg-[#070B0F]/60 space-y-2.5">
+          <label className="block text-xs font-semibold text-[#F1F5F9] flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#00C9A7]" />
+            <span>In 1–2 lines, how should Minions sound like you?</span>
+          </label>
+          <textarea
+            rows={3}
+            value={wizard.customSampleText}
+            onChange={(e) => wizard.setCustomSampleText(e.target.value)}
+            placeholder="e.g. Direct and practical. Short paragraphs, no hype, clear tradeoffs and a useful next step."
+            className={textareaClass}
+          />
+          <p className="text-[11px] text-[#64748B]">
+            This is the only voice input we need to start. Add posts and examples from Brand later to keep improving it.
+          </p>
+        </div>
+
         {/* Question 1 */}
         <div className="p-4 rounded-xl border border-[#1F2D3D] bg-[#070B0F]/60 space-y-2.5">
           <label className="block text-xs font-semibold text-[#F1F5F9] flex items-center gap-2">
@@ -241,7 +258,7 @@ export default function StepBrandInterview({ wizard }: { wizard: OnboardingWizar
         <button
           type="button"
           onClick={wizard.generateDirectives}
-          disabled={wizard.isGeneratingDirectives}
+          disabled={wizard.isGeneratingDirectives || wizard.customSampleText.trim().length < 20}
           className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#00C9A7] hover:bg-[#00C9A7]/90 text-[#070B0F] font-semibold text-sm transition-colors shadow-lg shadow-[#00C9A7]/20 disabled:opacity-50"
         >
           {wizard.isGeneratingDirectives ? (

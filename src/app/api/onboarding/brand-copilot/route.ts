@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireTenantAccess } from "@/lib/tenant";
-import { apiError, apiFailure } from "@/lib/api-response";
+import { apiError } from "@/lib/api-response";
 import { BRAND_PRESETS, type BrandPreset } from "@/constants/brandPresets";
 import { generateBrandDirectivesWithLLM, type GeneratedDirective } from "@/lib/ai/brandCopilot";
 import { fetchWebsiteContext } from "@/lib/ai/websiteContext";
@@ -13,6 +13,7 @@ interface CopilotInput {
   mythAnswer?: string;
   differentiatorAnswer?: string;
   avoidAnswer?: string;
+  voiceSample?: string;
   selectedPresetId?: string;
   headline?: string;
 }
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
     const myth = (body.mythAnswer || "").trim();
     const differentiator = (body.differentiatorAnswer || "").trim();
     const avoid = (body.avoidAnswer || "").trim();
+    const voiceSample = (body.voiceSample || "").trim();
     const websiteUrl = (body.websiteUrl || "").trim();
     const audienceDescription = (body.audienceDescription || "").trim();
 
@@ -51,6 +53,7 @@ export async function POST(request: Request) {
       mythAnswer: myth,
       differentiatorAnswer: differentiator,
       avoidAnswer: avoid,
+      voiceSample,
       headline: (body.headline || "").trim() || undefined,
       websiteContext: website?.summary,
     });
@@ -119,7 +122,9 @@ export async function POST(request: Request) {
     directives.push({
       category: "VOICE",
       rule_key: "PROSE_CADENCE_AND_RHYTHM",
-      instruction: `Write in concise 1–3 sentence paragraphs. Keep the tone ${preset.toneFormality.replace("_", " ")}. Use punchy hooks and clear actionable takeaways.`,
+      instruction: voiceSample
+        ? `Match the user's sampled voice: ${voiceSample.slice(0, 240)}${voiceSample.length > 240 ? "..." : ""} Keep the same sentence rhythm and level of directness without copying lines verbatim.`
+        : `Write in concise 1-3 sentence paragraphs. Keep the tone ${preset.toneFormality.replace("_", " ")}. Use punchy hooks and clear actionable takeaways.`,
       priority: 2,
     });
 

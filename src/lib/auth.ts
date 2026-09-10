@@ -1,7 +1,6 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { authConfig } from "./auth.config";
-import { requireOneOfEnv } from "./env";
 import { prisma } from "./prisma";
 import { consumePendingSignup } from "./onboarding";
 import type { UserRole } from "@/constants/access";
@@ -45,6 +44,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const dbUser = await prisma.user.findUnique({ where: { email: cleanEmail } });
       if (dbUser) return true;
 
+      const isPendingSignup = await consumePendingSignup();
+
       const pendingInvite = await prisma.clientMembership.findFirst({
         where: { email: cleanEmail, userId: null },
         orderBy: { invitedAt: "asc" },
@@ -68,41 +69,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return true;
       }
 
-      // For any new Google user, provision a workspace and User row as OWNER immediately.
-      const clientName = `${user.name || cleanEmail.split("@")[0]}'s Workspace`;
-      const baseSlug = (user.name || cleanEmail.split("@")[0])
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/[\s_-]+/g, "-")
-        .replace(/^-+|-+$/g, "")
-        .slice(0, 50) || "workspace";
-      const slug = `${baseSlug}-${Date.now().toString(36)}`;
+      if (!isPendingSignup) return false;
 
-      const newClient = await prisma.client.create({
-        data: {
-          name: clientName,
-          slug,
-          status: "TRIAL",
-        },
-      });
-
-      const newUser = await prisma.user.create({
+      await prisma.user.create({
         data: {
           email: cleanEmail,
           name: user.name ?? null,
-          clientId: newClient.id,
-          role: "OWNER",
-        },
-      });
-
-      await prisma.clientMembership.create({
-        data: {
-          clientId: newClient.id,
-          userId: newUser.id,
-          email: cleanEmail,
-          role: "OWNER",
-          acceptedAt: new Date(),
+          clientId: null,
+          role: "MEMBER",
         },
       });
 

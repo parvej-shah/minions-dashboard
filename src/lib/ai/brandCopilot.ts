@@ -152,6 +152,8 @@ export interface BrandDirectiveInput {
   headline?: string;
   /** Plain-text summary of the business's own website, when available. */
   websiteContext?: string;
+  /** User-provided writing sample captured during onboarding. */
+  voiceSample?: string;
 }
 
 const VALID_CATEGORIES = new Set(["POSITIONING", "VOICE", "FORBIDDEN"]);
@@ -173,6 +175,7 @@ Audience: ${input.audienceDescription || "(not specified)"}
 ${input.headline ? `Founder/operator's professional headline: ${input.headline}\n` : ""}${input.websiteContext ? `Their website (real content, use this as your primary source of truth):\n${input.websiteContext}\n\n` : ""}Myth they disagree with: ${input.mythAnswer || "(not specified)"}
 Their #1 differentiator: ${input.differentiatorAnswer || "(not specified)"}
 Topics/claims to strictly avoid: ${input.avoidAnswer || "(not specified)"}
+Writing sample to match, if present: ${input.voiceSample ? input.voiceSample.slice(0, 1000) : "(not provided)"}
 
 Task:
 Write 5-6 sharp, specific brand directives grounded in the answers above (do not invent facts not implied by them), plus a 1-2 sentence positioning summary. Each directive's "instruction" must be a concrete, actionable rule for an AI writer -- not vague marketing language.
