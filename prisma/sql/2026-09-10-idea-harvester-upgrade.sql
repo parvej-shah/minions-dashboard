@@ -45,10 +45,17 @@ CREATE TABLE IF NOT EXISTS idea_sources (
 
 CREATE INDEX IF NOT EXISTS idea_sources_client_active_idx ON idea_sources(client_id, is_active);
 
--- 4. Backfill: give every existing tenant the four feeds the harvester used
---    to hardcode, so behavior is unchanged until they edit their sources.
---    The Google News feed is stored as a query so the UI can show a topic
---    rather than an opaque URL.
+-- 4. Backfill: give every existing tenant the three general feeds the
+--    harvester used to hardcode, so behavior is unchanged until they edit
+--    their sources.
+--
+--    The fourth hardcoded feed -- a Google News query pinned to
+--    "pest control HVAC plumbing business owner" -- is deliberately NOT
+--    backfilled. It is correct only for a home-services brand and actively
+--    harmful elsewhere, and it was a major reason harvested ideas were both
+--    repetitive and off-topic. Tenants add their own industry topic in
+--    Brand > Idea Sources; see 2026-09-10-retarget-industry-news-source.sql
+--    for the repair applied to tenants that already received it.
 INSERT INTO idea_sources (id, client_id, kind, label, url, query, max_items)
 SELECT
   'ISRC-' || c.id || '-' || s.slug,
@@ -63,7 +70,6 @@ CROSS JOIN (
   VALUES
     ('hn',     'RSS',         'Hacker News',        'https://hnrss.org/frontpage', NULL, 5),
     ('tc',     'RSS',         'TechCrunch AI',      'https://techcrunch.com/category/artificial-intelligence/feed/', NULL, 5),
-    ('n8n',    'RSS',         'n8n Blog',           'https://blog.n8n.io/rss/', NULL, 3),
-    ('gnews',  'GOOGLE_NEWS', 'Industry News',      NULL, 'pest control HVAC plumbing business owner', 4)
+    ('n8n',    'RSS',         'n8n Blog',           'https://blog.n8n.io/rss/', NULL, 3)
 ) AS s(slug, kind, label, url, query, max_items)
 ON CONFLICT (id) DO NOTHING;

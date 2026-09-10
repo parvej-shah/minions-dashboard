@@ -9,6 +9,8 @@ import { useEditorialDraft } from "@/hooks/useEditorialDraft";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useToast } from "@/hooks/useToast";
 import { useChannelSummary } from "@/hooks/useChannelSummary";
+import { useBrandSettings } from "@/hooks/useBrandSettings";
+import { normalizeDomain } from "@/constants/config";
 import QueueRibbon, { type QueueFilter } from "./QueueRibbon";
 import DraftHeader from "./DraftHeader";
 import CoverImageCard from "./CoverImageCard";
@@ -40,6 +42,11 @@ export default function EditorialStudio({
   const { copiedKey, copy } = useCopyToClipboard(2200);
   const toast = useToast(3000);
   const channels = useChannelSummary();
+  // Confirmation copy names the tenant's own blog, not this company's.
+  const { brandSettings: studioBrand } = useBrandSettings();
+  const studioBlogHost =
+    (normalizeDomain(studioBrand?.company_domain) ?? "your blog").replace(/^https?:\/\//, "") +
+    (studioBrand?.company_domain ? "/blog" : "");
 
   const [listFilter, setListFilter] = useState<QueueFilter>("ALL");
   const [editorMode, setEditorMode] = useState<EditorMode>("preview");
@@ -307,8 +314,8 @@ export default function EditorialStudio({
         title={activeAsset.status === "PUBLISHED" ? "Unpublish Post" : "Republish Post Live"}
         description={
           activeAsset.status === "PUBLISHED"
-            ? `Are you sure you want to unpublish "${activeAsset.title}"? It will immediately be taken down from getminions.ai/blog and returned to the review queue without deleting any content.`
-            : `Are you sure you want to republish "${activeAsset.title}" live to getminions.ai/blog?`
+            ? `Are you sure you want to unpublish "${activeAsset.title}"? It will immediately be taken down from ${studioBlogHost} and returned to the review queue without deleting any content.`
+            : `Are you sure you want to republish "${activeAsset.title}" live to ${studioBlogHost}?`
         }
         confirmLabel={activeAsset.status === "PUBLISHED" ? "Unpublish Post" : "Republish Live"}
         cancelLabel="Cancel"

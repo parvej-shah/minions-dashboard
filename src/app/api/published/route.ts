@@ -3,15 +3,17 @@ import { prisma } from "@/lib/prisma";
 import { toPublishedDTO } from "@/lib/mappers/published";
 import { apiError } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
+import { getTenantBlogDomain } from "@/lib/tenantDomain";
 
 export async function GET() {
   const ctx = await requireClientId();
   if ("error" in ctx) return ctx.error;
 
   try {
-    const [assets, blogs] = await Promise.all([
+    const [assets, blogs, domain] = await Promise.all([
       prisma.asset.findMany({ where: { clientId: ctx.clientId } }),
       prisma.blog.findMany({ where: { clientId: ctx.clientId }, orderBy: { publishedAt: "desc" } }),
+      getTenantBlogDomain(ctx.clientId),
     ]);
 
     const assetsById = new Map(assets.map((a) => [a.id, a]));
@@ -21,7 +23,8 @@ export async function GET() {
       toPublishedDTO(
         blog,
         (blog.assetId ? assetsById.get(blog.assetId) : undefined) ?? assetsBySlug.get(blog.slug),
-        index
+        index,
+        domain
       )
     );
 

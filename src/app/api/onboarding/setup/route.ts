@@ -5,6 +5,7 @@ import { requireTenantAccess, isPlaceholderTenantName } from "@/lib/tenant";
 import { DISTRIBUTION_CHANNELS } from "@/constants/channels";
 import { BRAND_PRESETS } from "@/constants/brandPresets";
 import { resolveAudienceExpertise } from "@/constants/audienceExpertise";
+import { normalizeDomain } from "@/constants/config";
 
 /**
  * ICP/industry/tone-formality/channel step of onboarding. Writes:
@@ -25,6 +26,9 @@ export async function POST(request: Request) {
     const presetId = (body.preset_id || "").toString().trim();
     const logoUrl = (body.logo_url || "").toString().trim();
     const businessName = (body.business_name || "").toString().trim();
+    // The tenant's own public site. blogUrl() builds every public post URL on
+    // this, so leaving it empty makes those URLs advertise getminions.ai.
+    const websiteUrl = normalizeDomain((body.website_url || "").toString()) || "";
     // Falls back to OPERATOR for any unrecognized value, so an older client
     // that doesn't send the field still writes a valid level.
     const audienceExpertise = resolveAudienceExpertise(body.audience_expertise);
@@ -68,6 +72,8 @@ export async function POST(request: Request) {
       where: { clientId: ctx.clientId },
       update: {
         positioning: icpDescription,
+        // Never clobber a domain the operator already set with a blank.
+        ...(websiteUrl ? { companyDomain: websiteUrl } : {}),
         // Also set on update: re-running onboarding with a real business name
         // must overwrite a placeholder brandName, which previously persisted
         // because brandName was only ever written in the create branch.
@@ -82,7 +88,7 @@ export async function POST(request: Request) {
       create: {
         clientId: ctx.clientId,
         brandName: resolvedName,
-        companyDomain: "",
+        companyDomain: websiteUrl,
         positioning: icpDescription,
         primaryLogoUrl: logoUrl,
         primaryInk: "#12242A",

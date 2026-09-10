@@ -295,3 +295,66 @@ describe("toDirectiveDTO", () => {
     expect(dto.updated_at).toBe(UPDATED.toISOString());
   });
 });
+
+/**
+ * Public post URLs must name the tenant that owns the post. They were built
+ * from a hardcoded getminions.ai constant, so every tenant's "Live on Blog"
+ * button, published feed, and LinkedIn first-comment backlink advertised this
+ * company's domain instead of the customer's.
+ */
+describe("tenant-scoped blog URLs", () => {
+  const blog = {
+    slug: "why-chat-logs-fail",
+    title: "Why Chat Logs Fail",
+    subtitle: null,
+    hook: "State beats transcripts",
+    coreArgument: null,
+    content: "Body without an image",
+    audience: "ICP",
+    pillar: "Operations",
+    author: {},
+    tags: [],
+    metaDescription: null,
+    readingTimeMinutes: 2,
+    assetId: "ASSET-0001",
+    docUrl: null,
+    publishedAt: CREATED,
+    createdAt: CREATED,
+    updatedAt: UPDATED,
+  } as unknown as Blog;
+
+  it("builds published_url and first_comment on the tenant's own domain", () => {
+    const dto = toPublishedDTO(blog, makeAsset(), 0, "https://parvejshah.com");
+    expect(dto.published_url).toBe("https://parvejshah.com/blog/why-chat-logs-fail");
+    expect(dto.first_comment).toContain("https://parvejshah.com/blog/why-chat-logs-fail");
+    expect(dto.first_comment).not.toContain("getminions.ai");
+  });
+
+  it("accepts a bare domain with no scheme", () => {
+    expect(toPublishedDTO(blog, makeAsset(), 0, "acme.com").published_url).toBe(
+      "https://acme.com/blog/why-chat-logs-fail"
+    );
+  });
+
+  it("tolerates a trailing slash rather than doubling it", () => {
+    expect(toPublishedDTO(blog, makeAsset(), 0, "https://acme.com/").published_url).toBe(
+      "https://acme.com/blog/why-chat-logs-fail"
+    );
+  });
+
+  it("falls back to the default host only when the tenant has no domain", () => {
+    expect(toPublishedDTO(blog, makeAsset(), 0, "   ").published_url).toContain("getminions.ai");
+    expect(toPublishedDTO(blog, makeAsset(), 0, null).published_url).toContain("getminions.ai");
+  });
+
+  it("scopes asset doc_url and live_blog_url to the tenant too", () => {
+    const dto = toAssetDTO(makeAsset({ docUrl: null }), "my-post", "https://parvejshah.com");
+    expect(dto.doc_url).toBe("https://parvejshah.com/blog/deterministic-voice-pipelines");
+    expect(dto.live_blog_url).toBe("https://parvejshah.com/blog/my-post");
+  });
+
+  it("still prefers an explicitly stored docUrl over any domain", () => {
+    const dto = toAssetDTO(makeAsset({ docUrl: "https://example.com/x" }), null, "https://acme.com");
+    expect(dto.doc_url).toBe("https://example.com/x");
+  });
+});

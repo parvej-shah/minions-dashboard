@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
-import { blogUrl } from "@/constants/config";
+import { blogUrl, normalizeDomain } from "@/constants/config";
+import { useBrandSettings } from "@/hooks/useBrandSettings";
 import type { AssetItem, AssetStatus } from "@/types";
 
 export type PublishState = "idle" | "pending" | "success" | "error";
@@ -61,6 +62,11 @@ const EMPTY_EDITS = { title: "", hook: "", body: "", linkedin: "", facebook: "",
  * success before — and regardless of whether — the request succeeded.
  */
 export function useEditorialDraft(initialDraftId?: string): EditorialDraftState {
+  // The tenant's own blog host. Without it every optimistic doc_url and the
+  // publish confirmation named getminions.ai, whoever owned the post.
+  const { brandSettings } = useBrandSettings();
+  const tenantDomain = brandSettings?.company_domain || null;
+  const blogHost = (normalizeDomain(tenantDomain) ?? "your blog").replace(/^https?:\/\//, "");
   const [assets, setAssets] = useState<AssetItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -187,14 +193,14 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
       });
       setLastSaved(new Date());
       return activeAsset.status === "PUBLISHED"
-        ? "Live blog updated & synced to getminions.ai"
+        ? `Live blog updated & synced to ${blogHost}`
         : "Changes saved";
     } catch (err) {
       return toErrorMessage(err, "Could not save changes");
     } finally {
       setIsSaving(false);
     }
-  }, [activeAsset, isSaving, edited, patchActive]);
+  }, [activeAsset, isSaving, edited, patchActive, blogHost]);
 
   const approveAndPublish = useCallback(async (): Promise<string> => {
     if (!activeAsset || publishState === "pending") return "";
@@ -214,19 +220,19 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
       patchActive({
         status: "PUBLISHED",
         claims_ok: "Y",
-        doc_url: blogUrl(activeAsset.slug),
+        doc_url: blogUrl(activeAsset.slug, tenantDomain),
         published_at: new Date().toISOString(),
       });
       setPublishState("success");
       window.dispatchEvent(new Event("minions-counts-updated"));
-      return "Published live to LinkedIn & getminions.ai/blog";
+      return `Published live to LinkedIn & ${blogHost}`;
     } catch (err) {
       const message = toErrorMessage(err, "Publish failed");
       setPublishState("error");
       setPublishError(message);
       return message;
     }
-  }, [activeAsset, publishState, patchActive]);
+  }, [activeAsset, publishState, patchActive, tenantDomain, blogHost]);
 
   const toggleLiveStatus = useCallback(async (): Promise<string> => {
     if (!activeAsset) return "";
@@ -246,14 +252,14 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
       window.dispatchEvent(new Event("minions-counts-updated"));
 
       return nextStatus === "PUBLISHED"
-        ? "Post restored and published live on getminions.ai/blog"
+        ? `Post restored and published live on ${blogHost}`
         : "Post unpublished and hidden from the public blog";
     } catch (err) {
       return toErrorMessage(err, "Could not change live status");
     } finally {
       setIsTogglingLive(false);
     }
-  }, [activeAsset, patchActive]);
+  }, [activeAsset, patchActive, blogHost]);
 
   const permanentlyDelete = useCallback(async (): Promise<string> => {
     if (!activeAsset) return "";

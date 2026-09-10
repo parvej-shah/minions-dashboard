@@ -356,6 +356,10 @@ export function useOnboardingWizard(): OnboardingWizardState {
         // placeholder is what BrandProfile.brandName, /api/brand/context's
         // company_name, and therefore every generated cover image displayed.
         business_name: businessName.trim(),
+        // Collected on step 1 and used to ground the AI suggestions, but never
+        // persisted -- so BrandProfile.companyDomain stayed empty and every
+        // public post URL fell back to this company's domain.
+        website_url: websiteUrl.trim(),
         industry: industry.trim() || "General Business",
         icp_description: positioningSummary || `${businessName || "My Brand"} provides ${industry} solutions.`,
         content_focus: contentFocus.trim(),

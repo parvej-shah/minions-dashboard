@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useBrandSettings } from "@/hooks/useBrandSettings";
+import { normalizeDomain } from "@/constants/config";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -35,6 +37,14 @@ export const dynamic = "force-dynamic";
 type TabPlatform = "BLOG" | "LINKEDIN" | "FACEBOOK" | "TWITTER";
 
 export default function PublishedPostsPage() {
+  // Every "live blog" affordance points at the tenant's own domain. These were
+  // hardcoded to getminions.ai, so each tenant's page linked to and warned
+  // about this company's blog instead of their own.
+  const { brandSettings: pageBrand } = useBrandSettings();
+  const pageBlogOrigin = normalizeDomain(pageBrand?.company_domain);
+  const pageBlogHost = pageBlogOrigin
+    ? `${pageBlogOrigin.replace(/^https?:\/\//, "")}/blog`
+    : "your blog";
   const {
     data: feed,
     isLoading,
@@ -256,7 +266,7 @@ export default function PublishedPostsPage() {
         {tabEnabled.BLOG && (
           <div className="flex items-center gap-3 self-start md:self-auto shrink-0">
             <a
-              href="https://getminions.ai/blog"
+              href={pageBlogOrigin ? `${pageBlogOrigin}/blog` : "#"}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/20 transition-all cursor-pointer"
@@ -739,7 +749,7 @@ export default function PublishedPostsPage() {
       <ConfirmModal
         isOpen={Boolean(unpublishTarget)}
         title="Unpublish Broadcast"
-        description={`Are you sure you want to unpublish "${unpublishTarget?.title}"? It will immediately be taken down from getminions.ai/blog and returned to the review queue without deleting any content.`}
+        description={`Are you sure you want to unpublish "${unpublishTarget?.title}"? It will immediately be taken down from ${pageBlogHost} and returned to the review queue without deleting any content.`}
         confirmLabel="Unpublish Post"
         cancelLabel="Cancel"
         variant="warning"

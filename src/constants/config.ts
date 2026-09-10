@@ -5,12 +5,38 @@
  * and components lives here, so a change is one edit rather than a find-and-replace.
  */
 
-/** Canonical public blog host. Standardised without `www.` (both were in use). */
+/**
+ * Fallback public blog host, used only when a tenant has not set its own
+ * `BrandProfile.companyDomain`. Standardised without `www.` (both were in use).
+ *
+ * This is NOT "the" blog host: every tenant publishes to its own domain, so
+ * anything building a public post URL must pass that tenant's domain to
+ * `blogUrl()`. Defaulting silently to getminions.ai is how other tenants'
+ * posts, first-comment backlinks, and "Live on Blog" buttons ended up
+ * pointing at this company's site.
+ */
 export const BLOG_BASE_URL = "https://getminions.ai";
 
-/** Builds the canonical public URL for a published post. */
-export function blogUrl(slug: string): string {
-  return `${BLOG_BASE_URL}/blog/${slug}`;
+/**
+ * Normalises a tenant-entered domain into an absolute origin.
+ * Accepts "acme.com", "https://acme.com", or "https://acme.com/" alike, and
+ * returns null for blank input so callers can fall back deliberately.
+ */
+export function normalizeDomain(domain: string | null | undefined): string | null {
+  const trimmed = (domain || "").trim().replace(/\/+$/, "");
+  if (!trimmed) return null;
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
+/**
+ * Builds the canonical public URL for a published post.
+ *
+ * `domain` is the owning tenant's `BrandProfile.companyDomain`. It is optional
+ * only so existing single-tenant callers keep working; pass it wherever the
+ * tenant is known, or the URL will advertise the wrong company's site.
+ */
+export function blogUrl(slug: string, domain?: string | null): string {
+  return `${normalizeDomain(domain) ?? BLOG_BASE_URL}/blog/${slug}`;
 }
 
 /** Fallback hero image when an asset has none. */

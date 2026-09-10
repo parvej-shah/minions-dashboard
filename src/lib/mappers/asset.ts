@@ -60,7 +60,13 @@ export function toClaimDTO(claim: Claim): ClaimCheckItem {
  * "UNSPECIFIED" in the other. It is UNSPECIFIED everywhere now — a missing
  * trade is never presented as a real one.
  */
-export function toAssetDTO(asset: AssetWithClaims, liveBlogSlug?: string | null): AssetItem {
+export function toAssetDTO(
+  asset: AssetWithClaims,
+  liveBlogSlug?: string | null,
+  /** Owning tenant's BrandProfile.companyDomain; without it the URL falls back
+   * to getminions.ai and advertises the wrong company's site. */
+  domain?: string | null
+): AssetItem {
   return {
     id: asset.id,
     title: asset.title,
@@ -73,12 +79,12 @@ export function toAssetDTO(asset: AssetWithClaims, liveBlogSlug?: string | null)
     status: asset.status as AssetStatus,
     claims_ok: asset.claimsOk,
     hero_image_url: asset.heroImageUrl || DEFAULT_HERO_IMAGE,
-    doc_url: asset.docUrl || blogUrl(asset.slug),
+    doc_url: asset.docUrl || blogUrl(asset.slug, domain),
     version: asset.version || 1,
     generation_cost: Number(asset.generationCost) || DEFAULT_GENERATION_COST,
     published_at: asset.publishedAt ? asset.publishedAt.toISOString() : null,
     published_urls: parsePublishedUrls(asset.publishedUrls),
-    live_blog_url: liveBlogSlug ? blogUrl(liveBlogSlug) : null,
+    live_blog_url: liveBlogSlug ? blogUrl(liveBlogSlug, domain) : null,
     body_content: asset.content,
     variants: {
       linkedin: asset.linkedinVariant ?? "",

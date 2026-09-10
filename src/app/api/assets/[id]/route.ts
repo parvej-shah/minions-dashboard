@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { toAssetDTO } from "@/lib/mappers/asset";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
+import { getTenantBlogDomain } from "@/lib/tenantDomain";
 import {
   releaseIdeaForRedraft,
   removeFromBlog,
@@ -27,7 +28,7 @@ export async function GET(
     if (!asset) {
       return apiFailure("Asset not found", 404);
     }
-    return NextResponse.json(toAssetDTO(asset));
+    return NextResponse.json(toAssetDTO(asset, null, await getTenantBlogDomain(ctx.clientId)));
   } catch (error) {
     return apiError(error, "Failed to fetch asset");
   }
@@ -87,7 +88,10 @@ export async function PATCH(
     };
     await syncAssetToBlog(updated, body.status, edits);
 
-    return NextResponse.json({ success: true, asset: toAssetDTO(updated) });
+    return NextResponse.json({
+      success: true,
+      asset: toAssetDTO(updated, null, await getTenantBlogDomain(ctx.clientId)),
+    });
   } catch (error) {
     return apiError(error, "Failed to update asset");
   }
@@ -145,7 +149,7 @@ export async function DELETE(
     return NextResponse.json({
       success: true,
       message: "Blog unpublished and reverted to review queue",
-      asset: toAssetDTO(updated),
+      asset: toAssetDTO(updated, null, await getTenantBlogDomain(ctx.clientId)),
     });
   } catch (error) {
     return apiError(error, "Failed to delete or unpublish asset");

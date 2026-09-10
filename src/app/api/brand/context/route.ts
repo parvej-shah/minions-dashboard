@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getBrandSettings, getWriterVoiceConfig, getHarvestContext } from "@/services/brand";
-import { BLOG_BASE_URL } from "@/constants/config";
+import { BLOG_BASE_URL, normalizeDomain } from "@/constants/config";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { verifyWebhookSecret } from "@/lib/security";
 import { expertisePromptGuidance } from "@/constants/audienceExpertise";
@@ -33,7 +33,11 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       company_name: brand.brand_name,
-      brand_domain: BLOG_BASE_URL,
+      // The tenant's OWN public site, falling back to this company's only when
+      // the tenant has not set one. It previously always returned
+      // BLOG_BASE_URL, so the publishing pipeline built every tenant's
+      // canonical post URLs on getminions.ai.
+      brand_domain: normalizeDomain(brand.company_domain) ?? BLOG_BASE_URL,
       positioning: brand.positioning,
       primary_logo_url: brand.primary_logo_url,
       colors: {

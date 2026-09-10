@@ -16,7 +16,9 @@ const PUBLISHED_FALLBACK_HERO = "/images/social-covers/github/github_social_dark
 export function toPublishedDTO(
   blog: Blog,
   asset: Asset | undefined,
-  index: number
+  index: number,
+  /** Owning tenant's BrandProfile.companyDomain. See blogUrl(). */
+  domain?: string | null
 ): PublishedPostRecord {
   const inlineImage = (blog.content || "").match(MARKDOWN_IMAGE);
 
@@ -33,7 +35,7 @@ export function toPublishedDTO(
     excerpt:
       blog.hook || blog.coreArgument || asset?.hook || (blog.content || "").slice(0, 160),
     hero_image_url: inlineImage?.[1] || asset?.heroImageUrl || PUBLISHED_FALLBACK_HERO,
-    published_url: blogUrl(blog.slug),
+    published_url: blogUrl(blog.slug, domain),
     audience: (blog.audience || asset?.audience || "ICP") as AudienceLane,
     // No asset means no recorded cost. Showing the default here presented a
     // guess as a measurement.
@@ -43,7 +45,7 @@ export function toPublishedDTO(
       asset?.publishedAt ??
       new Date()
     ).toISOString(),
-    first_comment: `Read the full engineering deep dive: ${blogUrl(blog.slug)}`,
+    first_comment: `Read the full engineering deep dive: ${blogUrl(blog.slug, domain)}`,
     variants: {
       linkedin: asset?.linkedinVariant ?? "",
       facebook: asset?.facebookVariant ?? "",

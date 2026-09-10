@@ -15,6 +15,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { formatCost } from "@/utils/format";
+import { useBrandSettings } from "@/hooks/useBrandSettings";
+import { normalizeDomain } from "@/constants/config";
 import type { PublishState } from "@/hooks/useEditorialDraft";
 import type { AssetItem } from "@/types";
 
@@ -67,6 +69,11 @@ export default function ReviewDock({
   setDeleteConfirmOpen,
   blogEnabled = true,
 }: ReviewDockProps) {
+  // The tenant's own blog host. This badge previously read "Live on
+  // getminions.ai" for every tenant, naming the wrong company's site.
+  const { brandSettings } = useBrandSettings();
+  const blogHost = (normalizeDomain(brandSettings?.company_domain) ?? "").replace(/^https?:\/\//, "");
+
   /** Live-ness comes from the blog table, not the asset's own status. */
   const alreadyLive = blogEnabled && Boolean(activeAsset.live_blog_url) && activeAsset.status !== "PUBLISHED";
 
@@ -140,7 +147,9 @@ export default function ReviewDock({
               <div className="w-full bg-[#00C9A7]/15 border border-[#00C9A7] text-[#00C9A7] p-2.5 rounded-xl font-bold text-xs flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5">
                   <CheckCheck className="w-4 h-4" />
-                  <span>{blogEnabled ? "Live on getminions.ai" : "Approved & Published"}</span>
+                  <span>
+                    {blogEnabled && blogHost ? `Live on ${blogHost}` : "Approved & Published"}
+                  </span>
                 </div>
                 <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
               </div>
