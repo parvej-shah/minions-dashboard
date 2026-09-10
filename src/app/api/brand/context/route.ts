@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 import { getBrandSettings, getWriterVoiceConfig, getHarvestContext } from "@/services/brand";
 import { BLOG_BASE_URL, normalizeDomain } from "@/constants/config";
 import { apiError, apiFailure } from "@/lib/api-response";
@@ -25,6 +26,23 @@ export async function GET(request: Request) {
   }
 
   try {
+    // The webhook secret authenticates the *caller* (n8n), not a tenant, and n8n
+    // legitimately harvests for every tenant -- so this cannot be narrowed to one
+    // clientId. What it can do is refuse ids that name no live tenant, so a typo
+    // or a stale id fails loudly here instead of further downstream, where
+    // getBrandSettings' fallback would hand back a plausible-looking default
+    // profile for a tenant that does not exist.
+    const client = await prisma.client.findUnique({
+      where: { id: clientId },
+      select: { id: true, status: true },
+    });
+    if (!client) {
+      return apiFailure("Unknown clientId", 404);
+    }
+    if (client.status !== "ACTIVE") {
+      return apiFailure(`Tenant ${clientId} is ${client.status}, not ACTIVE`, 409);
+    }
+
     const [brand, voiceConfig, harvest] = await Promise.all([
       getBrandSettings(clientId),
       getWriterVoiceConfig(clientId),
@@ -81,6 +99,14 @@ export async function GET(request: Request) {
       // Rotates which slice of each feed the harvester reads, so consecutive
       // runs see different signals even when a slow feed publishes nothing new.
       harvest_run_index: harvest.runIndex,
+      // Health of this response. `context_complete` is false when any piece of
+      // harvest context fell back to a default -- a missing column, an
+      // unmigrated database, a stale Prisma client. The harvester checks it and
+      // aborts rather than running on fallback feeds and fixed pillars, which
+      // is what produced repetitive off-target ideas while every run reported
+      // success. `degraded` names what failed, for the log line.
+      context_complete: harvest.degraded.length === 0,
+      degraded: harvest.degraded,
     });
   } catch (error) {
     return apiError(error, "Failed to build brand context");

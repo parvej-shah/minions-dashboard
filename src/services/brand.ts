@@ -177,6 +177,13 @@ export interface HarvestSource {
 }
 
 export interface HarvestContext {
+  /**
+   * Names of the context pieces that failed to load and fell back to a default.
+   * Empty on a healthy run. Surfaced through /api/brand/context so the harvester
+   * can refuse to run on degraded context rather than silently producing
+   * repetitive, un-targeted ideas.
+   */
+  degraded: string[];
   writerExpertise: WriterExpertise;
   sources: HarvestSource[];
   recentTheses: string[];
@@ -199,13 +206,32 @@ export interface HarvestContext {
  *    blind to everything it had generated lately.
  */
 export async function getHarvestContext(clientId: string): Promise<HarvestContext> {
+  /**
+   * Each query degrades to a safe empty value so one missing table can't fail a
+   * whole harvest -- but it must SAY SO. Swallowing these silently is how a
+   * stale Prisma client and an undeployed migration both went unnoticed: the
+   * route answered 200 with empty sources and no rotation, the harvester fell
+   * back to its hardcoded feeds and fixed pillars, and every run looked green
+   * while the anti-repetition work was entirely inert.
+   */
+  const degraded: string[] = [];
+  const soft = <T>(label: string, fallback: T) => (err: unknown) => {
+    degraded.push(label);
+    console.error(
+      `[harvest-context] ${label} failed for client ${clientId} -- falling back. ` +
+        `The harvest will run with reduced context.`,
+      err
+    );
+    return fallback;
+  };
+
   const [profile, sourceRows, recentIdeas, runCount] = await Promise.all([
     prisma.brandProfile
       .findUnique({ where: { clientId }, select: { writerExpertise: true } })
-      .catch(() => null),
+      .catch(soft("writerExpertise", null)),
     prisma.ideaSource
       .findMany({ where: { clientId, isActive: true }, orderBy: { createdAt: "asc" } })
-      .catch(() => []),
+      .catch(soft("ideaSources", [])),
     prisma.idea
       .findMany({
         where: { clientId },
@@ -213,8 +239,10 @@ export async function getHarvestContext(clientId: string): Promise<HarvestContex
         take: 60,
         select: { rawIdea: true, angle: true, thesisKey: true },
       })
-      .catch(() => []),
-    prisma.pipelineRun.count({ where: { clientId, type: "HARVEST" } }).catch(() => 0),
+      .catch(soft("recentTheses", [])),
+    prisma.pipelineRun
+      .count({ where: { clientId, type: "HARVEST" } })
+      .catch(soft("harvestRunCount", 0)),
   ]);
 
   const sources = sourceRows
@@ -237,6 +265,7 @@ export async function getHarvestContext(clientId: string): Promise<HarvestContex
     .filter(Boolean);
 
   return {
+    degraded,
     writerExpertise: resolveWriterExpertise(profile?.writerExpertise),
     sources,
     recentTheses: Array.from(new Set(recentTheses)),
