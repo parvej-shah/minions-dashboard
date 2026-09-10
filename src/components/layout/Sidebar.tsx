@@ -71,7 +71,7 @@ export default function Sidebar({
       {/* SEARCH BAR (INTEGRATED IN SIDEBAR) */}
       <button
         onClick={() => onOpenPalette()}
-        className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-[#161d24] border border-[#1f2b37] text-xs text-[#64748B] hover:border-[#00C9A7]/50 hover:text-[#94A3B8] transition-all cursor-pointer shadow-xs"
+        className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] text-xs text-[#64748B] hover:border-[#00C9A7]/50 hover:text-[#94A3B8] transition-all cursor-pointer shadow-xs"
       >
         <div className="flex items-center gap-2 min-w-0">
           <Search className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
@@ -86,7 +86,7 @@ export default function Sidebar({
       <button
         onClick={onHarvest}
         disabled={isHarvesting}
-        className="w-full flex items-center justify-center gap-2 bg-[#ff6b4a] hover:bg-[#ff522b] text-white text-xs font-bold py-2.5 px-3 rounded-xl shadow-lg shadow-[#ff6b4a]/20 transition-all cursor-pointer disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-2 bg-[#ff6b4a] hover:bg-[#ff522b] text-white text-xs font-bold py-3 px-3 rounded-xl shadow-lg shadow-[#ff6b4a]/20 transition-all cursor-pointer disabled:opacity-50"
       >
         <Zap className={`w-3.5 h-3.5 ${isHarvesting ? "animate-spin" : ""}`} />
         <span>{isHarvesting ? "Harvesting Signals..." : "Trigger Idea Harvester"}</span>
@@ -106,7 +106,7 @@ export default function Sidebar({
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all group ${
+              className={`flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold whitespace-nowrap transition-all group ${
                 isActive
                   ? "bg-[#161d24] text-[#00C9A7] border-l-2 border-[#00C9A7]"
                   : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161d24]/60"

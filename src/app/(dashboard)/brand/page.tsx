@@ -88,7 +88,7 @@ export default function BrandStudioPage() {
         <div className="flex flex-wrap items-center bg-[#0F1419] p-1 rounded-xl border border-[#1F2D3D] self-start md:self-auto gap-1 max-w-full overflow-x-auto">
           <button
             onClick={() => setActiveTab("voice-proof")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "voice-proof"
                 ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
                 : "text-[#94A3B8] hover:text-[#F1F5F9]"
@@ -99,7 +99,7 @@ export default function BrandStudioPage() {
           </button>
           <button
             onClick={() => setActiveTab("overview")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "overview"
                 ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
                 : "text-[#94A3B8] hover:text-[#F1F5F9]"
@@ -110,7 +110,7 @@ export default function BrandStudioPage() {
           </button>
           <button
             onClick={() => setActiveTab("lexicon")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "lexicon"
                 ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
                 : "text-[#94A3B8] hover:text-[#F1F5F9]"

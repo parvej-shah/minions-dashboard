@@ -216,14 +216,14 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0F1419] p-4 rounded-2xl border border-[#1F2D3D]">
-        <p className="text-xs text-[#94A3B8] max-w-xl">
+        <p className="text-sm leading-relaxed text-[#94A3B8] max-w-xl">
           This is what the AI knows about your brand. Edit anything below, or let AI refresh it for you.
         </p>
         <button
           type="button"
           onClick={regenerateWithAI}
           disabled={regenerating || !profile}
-          className="flex items-center gap-1.5 bg-[#161D26] hover:bg-[#1E293B] border border-[#00C9A7]/40 text-[#00C9A7] text-xs font-semibold px-3.5 py-1.5 rounded-xl shadow-sm transition-all disabled:opacity-50"
+          className="flex items-center gap-1.5 bg-[#161D26] hover:bg-[#1E293B] border border-[#00C9A7]/40 text-[#00C9A7] text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm transition-all disabled:opacity-50"
         >
           {regenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
           Regenerate with AI
@@ -275,7 +275,7 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
               </div>
             </div>
           ) : (
-            <p className="text-xs text-[#F1F5F9] leading-relaxed">
+          <p className="text-sm text-[#F1F5F9] leading-relaxed">
               {profile?.positioning || "Not set yet — tap edit to describe who you are."}
             </p>
           )}
@@ -295,7 +295,7 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
             <Hash className="w-4 h-4 text-[#00C9A7]" />
             <h3 className="text-sm font-bold text-[#F1F5F9]">Topics</h3>
           </div>
-          <p className="text-xs text-[#94A3B8]">What you post about.</p>
+          <p className="text-sm text-[#94A3B8]">What you post about.</p>
           <TagList
             category="TOPICS"
             items={activeByCategory("TOPICS")}
@@ -311,7 +311,7 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
             <Users2 className="w-4 h-4 text-[#00C9A7]" />
             <h3 className="text-sm font-bold text-[#F1F5F9]">Audience</h3>
           </div>
-          <p className="text-xs text-[#94A3B8]">Who you&apos;re trying to reach.</p>
+          <p className="text-sm text-[#94A3B8]">Who you&apos;re trying to reach.</p>
           <TagList
             category="AUDIENCE"
             items={activeByCategory("AUDIENCE")}
@@ -354,7 +354,7 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
               </button>
             )}
           </div>
-          <p className="text-xs text-[#94A3B8]">Logo and colors used on generated thumbnails and covers.</p>
+          <p className="text-sm text-[#94A3B8]">Logo and colors used on generated thumbnails and covers.</p>
 
           {editingLook && lookDraft ? (
             <div className="space-y-3">
@@ -469,7 +469,7 @@ function TagList({
         {items.map((item) => (
           <span
             key={item.id}
-            className="inline-flex items-center gap-1.5 bg-[#161D26] border border-[#1F2D3D] text-[#F1F5F9] text-[11px] px-2.5 py-1 rounded-lg"
+            className="inline-flex items-center gap-1.5 bg-[#161D26] border border-[#1F2D3D] text-[#F1F5F9] text-[11px] px-3 py-1.5 rounded-lg leading-relaxed"
           >
             {item.content}
             <button onClick={() => onRemove(item.id)} className="text-[#64748B] hover:text-red-400">
@@ -489,12 +489,12 @@ function TagList({
           onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), submit())}
           disabled={isFull}
           placeholder={isFull ? `Limit reached (${PER_CATEGORY_LIMIT})` : placeholder}
-          className="flex-1 bg-[#161D26] border border-[#1F2D3D] rounded-lg px-3 py-1.5 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7] disabled:opacity-50"
+          className="flex-1 bg-[#161D26] border border-[#1F2D3D] rounded-lg px-3 py-2 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7] disabled:opacity-50"
         />
         <button
           onClick={submit}
           disabled={submitting || isFull || !draft.trim()}
-          className="flex items-center gap-1 bg-[#161D26] hover:bg-[#1F2D3D] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all disabled:opacity-50"
+          className="flex items-center gap-1 bg-[#161D26] hover:bg-[#1F2D3D] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] text-xs font-semibold px-3 py-2 rounded-lg transition-all disabled:opacity-50"
         >
           {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
         </button>

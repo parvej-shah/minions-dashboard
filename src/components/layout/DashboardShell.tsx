@@ -134,7 +134,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#0a0d12] text-[#F1F5F9]">
+    <div className="dashboard-readable flex min-h-screen bg-[#0a0d12] text-[#F1F5F9]">
       <CommandPalette
         isOpen={showPalette}
         onClose={() => setShowPalette(false)}

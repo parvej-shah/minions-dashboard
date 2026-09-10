@@ -99,6 +99,28 @@
   color: #E2E8F0;
 }
 
+/* Dashboard readability scale
+ *
+ * The cockpit is information-dense, but 10–12px UI text was too small for
+ * practical daily use. Keep this scoped to the signed-in workspace so the
+ * marketing site and compact onboarding flow retain their own typography.
+ */
+.dashboard-readable .text-xs {
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.dashboard-readable .text-\[11px\] {
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+.dashboard-readable .text-\[10px\],
+.dashboard-readable .text-\[9px\] {
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+
 @keyframes float-slow {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
   50% { transform: translateY(-10px) rotate(1.5deg); }
