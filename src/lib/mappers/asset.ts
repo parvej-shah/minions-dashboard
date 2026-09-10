@@ -2,7 +2,6 @@ import type { Asset, Claim } from "@prisma/client";
 import {
   DEFAULT_CLAIM_CONFIDENCE,
   DEFAULT_GENERATION_COST,
-  DEFAULT_HERO_IMAGE,
   UNSPECIFIED_TRADE,
   blogUrl,
 } from "@/constants/config";
@@ -78,7 +77,11 @@ export function toAssetDTO(
     target_trade: asset.targetTrade || UNSPECIFIED_TRADE,
     status: asset.status as AssetStatus,
     claims_ok: asset.claimsOk,
-    hero_image_url: asset.heroImageUrl || DEFAULT_HERO_IMAGE,
+    hero_image_url: asset.heroImageUrl,
+    hero_status: (asset.heroStatus || "READY") as AssetItem["hero_status"],
+    hero_error_code: asset.heroErrorCode,
+    hero_provider: asset.heroProvider,
+    hero_attempts: asset.heroAttempts ?? 0,
     doc_url: asset.docUrl || blogUrl(asset.slug, domain),
     version: asset.version || 1,
     generation_cost: Number(asset.generationCost) || DEFAULT_GENERATION_COST,

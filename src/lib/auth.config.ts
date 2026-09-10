@@ -30,6 +30,12 @@ export const authConfig: NextAuthConfig = {
         "/api/media/ingest",
         "/api/ideas/craft",
         "/api/internal",
+        // n8n PATCHes the terminal state of a run here when a workflow finishes
+        // or its error handler fires. This was gated, so every callback was
+        // bounced to /login and every pipeline_runs row stayed RUNNING forever
+        // -- which is why the progress HUD spun indefinitely and the Idea Stream
+        // never refreshed on its own. The route verifies the webhook secret.
+        "/api/pipeline/runs",
         "/login"
       ];
       if (publicPaths.some(p => url.pathname.startsWith(p))) {

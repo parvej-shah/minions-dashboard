@@ -25,6 +25,9 @@ describe("session gate public paths", () => {
     "/api/ideas/craft",
     "/api/webhooks/idea-harvested",
     "/api/internal/schedule/eligible-tenants",
+    // The run-status callback. While this was gated, every n8n callback was
+    // answered 307 and no pipeline_runs row ever left RUNNING.
+    "/api/pipeline/runs/cmtvsrrpm000004l8my0ysedg",
   ];
 
   it("lets every n8n-called route through without a session", () => {
@@ -48,10 +51,13 @@ describe("session gate public paths", () => {
   it("keeps the gate list narrow", () => {
     const paths = ["/docs", "/api/llms", "/api/version", "/api/auth", "/api/webhooks",
       "/api/channels", "/api/brand/context", "/api/media/ingest", "/api/ideas/craft",
-      "/api/internal", "/login"];
+      "/api/internal", "/api/pipeline/runs", "/login"];
     for (const p of paths) expect(authorized(p, false)).toBe(true);
     // A route NOT on the list stays gated even if it shares a prefix segment.
     expect(authorized("/api/ideas", false)).toBe(false);
     expect(authorized("/api/media/upload", false)).toBe(false);
+    // Only the run-status callback opens up, not the triggers that start work.
+    expect(authorized("/api/pipeline/draft", false)).toBe(false);
+    expect(authorized("/api/pipeline/harvest", false)).toBe(false);
   });
 });

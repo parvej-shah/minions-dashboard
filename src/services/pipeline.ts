@@ -1,4 +1,5 @@
 import { N8N_WEBHOOKS } from "@/constants/config";
+import { requireOneOfEnv } from "@/lib/env";
 import type { PipelineTriggerResult } from "@/types";
 
 /**
@@ -15,10 +16,23 @@ export async function triggerN8nWorkflow(
   const endpoint = N8N_WEBHOOKS[webhook];
 
   try {
+    // When the caller hands the workflow a callback_url, hand it the secret to
+    // call it back with. The run-status route verifies this the same way every
+    // other n8n-called route does, so the callback is reachable without the
+    // session gate bouncing it to /login -- which is what stranded every
+    // pipeline_runs row at RUNNING and left the progress UI spinning forever.
+    const callbackSecret = payload.callback_url
+      ? { callback_secret: requireOneOfEnv("BLOG_API_SECRET", "MINIONS_WEBHOOK_SECRET") }
+      : {};
+
     const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...payload, timestamp: new Date().toISOString() }),
+      body: JSON.stringify({
+        ...payload,
+        ...callbackSecret,
+        timestamp: new Date().toISOString(),
+      }),
     });
 
     if (!res.ok) {

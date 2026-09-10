@@ -1,6 +1,6 @@
 "use client";
 
-import type { IdeaItem } from "@/types";
+
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
@@ -33,34 +33,77 @@ interface AgentStage {
   name: string;
   icon: React.ElementType;
   description: string;
+  /** Measured from real n8n executions; drives stage advance, never a claim. */
+  typicalMs: number;
 }
 
+/**
+ * Every stage used to render its spinner at once, for the whole run, because
+ * nothing tracked which one the workflow was actually on. The progress bar was
+ * a literal `w-1/3 animate-pulse`. It looked like telemetry and reported
+ * nothing, so a dead run and a working run were indistinguishable.
+ *
+ * Stages now advance on measured elapsed time against `typicalMs`, taken from
+ * real executions (16655: brand context 1.8s, RSS ~4s, Qwen harvest 12.0s,
+ * craft 5.2s, DB sync 0.4s). That is still an estimate, so the UI says
+ * "typically Ns" rather than claiming to know, and only COMPLETED/FAILED from
+ * the run record is ever presented as fact.
+ */
 const AGENT_STAGES: AgentStage[] = [
   {
     id: "ingestion",
     name: "Signal Radar",
     icon: Radar,
-    description: "Scanning RSS, HVAC forums & brand context",
+    typicalMs: 6000,
+    description: "Reading your sources and brand context",
   },
   {
     id: "filtering",
     name: "Noise Filter",
     icon: Filter,
-    description: "Removing duplicates and irrelevant data",
+    typicalMs: 1000,
+    description: "Removing duplicates and off-topic signals",
   },
   {
     id: "synthesis",
     name: "Strategic Synthesizer",
     icon: Brain,
+    typicalMs: 12000,
     description: "Generating high-intent topical angles",
+  },
+  {
+    id: "craft",
+    name: "Craft Study",
+    icon: Bot,
+    typicalMs: 5200,
+    description: "Reading source articles for structure",
   },
   {
     id: "sync",
     name: "Database Sync",
     icon: Database,
-    description: "Injecting new ideas into stream",
+    typicalMs: 1000,
+    description: "Adding new ideas to your stream",
   },
 ];
+
+/**
+ * Which stage the run is on, given elapsed time.
+ *
+ * Returns `AGENT_STAGES.length` once past the last boundary, meaning "all
+ * stages have had their expected time" -- the run is taking longer than usual
+ * and the UI should say so rather than keep animating a fixed spinner.
+ */
+function stageIndexForElapsed(elapsedMs: number): number {
+  let boundary = 0;
+  for (let i = 0; i < AGENT_STAGES.length; i++) {
+    boundary += AGENT_STAGES[i].typicalMs;
+    if (elapsedMs < boundary) return i;
+  }
+  return AGENT_STAGES.length;
+}
+
+const TOTAL_TYPICAL_MS = AGENT_STAGES.reduce((sum, s) => sum + s.typicalMs, 0);
 
 export default function HarvestingProgressHUD({ job, onDismiss }: HarvestingProgressHUDProps) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -68,6 +111,7 @@ export default function HarvestingProgressHUD({ job, onDismiss }: HarvestingProg
   const [isCompleted, setIsCompleted] = useState(false);
   const [hasFailed, setHasFailed] = useState(false);
   const [harvestedCount, setHarvestedCount] = useState(0);
+  const [failureReason, setFailureReason] = useState<string | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Timer effect
@@ -78,6 +122,7 @@ export default function HarvestingProgressHUD({ job, onDismiss }: HarvestingProg
         setIsCompleted(false);
         setHasFailed(false);
         setHarvestedCount(0);
+        setFailureReason(null);
       }, 0);
       return () => clearTimeout(reset);
     }
@@ -105,6 +150,11 @@ export default function HarvestingProgressHUD({ job, onDismiss }: HarvestingProg
           setHarvestedCount(run.metadata?.harvestedCount || 0);
         } else if (run.status === "FAILED") {
           setHasFailed(true);
+          setFailureReason(
+            typeof run.metadata?.error === "string"
+              ? run.metadata.error
+              : "The run stopped before it finished."
+          );
         }
       } catch (err) {
         console.error("Error polling harvesting status:", err);
@@ -120,6 +170,15 @@ export default function HarvestingProgressHUD({ job, onDismiss }: HarvestingProg
   }, [job, isCompleted, hasFailed]);
 
   if (!job) return null;
+
+  // Which stage the run is on, and whether it has outrun its expected duration.
+  const elapsedMs = elapsedSeconds * 1000;
+  const activeStage = stageIndexForElapsed(elapsedMs);
+  const isOverrunning = !isCompleted && !hasFailed && activeStage >= AGENT_STAGES.length;
+  // Cap at 95% while running: only a real terminal status may show a finished bar.
+  const percent = isCompleted
+    ? 100
+    : Math.min(95, Math.round((elapsedMs / TOTAL_TYPICAL_MS) * 100));
 
   const formatTime = (secs: number) => {
     const mins = Math.floor(secs / 60);
@@ -169,7 +228,13 @@ export default function HarvestingProgressHUD({ job, onDismiss }: HarvestingProg
               </span>
             </div>
             <p className="text-[11px] text-[#94A3B8] truncate max-w-[220px]">
-              {isCompleted ? `Found ${harvestedCount} new signals` : hasFailed ? "Pipeline failed to complete" : "Scanning external sources for signals"}
+              {isCompleted
+                ? `Found ${harvestedCount} new signals`
+                : hasFailed
+                  ? failureReason ?? "Pipeline failed to complete"
+                  : isOverrunning
+                    ? "Taking longer than usual, still working"
+                    : AGENT_STAGES[activeStage].description}
             </p>
           </div>
         </div>
@@ -201,45 +266,61 @@ export default function HarvestingProgressHUD({ job, onDismiss }: HarvestingProg
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[11px] font-mono">
               <span className="text-[#94A3B8]">
-                {isCompleted ? "Pipeline completed" : hasFailed ? "Pipeline stopped" : "4-stage harvesting pipeline running"}
+                {isCompleted
+                  ? "Pipeline completed"
+                  : hasFailed
+                    ? "Pipeline stopped"
+                    : `Step ${Math.min(activeStage + 1, AGENT_STAGES.length)} of ${AGENT_STAGES.length}`}
               </span>
               <span className={`font-bold ${hasFailed ? "text-[#EF4444]" : "text-[#ff6b4a]"}`}>
                 {isCompleted ? "Done" : hasFailed ? "Error" : formatTime(elapsedSeconds)}
               </span>
             </div>
             <div className="w-full h-1.5 bg-[#161D26] rounded-full overflow-hidden">
-              {isCompleted ? (
-                <div className="h-full w-full bg-gradient-to-r from-[#ff6b4a] to-[#F59E0B] rounded-full" />
-              ) : hasFailed ? (
+              {hasFailed ? (
                 <div className="h-full w-full bg-[#EF4444] rounded-full" />
               ) : (
-                <div className="h-full w-1/3 bg-gradient-to-r from-[#ff6b4a] to-[#F59E0B] rounded-full animate-pulse" />
+                <div
+                  className="h-full bg-gradient-to-r from-[#ff6b4a] to-[#F59E0B] rounded-full transition-[width] duration-1000 ease-linear"
+                  style={{ width: `${percent}%` }}
+                />
               )}
             </div>
           </div>
 
-          {/* Stepper of 4 Agents */}
+          {/* Stepper -- each stage carries its own state, not one shared spinner */}
           <div className="space-y-2.5">
-            {AGENT_STAGES.map((stage) => {
+            {AGENT_STAGES.map((stage, index) => {
               const Icon = stage.icon;
+              // Completed run: every stage is done. Failed: stages before the
+              // one it died on stay done, the rest never ran.
+              const isStageDone = isCompleted || index < activeStage;
+              const isStageActive = !isCompleted && !hasFailed && index === activeStage;
+              const isStagePending = !isCompleted && !hasFailed && index > activeStage;
+              const isStageFailed = hasFailed && index === activeStage;
 
               return (
                 <div
                   key={stage.id}
+                  aria-current={isStageActive ? "step" : undefined}
                   className={`p-2.5 rounded-xl border transition-all flex items-center justify-between gap-3 ${
-                    isCompleted || hasFailed
-                      ? "bg-[#0F1419]/60 border-[#1F2D3D]"
-                      : "bg-[#161D26] border-[#1F2D3D]"
+                    isStageActive
+                      ? "bg-[#161D26] border-[#F59E0B]/50"
+                      : isStagePending
+                        ? "bg-[#0F1419]/40 border-[#1F2D3D]/60"
+                        : "bg-[#0F1419]/60 border-[#1F2D3D]"
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div
                       className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
-                        isCompleted
-                          ? "bg-[#ff6b4a]/10 text-[#ff6b4a]"
-                          : hasFailed
+                        isStageFailed
                           ? "bg-[#EF4444]/10 text-[#EF4444]"
-                          : "bg-[#F59E0B]/10 text-[#F59E0B]"
+                          : isStageDone
+                            ? "bg-[#ff6b4a]/10 text-[#ff6b4a]"
+                            : isStageActive
+                              ? "bg-[#F59E0B]/10 text-[#F59E0B]"
+                              : "bg-[#161D26] text-[#64748B]"
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5" />
@@ -247,24 +328,32 @@ export default function HarvestingProgressHUD({ job, onDismiss }: HarvestingProg
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-semibold text-white truncate">
+                        <span
+                          className={`text-xs font-semibold truncate ${
+                            isStagePending ? "text-[#64748B]" : "text-white"
+                          }`}
+                        >
                           {stage.name}
                         </span>
                       </div>
                       <p className="text-[10px] text-[#94A3B8] truncate">
-                        {stage.description}
+                        {isStagePending
+                          ? `Typically ${Math.round(stage.typicalMs / 1000)}s`
+                          : stage.description}
                       </p>
                     </div>
                   </div>
 
                   {/* Stage Indicator Badge */}
                   <div className="shrink-0">
-                    {isCompleted ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#ff6b4a]" />
-                    ) : hasFailed ? (
+                    {isStageFailed ? (
                       <X className="w-3.5 h-3.5 text-[#EF4444]" />
-                    ) : (
+                    ) : isStageDone ? (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#ff6b4a]" />
+                    ) : isStageActive ? (
                       <Loader2 className="w-3.5 h-3.5 text-[#F59E0B] animate-spin" />
+                    ) : (
+                      <span className="block w-1.5 h-1.5 rounded-full bg-[#1F2D3D]" />
                     )}
                   </div>
                 </div>

@@ -263,6 +263,10 @@ model Asset {
   status              String    @default("PENDING_REVIEW")
   claimsOk            String    @default("BLOCKED_PENDING_REVIEW") @map("claims_ok")
   heroImageUrl        String?   @map("hero_image_url")
+  heroStatus          String    @default("READY") @map("hero_status")
+  heroErrorCode       String?   @map("hero_error_code")
+  heroProvider        String?   @map("hero_provider")
+  heroAttempts        Int       @default(0) @map("hero_attempts")
   docUrl              String?   @map("doc_url")
   linkedinVariant     String?   @map("linkedin_variant") @db.Text
   facebookVariant     String?   @map("facebook_variant") @db.Text

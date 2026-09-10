@@ -20,7 +20,7 @@ import {
   LayoutGrid,
   CalendarDays,
 } from "lucide-react";
-import { IdeaItem, AudienceLane, TargetTrade, IdeaStatus } from "@/types";
+import { IdeaItem, AudienceLane, IdeaStatus } from "@/types";
 import CalendarView from "@/components/ideas/CalendarView";
 import ScheduleModal from "@/components/ideas/ScheduleModal";
 import QueueBuilderView from "@/components/ideas/QueueBuilderView";
@@ -36,29 +36,35 @@ import { useApiResource } from "@/hooks/useApiResource";
 import {
   getAudienceBadgeClass,
 } from "@/constants/ideaBadges";
+import {
+  IDEA_STAGES,
+  IDEA_STAGE_LABELS,
+  IDEA_STAGE_HINTS,
+  toIdeaStage,
+  type IdeaStage,
+} from "@/constants/ideaStage";
+import { FALLBACK_TOPICS } from "@/constants/topics";
 
-const TRADES: TargetTrade[] = [
-  "HVAC",
-  "Plumbing",
-  "Electrical",
-  "Roofing",
-  "Pest Control",
-  "Voice AI",
-  "Systems Architecture",
-  "Operations"
-];
+/**
+ * Topics are per-tenant now, loaded from /api/ideas/topics. The old hardcoded
+ * HVAC / Plumbing / Electrical / Roofing / Pest Control list came from the
+ * original home-services product and was shown to every tenant regardless of
+ * industry, so an AI consultancy was asked to file its ideas under "Roofing".
+ */
 
 const AUDIENCES: AudienceLane[] = ["ICP", "PEER", "BRIDGE"];
 
-const STATUS_FILTERS: Array<"ALL" | IdeaStatus> = [
-  "ALL",
-  "HARVESTED",
-  "QUEUED",
-  "CLAIMED",
-  "DRAFTED",
-  "PUBLISHED",
-  "REJECTED"
-];
+/**
+ * Filter on the STAGE an idea is in, not its raw status string.
+ *
+ * These chips used to be the literal statuses HARVESTED / QUEUED / CLAIMED /
+ * DRAFTED / PUBLISHED / REJECTED, compared with `===` against `idea.status`.
+ * The pipeline only ever writes REFINED, REVIEW, PICKED and QUEUED, so five of
+ * the six chips always read 0 and an idea in REFINED matched nothing at all --
+ * present in the database, invisible in the UI, which reads as "my idea was
+ * deleted". `toIdeaStage` maps every status the pipeline writes onto a stage.
+ */
+const STAGE_FILTERS: Array<"ALL" | IdeaStage> = ["ALL", ...IDEA_STAGES];
 
 export default function IdeaStreamPage() {
   const {
@@ -68,9 +74,17 @@ export default function IdeaStreamPage() {
     reload: reloadIdeas,
     setData: setIdeas,
   } = useApiResource<IdeaItem[]>("/api/ideas", [], { errorMessage: "Could not load ideas" });
+  // The tenant's own topic labels, derived from their core_themes directive.
+  const { data: topicData } = useApiResource<{ topics: string[] }>(
+    "/api/ideas/topics",
+    { topics: [] },
+    { errorMessage: "Could not load topics" }
+  );
+  const TRADES = topicData.topics.length > 0 ? topicData.topics : FALLBACK_TOPICS;
+
   const [selectedAudience, setSelectedAudience] = useState<string>("ALL");
   const [selectedTrade, setSelectedTrade] = useState<string>("ALL");
-  const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
+  const [selectedStage, setSelectedStage] = useState<"ALL" | IdeaStage>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [isInjectOpen, setIsInjectOpen] = useState(false);
 
@@ -97,9 +111,9 @@ export default function IdeaStreamPage() {
   const [editingIdea, setEditingIdea] = useState<IdeaItem | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editExcerpt, setEditExcerpt] = useState("");
-  const [editTrade, setEditTrade] = useState<TargetTrade>("HVAC");
+  const [editTrade, setEditTrade] = useState<string>("");
   const [editAudience, setEditAudience] = useState<AudienceLane>("ICP");
-  const [editStatus, setEditStatus] = useState<IdeaStatus>("HARVESTED");
+  const [editStatus, setEditStatus] = useState<IdeaStatus>("REFINED");
   const [isUpdating, setIsUpdating] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -127,10 +141,16 @@ export default function IdeaStreamPage() {
       try {
         const response = await fetch(`/api/pipeline/runs/${activeHarvestJob.runId}`);
         if (!response.ok) return;
-        const run = await response.json() as { status?: string };
-        if (run.status === "COMPLETED") {
+        const run = (await response.json()) as { status?: string };
+        // FAILED has to clear the job too. While it did not, a run that died
+        // left the HUD spinning forever with no way to tell it apart from a
+        // slow one -- and every DRAFT run in production was stuck RUNNING.
+        if (run.status === "COMPLETED" || run.status === "FAILED") {
           await reloadIdeas();
           setActiveHarvestJob(null);
+          if (run.status === "FAILED") {
+            setToastMessage("The harvest run failed. Nothing was added to your stream.");
+          }
         }
       } catch {
         // The HUD remains visible and keeps polling; a transient request
@@ -142,12 +162,46 @@ export default function IdeaStreamPage() {
     return () => window.clearInterval(interval);
   }, [activeHarvestJob, reloadIdeas]);
 
+  /**
+   * Refresh the stream while any run is in flight, and once more shortly after
+   * it clears.
+   *
+   * Ideas and assets are written by n8n straight into the database, so this page
+   * has no way to learn about them except by asking again. Without this the user
+   * had to reload the browser to see work that had already finished, which made
+   * a working pipeline look broken.
+   */
+  useEffect(() => {
+    if (!activeHarvestJob && !activeDraftingJob) return;
+    const interval = window.setInterval(() => {
+      void reloadIdeas();
+    }, 5000);
+    return () => window.clearInterval(interval);
+  }, [activeHarvestJob, activeDraftingJob, reloadIdeas]);
+
+  /**
+   * Pick up work finished in another tab, by the scheduler, or while this tab
+   * was in the background. Refetching only on focus keeps this close to free
+   * compared with polling a page nobody is looking at.
+   */
+  useEffect(() => {
+    const onFocus = () => {
+      if (document.visibilityState === "visible") void reloadIdeas();
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
+  }, [reloadIdeas]);
+
   // Slide-over form state
   const [formTitle, setFormTitle] = useState("");
   const [formExcerpt, setFormExcerpt] = useState("");
   const [formSourceUrl, setFormSourceUrl] = useState("");
   const [formSourceTitle, setFormSourceTitle] = useState("");
-  const [formTrade, setFormTrade] = useState<TargetTrade | "">("");
+  const [formTrade, setFormTrade] = useState<string>("");
   const [formAudience, setFormAudience] = useState<AudienceLane>("ICP");
   const [formTagsInput, setFormTagsInput] = useState("");
   const [formTags, setFormTags] = useState<string[]>(["Manual"]);
@@ -215,9 +269,9 @@ export default function IdeaStreamPage() {
     setEditingIdea(idea);
     setEditTitle(idea.title || idea.raw_idea || "");
     setEditExcerpt(idea.excerpt || idea.angle || "");
-    setEditTrade((idea.target_trade as TargetTrade) || "HVAC");
+    setEditTrade(idea.target_trade || "");
     setEditAudience((idea.audience as AudienceLane) || "ICP");
-    setEditStatus((idea.status as IdeaStatus) || "HARVESTED");
+    setEditStatus((idea.status as IdeaStatus) || "REFINED");
   };
 
   const handleSaveEdit = async (e: React.FormEvent) => {
@@ -469,11 +523,8 @@ export default function IdeaStreamPage() {
         if (!t.includes(selectedTrade.toLowerCase())) return false;
       }
 
-      // Status filter
-      if (selectedStatus !== "ALL") {
-        const st = (idea.status || "").toUpperCase();
-        if (st !== selectedStatus) return false;
-      }
+      // Stage filter -- compare mapped stages, never raw status strings.
+      if (selectedStage !== "ALL" && toIdeaStage(idea.status) !== selectedStage) return false;
 
       // Search query filter
       if (searchQuery.trim()) {
@@ -487,7 +538,7 @@ export default function IdeaStreamPage() {
 
       return true;
     });
-  }, [ideas, selectedAudience, selectedTrade, selectedStatus, searchQuery]);
+  }, [ideas, selectedAudience, selectedTrade, selectedStage, searchQuery]);
 
   // Audience Badge Styling Helper
   return (
@@ -683,45 +734,31 @@ export default function IdeaStreamPage() {
               })}
             </div>
 
-            {/* Row 3: Status Filters */}
+            {/* Row 3: Stage Filters */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 border-t border-[#1F2D3D]/40 scrollbar-none">
               <span className="text-[11px] font-mono uppercase tracking-wider text-[#64748B] mr-1 shrink-0">
-                Status:
+                Stage:
               </span>
-              <button
-                onClick={() => setSelectedStatus("ALL")}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
-                  selectedStatus === "ALL"
-                    ? "bg-[#161D26] text-[#F1F5F9] border border-[#00C9A7]/60 shadow-sm"
-                    : "bg-transparent text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#0F1419]"
-                }`}
-              >
-                <span>All</span>
-                <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${
-                  selectedStatus === "ALL" ? "bg-[#00C9A7]/20 text-[#00C9A7]" : "bg-[#161D26] text-[#64748B]"
-                }`}>
-                  {ideas.length}
-                </span>
-              </button>
-
-              {STATUS_FILTERS.filter(st => st !== "ALL").map((st) => {
-                const isSelected = selectedStatus === st;
-                const count = ideas.filter(i => {
-                  const s = i.status ? i.status.toUpperCase() : "HARVESTED";
-                  return s === st;
-                }).length;
+              {STAGE_FILTERS.map((stage) => {
+                const isSelected = selectedStage === stage;
+                const count =
+                  stage === "ALL"
+                    ? ideas.length
+                    : ideas.filter((i) => toIdeaStage(i.status) === stage).length;
+                const label = stage === "ALL" ? "All" : IDEA_STAGE_LABELS[stage];
 
                 return (
                   <button
-                    key={st}
-                    onClick={() => setSelectedStatus(st)}
+                    key={stage}
+                    onClick={() => setSelectedStage(stage)}
+                    title={stage === "ALL" ? "Every idea" : IDEA_STAGE_HINTS[stage]}
                     className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
                       isSelected
                         ? "bg-[#161D26] text-[#F1F5F9] border border-[#00C9A7]/60 shadow-sm"
                         : "bg-transparent text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#0F1419]"
                     }`}
                   >
-                    <span className="capitalize">{st.toLowerCase()}</span>
+                    <span>{label}</span>
                     <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${
                       isSelected ? "bg-[#00C9A7]/20 text-[#00C9A7]" : "bg-[#161D26] text-[#64748B]"
                     }`}>
@@ -790,13 +827,13 @@ export default function IdeaStreamPage() {
               <AlertCircle className="w-8 h-8 text-[#64748B] mx-auto" />
               <h3 className="text-base font-bold text-[#F1F5F9]">No ideas found matching filters</h3>
               <p className="text-xs text-[#94A3B8] max-w-sm mx-auto">
-                Try adjusting your Audience, Trade, or Status filters, or inject a new manual editorial signal.
+                Try adjusting your Audience, Topic, or Stage filters, or inject a new manual editorial signal.
               </p>
               <button
                 onClick={() => {
                   setSelectedAudience("ALL");
                   setSelectedTrade("ALL");
-                  setSelectedStatus("ALL");
+                  setSelectedStage("ALL");
                   setSearchQuery("");
                 }}
                 className="mt-2 text-xs font-semibold text-[#00C9A7] hover:underline cursor-pointer"
@@ -889,10 +926,10 @@ export default function IdeaStreamPage() {
                     required
                     value={formTrade}
                     onChange={(e) => {
-                      const t = e.target.value as TargetTrade;
+                      const t = e.target.value ;
                       setFormTrade(t);
                       if (!formTags.includes(t)) {
-                        setFormTags([...formTags.filter(x => !TRADES.includes(x as TargetTrade)), t]);
+                        setFormTags([...formTags.filter(x => !TRADES.includes(x)), t]);
                       }
                     }}
                     className="w-full bg-[#161D26] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3.5 py-2.5 text-xs text-[#F1F5F9] outline-none transition-all cursor-pointer"
@@ -1125,7 +1162,7 @@ export default function IdeaStreamPage() {
                     </label>
                     <select
                       value={editTrade}
-                      onChange={(e) => setEditTrade(e.target.value as TargetTrade)}
+                      onChange={(e) => setEditTrade(e.target.value)}
                       className="w-full bg-[#070B0F] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3 py-2.5 text-xs text-[#F1F5F9] outline-none transition-colors cursor-pointer"
                     >
                       {TRADES.map((t) => (

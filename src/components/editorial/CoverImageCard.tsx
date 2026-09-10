@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { ExternalLink, Image as ImageIcon } from "lucide-react";
+import { AlertTriangle, ExternalLink, Image as ImageIcon } from "lucide-react";
 import type { AssetItem } from "@/types";
 
 export interface CoverImageCardProps {
@@ -11,6 +11,11 @@ export interface CoverImageCardProps {
 
 /** The 16:9 studio cover art panel. */
 export default function CoverImageCard({ activeAsset }: CoverImageCardProps) {
+  const coverNeedsAttention = activeAsset.hero_status !== "READY";
+  const coverMessage = activeAsset.hero_status === "BLOCKED_BY_SAFETY"
+    ? "Qwen’s safety filter blocked this cover. The draft is ready for review."
+    : "The cover could not be generated. The draft is ready for review.";
+
   return (
 <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-4 sm:p-5 space-y-3 shadow-xl">
   <div className="flex items-center justify-between pb-2 border-b border-[#1F2D3D]/60">
@@ -20,7 +25,7 @@ export default function CoverImageCard({ activeAsset }: CoverImageCardProps) {
         16:9 Studio Cover Image
       </span>
     </div>
-    <span className="text-[10px] font-mono text-[#64748B]">AI Generated · 1280×720</span>
+    <span className="text-[10px] font-mono text-[#64748B]">{coverNeedsAttention ? "Cover needs attention" : "AI Generated · 1280×720"}</span>
   </div>
 
   {/* 16:9 Aspect Ratio Frame */}
@@ -36,8 +41,12 @@ export default function CoverImageCard({ activeAsset }: CoverImageCardProps) {
       />
     ) : (
       <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-2">
-        <ImageIcon className="w-10 h-10 text-[#64748B]" />
-        <span className="text-xs text-[#94A3B8]">Cover image synthesizing on R2...</span>
+        <AlertTriangle className="w-9 h-9 text-[#F59E0B]" />
+        <span className="text-sm font-semibold text-[#F1F5F9]">Cover needs attention</span>
+        <span className="max-w-sm text-xs leading-relaxed text-[#94A3B8]">{coverMessage}</span>
+        {activeAsset.hero_error_code && (
+          <span className="text-[10px] font-mono text-[#64748B]">{activeAsset.hero_error_code}</span>
+        )}
       </div>
     )}
 

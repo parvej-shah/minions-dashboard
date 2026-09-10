@@ -9,6 +9,8 @@ export type AssetStatus =
   | "BLOCKED"
   | "REJECTED";
 
+export type HeroStatus = "READY" | "BLOCKED_BY_SAFETY" | "FAILED";
+
 export type SocialPlatform = "LINKEDIN" | "FACEBOOK" | "TWITTER" | "NEWSLETTER";
 
 export interface ClaimCheckItem {
@@ -43,7 +45,11 @@ export interface AssetItem {
   target_trade: string;
   status: AssetStatus;
   claims_ok: string | null;
-  hero_image_url: string;
+  hero_image_url: string | null;
+  hero_status: HeroStatus;
+  hero_error_code: string | null;
+  hero_provider: string | null;
+  hero_attempts: number;
   doc_url: string;
   version: number;
   generation_cost: number;
