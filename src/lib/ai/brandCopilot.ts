@@ -24,7 +24,7 @@ export interface AiSuggestions {
 }
 
 export interface GeneratedDirective {
-  category: "POSITIONING" | "VOICE" | "FORBIDDEN";
+  category: "POSITIONING" | "VOICE" | "FORBIDDEN" | "TOPICS";
   rule_key: string;
   instruction: string;
   priority: number;
@@ -86,6 +86,8 @@ export interface BrandSuggestionInput {
   postSamples?: string[];
   /** Plain-text summary of the business's own website, when available -- the strongest grounding signal we have before the user types anything. */
   websiteContext?: string;
+  /** The subject-matter territory the user wants their content to own. */
+  contentFocus?: string;
 }
 
 /**
@@ -154,9 +156,11 @@ export interface BrandDirectiveInput {
   websiteContext?: string;
   /** User-provided writing sample captured during onboarding. */
   voiceSample?: string;
+  /** The subject-matter territory the user wants their content to own. */
+  contentFocus?: string;
 }
 
-const VALID_CATEGORIES = new Set(["POSITIONING", "VOICE", "FORBIDDEN"]);
+const VALID_CATEGORIES = new Set(["POSITIONING", "VOICE", "FORBIDDEN", "TOPICS"]);
 
 /**
  * Synthesizes the onboarding "Brand Copilot" directives + positioning
@@ -172,6 +176,7 @@ export async function generateBrandDirectivesWithLLM(
 Business: ${input.businessName}
 Industry: ${input.industry}
 Audience: ${input.audienceDescription || "(not specified)"}
+Content territory they want to own: ${input.contentFocus || "(not specified)"}
 ${input.headline ? `Founder/operator's professional headline: ${input.headline}\n` : ""}${input.websiteContext ? `Their website (real content, use this as your primary source of truth):\n${input.websiteContext}\n\n` : ""}Myth they disagree with: ${input.mythAnswer || "(not specified)"}
 Their #1 differentiator: ${input.differentiatorAnswer || "(not specified)"}
 Topics/claims to strictly avoid: ${input.avoidAnswer || "(not specified)"}
@@ -180,7 +185,7 @@ Writing sample to match, if present: ${input.voiceSample ? input.voiceSample.sli
 Task:
 Write 5-6 sharp, specific brand directives grounded in the answers above (do not invent facts not implied by them), plus a 1-2 sentence positioning summary. Each directive's "instruction" must be a concrete, actionable rule for an AI writer -- not vague marketing language.
 
-Categories to use (exactly these strings): "POSITIONING" (who they are / their differentiator), "VOICE" (tone, myths to challenge, cadence), "FORBIDDEN" (topics/claims/buzzwords to never use).
+Categories to use (exactly these strings): "POSITIONING" (who they are / their differentiator), "TOPICS" (the subject-matter territory to generate ideas within), "VOICE" (tone and cadence), "FORBIDDEN" (topics/claims/buzzwords to never use).
 
 Return ONLY a single valid JSON object (no markdown, no explanation):
 {

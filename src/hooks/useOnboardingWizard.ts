@@ -5,7 +5,7 @@ import type { BrandPreset } from "@/constants/brandPresets";
 import type { GeneratedDirective } from "@/app/api/onboarding/brand-copilot/route";
 import type { LinkedInProfile, AiSuggestions } from "@/app/api/onboarding/voice-import/route";
 
-export const ONBOARDING_STEPS = ["Your brand", "Your perspective", "Channels", "Start creating"] as const;
+export const ONBOARDING_STEPS = ["Your brand", "Your voice", "Start creating"] as const;
 
 export interface OnboardingWizardState {
   step: number;
@@ -35,6 +35,8 @@ export interface OnboardingWizardState {
   setWebsiteUrl: (val: string) => void;
   audienceDescription: string;
   setAudienceDescription: (val: string) => void;
+  contentFocus: string;
+  setContentFocus: (val: string) => void;
   industry: string;
   setIndustry: (val: string) => void;
   selectedPresetId: string | null;
@@ -76,8 +78,9 @@ export function useOnboardingWizard(): OnboardingWizardState {
   const [businessNameFromLinkedIn, setBusinessNameFromLinkedIn] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [audienceDescription, setAudienceDescription] = useState("");
-  const [industry, setIndustry] = useState("AI & Developer Tools");
-  const [selectedPresetId, setSelectedPresetId] = useState<string | null>("ai_tech_builders");
+  const [contentFocus, setContentFocus] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
 
   // Step 0: LinkedIn & Channels (Default: ONLY LinkedIn)
   const [linkedInConnected, setLinkedInConnected] = useState(false);
@@ -97,6 +100,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
   // Step 3: Review Directives
   const [directives, setDirectives] = useState<GeneratedDirective[]>([]);
   const [positioningSummary, setPositioningSummary] = useState("");
+  const [customSampleText, setCustomSampleText] = useState("");
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -119,6 +123,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         if (parsed.businessNameFromLinkedIn) setBusinessNameFromLinkedIn(parsed.businessNameFromLinkedIn);
         if (parsed.websiteUrl) setWebsiteUrl(parsed.websiteUrl);
         if (parsed.audienceDescription) setAudienceDescription(parsed.audienceDescription);
+        if (parsed.contentFocus) setContentFocus(parsed.contentFocus);
         if (parsed.industry) setIndustry(parsed.industry);
         if (parsed.selectedPresetId) setSelectedPresetId(parsed.selectedPresetId);
         if (parsed.channels && Array.isArray(parsed.channels)) setChannels(parsed.channels);
@@ -126,6 +131,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         if (parsed.mythAnswer) setMythAnswer(parsed.mythAnswer);
         if (parsed.differentiatorAnswer) setDifferentiatorAnswer(parsed.differentiatorAnswer);
         if (parsed.avoidAnswer) setAvoidAnswer(parsed.avoidAnswer);
+        if (typeof parsed.customSampleText === "string") setCustomSampleText(parsed.customSampleText);
         if (typeof parsed.step === "number") setStep(parsed.step);
         if (parsed.linkedInProfile) setLinkedInProfile(parsed.linkedInProfile);
         if (parsed.postSnippet) setPostSnippet(parsed.postSnippet);
@@ -151,6 +157,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
           businessNameFromLinkedIn,
           websiteUrl,
           audienceDescription,
+          contentFocus,
           industry,
           selectedPresetId,
           channels,
@@ -158,6 +165,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
           mythAnswer,
           differentiatorAnswer,
           avoidAnswer,
+          customSampleText,
           step,
           linkedInProfile,
           postSnippet,
@@ -168,7 +176,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         })
       );
     } catch {}
-  }, [businessName, businessNameFromLinkedIn, websiteUrl, audienceDescription, industry, selectedPresetId, channels, publishingMode, mythAnswer, differentiatorAnswer, avoidAnswer, step, linkedInProfile, postSnippet, aiSuggestions, importedVoiceCount, directives, positioningSummary, hasRestoredDraft]);
+  }, [businessName, businessNameFromLinkedIn, websiteUrl, audienceDescription, contentFocus, industry, selectedPresetId, channels, publishingMode, mythAnswer, differentiatorAnswer, avoidAnswer, customSampleText, step, linkedInProfile, postSnippet, aiSuggestions, importedVoiceCount, directives, positioningSummary, hasRestoredDraft]);
 
   function applyPreset(preset: BrandPreset) {
     setSelectedPresetId(preset.id);
@@ -177,36 +185,13 @@ export function useOnboardingWizard(): OnboardingWizardState {
 
   const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
 
-  // Personalizes the Brand Interview chips for users who skip LinkedIn, and
-  // re-personalizes them for users whose LinkedIn import only produced an
-  // ungrounded guess (no writing sample, so no real industry signal yet) --
-  // otherwise that guess (made with industry: "") silently outlives the
-  // real industry the user is about to pick right here, and the interview
-  // chips end up describing a business the user never selected. Never
-  // blocks the transition: any failure just leaves aiSuggestions as-is.
   async function goToBrandInterview() {
-    if (!aiSuggestions?.groundedIn && businessName.trim() && industry.trim()) {
-      setIsGeneratingSuggestions(true);
-      try {
-        const res = await apiClient.post<{ success: boolean; aiSuggestions: AiSuggestions | null }>(
-          "/api/onboarding/brand-suggestions",
-          { businessName: businessName.trim(), industry: industry.trim(), websiteUrl: websiteUrl.trim() }
-        );
-        if (res?.aiSuggestions) setAiSuggestions(res.aiSuggestions);
-      } catch (err) {
-        console.warn("Brand suggestion generation non-fatal:", err);
-      } finally {
-        setIsGeneratingSuggestions(false);
-      }
-    }
     setStep(1);
   }
 
   function toggleChannel(key: string) {
     setChannels((prev) => (prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key]));
   }
-
-  const [customSampleText, setCustomSampleText] = useState("");
 
   async function saveManualVoice() {
     const sample = customSampleText.trim();
@@ -289,6 +274,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         businessName: businessName.trim() || "Our Company",
         websiteUrl: websiteUrl.trim(),
         audienceDescription: audienceDescription.trim(),
+        contentFocus: contentFocus.trim(),
         voiceSample: customSampleText.trim(),
         mythAnswer,
         differentiatorAnswer,
@@ -337,6 +323,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
       await apiClient.post("/api/onboarding/setup", {
         industry: industry.trim() || "General Business",
         icp_description: positioningSummary || `${businessName || "My Brand"} provides ${industry} solutions.`,
+        content_focus: contentFocus.trim(),
         channels,
         preset_id: selectedPresetId,
         logo_url: linkedInProfile?.profilePicture || undefined,
@@ -412,6 +399,8 @@ export function useOnboardingWizard(): OnboardingWizardState {
     setWebsiteUrl,
     audienceDescription,
     setAudienceDescription,
+    contentFocus,
+    setContentFocus,
     industry,
     setIndustry,
     selectedPresetId,

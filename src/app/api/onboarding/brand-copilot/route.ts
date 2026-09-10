@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireTenantAccess } from "@/lib/tenant";
-import { apiError } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/lib/api-response";
 import { BRAND_PRESETS, type BrandPreset } from "@/constants/brandPresets";
 import { generateBrandDirectivesWithLLM, type GeneratedDirective } from "@/lib/ai/brandCopilot";
 import { fetchWebsiteContext } from "@/lib/ai/websiteContext";
@@ -10,6 +10,7 @@ interface CopilotInput {
   businessName?: string;
   websiteUrl?: string;
   audienceDescription?: string;
+  contentFocus?: string;
   mythAnswer?: string;
   differentiatorAnswer?: string;
   avoidAnswer?: string;
@@ -41,6 +42,11 @@ export async function POST(request: Request) {
     const voiceSample = (body.voiceSample || "").trim();
     const websiteUrl = (body.websiteUrl || "").trim();
     const audienceDescription = (body.audienceDescription || "").trim();
+    const contentFocus = (body.contentFocus || "").trim();
+
+    if (!audienceDescription || !contentFocus) {
+      return apiFailure("audienceDescription and contentFocus are required to create relevant ideas", 400);
+    }
 
     // Was accepted on the request body but never actually used -- collected
     // in Step 2, then silently dropped. Best-effort only, never blocks.
@@ -50,6 +56,7 @@ export async function POST(request: Request) {
       businessName,
       industry,
       audienceDescription,
+      contentFocus,
       mythAnswer: myth,
       differentiatorAnswer: differentiator,
       avoidAnswer: avoid,
@@ -83,6 +90,15 @@ export async function POST(request: Request) {
       instruction: `Position ${businessName} as an authoritative, grounded voice in ${industry}. Focus on practical realities and tangible outcomes over generic theory.`,
       priority: 1,
     });
+
+    if (contentFocus) {
+      directives.push({
+        category: "TOPICS",
+        rule_key: "CORE_CONTENT_FOCUS",
+        instruction: `Generate ideas within this territory: ${contentFocus}. Prioritize specific, practical angles over broad industry commentary.`,
+        priority: 1,
+      });
+    }
 
     // 2. The Differentiator Directive (from user's real answer)
     if (differentiator) {
@@ -147,7 +163,7 @@ export async function POST(request: Request) {
       priority: 1,
     });
 
-    const positioningSummary = `${businessName} provides high-reliability ${industry} solutions. Editorial focus centers on ${differentiator || "operational excellence"}, challenging common industry misconceptions (${myth || "inefficient legacy practices"}), and delivering clear, fluff-free insights.`;
+    const positioningSummary = `${businessName} provides high-reliability ${industry} solutions. Editorial focus centers on ${contentFocus || differentiator || "operational excellence"}, with clear, fluff-free insights.`;
 
     return NextResponse.json({
       success: true,

@@ -64,22 +64,22 @@ export const BRAND_PRESETS: BrandPreset[] = [
   },
   {
     id: "b2b_saas_growth",
-    name: "B2B SaaS & Growth",
-    badge: "Conversational & Analytical",
-    description: "For SaaS founders, product leaders, and growth operators. Focuses on ROI, customer retention, unit economics, and workflow leverage.",
-    industry: "B2B Software & SaaS",
-    icpDescription: "Founders, product managers, and growth leaders looking to scale SaaS operations, increase retention, and streamline customer onboarding.",
+    name: "Business & Services",
+    badge: "Practical & ICP-led",
+    description: "For founders, consultants, agencies, operators, and service businesses that want to earn attention from a specific buyer.",
+    industry: "Business & Professional Services",
+    icpDescription: "Founders, decision-makers, and professionals evaluating practical ways to solve a business problem, improve a workflow, or make a better buying decision.",
     toneFormality: "conversational_peer",
     toneCadence: "Clear, insightful, punchy narrative with concrete benchmarks and real numbers.",
     corePhilosophy:
-      "Cut through SaaS jargon and vanity metrics. Every piece of content should deliver an actionable framework, a concrete playbook, or a counter-intuitive business insight that readers can test immediately. Never post generic high-level advice without practical implementation steps.",
+      "Cut through business jargon and vague thought leadership. Every piece should deliver an actionable framework, a concrete playbook, or a useful perspective that the intended buyer can apply. Never post generic high-level advice without practical implementation steps.",
     coreThemes:
-      "SaaS Unit Economics, Product-Led Growth, Customer Retention, Workflow Automation, Onboarding UX, B2B Pricing Strategies, Churn Reduction.",
+      "Customer Problems, Practical Expertise, Workflow Improvement, Buying Decisions, Service Delivery, Trust Building, Sustainable Growth.",
     audienceLanes: {
       builders:
-        "Lane A — Product & Growth Teams: Deep dives on conversion funnels, activation benchmarks, and data-backed product experiments.",
+        "Lane A — Practitioners: Practical frameworks, better workflows, and lessons from doing the work.",
       business:
-        "Lane B — Founders & Executives: High-leverage strategic decisions, pricing models, and sustainable growth without burning cash.",
+        "Lane B — Buyers & Decision-Makers: Clear trade-offs, proof, and high-leverage decisions for their business.",
     },
     forbiddenWords: [
       "all-in-one solution",

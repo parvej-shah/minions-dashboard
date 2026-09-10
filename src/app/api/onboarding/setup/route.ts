@@ -20,6 +20,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const industry = (body.industry || "").toString().trim();
     const icpDescription = (body.icp_description || "").toString().trim();
+    const contentFocus = (body.content_focus || "").toString().trim();
     const presetId = (body.preset_id || "").toString().trim();
     const logoUrl = (body.logo_url || "").toString().trim();
     const channels: string[] = Array.isArray(body.channels) ? body.channels : [];
@@ -83,6 +84,7 @@ export async function POST(request: Request) {
             "lane_builders",
             "lane_business",
             "banned_buzzwords",
+            "content_focus",
           ],
         },
       },
@@ -100,6 +102,19 @@ export async function POST(request: Request) {
         isActive: true,
       },
     ];
+
+    if (contentFocus) {
+      directivesToCreate.push({
+        id: `DIR-${crypto.randomUUID()}`,
+        clientId: ctx.clientId,
+        category: "TOPICS",
+        ruleKey: "content_focus",
+        instruction: contentFocus,
+        priority: 1,
+        audienceScope: "ALL",
+        isActive: true,
+      });
+    }
 
     if (client?.name) {
       directivesToCreate.push({
