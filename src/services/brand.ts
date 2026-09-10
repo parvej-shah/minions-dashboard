@@ -132,6 +132,16 @@ export async function updateBrandSettings(
     create: { clientId, ...data },
   });
 
+  // Keep Client.name in step with the brand name. They are shown in different
+  // places -- Client.name in the sidebar and workspace switcher, brandName on
+  // generated images and in pipeline prompts -- and letting them diverge is
+  // how a tenant ends up renamed everywhere except its own cover art.
+  if (input.brand_name) {
+    await prisma.client
+      .update({ where: { id: clientId }, data: { name: input.brand_name } })
+      .catch(() => {});
+  }
+
   const directives = await prisma.brandDirective
     .findMany({
       where: { clientId, category: { not: "DISTRIBUTION" } },

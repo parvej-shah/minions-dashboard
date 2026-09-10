@@ -350,6 +350,12 @@ export function useOnboardingWizard(): OnboardingWizardState {
       }
 
       await apiClient.post("/api/onboarding/setup", {
+        // The wizard collected this on step 1 but never sent it, so the tenant
+        // kept the "<email-local-part>'s Workspace" placeholder that
+        // getOrCreateTenant() assigns before onboarding runs -- and that
+        // placeholder is what BrandProfile.brandName, /api/brand/context's
+        // company_name, and therefore every generated cover image displayed.
+        business_name: businessName.trim(),
         industry: industry.trim() || "General Business",
         icp_description: positioningSummary || `${businessName || "My Brand"} provides ${industry} solutions.`,
         content_focus: contentFocus.trim(),

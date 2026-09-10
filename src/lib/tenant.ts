@@ -79,12 +79,33 @@ export async function requireClientId(): Promise<
 }
 
 /**
+ * The name a tenant gets before onboarding has asked for a real one.
+ *
+ * A fresh Client row must exist the moment a user signs in -- well before the
+ * onboarding wizard collects their business name -- so it is seeded from the
+ * email's local part. Onboarding then promotes the real name (see
+ * /api/onboarding/setup), but only over a name still matching this shape:
+ * a tenant that already has a real name must never be silently renamed.
+ */
+export function placeholderTenantName(email: string): string {
+  return `${email.split("@")[0]}'s Workspace`;
+}
+
+/**
+ * True when `name` is still the auto-generated placeholder rather than
+ * something the user chose, and is therefore safe to overwrite.
+ */
+export function isPlaceholderTenantName(name: string | null | undefined): boolean {
+  return !name?.trim() || /'s Workspace$/.test(name.trim());
+}
+
+/**
  * Creates a new Client workspace for a fresh user and attaches it as OWNER.
  */
 export async function getOrCreateTenant(user: CurrentUser, name?: string): Promise<string> {
   if (user.clientId) return user.clientId;
 
-  const clientName = name || `${user.email.split("@")[0]}'s Workspace`;
+  const clientName = name || placeholderTenantName(user.email);
   const baseSlug = clientName
     .toLowerCase()
     .trim()

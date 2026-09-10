@@ -16,7 +16,8 @@ vi.mock("next/headers", () => ({
   cookies: async () => ({ get: cookiesGetMock }),
 }));
 
-const { requireClientId, isPlatformStaff } = await import("./tenant");
+const { requireClientId, isPlatformStaff, placeholderTenantName, isPlaceholderTenantName } =
+  await import("./tenant");
 
 function dbUser(overrides: Partial<{ id: string; email: string; clientId: string | null; role: string }> = {}) {
   return { id: "user-1", email: "a@example.com", clientId: "client-1", role: "MEMBER", ...overrides };
@@ -90,5 +91,30 @@ describe("requireClientId", () => {
     const result = await requireClientId();
     expect("error" in result).toBe(true);
     if ("error" in result) expect(result.error.status).toBe(403);
+  });
+});
+
+describe("placeholderTenantName / isPlaceholderTenantName", () => {
+  it("derives the placeholder from the email local part", () => {
+    expect(placeholderTenantName("bsse1610@iit.du.ac.bd")).toBe("bsse1610's Workspace");
+  });
+
+  it("recognizes its own output as a placeholder", () => {
+    expect(isPlaceholderTenantName(placeholderTenantName("someone@example.com"))).toBe(true);
+  });
+
+  it("treats an empty or whitespace name as a placeholder", () => {
+    expect(isPlaceholderTenantName("")).toBe(true);
+    expect(isPlaceholderTenantName(null)).toBe(true);
+    expect(isPlaceholderTenantName("   ")).toBe(true);
+  });
+
+  it("never flags a real business name, so onboarding cannot rename it", () => {
+    expect(isPlaceholderTenantName("Acme HVAC")).toBe(false);
+    expect(isPlaceholderTenantName("Brain Station 23")).toBe(false);
+  });
+
+  it("does not flag a real name that merely contains the word Workspace", () => {
+    expect(isPlaceholderTenantName("Workspace Analytics")).toBe(false);
   });
 });
