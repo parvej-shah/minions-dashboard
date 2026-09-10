@@ -104,8 +104,14 @@ export default function DashboardShell({ children }: DashboardShellProps) {
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get("onboarding_success") === "true") {
-        notify("🎉 Setup complete! Minions AI is harvesting ideas & drafting your post in the background.");
-        window.history.replaceState({}, document.title, window.location.pathname);
+        notify("🎉 Brand Brief saved. Minions is now finding your first content ideas.");
+        urlParams.delete("onboarding_success");
+        const remainingQuery = urlParams.toString();
+        window.history.replaceState(
+          {},
+          document.title,
+          `${window.location.pathname}${remainingQuery ? `?${remainingQuery}` : ""}`
+        );
       }
     }
   }, [brandLoading, brandSettings, pathname, router, notify]);

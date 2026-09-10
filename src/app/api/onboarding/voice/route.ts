@@ -4,7 +4,7 @@ import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 
 /**
- * Voice-test step: structured questionnaire + 3-5 pasted example posts.
+ * Voice-test step: structured questionnaire + 1-5 pasted example posts.
  * Both feed the Writer prompt in 02_idea_to_asset as few-shot context (see
  * Build Writer Payload's tone_examples / tone_questionnaire injection).
  */
@@ -19,8 +19,8 @@ export async function POST(request: Request) {
       ? body.examples.map((e: unknown) => (e || "").toString().trim()).filter(Boolean)
       : [];
 
-    if (examples.length > 0 && (examples.length < 3 || examples.length > 5)) {
-      return apiFailure("Provide 3 to 5 example posts, or none at all", 400);
+    if (examples.length > 5) {
+      return apiFailure("Provide up to 5 example posts", 400);
     }
 
     await prisma.brandProfile.upsert({

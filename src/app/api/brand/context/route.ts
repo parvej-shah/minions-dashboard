@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getBrandSettings, getWriterVoiceConfig } from "@/services/brand";
 import { BLOG_BASE_URL } from "@/constants/config";
 import { apiError, apiFailure } from "@/lib/api-response";
+import { verifyWebhookSecret } from "@/lib/security";
 
 /**
  * Structured brand context for the n8n drafting pipeline to ingest.
@@ -14,6 +15,9 @@ import { apiError, apiFailure } from "@/lib/api-response";
  * already carries from the workflow trigger payload.
  */
 export async function GET(request: Request) {
+  const authCheck = await verifyWebhookSecret(request);
+  if (!authCheck.isValid && authCheck.response) return authCheck.response;
+
   const clientId = new URL(request.url).searchParams.get("clientId");
   if (!clientId) {
     return apiFailure("clientId query param is required", 400);

@@ -8,8 +8,16 @@ export async function GET(request: Request) {
 
   try {
     const url = new URL(request.url);
-    // Base URL for the redirect callback
-    const redirectUri = `${url.protocol}//${url.host}/api/auth/linkedin/callback`;
+    const requestedReturnTo = url.searchParams.get("return_to") || "/fleet";
+    // OAuth must never turn a query parameter into an off-site redirect.
+    const returnTo = requestedReturnTo.startsWith("/") ? requestedReturnTo : "/fleet";
+    const redirectUri = process.env.LINKEDIN_REDIRECT_URI?.trim() || `${url.origin}/api/auth/linkedin/callback`;
+
+    if (!process.env.LINKEDIN_CLIENT_ID?.trim() || !process.env.LINKEDIN_CLIENT_SECRET?.trim()) {
+      const failureUrl = new URL(returnTo, url.origin);
+      failureUrl.searchParams.set("error", "LinkedIn OAuth is not configured yet. Add the LinkedIn client ID and secret, then try again.");
+      return NextResponse.redirect(failureUrl);
+    }
 
     const linkedInAuthUrl = new URL("https://www.linkedin.com/oauth/v2/authorization");
     linkedInAuthUrl.searchParams.append("response_type", "code");
@@ -18,7 +26,6 @@ export async function GET(request: Request) {
     // Request permissions for profile, email, and member posting
     linkedInAuthUrl.searchParams.append("scope", "openid profile email w_member_social");
     
-    const returnTo = url.searchParams.get("return_to") || "/fleet";
     const state = Buffer.from(JSON.stringify({ clientId: ctx.clientId, returnTo, ts: Date.now() })).toString("base64");
     linkedInAuthUrl.searchParams.append("state", state);
 

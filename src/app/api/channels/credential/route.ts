@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { apiError, apiFailure } from "@/lib/api-response";
+import { verifyWebhookSecret } from "@/lib/security";
 
 /**
  * Resolves a tenant's channel credential for n8n's publish nodes.
@@ -15,6 +16,9 @@ import { apiError, apiFailure } from "@/lib/api-response";
  * session, since the caller is n8n.
  */
 export async function GET(request: Request) {
+  const authCheck = await verifyWebhookSecret(request);
+  if (!authCheck.isValid && authCheck.response) return authCheck.response;
+
   const url = new URL(request.url);
   const clientId = url.searchParams.get("clientId");
   const channel = url.searchParams.get("channel");

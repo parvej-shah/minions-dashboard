@@ -101,4 +101,32 @@ export interface BrandProfileInput {
   visual_assets?: VisualAssets;
 }
 
-export type BrandTab = "overview" | "lexicon";
+export interface BrandVoiceQuestionnaire {
+  formality: "casual" | "balanced" | "formal";
+  sentence_length: "short" | "mixed" | "long";
+  humor: "none" | "light" | "frequent";
+  emoji_use: "never" | "sometimes" | "often";
+  signature_phrases: string[];
+}
+
+export interface BrandToneExample {
+  id: string;
+  content: string;
+  source: string | null;
+}
+
+export interface BrandProofItem {
+  id: string;
+  claim: string;
+  source_url: string;
+  source_title: string;
+  notes: string;
+}
+
+export interface BrandVoiceProofSettings {
+  questionnaire: BrandVoiceQuestionnaire;
+  examples: BrandToneExample[];
+  proofs: BrandProofItem[];
+}
+
+export type BrandTab = "overview" | "voice-proof" | "lexicon";

@@ -1,6 +1,6 @@
 import type { OnboardingWizardState } from "@/hooks/useOnboardingWizard";
 import { BRAND_PRESETS } from "@/constants/brandPresets";
-import { Globe, Building2, Sparkles, CheckCircle2, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
+import { Globe, Building2, Sparkles, CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
 
 const inputClass =
   "w-full rounded-xl bg-[#070B0F] border border-[#1F2D3D] px-3.5 py-2.5 sm:px-4 sm:py-3 text-[#F1F5F9] placeholder:text-[#475569] focus:outline-none focus:border-[#00C9A7] text-sm";
@@ -16,7 +16,7 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
         if (inferredName) {
           wizard.setBusinessName(inferredName.charAt(0).toUpperCase() + inferredName.slice(1));
         }
-      } catch (e) {}
+      } catch {}
     }
   };
 
@@ -25,11 +25,25 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
       <div>
         <div className="flex items-center gap-2 mb-1.5">
           <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#00C9A7] shrink-0" />
-          <h2 className="text-lg sm:text-xl font-bold text-[#F1F5F9] leading-snug">Let&apos;s set up your brand</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-[#F1F5F9] leading-snug">Start with your brand</h2>
         </div>
         <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-          Tell us about your business so Minions can tailor every post and editorial draft to your industry.
+          A few honest details give Minions the context to find ideas that are relevant to your work — not generic content prompts.
         </p>
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-[#94A3B8] mb-1.5">
+          Who do you want your content to reach?
+        </label>
+        <textarea
+          rows={3}
+          value={wizard.audienceDescription}
+          onChange={(e) => wizard.setAudienceDescription(e.target.value)}
+          placeholder="For example: operations leaders at growing B2B companies who need a clearer way to adopt AI."
+          className={`${inputClass} resize-y leading-relaxed`}
+        />
+        <p className="mt-1.5 text-[11px] text-[#64748B]">A role, industry, problem, or audience is enough. You can refine this later.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
@@ -122,16 +136,7 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-4 border-t border-[#1F2D3D]/60">
-        <button
-          type="button"
-          onClick={() => wizard.setStep(0)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:text-[#F1F5F9] transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back</span>
-        </button>
-
+      <div className="flex items-center justify-end pt-4 border-t border-[#1F2D3D]/60">
         <button
           type="button"
           onClick={wizard.goToBrandInterview}
@@ -145,7 +150,7 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
             </>
           ) : (
             <>
-              <span>Next: Brand Interview</span>
+          <span>Next: Your Perspective</span>
               <ArrowRight className="w-4 h-4" />
             </>
           )}

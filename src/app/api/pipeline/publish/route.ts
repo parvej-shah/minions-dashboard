@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { triggerN8nWorkflow } from "@/services/pipeline";
+import { prisma } from "@/lib/prisma";
+import { apiFailure } from "@/lib/api-response";
+import { requireClientId } from "@/lib/tenant";
 
 /**
  * Triggers the 03_review_publisher workflow in n8n.
@@ -9,12 +12,29 @@ import { triggerN8nWorkflow } from "@/services/pipeline";
  * host to any page visitor. It goes through here now, like harvest and draft.
  */
 export async function POST(request: Request) {
+  const ctx = await requireClientId();
+  if ("error" in ctx) return ctx.error;
+
   const body = await request.json().catch(() => ({} as Record<string, unknown>));
+  const assetId = typeof body.asset_id === "string" ? body.asset_id.trim() : "";
+
+  if (!assetId) {
+    return apiFailure("asset_id is required", 400);
+  }
+
+  const asset = await prisma.asset.findFirst({
+    where: { id: assetId, clientId: ctx.clientId },
+    select: { id: true },
+  });
+  if (!asset) {
+    return apiFailure("Draft not found", 404);
+  }
 
   const { result, status } = await triggerN8nWorkflow(
     "publish",
     {
-      asset_id: body.asset_id ?? null,
+      asset_id: asset.id,
+      client_id: ctx.clientId,
       trigger_source: "MINIONS_COCKPIT_EDITORIAL",
     },
     {

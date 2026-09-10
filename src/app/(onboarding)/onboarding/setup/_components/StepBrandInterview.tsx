@@ -99,7 +99,7 @@ export default function StepBrandInterview({ wizard }: { wizard: OnboardingWizar
         <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-[#00C9A7] shrink-0" />
-            <h2 className="text-lg sm:text-xl font-bold text-[#F1F5F9] leading-snug">2-Minute Brand Interview</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-[#F1F5F9] leading-snug">Share your perspective</h2>
           </div>
           {isAiPowered && (
             <span
@@ -119,9 +119,9 @@ export default function StepBrandInterview({ wizard }: { wizard: OnboardingWizar
               Based on <span className="text-[#F1F5F9] font-medium">{groundedIn}</span>. Tap to use or type your own.
             </>
           ) : isAiPowered ? (
-            "A first-pass draft based on your industry — edit freely, or paste a writing sample on the previous step for suggestions matched to your voice."
+            "A first-pass draft based on your industry — edit freely, then add a writing sample on the next step so your drafts sound more like you."
           ) : (
-            "Tap a suggestion or type your own perspective. Our AI Copilot will turn your answers into sharp, high-converting editorial guardrails."
+            "Tap a suggestion or type your own perspective. Minions will turn it into a clear writing playbook for your ideas and drafts."
           )}
         </p>
       </div>
@@ -252,7 +252,7 @@ export default function StepBrandInterview({ wizard }: { wizard: OnboardingWizar
           ) : (
             <>
               <Sparkles className="w-4 h-4" />
-              <span>Generate My Brand Directives</span>
+              <span>Build My Writing Playbook</span>
             </>
           )}
         </button>

@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, Sparkles } from "lucide-react";
+import { AlertTriangle, Mic2, Sparkles } from "lucide-react";
 import { BrandDirectiveItem, BrandTab } from "@/types";
 import LexiconTab from "@/components/brand/LexiconTab";
 import OverviewTab from "@/components/brand/OverviewTab";
+import VoiceProofTab from "@/components/brand/VoiceProofTab";
 import { useApiResource } from "@/hooks/useApiResource";
 
 export default function BrandStudioPage() {
@@ -86,6 +87,17 @@ export default function BrandStudioPage() {
         {/* Tab Switcher */}
         <div className="flex flex-wrap items-center bg-[#0F1419] p-1 rounded-xl border border-[#1F2D3D] self-start md:self-auto gap-1 max-w-full overflow-x-auto">
           <button
+            onClick={() => setActiveTab("voice-proof")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === "voice-proof"
+                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
+                : "text-[#94A3B8] hover:text-[#F1F5F9]"
+            }`}
+          >
+            <Mic2 className="w-3.5 h-3.5" />
+            Voice & Proof
+          </button>
+          <button
             onClick={() => setActiveTab("overview")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "overview"
@@ -116,6 +128,8 @@ export default function BrandStudioPage() {
       {activeTab === "overview" && (
         <OverviewTab directives={directives} setDirectives={setDirectives} />
       )}
+
+      {activeTab === "voice-proof" && <VoiceProofTab />}
 
       {/* ======================================================== */}
       {/* BANNED LEXICON & COMPLIANCE */}

@@ -57,13 +57,13 @@ export default function OnboardingWizard() {
         <div className="text-center sm:text-left space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-[#00C9A7] text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5 shrink-0" />
-            <span>Minions Autonomous Content Engine</span>
+            <span>Minions Brand Brief</span>
           </div>
           <h1 className="text-xl sm:text-3xl font-extrabold text-[#F1F5F9] tracking-tight leading-tight">
-            Let&apos;s personalize your content engine
+            Let&apos;s capture how you want to be known
           </h1>
           <p className="text-xs sm:text-sm text-[#94A3B8] max-w-2xl leading-relaxed">
-            In under 2 minutes, connect your channels, calibrate your writing style, and launch your first executive draft.
+            Give Minions the context behind your work. We&apos;ll turn it into relevant ideas, then you choose what becomes your first draft.
           </p>
         </div>
 
@@ -72,9 +72,9 @@ export default function OnboardingWizard() {
 
         {/* Step Container */}
         <div>
-          {wizard.step === 0 && <StepLinkedInVoice wizard={wizard} />}
-          {wizard.step === 1 && <StepCompanySnapshot wizard={wizard} />}
-          {wizard.step === 2 && <StepBrandInterview wizard={wizard} />}
+          {wizard.step === 0 && <StepCompanySnapshot wizard={wizard} />}
+          {wizard.step === 1 && <StepBrandInterview wizard={wizard} />}
+          {wizard.step === 2 && <StepLinkedInVoice wizard={wizard} />}
           {wizard.step === 3 && <StepConfirmDirectives wizard={wizard} />}
         </div>
       </div>

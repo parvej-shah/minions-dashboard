@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { apiClient, toErrorMessage, ApiRequestError } from "@/lib/api-client";
 import { BRAND_PRESETS, type BrandPreset } from "@/constants/brandPresets";
 import type { GeneratedDirective } from "@/app/api/onboarding/brand-copilot/route";
 import type { LinkedInProfile, AiSuggestions } from "@/app/api/onboarding/voice-import/route";
 
-export const ONBOARDING_STEPS = ["Connect LinkedIn", "Company Profile", "Brand Interview", "Review & Launch"] as const;
+export const ONBOARDING_STEPS = ["Your brand", "Your perspective", "Your voice", "Start creating"] as const;
 
 export interface OnboardingWizardState {
   step: number;
@@ -15,12 +16,15 @@ export interface OnboardingWizardState {
   setLinkedInConnected: (val: boolean) => void;
   channels: string[];
   toggleChannel: (key: string) => void;
+  publishingMode: "review" | "auto";
+  setPublishingMode: (mode: "review" | "auto") => void;
   importedVoiceCount: number;
   linkedInProfile: LinkedInProfile | null;
   postSnippet: string | null;
   aiSuggestions: AiSuggestions | null;
   customSampleText: string;
   setCustomSampleText: (val: string) => void;
+  saveManualVoice: () => Promise<void>;
   importLinkedInVoice: (overrideText?: string) => Promise<void>;
 
   // Step 1: Company Snapshot
@@ -29,6 +33,8 @@ export interface OnboardingWizardState {
   businessNameFromLinkedIn: boolean;
   websiteUrl: string;
   setWebsiteUrl: (val: string) => void;
+  audienceDescription: string;
+  setAudienceDescription: (val: string) => void;
   industry: string;
   setIndustry: (val: string) => void;
   selectedPresetId: string | null;
@@ -62,18 +68,21 @@ export interface OnboardingWizardState {
 const STORAGE_KEY = "minions_onboarding_draft";
 
 export function useOnboardingWizard(): OnboardingWizardState {
+  const router = useRouter();
   const [step, setStep] = useState(0);
 
   // Step 1: Company
   const [businessName, setBusinessNameRaw] = useState("");
   const [businessNameFromLinkedIn, setBusinessNameFromLinkedIn] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState("");
+  const [audienceDescription, setAudienceDescription] = useState("");
   const [industry, setIndustry] = useState("AI & Developer Tools");
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>("ai_tech_builders");
 
   // Step 0: LinkedIn & Channels (Default: ONLY LinkedIn)
   const [linkedInConnected, setLinkedInConnected] = useState(false);
   const [channels, setChannels] = useState<string[]>(["linkedin"]);
+  const [publishingMode, setPublishingMode] = useState<"review" | "auto">("review");
   const [importedVoiceCount, setImportedVoiceCount] = useState(0);
   const [linkedInProfile, setLinkedInProfile] = useState<LinkedInProfile | null>(null);
   const [postSnippet, setPostSnippet] = useState<string | null>(null);
@@ -91,6 +100,9 @@ export function useOnboardingWizard(): OnboardingWizardState {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Do not let the persistence effect overwrite a returned OAuth wizard
+  // state with defaults before the restore effect has finished reading it.
+  const [hasRestoredDraft, setHasRestoredDraft] = useState(false);
 
   function setBusinessName(val: string) {
     setBusinessNameRaw(val);
@@ -106,9 +118,11 @@ export function useOnboardingWizard(): OnboardingWizardState {
         if (parsed.businessName) setBusinessNameRaw(parsed.businessName);
         if (parsed.businessNameFromLinkedIn) setBusinessNameFromLinkedIn(parsed.businessNameFromLinkedIn);
         if (parsed.websiteUrl) setWebsiteUrl(parsed.websiteUrl);
+        if (parsed.audienceDescription) setAudienceDescription(parsed.audienceDescription);
         if (parsed.industry) setIndustry(parsed.industry);
         if (parsed.selectedPresetId) setSelectedPresetId(parsed.selectedPresetId);
         if (parsed.channels && Array.isArray(parsed.channels)) setChannels(parsed.channels);
+        if (parsed.publishingMode === "review" || parsed.publishingMode === "auto") setPublishingMode(parsed.publishingMode);
         if (parsed.mythAnswer) setMythAnswer(parsed.mythAnswer);
         if (parsed.differentiatorAnswer) setDifferentiatorAnswer(parsed.differentiatorAnswer);
         if (parsed.avoidAnswer) setAvoidAnswer(parsed.avoidAnswer);
@@ -117,12 +131,18 @@ export function useOnboardingWizard(): OnboardingWizardState {
         if (parsed.postSnippet) setPostSnippet(parsed.postSnippet);
         if (parsed.aiSuggestions) setAiSuggestions(parsed.aiSuggestions);
         if (parsed.importedVoiceCount) setImportedVoiceCount(parsed.importedVoiceCount);
+        if (Array.isArray(parsed.directives)) setDirectives(parsed.directives);
+        if (typeof parsed.positioningSummary === "string") setPositioningSummary(parsed.positioningSummary);
       }
-    } catch (e) {}
+    } catch {}
+    finally {
+      setHasRestoredDraft(true);
+    }
   }, []);
 
   // Save draft state to localStorage on changes
   useEffect(() => {
+    if (!hasRestoredDraft) return;
     try {
       localStorage.setItem(
         STORAGE_KEY,
@@ -130,9 +150,11 @@ export function useOnboardingWizard(): OnboardingWizardState {
           businessName,
           businessNameFromLinkedIn,
           websiteUrl,
+          audienceDescription,
           industry,
           selectedPresetId,
           channels,
+          publishingMode,
           mythAnswer,
           differentiatorAnswer,
           avoidAnswer,
@@ -141,10 +163,12 @@ export function useOnboardingWizard(): OnboardingWizardState {
           postSnippet,
           aiSuggestions,
           importedVoiceCount,
+          directives,
+          positioningSummary,
         })
       );
-    } catch (e) {}
-  }, [businessName, businessNameFromLinkedIn, websiteUrl, industry, selectedPresetId, channels, mythAnswer, differentiatorAnswer, avoidAnswer, step, linkedInProfile, postSnippet, aiSuggestions, importedVoiceCount]);
+    } catch {}
+  }, [businessName, businessNameFromLinkedIn, websiteUrl, audienceDescription, industry, selectedPresetId, channels, publishingMode, mythAnswer, differentiatorAnswer, avoidAnswer, step, linkedInProfile, postSnippet, aiSuggestions, importedVoiceCount, directives, positioningSummary, hasRestoredDraft]);
 
   function applyPreset(preset: BrandPreset) {
     setSelectedPresetId(preset.id);
@@ -175,7 +199,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         setIsGeneratingSuggestions(false);
       }
     }
-    setStep(2);
+    setStep(1);
   }
 
   function toggleChannel(key: string) {
@@ -183,6 +207,27 @@ export function useOnboardingWizard(): OnboardingWizardState {
   }
 
   const [customSampleText, setCustomSampleText] = useState("");
+
+  async function saveManualVoice() {
+    const sample = customSampleText.trim();
+    if (sample.length < 20) {
+      setError("Add a little more writing so Minions has enough context to learn your voice.");
+      return;
+    }
+
+    setError(null);
+    try {
+      const res = await apiClient.post<{ success: boolean; examples_saved: number }>("/api/onboarding/voice", {
+        examples: [sample],
+      });
+      if (res.success) {
+        setImportedVoiceCount(res.examples_saved);
+        setPostSnippet(sample.slice(0, 160));
+      }
+    } catch (err) {
+      setError(toErrorMessage(err, "Couldn't save your writing sample. Please try again."));
+    }
+  }
 
   async function importLinkedInVoice(overrideText?: string) {
     setError(null);
@@ -239,6 +284,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         industry,
         businessName: businessName.trim() || "Our Company",
         websiteUrl: websiteUrl.trim(),
+        audienceDescription: audienceDescription.trim(),
         mythAnswer,
         differentiatorAnswer,
         avoidAnswer,
@@ -249,7 +295,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
       if (res?.directives) {
         setDirectives(res.directives);
         setPositioningSummary(res.positioningSummary || "");
-        setStep(3);
+        setStep(2);
       }
     } catch (err) {
       setError(toErrorMessage(err, "Failed to generate brand directives with Copilot."));
@@ -304,8 +350,20 @@ export function useOnboardingWizard(): OnboardingWizardState {
         }
       }
 
+      await apiClient.patch("/api/schedule", {
+        cadence_type: "EVERY_N_DAYS",
+        interval_days: 3,
+        days_of_week: [],
+        posts_per_day: 1,
+        times_of_day: ["09:00"],
+        require_review: publishingMode === "review",
+        is_active: true,
+      });
+
+      let harvestRunId: string | undefined;
       try {
-        await apiClient.post("/api/pipeline/harvest", {});
+        const harvest = await apiClient.post<{ run_id?: string }>("/api/pipeline/harvest", {});
+        harvestRunId = harvest.run_id;
       } catch (harvestErr) {
         console.warn("Initial harvest trigger non-fatal:", harvestErr);
       }
@@ -314,8 +372,13 @@ export function useOnboardingWizard(): OnboardingWizardState {
         localStorage.removeItem(STORAGE_KEY);
       } catch (e) {}
 
-      // Redirect directly to dashboard with success toast
-      window.location.href = "/?onboarding_success=true";
+      // The harvest begins here. The Idea Stream is the honest next step: the
+      // user sees real opportunities arrive, then chooses what becomes Draft #1.
+      router.replace(
+        harvestRunId
+          ? `/ideas?onboarding_success=true&onboarding_run=${encodeURIComponent(harvestRunId)}`
+          : "/ideas?onboarding_success=true"
+      );
     } catch (err) {
       setError(toErrorMessage(err, "Could not finalize onboarding. Please try again."));
       setSaving(false);
@@ -330,6 +393,8 @@ export function useOnboardingWizard(): OnboardingWizardState {
     businessNameFromLinkedIn,
     websiteUrl,
     setWebsiteUrl,
+    audienceDescription,
+    setAudienceDescription,
     industry,
     setIndustry,
     selectedPresetId,
@@ -341,12 +406,15 @@ export function useOnboardingWizard(): OnboardingWizardState {
     setLinkedInConnected,
     channels,
     toggleChannel,
+    publishingMode,
+    setPublishingMode,
     importedVoiceCount,
     linkedInProfile,
     postSnippet,
     aiSuggestions,
     customSampleText,
     setCustomSampleText,
+    saveManualVoice,
     importLinkedInVoice,
     mythAnswer,
     setMythAnswer,

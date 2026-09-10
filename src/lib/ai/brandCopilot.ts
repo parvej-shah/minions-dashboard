@@ -144,6 +144,7 @@ Return ONLY a single valid JSON object (no markdown, no explanation, no fake com
 export interface BrandDirectiveInput {
   businessName: string;
   industry: string;
+  audienceDescription?: string;
   mythAnswer: string;
   differentiatorAnswer: string;
   avoidAnswer: string;
@@ -168,6 +169,7 @@ export async function generateBrandDirectivesWithLLM(
 
 Business: ${input.businessName}
 Industry: ${input.industry}
+Audience: ${input.audienceDescription || "(not specified)"}
 ${input.headline ? `Founder/operator's professional headline: ${input.headline}\n` : ""}${input.websiteContext ? `Their website (real content, use this as your primary source of truth):\n${input.websiteContext}\n\n` : ""}Myth they disagree with: ${input.mythAnswer || "(not specified)"}
 Their #1 differentiator: ${input.differentiatorAnswer || "(not specified)"}
 Topics/claims to strictly avoid: ${input.avoidAnswer || "(not specified)"}

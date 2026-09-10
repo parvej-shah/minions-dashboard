@@ -9,6 +9,7 @@ interface CopilotInput {
   industry?: string;
   businessName?: string;
   websiteUrl?: string;
+  audienceDescription?: string;
   mythAnswer?: string;
   differentiatorAnswer?: string;
   avoidAnswer?: string;
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
     const differentiator = (body.differentiatorAnswer || "").trim();
     const avoid = (body.avoidAnswer || "").trim();
     const websiteUrl = (body.websiteUrl || "").trim();
+    const audienceDescription = (body.audienceDescription || "").trim();
 
     // Was accepted on the request body but never actually used -- collected
     // in Step 2, then silently dropped. Best-effort only, never blocks.
@@ -45,6 +47,7 @@ export async function POST(request: Request) {
     const llmResult = await generateBrandDirectivesWithLLM({
       businessName,
       industry,
+      audienceDescription,
       mythAnswer: myth,
       differentiatorAnswer: differentiator,
       avoidAnswer: avoid,

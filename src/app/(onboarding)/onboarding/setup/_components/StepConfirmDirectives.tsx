@@ -1,5 +1,5 @@
 import type { OnboardingWizardState } from "@/hooks/useOnboardingWizard";
-import { Sparkles, CheckCircle2, X, ArrowLeft, Loader2, Rocket, ShieldCheck } from "lucide-react";
+import { Sparkles, X, ArrowLeft, Loader2, Rocket, ShieldCheck } from "lucide-react";
 import { CATEGORIES } from "@/constants/brandAssets";
 
 export default function StepConfirmDirectives({ wizard }: { wizard: OnboardingWizardState }) {
@@ -8,10 +8,10 @@ export default function StepConfirmDirectives({ wizard }: { wizard: OnboardingWi
       <div>
         <div className="flex items-center gap-2 mb-1.5">
           <Sparkles className="w-5 h-5 text-[#00C9A7]" />
-          <h2 className="text-xl font-bold text-[#F1F5F9]">Review Your Brand Guardrails</h2>
+          <h2 className="text-xl font-bold text-[#F1F5F9]">Review your Brand Brief</h2>
         </div>
         <p className="text-xs sm:text-sm text-[#94A3B8]">
-          Here are the core rules our AI Writer will follow for every article, hook, and social post.
+          This is Minions&apos; understanding of your brand. These writing rules guide every idea, draft, and social post — and you can edit them anytime.
         </p>
       </div>
 
@@ -35,7 +35,7 @@ export default function StepConfirmDirectives({ wizard }: { wizard: OnboardingWi
       {/* Directives List */}
       <div className="space-y-3">
         <h3 className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">
-          Active Directives ({wizard.directives.length})
+          Writing Rules ({wizard.directives.length})
         </h3>
 
         {wizard.directives.map((dir, idx) => (
@@ -65,6 +65,39 @@ export default function StepConfirmDirectives({ wizard }: { wizard: OnboardingWi
         ))}
       </div>
 
+      <div className="rounded-xl border border-[#1F2D3D] bg-[#070B0F]/60 p-4 space-y-3">
+        <div>
+          <h3 className="text-sm font-semibold text-[#F1F5F9]">How should posts go live?</h3>
+          <p className="mt-1 text-xs leading-relaxed text-[#94A3B8]">You can change this anytime in Schedule. Review is the safer default.</p>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => wizard.setPublishingMode("review")}
+            className={`rounded-xl border p-3 text-left transition-colors ${
+              wizard.publishingMode === "review"
+                ? "border-[#00C9A7] bg-[#00C9A7]/10 ring-1 ring-[#00C9A7]/30"
+                : "border-[#1F2D3D] bg-[#0D1520] hover:border-[#00C9A7]/40"
+            }`}
+          >
+            <span className="block text-xs font-bold text-[#F1F5F9]">I review every post</span>
+            <span className="mt-1 block text-[11px] leading-relaxed text-[#94A3B8]">Minions prepares drafts; nothing publishes until you approve it.</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => wizard.setPublishingMode("auto")}
+            className={`rounded-xl border p-3 text-left transition-colors ${
+              wizard.publishingMode === "auto"
+                ? "border-[#F59E0B] bg-[#F59E0B]/10 ring-1 ring-[#F59E0B]/30"
+                : "border-[#1F2D3D] bg-[#0D1520] hover:border-[#F59E0B]/40"
+            }`}
+          >
+            <span className="block text-xs font-bold text-[#F1F5F9]">Publish automatically</span>
+            <span className="mt-1 block text-[11px] leading-relaxed text-[#94A3B8]">Eligible scheduled drafts can publish without a manual approval step.</span>
+          </button>
+        </div>
+      </div>
+
       {/* Navigation & Launch */}
       <div className="flex items-center justify-between pt-4 border-t border-[#1F2D3D]/60">
         <button
@@ -90,7 +123,7 @@ export default function StepConfirmDirectives({ wizard }: { wizard: OnboardingWi
           ) : (
             <>
               <Rocket className="w-4 h-4" />
-              <span>Launch Content Engine &amp; Draft #1</span>
+              <span>Save My Brand Brief &amp; Find Ideas</span>
             </>
           )}
         </button>

@@ -22,17 +22,22 @@ export async function GET(request: Request) {
   }
 
   const fallbackRedirect = returnTo.includes("/onboarding") ? "/onboarding/setup" : "/fleet";
+  const onboardingFailure = (message: string) => {
+    const failureUrl = new URL(fallbackRedirect, request.url);
+    failureUrl.searchParams.set("error", message);
+    return NextResponse.redirect(failureUrl);
+  };
 
   if (error) {
     console.error("LinkedIn OAuth Error:", error, errorDescription);
-    return NextResponse.redirect(new URL(`${fallbackRedirect}?error=${encodeURIComponent(errorDescription || error)}`, request.url));
+    return onboardingFailure(errorDescription || error);
   }
 
   if (!code) {
-    return NextResponse.redirect(new URL(`${fallbackRedirect}?error=No+code+provided`, request.url));
+    return onboardingFailure("LinkedIn did not return an authorization code. Please try connecting again.");
   }
 
-  const redirectUri = `${url.protocol}//${url.host}/api/auth/linkedin/callback`;
+  const redirectUri = process.env.LINKEDIN_REDIRECT_URI?.trim() || `${url.origin}/api/auth/linkedin/callback`;
 
   try {
     // Exchange code for access token
@@ -53,7 +58,7 @@ export async function GET(request: Request) {
     if (!tokenResponse.ok) {
       const errData = await tokenResponse.text();
       console.error("Failed to exchange token:", errData);
-      return NextResponse.redirect(new URL(`${fallbackRedirect}?error=Token+exchange+failed`, request.url));
+      return onboardingFailure("LinkedIn could not complete the authorization exchange. Check the configured redirect URL and try again.");
     }
 
     const tokenData = await tokenResponse.json();
@@ -94,7 +99,12 @@ export async function GET(request: Request) {
           // Redirect directly back to onboarding setup without intermediate page drift!
           return NextResponse.redirect(new URL("/onboarding/setup?imported=true", request.url));
         }
+
+        console.error("LinkedIn onboarding credential save failed:", vaultError);
+        return onboardingFailure("LinkedIn connected, but Minions could not save the credential. Please try again.");
       }
+
+      return onboardingFailure("LinkedIn did not return a usable member profile. Ensure this app has OpenID Connect access, then try again.");
     }
 
     // Standard fleet selection flow if connecting from Fleet
@@ -115,6 +125,6 @@ export async function GET(request: Request) {
     return response;
   } catch (err) {
     console.error("OAuth Callback Exception:", err);
-    return NextResponse.redirect(new URL(`${fallbackRedirect}?error=Internal+OAuth+Error`, request.url));
+    return onboardingFailure("LinkedIn connection encountered an internal error. Please try again.");
   }
 }

@@ -2,10 +2,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const authMock = vi.fn();
 const findUniqueMock = vi.fn();
+const clientFindUniqueMock = vi.fn();
 const cookiesGetMock = vi.fn();
 
 vi.mock("@/lib/auth", () => ({ auth: authMock }));
-vi.mock("@/lib/prisma", () => ({ prisma: { user: { findUnique: findUniqueMock } } }));
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    user: { findUnique: findUniqueMock },
+    client: { findUnique: clientFindUniqueMock },
+  },
+}));
 vi.mock("next/headers", () => ({
   cookies: async () => ({ get: cookiesGetMock }),
 }));
@@ -19,6 +25,7 @@ function dbUser(overrides: Partial<{ id: string; email: string; clientId: string
 beforeEach(() => {
   authMock.mockReset();
   findUniqueMock.mockReset();
+  clientFindUniqueMock.mockReset();
   cookiesGetMock.mockReset();
 });
 
@@ -72,6 +79,7 @@ describe("requireClientId", () => {
     authMock.mockResolvedValue({ user: { id: "admin-1" } });
     findUniqueMock.mockResolvedValue(dbUser({ id: "admin-1", clientId: null, role: "SYSTEM_ADMIN" }));
     cookiesGetMock.mockReturnValue({ value: "client-9" });
+    clientFindUniqueMock.mockResolvedValue({ id: "client-9" });
     const result = await requireClientId();
     expect("clientId" in result && result.clientId).toBe("client-9");
   });

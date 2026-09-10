@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import type { OnboardingWizardState } from "@/hooks/useOnboardingWizard";
-import { KeyRound, Sparkles, CheckCircle2, ArrowRight, Loader2, Share2, User, Newspaper } from "lucide-react";
+import { KeyRound, Sparkles, CheckCircle2, ArrowLeft, ArrowRight, Loader2, Share2, Newspaper } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 
 const CHANNEL_OPTIONS = [
@@ -37,24 +39,26 @@ function ProfileAvatar({ picture, name }: { picture?: string; name: string }) {
 }
 
 export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizardState }) {
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const searchParams = useSearchParams();
   const [importing, setImporting] = useState(false);
   const [linkedInDetails, setLinkedInDetails] = useState<{ connected: boolean; externalId?: string } | null>(null);
+  const { setLinkedInConnected } = wizard;
 
   useEffect(() => {
     async function checkStatus() {
       try {
-        const res: any = await apiClient.get("/api/channels");
-        const li = res?.channels?.find((c: any) => c.key === "linkedin");
+        const res = await apiClient.get<{
+          channels?: Array<{ key: string; has_credential?: boolean; external_id?: string }>;
+        }>("/api/channels");
+        const li = res?.channels?.find((channel) => channel.key === "linkedin");
         if (li && li.has_credential) {
           setLinkedInDetails({ connected: true, externalId: li.external_id });
-          wizard.setLinkedInConnected(true);
+          setLinkedInConnected(true);
         }
-      } catch (e) {}
-      setCheckingAuth(false);
+      } catch {}
     }
     checkStatus();
-  }, []);
+  }, [setLinkedInConnected]);
 
   const handleImport = async () => {
     setImporting(true);
@@ -69,22 +73,29 @@ export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizard
   const isConnected = wizard.linkedInConnected || linkedInDetails?.connected;
   const profile = wizard.linkedInProfile;
   const hasImported = wizard.importedVoiceCount > 0 || !!profile;
+  const linkedInError = searchParams.get("error");
 
   return (
     <section className="rounded-2xl border border-[#1F2D3D] bg-[#0D1520] p-4 sm:p-8 space-y-5 sm:space-y-6 shadow-xl">
       <div>
         <div className="flex items-center gap-2 mb-1.5">
           <KeyRound className="w-4 h-4 sm:w-5 sm:h-5 text-[#00C9A7] shrink-0" />
-          <h2 className="text-lg sm:text-xl font-bold text-[#F1F5F9] leading-snug">Connect &amp; Match Your Voice</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-[#F1F5F9] leading-snug">Make it sound like you <span className="text-sm font-medium text-[#94A3B8]">(optional)</span></h2>
         </div>
         <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-          Connect your LinkedIn profile so Minions can match your natural writing voice and schedule posts on your behalf.
+          Paste a post you&apos;re proud of or connect LinkedIn. This improves voice matching, but you can start creating without it.
         </p>
       </div>
 
       {wizard.error && (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-xs text-red-400">
           {wizard.error}
+        </div>
+      )}
+
+      {linkedInError && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-xs leading-relaxed text-amber-200">
+          LinkedIn connection wasn&apos;t completed: {linkedInError}
         </div>
       )}
 
@@ -125,22 +136,23 @@ export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizard
               {hasImported ? "Re-sync Voice" : "Import My Voice"}
             </button>
           ) : (
-            <a
+            <Link
               href="/api/auth/linkedin/connect?return_to=/onboarding/setup"
+              prefetch={false}
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#0077b5] hover:bg-[#0077b5]/90 text-white text-xs font-semibold transition-colors shrink-0 shadow-md shadow-[#0077b5]/20"
             >
               <KeyRound className="w-3.5 h-3.5" />
               <span>Connect with 1-Click</span>
-            </a>
+            </Link>
           )}
         </div>
 
-        {/* Manual post paste box until API verification completes */}
-        {isConnected && (
-          <div className="pt-3 border-t border-[#0077b5]/20 space-y-2">
+        {/* A real sample must not be gated behind OAuth: it is the dependable
+            voice-calibration path while LinkedIn's post API is unavailable. */}
+        <div className="pt-3 border-t border-[#0077b5]/20 space-y-2">
             <div className="flex items-center justify-between">
               <label className="block text-xs font-semibold text-[#94A3B8]">
-                Paste a sample post or profile bio <span className="text-[#64748B] font-normal">(optional until LinkedIn API review completes)</span>:
+                Paste a post, email, or profile bio <span className="text-[#64748B] font-normal">(optional)</span>:
               </label>
             </div>
             <textarea
@@ -150,6 +162,23 @@ export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizard
               placeholder='e.g. "Clear systems beat clever strategies every time..." — Paste any post or bio sample to calibrate your voice instantly.'
               className="w-full rounded-xl bg-[#070B0F] border border-[#1F2D3D] p-3 text-[#F1F5F9] placeholder:text-[#475569] focus:outline-none focus:border-[#00C9A7] text-xs leading-relaxed"
             />
+            {!isConnected && (
+              <button
+                type="button"
+                onClick={wizard.saveManualVoice}
+                disabled={wizard.customSampleText.trim().length < 20}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#00C9A7]/30 bg-[#00C9A7]/10 text-xs font-semibold text-[#00C9A7] hover:bg-[#00C9A7]/20 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                Save writing sample
+              </button>
+            )}
+        </div>
+
+        {wizard.importedVoiceCount > 0 && !profile && (
+          <div className="flex items-center gap-2 text-[11px] text-[#00C9A7]">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>Writing sample saved. Your next drafts will use it as voice guidance.</span>
           </div>
         )}
 
@@ -244,13 +273,21 @@ export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizard
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center justify-end pt-4 border-t border-[#1F2D3D]/60">
+      <div className="flex items-center justify-between gap-3 pt-4 border-t border-[#1F2D3D]/60">
         <button
           type="button"
-          onClick={() => wizard.setStep(1)}
+          onClick={wizard.goBack}
+          className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#94A3B8] transition-colors hover:text-[#F1F5F9]"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </button>
+        <button
+          type="button"
+          onClick={() => wizard.setStep(3)}
           className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 sm:py-2.5 rounded-xl bg-[#00C9A7] hover:bg-[#00C9A7]/90 text-[#070B0F] font-bold text-sm transition-colors shadow-lg shadow-[#00C9A7]/20 cursor-pointer"
         >
-          <span>Next: Company Profile</span>
+          <span>Review My Brand Brief</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

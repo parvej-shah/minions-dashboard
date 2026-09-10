@@ -3,6 +3,7 @@
 import {
   useState,
   useMemo,
+  useEffect,
 } from "react";
 import {
   Sparkles,
@@ -24,6 +25,7 @@ import CalendarView from "@/components/ideas/CalendarView";
 import ScheduleModal from "@/components/ideas/ScheduleModal";
 import QueueBuilderView from "@/components/ideas/QueueBuilderView";
 import DraftingProgressHUD, { DraftingJob } from "@/components/common/DraftingProgressHUD";
+import HarvestingProgressHUD, { HarvestingJob } from "@/components/common/HarvestingProgressHUD";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import IdeaCard from "@/components/ideas/IdeaCard";
 import IdeaDetailModal from "@/components/ideas/IdeaDetailModal";
@@ -63,6 +65,7 @@ export default function IdeaStreamPage() {
     data: ideas,
     isLoading: ideasLoading,
     error: ideasError,
+    reload: reloadIdeas,
     setData: setIdeas,
   } = useApiResource<IdeaItem[]>("/api/ideas", [], { errorMessage: "Could not load ideas" });
   const [selectedAudience, setSelectedAudience] = useState<string>("ALL");
@@ -78,6 +81,8 @@ export default function IdeaStreamPage() {
 
   // Live Drafting Multi-Agent Progress HUD state
   const [activeDraftingJob, setActiveDraftingJob] = useState<DraftingJob | null>(null);
+  const [activeHarvestJob, setActiveHarvestJob] = useState<HarvestingJob | null>(null);
+  const [isFirstRun, setIsFirstRun] = useState(false);
 
   // View mode: Stream cards vs Drag & Drop Queue Builder vs Editorial Calendar
   const [viewMode, setViewMode] = useState<"stream" | "queue" | "calendar">("queue");
@@ -97,6 +102,45 @@ export default function IdeaStreamPage() {
   const [editStatus, setEditStatus] = useState<IdeaStatus>("HARVESTED");
   const [isUpdating, setIsUpdating] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Onboarding owns the first harvest, then hands its concrete run id to this
+  // screen. That lets a new user see real work in progress rather than a
+  // generic dashboard and a promise that something might happen later.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const runId = params.get("onboarding_run");
+    if (!runId) return;
+
+    const startFirstRun = window.setTimeout(() => {
+      setIsFirstRun(true);
+      setViewMode("stream");
+      setActiveHarvestJob({ runId, startedAt: Date.now() });
+    }, 0);
+    window.history.replaceState({}, document.title, window.location.pathname);
+    return () => window.clearTimeout(startFirstRun);
+  }, []);
+
+  useEffect(() => {
+    if (!activeHarvestJob) return;
+
+    const pollRun = async () => {
+      try {
+        const response = await fetch(`/api/pipeline/runs/${activeHarvestJob.runId}`);
+        if (!response.ok) return;
+        const run = await response.json() as { status?: string };
+        if (run.status === "COMPLETED") {
+          await reloadIdeas();
+          setActiveHarvestJob(null);
+        }
+      } catch {
+        // The HUD remains visible and keeps polling; a transient request
+        // failure should never make the user think their first run vanished.
+      }
+    };
+
+    const interval = window.setInterval(pollRun, 3500);
+    return () => window.clearInterval(interval);
+  }, [activeHarvestJob, reloadIdeas]);
 
   // Slide-over form state
   const [formTitle, setFormTitle] = useState("");
@@ -449,6 +493,22 @@ export default function IdeaStreamPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16 selection:bg-[#00C9A7]/30 selection:text-[#00C9A7]">
       {/* Page Header - Clean, Executive & Compact */}
+      {isFirstRun && (
+        <section className="relative overflow-hidden rounded-2xl border border-[#00C9A7]/35 bg-[#00C9A7]/[0.07] px-5 py-4 shadow-lg shadow-[#00C9A7]/5">
+          <div className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[#00C9A7]/10 blur-2xl" />
+          <div className="relative flex items-start gap-3">
+            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#00C9A7]/30 bg-[#00C9A7]/15">
+              <Sparkles className="h-4 w-4 text-[#00C9A7]" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-[#F1F5F9]">Your first ideas are being prepared</p>
+              <p className="mt-1 max-w-2xl text-xs leading-relaxed text-[#94A3B8]">
+                Minions is using your Brand Brief to find relevant angles. When they arrive, choose the one you want turned into your first draft.
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -1198,6 +1258,11 @@ export default function IdeaStreamPage() {
       <DraftingProgressHUD
         job={activeDraftingJob}
         onDismiss={() => setActiveDraftingJob(null)}
+      />
+
+      <HarvestingProgressHUD
+        job={activeHarvestJob}
+        onDismiss={() => setActiveHarvestJob(null)}
       />
 
       {/* Delete Idea Confirmation Modal */}
