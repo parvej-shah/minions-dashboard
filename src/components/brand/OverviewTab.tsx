@@ -68,6 +68,10 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
 
   const [editingPositioning, setEditingPositioning] = useState(false);
   const [positioningDraft, setPositioningDraft] = useState("");
+  // Edited alongside positioning: brand_name is what every generated cover
+  // image prints, and tenants created before onboarding sent a real name are
+  // stuck showing "<email-local-part>'s Workspace" until they can change it.
+  const [brandNameDraft, setBrandNameDraft] = useState("");
   const [savingPositioning, setSavingPositioning] = useState(false);
 
   const [regenerating, setRegenerating] = useState(false);
@@ -117,6 +121,7 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
   const openPositioningEdit = () => {
     if (!profile) return;
     setPositioningDraft(profile.positioning);
+    setBrandNameDraft(profile.brand_name);
     setEditingPositioning(true);
   };
 
@@ -126,6 +131,7 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
     try {
       const updated = await apiClient.post<BrandSettings>("/api/brand", {
         ...toProfileInput(profile),
+        brand_name: brandNameDraft.trim() || profile.brand_name,
         positioning: positioningDraft,
       });
       setProfile(updated);
@@ -251,6 +257,21 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
 
           {editingPositioning ? (
             <div className="space-y-2">
+              <div>
+                <label className="mb-1 block text-[11px] font-semibold text-[#94A3B8]">
+                  Business name
+                </label>
+                <input
+                  type="text"
+                  value={brandNameDraft}
+                  onChange={(e) => setBrandNameDraft(e.target.value)}
+                  placeholder="e.g. Acme HVAC"
+                  className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]"
+                />
+                <p className="mt-1 text-[10px] text-[#64748B]">
+                  Shown on generated cover images and used throughout your content.
+                </p>
+              </div>
               <textarea
                 rows={3}
                 value={positioningDraft}
@@ -275,9 +296,14 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
               </div>
             </div>
           ) : (
-          <p className="text-sm text-[#F1F5F9] leading-relaxed">
-              {profile?.positioning || "Not set yet — tap edit to describe who you are."}
-            </p>
+          <div className="space-y-1">
+              <p className="text-sm font-semibold text-[#F1F5F9]">
+                {profile?.brand_name || "Unnamed brand"}
+              </p>
+              <p className="text-sm text-[#F1F5F9] leading-relaxed">
+                {profile?.positioning || "Not set yet — tap edit to describe who you are."}
+              </p>
+            </div>
           )}
 
           <TagList

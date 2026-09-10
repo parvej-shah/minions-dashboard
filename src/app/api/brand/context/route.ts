@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { getBrandSettings, getWriterVoiceConfig } from "@/services/brand";
+import { getBrandSettings, getWriterVoiceConfig, getHarvestContext } from "@/services/brand";
 import { BLOG_BASE_URL } from "@/constants/config";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { verifyWebhookSecret } from "@/lib/security";
+import { expertisePromptGuidance } from "@/constants/audienceExpertise";
 
 /**
  * Structured brand context for the n8n drafting pipeline to ingest.
@@ -24,9 +25,10 @@ export async function GET(request: Request) {
   }
 
   try {
-    const [brand, voiceConfig] = await Promise.all([
+    const [brand, voiceConfig, harvest] = await Promise.all([
       getBrandSettings(clientId),
       getWriterVoiceConfig(clientId),
+      getHarvestContext(clientId),
     ]);
 
     return NextResponse.json({
@@ -55,6 +57,23 @@ export async function GET(request: Request) {
       tone_examples: voiceConfig.toneExamples,
       allow_customer_result_claims: voiceConfig.allowCustomerResultClaims,
       visual_assets: brand.visual_assets,
+      // Audience depth, set once in onboarding. Both the harvester and the
+      // writer read this so idea depth and draft depth cannot drift apart.
+      audience_expertise: harvest.audienceExpertise,
+      audience_expertise_guidance: expertisePromptGuidance(harvest.audienceExpertise),
+      // Per-tenant harvest feeds, replacing the four URLs 01_idea_harvester
+      // used to hardcode for every tenant regardless of industry.
+      idea_sources: harvest.sources,
+      // The most RECENT theses, for the harvester's do-not-repeat list. The
+      // old workflow sliced the oldest 40 rows off a descending array, so the
+      // model never saw what it had just generated and reliably repeated it.
+      recent_theses: harvest.recentTheses,
+      // Rotates the pillar set per run so the harvester stops emitting the
+      // same Stakes/Myth/How-it-works triplet every single time.
+      pillar_rotation: harvest.pillarRotation,
+      // Rotates which slice of each feed the harvester reads, so consecutive
+      // runs see different signals even when a slow feed publishes nothing new.
+      harvest_run_index: harvest.runIndex,
     });
   } catch (error) {
     return apiError(error, "Failed to build brand context");

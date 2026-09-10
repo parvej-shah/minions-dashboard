@@ -26,16 +26,16 @@ enum AudienceLane {
 // ---------------------------------------------------------------------------
 
 model Client {
-  id        String   @id @default(cuid())
-  slug      String   @unique // subdomain / URL segment, e.g. "acme-hvac"
-  name      String
-  status    String   @default("TRIAL") // TRIAL | ACTIVE | PAST_DUE | SUSPENDED | CANCELED
-  timezone  String   @default("America/New_York")
+  id                     String   @id @default(cuid())
+  slug                   String   @unique // subdomain / URL segment, e.g. "acme-hvac"
+  name                   String
+  status                 String   @default("TRIAL") // TRIAL | ACTIVE | PAST_DUE | SUSPENDED | CANCELED
+  timezone               String   @default("America/New_York")
   // Maintainer-set manual usage-cap override (platform-admin dashboard), independent of
   // Subscription/Stripe -- NULL means "use the plan default". See findPlan()/plans.ts.
   assetsPerMonthOverride Int?     @map("assets_per_month_override")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @default(now()) @updatedAt @map("updated_at")
 
   users           User[]
   brandProfile    BrandProfile?
@@ -50,6 +50,7 @@ model Client {
   pipelineRuns    PipelineRun[]
   memberships     ClientMembership[]
   postingSchedule PostingSchedule?
+  ideaSources     IdeaSource[]
 
   @@map("clients")
 }
@@ -78,7 +79,6 @@ model User {
  * clients (an agency) without widening `User` itself, so the common
  * single-tenant case (one row here per user) stays a simple lookup and only
  * agency accounts pay the extra join.
- *
  * `userId` is nullable because an invite is written before the invitee has
  * ever signed in — keyed by `email` until then. `auth.ts`'s signIn callback
  * resolves it to a real `userId` (and sets `acceptedAt`) on their first
@@ -119,6 +119,40 @@ model ClientChannel {
 
   @@unique([clientId, channelKey])
   @@map("client_channels")
+}
+
+/**
+ * A feed the idea harvester pulls market signals from, per tenant.
+ * Replaces the four RSS URLs that used to be hardcoded in 01_idea_harvester
+ * (Hacker News, the n8n blog, TechCrunch AI, and a Google News query pinned
+ * to "pest control HVAC plumbing") -- every tenant harvested the same four
+ * feeds regardless of industry, which is a large part of why ideas repeated.
+ * `kind` is RSS | GOOGLE_NEWS | REDDIT | SITEMAP; for GOOGLE_NEWS and REDDIT
+ * the `url` is built from `query` at harvest time rather than stored, so a
+ * tenant can type a topic instead of composing a feed URL.
+ */
+model IdeaSource {
+  id            String    @id @default(cuid())
+  clientId      String    @map("client_id")
+  kind          String    @default("RSS")
+  label         String
+  url           String?
+  query         String?
+  // Harvest pulls at most this many items from this feed per run. Keeping it
+  // per-source lets a tenant weight a high-signal feed above a noisy one.
+  maxItems      Int       @default(5) @map("max_items")
+  isActive      Boolean   @default(true) @map("is_active")
+  // Set when a fetch fails, so the UI can show a broken feed instead of the
+  // harvester silently returning fewer signals every run.
+  lastError     String?   @map("last_error")
+  lastFetchedAt DateTime? @map("last_fetched_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId, isActive])
+  @@map("idea_sources")
 }
 
 model ToneExample {
@@ -193,6 +227,16 @@ model Idea {
   scheduledFor     DateTime? @map("scheduled_for")
   queueOrder       Int?      @map("queue_order")
   tags             String[]  @default([])
+  // "Steal like an artist": the structural lesson taken from the source
+  // article -- how it opens, what evidence it leans on, how it closes --
+  // never its wording. 02_idea_to_asset feeds this to the writer as craft
+  // guidance, paired with a hard no-verbatim rule. See craftSourceUrl for
+  // the piece it was learned from, which must be attributed if quoted.
+  craftNotes       String?   @map("craft_notes") @db.Text
+  craftSourceUrl   String?   @map("craft_source_url")
+  // Normalized thesis used for semantic dedupe across runs -- lowercase,
+  // stopworded, sorted keyword fingerprint of the idea's actual claim.
+  thesisKey        String?   @map("thesis_key")
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
 
@@ -200,6 +244,7 @@ model Idea {
   assets Asset[]
 
   @@index([clientId])
+  @@index([clientId, thesisKey])
   @@map("ideas")
 }
 
@@ -292,6 +337,13 @@ model BrandProfile {
   // other tenants WILL have real customer results to cite truthfully, so
   // this becomes a typed boolean the gate code reads, not prose fed to an LLM.
   allowCustomerResultClaims Boolean  @default(false) @map("allow_customer_result_claims")
+  // How deep the audience already is in this subject, set during onboarding.
+  // PRACTITIONER = assumes fundamentals, goes technical fast.
+  // OPERATOR     = mixed room, explain the why before the how (default).
+  // EXECUTIVE    = outcomes, cost and risk; little implementation detail.
+  // Read by /api/brand/context so the harvester and the writer calibrate
+  // depth and jargon to the same level instead of each guessing.
+  audienceExpertise         String   @default("OPERATOR") @map("audience_expertise")
   visualAssets              Json?    @default("{}") @map("visual_assets")
   updatedAt                 DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -352,8 +404,8 @@ model Blog {
 model PipelineRun {
   id        String   @id @default(cuid())
   clientId  String?  @map("client_id")
-  type      String   
-  status    String   
+  type      String
+  status    String
   metadata  Json?
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")

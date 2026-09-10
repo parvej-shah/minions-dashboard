@@ -1,3 +1,5 @@
+import type { AudienceExpertise } from "@/constants/audienceExpertise";
+
 /**
  * Collapsed from a 17-value taxonomy (IDENTITY/ICP_PROFILE/ICP_PAIN/POSITIONING/
  * PROOF/OBJECTION/VOICE_DO/VOICE_DONT/CTA/PEER_STANCE/EDITORIAL_PHILOSOPHY/
@@ -82,6 +84,8 @@ export interface BrandSettings {
   };
   directives?: BrandDirectiveItem[];
   visual_assets?: VisualAssets;
+  /** How deep the audience already is; drives idea and draft depth. */
+  audience_expertise: AudienceExpertise;
   updated_at: string;
 }
 
@@ -99,6 +103,7 @@ export interface BrandProfileInput {
   tone_cadence: string;
   allowed_proof_claims: string[];
   visual_assets?: VisualAssets;
+  audience_expertise?: AudienceExpertise;
 }
 
 export interface BrandVoiceQuestionnaire {
@@ -129,4 +134,4 @@ export interface BrandVoiceProofSettings {
   proofs: BrandProofItem[];
 }
 
-export type BrandTab = "overview" | "voice-proof" | "lexicon";
+export type BrandTab = "overview" | "voice-proof" | "lexicon" | "sources";

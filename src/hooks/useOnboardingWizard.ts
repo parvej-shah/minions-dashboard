@@ -4,6 +4,7 @@ import { apiClient, toErrorMessage, ApiRequestError } from "@/lib/api-client";
 import type { BrandPreset } from "@/constants/brandPresets";
 import type { GeneratedDirective } from "@/app/api/onboarding/brand-copilot/route";
 import type { LinkedInProfile, AiSuggestions } from "@/app/api/onboarding/voice-import/route";
+import { DEFAULT_AUDIENCE_EXPERTISE, type AudienceExpertise } from "@/constants/audienceExpertise";
 
 export const ONBOARDING_STEPS = ["Your brand", "Your voice", "Start creating"] as const;
 
@@ -46,6 +47,8 @@ export interface OnboardingWizardState {
   setAudienceDescription: (val: string) => void;
   contentFocus: string;
   setContentFocus: (val: string) => void;
+  audienceExpertise: AudienceExpertise;
+  setAudienceExpertise: (val: AudienceExpertise) => void;
   industry: string;
   setIndustry: (val: string) => void;
   selectedPresetId: string | null;
@@ -88,6 +91,8 @@ export function useOnboardingWizard(): OnboardingWizardState {
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [audienceDescription, setAudienceDescription] = useState("");
   const [contentFocus, setContentFocus] = useState("");
+  const [audienceExpertise, setAudienceExpertise] =
+    useState<AudienceExpertise>(DEFAULT_AUDIENCE_EXPERTISE);
   const [industry, setIndustry] = useState("");
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
 
@@ -134,6 +139,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         if (parsed.websiteUrl) setWebsiteUrl(parsed.websiteUrl);
         if (parsed.audienceDescription) setAudienceDescription(parsed.audienceDescription);
         if (parsed.contentFocus) setContentFocus(parsed.contentFocus);
+        if (parsed.audienceExpertise) setAudienceExpertise(parsed.audienceExpertise);
         if (parsed.industry) setIndustry(parsed.industry);
         if (parsed.selectedPresetId) setSelectedPresetId(parsed.selectedPresetId);
         if (parsed.channels && Array.isArray(parsed.channels)) setChannels(parsed.channels);
@@ -177,6 +183,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
           websiteUrl,
           audienceDescription,
           contentFocus,
+          audienceExpertise,
           industry,
           selectedPresetId,
           channels,
@@ -196,7 +203,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         })
       );
     } catch {}
-  }, [businessName, businessNameFromLinkedIn, websiteUrl, audienceDescription, contentFocus, industry, selectedPresetId, channels, publishingMode, mythAnswer, differentiatorAnswer, avoidAnswer, selectedVoice, customSampleText, step, linkedInProfile, postSnippet, aiSuggestions, importedVoiceCount, directives, positioningSummary, hasRestoredDraft]);
+  }, [businessName, businessNameFromLinkedIn, websiteUrl, audienceDescription, contentFocus, audienceExpertise, industry, selectedPresetId, channels, publishingMode, mythAnswer, differentiatorAnswer, avoidAnswer, selectedVoice, customSampleText, step, linkedInProfile, postSnippet, aiSuggestions, importedVoiceCount, directives, positioningSummary, hasRestoredDraft]);
 
   function applyPreset(preset: BrandPreset) {
     setSelectedPresetId(preset.id);
@@ -296,6 +303,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         websiteUrl: websiteUrl.trim(),
         audienceDescription: audienceDescription.trim(),
         contentFocus: contentFocus.trim(),
+        audienceExpertise,
         voiceSample,
         mythAnswer,
         differentiatorAnswer,
@@ -342,9 +350,16 @@ export function useOnboardingWizard(): OnboardingWizardState {
       }
 
       await apiClient.post("/api/onboarding/setup", {
+        // The wizard collected this on step 1 but never sent it, so the tenant
+        // kept the "<email-local-part>'s Workspace" placeholder that
+        // getOrCreateTenant() assigns before onboarding runs -- and that
+        // placeholder is what BrandProfile.brandName, /api/brand/context's
+        // company_name, and therefore every generated cover image displayed.
+        business_name: businessName.trim(),
         industry: industry.trim() || "General Business",
         icp_description: positioningSummary || `${businessName || "My Brand"} provides ${industry} solutions.`,
         content_focus: contentFocus.trim(),
+        audience_expertise: audienceExpertise,
         channels,
         preset_id: selectedPresetId,
         logo_url: linkedInProfile?.profilePicture || undefined,
@@ -422,6 +437,8 @@ export function useOnboardingWizard(): OnboardingWizardState {
     setAudienceDescription,
     contentFocus,
     setContentFocus,
+    audienceExpertise,
+    setAudienceExpertise,
     industry,
     setIndustry,
     selectedPresetId,

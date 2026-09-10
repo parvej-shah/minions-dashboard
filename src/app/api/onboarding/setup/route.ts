@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { apiError, apiFailure } from "@/lib/api-response";
-import { requireTenantAccess } from "@/lib/tenant";
+import { requireTenantAccess, isPlaceholderTenantName } from "@/lib/tenant";
 import { DISTRIBUTION_CHANNELS } from "@/constants/channels";
 import { BRAND_PRESETS } from "@/constants/brandPresets";
+import { resolveAudienceExpertise } from "@/constants/audienceExpertise";
 
 /**
  * ICP/industry/tone-formality/channel step of onboarding. Writes:
@@ -23,6 +24,10 @@ export async function POST(request: Request) {
     const contentFocus = (body.content_focus || "").toString().trim();
     const presetId = (body.preset_id || "").toString().trim();
     const logoUrl = (body.logo_url || "").toString().trim();
+    const businessName = (body.business_name || "").toString().trim();
+    // Falls back to OPERATOR for any unrecognized value, so an older client
+    // that doesn't send the field still writes a valid level.
+    const audienceExpertise = resolveAudienceExpertise(body.audience_expertise);
     const channels: string[] = Array.isArray(body.channels) ? body.channels : [];
     // When the Brand Interview already produced real, grounded directives
     // (Step 3), don't also lay down this preset's generic template content --
@@ -44,19 +49,39 @@ export async function POST(request: Request) {
       select: { name: true },
     });
 
+    // getOrCreateTenant() names a fresh tenant "<email-local-part>'s
+    // Workspace" because it runs before onboarding has asked for anything.
+    // Onboarding is where the real name finally arrives, so promote it here --
+    // otherwise the placeholder stuck permanently and surfaced everywhere
+    // company_name is shown, including generated cover images.
+    const isPlaceholderName = isPlaceholderTenantName(client?.name);
+    const resolvedName = businessName || client?.name || industry;
+
+    if (businessName && businessName !== client?.name && isPlaceholderName) {
+      await prisma.client.update({
+        where: { id: ctx.clientId },
+        data: { name: businessName },
+      });
+    }
+
     await prisma.brandProfile.upsert({
       where: { clientId: ctx.clientId },
       update: {
         positioning: icpDescription,
+        // Also set on update: re-running onboarding with a real business name
+        // must overwrite a placeholder brandName, which previously persisted
+        // because brandName was only ever written in the create branch.
+        ...(businessName ? { brandName: businessName } : {}),
         toneCadence: matchedPreset?.toneCadence ?? "1-3 sentence paragraphs, plain language, no filler.",
         toneFormality: matchedPreset?.toneFormality ?? "conversational_peer",
         allowedProofClaims: matchedPreset?.proofPoints ?? [],
+        audienceExpertise,
         // Only set on a fresh LinkedIn import -- never clobber a logo the user already set.
         ...(logoUrl ? { primaryLogoUrl: logoUrl } : {}),
       },
       create: {
         clientId: ctx.clientId,
-        brandName: client?.name || industry,
+        brandName: resolvedName,
         companyDomain: "",
         positioning: icpDescription,
         primaryLogoUrl: logoUrl,
@@ -68,6 +93,7 @@ export async function POST(request: Request) {
         toneFormality: matchedPreset?.toneFormality ?? "conversational_peer",
         toneCadence: matchedPreset?.toneCadence ?? "1-3 sentence paragraphs, plain language, no filler.",
         allowedProofClaims: matchedPreset?.proofPoints ?? [],
+        audienceExpertise,
       },
     });
 
@@ -116,13 +142,13 @@ export async function POST(request: Request) {
       });
     }
 
-    if (client?.name) {
+    if (resolvedName) {
       directivesToCreate.push({
         id: `DIR-${crypto.randomUUID()}`,
         clientId: ctx.clientId,
         category: "POSITIONING",
         ruleKey: "company_name",
-        instruction: client.name,
+        instruction: resolvedName,
         priority: 1,
         audienceScope: "ALL",
         isActive: true,
