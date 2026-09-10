@@ -7,6 +7,13 @@ import type { LinkedInProfile, AiSuggestions } from "@/app/api/onboarding/voice-
 
 export const ONBOARDING_STEPS = ["Your brand", "Your voice", "Start creating"] as const;
 
+const LEGACY_VOICE_DESCRIPTIONS = new Set([
+  "Short paragraphs, clear tradeoffs, and a useful next step. No hype.",
+  "Teach the why before the how, with calm and precise language.",
+  "Lead with a strong point of view, then back it up with reasoning.",
+  "Write like a smart colleague: clear, human, and approachable.",
+]);
+
 export interface OnboardingWizardState {
   step: number;
   setStep: (step: number) => void;
@@ -22,6 +29,8 @@ export interface OnboardingWizardState {
   linkedInProfile: LinkedInProfile | null;
   postSnippet: string | null;
   aiSuggestions: AiSuggestions | null;
+  selectedVoice: string;
+  setSelectedVoice: (val: string) => void;
   customSampleText: string;
   setCustomSampleText: (val: string) => void;
   saveManualVoice: () => Promise<void>;
@@ -100,6 +109,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
   // Step 3: Review Directives
   const [directives, setDirectives] = useState<GeneratedDirective[]>([]);
   const [positioningSummary, setPositioningSummary] = useState("");
+  const [selectedVoice, setSelectedVoice] = useState("");
   const [customSampleText, setCustomSampleText] = useState("");
 
   const [saving, setSaving] = useState(false);
@@ -131,7 +141,16 @@ export function useOnboardingWizard(): OnboardingWizardState {
         if (parsed.mythAnswer) setMythAnswer(parsed.mythAnswer);
         if (parsed.differentiatorAnswer) setDifferentiatorAnswer(parsed.differentiatorAnswer);
         if (parsed.avoidAnswer) setAvoidAnswer(parsed.avoidAnswer);
-        if (typeof parsed.customSampleText === "string") setCustomSampleText(parsed.customSampleText);
+        if (typeof parsed.selectedVoice === "string") setSelectedVoice(parsed.selectedVoice);
+        if (typeof parsed.customSampleText === "string") {
+          // Drafts created before voice and instruction were separate stored the
+          // selected card description in this field. Keep those selections intact.
+          if (!parsed.selectedVoice && LEGACY_VOICE_DESCRIPTIONS.has(parsed.customSampleText)) {
+            setSelectedVoice(parsed.customSampleText);
+          } else {
+            setCustomSampleText(parsed.customSampleText);
+          }
+        }
         if (typeof parsed.step === "number") setStep(parsed.step);
         if (parsed.linkedInProfile) setLinkedInProfile(parsed.linkedInProfile);
         if (parsed.postSnippet) setPostSnippet(parsed.postSnippet);
@@ -165,6 +184,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
           mythAnswer,
           differentiatorAnswer,
           avoidAnswer,
+          selectedVoice,
           customSampleText,
           step,
           linkedInProfile,
@@ -176,7 +196,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         })
       );
     } catch {}
-  }, [businessName, businessNameFromLinkedIn, websiteUrl, audienceDescription, contentFocus, industry, selectedPresetId, channels, publishingMode, mythAnswer, differentiatorAnswer, avoidAnswer, customSampleText, step, linkedInProfile, postSnippet, aiSuggestions, importedVoiceCount, directives, positioningSummary, hasRestoredDraft]);
+  }, [businessName, businessNameFromLinkedIn, websiteUrl, audienceDescription, contentFocus, industry, selectedPresetId, channels, publishingMode, mythAnswer, differentiatorAnswer, avoidAnswer, selectedVoice, customSampleText, step, linkedInProfile, postSnippet, aiSuggestions, importedVoiceCount, directives, positioningSummary, hasRestoredDraft]);
 
   function applyPreset(preset: BrandPreset) {
     setSelectedPresetId(preset.id);
@@ -194,7 +214,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
   }
 
   async function saveManualVoice() {
-    const sample = customSampleText.trim();
+    const sample = [selectedVoice, customSampleText.trim()].filter(Boolean).join(" ");
     if (sample.length < 20) {
       setError("Add a little more writing so Minions has enough context to learn your voice.");
       return;
@@ -217,7 +237,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
   async function importLinkedInVoice(overrideText?: string) {
     setError(null);
     try {
-      const textToPass = overrideText !== undefined ? overrideText : customSampleText;
+      const textToPass = overrideText !== undefined ? overrideText : [selectedVoice, customSampleText.trim()].filter(Boolean).join(" ");
       const res: any = await apiClient.post("/api/onboarding/voice-import", {
         customSampleText: textToPass,
         // Only non-empty if the user already filled in Step 2 and came back
@@ -263,8 +283,9 @@ export function useOnboardingWizard(): OnboardingWizardState {
 
   async function generateDirectives() {
     setError(null);
-    if (customSampleText.trim().length < 20) {
-      setError("Add a short description of your natural writing voice so we can make the first drafts sound like you.");
+    const voiceSample = [selectedVoice, customSampleText.trim()].filter(Boolean).join(" ");
+    if (voiceSample.length < 20) {
+      setError("Choose a writing voice or add a short instruction so Minions can make the first drafts sound like you.");
       return;
     }
     setIsGeneratingDirectives(true);
@@ -275,7 +296,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         websiteUrl: websiteUrl.trim(),
         audienceDescription: audienceDescription.trim(),
         contentFocus: contentFocus.trim(),
-        voiceSample: customSampleText.trim(),
+        voiceSample,
         mythAnswer,
         differentiatorAnswer,
         avoidAnswer,
@@ -308,7 +329,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
     setError(null);
     setSaving(true);
     try {
-      const sample = customSampleText.trim();
+      const sample = [selectedVoice, customSampleText.trim()].filter(Boolean).join(" ");
       if (sample.length >= 20 && importedVoiceCount === 0) {
         try {
           const res = await apiClient.post<{ success: boolean; examples_saved: number }>("/api/onboarding/voice", {
@@ -418,6 +439,8 @@ export function useOnboardingWizard(): OnboardingWizardState {
     linkedInProfile,
     postSnippet,
     aiSuggestions,
+    selectedVoice,
+    setSelectedVoice,
     customSampleText,
     setCustomSampleText,
     saveManualVoice,

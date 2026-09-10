@@ -42,7 +42,7 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-[#94A3B8] mb-1.5">What do you want to be known for? <span className="text-[#00C9A7]">*</span></label>
+        <label className="block text-sm font-semibold text-[#94A3B8] mb-1.5">What do you want to be known for? <span className="text-[#00C9A7]">*</span></label>
         <input
           type="text"
           value={wizard.contentFocus}
@@ -50,11 +50,11 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
           placeholder="e.g. Practical AI tools, developer workflows, and real-world use cases"
           className={ideaInputClass}
         />
-        <p className="mt-1.5 text-[11px] text-[#64748B]">This gives Minions a clear territory for your first ideas.</p>
+        <p className="mt-1.5 text-xs text-[#64748B]">This gives Minions a clear territory for your first ideas.</p>
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-[#94A3B8] mb-1.5">
+        <label className="block text-sm font-semibold text-[#94A3B8] mb-1.5">
           Who do you want your content to reach? <span className="text-[#00C9A7]">*</span>
         </label>
         <textarea
@@ -68,7 +68,7 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
         <div>
-          <label className="block text-xs font-semibold text-[#94A3B8] mb-1.5 flex items-center gap-1.5">
+          <label className="block text-sm font-semibold text-[#94A3B8] mb-1.5 flex items-center gap-1.5">
             <Globe className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
             Company Website
           </label>
@@ -83,7 +83,7 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-[#94A3B8] mb-1.5 flex items-center gap-1.5">
+          <label className="block text-sm font-semibold text-[#94A3B8] mb-1.5 flex items-center gap-1.5">
             <Building2 className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
             Business Name
             {wizard.businessNameFromLinkedIn && (
@@ -105,7 +105,7 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
       <div className="border-t border-[#1F2D3D]/60 pt-3">
         <div className="mb-2 flex items-center gap-2">
           <Sparkles className="h-4 w-4 shrink-0 text-[#00C9A7]" />
-          <h3 className="text-xs font-semibold text-[#F1F5F9]">Industry <span className="font-normal text-[#64748B]">(optional context)</span></h3>
+          <h3 className="text-sm font-semibold text-[#F1F5F9]">Industry <span className="font-normal text-[#64748B]">(optional context)</span></h3>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
@@ -124,7 +124,7 @@ export default function StepCompanySnapshot({ wizard }: { wizard: OnboardingWiza
               >
                 <div>
                   <div className="flex items-center justify-between gap-1">
-                    <h4 className="text-[11px] font-semibold leading-snug text-[#F1F5F9]">{preset.name}</h4>
+                    <h4 className="text-xs font-semibold leading-snug text-[#F1F5F9]">{preset.name}</h4>
                     {isSelected && <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[#00C9A7]" />}
                   </div>
                 </div>

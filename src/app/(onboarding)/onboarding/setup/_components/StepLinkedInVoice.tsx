@@ -16,8 +16,8 @@ export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizard
   return (
     <section className="rounded-2xl border border-[#1F2D3D] bg-[#0D1520] p-4 sm:p-6 space-y-4 shadow-xl">
       <div>
-        <h2 className="text-lg font-bold text-[#F1F5F9]">You&apos;re ready to create</h2>
-        <p className="mt-1 text-xs leading-relaxed text-[#94A3B8]">Your first ideas will use your audience, industry, and selected writing voice. Tune the full brand brief later from Brand.</p>
+        <h2 className="text-xl font-bold text-[#F1F5F9]">You&apos;re ready to create</h2>
+        <p className="mt-1 text-sm leading-relaxed text-[#94A3B8]">Your first ideas will use your audience, industry, and selected writing voice. Tune the full brand brief later from Brand.</p>
       </div>
 
       {wizard.error && <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400">{wizard.error}</div>}
@@ -27,8 +27,8 @@ export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizard
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0077b5] font-serif text-xl font-bold text-white">in</div>
             <div>
-              <h3 className="text-sm font-semibold text-[#F1F5F9]">LinkedIn publishing <span className="font-normal text-[#64748B]">(optional)</span></h3>
-              <p className="mt-1 text-[11px] leading-relaxed text-[#94A3B8]">
+              <h3 className="text-base font-semibold text-[#F1F5F9]">LinkedIn publishing <span className="font-normal text-[#64748B]">(optional)</span></h3>
+              <p className="mt-1 text-xs leading-relaxed text-[#94A3B8]">
                 {wizard.linkedInConnected ? "LinkedIn is connected for publishing. You can add voice examples separately from Brand." : "Connect now to publish there later. Connecting only verifies your profile; it does not analyze your posts."}
               </p>
             </div>
@@ -40,8 +40,8 @@ export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizard
       <div className="rounded-xl border border-[#1F2D3D] bg-[#070B0F]/60 p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold text-[#F1F5F9]">How should posts go live?</h3>
-            <p className="mt-1 text-[11px] text-[#94A3B8]">Review is the safe default. Change it any time.</p>
+            <h3 className="text-base font-semibold text-[#F1F5F9]">How should posts go live?</h3>
+            <p className="mt-1 text-xs text-[#94A3B8]">Review is the safe default. Change it any time.</p>
           </div>
           <div className="flex rounded-lg border border-[#1F2D3D] p-1 text-xs font-semibold">
             <button type="button" onClick={() => wizard.setPublishingMode("review")} className={`rounded-md px-3 py-1.5 ${wizard.publishingMode === "review" ? "bg-[#00C9A7] text-[#070B0F]" : "text-[#94A3B8]"}`}>Review</button>
@@ -57,7 +57,7 @@ export default function StepLinkedInVoice({ wizard }: { wizard: OnboardingWizard
           {wizard.saving ? "Finding ideas…" : "Find my first ideas"}
         </button>
       </div>
-      <div className="flex items-center gap-1.5 text-[11px] text-[#64748B]"><ShieldCheck className="h-3.5 w-3.5 text-[#00C9A7]" />Nothing is published automatically unless you choose Auto.</div>
+      <div className="flex items-center gap-1.5 text-xs text-[#64748B]"><ShieldCheck className="h-3.5 w-3.5 text-[#00C9A7]" />Nothing is published automatically unless you choose Auto.</div>
     </section>
   );
 }
