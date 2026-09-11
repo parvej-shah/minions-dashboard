@@ -9,7 +9,7 @@ export type AssetStatus =
   | "BLOCKED"
   | "REJECTED";
 
-export type HeroStatus = "READY" | "BLOCKED_BY_SAFETY" | "FAILED";
+export type HeroStatus = "PENDING" | "READY" | "BLOCKED_BY_SAFETY" | "FAILED";
 
 export type SocialPlatform = "LINKEDIN" | "FACEBOOK" | "TWITTER" | "NEWSLETTER";
 

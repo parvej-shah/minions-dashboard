@@ -113,6 +113,34 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
     };
   }, [initialDraftId]);
 
+  /**
+   * Poll while any draft is still waiting on its cover image.
+   *
+   * Cover generation runs outside the drafting workflow now (it was ~43s of a
+   * ~98s run), so the asset is saved with `hero_status: PENDING` and filled in
+   * a minute or so later by 04_hero_image. Without this the cover only appears
+   * on a manual browser reload, which reads as the image never arriving.
+   *
+   * Polling stops as soon as nothing is pending, so a settled studio is idle.
+   */
+  const hasPendingCover = assets.some((a) => a.hero_status === "PENDING");
+  useEffect(() => {
+    if (!hasPendingCover) return;
+
+    const interval = window.setInterval(() => {
+      void (async () => {
+        try {
+          const data = await apiClient.get<AssetItem[]>("/api/assets");
+          setAssets(data);
+        } catch {
+          // A transient failure should not disturb the editor; the next tick retries.
+        }
+      })();
+    }, 8000);
+
+    return () => window.clearInterval(interval);
+  }, [hasPendingCover]);
+
   // Reset the editor buffers whenever the active draft changes.
   //
   // Adjusted during render rather than in an effect: this is derived state

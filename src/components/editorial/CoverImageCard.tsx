@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { AlertTriangle, ExternalLink, Image as ImageIcon } from "lucide-react";
+import { AlertTriangle, ExternalLink, Image as ImageIcon, Loader2 } from "lucide-react";
 import type { AssetItem } from "@/types";
 
 export interface CoverImageCardProps {
@@ -11,9 +11,13 @@ export interface CoverImageCardProps {
 
 /** The 16:9 studio cover art panel. */
 export default function CoverImageCard({ activeAsset }: CoverImageCardProps) {
-  const coverNeedsAttention = activeAsset.hero_status !== "READY";
+  // PENDING is not a failure. Cover generation runs after the draft is saved
+  // (it took ~43s of a ~98s run, so holding the draft for it meant nothing was
+  // readable until the image landed), and this is the window in between.
+  const isCoverPending = activeAsset.hero_status === "PENDING";
+  const coverNeedsAttention = !isCoverPending && activeAsset.hero_status !== "READY";
   const coverMessage = activeAsset.hero_status === "BLOCKED_BY_SAFETY"
-    ? "Qwen’s safety filter blocked this cover. The draft is ready for review."
+    ? "Qwen's safety filter blocked this cover. The draft is ready for review."
     : "The cover could not be generated. The draft is ready for review.";
 
   return (
@@ -25,7 +29,7 @@ export default function CoverImageCard({ activeAsset }: CoverImageCardProps) {
         16:9 Studio Cover Image
       </span>
     </div>
-    <span className="text-[10px] font-mono text-[#64748B]">{coverNeedsAttention ? "Cover needs attention" : "AI Generated · 1280×720"}</span>
+    <span className="text-[10px] font-mono text-[#64748B]">{isCoverPending ? "Generating…" : coverNeedsAttention ? "Cover needs attention" : "AI Generated · 1280×720"}</span>
   </div>
 
   {/* 16:9 Aspect Ratio Frame */}
@@ -39,6 +43,15 @@ export default function CoverImageCard({ activeAsset }: CoverImageCardProps) {
         sizes="(max-width: 1024px) 100vw, 780px"
         className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
       />
+    ) : isCoverPending ? (
+      <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-2">
+        <Loader2 className="w-9 h-9 text-[#00C9A7] animate-spin" />
+        <span className="text-sm font-semibold text-[#F1F5F9]">Generating cover art</span>
+        <span className="max-w-sm text-xs leading-relaxed text-[#94A3B8]">
+          Your draft is ready to read now. The cover usually takes about a minute and appears here
+          on its own.
+        </span>
+      </div>
     ) : (
       <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-2">
         <AlertTriangle className="w-9 h-9 text-[#F59E0B]" />
