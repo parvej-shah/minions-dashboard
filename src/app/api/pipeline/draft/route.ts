@@ -4,6 +4,7 @@ import { apiFailure } from "@/lib/api-response";
 import { triggerN8nWorkflow } from "@/services/pipeline";
 import { requireClientId } from "@/lib/tenant";
 import { requireOneOfEnv } from "@/lib/env";
+import { claimRunSlot } from "@/lib/harvestBudget";
 
 /**
  * Triggers the live 02_idea_to_asset workflow in n8n.
@@ -11,6 +12,11 @@ import { requireOneOfEnv } from "@/lib/env";
  * This route creates a PipelineRun row so the UI can track progress perfectly.
  * The workflow claims an idea, drafts it, runs the claims gate and syncs the 
  * finished asset into the `assets` table (roughly 150s later).
+ *
+ * The run row is claimed through `claimRunSlot`, which enforces the system-wide
+ * daily ceiling. Drafting is the expensive half of the pipeline -- two writer
+ * calls, a claims gate, social variants and a hero image -- so its budget is
+ * deliberately tighter than the harvest one.
  */
 export async function POST(request: Request) {
   const ctx = await requireClientId();
@@ -51,13 +57,21 @@ export async function POST(request: Request) {
     }
   }
 
-  const run = await prisma.pipelineRun.create({
-    data: {
-      clientId: ctx.clientId,
-      type: "DRAFT",
-      status: "RUNNING",
-    },
+  const slot = await claimRunSlot("DRAFT", ctx.clientId, {
+    trigger_source: "MINIONS_COCKPIT_EDITORIAL",
+    idea_id: ideaId,
   });
+
+  if (!slot.granted) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: `Daily drafting limit reached (${slot.budget.limit} runs across all tenants). The next window opens at 00:00 UTC.`,
+        budget: slot.budget,
+      },
+      { status: 429 }
+    );
+  }
 
   const { result, status } = await triggerN8nWorkflow(
     "draft",
@@ -68,8 +82,8 @@ export async function POST(request: Request) {
       audience: body.audience ?? null,
       trade: body.target_trade ?? null,
       trigger_source: "MINIONS_COCKPIT_EDITORIAL",
-      run_id: run.id,
-      callback_url: `${requireOneOfEnv("NEXT_PUBLIC_APP_URL", "NEXTAUTH_URL")}/api/pipeline/runs/${run.id}`
+      run_id: slot.runId,
+      callback_url: `${requireOneOfEnv("NEXT_PUBLIC_APP_URL", "NEXTAUTH_URL")}/api/pipeline/runs/${slot.runId}`
     },
     {
       failure:
@@ -81,10 +95,13 @@ export async function POST(request: Request) {
 
   if (!result.success) {
     await prisma.pipelineRun.update({
-      where: { id: run.id },
+      where: { id: slot.runId },
       data: { status: "FAILED" },
     });
   }
 
-  return NextResponse.json({ ...result, requested_idea_id: ideaId, run_id: run.id }, { status });
+  return NextResponse.json(
+    { ...result, requested_idea_id: ideaId, run_id: slot.runId, budget: slot.budget },
+    { status }
+  );
 }
