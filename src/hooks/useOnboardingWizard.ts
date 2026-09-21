@@ -171,6 +171,60 @@ export function useOnboardingWizard(): OnboardingWizardState {
     }
   }, []);
 
+  // Prefill from the already-saved BrandProfile/directives, for a user who
+  // lands here a second time (e.g. redirected back by DashboardShell) with no
+  // localStorage draft -- previously the form was just blank in that case,
+  // even though their data was sitting in the DB the whole time. Only fills
+  // fields still at their empty default, so an in-progress draft always wins.
+  useEffect(() => {
+    if (!hasRestoredDraft) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const [brand, directiveRows] = await Promise.all([
+          apiClient.get<{
+            brand_name?: string;
+            company_domain?: string;
+            positioning?: string;
+            writer_expertise?: WriterExpertise;
+          }>("/api/brand"),
+          apiClient
+            .get<Array<{ category: string; key: string; content: string; priority: 1 | 2 | 3 }>>(
+              "/api/brand/directives"
+            )
+            .catch(() => []),
+        ]);
+        if (cancelled || !brand?.positioning) return;
+
+        setBusinessNameRaw((prev) =>
+          prev || (brand.brand_name && brand.brand_name !== "getminions.ai" ? brand.brand_name : prev)
+        );
+        setWebsiteUrl((prev) =>
+          prev || (brand.company_domain && brand.company_domain !== "getminions.ai" ? brand.company_domain : prev)
+        );
+        setWriterExpertise((prev) => prev || brand.writer_expertise || prev);
+        setPositioningSummary((prev) => prev || brand.positioning || prev);
+        if (Array.isArray(directiveRows) && directiveRows.length > 0) {
+          setDirectives((prev) =>
+            prev.length > 0
+              ? prev
+              : directiveRows.map((d) => ({
+                  category: d.category as GeneratedDirective["category"],
+                  rule_key: d.key,
+                  instruction: d.content,
+                  priority: d.priority,
+                }))
+          );
+        }
+      } catch {
+        // Non-fatal -- worst case the form stays blank, same as before.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [hasRestoredDraft]);
+
   // Save draft state to localStorage on changes
   useEffect(() => {
     if (!hasRestoredDraft) return;
