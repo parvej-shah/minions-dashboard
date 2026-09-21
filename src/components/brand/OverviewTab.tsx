@@ -6,6 +6,7 @@ import type { BrandDirectiveItem, BrandCategory, BrandSettings, BrandProfileInpu
 import { useApiResource } from "@/hooks/useApiResource";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { LoadingState } from "@/components/ui/EmptyState";
+import BrandLookPreview from "@/components/brand/BrandLookPreview";
 
 const PER_CATEGORY_LIMIT = 6;
 
@@ -411,6 +412,7 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
                   </div>
                 ))}
               </div>
+              <BrandLookPreview colors={lookDraft} brandName={profile?.brand_name} />
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setEditingLook(false)}
