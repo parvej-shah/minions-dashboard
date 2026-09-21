@@ -16,12 +16,19 @@ const TONE_LABELS: Record<string, string> = {
   conversational_peer: "Conversational Peer",
 };
 
+// Ordered and labeled to match each color's actual role in a generated
+// cover (see 02_idea_to_asset's "Parse Variants and Prepare Rows" node):
+// cream canvas, ink headline + wordmark, coral highlight word, then one of
+// two small corner-icon colors depending on the article's topic register
+// (accent_blue for software/data topics, brand_teal for the five physical
+// trades). Generic names like "Accent" vs "Blue" didn't say why there were
+// two near-identical-sounding accent colors.
 const LOOK_COLOR_FIELDS: { key: "primary_ink" | "brand_teal" | "brand_coral" | "brand_cream" | "accent_blue"; label: string }[] = [
-  { key: "primary_ink", label: "Ink" },
-  { key: "brand_teal", label: "Accent" },
-  { key: "brand_coral", label: "Coral" },
-  { key: "brand_cream", label: "Cream" },
-  { key: "accent_blue", label: "Blue" },
+  { key: "brand_cream", label: "Background" },
+  { key: "primary_ink", label: "Text" },
+  { key: "brand_coral", label: "Highlight word" },
+  { key: "accent_blue", label: "Icon (digital)" },
+  { key: "brand_teal", label: "Icon (trade)" },
 ];
 
 type LookDraft = Pick<
@@ -433,16 +440,14 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
           ) : (
             <div className="flex flex-wrap items-center gap-2">
               {profile &&
-                [profile.primary_ink, profile.brand_teal, profile.brand_coral, profile.brand_cream, profile.accent_blue].map(
-                  (color, i) => (
-                    <span
-                      key={i}
-                      className="w-8 h-8 rounded-lg border border-[#1F2D3D]"
-                      style={{ backgroundColor: color }}
-                      title={color}
-                    />
-                  )
-                )}
+                LOOK_COLOR_FIELDS.map(({ key, label }) => (
+                  <span
+                    key={key}
+                    className="w-8 h-8 rounded-lg border border-[#1F2D3D]"
+                    style={{ backgroundColor: profile[key] }}
+                    title={`${label}: ${profile[key]}`}
+                  />
+                ))}
               {profile?.primary_logo_url && (
                 <span className="text-[11px] text-[#94A3B8] font-mono ml-2 truncate max-w-[240px]">
                   {profile.primary_logo_url}

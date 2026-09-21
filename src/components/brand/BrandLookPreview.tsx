@@ -26,7 +26,7 @@ export default function BrandLookPreview({ colors, brandName }: BrandLookPreview
     <div className="space-y-1.5">
       <label className="text-[11px] font-medium text-[#94A3B8] block">Live thumbnail preview</label>
       <div
-        className="w-full aspect-video rounded-lg border border-[#1F2D3D] relative overflow-hidden p-4 sm:p-6 flex flex-col justify-between transition-colors"
+        className="w-full max-w-sm aspect-video rounded-lg border border-[#1F2D3D] relative overflow-hidden p-3 sm:p-4 flex flex-col justify-between transition-colors"
         style={{ backgroundColor: colors.brand_cream }}
       >
         {/* Wordmark, top-right */}
