@@ -58,23 +58,53 @@ export async function POST(request: Request) {
       thesisKey: thesisKey(rawIdea, angle),
     };
 
-    // Per-tenant sequence. The previous global `prisma.idea.count()` both
-    // leaked one tenant's volume into another's ID space and raced: two
-    // concurrent harvests read the same count and generated the same ID,
-    // so the second silently upserted over the first's idea.
-    const ideaId = (body.ideaId || body.id || "").toString().trim() || (await nextIdeaId(clientId));
+    const explicitIdeaId = (body.ideaId || body.id || "").toString().trim();
 
-    const created = await prisma.idea.upsert({
-      where: { id: ideaId },
-      update: { ...data, clientId },
-      create: {
-        id: ideaId,
-        clientId,
-        ...data,
-        status: "HARVESTED",
-        icpRelevance: Number(body.icp_relevance) || 90,
-      },
-    });
+    let created;
+    if (explicitIdeaId) {
+      // Caller named the row explicitly (e.g. re-syncing an idea already known
+      // to n8n) -- update it in place rather than treating a match as a collision.
+      created = await prisma.idea.upsert({
+        where: { id: explicitIdeaId },
+        update: { ...data, clientId },
+        create: {
+          id: explicitIdeaId,
+          clientId,
+          ...data,
+          status: "HARVESTED",
+          icpRelevance: Number(body.icp_relevance) || 90,
+        },
+      });
+    } else {
+      // Per-tenant sequence, derived from that tenant's highest existing number
+      // rather than a global row count -- the previous global `prisma.idea.count()`
+      // leaked one tenant's volume into another's ID space. Two concurrent
+      // harvests can still compute the same next number, so retry the id
+      // allocation on a primary-key collision instead of `upsert`ing, which would
+      // silently overwrite the first harvest's idea with the second's data.
+      for (let attempt = 0; attempt < 5 && created === undefined; attempt++) {
+        const ideaId = await nextIdeaId(clientId, attempt);
+        try {
+          created = await prisma.idea.create({
+            data: {
+              id: ideaId,
+              clientId,
+              ...data,
+              status: "HARVESTED",
+              icpRelevance: Number(body.icp_relevance) || 90,
+            },
+          });
+        } catch (err) {
+          const isIdCollision =
+            typeof err === "object" && err !== null && (err as { code?: string }).code === "P2002";
+          if (!isIdCollision) throw err;
+        }
+      }
+
+      if (created === undefined) {
+        return apiFailure("Could not allocate an idea id. Please try again.", 503);
+      }
+    }
 
     return NextResponse.json({ success: true, idea: created }, { status: 201 });
   } catch (error) {
@@ -84,10 +114,10 @@ export async function POST(request: Request) {
 
 /**
  * Next free `IDEA-<n>` for one tenant, derived from that tenant's highest
- * existing number rather than a global row count. Retries on the unique-ID
- * collision two simultaneous harvests can still produce.
+ * existing number rather than a global row count. `attempt` is added on top so
+ * a caller retrying after a collision doesn't just recompute the same number.
  */
-async function nextIdeaId(clientId: string): Promise<string> {
+async function nextIdeaId(clientId: string, attempt = 0): Promise<string> {
   const rows = await prisma.idea.findMany({
     where: { clientId },
     select: { id: true },
@@ -99,5 +129,5 @@ async function nextIdeaId(clientId: string): Promise<string> {
     if (match) max = Math.max(max, Number(match[1]));
   }
 
-  return `IDEA-${String(max + 1).padStart(4, "0")}`;
+  return `IDEA-${String(max + 1 + attempt).padStart(4, "0")}`;
 }

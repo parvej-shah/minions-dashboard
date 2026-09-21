@@ -4,17 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireClientId } from "@/lib/tenant";
 import { verifyWebhookSecret } from "@/lib/security";
 import { apiFailure } from "@/lib/api-response";
-
-/**
- * A run is considered dead after this long with no terminal callback. n8n's own
- * draft path takes ~85s and harvest ~25s, so a run still RUNNING well past that
- * has lost its workflow -- the process died, or the callback never fired.
- *
- * Without this, a lost run stays RUNNING forever and the UI's progress HUD spins
- * indefinitely: every DRAFT run in production was RUNNING, including ones from
- * two weeks earlier, because the callback only ever fired on the success path.
- */
-const RUN_TIMEOUT_MS = 10 * 60 * 1000;
+import { sweepStaleRuns } from "@/lib/harvestBudget";
 
 export async function GET(
   request: Request,
@@ -24,29 +14,18 @@ export async function GET(
   if ("error" in ctx) return ctx.error;
 
   const { id } = await params;
+
+  // Report a lost run as failed rather than leaving the caller polling a status
+  // that will never change. Sweeps every stale run, not just this one -- see
+  // `sweepStaleRuns` for why relying solely on whoever polls this id isn't enough.
+  await sweepStaleRuns();
+
   const run = await prisma.pipelineRun.findUnique({
     where: { id, clientId: ctx.clientId },
   });
 
   if (!run) {
     return NextResponse.json({ error: "Run not found" }, { status: 404 });
-  }
-
-  // Report a lost run as failed rather than leaving the caller polling a status
-  // that will never change. Persist it so every later reader agrees.
-  if (run.status === "RUNNING" && Date.now() - run.createdAt.getTime() > RUN_TIMEOUT_MS) {
-    const timedOut = await prisma.pipelineRun.update({
-      where: { id: run.id },
-      data: {
-        status: "FAILED",
-        metadata: {
-          ...((run.metadata as Record<string, unknown>) ?? {}),
-          error: "The run stopped reporting progress and was marked failed.",
-          timedOut: true,
-        },
-      },
-    });
-    return NextResponse.json(timedOut);
   }
 
   return NextResponse.json(run);

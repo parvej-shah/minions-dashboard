@@ -80,6 +80,49 @@ export async function getRunBudget(
 /** @deprecated Use `getRunBudget("HARVEST")`. */
 export const getHarvestBudget = (now?: Date) => getRunBudget("HARVEST", now);
 
+/**
+ * A run is considered dead after this long with no terminal callback. n8n's own
+ * draft path takes ~85s and harvest ~25s, so a run still RUNNING well past that
+ * has lost its workflow -- the process died, or the callback never fired.
+ */
+export const RUN_TIMEOUT_MS = 10 * 60 * 1000;
+
+/**
+ * Marks every run stuck in RUNNING past `RUN_TIMEOUT_MS` as FAILED.
+ *
+ * Previously this only happened when a caller GET'd that exact run's status
+ * endpoint -- if nobody kept polling (tab closed, HUD navigated away from), the
+ * row stayed RUNNING forever. Called from `claimRunSlot` so every new trigger
+ * self-heals stale runs from earlier in the day, independent of who's watching.
+ */
+export async function sweepStaleRuns(now: Date = new Date()): Promise<number> {
+  const cutoff = new Date(now.getTime() - RUN_TIMEOUT_MS);
+  const stale = await prisma.pipelineRun.findMany({
+    where: { status: "RUNNING", createdAt: { lt: cutoff } },
+    select: { id: true, metadata: true },
+  });
+
+  if (stale.length === 0) return 0;
+
+  await Promise.all(
+    stale.map((run) =>
+      prisma.pipelineRun.update({
+        where: { id: run.id },
+        data: {
+          status: "FAILED",
+          metadata: {
+            ...((run.metadata as Record<string, unknown>) ?? {}),
+            error: "The run stopped reporting progress and was marked failed.",
+            timedOut: true,
+          },
+        },
+      })
+    )
+  );
+
+  return stale.length;
+}
+
 export type RunSlot =
   | { granted: true; runId: string; budget: RunBudget }
   | { granted: false; runId: null; budget: RunBudget };
@@ -107,6 +150,8 @@ export async function claimRunSlot(
 ): Promise<RunSlot> {
   const since = startOfUtcDay();
   const limit = DAILY_LIMITS[type];
+
+  await sweepStaleRuns();
 
   const run = await prisma.pipelineRun.create({
     data: {
