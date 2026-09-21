@@ -1,7 +1,17 @@
 import { NextResponse } from "next/server";
+import sharp from "sharp";
 import { uploadToR2 } from "@/lib/r2";
 import { assertSafeFetchTarget } from "@/lib/ssrf-guard";
 import { checkRateLimit } from "@/lib/rate-limit";
+
+// Qwen hands back raw PNG for every cover -- lossless, and wasteful for a flat
+// editorial design (solid cream background, big flat text, one small icon).
+// Re-encoding to WebP typically cuts 60-80% off the bytes with no visible
+// loss for this kind of graphic, unlike JPEG which blocks up sharp text edges.
+// GIF is skipped (an animation would break under a single-frame re-encode),
+// and anything already WebP is left alone.
+const COMPRESSIBLE_TYPES = new Set(["image/png", "image/jpeg"]);
+const WEBP_QUALITY = 82;
 
 const MAX_BYTES = 25 * 1024 * 1024;
 const MAX_REDIRECTS = 1;
@@ -107,17 +117,32 @@ export async function POST(request: Request) {
         { status: 422 }
       );
     }
+    let outBuffer = buffer;
+    let outContentType = contentType;
+    let outExt = ext;
+
+    if (COMPRESSIBLE_TYPES.has(contentType)) {
+      try {
+        outBuffer = await sharp(buffer).webp({ quality: WEBP_QUALITY }).toBuffer();
+        outContentType = "image/webp";
+        outExt = "webp";
+      } catch {
+        // Malformed/unsupported source image: fall back to storing the
+        // original bytes rather than failing the whole ingest.
+      }
+    }
+
     const prefix = safeSegment(body.key_prefix || "assets", "assets");
     const name = safeSegment(body.filename || `${Date.now()}`, `${Date.now()}`);
-    const key = `${prefix}/${name}.${ext}`;
+    const key = `${prefix}/${name}.${outExt}`;
 
-    const { url } = await uploadToR2(key, buffer, contentType);
+    const { url } = await uploadToR2(key, outBuffer, outContentType);
 
     return NextResponse.json({
       url,
       key,
-      bytes: buffer.byteLength,
-      content_type: contentType
+      bytes: outBuffer.byteLength,
+      content_type: outContentType
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unknown error";
