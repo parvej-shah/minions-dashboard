@@ -38,49 +38,73 @@ interface AgentStage {
   name: string;
   icon: React.ElementType;
   description: string;
+  /** Estimate, not telemetry -- see comment below. Drives stage advance, never a claim. */
+  typicalMs: number;
 }
 
 /**
  * The stages of `02_idea_to_asset`, in the order n8n runs them.
  *
- * This is a description of the pipeline, not live progress: System reports nothing
- * back until the asset row exists, so the HUD polls for that and never claims
- * to know which stage is running right now. The per-stage timers that used to
- * drive this ("0-12s strategist, 12-34s writer…") were pure invention, and the
- * percentage they produced had no relationship to the run.
+ * Nothing reports live stage progress back mid-run, so unlike the harvester HUD
+ * these `typicalMs` aren't measured per-stage -- they're apportioned from the
+ * one real number we have (commit b4aa059: cover generation took ~43s of a
+ * ~98s total run before it was moved off the critical path) plus relative
+ * LLM-call complexity for the rest. Still an estimate, so stages advance on
+ * elapsed time the same way the harvester's do, and only COMPLETED/FAILED from
+ * the run record is ever presented as fact.
  */
 const AGENT_STAGES: AgentStage[] = [
   {
     id: "strategist",
     name: "Strategist Minion",
     icon: Brain,
+    typicalMs: 8000,
     description: "Formulating the thesis angle and defending it",
   },
   {
     id: "writer",
     name: "Writer Minion",
     icon: PenTool,
+    typicalMs: 25000,
     description: "Authoring the 800–1,200 word deep dive",
   },
   {
     id: "editor",
     name: "Editor / Critic Minion",
     icon: ShieldCheck,
+    typicalMs: 15000,
     description: "Extracting and classifying every factual claim",
   },
   {
     id: "variants",
     name: "Distribution Minion",
     icon: Share2,
+    typicalMs: 12000,
     description: "Writing the LinkedIn, Facebook and X variants",
   },
   {
     id: "artist",
     name: "Visual Artist Minion",
     icon: Palette,
+    typicalMs: 40000,
     description: "Synthesizing the 16:9 1280×720 cover illustration",
   },
 ];
+
+/**
+ * Which stage the run is on, given elapsed time. Returns `AGENT_STAGES.length`
+ * once past the last boundary -- the run is taking longer than usual.
+ */
+function stageIndexForElapsed(elapsedMs: number): number {
+  let boundary = 0;
+  for (let i = 0; i < AGENT_STAGES.length; i++) {
+    boundary += AGENT_STAGES[i].typicalMs;
+    if (elapsedMs < boundary) return i;
+  }
+  return AGENT_STAGES.length;
+}
+
+const TOTAL_TYPICAL_MS = AGENT_STAGES.reduce((sum, s) => sum + s.typicalMs, 0);
 
 export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgressHUDProps) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -88,6 +112,7 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
   const [isCompleted, setIsCompleted] = useState(false);
   const [hasFailed, setHasFailed] = useState(false);
   const [completedAssetId, setCompletedAssetId] = useState<string | null>(null);
+  const [failureReason, setFailureReason] = useState<string | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Timer effect
@@ -99,6 +124,7 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
         setIsCompleted(false);
         setHasFailed(false);
         setCompletedAssetId(null);
+        setFailureReason(null);
       }, 0);
       return () => clearTimeout(reset);
     }
@@ -126,6 +152,11 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
           setCompletedAssetId(run.metadata?.assetId || null);
         } else if (run.status === "FAILED") {
           setHasFailed(true);
+          setFailureReason(
+            typeof run.metadata?.error === "string"
+              ? run.metadata.error
+              : "The run stopped before it finished."
+          );
         }
       } catch (err) {
         console.error("Error polling drafting status:", err);
@@ -142,8 +173,15 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
 
   if (!job) return null;
 
-  // Progress is binary, because that is all the pipeline actually reports:
-  // either the asset row has appeared (polled) or it has not.
+  // Which stage the run is on, and whether it has outrun its expected duration.
+  const elapsedMs = elapsedSeconds * 1000;
+  const activeStage = stageIndexForElapsed(elapsedMs);
+  const isOverrunning = !isCompleted && !hasFailed && activeStage >= AGENT_STAGES.length;
+  // Cap at 95% while running: only a real terminal status may show a finished bar.
+  const percent = isCompleted
+    ? 100
+    : Math.min(95, Math.round((elapsedMs / TOTAL_TYPICAL_MS) * 100));
+
   const formatTime = (secs: number) => {
     const mins = Math.floor(secs / 60);
     const remaining = secs % 60;
@@ -192,7 +230,13 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
               </span>
             </div>
             <p className="text-[11px] text-[#94A3B8] truncate max-w-[220px]">
-              {job.title || "Synthesizing content..."}
+              {isCompleted
+                ? job.title || "Draft staged in Editorial Studio"
+                : hasFailed
+                  ? failureReason ?? "Pipeline failed to complete"
+                  : isOverrunning
+                    ? "Taking longer than usual, still working"
+                    : job.title || "Synthesizing content..."}
             </p>
           </div>
         </div>
@@ -224,46 +268,61 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[11px] font-mono">
               <span className="text-[#94A3B8]">
-                {isCompleted ? "Pipeline completed" : hasFailed ? "Pipeline stopped" : "5-stage drafting pipeline running"}
+                {isCompleted
+                  ? "Pipeline completed"
+                  : hasFailed
+                    ? "Pipeline stopped"
+                    : `Step ${Math.min(activeStage + 1, AGENT_STAGES.length)} of ${AGENT_STAGES.length}`}
               </span>
               <span className={`font-bold ${hasFailed ? "text-[#EF4444]" : "text-indigo-400"}`}>
                 {isCompleted ? "Done" : hasFailed ? "Error" : formatTime(elapsedSeconds)}
               </span>
             </div>
-            {/* Indeterminate while running: n8n does not report a percentage. */}
             <div className="w-full h-1.5 bg-[#161D26] rounded-full overflow-hidden">
-              {isCompleted ? (
-                <div className="h-full w-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full" />
-              ) : hasFailed ? (
+              {hasFailed ? (
                 <div className="h-full w-full bg-[#EF4444] rounded-full" />
               ) : (
-                <div className="h-full w-1/3 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-pulse" />
+                <div
+                  className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-[width] duration-1000 ease-linear"
+                  style={{ width: `${percent}%` }}
+                />
               )}
             </div>
           </div>
 
-          {/* Stepper of 5 Agents */}
+          {/* Stepper -- each stage carries its own state, not one shared spinner */}
           <div className="space-y-2.5">
-            {AGENT_STAGES.map((stage) => {
+            {AGENT_STAGES.map((stage, index) => {
               const Icon = stage.icon;
+              // Completed run: every stage is done. Failed: stages before the
+              // one it died on stay done, the rest never ran.
+              const isStageDone = isCompleted || index < activeStage;
+              const isStageActive = !isCompleted && !hasFailed && index === activeStage;
+              const isStagePending = !isCompleted && !hasFailed && index > activeStage;
+              const isStageFailed = hasFailed && index === activeStage;
 
               return (
                 <div
                   key={stage.id}
+                  aria-current={isStageActive ? "step" : undefined}
                   className={`p-2.5 rounded-xl border transition-all flex items-center justify-between gap-3 ${
-                    isCompleted || hasFailed
-                      ? "bg-[#0F1419]/60 border-[#1F2D3D]"
-                      : "bg-[#161D26] border-[#1F2D3D]"
+                    isStageActive
+                      ? "bg-[#161D26] border-indigo-500/50"
+                      : isStagePending
+                        ? "bg-[#0F1419]/40 border-[#1F2D3D]/60"
+                        : "bg-[#0F1419]/60 border-[#1F2D3D]"
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div
                       className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
-                        isCompleted
-                          ? "bg-indigo-500/10 text-indigo-400"
-                          : hasFailed
+                        isStageFailed
                           ? "bg-[#EF4444]/10 text-[#EF4444]"
-                          : "bg-indigo-500/10 text-indigo-400"
+                          : isStageDone
+                            ? "bg-indigo-500/10 text-indigo-400"
+                            : isStageActive
+                              ? "bg-indigo-500/10 text-indigo-400"
+                              : "bg-[#161D26] text-[#64748B]"
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5" />
@@ -271,24 +330,32 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-semibold text-white truncate">
+                        <span
+                          className={`text-xs font-semibold truncate ${
+                            isStagePending ? "text-[#64748B]" : "text-white"
+                          }`}
+                        >
                           {stage.name}
                         </span>
                       </div>
                       <p className="text-[10px] text-[#94A3B8] truncate">
-                        {stage.description}
+                        {isStagePending
+                          ? `Typically ${Math.round(stage.typicalMs / 1000)}s`
+                          : stage.description}
                       </p>
                     </div>
                   </div>
 
                   {/* Stage Indicator Badge */}
                   <div className="shrink-0">
-                    {isCompleted ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
-                    ) : hasFailed ? (
+                    {isStageFailed ? (
                       <X className="w-3.5 h-3.5 text-[#EF4444]" />
-                    ) : (
+                    ) : isStageDone ? (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
+                    ) : isStageActive ? (
                       <Loader2 className="w-3.5 h-3.5 text-indigo-400 animate-spin" />
+                    ) : (
+                      <span className="block w-1.5 h-1.5 rounded-full bg-[#1F2D3D]" />
                     )}
                   </div>
                 </div>
