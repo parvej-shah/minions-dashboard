@@ -38,7 +38,7 @@ export default function MobileActionBar({
   onPublish,
 }: MobileActionBarProps) {
   return (
-  <div className="lg:hidden fixed bottom-12.5 left-0 right-0 z-35 bg-[#0F1419]/95 backdrop-blur-xl border-t border-[#1F2D3D] p-2.5 px-4 flex items-center justify-between gap-3 shadow-2xl">
+  <div className="lg:hidden fixed bottom-0 max-md:bottom-[calc(67px+max(0.65rem,env(safe-area-inset-bottom)))] left-0 right-0 z-35 bg-[#0F1419]/95 backdrop-blur-xl border-t border-[#1F2D3D] p-2.5 px-4 md:pb-[max(0.625rem,env(safe-area-inset-bottom))] flex items-center justify-between gap-3 shadow-2xl">
     <div className="min-w-0 flex-1">
       <div className="flex items-center gap-1.5 text-[10px] font-mono">
         <span className="font-bold text-[#00C9A7]">Draft {currentAssetIndex + 1}/{totalDrafts}</span>

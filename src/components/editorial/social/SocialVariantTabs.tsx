@@ -97,7 +97,7 @@ export default function SocialVariantTabs({
         </div>
 
         {/* Social Platform Tabs */}
-        <div className="flex items-center gap-1.5 bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D]">
+        <div className="flex items-center flex-wrap gap-1.5 bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D]">
           {showLinkedin && (
             <button
               onClick={() => setSocialTab("LINKEDIN")}

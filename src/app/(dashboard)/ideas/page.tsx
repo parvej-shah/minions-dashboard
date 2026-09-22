@@ -953,7 +953,7 @@ export default function IdeaStreamPage() {
                   <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
                     Target Audience
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {AUDIENCES.map((aud) => {
                       const isSelected = formAudience === aud;
                       let badge = "ICP (Contractors)";
