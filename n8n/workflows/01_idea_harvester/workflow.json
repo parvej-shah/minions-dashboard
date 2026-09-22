@@ -1,0 +1,1353 @@
+{
+  "active": true,
+  "connections": {
+    "Assign Idea IDs": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Sync Ideas to DB",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Attach Source URLs": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Dedupe Ideas",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Backlog Guard": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Skip Check",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Build Craft Payload": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Craft Available?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Build Harvest Payload": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Qwen Harvest",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Build Refine Payload": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Has NEW Rows?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Craft Available?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Qwen Craft Notes",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Merge Craft Into Ideas",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Dedupe Ideas": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Fetch Source Articles",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Expand Tenant Sources": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "RSS - Tenant Sources",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Fetch Brand Context": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Build Refine Payload",
+            "type": "main"
+          },
+          {
+            "index": 0,
+            "node": "Expand Tenant Sources",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Fetch Source Articles": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Build Craft Payload",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Has Callback Harvested": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Callback Harvested",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Has Callback Skipped": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Callback Skipped",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Has NEW Rows?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Qwen Refine",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "NoOp No NEW Rows",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Resolve Client ID",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Merge Craft Into Ideas": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Read Global Max Idea ID",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "NoOp Backlog Full": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Has Callback Skipped",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Parse Harvest JSON": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Attach Source URLs",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Parse Refine JSON": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Refine Parse OK?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Qwen Craft Notes": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Merge Craft Into Ideas",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Qwen Harvest": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Parse Harvest JSON",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Qwen Refine": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Parse Refine JSON",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "RSS - Tenant Sources": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Build Harvest Payload",
+            "type": "main"
+          },
+          {
+            "index": 0,
+            "node": "Report Source Status",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Read Global Max Idea ID": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Assign Idea IDs",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Read Ideas": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Backlog Guard",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Refine Parse OK?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Sync Refined Ideas to DB",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "NoOp Refine Parse Failed",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Report Source Status": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "POST Source Status",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Resolve Client ID": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Read Ideas",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Skip Check": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Fetch Brand Context",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "NoOp Backlog Full",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Sync Ideas to DB": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Has Callback Harvested",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Test Webhook Trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Resolve Client ID",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "Ykpl0pQTzBdZlDcA",
+  "name": "01_idea_harvester",
+  "nodes": [
+    {
+      "id": "e3f4a5b6-c7d8-4e9f-0a1b-2c3d4e5f6a7b",
+      "name": "Assign Idea IDs",
+      "parameters": {
+        "jsCode": "@file:code/assign-idea-ids.js"
+      },
+      "position": [
+        1648,
+        240
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "f1c3d5e7-8a9b-4c1d-9e2f-3a4b5c6d7e82",
+      "name": "Attach Source URLs",
+      "parameters": {
+        "jsCode": "@file:code/attach-source-urls.js"
+      },
+      "position": [
+        1310,
+        400
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
+      "name": "Backlog Guard",
+      "parameters": {
+        "jsCode": "@file:code/backlog-guard.js"
+      },
+      "position": [
+        -560,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "b3c5d7e9-0a1b-4c3d-9e4f-5a6b7c8d9e04",
+      "name": "Build Craft Payload",
+      "parameters": {
+        "jsCode": "@file:code/build-craft-payload.js"
+      },
+      "position": [
+        1840,
+        480
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "a9b0c1d2-e3f4-4a5b-6c7d-8e9f0a1b2c3d",
+      "name": "Build Harvest Payload",
+      "parameters": {
+        "jsCode": "@file:code/build-harvest-payload.js"
+      },
+      "position": [
+        768,
+        240
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "b8c9d0e1-f2a3-4b4c-5d6e-7f8a9b0c1d2e",
+      "name": "Build Refine Payload",
+      "parameters": {
+        "jsCode": "@file:code/build-refine-payload.js"
+      },
+      "position": [
+        112,
+        -144
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {},
+      "id": "281fef05-57e5-4b1c-bf2b-08edeab183e1",
+      "name": "Callback Harvested",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "none",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $('Resolve Client ID').first().json.callback_secret }}"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({ status: 'COMPLETED', metadata: { harvestedCount: $input.all().length } }) }}",
+        "method": "PATCH",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "={{ $('Resolve Client ID').first().json.callback_url }}"
+      },
+      "position": [
+        2500,
+        240
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {},
+      "id": "2b599ba3-882f-423a-b61a-92af5320028c",
+      "name": "Callback Skipped",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "none",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $('Resolve Client ID').first().json.callback_secret }}"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({ status: 'COMPLETED', metadata: { harvestedCount: 0, skipped: true } }) }}",
+        "method": "PATCH",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "={{ $('Resolve Client ID').first().json.callback_url }}"
+      },
+      "position": [
+        450,
+        400
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "61d26d29-c495-4b5c-932a-0b4419eb0dc5",
+      "name": "Craft Available?",
+      "notes": "Only call Qwen when there is article text to study. Without this the craft node fired on every run with an empty body and spent ~5s producing an error.",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "craft-guard-1",
+              "leftValue": "={{ $json.skip_craft }}",
+              "operator": {
+                "operation": "notEquals",
+                "type": "boolean"
+              },
+              "rightValue": true
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "position": [
+        1940,
+        480
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2
+    },
+    {
+      "id": "d2e3f4a5-b6c7-4d8e-9f0a-1b2c3d4e5f6a",
+      "name": "Dedupe Ideas",
+      "parameters": {
+        "jsCode": "@file:code/dedupe-ideas.js"
+      },
+      "position": [
+        1424,
+        240
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "c7a1e2f4-5b6d-4e88-9a3c-1d2e3f4a5b60",
+      "name": "Expand Tenant Sources",
+      "parameters": {
+        "jsCode": "@file:code/expand-tenant-sources.js"
+      },
+      "position": [
+        -128,
+        640
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "43bb9529-2ec9-4ab7-b3a9-f745439da8cf",
+      "maxTries": 3,
+      "name": "Fetch Brand Context",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "GET",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "url": "=https://minions.getminions.ai/api/brand/context?clientId={{ $('Resolve Client ID').first().json.client_id }}"
+      },
+      "position": [
+        -128,
+        0
+      ],
+      "retryOnFail": true,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "executeOnce": true,
+      "id": "a2b4c6d8-9e0f-4a2b-8c3d-4e5f6a7b8c93",
+      "maxTries": 2,
+      "name": "Fetch Source Articles",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({ client_id: $('Resolve Client ID').first().json.client_id, urls: $input.all().map(i => i.json.source_url).filter(Boolean) }) }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 25000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/ideas/craft"
+      },
+      "position": [
+        1648,
+        480
+      ],
+      "retryOnFail": true,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "id": "9590d8de-1194-49f2-984f-511f63cf43ae",
+      "name": "Has Callback Harvested",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $('Resolve Client ID').first().json.callback_url }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        2300,
+        240
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "992c99ee-4863-4ea1-8ad3-8d2ee3af7b0b",
+      "name": "Has Callback Skipped",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $('Resolve Client ID').first().json.callback_url }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        230,
+        400
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "c9d0e1f2-a3b4-4c5d-6e7f-8a9b0c1d2e3f",
+      "name": "Has NEW Rows?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e",
+              "leftValue": "={{ $json.has_new }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "position": [
+        320,
+        -144
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "b2c3d4e5-f6a7-4b5c-9d0e-1f2a3b4c5d6e",
+      "name": "Manual Trigger",
+      "parameters": {},
+      "position": [
+        -1008,
+        112
+      ],
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1
+    },
+    {
+      "id": "d5e7f9a1-2b3c-4e5f-9a6b-7c8d9e0f1a26",
+      "name": "Merge Craft Into Ideas",
+      "parameters": {
+        "jsCode": "@file:code/merge-craft-into-ideas.js"
+      },
+      "position": [
+        2240,
+        480
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c",
+      "name": "NoOp Backlog Full",
+      "parameters": {},
+      "position": [
+        -128,
+        192
+      ],
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1
+    },
+    {
+      "id": "d0e1f2a3-b4c5-4d6e-7f8a-9b0c1d2e3f4a",
+      "name": "NoOp No NEW Rows",
+      "parameters": {},
+      "position": [
+        544,
+        -256
+      ],
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1
+    },
+    {
+      "id": "3c47d216-e7ef-403f-a852-886baea68bfd",
+      "name": "NoOp Refine Parse Failed",
+      "parameters": {},
+      "position": [
+        880,
+        128
+      ],
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1
+    },
+    {
+      "id": "c1d2e3f4-a5b6-4c7d-8e9f-0a1b2c3d4e5f",
+      "name": "Parse Harvest JSON",
+      "parameters": {
+        "jsCode": "@file:code/parse-harvest-json.js"
+      },
+      "position": [
+        1200,
+        240
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "f2a3b4c5-d6e7-4f8a-9b0c-1d2e3f4a5b6c",
+      "name": "Parse Refine JSON",
+      "parameters": {
+        "jsCode": "@file:code/parse-refine-json.js"
+      },
+      "position": [
+        768,
+        -48
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "post-source-status-http",
+      "name": "POST Source Status",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ JSON.stringify({ source_id: $json.source_id, ok: $json.ok, error: $json.error }) }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 10000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/source-status"
+      },
+      "position": [
+        336,
+        840
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "7woVA2ycgDGlIipS",
+          "name": "Qwen API"
+        }
+      },
+      "disabled": false,
+      "id": "c4d6e8f0-1a2b-4d4e-9f5a-6b7c8d9e0f15",
+      "maxTries": 2,
+      "name": "Qwen Craft Notes",
+      "notes": "Skipped at runtime when Build Craft Payload sets skip_craft:true -- see the IF guard upstream.",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify($json.prompt_payload || {}) }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 60000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+      },
+      "position": [
+        2040,
+        480
+      ],
+      "retryOnFail": true,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "waitBetweenTries": 5000
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "7woVA2ycgDGlIipS",
+          "name": "Qwen API"
+        }
+      },
+      "id": "b0c1d2e3-f4a5-4b6c-7d8e-9f0a1b2c3d4e",
+      "maxTries": 3,
+      "name": "Qwen Harvest",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ $json.prompt_payload }}",
+        "method": "POST",
+        "options": {
+          "timeout": 60000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+      },
+      "position": [
+        992,
+        240
+      ],
+      "retryOnFail": true,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "waitBetweenTries": 5000
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "7woVA2ycgDGlIipS",
+          "name": "Qwen API"
+        }
+      },
+      "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b",
+      "maxTries": 3,
+      "name": "Qwen Refine",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ $json.prompt_payload }}",
+        "method": "POST",
+        "options": {
+          "timeout": 60000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+      },
+      "position": [
+        544,
+        -48
+      ],
+      "retryOnFail": true,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "waitBetweenTries": 5000
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "e8f1a2b3-4c5d-4e6f-9a1b-2c3d4e5f6a71",
+      "name": "Read Global Max Idea ID",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "method": "GET",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "select",
+              "value": "id"
+            },
+            {
+              "name": "order",
+              "value": "id.desc"
+            },
+            {
+              "name": "limit",
+              "value": "1"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/ideas"
+      },
+      "position": [
+        1424,
+        400
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "4d81bc34-b6de-4994-9529-2b6c0365804d",
+      "maxTries": 3,
+      "name": "Read Ideas",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "method": "GET",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "select",
+              "value": "idea_id:id,client_id,raw_idea,angle,audience,target_trade,pillar,priority,geo_metro,why,icp_relevance,evidence_required,status,claimed_at,created_at"
+            },
+            {
+              "name": "client_id",
+              "value": "=eq.{{ $json.client_id }}"
+            },
+            {
+              "name": "order",
+              "value": "created_at.desc"
+            },
+            {
+              "name": "limit",
+              "value": "2000"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/ideas"
+      },
+      "position": [
+        -784,
+        0
+      ],
+      "retryOnFail": true,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "id": "a5fd33d4-26b6-477e-9410-2c58cd59a1db",
+      "name": "Refine Parse OK?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "9f1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5e",
+              "leftValue": "={{ $json.idea_id }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "position": [
+        880,
+        -48
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "report-source-status-code",
+      "name": "Report Source Status",
+      "parameters": {
+        "jsCode": "@file:code/report-source-status.js"
+      },
+      "position": [
+        112,
+        840
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "resolve-client-id-01",
+      "name": "Resolve Client ID",
+      "parameters": {
+        "jsCode": "@file:code/resolve-client-id.js"
+      },
+      "position": [
+        -896,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "d8b2f3a5-6c7e-4f99-8b4d-2e3f4a5b6c71",
+      "maxTries": 2,
+      "name": "RSS - Tenant Sources",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "options": {},
+        "url": "={{ $json.feed_url }}"
+      },
+      "position": [
+        112,
+        640
+      ],
+      "retryOnFail": true,
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "id": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
+      "name": "Skip Check",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+              "leftValue": "={{ $json.skip_harvest }}",
+              "operator": {
+                "operation": "equals",
+                "type": "boolean"
+              },
+              "rightValue": false
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "position": [
+        -336,
+        0
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "9966db11-36bc-4314-a63a-03562309e045",
+      "name": "Sync Ideas to DB",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=minimal"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({\n  id: $json.idea_id,\n  client_id: $('Resolve Client ID').first().json.client_id,\n  raw_idea: $json.raw_idea || '',\n  angle: $json.angle || '',\n  audience: $json.audience || 'ICP',\n  target_trade: $json.target_trade || 'HVAC',\n  pillar: $json.pillar || 'Contractor Realities',\n  source: $json.source || 'HARVESTER',\n  source_url: $json.source_url || null,\n  source_title: $json.source_title || null,\n  signals: $json.signals || [],\n  status: $json.status || 'REFINED',\n  priority: $json.priority || 'HIGH',\n  geo_metro: $json.geo_metro || null,\n  why: $json.why || null,\n  icp_relevance: Number($json.icp_relevance) || 50,\n  evidence_required: $json.evidence_required || 'N',\n  thesis_key: $json.thesis_key || null,\n  craft_notes: $json.craft_notes || null,\n  craft_source_url: $json.craft_source_url || null,\n  updated_at: new Date().toISOString()\n}) }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/ideas?on_conflict=id"
+      },
+      "position": [
+        2096,
+        240
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "eabc7627-7907-4d4b-b11f-4b55e46a235b",
+      "name": "Sync Refined Ideas to DB",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=minimal"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({\n  id: $json.idea_id,\n  client_id: $('Resolve Client ID').first().json.client_id,\n  raw_idea: $json.raw_idea || $json.angle || '',\n  angle: $json.angle || '',\n  audience: $json.audience || 'ICP',\n  pillar: $json.pillar || 'Contractor Realities',\n  source: 'MANUAL',\n  status: 'REFINED',\n  priority: $json.priority || 'HIGH',\n  why: $json.why || null,\n  icp_relevance: Number($json.icp_relevance) || 4,\n  evidence_required: $json.evidence_required || 'N',\n  updated_at: new Date().toISOString()\n}) }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/ideas?on_conflict=id"
+      },
+      "position": [
+        1216,
+        -48
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "test-wh-harvester",
+      "name": "Test Webhook Trigger",
+      "parameters": {
+        "httpMethod": "POST",
+        "options": {},
+        "path": "test-harvester",
+        "responseMode": "onReceived"
+      },
+      "position": [
+        -1008,
+        304
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "f2731848-9b7c-463a-9b55-38093c090176"
+    }
+  ],
+  "settings": {
+    "binaryMode": "separate",
+    "errorWorkflow": "rVlJXV1SeU9GvAqz",
+    "executionOrder": "v1"
+  }
+}

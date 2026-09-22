@@ -1,0 +1,171 @@
+{
+  "active": true,
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Format Error Message",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Format Error Message": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Send Telegram Alert",
+            "type": "main"
+          },
+          {
+            "index": 0,
+            "node": "Has Run Callback",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Has Run Callback": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Mark Run Failed",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "rVlJXV1SeU9GvAqz",
+  "name": "00c_pipeline_error_alert",
+  "nodes": [
+    {
+      "id": "error-trigger-00c",
+      "name": "Error Trigger",
+      "parameters": {},
+      "position": [
+        -400,
+        0
+      ],
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1
+    },
+    {
+      "id": "format-error-00c",
+      "name": "Format Error Message",
+      "parameters": {
+        "jsCode": "@file:code/format-error-message.js"
+      },
+      "position": [
+        -160,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "73576c7b-5d59-4ec6-ad24-26080620db39",
+      "name": "Has Run Callback",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $json.has_callback }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        80,
+        200
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "69770c69-3c91-4234-8b72-b5c12b2f9fb7",
+      "name": "Mark Run Failed",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $json.callback_secret }}"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({ status: 'FAILED', metadata: { failedNode: $json.failed_node, error: $json.error_message } }) }}",
+        "method": "PATCH",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "={{ $json.callback_url }}"
+      },
+      "position": [
+        320,
+        200
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "credentials": {
+        "telegramApi": {
+          "id": "sQdF1b6damw4h5FH",
+          "name": "Telegram - Leadswave bot"
+        }
+      },
+      "id": "send-telegram-00c",
+      "name": "Send Telegram Alert",
+      "parameters": {
+        "additionalFields": {
+          "parse_mode": "HTML"
+        },
+        "chatId": "={{ $env.TELEGRAM_ALERT_CHAT_ID || '8224701322' }}",
+        "text": "={{ $json.text }}"
+      },
+      "position": [
+        80,
+        0
+      ],
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "webhookId": "677058c9-f184-4245-b20e-af0b33383573"
+    }
+  ],
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  }
+}

@@ -1,0 +1,285 @@
+{
+  "workflows": [
+    {
+      "id": "2wieCETnOXuLrwJY",
+      "slug": "00_tenant_dispatcher",
+      "schedule": "Daily 00:00 fan-out: one harvest per ACTIVE tenant, gated by the harvest budget."
+    },
+    {
+      "id": "7zbuDfvy3bhJLf3x",
+      "slug": "00b_posting_scheduler_dispatcher",
+      "schedule": "Every 5 min: drafts for tenants whose posting schedule is due. Deactivated 2026-09-21."
+    },
+    {
+      "id": "49yAgdBe5IeO729r",
+      "slug": "00c_stale_claim_sweeper",
+      "schedule": "Every 15 min: releases ideas stuck at PICKED."
+    },
+    {
+      "id": "rVlJXV1SeU9GvAqz",
+      "slug": "00c_pipeline_error_alert"
+    },
+    {
+      "id": "Ykpl0pQTzBdZlDcA",
+      "slug": "01_idea_harvester"
+    },
+    {
+      "id": "0ZeUkMgGXpBKVB2A",
+      "slug": "02_idea_to_asset"
+    },
+    {
+      "id": "4GNbfvmveKtbJrVd",
+      "slug": "03_review_publisher",
+      "schedule": "Every 5 min: safety-net poll for approved assets the webhook missed."
+    },
+    {
+      "id": "10vre0a16gvu32Hu",
+      "slug": "04_hero_image"
+    }
+  ],
+  "ignored": [
+    {
+      "id": "yQEKL6q3CJTLgkiu",
+      "name": "RAG Query - Ironclad KB",
+      "reason": "Ironclad Pest Solutions website chat (Pip). Separate project."
+    },
+    {
+      "id": "WoZZOLqOpl5N5Iwq",
+      "name": "RAG Ingestion - Ironclad KB",
+      "reason": "Ironclad knowledge-base ingestion. Separate project."
+    },
+    {
+      "id": "4JNScRPn5gDVzcVb",
+      "name": "check_availability",
+      "reason": "Pest-control voice agent tool. Separate project."
+    },
+    {
+      "id": "pdi8N62k0fFxFOCF",
+      "name": "book_appointment",
+      "reason": "Pest-control voice agent tool. Separate project."
+    },
+    {
+      "id": "KaWo2fPUFnHoTBIn",
+      "name": "modify_appointment",
+      "reason": "Pest-control voice agent tool. Separate project."
+    },
+    {
+      "id": "d07nz1gyIWib59rR",
+      "name": "cancel_appointment",
+      "reason": "Pest-control voice agent tool. Separate project."
+    },
+    {
+      "id": "ktFLMXt4pL0hbxxg",
+      "name": "find_appointment",
+      "reason": "Pest-control voice agent tool. Separate project."
+    },
+    {
+      "id": "Xw2KEyR5STahFbC3",
+      "name": "pest_control_post_call",
+      "reason": "Pest-control voice agent. Separate project."
+    },
+    {
+      "id": "50GxJv8jKUURYJtN",
+      "name": "re_check_availability",
+      "reason": "Real-estate voice agent tool. Separate project."
+    },
+    {
+      "id": "6V5dQHgL1dM2JmmQ",
+      "name": "re_modify_appointment",
+      "reason": "Real-estate voice agent tool. Separate project."
+    },
+    {
+      "id": "tzXjc4MImfo5REKw",
+      "name": "re_cancel_appointment",
+      "reason": "Real-estate voice agent tool. Separate project."
+    },
+    {
+      "id": "wcAiB7IV9It3432r",
+      "name": "re_find_appointment",
+      "reason": "Real-estate voice agent tool. Separate project."
+    },
+    {
+      "id": "uRu6cKIqEQNl7VZU",
+      "name": "re_book_showing",
+      "reason": "Real-estate voice agent tool. Separate project."
+    },
+    {
+      "id": "scNu7yZ5D1aNGB9Z",
+      "name": "re_post_call",
+      "reason": "Real-estate voice agent. Separate project."
+    },
+    {
+      "id": "N9JmqpY8Ud0xMzKW",
+      "name": "Workflow A - trigger_call",
+      "reason": "Order voice agent. Separate project."
+    },
+    {
+      "id": "vuMyIMbIWEyKdpTi",
+      "name": "Workflow B - update_delivery_address",
+      "reason": "Order voice agent. Separate project."
+    },
+    {
+      "id": "G89LREsVRgFIM4Jt",
+      "name": "Workflow C - confirm_order",
+      "reason": "Order voice agent. Separate project."
+    },
+    {
+      "id": "PVotMW7vZ1VyNdFh",
+      "name": "Workflow D - create_order",
+      "reason": "Order voice agent. Separate project."
+    },
+    {
+      "id": "zjMeeLanek53QsDz",
+      "name": "mctb-missed-call",
+      "reason": "Missed-call text-back. Separate project."
+    },
+    {
+      "id": "rF4Q9DecDN4klWsy",
+      "name": "mctb-reply-handler",
+      "reason": "Missed-call text-back. Separate project."
+    },
+    {
+      "id": "nVR2hF7W7oGtawpw",
+      "name": "mctb-noreply-timeout",
+      "reason": "Missed-call text-back. Separate project."
+    },
+    {
+      "id": "lFYAnnbUI5IEBzXl",
+      "name": "01_idea_harvester_BACKUP_2026-08-22",
+      "reason": "Inactive backup of the harvester from before the rotation rewrite. Superseded by git history."
+    },
+    {
+      "id": "wx8oSqftN8xA0w7I",
+      "name": "TEMP_migrate_linkedin_columns",
+      "reason": "One-off migration, deactivated 2026-09-22."
+    }
+  ],
+  "lintAllow": [
+    {
+      "rule": "unchecked-write",
+      "workflow": "00c_pipeline_error_alert",
+      "node": "Mark Run Failed",
+      "reason": "Last step of the error handler itself; there is nothing left to report a failure to."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "01_idea_harvester",
+      "node": "Callback Harvested",
+      "reason": "Terminal run-status callback. A failure only leaves the pipeline run RUNNING in the HUD, and the execution log shows it."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "01_idea_harvester",
+      "node": "Callback Skipped",
+      "reason": "Terminal run-status callback. A failure only leaves the pipeline run RUNNING in the HUD, and the execution log shows it."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "02_idea_to_asset",
+      "node": "Callback Drafted",
+      "reason": "Terminal run-status callback. A failure only leaves the pipeline run RUNNING in the HUD, and the execution log shows it."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "02_idea_to_asset",
+      "node": "Callback Skipped",
+      "reason": "Terminal run-status callback. A failure only leaves the pipeline run RUNNING in the HUD, and the execution log shows it."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "00_tenant_dispatcher",
+      "node": "Trigger Harvest for Tenant",
+      "reason": "Fan-out webhook. The harvester reports its own failures through the error workflow."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "02_idea_to_asset",
+      "node": "Trigger Harvest for Tenant",
+      "reason": "Best-effort refill when the queue is empty; the next dispatcher run covers a miss."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "01_idea_harvester",
+      "node": "POST Source Status",
+      "reason": "Side branch by design: feed-health reporting must never affect idea generation."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "00b_posting_scheduler_dispatcher",
+      "node": "Create PipelineRun Row",
+      "reason": "Workflow deactivated 2026-09-21. Add status checks before reactivating."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "00b_posting_scheduler_dispatcher",
+      "node": "Trigger Draft for Tenant",
+      "reason": "Workflow deactivated 2026-09-21. Add status checks before reactivating."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "00b_posting_scheduler_dispatcher",
+      "node": "Mark Schedule Run",
+      "reason": "Workflow deactivated 2026-09-21. Add status checks before reactivating."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "03_review_publisher",
+      "node": "Initialize_LinkedIn_Image_Upload",
+      "reason": "Checked inside Publish_to_LinkedIn's body: a failed upload posts without the image."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "03_review_publisher",
+      "node": "Upload_LinkedIn_Image",
+      "reason": "Checked inside Publish_to_LinkedIn's body (uploadResp.statusCode): a failed upload posts without the image."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "02_idea_to_asset",
+      "node": "Dispatch Hero Generation",
+      "reason": "OPEN RISK: if 04 cannot be reached the asset's cover stays PENDING with no alert."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "01_idea_harvester",
+      "node": "Sync Ideas to DB",
+      "reason": "OPEN RISK: a rejected upsert still reports the harvest COMPLETED with ideas that were never stored."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "01_idea_harvester",
+      "node": "Sync Refined Ideas to DB",
+      "reason": "OPEN RISK: a rejected upsert leaves the idea at NEW with no alert."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "02_idea_to_asset",
+      "node": "Sync Idea to DB",
+      "reason": "OPEN RISK: the idea may stay PICKED while its asset exists; the sweeper does not release it because draft_asset_id is unset."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "02_idea_to_asset",
+      "node": "Sync Claims to DB",
+      "reason": "OPEN RISK: claims can be lost while the draft reports COMPLETED."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "03_review_publisher",
+      "node": "Mark_Asset_Published_DB",
+      "reason": "OPEN RISK: if this fails, published_at stays null and the 5-min poll re-posts the asset to Facebook and LinkedIn."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "03_review_publisher",
+      "node": "Publish_to_Blog",
+      "reason": "OPEN RISK: a failed hosted-blog upsert is still marked published."
+    },
+    {
+      "rule": "unchecked-write",
+      "workflow": "03_review_publisher",
+      "node": "Publish_to_LinkedIn",
+      "reason": "OPEN RISK: a failed LinkedIn post is still marked published, with linkedin_post_id null."
+    }
+  ]
+}

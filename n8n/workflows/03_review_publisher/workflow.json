@@ -1,0 +1,1406 @@
+{
+  "active": true,
+  "connections": {
+    "Blog_Hosted_Allowed": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Publish_to_Blog",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Tag_Blog_Skipped_Result",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Blog_Result": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Resolve_Facebook_Channel",
+            "type": "main"
+          },
+          {
+            "index": 0,
+            "node": "Resolve_LinkedIn_Channel",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Blog_Webhook_Configured": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Publish_to_Blog_Webhook",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Blog_Hosted_Allowed",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Check_Pending_Assets": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Resolve_Blog_Channel",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Comment_Blog_Link_on_FB": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Normalize_Facebook_Published",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Download_Hero_Image": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Merge_LinkedIn_Upload_Data",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Facebook_Enabled": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Publish_to_Facebook_Photo",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Normalize_Facebook_Skipped",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Filter_Approved_Assets": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Check_Pending_Assets",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Has_Blog_Link_FB": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Comment_Blog_Link_on_FB",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Normalize_Facebook_Published",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Initialize_LinkedIn_Image_Upload": {
+      "main": [
+        [
+          {
+            "index": 1,
+            "node": "Merge_LinkedIn_Upload_Data",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "LinkedIn_Enabled": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Download_Hero_Image",
+            "type": "main"
+          },
+          {
+            "index": 0,
+            "node": "Initialize_LinkedIn_Image_Upload",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Normalize_LinkedIn_Skipped",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Mark_Asset_Published_DB": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Prepare_Telegram_Alert",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Merge_LinkedIn_Upload_Data": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Upload_LinkedIn_Image",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Merge_Publish_Results": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Mark_Asset_Published_DB",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Normalize_Facebook_Published": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Merge_Publish_Results",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Normalize_Facebook_Skipped": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Merge_Publish_Results",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Normalize_LinkedIn_Published": {
+      "main": [
+        [
+          {
+            "index": 1,
+            "node": "Merge_Publish_Results",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Normalize_LinkedIn_Skipped": {
+      "main": [
+        [
+          {
+            "index": 1,
+            "node": "Merge_Publish_Results",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Prepare_Telegram_Alert": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Send_Telegram_Alert",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Publish_to_Blog": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Tag_Blog_Hosted_Result",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Publish_to_Blog_Webhook": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Tag_Blog_Webhook_Result",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Publish_to_Facebook_Photo": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Has_Blog_Link_FB",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Publish_to_LinkedIn": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Normalize_LinkedIn_Published",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Read_Approved_Assets_DB": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Filter_Approved_Assets",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Resolve_Blog_Channel": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Blog_Webhook_Configured",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Resolve_Facebook_Channel": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Facebook_Enabled",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Resolve_LinkedIn_Channel": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "LinkedIn_Enabled",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Schedule_5min": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Read_Approved_Assets_DB",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Tag_Blog_Hosted_Result": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Blog_Result",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Tag_Blog_Skipped_Result": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Blog_Result",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Tag_Blog_Webhook_Result": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Blog_Result",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Upload_LinkedIn_Image": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Publish_to_LinkedIn",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Webhook_Trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Read_Approved_Assets_DB",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "4GNbfvmveKtbJrVd",
+  "name": "03_review_publisher",
+  "nodes": [
+    {
+      "id": "7261f15d-508e-489a-b352-b615e8cc7eeb",
+      "name": "Blog_Hosted_Allowed",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "is-tenant-zero",
+              "leftValue": "={{ $('Filter_Approved_Assets').item.json.client_id }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "tenant-zero-getminions-ai"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        1060,
+        60
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2
+    },
+    {
+      "id": "e6f7a8b9-0c1d-4e2f-3a4b-5c6d7e8f9001",
+      "name": "Blog_Result",
+      "parameters": {
+        "jsCode": "@file:code/blog-result.js"
+      },
+      "position": [
+        1620,
+        120
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "a2b3c4d5-6e7f-4a8b-9c0d-1e2f3a4b5c6d",
+      "name": "Blog_Webhook_Configured",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "blog-is-active",
+              "leftValue": "={{ $json.is_active }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": true
+            },
+            {
+              "id": "blog-has-token",
+              "leftValue": "={{ $json.token }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        1060,
+        260
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2
+    },
+    {
+      "id": "check-pending",
+      "name": "Check_Pending_Assets",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "has-asset-id",
+              "leftValue": "={{ $json.asset_id }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        900,
+        100
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "comment-fb",
+      "name": "Comment_Blog_Link_on_FB",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "none",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "=👉 Read the full breakdown and operational field guide: {{ $('Blog_Result').item.json.blog_url }}"
+            },
+            {
+              "name": "access_token",
+              "value": "={{ $('Resolve_Facebook_Channel').item.json.token }}"
+            }
+          ]
+        },
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": false,
+              "neverError": false
+            }
+          },
+          "timeout": 25000
+        },
+        "sendBody": true,
+        "specifyBody": "keypair",
+        "url": "={{ 'https://graph.facebook.com/v20.0/' + ($('Publish_to_Facebook_Photo').item.json.post_id || $('Publish_to_Facebook_Photo').item.json.id) + '/comments' }}"
+      },
+      "position": [
+        1640,
+        -100
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "a1a1a1a1-1111-4111-8111-111111111111",
+      "name": "Download_Hero_Image",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "none",
+        "method": "GET",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "outputPropertyName": "data",
+              "responseFormat": "file"
+            }
+          },
+          "timeout": 25000
+        },
+        "url": "={{ $('Filter_Approved_Assets').item.json.hero_image_url }}"
+      },
+      "position": [
+        1620,
+        300
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "fb-enabled-check",
+      "name": "Facebook_Enabled",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "is-fb-active",
+              "leftValue": "={{ $json.is_active }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": true
+            },
+            {
+              "id": "has-fb-token",
+              "leftValue": "={{ $json.token }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        1220,
+        0
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "filter-approved",
+      "name": "Filter_Approved_Assets",
+      "parameters": {
+        "jsCode": "@file:code/filter-approved-assets.js"
+      },
+      "position": [
+        680,
+        100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "a6a6a6a6-6666-4666-8666-666666666666",
+      "name": "Has_Blog_Link_FB",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "fb-has-blog-url",
+              "leftValue": "={{ $('Blog_Result').item.json.blog_url }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        1580,
+        -180
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "a2a2a2a2-2222-4222-8222-222222222222",
+      "name": "Initialize_LinkedIn_Image_Upload",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "none",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Restli-Protocol-Version",
+              "value": "2.0.0"
+            },
+            {
+              "name": "LinkedIn-Version",
+              "value": "202607"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $('Resolve_LinkedIn_Channel').item.json.token }}"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({ initializeUploadRequest: { owner: $('Resolve_LinkedIn_Channel').item.json.external_id } }) }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": false,
+              "neverError": true
+            }
+          },
+          "timeout": 20000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "https://api.linkedin.com/rest/images?action=initializeUpload"
+      },
+      "position": [
+        1780,
+        300
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "b2c3d4e5-2222-4f6a-9b0c-1d2e3f4a5b62",
+      "name": "LinkedIn_Enabled",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "li-is-active",
+              "leftValue": "={{ $json.is_active }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": true
+            },
+            {
+              "id": "li-has-token",
+              "leftValue": "={{ $json.token }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        1420,
+        420
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "b701db73-bee4-4f5d-976f-19c955b327cd",
+      "name": "Mark_Asset_Published_DB",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({\n  status: 'PUBLISHED',\n  published_at: new Date().toISOString(),\n  published_urls: $json.blog_url,\n  facebook_post_id: $json.facebook_post_id,\n  facebook_published_at: $json.facebook_post_id ? new Date().toISOString() : null,\n  linkedin_post_id: $json.linkedin_post_id,\n  linkedin_published_at: $json.linkedin_post_id ? new Date().toISOString() : null,\n  updated_at: new Date().toISOString()\n}) }}",
+        "method": "PATCH",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 20000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "=https://kneafaxwkopodiausljf.supabase.co/rest/v1/assets?id=eq.{{ $json.asset_id }}"
+      },
+      "position": [
+        1880,
+        0
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "b1b1b1b1-1111-4111-8111-111111111111",
+      "name": "Merge_LinkedIn_Upload_Data",
+      "parameters": {
+        "combineBy": "combineByPosition",
+        "mode": "combine",
+        "numberInputs": 2
+      },
+      "position": [
+        1940,
+        260
+      ],
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2
+    },
+    {
+      "id": "a7b8c9d0-7777-4e1f-9a5b-6c7d8e9fa0b7",
+      "name": "Merge_Publish_Results",
+      "parameters": {
+        "combineBy": "combineByPosition",
+        "mode": "combine",
+        "numberInputs": 2
+      },
+      "position": [
+        2280,
+        120
+      ],
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2
+    },
+    {
+      "id": "b2e1d3f5-7c4f-4a2b-8d9e-3f6a9b2c4d5e",
+      "name": "Normalize_Facebook_Published",
+      "parameters": {
+        "jsCode": "@file:code/normalize-facebook-published.js"
+      },
+      "position": [
+        2060,
+        -100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "c3f2e4a6-8d5f-4b3c-9e8f-4a7b1c3d5e6f",
+      "name": "Normalize_Facebook_Skipped",
+      "parameters": {
+        "jsCode": "@file:code/normalize-facebook-skipped.js"
+      },
+      "position": [
+        1620,
+        140
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "e5f6a7b8-5555-4c9d-2e3f-4a5b6c7d8e95",
+      "name": "Normalize_LinkedIn_Published",
+      "parameters": {
+        "jsCode": "@file:code/normalize-linkedin-published.js"
+      },
+      "position": [
+        2060,
+        360
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "f6a7b8c9-6666-4d0e-3f4a-5b6c7d8e9fa6",
+      "name": "Normalize_LinkedIn_Skipped",
+      "parameters": {
+        "jsCode": "@file:code/normalize-linkedin-skipped.js"
+      },
+      "position": [
+        1620,
+        480
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "d4a3f5b7-9e6a-4c4d-8f9a-5b8c2d4e6f70",
+      "name": "Prepare_Telegram_Alert",
+      "parameters": {
+        "jsCode": "@file:code/prepare-telegram-alert.js"
+      },
+      "position": [
+        2280,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "publish-blog",
+      "name": "Publish_to_Blog",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=minimal"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({\n  slug: $json.slug,\n  client_id: $json.client_id,\n  title: $json.title,\n  hook: $json.hook,\n  core_argument: $json.core_argument,\n  content: $json.content,\n  audience: $json.audience,\n  pillar: 'Operations',\n  tags: [$json.audience, 'Operations'],\n  asset_id: $json.asset_id,\n  doc_url: $json.doc_url,\n  meta_description: ($json.hook || $json.title || '').slice(0, 160)\n}) }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 20000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/blogs?on_conflict=slug"
+      },
+      "position": [
+        1060,
+        0
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "b3c4d5e6-7f8a-4b9c-0d1e-2f3a4b5c6d7e",
+      "name": "Publish_to_Blog_Webhook",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "none",
+        "jsonBody": "={{ JSON.stringify({ asset_id: $('Filter_Approved_Assets').item.json.asset_id, title: $('Filter_Approved_Assets').item.json.title, hook: $('Filter_Approved_Assets').item.json.hook, content: $('Filter_Approved_Assets').item.json.content, slug: $('Filter_Approved_Assets').item.json.slug, hero_image_url: $('Filter_Approved_Assets').item.json.hero_image_url, audience: $('Filter_Approved_Assets').item.json.audience, published_at: new Date().toISOString() }) }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": false,
+              "neverError": true
+            }
+          },
+          "timeout": 20000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "={{ $json.token }}"
+      },
+      "position": [
+        1220,
+        180
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "publish-fb-photo",
+      "name": "Publish_to_Facebook_Photo",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "none",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $('Filter_Approved_Assets').item.json.hero_image_url }}"
+            },
+            {
+              "name": "caption",
+              "value": "={{ $('Filter_Approved_Assets').item.json.fb_variant }}"
+            },
+            {
+              "name": "access_token",
+              "value": "={{ $('Resolve_Facebook_Channel').item.json.token }}"
+            }
+          ]
+        },
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": false,
+              "neverError": false
+            }
+          },
+          "timeout": 25000
+        },
+        "sendBody": true,
+        "specifyBody": "keypair",
+        "url": "=https://graph.facebook.com/v20.0/{{ $('Resolve_Facebook_Channel').item.json.external_id }}/photos"
+      },
+      "position": [
+        1420,
+        -100
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "c3d4e5f6-3333-4a7b-0c1d-2e3f4a5b6c73",
+      "name": "Publish_to_LinkedIn",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "none",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Restli-Protocol-Version",
+              "value": "2.0.0"
+            },
+            {
+              "name": "LinkedIn-Version",
+              "value": "202607"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $('Resolve_LinkedIn_Channel').item.json.token }}"
+            }
+          ]
+        },
+        "jsonBody": "={{ (() => { const li = $('Filter_Approved_Assets').item.json.li_variant; const initResp = $('Initialize_LinkedIn_Image_Upload').item.json; const uploadResp = $('Upload_LinkedIn_Image').item.json; const uploadOk = uploadResp && (uploadResp.statusCode === 200 || uploadResp.statusCode === 201); const imageUrn = (uploadOk && initResp && initResp.value) ? initResp.value.image : null; const body = { author: $('Resolve_LinkedIn_Channel').item.json.external_id, commentary: li, visibility: 'PUBLIC', distribution: { feedDistribution: 'MAIN_FEED', targetEntities: [], thirdPartyDistributionChannels: [] }, lifecycleState: 'PUBLISHED', isReshareDisabledByAuthor: false }; if (imageUrn) { body.content = { media: { id: imageUrn, altText: $('Filter_Approved_Assets').item.json.title } }; } return JSON.stringify(body); })() }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 20000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "https://api.linkedin.com/rest/posts"
+      },
+      "position": [
+        1620,
+        360
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "53c791d7-0253-480f-8a9e-23fd85bab073",
+      "name": "Read_Approved_Assets_DB",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "method": "GET",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 20000
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "select",
+              "value": "*"
+            },
+            {
+              "name": "claims_ok",
+              "value": "eq.Y"
+            },
+            {
+              "name": "status",
+              "value": "eq.PUBLISHED"
+            },
+            {
+              "name": "published_at",
+              "value": "is.null"
+            },
+            {
+              "name": "order",
+              "value": "created_at.asc"
+            },
+            {
+              "name": "limit",
+              "value": "3"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/assets"
+      },
+      "position": [
+        240,
+        100
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "f1a2b3c4-5d6e-4f7a-8b9c-0d1e2f3a4b5c",
+      "name": "Resolve_Blog_Channel",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "GET",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "url": "=https://minions.getminions.ai/api/channels/credential?clientId={{ $('Filter_Approved_Assets').item.json.client_id }}&channel=blog"
+      },
+      "position": [
+        900,
+        260
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "a1f0c2d4-6b3e-4f1a-9c7d-2e5f8a1b3c4d",
+      "name": "Resolve_Facebook_Channel",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "GET",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "url": "=https://minions.getminions.ai/api/channels/credential?clientId={{ $('Filter_Approved_Assets').item.json.client_id }}&channel=facebook"
+      },
+      "position": [
+        1220,
+        0
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "a1b2c3d4-1111-4e5f-8a9b-0c1d2e3f4a51",
+      "name": "Resolve_LinkedIn_Channel",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "GET",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "url": "=https://minions.getminions.ai/api/channels/credential?clientId={{ $('Filter_Approved_Assets').item.json.client_id }}&channel=linkedin"
+      },
+      "position": [
+        1220,
+        420
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "schedule-5min",
+      "name": "Schedule_5min",
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "position": [
+        -100,
+        0
+      ],
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2
+    },
+    {
+      "credentials": {
+        "telegramApi": {
+          "id": "sQdF1b6damw4h5FH",
+          "name": "Telegram - Leadswave bot"
+        }
+      },
+      "id": "send-telegram",
+      "name": "Send_Telegram_Alert",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "additionalFields": {
+          "parse_mode": "HTML"
+        },
+        "chatId": "={{ $env.TELEGRAM_ALERT_CHAT_ID || '8224701322' }}",
+        "text": "=🚀 <b>Approved Asset Published Live</b>\n\n📌 <b>Asset:</b> {{ $json.asset_id }}\n📰 <b>Title:</b> {{ $json.title }}\n🌐 <b>Blog:</b> {{ $json.blog_url }}\n📢 <b>Facebook:</b> {{ $json.facebook_enabled ? 'Published' : 'Paused / Skipped' }}\n💼 <b>LinkedIn:</b> {{ $json.linkedin_enabled ? 'Published' : 'Paused / Skipped' }}"
+      },
+      "position": [
+        2100,
+        0
+      ],
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "webhookId": "43425695-fc9c-4208-a232-a6fd34d9c5ba"
+    },
+    {
+      "id": "d5e6f7a8-9b0c-4d1e-2f3a-4b5c6d7e8f90",
+      "name": "Tag_Blog_Hosted_Result",
+      "parameters": {
+        "jsCode": "@file:code/tag-blog-hosted-result.js"
+      },
+      "position": [
+        1420,
+        60
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "8273defe-1109-434c-ac81-917b5ede26b5",
+      "name": "Tag_Blog_Skipped_Result",
+      "parameters": {
+        "jsCode": "@file:code/tag-blog-skipped-result.js"
+      },
+      "position": [
+        1420,
+        -60
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "c4d5e6f7-8a9b-4c0d-1e2f-3a4b5c6d7e8f",
+      "name": "Tag_Blog_Webhook_Result",
+      "parameters": {
+        "jsCode": "@file:code/tag-blog-webhook-result.js"
+      },
+      "position": [
+        1420,
+        180
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "a3a3a3a3-3333-4333-8333-333333333333",
+      "name": "Upload_LinkedIn_Image",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "none",
+        "contentType": "binaryData",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $('Resolve_LinkedIn_Channel').item.json.token }}"
+            }
+          ]
+        },
+        "inputDataFieldName": "data",
+        "method": "PUT",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 30000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "url": "={{ $('Initialize_LinkedIn_Image_Upload').item.json.value.uploadUrl }}"
+      },
+      "position": [
+        1940,
+        300
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "webhook-trigger",
+      "name": "Webhook_Trigger",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "publish-approved-asset"
+      },
+      "position": [
+        -100,
+        180
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "publish-approved-asset"
+    }
+  ],
+  "settings": {
+    "errorWorkflow": "rVlJXV1SeU9GvAqz",
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  }
+}

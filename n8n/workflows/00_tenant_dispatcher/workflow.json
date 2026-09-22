@@ -1,0 +1,270 @@
+{
+  "active": true,
+  "connections": {
+    "Claim Harvest Slot": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Slot Granted?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Read Active Clients",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Read Active Clients": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Claim Harvest Slot",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Read Active Clients",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Slot Granted?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Trigger Harvest for Tenant",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "NoOp Budget Exhausted",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "2wieCETnOXuLrwJY",
+  "name": "00_tenant_dispatcher",
+  "nodes": [
+    {
+      "alwaysOutputData": true,
+      "id": "c1a2b3c4-d5e6-4f70-8a9b-0c1d2e3f4a50",
+      "name": "Claim Harvest Slot",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $env.BLOG_API_SECRET }}"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({ client_id: $json.id }) }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/harvest-slot"
+      },
+      "position": [
+        -464,
+        88
+      ],
+      "retryOnFail": false,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "manual-dispatcher",
+      "name": "Manual Trigger",
+      "parameters": {},
+      "position": [
+        -800,
+        176
+      ],
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1
+    },
+    {
+      "id": "e3c4d5e6-f708-4192-8c1d-2e3f4a5b6c72",
+      "name": "NoOp Budget Exhausted",
+      "parameters": {},
+      "position": [
+        -240,
+        264
+      ],
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "read-active-clients",
+      "maxTries": 3,
+      "name": "Read Active Clients",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "method": "GET",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "select",
+              "value": "id,slug,status"
+            },
+            {
+              "name": "status",
+              "value": "eq.ACTIVE"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/clients"
+      },
+      "position": [
+        -576,
+        88
+      ],
+      "retryOnFail": true,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "id": "schedule-dispatcher",
+      "name": "Schedule Trigger",
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "expression": "0 0 * * *",
+              "field": "cronExpression"
+            }
+          ]
+        }
+      },
+      "position": [
+        -800,
+        0
+      ],
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "d2b3c4d5-e6f7-4081-9b0c-1d2e3f4a5b61",
+      "name": "Slot Granted?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "a1b2c3d4-e5f6-4789-9012-3456789abcde",
+              "leftValue": "={{ $json.statusCode }}",
+              "operator": {
+                "operation": "equals",
+                "type": "number"
+              },
+              "rightValue": 200
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "position": [
+        -352,
+        88
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "trigger-harvest-per-tenant",
+      "maxTries": 2,
+      "name": "Trigger Harvest for Tenant",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "jsonBody": "={{ JSON.stringify({ client_id: $('Read Active Clients').item.json.id, run_id: $json.body.run_id, callback_url: 'https://minions.getminions.ai/api/pipeline/runs/' + $json.body.run_id, callback_secret: $env.BLOG_API_SECRET, trigger_source: 'TENANT_DISPATCHER_SCHEDULED' }) }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://n8n.getminions.ai/webhook/test-harvester"
+      },
+      "position": [
+        -240,
+        40
+      ],
+      "retryOnFail": true,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "waitBetweenTries": 3000
+    }
+  ],
+  "settings": {
+    "errorWorkflow": "rVlJXV1SeU9GvAqz",
+    "executionOrder": "v1"
+  }
+}

@@ -1,0 +1,1868 @@
+{
+  "active": true,
+  "connections": {
+    "Assemble Brand Context": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Executive Strategist Agent",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Asset Write OK?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Split Claims Rows",
+            "type": "main"
+          },
+          {
+            "index": 0,
+            "node": "Dispatch Hero Generation",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Build Sheet Asset Row": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Sync Idea to DB",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Build Writer Payload": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Qwen Call 2 Writer",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Claim Idea Row": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Claim Landed?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Claim Landed?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Read Assets For Idea",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "NoOp Nothing to Draft",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Claims Gate Passed?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Build Sheet Asset Row",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Build Sheet Asset Row",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Collapse Brand Directive Rows": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Fetch Brand Context",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Executive Strategist Agent": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Parse Strategy JSON",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Fetch Brand Context": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Fetch Tone Examples",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Fetch Tone Examples": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Assemble Brand Context",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Format Evidence Context": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Merge Strategy and Evidence",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Generate run_id": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Read Ideas",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Has Callback Drafted": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Callback Drafted",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Has Callback Skipped": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Callback Skipped",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Idea Already Has Asset?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "NoOp Nothing to Draft",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Read Brand",
+            "type": "main"
+          },
+          {
+            "index": 0,
+            "node": "Read Posting Schedule",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Generate run_id",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Merge Strategy and Evidence": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Build Writer Payload",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Need Evidence?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Format Evidence Context",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 1,
+            "node": "Merge Strategy and Evidence",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "NoOp Nothing to Draft": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Has Callback Skipped",
+            "type": "main"
+          },
+          {
+            "index": 0,
+            "node": "Should Harvest?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Parse Claims and Gate": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Qwen Call 4 Variants",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Parse Editor Output": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Parse Claims and Gate",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Parse Strategy JSON": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Need Evidence?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Parse Variants and Prepare Rows": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Validate Social Variants",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Parse Writer Output": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Qwen Call 3 Editor",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Prepare Asset Row": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Claims Gate Passed?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Qwen Call 2 Writer": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Parse Writer Output",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Qwen Call 3 Editor": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Parse Editor Output",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Qwen Call 4 Variants": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Parse Variants and Prepare Rows",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Read Assets For Idea": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Idea Already Has Asset?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Read Brand": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Collapse Brand Directive Rows",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Read Ideas": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Select Target",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Select Target": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Target Found?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Send Telegram Message": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Has Callback Drafted",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Should Harvest?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Trigger Harvest for Tenant",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Split Claims Rows": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Sync Claims to DB",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Sync Asset to DB": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Asset Write OK?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Sync Claims to DB": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Telegram Notification",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Sync Idea to DB": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Sync Asset to DB",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Target Found?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Claim Idea Row",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "NoOp Nothing to Draft",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Telegram Notification": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Send Telegram Message",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Test Webhook Trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Generate run_id",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Validate Social Variants": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Prepare Asset Row",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "0ZeUkMgGXpBKVB2A",
+  "name": "02_idea_to_asset",
+  "nodes": [
+    {
+      "id": "assemble-brand-context-02",
+      "name": "Assemble Brand Context",
+      "parameters": {
+        "jsCode": "@file:code/assemble-brand-context.js"
+      },
+      "position": [
+        1040,
+        16
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "c0002bdb-ea42-4623-88ec-0a3396d8a91b",
+      "name": "Asset Write OK?",
+      "parameters": {
+        "jsCode": "@file:code/asset-write-ok.js"
+      },
+      "position": [
+        6760,
+        512
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "f540bc3b-01c9-44e4-a5a3-b5aacd705248",
+      "name": "Build Sheet Asset Row",
+      "parameters": {
+        "jsCode": "@file:code/build-sheet-asset-row.js"
+      },
+      "position": [
+        6048,
+        496
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "build-writer-payload-02",
+      "name": "Build Writer Payload",
+      "parameters": {
+        "jsCode": "@file:code/build-writer-payload.js"
+      },
+      "position": [
+        2384,
+        16
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {},
+      "id": "55089ef5-9ef6-47e9-b464-735483bf4b16",
+      "name": "Callback Drafted",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "none",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $('Generate run_id').first().json.callback_secret }}"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({ status: 'COMPLETED', metadata: { assetId: $('Prepare Asset Row').first().json.asset_id || null } }) }}",
+        "method": "PATCH",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "={{ $('Generate run_id').first().json.callback_url }}"
+      },
+      "position": [
+        2800,
+        400
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {},
+      "id": "780385ab-751f-494f-a821-758aa9b090d2",
+      "name": "Callback Skipped",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "none",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $('Generate run_id').first().json.callback_secret }}"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({ status: 'COMPLETED', metadata: { skipped: true, reason: 'NoOp Nothing to Draft' } }) }}",
+        "method": "PATCH",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "={{ $('Generate run_id').first().json.callback_url }}"
+      },
+      "position": [
+        450,
+        -200
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "a0b540e0-6162-4d76-afa0-8cca28dff096",
+      "name": "Claim Idea Row",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({status:'PICKED', claimed_at: $json.claimed_at, claimed_by_run_id: $json.run_id}) }}",
+        "method": "PATCH",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id",
+              "value": "=eq.{{ $json.idea_id }}"
+            },
+            {
+              "name": "status",
+              "value": "=eq.{{ $json.orig_status }}"
+            },
+            {
+              "name": "claimed_at",
+              "value": "={{ $json.orig_claimed_at ? ('eq.' + $json.orig_claimed_at) : 'is.null' }}"
+            },
+            {
+              "name": "draft_asset_id",
+              "value": "is.null"
+            },
+            {
+              "name": "client_id",
+              "value": "=eq.{{ $('Generate run_id').first().json.client_id }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "sendQuery": true,
+        "specifyBody": "json",
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/ideas"
+      },
+      "position": [
+        -80,
+        112
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "f6a19238-a0c9-4740-be01-567de57e04a0",
+      "name": "Claim Landed?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "claim-landed-check",
+              "leftValue": "={{ $json.id }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "position": [
+        160,
+        112
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3
+    },
+    {
+      "id": "dbc0573a-0065-4fdb-98ec-74bb01921cc6",
+      "name": "Claims Gate Passed?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "condition-1786782027859-fbjn2lk0c",
+              "leftValue": "={{ $('Parse Claims and Gate').first().json.claims_ok }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "Y"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "position": [
+        5680,
+        496
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "c8778a9e-8f6c-4f67-9f18-9b4764f832e3",
+      "name": "Collapse Brand Directive Rows",
+      "parameters": {
+        "jsCode": "@file:code/collapse-brand-directive-rows.js"
+      },
+      "position": [
+        928,
+        -144
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "4b67515e-c158-4458-8ed3-cfac7825c95d",
+      "name": "Dispatch Hero Generation",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({\n  asset_id: $('Prepare Asset Row').first().json.asset_id,\n  image_prompt: $('Parse Variants and Prepare Rows').first().json.image_prompt,\n  callback_secret: $('Generate run_id').first().json.callback_secret,\n  app_url: 'https://minions.getminions.ai'\n}) }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 20000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "https://n8n.getminions.ai/webhook/hero-image"
+      },
+      "position": [
+        7000,
+        620
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "7woVA2ycgDGlIipS",
+          "name": "Qwen API"
+        }
+      },
+      "id": "qwen-call-1-strategist-02",
+      "name": "Executive Strategist Agent",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ $json.prompt_payload }}",
+        "method": "POST",
+        "options": {
+          "timeout": 60000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+      },
+      "position": [
+        1264,
+        16
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "fetch-brand-context-02",
+      "maxTries": 2,
+      "name": "Fetch Brand Context",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "method": "GET",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "select",
+              "value": "brand_name,company_domain,positioning,primary_logo_url,primary_ink,brand_teal,brand_coral,brand_cream,accent_blue,tone_formality,tone_cadence,allowed_proof_claims,tone_questionnaire,allow_customer_result_claims,visual_assets"
+            },
+            {
+              "name": "client_id",
+              "value": "=eq.{{ $('Generate run_id').first().json.client_id }}"
+            },
+            {
+              "name": "limit",
+              "value": "1"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/brand_profile"
+      },
+      "position": [
+        816,
+        16
+      ],
+      "retryOnFail": true,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "waitBetweenTries": 2000
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "95db5ccb-2b67-4d95-8d37-5d0768c1926f",
+      "maxTries": 2,
+      "name": "Fetch Tone Examples",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "method": "GET",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "select",
+              "value": "content,source"
+            },
+            {
+              "name": "client_id",
+              "value": "=eq.{{ $('Generate run_id').first().json.client_id }}"
+            },
+            {
+              "name": "order",
+              "value": "created_at.asc"
+            },
+            {
+              "name": "limit",
+              "value": "5"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/tone_examples"
+      },
+      "position": [
+        1200,
+        -144
+      ],
+      "retryOnFail": true,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "format-evidence-02",
+      "name": "Format Evidence Context",
+      "parameters": {
+        "jsCode": "@file:code/format-evidence-context.js"
+      },
+      "position": [
+        1936,
+        -80
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "generate-run-id-02",
+      "name": "Generate run_id",
+      "parameters": {
+        "jsCode": "@file:code/generate-run-id.js"
+      },
+      "position": [
+        -976,
+        304
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "def75672-bf49-48dd-8456-de10bcabe895",
+      "name": "Has Callback Drafted",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $('Generate run_id').first().json.callback_url }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        2600,
+        400
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "b59a3ebb-98e2-4514-9fd5-278bad61ea54",
+      "name": "Has Callback Skipped",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $('Generate run_id').first().json.callback_url }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        230,
+        -200
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "613c182c-37b3-4331-ad77-c4baf8c61924",
+      "name": "Idea Already Has Asset?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "already-has-asset-check",
+              "leftValue": "={{ $json.id }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "position": [
+        640,
+        112
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3
+    },
+    {
+      "id": "manual-trigger-02",
+      "name": "Manual Trigger",
+      "parameters": {},
+      "position": [
+        -1264,
+        176
+      ],
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1
+    },
+    {
+      "id": "merge-strategy-evidence-02",
+      "name": "Merge Strategy and Evidence",
+      "parameters": {},
+      "position": [
+        2160,
+        16
+      ],
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2
+    },
+    {
+      "id": "need-evidence-02",
+      "name": "Need Evidence?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "e3f4a5b6-7890-12cd-ef01-3456789012cd",
+              "leftValue": "={{ $json.evidence_required }}",
+              "operator": {
+                "operation": "equals",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": "Y"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "position": [
+        1712,
+        16
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "noop-nothing-to-draft-02",
+      "name": "NoOp Nothing to Draft",
+      "parameters": {},
+      "position": [
+        -80,
+        400
+      ],
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1
+    },
+    {
+      "id": "parse-claims-and-gate-02",
+      "name": "Parse Claims and Gate",
+      "parameters": {
+        "jsCode": "@file:code/parse-claims-and-gate.js"
+      },
+      "position": [
+        3952,
+        16
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "parse-editor-output-02",
+      "name": "Parse Editor Output",
+      "parameters": {
+        "jsCode": "@file:code/parse-editor-output.js"
+      },
+      "position": [
+        3280,
+        16
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "parse-strategy-json-02",
+      "name": "Parse Strategy JSON",
+      "parameters": {
+        "jsCode": "@file:code/parse-strategy-json.js"
+      },
+      "position": [
+        1488,
+        16
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "parse-variants-and-prepare-rows-02",
+      "name": "Parse Variants and Prepare Rows",
+      "parameters": {
+        "jsCode": "@file:code/parse-variants-and-prepare-rows.js"
+      },
+      "position": [
+        4400,
+        16
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "parse-writer-output-02",
+      "name": "Parse Writer Output",
+      "parameters": {
+        "jsCode": "@file:code/parse-writer-output.js"
+      },
+      "position": [
+        2832,
+        16
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "prepare-asset-row-02",
+      "name": "Prepare Asset Row",
+      "parameters": {
+        "jsCode": "@file:code/prepare-asset-row.js"
+      },
+      "position": [
+        5440,
+        496
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "7woVA2ycgDGlIipS",
+          "name": "Qwen API"
+        }
+      },
+      "id": "qwen-call-2-writer-02",
+      "name": "Qwen Call 2 Writer",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ $json.prompt_payload }}",
+        "method": "POST",
+        "options": {
+          "timeout": 90000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+      },
+      "position": [
+        2608,
+        16
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "7woVA2ycgDGlIipS",
+          "name": "Qwen API"
+        }
+      },
+      "id": "qwen-call-3-editor-02",
+      "name": "Qwen Call 3 Editor",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ $json.prompt_payload }}",
+        "method": "POST",
+        "options": {
+          "timeout": 90000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+      },
+      "position": [
+        3056,
+        16
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "7woVA2ycgDGlIipS",
+          "name": "Qwen API"
+        }
+      },
+      "id": "qwen-call-4-variants-02",
+      "name": "Qwen Call 4 Variants",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ $json.prompt_payload }}",
+        "method": "POST",
+        "options": {
+          "timeout": 60000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+      },
+      "position": [
+        4176,
+        16
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "0d95d974-f699-4e06-b0b0-84d0877458c8",
+      "name": "Read Assets For Idea",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "idea_id",
+              "value": "=eq.{{ $('Select Target').first().json.idea_id }}"
+            },
+            {
+              "name": "select",
+              "value": "id,created_at"
+            },
+            {
+              "name": "limit",
+              "value": "1"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/assets"
+      },
+      "position": [
+        400,
+        112
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "e278c18e-8a82-431e-a51c-bc5fbea96867",
+      "maxTries": 3,
+      "name": "Read Brand",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "select",
+              "value": "category,priority,audience_scope,key:rule_key,content:instruction"
+            },
+            {
+              "name": "is_active",
+              "value": "eq.true"
+            },
+            {
+              "name": "client_id",
+              "value": "=eq.{{ $('Generate run_id').first().json.client_id }}"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/brand_directives"
+      },
+      "position": [
+        816,
+        16
+      ],
+      "retryOnFail": true,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "95023b87-2bd6-408b-bf15-53295e9424b0",
+      "maxTries": 3,
+      "name": "Read Ideas",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "select",
+              "value": "idea_id:id,client_id,raw_idea,angle,audience,target_trade,pillar,source,source_url,source_title,signals,priority,geo_metro,why,icp_relevance,evidence_required,status,claimed_at,scheduled_for,queue_order,created_at,draft_asset_id"
+            },
+            {
+              "name": "client_id",
+              "value": "=eq.{{ $json.client_id }}"
+            },
+            {
+              "name": "order",
+              "value": "created_at.desc"
+            },
+            {
+              "name": "limit",
+              "value": "2000"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/ideas"
+      },
+      "position": [
+        -752,
+        304
+      ],
+      "retryOnFail": true,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "read-posting-schedule-02",
+      "name": "Read Posting Schedule",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "method": "GET",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "url": "=https://kneafaxwkopodiausljf.supabase.co/rest/v1/posting_schedules?client_id=eq.{{ $('Generate run_id').first().json.client_id }}&select=require_review"
+      },
+      "position": [
+        816,
+        160
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "select-target-02",
+      "name": "Select Target",
+      "parameters": {
+        "jsCode": "@file:code/select-target.js"
+      },
+      "position": [
+        -528,
+        304
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "sQdF1b6damw4h5FH",
+          "name": "Telegram - Leadswave bot"
+        }
+      },
+      "id": "20561c4a-c606-43c9-a7b4-796c0460352b",
+      "name": "Send Telegram Message",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "additionalFields": {
+          "parse_mode": "HTML"
+        },
+        "chatId": "={{ $env.TELEGRAM_ALERT_CHAT_ID || '8224701322' }}",
+        "text": "={{ $json.telegram_payload.text }}"
+      },
+      "position": [
+        8784,
+        80
+      ],
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "webhookId": "1ede522c-c949-44c5-b52c-133e8fe5c359"
+    },
+    {
+      "id": "should-harvest-02",
+      "name": "Should Harvest?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $('Select Target').first().json.reason }}",
+              "operator": {
+                "operation": "notEquals",
+                "type": "string"
+              },
+              "rightValue": "ALREADY_DRAFTED"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        -80,
+        560
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "split-claims-rows-02",
+      "name": "Split Claims Rows",
+      "parameters": {
+        "jsCode": "@file:code/split-claims-rows.js"
+      },
+      "position": [
+        6928,
+        448
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "136712b2-f03d-4492-b394-cb6f69387ed4",
+      "name": "Sync Asset to DB",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=minimal"
+            }
+          ]
+        },
+        "jsonBody": "={{ (() => {\n  const row = $('Prepare Asset Row').first().json;\n  return JSON.stringify({\n    id: row.asset_id,\n    client_id: row.client_id || null,\n    idea_id: row.idea_id || null,\n    title: row.title,\n    slug: row.slug,\n    hook: row.hook,\n    core_argument: row.core_argument,\n    content: row.content_with_hero,\n    audience: row.audience || 'ICP',\n    pillar: 'Operations',\n    target_trade: row.target_trade || null,\n    status: row.status,\n    claims_ok: row.claims_ok,\n    hero_image_url: row.hero_image_url || null,\n    hero_status: row.hero_status || 'READY',\n    hero_error_code: row.hero_error_code || null,\n    hero_provider: row.hero_provider || null,\n    hero_attempts: row.hero_attempts || 0,\n    doc_url: row.doc_url,\n    linkedin_variant: row.li_variant || null,\n    facebook_variant: row.fb_variant || null,\n    x_variant: row.x_variant || null,\n    version: row.version || 1,\n    generation_cost: 0.041,\n    published_at: row.claims_ok === 'Y' ? row.updated_at : null,\n    published_urls: row.published_urls || null,\n    updated_at: row.updated_at\n  });\n})() }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 20000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/assets?on_conflict=id"
+      },
+      "position": [
+        6576,
+        512
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "executeOnce": true,
+      "id": "7c6bb71c-6855-417c-ae42-4e956553bbaa",
+      "name": "Sync Claims to DB",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=minimal"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify($('Split Claims Rows').all().map(i => i.json).filter(c => c && c.claim_id).map(c => ({\n  id: c.claim_id,\n  asset_id: c.asset_id,\n  claim_text: c.claim_text || '',\n  claim_type: c.claim_type || 'ANECDOTE',\n  source: c.source_url || null,\n  verified: c.verified || 'N',\n  confidence_score: c.verified === 'Y' ? 0.95 : 0.5,\n  notes: [c.source_title, c.source_date].filter(Boolean).join(' | ') || null\n}))) }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 20000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/claims?on_conflict=id"
+      },
+      "position": [
+        7200,
+        496
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "d458f83d-c602-469f-bf89-0da276d03a79",
+      "name": "Sync Idea to DB",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=minimal"
+            }
+          ]
+        },
+        "jsonBody": "={{ (() => {\n  const row = $('Prepare Asset Row').first().json;\n  const idea = $('Select Target').first().json || {};\n  return JSON.stringify({\n    id: row.idea_id,\n    client_id: row.client_id || null,\n    raw_idea: idea.raw_idea || row.title,\n    angle: idea.angle || '',\n    audience: row.audience || 'ICP',\n    target_trade: row.target_trade || 'HVAC',\n    pillar: idea.pillar || 'Contractor Realities',\n    source: idea.source || 'HARVESTER',\n    source_url: idea.source_url || null,\n    source_title: idea.source_title || null,\n    signals: idea.signals || [],\n    status: 'REVIEW',\n    priority: idea.priority || 'HIGH',\n    why: idea.why || null,\n    icp_relevance: Number(idea.icp_relevance) || 4,\n    evidence_required: idea.evidence_required || 'N',\n    draft_asset_id: row.asset_id,\n    updated_at: new Date().toISOString()\n  });\n})() }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/ideas?on_conflict=id"
+      },
+      "position": [
+        6304,
+        512
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "target-found-02",
+      "name": "Target Found?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c1d2e3f4-5678-90ab-cdef-1234567890ab",
+              "leftValue": "={{ $json.found }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "position": [
+        -304,
+        304
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "telegram-notification-02",
+      "name": "Telegram Notification",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "jsCode": "@file:code/telegram-notification.js"
+      },
+      "position": [
+        8464,
+        80
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "test-webhook-02",
+      "name": "Test Webhook Trigger",
+      "parameters": {
+        "httpMethod": "POST",
+        "options": {},
+        "path": "test-idea-to-asset"
+      },
+      "position": [
+        -1264,
+        368
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "wh-idea-to-asset-test"
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "trigger-harvest-cascade-02",
+      "name": "Trigger Harvest for Tenant",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "jsonBody": "={{ JSON.stringify({ client_id: $('Generate run_id').first().json.client_id, trigger_source: 'SCHEDULER_CASCADE_EMPTY_QUEUE' }) }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://n8n.getminions.ai/webhook/test-harvester"
+      },
+      "position": [
+        140,
+        560
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "c1a2b3c4-d5e6-4f70-8a9b-1c2d3e4f5a6b",
+      "name": "Validate Social Variants",
+      "parameters": {
+        "jsCode": "@file:code/validate-social-variants.js"
+      },
+      "position": [
+        4624,
+        320
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    }
+  ],
+  "settings": {
+    "binaryMode": "separate",
+    "errorWorkflow": "rVlJXV1SeU9GvAqz",
+    "executionOrder": "v1"
+  }
+}

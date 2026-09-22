@@ -1,0 +1,309 @@
+{
+  "active": false,
+  "connections": {
+    "Create PipelineRun Row": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Trigger Draft for Tenant",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Generate Draft Run": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Create PipelineRun Row",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Read Due Tenants",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Read Due Tenants": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Split Due Tenants",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Schedule_5min": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Read Due Tenants",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Split Due Tenants": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Generate Draft Run",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Trigger Draft for Tenant": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Mark Schedule Run",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "7zbuDfvy3bhJLf3x",
+  "name": "00b_posting_scheduler_dispatcher",
+  "nodes": [
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "create-pipeline-run",
+      "name": "Create PipelineRun Row",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({ id: $json.run_id, client_id: $json.client_id, type: 'DRAFT', status: 'RUNNING' }) }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/pipeline_runs"
+      },
+      "position": [
+        96,
+        88
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "generate-draft-run",
+      "name": "Generate Draft Run",
+      "parameters": {
+        "jsCode": "@file:code/generate-draft-run.js"
+      },
+      "position": [
+        -128,
+        88
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "manual-dispatcher-b",
+      "name": "Manual Trigger",
+      "parameters": {},
+      "position": [
+        -800,
+        176
+      ],
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "mark-schedule-run",
+      "name": "Mark Schedule Run",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({ last_run_at: new Date().toISOString() }) }}",
+        "method": "PATCH",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "=https://kneafaxwkopodiausljf.supabase.co/rest/v1/posting_schedules?client_id=eq.{{ $('Generate Draft Run').item.json.client_id }}"
+      },
+      "position": [
+        544,
+        88
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "read-due-tenants",
+      "name": "Read Due Tenants",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "GET",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "url": "https://minions.getminions.ai/api/internal/schedule/eligible-tenants"
+      },
+      "position": [
+        -576,
+        88
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "schedule-dispatcher-b",
+      "name": "Schedule_5min",
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "position": [
+        -800,
+        0
+      ],
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "split-due-tenants",
+      "name": "Split Due Tenants",
+      "parameters": {
+        "jsCode": "@file:code/split-due-tenants.js"
+      },
+      "position": [
+        -352,
+        88
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "trigger-draft-per-tenant",
+      "maxTries": 2,
+      "name": "Trigger Draft for Tenant",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "jsonBody": "={{ JSON.stringify({ client_id: $('Generate Draft Run').item.json.client_id, run_id: $('Generate Draft Run').item.json.run_id, callback_url: $('Generate Draft Run').item.json.callback_url, callback_secret: $env.BLOG_API_SECRET, trigger_source: 'POSTING_SCHEDULER' }) }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://n8n.getminions.ai/webhook/test-idea-to-asset"
+      },
+      "position": [
+        320,
+        88
+      ],
+      "retryOnFail": true,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "waitBetweenTries": 3000
+    }
+  ],
+  "settings": {
+    "errorWorkflow": "rVlJXV1SeU9GvAqz",
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  }
+}

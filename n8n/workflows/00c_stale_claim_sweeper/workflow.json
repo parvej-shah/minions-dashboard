@@ -1,0 +1,252 @@
+{
+  "active": true,
+  "connections": {
+    "Any Rows Reset?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Format Sweep Alert",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "NoOp Nothing Stale",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Compute Cutoff": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Reset Stale Claims",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Format Sweep Alert": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Send Sweep Alert",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Reset Stale Claims": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Any Rows Reset?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Schedule_Every_15min": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Compute Cutoff",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "49yAgdBe5IeO729r",
+  "name": "00c_stale_claim_sweeper",
+  "nodes": [
+    {
+      "id": "check-any-reset-00c",
+      "name": "Any Rows Reset?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "any-reset",
+              "leftValue": "={{ $json.id }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "position": [
+        320,
+        0
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "compute-cutoff-00c",
+      "name": "Compute Cutoff",
+      "parameters": {
+        "jsCode": "@file:code/compute-cutoff.js"
+      },
+      "position": [
+        -160,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "format-sweep-alert-00c",
+      "name": "Format Sweep Alert",
+      "parameters": {
+        "jsCode": "@file:code/format-sweep-alert.js"
+      },
+      "position": [
+        560,
+        -100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "noop-nothing-stale-00c",
+      "name": "NoOp Nothing Stale",
+      "parameters": {},
+      "position": [
+        560,
+        100
+      ],
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1
+    },
+    {
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "reset-stale-claims-00c",
+      "name": "Reset Stale Claims",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({status:'HARVESTED', claimed_at: null, claimed_by_run_id: null}) }}",
+        "method": "PATCH",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "status",
+              "value": "eq.PICKED"
+            },
+            {
+              "name": "draft_asset_id",
+              "value": "is.null"
+            },
+            {
+              "name": "claimed_at",
+              "value": "=lt.{{ $json.cutoff }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "sendQuery": true,
+        "specifyBody": "json",
+        "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/ideas"
+      },
+      "position": [
+        80,
+        0
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "schedule-sweep-00c",
+      "name": "Schedule_Every_15min",
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "position": [
+        -400,
+        0
+      ],
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2
+    },
+    {
+      "credentials": {
+        "telegramApi": {
+          "id": "sQdF1b6damw4h5FH",
+          "name": "Telegram - Leadswave bot"
+        }
+      },
+      "id": "send-sweep-alert-00c",
+      "name": "Send Sweep Alert",
+      "parameters": {
+        "additionalFields": {
+          "parse_mode": "HTML"
+        },
+        "chatId": "={{ $env.TELEGRAM_ALERT_CHAT_ID || '8224701322' }}",
+        "text": "={{ $json.text }}"
+      },
+      "position": [
+        800,
+        -100
+      ],
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "webhookId": "1b065956-820a-49c1-a5cc-a7fb20a45748"
+    }
+  ],
+  "settings": {
+    "errorWorkflow": "rVlJXV1SeU9GvAqz"
+  }
+}
