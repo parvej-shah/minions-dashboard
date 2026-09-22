@@ -65,6 +65,7 @@ Every rule exists because the problem it catches shipped at least once.
 | `missing-error-workflow` | Active workflows with no error workflow | 00 and 01 failures left runs RUNNING with no alert |
 | `unchecked-write` | Writes with `neverError` and no status check after | A rejected asset write reported success for a full day |
 | `prompt-outside-repo` | Model calls not fed by a `Render … Prompt` node, or prompt text in a Code node | Prompts lived in n8n where no review or test could see them |
+| `credential-to-dynamic-url` | A credential sent to a URL whose host comes from the request | 04's hero attach took its host from the public webhook body |
 | `code-syntax` | Code nodes that do not parse | Only surfaced when a live run reached the node |
 | `disabled-node` | Disabled nodes | Git keeps the history; delete instead |
 

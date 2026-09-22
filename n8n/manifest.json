@@ -272,12 +272,6 @@
     {
       "rule": "unchecked-write",
       "workflow": "03_review_publisher",
-      "node": "Mark_Asset_Published_DB",
-      "reason": "OPEN RISK: if this fails, published_at stays null and the 5-min poll re-posts the asset to Facebook and LinkedIn."
-    },
-    {
-      "rule": "unchecked-write",
-      "workflow": "03_review_publisher",
       "node": "Publish_to_Blog",
       "reason": "OPEN RISK: a failed hosted-blog upsert is still marked published."
     },

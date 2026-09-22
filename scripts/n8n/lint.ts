@@ -183,6 +183,28 @@ const RULES: Record<string, (w: Workflow, entry: ManifestWorkflow, all: Workflow
     return findings;
   },
 
+  /**
+   * A node that carries an n8n credential must call a fixed host. The
+   * pipeline's webhooks are public, so a host taken from the request body
+   * would let any caller have n8n send the credential to their own server.
+   */
+  "credential-to-dynamic-url": (w, e) =>
+    w.nodes
+      .filter(
+        (n) =>
+          n.type.endsWith(".httpRequest") &&
+          Object.keys(n.credentials || {}).length > 0 &&
+          !!n.parameters.authentication &&
+          n.parameters.authentication !== "none"
+      )
+      .filter((n) => !/^=?https:\/\/[a-z0-9.-]+\//i.test(String(n.parameters.url || "")))
+      .map((n) => ({
+        rule: "credential-to-dynamic-url",
+        workflow: e.slug,
+        node: n.name,
+        message: `Sends a credential to a URL whose host is not fixed (${String(n.parameters.url).slice(0, 60)}).`,
+      })),
+
   "disabled-node": (w, e) =>
     w.nodes
       .filter((n) => n.disabled)

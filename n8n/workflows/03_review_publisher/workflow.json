@@ -58,7 +58,36 @@
         [
           {
             "index": 0,
+            "node": "Claim_Asset_For_Publish",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Claim_Asset_For_Publish": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Claim_Landed",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Claim_Landed": {
+      "main": [
+        [
+          {
+            "index": 0,
             "node": "Resolve_Blog_Channel",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Skip_Already_Claimed",
             "type": "main"
           }
         ]
@@ -168,6 +197,17 @@
       ]
     },
     "Mark_Asset_Published_DB": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Mark_Write_OK",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Mark_Write_OK": {
       "main": [
         [
           {
@@ -535,6 +575,88 @@
       "typeVersion": 2
     },
     {
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "sQt3isqpmX7GM210",
+          "name": "Supabase Minions (service role)"
+        }
+      },
+      "id": "af190bdd-559e-5cc2-9fe9-8326f72c8f49",
+      "name": "Claim_Asset_For_Publish",
+      "notes": "Compare-and-set claim BEFORE posting: only a row still unpublished is updated. A second run (the 5-min poll racing an Approve click, or a retry after a failed final write) gets an empty body and skips, so an asset is never posted twice.",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({ published_at: new Date().toISOString(), updated_at: new Date().toISOString() }) }}",
+        "method": "PATCH",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 20000
+        },
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "url": "=https://kneafaxwkopodiausljf.supabase.co/rest/v1/assets?id=eq.{{ $json.asset_id }}&status=eq.PUBLISHED&published_at=is.null"
+      },
+      "position": [
+        1120,
+        100
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "2c0bafb0-0ff3-588d-bd9d-de07e7b694a5",
+      "name": "Claim_Landed",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "claim-landed",
+              "leftValue": "={{ $json.statusCode === 200 && Array.isArray($json.body) && $json.body.length === 1 }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": true
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "position": [
+        1340,
+        100
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2
+    },
+    {
       "alwaysOutputData": true,
       "id": "comment-fb",
       "name": "Comment_Blog_Link_on_FB",
@@ -832,6 +954,19 @@
       ],
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2
+    },
+    {
+      "id": "1f798407-3213-5562-b08f-547c3a7d89b2",
+      "name": "Mark_Write_OK",
+      "parameters": {
+        "jsCode": "@file:code/mark-write-ok.js"
+      },
+      "position": [
+        2100,
+        160
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
     },
     {
       "id": "b1b1b1b1-1111-4111-8111-111111111111",
@@ -1301,6 +1436,17 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "webhookId": "43425695-fc9c-4208-a232-a6fd34d9c5ba"
+    },
+    {
+      "id": "06cdb185-34be-5cc8-a8c5-d5f22c7fd71b",
+      "name": "Skip_Already_Claimed",
+      "parameters": {},
+      "position": [
+        1560,
+        280
+      ],
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1
     },
     {
       "id": "d5e6f7a8-9b0c-4d1e-2f3a-4b5c6d7e8f90",

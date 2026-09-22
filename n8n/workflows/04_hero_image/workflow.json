@@ -142,18 +142,22 @@
   "nodes": [
     {
       "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
       "id": "hero-attach-04",
       "name": "Attach Hero to Asset",
       "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "headerParameters": {
           "parameters": [
             {
               "name": "Content-Type",
               "value": "application/json"
-            },
-            {
-              "name": "X-Webhook-Secret",
-              "value": "={{ $json.callback_secret }}"
             }
           ]
         },
@@ -171,7 +175,7 @@
         "sendBody": true,
         "sendHeaders": true,
         "specifyBody": "json",
-        "url": "={{ $json.app_url }}/api/internal/assets/hero"
+        "url": "https://minions.getminions.ai/api/internal/assets/hero"
       },
       "position": [
         1260,

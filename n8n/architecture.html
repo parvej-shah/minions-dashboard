@@ -286,7 +286,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
 <tr><td><code>00c_pipeline_error_alert</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">error trigger</span></div></td><td class="num">5</td><td>—</td></tr>
 <tr><td><code>01_idea_harvester</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">manual</span> <span class="chip">webhook /test-harvester</span></div></td><td class="num">40</td><td>✓</td></tr>
 <tr><td><code>02_idea_to_asset</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">manual</span> <span class="chip">webhook /test-idea-to-asset</span></div></td><td class="num">52</td><td>✓</td></tr>
-<tr><td><code>03_review_publisher</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">every 5 min</span> <span class="chip">webhook /publish-approved-asset</span></div><div style="margin-top:4px">Every 5 min: safety-net poll for approved assets the webhook missed.</div></td><td class="num">34</td><td>✓</td></tr>
+<tr><td><code>03_review_publisher</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">every 5 min</span> <span class="chip">webhook /publish-approved-asset</span></div><div style="margin-top:4px">Every 5 min: safety-net poll for approved assets the webhook missed.</div></td><td class="num">38</td><td>✓</td></tr>
 <tr><td><code>04_hero_image</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">webhook /hero-image</span></div></td><td class="num">12</td><td>✓</td></tr>
 </tbody></table></div>
 </section>
@@ -800,7 +800,7 @@ Aesthetic Style: The exact editorial standard of a modern SaaS/dev-tools blog (S
 
 <!-- ============ PUBLISH ============ -->
 <section id="publish">
-  <div class="sec-head"><h2>03 · Review publisher</h2><p><code>4GNbfvmveKtbJrVd</code> · 34 nodes No model calls. It publishes what a human approved.</p></div>
+  <div class="sec-head"><h2>03 · Review publisher</h2><p><code>4GNbfvmveKtbJrVd</code> · 38 nodes No model calls. It publishes what a human approved.</p></div>
   <div class="wfblock">
     <ol class="steps">
       <li class="io"><b>Read Approved Assets</b>: <code>claims_ok=Y · status=PUBLISHED · published_at is null</code>, oldest first, 3 at a time. The webhook and the 5-minute cron run the same query.</li>
@@ -976,7 +976,6 @@ Return ONLY a single valid JSON object (no markdown, no explanation):
 <div class="f"><span class="sev md">Open</span><div><h4>01_idea_harvester › Sync Refined Ideas to DB</h4><p>a rejected upsert leaves the idea at NEW with no alert.</p></div></div>
 <div class="f"><span class="sev md">Open</span><div><h4>02_idea_to_asset › Sync Idea to DB</h4><p>the idea may stay PICKED while its asset exists; the sweeper does not release it because draft_asset_id is unset.</p></div></div>
 <div class="f"><span class="sev md">Open</span><div><h4>02_idea_to_asset › Sync Claims to DB</h4><p>claims can be lost while the draft reports COMPLETED.</p></div></div>
-<div class="f"><span class="sev md">Open</span><div><h4>03_review_publisher › Mark_Asset_Published_DB</h4><p>if this fails, published_at stays null and the 5-min poll re-posts the asset to Facebook and LinkedIn.</p></div></div>
 <div class="f"><span class="sev md">Open</span><div><h4>03_review_publisher › Publish_to_Blog</h4><p>a failed hosted-blog upsert is still marked published.</p></div></div>
 <div class="f"><span class="sev md">Open</span><div><h4>03_review_publisher › Publish_to_LinkedIn</h4><p>a failed LinkedIn post is still marked published, with linkedin_post_id null.</p></div></div></div>
 </section>
