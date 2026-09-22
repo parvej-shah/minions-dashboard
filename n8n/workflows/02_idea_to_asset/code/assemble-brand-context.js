@@ -53,6 +53,11 @@ return [{
     brand_teal: brand.brand_teal || '#0E5C63',
     brand_coral: brand.brand_coral || '#FF6B4A',
     primary_ink: brand.primary_ink || '#12242A',
+    // Read by Parse Variants for the cover's background and corner icon. They
+    // were never passed on, so every cover used hardcoded colors while the
+    // Brand look editor previewed the tenant's own.
+    brand_cream: brand.brand_cream || '#FFF8F0',
+    accent_blue: brand.accent_blue || '#3A6EA5',
     visual_assets: brand.visual_assets || {},
     tone_questionnaire: brand.tone_questionnaire || null,
     tone_examples: toneRows.slice(0, 5).map(row => row.content),

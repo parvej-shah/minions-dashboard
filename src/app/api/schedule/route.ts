@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
+import { refuseOnboardingOverwrite } from "@/lib/onboardingGuard";
 
 const CADENCE_TYPES = ["DAILY", "EVERY_N_DAYS", "DAYS_OF_WEEK"] as const;
 const TIME_RE = /^([01]?\d|2[0-3]):[0-5]\d$/;
@@ -60,6 +61,13 @@ export async function PATCH(request: Request) {
 
   try {
     const body = await request.json();
+
+    // Shared with the Brand/Settings pages; only the onboarding wizard's writes
+    // (flagged from_onboarding) are refused for an established workspace.
+    if (body.from_onboarding === true) {
+      const refused = await refuseOnboardingOverwrite(ctx.clientId);
+      if (refused) return refused;
+    }
 
     const cadenceType = (body.cadence_type || "").toString().trim();
     if (!CADENCE_TYPES.includes(cadenceType as (typeof CADENCE_TYPES)[number])) {

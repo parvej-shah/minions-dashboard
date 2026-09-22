@@ -5,6 +5,7 @@ import { requireRealTenantUser } from "@/lib/tenant";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { generateBrandSuggestionsWithLLM, type AiSuggestions } from "@/lib/ai/brandCopilot";
 import { fetchWebsiteContext } from "@/lib/ai/websiteContext";
+import { refuseOnboardingOverwrite } from "@/lib/onboardingGuard";
 
 /**
  * LinkedIn Voice & Profile Importer:
@@ -27,6 +28,10 @@ export type { AiSuggestions };
 export async function POST(request: Request) {
   const ctx = await requireRealTenantUser(true);
   if ("error" in ctx) return ctx.error;
+
+  // Onboarding rewrites the whole brand; never let it run over an established workspace.
+  const refused = await refuseOnboardingOverwrite(ctx.clientId);
+  if (refused) return refused;
 
   try {
     const body = await request.json().catch(() => ({}));

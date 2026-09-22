@@ -16,6 +16,8 @@ const LEGACY_VOICE_DESCRIPTIONS = new Set([
 ]);
 
 export interface OnboardingWizardState {
+  /** True when this workspace is already onboarded; the wizard must not run. */
+  alreadySetUp: boolean;
   step: number;
   setStep: (step: number) => void;
 
@@ -127,6 +129,17 @@ export function useOnboardingWizard(): OnboardingWizardState {
     setBusinessNameRaw(val);
     setBusinessNameFromLinkedIn(false); // user manually edited — clear flag
   }
+
+  // An established workspace must not be re-onboarded: the wizard rewrites
+  // the whole brand. The write routes refuse it too; this just says so before
+  // the user fills in every step.
+  const [alreadySetUp, setAlreadySetUp] = useState(false);
+  useEffect(() => {
+    apiClient
+      .get<{ established: boolean }>("/api/onboarding/status")
+      .then((res) => setAlreadySetUp(res.established === true))
+      .catch(() => {});
+  }, []);
 
   // Restore draft state from localStorage on mount
   useEffect(() => {
@@ -437,6 +450,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
               content: dir.instruction,
               priority: dir.priority,
               audience_scope: "ALL",
+              from_onboarding: true,
             });
           } catch (e) {
             failures.push(dir.rule_key);
@@ -456,6 +470,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         times_of_day: ["09:00"],
         require_review: publishingMode === "review",
         is_active: true,
+        from_onboarding: true,
       });
 
       let harvestRunId: string | undefined;
@@ -484,6 +499,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
   }
 
   return {
+    alreadySetUp,
     step,
     setStep,
     businessName,

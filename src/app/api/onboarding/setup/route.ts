@@ -6,6 +6,7 @@ import { DISTRIBUTION_CHANNELS } from "@/constants/channels";
 import { BRAND_PRESETS } from "@/constants/brandPresets";
 import { resolveWriterExpertise } from "@/constants/writerExpertise";
 import { normalizeDomain } from "@/constants/config";
+import { refuseOnboardingOverwrite } from "@/lib/onboardingGuard";
 
 /**
  * ICP/industry/tone-formality/channel step of onboarding. Writes:
@@ -17,6 +18,10 @@ import { normalizeDomain } from "@/constants/config";
 export async function POST(request: Request) {
   const ctx = await requireTenantAccess(true);
   if ("error" in ctx) return ctx.error;
+
+  // Onboarding rewrites the whole brand; never let it run over an established workspace.
+  const refused = await refuseOnboardingOverwrite(ctx.clientId);
+  if (refused) return refused;
 
   try {
     const body = await request.json();

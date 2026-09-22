@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { toDirectiveDTO } from "@/lib/mappers/directive";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
+import { refuseOnboardingOverwrite } from "@/lib/onboardingGuard";
 
 export async function GET() {
   const ctx = await requireClientId();
@@ -26,6 +27,13 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
+
+    // Shared with the Brand/Settings pages; only the onboarding wizard's writes
+    // (flagged from_onboarding) are refused for an established workspace.
+    if (body.from_onboarding === true) {
+      const refused = await refuseOnboardingOverwrite(ctx.clientId);
+      if (refused) return refused;
+    }
     if (!body.category || !body.key || !body.content) {
       return apiFailure("category, key, and content are required", 400);
     }

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { runCodeNode, workflowNodes } from "./harness";
+import { readCode, runCodeNode, workflowNodes } from "./harness";
+import { SCENARIOS } from "./scenarios";
 import { brandContext, harvestContext } from "./fixtures";
 import { thesisKey, isRedundantThesis } from "@/lib/thesis";
 import { verbatimGuard } from "@/lib/ai/craftExtract";
@@ -145,5 +146,45 @@ describe("n8n -> dashboard callbacks", () => {
     // The route rejects READY without an https URL; an expiring provider URL must never be sent as READY.
     if (out.hero_status === "READY") expect(String(out.hero_image_url)).toMatch(/^https:\/\/r2\.example/);
     else expect(out.hero_image_url).toBeNull();
+  });
+});
+
+describe("02_idea_to_asset: fields read from Assemble Brand Context", () => {
+  // Parse Variants read brand_cream and accent_blue from this node, which never
+  // output them, so every cover silently fell back to hardcoded colors while
+  // the Brand look editor previewed the tenant's own.
+  it("every field a later node reads is one the node actually outputs", async () => {
+    const slug = "02_idea_to_asset";
+    const reads = new Set<string>();
+    for (const n of workflowNodes(slug)) {
+      if (typeof n.parameters.jsCode !== "string" || n.name === "Assemble Brand Context") continue;
+      const code = readCode(slug, n.name);
+      const direct = /\$\('Assemble Brand Context'\)\.first\(\)\??\.json\??\.(\w+)/g;
+      for (const m of code.matchAll(direct)) reads.add(m[1]);
+      if (/brandCtx\s*=\s*\$\('Assemble Brand Context'\)/.test(code)) {
+        for (const m of code.matchAll(/brandCtx\.(\w+)/g)) reads.add(m[1]);
+      }
+    }
+    const strategist = SCENARIOS.find((s) => s.stage === "strategist")!;
+    const [out] = await runCodeNode(slug, "Assemble Brand Context", strategist.opts);
+    const missing = [...reads].filter((k) => !(k in out));
+    expect(reads.size).toBeGreaterThan(5);
+    expect(missing, `read downstream but never output: ${missing.join(", ")}`).toEqual([]);
+  });
+
+  it("the tenant's cover colors reach cover_inputs", async () => {
+    const strategist = SCENARIOS.find((s) => s.stage === "strategist")!;
+    const profile = { ...(strategist.opts.nodes!["Fetch Brand Context"][0]), brand_cream: "#ABCDEF", accent_blue: "#123456" };
+    const [assembled] = await runCodeNode("02_idea_to_asset", "Assemble Brand Context", {
+      nodes: { ...strategist.opts.nodes, "Fetch Brand Context": [profile] },
+    });
+    const cover = SCENARIOS.find((s) => s.name === "cover-strategist-scene")!;
+    const [out] = await runCodeNode("02_idea_to_asset", "Parse Variants and Prepare Rows", {
+      ...cover.opts,
+      nodes: { ...cover.opts.nodes, "Assemble Brand Context": [assembled] },
+    });
+    const colors = (out.cover_inputs as { colors: Record<string, string> }).colors;
+    expect(colors.brand_cream).toBe("#ABCDEF");
+    expect(colors.accent_blue).toBe("#123456");
   });
 });

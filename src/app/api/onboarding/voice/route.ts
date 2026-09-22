@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
+import { refuseOnboardingOverwrite } from "@/lib/onboardingGuard";
 
 /**
  * Voice-test step: structured questionnaire + 1-5 pasted example posts.
@@ -11,6 +12,10 @@ import { requireClientId } from "@/lib/tenant";
 export async function POST(request: Request) {
   const ctx = await requireClientId();
   if ("error" in ctx) return ctx.error;
+
+  // Onboarding rewrites the whole brand; never let it run over an established workspace.
+  const refused = await refuseOnboardingOverwrite(ctx.clientId);
+  if (refused) return refused;
 
   try {
     const body = await request.json();

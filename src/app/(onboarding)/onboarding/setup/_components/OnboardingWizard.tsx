@@ -4,7 +4,8 @@ import { useOnboardingWizard, ONBOARDING_STEPS } from "@/hooks/useOnboardingWiza
 import StepCompanySnapshot from "./StepCompanySnapshot";
 import StepLinkedInVoice from "./StepLinkedInVoice";
 import StepBrandInterview from "./StepBrandInterview";
-import { Sparkles } from "lucide-react";
+import Link from "next/link";
+import { Sparkles, ShieldCheck } from "lucide-react";
 
 function ProgressHeader({ step }: { step: number }) {
   return (
@@ -46,6 +47,36 @@ function ProgressHeader({ step }: { step: number }) {
   );
 }
 
+/** Shown instead of the wizard when this workspace has already been onboarded. */
+function AlreadySetUp() {
+  return (
+    <div className="rounded-2xl border border-[#1F2D3D] bg-[#0F1419] p-5 sm:p-6 space-y-3">
+      <div className="flex items-center gap-2 text-[#00C9A7]">
+        <ShieldCheck className="w-5 h-5 shrink-0" />
+        <h2 className="text-base sm:text-lg font-bold text-[#F1F5F9]">This workspace is already set up</h2>
+      </div>
+      <p className="text-sm text-[#94A3B8] leading-relaxed">
+        Running onboarding again would replace its brand, voice examples, directives and posting schedule.
+        Change any of those in Brand settings instead.
+      </p>
+      <div className="flex flex-col sm:flex-row gap-2 pt-1">
+        <Link
+          href="/brand"
+          className="inline-flex justify-center items-center px-4 py-2 rounded-xl bg-[#00C9A7] text-[#070B0F] text-sm font-bold hover:bg-[#00A88A] transition-colors"
+        >
+          Open Brand settings
+        </Link>
+        <Link
+          href="/ideas"
+          className="inline-flex justify-center items-center px-4 py-2 rounded-xl border border-[#1F2D3D] text-sm font-semibold text-[#F1F5F9] hover:bg-[#161D26] transition-colors"
+        >
+          Go to Ideas
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export default function OnboardingWizard() {
   const wizard = useOnboardingWizard();
 
@@ -66,15 +97,21 @@ export default function OnboardingWizard() {
           </p>
         </div>
 
-        {/* Progress Tracker */}
-        <ProgressHeader step={wizard.step} />
+        {wizard.alreadySetUp ? (
+          <AlreadySetUp />
+        ) : (
+          <>
+            {/* Progress Tracker */}
+            <ProgressHeader step={wizard.step} />
 
-        {/* Step Container */}
-        <div>
-          {wizard.step === 0 && <StepCompanySnapshot wizard={wizard} />}
-          {wizard.step === 1 && <StepBrandInterview wizard={wizard} />}
-          {wizard.step === 2 && <StepLinkedInVoice wizard={wizard} />}
-        </div>
+            {/* Step Container */}
+            <div>
+              {wizard.step === 0 && <StepCompanySnapshot wizard={wizard} />}
+              {wizard.step === 1 && <StepBrandInterview wizard={wizard} />}
+              {wizard.step === 2 && <StepLinkedInVoice wizard={wizard} />}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
