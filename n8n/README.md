@@ -44,6 +44,13 @@ therefore changes a golden file, and that diff is what gets reviewed:
 UPDATE_GOLDEN=1 npx vitest run src/test/n8n
 ```
 
+## Architecture page
+
+`n8n/architecture.html` is generated: `npm run n8n:docs`. Prompts, models,
+triggers, node counts, fragments and open risks come from the source; the
+narrative lives in `scripts/n8n/docs-template.html`. CI fails if the page is
+stale, or if a prompt stage has no place on it.
+
 ## Lint rules
 
 Every rule exists because the problem it catches shipped at least once.

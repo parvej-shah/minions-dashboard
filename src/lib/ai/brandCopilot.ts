@@ -30,6 +30,9 @@ export interface GeneratedDirective {
   priority: number;
 }
 
+/** Model settings for both onboarding calls (single user message, no system prompt). */
+export const ONBOARDING_MODEL = { model: "qwen-plus", temperature: 0.7, max_tokens: 800 } as const;
+
 async function callQwen(prompt: string, timeoutMs = DEFAULT_TIMEOUT_MS): Promise<string | null> {
   const apiKey = process.env.DASHSCOPE_API_KEY;
   if (!apiKey) return null;
@@ -45,10 +48,10 @@ async function callQwen(prompt: string, timeoutMs = DEFAULT_TIMEOUT_MS): Promise
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "qwen-plus",
+        model: ONBOARDING_MODEL.model,
         messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-        max_tokens: 800,
+        temperature: ONBOARDING_MODEL.temperature,
+        max_tokens: ONBOARDING_MODEL.max_tokens,
       }),
       signal: controller.signal,
     });
@@ -102,7 +105,8 @@ export interface BrandSuggestionInput {
  * just the business name and industry typed in Step 1. Falls back to `null`
  * so callers can drop back to the static INDUSTRY_SUGGESTIONS map.
  */
-export async function generateBrandSuggestionsWithLLM(input: BrandSuggestionInput): Promise<AiSuggestions | null> {
+/** The onboarding suggestion-chip prompt. Exported so the architecture docs render the real text. */
+export function buildBrandSuggestionsPrompt(input: BrandSuggestionInput): string {
   const postsContext =
     input.postSamples && input.postSamples.length > 0
       ? input.postSamples.slice(0, 3).map((p, i) => `Sample ${i + 1}: "${p.slice(0, 400)}"`).join("\n")
@@ -134,7 +138,11 @@ Return ONLY a single valid JSON object (no markdown, no explanation, no fake com
   "differentiators": ["diff 1", "diff 2", "diff 3"],
   "avoids": ["avoid 1", "avoid 2", "avoid 3"]
 }`;
+  return prompt;
+}
 
+export async function generateBrandSuggestionsWithLLM(input: BrandSuggestionInput): Promise<AiSuggestions | null> {
+  const prompt = buildBrandSuggestionsPrompt(input);
   const raw = await callQwen(prompt);
   const parsed = parseJsonResponse<Partial<AiSuggestions>>(raw);
   if (
@@ -180,9 +188,8 @@ const VALID_CATEGORIES = new Set(["POSITIONING", "VOICE", "FORBIDDEN", "TOPICS"]
  * than the fixed sentence templates in `api/onboarding/brand-copilot/route.ts`.
  * Falls back to `null` so the caller can use those templates instead.
  */
-export async function generateBrandDirectivesWithLLM(
-  input: BrandDirectiveInput
-): Promise<{ directives: GeneratedDirective[]; positioningSummary: string } | null> {
+/** The onboarding brand-directives prompt. Exported so the architecture docs render the real text. */
+export function buildBrandDirectivesPrompt(input: BrandDirectiveInput): string {
   const prompt = `You are a world-class editorial strategist setting up a brand's content guardrails during onboarding.
 
 Business: ${input.businessName}
@@ -206,6 +213,13 @@ Return ONLY a single valid JSON object (no markdown, no explanation):
     { "category": "POSITIONING", "rule_key": "short_snake_case_key", "instruction": "...", "priority": 1 }
   ]
 }`;
+  return prompt;
+}
+
+export async function generateBrandDirectivesWithLLM(
+  input: BrandDirectiveInput
+): Promise<{ directives: GeneratedDirective[]; positioningSummary: string } | null> {
+  const prompt = buildBrandDirectivesPrompt(input);
 
   // Heavier structured-output prompt than the suggestion-chip call; give it
   // more headroom before falling back to the template -- onboarding's

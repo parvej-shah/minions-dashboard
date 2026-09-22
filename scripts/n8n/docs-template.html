@@ -1,0 +1,506 @@
+<title>Minions Content Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F4F7F8; --surface:#FFFFFF; --sunk:#EAF0F2; --line:#D5DFE4; --line-2:#C2CFD6;
+  --text:#0E1B23; --muted:#46586A; --dim:#6A7B8B;
+  --teal:#00806F; --teal-soft:rgba(0,128,111,.10); --coral:#C9482A; --coral-soft:rgba(201,72,42,.10);
+  --amber:#A15C07; --amber-soft:rgba(161,92,7,.11); --blue:#2458D6; --blue-soft:rgba(36,88,214,.10);
+  --violet:#6D4ED8; --violet-soft:rgba(109,78,216,.10);
+  --var:#0B6FA8;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#070B0F; --surface:#0F1419; --sunk:#0A0F14; --line:#1F2D3D; --line-2:#2A3B4E;
+  --text:#F1F5F9; --muted:#A3B1C2; --dim:#6B7C8F;
+  --teal:#00C9A7; --teal-soft:rgba(0,201,167,.12); --coral:#FF6B4A; --coral-soft:rgba(255,107,74,.12);
+  --amber:#F59E0B; --amber-soft:rgba(245,158,11,.12); --blue:#5B8CFF; --blue-soft:rgba(91,140,255,.12);
+  --violet:#A78BFA; --violet-soft:rgba(167,139,250,.12); --var:#7DD3FC;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#070B0F; --surface:#0F1419; --sunk:#0A0F14; --line:#1F2D3D; --line-2:#2A3B4E;
+  --text:#F1F5F9; --muted:#A3B1C2; --dim:#6B7C8F;
+  --teal:#00C9A7; --teal-soft:rgba(0,201,167,.12); --coral:#FF6B4A; --coral-soft:rgba(255,107,74,.12);
+  --amber:#F59E0B; --amber-soft:rgba(245,158,11,.12); --blue:#5B8CFF; --blue-soft:rgba(91,140,255,.12);
+  --violet:#A78BFA; --violet-soft:rgba(167,139,250,.12); --var:#7DD3FC;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.55;padding-inline:20px;padding-block:0 80px}
+.wrap{max-width:1120px;margin:0 auto}
+a{color:var(--teal)}
+code,.mono{font-family:var(--mono);font-size:.86em}
+h1,h2,h3,h4{text-wrap:balance;margin:0;line-height:1.2}
+p{margin:0}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:4px}
+
+/* header */
+header{padding-block:48px 28px;border-bottom:1px solid var(--line);display:grid;gap:18px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal)}
+h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em}
+.lede{max-width:70ch;color:var(--muted);font-size:16.5px}
+.facts{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:var(--mono);font-size:12.5px;color:var(--dim)}
+.facts b{color:var(--text);font-weight:600}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+nav.toc a{font-family:var(--mono);font-size:12px;text-decoration:none;color:var(--muted);border:1px solid var(--line);padding:5px 10px;border-radius:999px;background:var(--surface)}
+nav.toc a:hover{color:var(--text);border-color:var(--line-2)}
+
+section{padding-block:44px 8px}
+.sec-head{display:grid;gap:8px;margin-bottom:22px}
+h2{font-size:24px;font-weight:650;letter-spacing:-.01em}
+.sec-head p{color:var(--muted);max-width:72ch}
+
+/* pipeline map */
+.map{display:grid;gap:0}
+.row{display:grid;grid-template-columns:200px 1fr 250px;gap:18px;align-items:stretch;position:relative}
+.row + .row{margin-top:0}
+.trig{font-family:var(--mono);font-size:12px;color:var(--muted);padding-top:18px;display:grid;gap:6px;align-content:start;text-align:right}
+.trig .t{display:inline-block;justify-self:end;border:1px dashed var(--line-2);padding:3px 8px;border-radius:6px;background:var(--surface)}
+.spine{position:relative;padding-left:34px;padding-block:10px}
+.spine::before{content:"";position:absolute;left:12px;top:0;bottom:0;width:2px;background:var(--line-2)}
+.row:first-child .spine::before{top:28px}
+.row:last-child .spine::before{bottom:calc(100% - 28px)}
+.dot{position:absolute;left:5px;top:22px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:2px solid var(--c,var(--teal))}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px}
+.stage h3{font-size:16px;font-weight:650;display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+.stage h3 .wf{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--dim)}
+.stage p{color:var(--muted);font-size:14px}
+.stage.human{border-style:dashed;background:transparent}
+.writes{padding-top:18px;display:grid;gap:6px;align-content:start;font-size:12.5px}
+.w{font-family:var(--mono);display:flex;gap:6px;align-items:baseline;color:var(--muted)}
+.w .arrow{color:var(--dim)}
+.w b{color:var(--text);font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.chip{font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:5px;background:var(--sunk);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.chip.llm{background:var(--violet-soft);border-color:transparent;color:var(--violet)}
+.chip.img{background:var(--coral-soft);border-color:transparent;color:var(--coral)}
+.chip.off{background:var(--amber-soft);border-color:transparent;color:var(--amber)}
+.chip.ok{background:var(--teal-soft);border-color:transparent;color:var(--teal)}
+
+.ops{margin-top:22px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.op{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--surface);display:grid;gap:4px;align-content:start}
+.op h4{font-size:14px;font-weight:600;display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.op p{font-size:13.5px;color:var(--muted)}
+
+/* lifecycle */
+.life{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:20px}
+.life-track{display:flex;align-items:center;gap:0;min-width:760px}
+.st{flex:none;display:grid;gap:4px;justify-items:center;text-align:center;width:118px}
+.st .pill{font-family:var(--mono);font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;border:1.5px solid var(--c);color:var(--c);background:var(--surface)}
+.st small{font-size:11.5px;color:var(--dim);line-height:1.35}
+.link{flex:1;height:2px;background:var(--line-2);position:relative;min-width:18px;margin-bottom:34px}
+.link::after{content:"";position:absolute;right:-1px;top:-4px;border:5px solid transparent;border-left-color:var(--line-2);border-right:0}
+.life-note{margin-top:16px;font-size:13px;color:var(--muted);display:grid;gap:4px}
+.life-note span{font-family:var(--mono);font-size:12px}
+
+/* stage detail */
+.wfblock{border-top:1px solid var(--line);padding-block:30px 6px;display:grid;gap:18px}
+.wfblock:first-of-type{border-top:0;padding-top:0}
+.wf-head{display:grid;gap:6px}
+.wf-head h3{font-size:20px;font-weight:650;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
+.wf-head h3 code{font-size:13px;color:var(--dim);font-weight:500}
+.wf-head p{color:var(--muted);max-width:74ch}
+.meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--mono);font-size:12px;color:var(--dim)}
+.meta b{color:var(--muted);font-weight:500}
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;gap:0;border-left:2px solid var(--line);margin-left:10px}
+ol.steps>li{counter-increment:s;position:relative;padding:7px 0 7px 26px;font-size:14px;color:var(--muted)}
+ol.steps>li::before{content:counter(s);position:absolute;left:-12px;top:8px;width:22px;height:22px;border-radius:50%;background:var(--bg);border:1.5px solid var(--line-2);font-family:var(--mono);font-size:10.5px;display:grid;place-items:center;color:var(--dim)}
+ol.steps>li b{color:var(--text);font-weight:600}
+ol.steps>li.ai::before{border-color:var(--violet);color:var(--violet)}
+ol.steps>li.gate::before{border-color:var(--amber);color:var(--amber)}
+ol.steps>li.io::before{border-color:var(--teal);color:var(--teal)}
+
+.llm{border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.llm-top{display:grid;grid-template-columns:1fr auto;gap:10px 18px;padding:14px 16px;align-items:start}
+.llm-top h4{font-size:15.5px;font-weight:650;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.llm-top h4 .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:var(--violet-soft);color:var(--violet)}
+.llm-top h4 .tag.img{background:var(--coral-soft);color:var(--coral)}
+.llm-top p{font-size:13.5px;color:var(--muted);margin-top:4px;max-width:70ch}
+.params{display:grid;grid-template-columns:auto auto;gap:2px 10px;font-family:var(--mono);font-size:11.5px;color:var(--dim);white-space:nowrap;font-variant-numeric:tabular-nums}
+.params b{color:var(--text);font-weight:500;text-align:right}
+.io{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
+.io>div{padding:10px 16px;font-size:13px;color:var(--muted)}
+.io>div+div{border-left:1px solid var(--line)}
+.io h5{margin:0 0 3px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);font-weight:500}
+details.prompt{border-top:1px solid var(--line)}
+details.prompt summary{cursor:pointer;padding:10px 16px;font-family:var(--mono);font-size:12px;color:var(--teal);list-style:none;display:flex;justify-content:space-between;gap:10px;align-items:center}
+details.prompt summary::-webkit-details-marker{display:none}
+details.prompt summary::before{content:"▸";margin-right:6px;display:inline-block;transition:transform .15s}
+details.prompt[open] summary::before{transform:rotate(90deg)}
+details.prompt summary .n{color:var(--dim)}
+.pbody{padding:0 16px 16px;display:grid;gap:12px}
+.plabel{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.copy{font-family:var(--mono);font-size:11px;background:var(--sunk);border:1px solid var(--line);color:var(--muted);padding:3px 9px;border-radius:5px;cursor:pointer;letter-spacing:0;text-transform:none}
+.copy:hover{color:var(--text)}
+pre.p{margin:0;background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:14px;font-family:var(--mono);font-size:12px;line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:520px;overflow:auto;color:var(--text)}
+pre.p .v{color:var(--var);background:color-mix(in srgb,var(--var) 10%,transparent);border-radius:3px}
+
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.note{border-left:3px solid var(--c,var(--teal));background:var(--surface);border-radius:0 8px 8px 0;padding:10px 14px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--text)}
+
+/* tables */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:640px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);font-weight:500;background:var(--sunk)}
+td{color:var(--muted)}
+td:first-child{color:var(--text)}
+td code{color:var(--text)}
+.num{font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:12.5px}
+
+.findings{display:grid;gap:10px}
+.f{display:grid;grid-template-columns:auto 1fr;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.sev{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:4px;height:fit-content;white-space:nowrap}
+.sev.hi{background:var(--coral-soft);color:var(--coral)}
+.sev.md{background:var(--amber-soft);color:var(--amber)}
+.v{color:var(--var);background:color-mix(in srgb,var(--var) 10%,transparent);border-radius:3px}
+.sev.ok-s{background:var(--teal-soft);color:var(--teal)}
+.sev.lo{background:var(--blue-soft);color:var(--blue)}
+.f h4{font-size:14.5px;font-weight:600;margin-bottom:3px}
+.f p{font-size:13.5px;color:var(--muted)}
+
+.toolbar{display:flex;justify-content:flex-end;margin-bottom:10px}
+.btn{font-family:var(--mono);font-size:12px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:6px;padding:6px 11px;cursor:pointer}
+.btn:hover{color:var(--text);border-color:var(--line-2)}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--dim)}
+
+@media (max-width:880px){
+  .row{grid-template-columns:1fr;gap:0}
+  .trig{text-align:left;padding:14px 0 6px 34px;display:flex;flex-wrap:wrap}
+  .trig .t{justify-self:start}
+  .writes{padding:6px 0 12px 34px}
+  .spine{padding-block:4px}
+  .row .spine::before,.row:first-child .spine::before,.row:last-child .spine::before{top:0;bottom:0}
+  .dot{top:16px}
+  .ops{grid-template-columns:1fr}
+  .twocol{grid-template-columns:1fr}
+  .io{grid-template-columns:1fr}
+  .io>div+div{border-left:0;border-top:1px solid var(--line)}
+  .llm-top{grid-template-columns:1fr}
+  .params{justify-content:start}
+  .params b{text-align:left}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">n8n · n8n.getminions.ai · generated from source</div>
+  <h1>Minions Content Pipeline</h1>
+  <p class="lede">How an RSS headline becomes a reviewed blog post, a cover image and three social posts. The page covers every workflow, every hand-off between n8n, the dashboard and Supabase, and every prompt the system sends to a model. That includes the n8n content pipeline, the dashboard's onboarding calls, and the text fragments that code injects into those prompts. Everything is copied word for word from the live workflow JSON and the repo.</p>
+  {{FACTS}}
+  <nav class="toc" aria-label="Sections">
+    <a href="#map">Pipeline map</a><a href="#lifecycle">Idea lifecycle</a><a href="#models">Models</a><a href="#harvest">01 Harvest</a><a href="#draft">02 Draft</a><a href="#hero">04 Cover</a><a href="#publish">03 Publish</a><a href="#workflows">Workflows</a><a href="#fragments">Injected fragments</a><a href="#onboarding">Onboarding prompts</a><a href="#ops">Ops</a><a href="#guards">Guardrails</a><a href="#data">Data &amp; services</a><a href="#risks">Open risks</a>
+  </nav>
+</header>
+
+<!-- ============ MAP ============ -->
+<section id="map">
+  <div class="sec-head">
+    <h2>Pipeline map</h2>
+    <p>Left column: what starts each stage. Middle: what the stage does. Right: what it writes. Every stage reports progress back to the dashboard through <code>callback_url</code>, which points at <code>/api/pipeline/runs/{run_id}</code>, so the drafting HUD can follow the run.</p>
+  </div>
+  <div class="map">
+    <div class="row">
+      <div class="trig"><span class="t">cron 00:00 daily</span><span class="t">manual</span></div>
+      <div class="spine"><span class="dot" style="--c:var(--blue)"></span>
+        <div class="stage"><h3>Dispatch <span class="wf">00_tenant_dispatcher</span></h3>
+          <p>Reads every <code>ACTIVE</code> client and asks the dashboard for a harvest slot from the system-wide daily budget. For each granted slot it POSTs to the harvester webhook. Tenants refused a slot are skipped until tomorrow; this is not an error.</p></div>
+      </div>
+      <div class="writes"><div class="w"><span class="arrow">←</span><b>clients</b></div><div class="w"><span class="arrow">→</span>POST /api/internal/harvest-slot</div></div>
+    </div>
+    <div class="row">
+      <div class="trig"><span class="t">webhook test-harvester</span><span class="t">dashboard “Harvest”</span><span class="t">02 empty queue</span></div>
+      <div class="spine"><span class="dot" style="--c:var(--violet)"></span>
+        <div class="stage"><h3>Harvest ideas <span class="wf">01_idea_harvester</span></h3>
+          <p>Skips if more than 12 unclaimed REFINED ideas already exist. It refines any human-entered NEW notes, reads the tenant's RSS sources, and generates one idea per pillar in the rotation. It then drops ideas whose thesis duplicates an earlier one and studies each source article's structure ("craft notes").</p>
+          <div class="chips"><span class="chip llm">Refine · qwen-flash</span><span class="chip llm">Harvest · qwen3.7-max</span><span class="chip llm">Craft · qwen3.7-max</span></div></div>
+      </div>
+      <div class="writes"><div class="w"><span class="arrow">→</span><b>ideas</b> status REFINED</div><div class="w"><span class="arrow">←</span>/api/brand/context</div><div class="w"><span class="arrow">→</span>/api/ideas/craft</div><div class="w"><span class="arrow">→</span>/api/internal/source-status</div></div>
+    </div>
+    <div class="row">
+      <div class="trig"><span class="t">webhook test-idea-to-asset</span><span class="t">dashboard “Refine &amp; Draft”</span></div>
+      <div class="spine"><span class="dot" style="--c:var(--violet)"></span>
+        <div class="stage"><h3>Draft asset <span class="wf">02_idea_to_asset</span></h3>
+          <p>Picks one idea and claims it with a compare-and-set PATCH to <code>PICKED</code>. Four model calls follow: the strategist sets the angle and cover brief, the writer drafts the article, the editor cleans it and extracts claims, and the distributor writes the LinkedIn, Facebook and X versions. Deterministic gates check claims, banned words and variant rules. The asset is saved with its cover <code>PENDING</code>, and cover generation is handed off without waiting for it to finish.</p>
+          <div class="chips"><span class="chip llm">Strategist · qwen3.7-max</span><span class="chip llm">Writer · qwen3-max</span><span class="chip llm">Editor · qwen3.7-flash</span><span class="chip llm">Variants · qwen-flash</span></div></div>
+      </div>
+      <div class="writes"><div class="w"><span class="arrow">→</span><b>assets</b> PENDING_REVIEW</div><div class="w"><span class="arrow">→</span><b>claims</b></div><div class="w"><span class="arrow">→</span><b>ideas</b> status REVIEW</div><div class="w"><span class="arrow">→</span>Telegram “draft ready”</div></div>
+    </div>
+    <div class="row">
+      <div class="trig"><span class="t">webhook hero-image</span><span class="t">fired by 02</span></div>
+      <div class="spine"><span class="dot" style="--c:var(--coral)"></span>
+        <div class="stage"><h3>Generate cover <span class="wf">04_hero_image</span></h3>
+          <p>Runs asynchronously; it used to take about 43s of a 98s draft. Sends the type-led cover prompt to Qwen Image 3.0 Pro at 1280×720. If the model refuses or returns nothing, it retries once with a neutral, text-free still-life prompt. The image is stored in R2 as WebP and attached to the asset.</p>
+          <div class="chips"><span class="chip img">qwen-image-3.0-pro</span><span class="chip">safe retry</span></div></div>
+      </div>
+      <div class="writes"><div class="w"><span class="arrow">→</span>/api/media/ingest → <b>R2</b></div><div class="w"><span class="arrow">→</span>/api/internal/assets/hero</div><div class="w">hero_status READY · FAILED · BLOCKED_BY_SAFETY</div></div>
+    </div>
+    <div class="row">
+      <div class="trig"><span class="t">editor opens /editorial</span></div>
+      <div class="spine"><span class="dot" style="--c:var(--amber)"></span>
+        <div class="stage human"><h3>Human review <span class="wf">Editorial Studio</span></h3>
+          <p>The editor reads the draft, edits the article and variants, and ticks off flagged claims in the Claims Gate. Clicking <b>Approve</b> marks the asset approved and calls <code>/api/pipeline/publish</code>. Auto-publish exists in code but is off in practice, because <code>require_review</code> defaults to true and the cover is never ready when the draft finishes.</p></div>
+      </div>
+      <div class="writes"><div class="w"><span class="arrow">→</span><b>assets</b> status PUBLISHED, claims_ok Y</div></div>
+    </div>
+    <div class="row">
+      <div class="trig"><span class="t">webhook publish-approved-asset</span><span class="t">cron every 5 min</span></div>
+      <div class="spine"><span class="dot" style="--c:var(--teal)"></span>
+        <div class="stage"><h3>Publish <span class="wf">03_review_publisher</span></h3>
+          <p>Takes up to 3 approved assets that have no <code>published_at</code>. Each goes to the blog, either through the tenant's webhook or the hosted getminions.ai blog (tenant zero only). It then posts to Facebook as a photo post with the blog link as the first comment, and to LinkedIn as an image post, using each tenant's channel credentials. Finally it stamps the post IDs.</p>
+          <div class="chips"><span class="chip ok">Blog</span><span class="chip ok">Facebook</span><span class="chip ok">LinkedIn</span><span class="chip off">X not wired</span></div></div>
+      </div>
+      <div class="writes"><div class="w"><span class="arrow">→</span><b>blogs</b> / tenant webhook</div><div class="w"><span class="arrow">→</span>Graph API · LinkedIn REST</div><div class="w"><span class="arrow">→</span><b>assets</b> published_at, post IDs</div></div>
+    </div>
+  </div>
+
+  <div class="ops" id="ops">
+    <div class="op"><h4>00c_stale_claim_sweeper <span class="chip ok">every 15 min</span></h4><p>Resets ideas stuck at <code>PICKED</code> for over 30 minutes with no asset back to <code>HARVESTED</code>, and sends a Telegram alert. Covers crashed draft runs.</p></div>
+    <div class="op"><h4>00c_pipeline_error_alert <span class="chip ok">error trigger</span></h4><p>Sends a Telegram alert for any failed node. It also recovers the run's <code>callback_url</code> and marks the pipeline run <code>FAILED</code>, so the HUD stops spinning.</p></div>
+    <div class="op"><h4>00b_posting_scheduler_dispatcher <span class="chip off">paused</span></h4><p>Every 5 minutes it would read tenants whose posting schedule is due, create a DRAFT pipeline run, and fire 02. Deactivated on 21 Sep when scheduled drafts were turned off.</p></div>
+  </div>
+</section>
+
+<!-- ============ WORKFLOWS ============ -->
+<section id="workflows">
+  <div class="sec-head"><h2>Workflows</h2><p>From <code>n8n/manifest.json</code> and <code>n8n/workflows/</code>: what is deployed, what starts it, and why a workflow may run on a schedule. Other workflows on the same instance belong to separate projects and are listed as ignored in the manifest.</p></div>
+  {{WORKFLOWS}}
+</section>
+
+<!-- ============ LIFECYCLE ============ -->
+<section id="lifecycle">
+  <div class="sec-head">
+    <h2>Idea lifecycle</h2>
+    <p>The <code>ideas.status</code> column is the backbone of the pipeline. Every stage decides what to do by reading it, and claims work by changing it.</p>
+  </div>
+  <div class="life">
+    <div class="life-track">
+      <div class="st" style="--c:var(--dim)"><span class="pill">NEW</span><small>typed by a human</small></div><div class="link"></div>
+      <div class="st" style="--c:var(--blue)"><span class="pill">REFINED</span><small>01 refine or harvest</small></div><div class="link"></div>
+      <div class="st" style="--c:var(--blue)"><span class="pill">QUEUED</span><small>scheduled in Ideas<br>(drafted first)</small></div><div class="link"></div>
+      <div class="st" style="--c:var(--amber)"><span class="pill">PICKED</span><small>02 claim (CAS)<br>+ claimed_at</small></div><div class="link"></div>
+      <div class="st" style="--c:var(--violet)"><span class="pill">REVIEW</span><small>asset written,<br>draft_asset_id set</small></div><div class="link"></div>
+      <div class="st" style="--c:var(--teal)"><span class="pill">PUBLISHED</span><small>after 03 run</small></div>
+    </div>
+    <div class="life-note">
+      <span>PICKED &gt; 30 min, no asset → sweeper → HARVESTED (eligible again)</span>
+      <span>Idea with draft_asset_id is never re-drafted (reason ALREADY_DRAFTED) until its asset is deleted</span>
+      <span>02 pick order: explicit idea_id → due QUEUED (scheduled_for, queue_order) → HIGH priority REFINED/HARVESTED by batch_rank, oldest first</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODELS ============ -->
+<section id="models">
+  <div class="sec-head">
+    <h2>Prompt index</h2>
+    <p>Every place the system calls a model. Text models all go through DashScope's OpenAI-compatible endpoint (<code>dashscope-intl.aliyuncs.com</code>). The pipeline calls use <code>enable_thinking: false</code> and require a JSON-only reply. Every prompt is rendered by <code>src/lib/prompts</code> and reaches n8n through <code>/api/internal/prompts/&lt;stage&gt;</code>; in the full prompts below, <span class="v">{{placeholders}}</span> mark run-time values.</p>
+  </div>
+  {{PROMPT_INDEX}}
+</section>
+
+<!-- ============ HARVEST ============ -->
+<section id="harvest">
+  <div class="sec-head"><h2>01 · Idea harvester</h2><p><code>Ykpl0pQTzBdZlDcA</code> · {{NODES:01_idea_harvester}}. Brand context comes from <code>/api/brand/context</code>, which supplies positioning, directives, author standing, tenant RSS sources, the pillar rotation for this run, and fingerprints of the 60 most recent theses. If that context is incomplete (<code>context_complete: false</code>) or has no <code>pillar_rotation</code>, the run fails instead of falling back to generic sources.</p></div>
+  <div class="wfblock">
+    <ol class="steps">
+      <li class="io"><b>Resolve Client ID</b>: takes <code>client_id</code>, <code>callback_url</code> and <code>callback_secret</code> from the webhook body. It starts only from the webhook (dispatcher, dashboard, or 02 when the queue is empty) or a manual run.</li>
+      <li class="io"><b>Read Ideas</b>: loads up to 2,000 of the tenant's ideas.</li>
+      <li class="gate"><b>Backlog Guard</b>: if more than 12 REFINED ideas are unclaimed, the run skips and reports <code>skipped: true</code> in the callback.</li>
+      <li class="io"><b>Fetch Brand Context</b>: branches into two parallel paths, A and B.</li>
+      <li class="ai"><b>A · Refine</b>: any <code>NEW</code> rows are sent to the refiner (prompt below) and saved as <code>REFINED</code> with source <code>MANUAL</code>.</li>
+      <li class="io"><b>B · Expand Tenant Sources → RSS</b>: reads one feed per active source. Without sources it falls back to Hacker News, TechCrunch AI and the n8n blog. Feed health goes to <code>/api/internal/source-status</code>.</li>
+      <li class="gate"><b>Build Harvest Payload</b>: groups signals by source, takes a rotating window of each source's <code>max_items</code> (offset by <code>harvest_run_index</code>), and caps the total at 18.</li>
+      <li class="ai"><b>Qwen Harvest</b>: generates exactly one idea per rotation angle.</li>
+      <li class="gate"><b>Attach Source URLs → Dedupe Ideas</b>: maps <code>signal_index</code> back to the article, then builds a stemmed 8-token thesis fingerprint. An idea is dropped if its fingerprint overlaps a known thesis by Jaccard 0.5 or more. This mirrors <code>src/lib/thesis.ts</code>.</li>
+      <li class="ai"><b>Fetch Source Articles → Craft Notes</b>: <code>/api/ideas/craft</code> fetches the article text, and the model describes only its structure. <b>Merge Craft</b> removes any sentence that contains a run of 9 or more words copied from the source.</li>
+      <li class="io"><b>Assign IDs → Sync Ideas to DB</b>: assigns global sequential <code>IDEA-0001</code> IDs, upserts with status <code>REFINED</code>, and reports COMPLETED with <code>harvestedCount</code>.</li>
+    </ol>
+
+    {{PROMPT:refine}}
+    {{PROMPT:harvest}}
+    {{PROMPT:craft}}
+  </div>
+</section>
+
+<!-- ============ DRAFT ============ -->
+<section id="draft">
+  <div class="sec-head"><h2>02 · Idea to asset</h2><p><code>0ZeUkMgGXpBKVB2A</code> · {{NODES:02_idea_to_asset}}. The strategist writes the brief, the writer drafts, the editor fact-checks, and the distributor adapts the piece per platform. Brand voice comes from three sources: <code>brand_directives</code> (priority 1–2 and audience-scoped), <code>brand_profile</code>, and up to 5 <code>tone_examples</code>.</p></div>
+  <div class="wfblock">
+    <ol class="steps">
+      <li class="io"><b>Generate run_id</b>: carries <code>idea_id</code>, <code>client_id</code> and the callback details from the dashboard. It starts only from the webhook or a manual run.</li>
+      <li class="gate"><b>Select Target → Claim Idea Row</b>: chooses the idea, then PATCHes it to <code>PICKED</code> only if <code>status</code>, <code>claimed_at</code> and a null <code>draft_asset_id</code> still match. If another run already claimed it, this run does nothing. If there is nothing to draft, it fires the harvester (<code>SCHEDULER_CASCADE_EMPTY_QUEUE</code>).</li>
+      <li class="io"><b>Read Brand · Brand Profile · Tone Examples · Posting Schedule</b>: loaded in parallel.</li>
+      <li class="gate"><b>Assemble Brand Context</b>: picks the hook archetype deterministically from the pillar. <em>Myth / contrarian / architecture / systems</em> gives INVERSION. <em>Stakes / economics</em> gives DIRECT COST. Anything else gives SCENE-FIRST. Brand context is capped at 8,000 characters, and only PROOF rows with <code>approved: true</code> and an http(s) source are included as verified proof.</li>
+      <li class="ai"><b>Executive Strategist</b>: produces the brief and the cover-card copy.</li>
+      <li class="gate"><b>Need Evidence?</b>: if the idea is <code>evidence_required = Y</code> or the strategist listed <code>evidence_needs</code>, the signals are formatted as <code>SUPPLIED_SOURCE_n</code> leads and each need becomes an <code>UNVERIFIED_NEED_n</code> marker that must not be stated as fact.</li>
+      <li class="ai"><b>Writer</b>: drafts the article. <b>Editor</b>: tightens it and extracts claims.</li>
+      <li class="gate"><b>Parse Claims and Gate</b>: matches each claim against approved proof (at least 3 shared significant words and ≥40% overlap). An unbacked STATISTIC, FACT, MARKET_CLAIM or PRODUCT_CLAIM sets <code>claims_ok = N</code>. An unapproved CUSTOMER_RESULT sets it to <code>BLOCKED</code>.</li>
+      <li class="ai"><b>Variants</b>: writes the LinkedIn, Facebook and X posts. The same node assembles the <b>cover image prompt</b>.</li>
+      <li class="gate"><b>Validate Social Variants</b>: checks for empty variants, X over 280 characters or more than 1 hashtag, LinkedIn over 2 hashtags, the Minions brand appearing in another tenant's copy, and invented client stories.</li>
+      <li class="gate"><b>Prepare Asset Row</b>: runs a word-boundary scan for FORBIDDEN directives, and any hit makes the draft <code>BLOCKED</code>. It assigns a byline (a random founder for tenant zero, otherwise “{Brand} Team”) and sets <code>hero_status: PENDING</code>. Auto-publish requires claims Y, no review, and a permanent hero, so in practice drafts are never auto-published.</li>
+      <li class="io"><b>Sync Idea (REVIEW) → Sync Asset → Asset Write OK?</b>: any non-2xx response throws, so the error workflow marks the run FAILED. The run then writes claims, sends a Telegram notice, and reports COMPLETED with the <code>assetId</code>, while in parallel <b>Dispatch Hero Generation</b> fires 04.</li>
+    </ol>
+
+    <div class="note" style="--c:var(--violet)"><b>Hook archetype instructions</b> are injected into the strategist prompt as <code>${hookArchetype}</code> and <code>${archetypeInstruction}</code>:<br>
+      INVERSION: “Contrast a common industry assumption against a practical architectural observation… Never use dramatic or arrogant words like ‘dogma’.”<br>
+      DIRECT COST: “Open with the concrete, immediate consequence of inaction or bad architecture, stated clearly and objectively.”<br>
+      SCENE-FIRST: “Open inside a specific, recognizable operational moment the reader has lived, then reveal what is actually happening underneath it.”</div>
+
+    {{PROMPT:strategist}}
+    {{PROMPT:writer}}
+    {{PROMPT:editor}}
+    {{PROMPT:variants}}
+  </div>
+</section>
+
+<!-- ============ HERO ============ -->
+<section id="hero">
+  <div class="sec-head"><h2>04 · Hero image</h2><p><code>10vre0a16gvu32Hu</code> · {{NODES:04_hero_image}}. 02 (Parse Variants and Prepare Rows) sends <code>cover_inputs</code>: the strategist's <code>thumbnail_card</code>, the title and the tenant's brand colors. 04 renders the prompt through <code>/api/internal/prompts/cover</code>.</p></div>
+  <div class="wfblock">
+    <div class="twocol">
+      <div class="note" style="--c:var(--coral)"><b>Headline</b> comes from <code>thumbnail_card.headline</code> (3–5 bold words); one word is rendered in brand coral. <b>Kicker</b> is <code>thumbnail_card.subtitle</code>, cut at a word boundary to 90 characters or fewer. <b>Wordmark</b> is the company name, set in top-right ink.</div>
+      <div class="note" style="--c:var(--coral)"><b>Corner icon</b>: the strategist's <code>physical_scene</code> is used unless it mentions trade hardware on a non-trade account, is shorter than 25 characters, or mentions a “clipboard”. In those cases a keyword router picks a line glyph instead: chat bubble, soundwave, bar chart, node flow or dashboard card for abstract topics, and wrench+droplet, gauge, headset, bolt, roof or magnifier for trade topics.</div>
+    </div>
+    <ol class="steps">
+      <li class="io"><b>Read Hero Request → Render Cover Prompt</b>: reads <code>asset_id</code> and <code>cover_inputs</code>, then renders the cover prompt. A pre-rendered <code>image_prompt</code> from an older 02 run skips the render.</li>
+      <li class="ai"><b>Qwen Image 3.0 Pro</b>: <code>size 1280*720</code>, <code>prompt_extend: true</code>, 120s timeout.</li>
+      <li class="gate"><b>Needs Safe Image Retry? → Render Safe Cover Prompt</b>: if no image URL comes back, it retries with the fixed safe prompt and <code>prompt_extend: false</code>.</li>
+      <li class="io"><b>Upload Hero to R2</b>: calls <code>/api/media/ingest</code>, which downloads the image, converts it with sharp to WebP, and stores it under <code>assets/</code>.</li>
+      <li class="gate"><b>Resolve Hero Outcome</b>: sets READY only when the R2 upload succeeded. An Alibaba URL alone never counts, because it expires in about 24h. A safety refusal (DataInspectionFailed) sets BLOCKED_BY_SAFETY; anything else sets FAILED.</li>
+      <li class="io"><b>Attach Hero to Asset → Attach OK?</b>: throws on a non-2xx response so a cover that silently never arrives becomes a visible error.</li>
+    </ol>
+    {{PROMPT:cover}}
+    {{PROMPT:cover_safe}}
+  </div>
+</section>
+
+<!-- ============ PUBLISH ============ -->
+<section id="publish">
+  <div class="sec-head"><h2>03 · Review publisher</h2><p><code>4GNbfvmveKtbJrVd</code> · {{NODES:03_review_publisher}} No model calls. It publishes what a human approved.</p></div>
+  <div class="wfblock">
+    <ol class="steps">
+      <li class="io"><b>Read Approved Assets</b>: <code>claims_ok=Y · status=PUBLISHED · published_at is null</code>, oldest first, 3 at a time. The webhook and the 5-minute cron run the same query.</li>
+      <li class="gate"><b>Filter Approved Assets</b>: puts the hero image at the top of the markdown body if none is embedded, and maps the <code>facebook_variant</code> and <code>linkedin_variant</code> columns.</li>
+      <li class="io"><b>Resolve Blog Channel</b>: if the tenant set a blog webhook, POSTs the article there. Otherwise, the hosted <code>blogs</code> upsert applies only to <code>tenant-zero-getminions-ai</code>, and every other tenant is tagged “skipped”.</li>
+      <li class="io"><b>Resolve Facebook Channel</b>: <code>/api/channels/credential?channel=facebook</code>. If it is active and has a token, posts the hero image with <code>fb_variant</code> as the caption to <code>/{page}/photos</code>, then comments with the blog link.</li>
+      <li class="io"><b>Resolve LinkedIn Channel</b>: downloads the hero, calls <code>images?action=initializeUpload</code>, PUTs the binary, then POSTs to <code>/rest/posts</code> with the image URN and <code>li_variant</code> as commentary.</li>
+      <li class="io"><b>Merge Publish Results → Mark Asset Published</b>: stamps <code>published_at</code>, <code>published_urls</code>, and the Facebook and LinkedIn post IDs with their timestamps, then sends a Telegram alert.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ FRAGMENTS ============ -->
+<section id="fragments">
+  <div class="sec-head"><h2>Injected prompt fragments</h2><p>Several parts of the prompts above are not written in the prompt itself. Code chooses or assembles them at run time and splices them in: the author-standing text, this run's angles, the hook archetype, the brand, evidence and voice blocks, and the cover's corner icon. Every variant is listed here.</p></div>
+  <div class="wfblock">
+  {{FRAGMENTS}}
+  </div>
+</section>
+
+<!-- ============ ONBOARDING ============ -->
+<section id="onboarding">
+  <div class="sec-head"><h2>Onboarding prompts (dashboard)</h2><p>These are the only model calls made from the Next.js app itself (<code>DASHSCOPE_API_KEY</code>). They run once per tenant during onboarding, and their output becomes the <code>brand_directives</code> that every pipeline prompt reads later.</p></div>
+  <div class="wfblock">
+    {{PROMPT:onboarding_suggestions}}
+    {{PROMPT:onboarding_directives}}
+  </div>
+</section>
+
+<!-- ============ GUARDS ============ -->
+<section id="guards">
+  <div class="sec-head"><h2>Guardrails that don't rely on the prompt</h2><p>The prompts ask for good behavior, and these code checks enforce it. None of them uses a model.</p></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Guard</th><th>Where</th><th>Rule</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td>Harvest budget</td><td>00 → /api/internal/harvest-slot</td><td>System-wide daily run limit across tenants</td><td>Tenant skipped for the day</td></tr>
+      <tr><td>Backlog guard</td><td>01 Backlog Guard</td><td>More than 12 unclaimed REFINED ideas</td><td>Harvest skipped</td></tr>
+      <tr><td>Degraded context</td><td>01 Build Harvest Payload</td><td><code>context_complete=false</code> or empty rotation</td><td>Run throws</td></tr>
+      <tr><td>Thesis dedupe</td><td>01 Dedupe Ideas</td><td>Stemmed 8-token fingerprint, Jaccard ≥ 0.5 vs recent theses + backlog</td><td>Idea dropped</td></tr>
+      <tr><td>Verbatim guard</td><td>01 Merge Craft</td><td>Any 9-word run found in the source</td><td>Sentence replaced by […]</td></tr>
+      <tr><td>Atomic claim</td><td>02 Claim Idea Row</td><td>PATCH only if status, claimed_at and draft_asset_id unchanged</td><td>Concurrent run no-ops</td></tr>
+      <tr><td>One idea, one asset</td><td>02 Select Target</td><td>draft_asset_id already set</td><td>ALREADY_DRAFTED</td></tr>
+      <tr><td>Claims gate</td><td>02 Parse Claims and Gate</td><td>Unbacked stat/fact/market/product claim; unapproved customer result</td><td><code>N</code> / <code>BLOCKED</code></td></tr>
+      <tr><td>Banned words</td><td>02 Prepare Asset Row</td><td>FORBIDDEN directive found in body or any variant</td><td><code>BLOCKED</code></td></tr>
+      <tr><td>Variant validation</td><td>02 Validate Social Variants</td><td>Empty, X &gt; 280 chars or &gt; 1 hashtag, LinkedIn &gt; 2 hashtags, brand leak, fake client story</td><td>Errors listed in Telegram</td></tr>
+      <tr><td>Em-dash scrub</td><td>every parse node</td><td><code>—</code> and <code>--</code> → <code>, </code></td><td>Rewritten in place</td></tr>
+      <tr><td>Write verification</td><td>02 Asset Write OK? · 04 Attach OK?</td><td>Non-2xx from PostgREST / hero attach</td><td>Throws → run FAILED</td></tr>
+      <tr><td>Permanent hero</td><td>04 Resolve Hero Outcome</td><td>Only an R2 URL is READY</td><td>Expiring URL never stored</td></tr>
+      <tr><td>Stale claim</td><td>00c sweeper</td><td>PICKED more than 30 min with no asset</td><td>Reset to HARVESTED</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ DATA ============ -->
+<section id="data">
+  <div class="sec-head"><h2>Data &amp; services</h2><p>n8n talks to Supabase directly through PostgREST for bulk reads and writes. Anything that needs app logic, secrets or tenant-scoped credentials goes through the dashboard's API.</p></div>
+  <div class="twocol">
+    <div class="tbl"><table style="min-width:0">
+      <thead><tr><th>Supabase table</th><th>Read by</th><th>Written by</th></tr></thead>
+      <tbody>
+        <tr><td><code>clients</code></td><td>00</td><td>—</td></tr>
+        <tr><td><code>ideas</code></td><td>01, 02</td><td>01, 02, sweeper</td></tr>
+        <tr><td><code>brand_directives</code></td><td>02</td><td>dashboard</td></tr>
+        <tr><td><code>brand_profile</code></td><td>02</td><td>dashboard</td></tr>
+        <tr><td><code>tone_examples</code></td><td>02</td><td>dashboard</td></tr>
+        <tr><td><code>posting_schedules</code></td><td>02, 00b</td><td>00b</td></tr>
+        <tr><td><code>assets</code></td><td>02, 03</td><td>02, 03, 04 (via API)</td></tr>
+        <tr><td><code>claims</code></td><td>—</td><td>02</td></tr>
+        <tr><td><code>blogs</code></td><td>getminions.ai</td><td>03 (tenant zero)</td></tr>
+        <tr><td><code>pipeline_runs</code></td><td>dashboard HUD</td><td>callbacks, 00b, 00c</td></tr>
+      </tbody>
+    </table></div>
+    <div class="tbl"><table style="min-width:0">
+      <thead><tr><th>Dashboard endpoint</th><th>Called by</th></tr></thead>
+      <tbody>
+        <tr><td><code>/api/internal/harvest-slot</code></td><td>00</td></tr>
+        <tr><td><code>/api/brand/context</code></td><td>01</td></tr>
+        <tr><td><code>/api/ideas/craft</code></td><td>01</td></tr>
+        <tr><td><code>/api/internal/source-status</code></td><td>01</td></tr>
+        <tr><td><code>/api/media/ingest</code></td><td>04</td></tr>
+        <tr><td><code>/api/internal/assets/hero</code></td><td>04</td></tr>
+        <tr><td><code>/api/channels/credential</code></td><td>03</td></tr>
+        <tr><td><code>/api/pipeline/runs/{id}</code></td><td>01, 02, 00c (callbacks)</td></tr>
+        <tr><td><code>/api/internal/schedule/eligible-tenants</code></td><td>00b</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <div class="tbl" style="margin-top:14px"><table>
+    <thead><tr><th>Dashboard → n8n</th><th>Webhook</th><th>trigger_source</th></tr></thead>
+    <tbody>
+      <tr><td><code>/api/pipeline/harvest</code>, onboarding complete</td><td><code>/webhook/test-harvester</code></td><td>MINIONS_COCKPIT_EDITORIAL · TENANT_DISPATCHER_SCHEDULED · SCHEDULER_CASCADE_EMPTY_QUEUE</td></tr>
+      <tr><td><code>/api/pipeline/draft</code></td><td><code>/webhook/test-idea-to-asset</code></td><td>MINIONS_COCKPIT_EDITORIAL · POSTING_SCHEDULER</td></tr>
+      <tr><td><code>/api/pipeline/publish</code></td><td><code>/webhook/publish-approved-asset</code></td><td>MINIONS_COCKPIT_EDITORIAL</td></tr>
+      <tr><td>02 Dispatch Hero Generation</td><td><code>/webhook/hero-image</code></td><td>—</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ RISKS ============ -->
+<section id="risks">
+  <div class="sec-head"><h2>Open risks</h2><p>Known bugs the n8n lint currently tolerates: <code>lintAllow</code> entries marked <code>OPEN RISK</code> in <code>n8n/manifest.json</code>. Fixing one means fixing the workflow and deleting its entry.</p></div>
+  {{RISKS}}
+</section>
+
+<footer>Generated by <code>npm run n8n:docs</code> from <code>n8n/</code> and <code>src/lib/prompts</code>. Edit those, not this file.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var pre=document.getElementById(b.dataset.for);
+    var text=pre.innerText;
+    var done=function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)};
+    try{navigator.clipboard.writeText(text).then(done,function(){sel(pre)})}catch(e){sel(pre)}
+  });
+});
+function sel(el){var r=document.createRange();r.selectNodeContents(el);var s=getSelection();s.removeAllRanges();s.addRange(r)}
+var tog=document.getElementById('toggleAll');
+</script>

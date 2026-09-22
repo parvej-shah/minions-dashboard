@@ -22,5 +22,8 @@ jobs:
       - name: Lint n8n workflows
         run: npm run n8n:lint
 
-      - name: Unit and contract tests
+      - name: Unit, contract and prompt-golden tests
         run: npm test
+
+      - name: Architecture page is current
+        run: npm run n8n:docs -- --check

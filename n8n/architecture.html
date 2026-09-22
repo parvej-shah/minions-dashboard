@@ -1,0 +1,998 @@
+<title>Minions Content Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F4F7F8; --surface:#FFFFFF; --sunk:#EAF0F2; --line:#D5DFE4; --line-2:#C2CFD6;
+  --text:#0E1B23; --muted:#46586A; --dim:#6A7B8B;
+  --teal:#00806F; --teal-soft:rgba(0,128,111,.10); --coral:#C9482A; --coral-soft:rgba(201,72,42,.10);
+  --amber:#A15C07; --amber-soft:rgba(161,92,7,.11); --blue:#2458D6; --blue-soft:rgba(36,88,214,.10);
+  --violet:#6D4ED8; --violet-soft:rgba(109,78,216,.10);
+  --var:#0B6FA8;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#070B0F; --surface:#0F1419; --sunk:#0A0F14; --line:#1F2D3D; --line-2:#2A3B4E;
+  --text:#F1F5F9; --muted:#A3B1C2; --dim:#6B7C8F;
+  --teal:#00C9A7; --teal-soft:rgba(0,201,167,.12); --coral:#FF6B4A; --coral-soft:rgba(255,107,74,.12);
+  --amber:#F59E0B; --amber-soft:rgba(245,158,11,.12); --blue:#5B8CFF; --blue-soft:rgba(91,140,255,.12);
+  --violet:#A78BFA; --violet-soft:rgba(167,139,250,.12); --var:#7DD3FC;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#070B0F; --surface:#0F1419; --sunk:#0A0F14; --line:#1F2D3D; --line-2:#2A3B4E;
+  --text:#F1F5F9; --muted:#A3B1C2; --dim:#6B7C8F;
+  --teal:#00C9A7; --teal-soft:rgba(0,201,167,.12); --coral:#FF6B4A; --coral-soft:rgba(255,107,74,.12);
+  --amber:#F59E0B; --amber-soft:rgba(245,158,11,.12); --blue:#5B8CFF; --blue-soft:rgba(91,140,255,.12);
+  --violet:#A78BFA; --violet-soft:rgba(167,139,250,.12); --var:#7DD3FC;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.55;padding-inline:20px;padding-block:0 80px}
+.wrap{max-width:1120px;margin:0 auto}
+a{color:var(--teal)}
+code,.mono{font-family:var(--mono);font-size:.86em}
+h1,h2,h3,h4{text-wrap:balance;margin:0;line-height:1.2}
+p{margin:0}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:4px}
+
+/* header */
+header{padding-block:48px 28px;border-bottom:1px solid var(--line);display:grid;gap:18px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal)}
+h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em}
+.lede{max-width:70ch;color:var(--muted);font-size:16.5px}
+.facts{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:var(--mono);font-size:12.5px;color:var(--dim)}
+.facts b{color:var(--text);font-weight:600}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+nav.toc a{font-family:var(--mono);font-size:12px;text-decoration:none;color:var(--muted);border:1px solid var(--line);padding:5px 10px;border-radius:999px;background:var(--surface)}
+nav.toc a:hover{color:var(--text);border-color:var(--line-2)}
+
+section{padding-block:44px 8px}
+.sec-head{display:grid;gap:8px;margin-bottom:22px}
+h2{font-size:24px;font-weight:650;letter-spacing:-.01em}
+.sec-head p{color:var(--muted);max-width:72ch}
+
+/* pipeline map */
+.map{display:grid;gap:0}
+.row{display:grid;grid-template-columns:200px 1fr 250px;gap:18px;align-items:stretch;position:relative}
+.row + .row{margin-top:0}
+.trig{font-family:var(--mono);font-size:12px;color:var(--muted);padding-top:18px;display:grid;gap:6px;align-content:start;text-align:right}
+.trig .t{display:inline-block;justify-self:end;border:1px dashed var(--line-2);padding:3px 8px;border-radius:6px;background:var(--surface)}
+.spine{position:relative;padding-left:34px;padding-block:10px}
+.spine::before{content:"";position:absolute;left:12px;top:0;bottom:0;width:2px;background:var(--line-2)}
+.row:first-child .spine::before{top:28px}
+.row:last-child .spine::before{bottom:calc(100% - 28px)}
+.dot{position:absolute;left:5px;top:22px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:2px solid var(--c,var(--teal))}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px}
+.stage h3{font-size:16px;font-weight:650;display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+.stage h3 .wf{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--dim)}
+.stage p{color:var(--muted);font-size:14px}
+.stage.human{border-style:dashed;background:transparent}
+.writes{padding-top:18px;display:grid;gap:6px;align-content:start;font-size:12.5px}
+.w{font-family:var(--mono);display:flex;gap:6px;align-items:baseline;color:var(--muted)}
+.w .arrow{color:var(--dim)}
+.w b{color:var(--text);font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.chip{font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:5px;background:var(--sunk);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.chip.llm{background:var(--violet-soft);border-color:transparent;color:var(--violet)}
+.chip.img{background:var(--coral-soft);border-color:transparent;color:var(--coral)}
+.chip.off{background:var(--amber-soft);border-color:transparent;color:var(--amber)}
+.chip.ok{background:var(--teal-soft);border-color:transparent;color:var(--teal)}
+
+.ops{margin-top:22px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.op{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--surface);display:grid;gap:4px;align-content:start}
+.op h4{font-size:14px;font-weight:600;display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.op p{font-size:13.5px;color:var(--muted)}
+
+/* lifecycle */
+.life{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:20px}
+.life-track{display:flex;align-items:center;gap:0;min-width:760px}
+.st{flex:none;display:grid;gap:4px;justify-items:center;text-align:center;width:118px}
+.st .pill{font-family:var(--mono);font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;border:1.5px solid var(--c);color:var(--c);background:var(--surface)}
+.st small{font-size:11.5px;color:var(--dim);line-height:1.35}
+.link{flex:1;height:2px;background:var(--line-2);position:relative;min-width:18px;margin-bottom:34px}
+.link::after{content:"";position:absolute;right:-1px;top:-4px;border:5px solid transparent;border-left-color:var(--line-2);border-right:0}
+.life-note{margin-top:16px;font-size:13px;color:var(--muted);display:grid;gap:4px}
+.life-note span{font-family:var(--mono);font-size:12px}
+
+/* stage detail */
+.wfblock{border-top:1px solid var(--line);padding-block:30px 6px;display:grid;gap:18px}
+.wfblock:first-of-type{border-top:0;padding-top:0}
+.wf-head{display:grid;gap:6px}
+.wf-head h3{font-size:20px;font-weight:650;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
+.wf-head h3 code{font-size:13px;color:var(--dim);font-weight:500}
+.wf-head p{color:var(--muted);max-width:74ch}
+.meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--mono);font-size:12px;color:var(--dim)}
+.meta b{color:var(--muted);font-weight:500}
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;gap:0;border-left:2px solid var(--line);margin-left:10px}
+ol.steps>li{counter-increment:s;position:relative;padding:7px 0 7px 26px;font-size:14px;color:var(--muted)}
+ol.steps>li::before{content:counter(s);position:absolute;left:-12px;top:8px;width:22px;height:22px;border-radius:50%;background:var(--bg);border:1.5px solid var(--line-2);font-family:var(--mono);font-size:10.5px;display:grid;place-items:center;color:var(--dim)}
+ol.steps>li b{color:var(--text);font-weight:600}
+ol.steps>li.ai::before{border-color:var(--violet);color:var(--violet)}
+ol.steps>li.gate::before{border-color:var(--amber);color:var(--amber)}
+ol.steps>li.io::before{border-color:var(--teal);color:var(--teal)}
+
+.llm{border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.llm-top{display:grid;grid-template-columns:1fr auto;gap:10px 18px;padding:14px 16px;align-items:start}
+.llm-top h4{font-size:15.5px;font-weight:650;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.llm-top h4 .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:var(--violet-soft);color:var(--violet)}
+.llm-top h4 .tag.img{background:var(--coral-soft);color:var(--coral)}
+.llm-top p{font-size:13.5px;color:var(--muted);margin-top:4px;max-width:70ch}
+.params{display:grid;grid-template-columns:auto auto;gap:2px 10px;font-family:var(--mono);font-size:11.5px;color:var(--dim);white-space:nowrap;font-variant-numeric:tabular-nums}
+.params b{color:var(--text);font-weight:500;text-align:right}
+.io{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
+.io>div{padding:10px 16px;font-size:13px;color:var(--muted)}
+.io>div+div{border-left:1px solid var(--line)}
+.io h5{margin:0 0 3px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);font-weight:500}
+details.prompt{border-top:1px solid var(--line)}
+details.prompt summary{cursor:pointer;padding:10px 16px;font-family:var(--mono);font-size:12px;color:var(--teal);list-style:none;display:flex;justify-content:space-between;gap:10px;align-items:center}
+details.prompt summary::-webkit-details-marker{display:none}
+details.prompt summary::before{content:"▸";margin-right:6px;display:inline-block;transition:transform .15s}
+details.prompt[open] summary::before{transform:rotate(90deg)}
+details.prompt summary .n{color:var(--dim)}
+.pbody{padding:0 16px 16px;display:grid;gap:12px}
+.plabel{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.copy{font-family:var(--mono);font-size:11px;background:var(--sunk);border:1px solid var(--line);color:var(--muted);padding:3px 9px;border-radius:5px;cursor:pointer;letter-spacing:0;text-transform:none}
+.copy:hover{color:var(--text)}
+pre.p{margin:0;background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:14px;font-family:var(--mono);font-size:12px;line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:520px;overflow:auto;color:var(--text)}
+pre.p .v{color:var(--var);background:color-mix(in srgb,var(--var) 10%,transparent);border-radius:3px}
+
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.note{border-left:3px solid var(--c,var(--teal));background:var(--surface);border-radius:0 8px 8px 0;padding:10px 14px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--text)}
+
+/* tables */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:640px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);font-weight:500;background:var(--sunk)}
+td{color:var(--muted)}
+td:first-child{color:var(--text)}
+td code{color:var(--text)}
+.num{font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:12.5px}
+
+.findings{display:grid;gap:10px}
+.f{display:grid;grid-template-columns:auto 1fr;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.sev{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:4px;height:fit-content;white-space:nowrap}
+.sev.hi{background:var(--coral-soft);color:var(--coral)}
+.sev.md{background:var(--amber-soft);color:var(--amber)}
+.v{color:var(--var);background:color-mix(in srgb,var(--var) 10%,transparent);border-radius:3px}
+.sev.ok-s{background:var(--teal-soft);color:var(--teal)}
+.sev.lo{background:var(--blue-soft);color:var(--blue)}
+.f h4{font-size:14.5px;font-weight:600;margin-bottom:3px}
+.f p{font-size:13.5px;color:var(--muted)}
+
+.toolbar{display:flex;justify-content:flex-end;margin-bottom:10px}
+.btn{font-family:var(--mono);font-size:12px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:6px;padding:6px 11px;cursor:pointer}
+.btn:hover{color:var(--text);border-color:var(--line-2)}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--dim)}
+
+@media (max-width:880px){
+  .row{grid-template-columns:1fr;gap:0}
+  .trig{text-align:left;padding:14px 0 6px 34px;display:flex;flex-wrap:wrap}
+  .trig .t{justify-self:start}
+  .writes{padding:6px 0 12px 34px}
+  .spine{padding-block:4px}
+  .row .spine::before,.row:first-child .spine::before,.row:last-child .spine::before{top:0;bottom:0}
+  .dot{top:16px}
+  .ops{grid-template-columns:1fr}
+  .twocol{grid-template-columns:1fr}
+  .io{grid-template-columns:1fr}
+  .io>div+div{border-left:0;border-top:1px solid var(--line)}
+  .llm-top{grid-template-columns:1fr}
+  .params{justify-content:start}
+  .params b{text-align:left}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">n8n · n8n.getminions.ai · generated from source</div>
+  <h1>Minions Content Pipeline</h1>
+  <p class="lede">How an RSS headline becomes a reviewed blog post, a cover image and three social posts. The page covers every workflow, every hand-off between n8n, the dashboard and Supabase, and every prompt the system sends to a model. That includes the n8n content pipeline, the dashboard's onboarding calls, and the text fragments that code injects into those prompts. Everything is copied word for word from the live workflow JSON and the repo.</p>
+  <div class="facts">
+    <span><b>8</b> pipeline workflows (7 active)</span>
+    <span><b>9</b> text-model prompts</span>
+    <span><b>2</b> image prompts</span>
+    <span><b>1</b> human gate</span>
+    <span>LLM host <b>DashScope (intl)</b></span>
+    <span>DB <b>Supabase Postgres</b></span>
+    <span>Media <b>Cloudflare R2</b></span>
+  </div>
+  <nav class="toc" aria-label="Sections">
+    <a href="#map">Pipeline map</a><a href="#lifecycle">Idea lifecycle</a><a href="#models">Models</a><a href="#harvest">01 Harvest</a><a href="#draft">02 Draft</a><a href="#hero">04 Cover</a><a href="#publish">03 Publish</a><a href="#workflows">Workflows</a><a href="#fragments">Injected fragments</a><a href="#onboarding">Onboarding prompts</a><a href="#ops">Ops</a><a href="#guards">Guardrails</a><a href="#data">Data &amp; services</a><a href="#risks">Open risks</a>
+  </nav>
+</header>
+
+<!-- ============ MAP ============ -->
+<section id="map">
+  <div class="sec-head">
+    <h2>Pipeline map</h2>
+    <p>Left column: what starts each stage. Middle: what the stage does. Right: what it writes. Every stage reports progress back to the dashboard through <code>callback_url</code>, which points at <code>/api/pipeline/runs/{run_id}</code>, so the drafting HUD can follow the run.</p>
+  </div>
+  <div class="map">
+    <div class="row">
+      <div class="trig"><span class="t">cron 00:00 daily</span><span class="t">manual</span></div>
+      <div class="spine"><span class="dot" style="--c:var(--blue)"></span>
+        <div class="stage"><h3>Dispatch <span class="wf">00_tenant_dispatcher</span></h3>
+          <p>Reads every <code>ACTIVE</code> client and asks the dashboard for a harvest slot from the system-wide daily budget. For each granted slot it POSTs to the harvester webhook. Tenants refused a slot are skipped until tomorrow; this is not an error.</p></div>
+      </div>
+      <div class="writes"><div class="w"><span class="arrow">←</span><b>clients</b></div><div class="w"><span class="arrow">→</span>POST /api/internal/harvest-slot</div></div>
+    </div>
+    <div class="row">
+      <div class="trig"><span class="t">webhook test-harvester</span><span class="t">dashboard “Harvest”</span><span class="t">02 empty queue</span></div>
+      <div class="spine"><span class="dot" style="--c:var(--violet)"></span>
+        <div class="stage"><h3>Harvest ideas <span class="wf">01_idea_harvester</span></h3>
+          <p>Skips if more than 12 unclaimed REFINED ideas already exist. It refines any human-entered NEW notes, reads the tenant's RSS sources, and generates one idea per pillar in the rotation. It then drops ideas whose thesis duplicates an earlier one and studies each source article's structure ("craft notes").</p>
+          <div class="chips"><span class="chip llm">Refine · qwen-flash</span><span class="chip llm">Harvest · qwen3.7-max</span><span class="chip llm">Craft · qwen3.7-max</span></div></div>
+      </div>
+      <div class="writes"><div class="w"><span class="arrow">→</span><b>ideas</b> status REFINED</div><div class="w"><span class="arrow">←</span>/api/brand/context</div><div class="w"><span class="arrow">→</span>/api/ideas/craft</div><div class="w"><span class="arrow">→</span>/api/internal/source-status</div></div>
+    </div>
+    <div class="row">
+      <div class="trig"><span class="t">webhook test-idea-to-asset</span><span class="t">dashboard “Refine &amp; Draft”</span></div>
+      <div class="spine"><span class="dot" style="--c:var(--violet)"></span>
+        <div class="stage"><h3>Draft asset <span class="wf">02_idea_to_asset</span></h3>
+          <p>Picks one idea and claims it with a compare-and-set PATCH to <code>PICKED</code>. Four model calls follow: the strategist sets the angle and cover brief, the writer drafts the article, the editor cleans it and extracts claims, and the distributor writes the LinkedIn, Facebook and X versions. Deterministic gates check claims, banned words and variant rules. The asset is saved with its cover <code>PENDING</code>, and cover generation is handed off without waiting for it to finish.</p>
+          <div class="chips"><span class="chip llm">Strategist · qwen3.7-max</span><span class="chip llm">Writer · qwen3-max</span><span class="chip llm">Editor · qwen3.7-flash</span><span class="chip llm">Variants · qwen-flash</span></div></div>
+      </div>
+      <div class="writes"><div class="w"><span class="arrow">→</span><b>assets</b> PENDING_REVIEW</div><div class="w"><span class="arrow">→</span><b>claims</b></div><div class="w"><span class="arrow">→</span><b>ideas</b> status REVIEW</div><div class="w"><span class="arrow">→</span>Telegram “draft ready”</div></div>
+    </div>
+    <div class="row">
+      <div class="trig"><span class="t">webhook hero-image</span><span class="t">fired by 02</span></div>
+      <div class="spine"><span class="dot" style="--c:var(--coral)"></span>
+        <div class="stage"><h3>Generate cover <span class="wf">04_hero_image</span></h3>
+          <p>Runs asynchronously; it used to take about 43s of a 98s draft. Sends the type-led cover prompt to Qwen Image 3.0 Pro at 1280×720. If the model refuses or returns nothing, it retries once with a neutral, text-free still-life prompt. The image is stored in R2 as WebP and attached to the asset.</p>
+          <div class="chips"><span class="chip img">qwen-image-3.0-pro</span><span class="chip">safe retry</span></div></div>
+      </div>
+      <div class="writes"><div class="w"><span class="arrow">→</span>/api/media/ingest → <b>R2</b></div><div class="w"><span class="arrow">→</span>/api/internal/assets/hero</div><div class="w">hero_status READY · FAILED · BLOCKED_BY_SAFETY</div></div>
+    </div>
+    <div class="row">
+      <div class="trig"><span class="t">editor opens /editorial</span></div>
+      <div class="spine"><span class="dot" style="--c:var(--amber)"></span>
+        <div class="stage human"><h3>Human review <span class="wf">Editorial Studio</span></h3>
+          <p>The editor reads the draft, edits the article and variants, and ticks off flagged claims in the Claims Gate. Clicking <b>Approve</b> marks the asset approved and calls <code>/api/pipeline/publish</code>. Auto-publish exists in code but is off in practice, because <code>require_review</code> defaults to true and the cover is never ready when the draft finishes.</p></div>
+      </div>
+      <div class="writes"><div class="w"><span class="arrow">→</span><b>assets</b> status PUBLISHED, claims_ok Y</div></div>
+    </div>
+    <div class="row">
+      <div class="trig"><span class="t">webhook publish-approved-asset</span><span class="t">cron every 5 min</span></div>
+      <div class="spine"><span class="dot" style="--c:var(--teal)"></span>
+        <div class="stage"><h3>Publish <span class="wf">03_review_publisher</span></h3>
+          <p>Takes up to 3 approved assets that have no <code>published_at</code>. Each goes to the blog, either through the tenant's webhook or the hosted getminions.ai blog (tenant zero only). It then posts to Facebook as a photo post with the blog link as the first comment, and to LinkedIn as an image post, using each tenant's channel credentials. Finally it stamps the post IDs.</p>
+          <div class="chips"><span class="chip ok">Blog</span><span class="chip ok">Facebook</span><span class="chip ok">LinkedIn</span><span class="chip off">X not wired</span></div></div>
+      </div>
+      <div class="writes"><div class="w"><span class="arrow">→</span><b>blogs</b> / tenant webhook</div><div class="w"><span class="arrow">→</span>Graph API · LinkedIn REST</div><div class="w"><span class="arrow">→</span><b>assets</b> published_at, post IDs</div></div>
+    </div>
+  </div>
+
+  <div class="ops" id="ops">
+    <div class="op"><h4>00c_stale_claim_sweeper <span class="chip ok">every 15 min</span></h4><p>Resets ideas stuck at <code>PICKED</code> for over 30 minutes with no asset back to <code>HARVESTED</code>, and sends a Telegram alert. Covers crashed draft runs.</p></div>
+    <div class="op"><h4>00c_pipeline_error_alert <span class="chip ok">error trigger</span></h4><p>Sends a Telegram alert for any failed node. It also recovers the run's <code>callback_url</code> and marks the pipeline run <code>FAILED</code>, so the HUD stops spinning.</p></div>
+    <div class="op"><h4>00b_posting_scheduler_dispatcher <span class="chip off">paused</span></h4><p>Every 5 minutes it would read tenants whose posting schedule is due, create a DRAFT pipeline run, and fire 02. Deactivated on 21 Sep when scheduled drafts were turned off.</p></div>
+  </div>
+</section>
+
+<!-- ============ WORKFLOWS ============ -->
+<section id="workflows">
+  <div class="sec-head"><h2>Workflows</h2><p>From <code>n8n/manifest.json</code> and <code>n8n/workflows/</code>: what is deployed, what starts it, and why a workflow may run on a schedule. Other workflows on the same instance belong to separate projects and are listed as ignored in the manifest.</p></div>
+  <div class="tbl"><table><thead><tr><th>Workflow</th><th>State</th><th>Triggers</th><th>Nodes</th><th>Error alerts</th></tr></thead><tbody>
+<tr><td><code>00_tenant_dispatcher</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">manual</span> <span class="chip">cron 0 0 * * *</span></div><div style="margin-top:4px">Daily 00:00 fan-out: one harvest per ACTIVE tenant, gated by the harvest budget.</div></td><td class="num">7</td><td>✓</td></tr>
+<tr><td><code>00b_posting_scheduler_dispatcher</code></td><td><span class="chip off">inactive</span></td><td><div class="chips"><span class="chip">manual</span> <span class="chip">every 5 min</span></div><div style="margin-top:4px">Every 5 min: drafts for tenants whose posting schedule is due. Deactivated 2026-09-21.</div></td><td class="num">8</td><td>✓</td></tr>
+<tr><td><code>00c_stale_claim_sweeper</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">every 15 min</span></div><div style="margin-top:4px">Every 15 min: releases ideas stuck at PICKED.</div></td><td class="num">7</td><td>✓</td></tr>
+<tr><td><code>00c_pipeline_error_alert</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">error trigger</span></div></td><td class="num">5</td><td>—</td></tr>
+<tr><td><code>01_idea_harvester</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">manual</span> <span class="chip">webhook /test-harvester</span></div></td><td class="num">40</td><td>✓</td></tr>
+<tr><td><code>02_idea_to_asset</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">manual</span> <span class="chip">webhook /test-idea-to-asset</span></div></td><td class="num">52</td><td>✓</td></tr>
+<tr><td><code>03_review_publisher</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">every 5 min</span> <span class="chip">webhook /publish-approved-asset</span></div><div style="margin-top:4px">Every 5 min: safety-net poll for approved assets the webhook missed.</div></td><td class="num">34</td><td>✓</td></tr>
+<tr><td><code>04_hero_image</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">webhook /hero-image</span></div></td><td class="num">12</td><td>✓</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============ LIFECYCLE ============ -->
+<section id="lifecycle">
+  <div class="sec-head">
+    <h2>Idea lifecycle</h2>
+    <p>The <code>ideas.status</code> column is the backbone of the pipeline. Every stage decides what to do by reading it, and claims work by changing it.</p>
+  </div>
+  <div class="life">
+    <div class="life-track">
+      <div class="st" style="--c:var(--dim)"><span class="pill">NEW</span><small>typed by a human</small></div><div class="link"></div>
+      <div class="st" style="--c:var(--blue)"><span class="pill">REFINED</span><small>01 refine or harvest</small></div><div class="link"></div>
+      <div class="st" style="--c:var(--blue)"><span class="pill">QUEUED</span><small>scheduled in Ideas<br>(drafted first)</small></div><div class="link"></div>
+      <div class="st" style="--c:var(--amber)"><span class="pill">PICKED</span><small>02 claim (CAS)<br>+ claimed_at</small></div><div class="link"></div>
+      <div class="st" style="--c:var(--violet)"><span class="pill">REVIEW</span><small>asset written,<br>draft_asset_id set</small></div><div class="link"></div>
+      <div class="st" style="--c:var(--teal)"><span class="pill">PUBLISHED</span><small>after 03 run</small></div>
+    </div>
+    <div class="life-note">
+      <span>PICKED &gt; 30 min, no asset → sweeper → HARVESTED (eligible again)</span>
+      <span>Idea with draft_asset_id is never re-drafted (reason ALREADY_DRAFTED) until its asset is deleted</span>
+      <span>02 pick order: explicit idea_id → due QUEUED (scheduled_for, queue_order) → HIGH priority REFINED/HARVESTED by batch_rank, oldest first</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODELS ============ -->
+<section id="models">
+  <div class="sec-head">
+    <h2>Prompt index</h2>
+    <p>Every place the system calls a model. Text models all go through DashScope's OpenAI-compatible endpoint (<code>dashscope-intl.aliyuncs.com</code>). The pipeline calls use <code>enable_thinking: false</code> and require a JSON-only reply. Every prompt is rendered by <code>src/lib/prompts</code> and reaches n8n through <code>/api/internal/prompts/&lt;stage&gt;</code>; in the full prompts below, <span class="v">{{placeholders}}</span> mark run-time values.</p>
+  </div>
+  <div class="tbl"><table><thead><tr><th>Stage</th><th>Model</th><th>Temp</th><th>Max tokens / size</th><th>Returns</th></tr></thead><tbody>
+<tr><th colspan="5">Content pipeline (n8n → /api/internal/prompts)</th></tr>
+<tr><td><a href="#p-refine">Refine human notes</a></td><td><code>qwen-flash</code></td><td class="num">0.6</td><td class="num">1,500</td><td>JSON array: angle, audience, pillar, priority, batch_rank, evidence_required, why, icp_relevance per row.</td></tr>
+<tr><td><a href="#p-harvest">Harvest ideas</a></td><td><code>qwen3.7-max</code></td><td class="num">0.9</td><td class="num">2,500</td><td>{&quot;ideas&quot;:[…]}, one per angle, with signal_index, priority and icp_relevance 0–100.</td></tr>
+<tr><td><a href="#p-craft">Craft notes</a></td><td><code>qwen3.7-max</code></td><td class="num">0.4</td><td class="num">1,200</td><td>{&quot;notes&quot;:[{&quot;index&quot;,&quot;craft_notes&quot;}]}, stored on the idea with craft_source_url.</td></tr>
+<tr><td><a href="#p-strategist">Executive strategist</a></td><td><code>qwen3.7-max</code></td><td class="num">0.5</td><td class="num">2,000</td><td>title, inversion_hook, core_argument, content_mode, reader, reader_objection, key_points, thumbnail_card, seo_keyword, narrative_thread, cta, evidence_needs.</td></tr>
+<tr><td><a href="#p-writer">Writer</a></td><td><code>qwen3-max</code></td><td class="num">0.7</td><td class="num">4,000</td><td>{&quot;hook&quot;,&quot;body_text&quot;}; a non-JSON reply becomes the body.</td></tr>
+<tr><td><a href="#p-editor">Editor &amp; claim extractor</a></td><td><code>qwen3.7-flash</code></td><td class="num">0.3</td><td class="num">4,000</td><td>hook, body, claims[] (claim_text, claim_type, source_url/title/date), forbidden_hits[].</td></tr>
+<tr><td><a href="#p-variants">Platform variants</a></td><td><code>qwen-flash</code></td><td class="num">0.55</td><td class="num">2,500</td><td>{&quot;li_variant&quot;,&quot;fb_variant&quot;,&quot;x_variant&quot;}, then markdown-stripped and validated.</td></tr>
+<tr><td><a href="#p-cover">Cover image</a></td><td><code>qwen-image-3.0-pro</code></td><td class="num">—</td><td class="num">1280×720</td><td>Signed image URL → /api/media/ingest (R2 WebP) → asset hero.</td></tr>
+<tr><td><a href="#p-cover_safe">Safe retry cover</a></td><td><code>qwen-image-3.0-pro</code></td><td class="num">—</td><td class="num">1280×720</td><td>Same path as the main cover; hero_provider QWEN_IMAGE_SAFE_RETRY.</td></tr>
+<tr><th colspan="5">Dashboard (onboarding)</th></tr>
+<tr><td><a href="#p-onboarding_suggestions">Brand interview suggestions</a></td><td><code>qwen-plus</code></td><td class="num">0.7</td><td class="num">800</td><td>{&quot;myths&quot;:[3],&quot;differentiators&quot;:[3],&quot;avoids&quot;:[3]}</td></tr>
+<tr><td><a href="#p-onboarding_directives">Brand copilot directives</a></td><td><code>qwen-plus</code></td><td class="num">0.7</td><td class="num">800</td><td>{&quot;positioningSummary&quot;,&quot;directives&quot;:[{category,rule_key,instruction,priority}]}, capped at 6.</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============ HARVEST ============ -->
+<section id="harvest">
+  <div class="sec-head"><h2>01 · Idea harvester</h2><p><code>Ykpl0pQTzBdZlDcA</code> · 40 nodes. Brand context comes from <code>/api/brand/context</code>, which supplies positioning, directives, author standing, tenant RSS sources, the pillar rotation for this run, and fingerprints of the 60 most recent theses. If that context is incomplete (<code>context_complete: false</code>) or has no <code>pillar_rotation</code>, the run fails instead of falling back to generic sources.</p></div>
+  <div class="wfblock">
+    <ol class="steps">
+      <li class="io"><b>Resolve Client ID</b>: takes <code>client_id</code>, <code>callback_url</code> and <code>callback_secret</code> from the webhook body. It starts only from the webhook (dispatcher, dashboard, or 02 when the queue is empty) or a manual run.</li>
+      <li class="io"><b>Read Ideas</b>: loads up to 2,000 of the tenant's ideas.</li>
+      <li class="gate"><b>Backlog Guard</b>: if more than 12 REFINED ideas are unclaimed, the run skips and reports <code>skipped: true</code> in the callback.</li>
+      <li class="io"><b>Fetch Brand Context</b>: branches into two parallel paths, A and B.</li>
+      <li class="ai"><b>A · Refine</b>: any <code>NEW</code> rows are sent to the refiner (prompt below) and saved as <code>REFINED</code> with source <code>MANUAL</code>.</li>
+      <li class="io"><b>B · Expand Tenant Sources → RSS</b>: reads one feed per active source. Without sources it falls back to Hacker News, TechCrunch AI and the n8n blog. Feed health goes to <code>/api/internal/source-status</code>.</li>
+      <li class="gate"><b>Build Harvest Payload</b>: groups signals by source, takes a rotating window of each source's <code>max_items</code> (offset by <code>harvest_run_index</code>), and caps the total at 18.</li>
+      <li class="ai"><b>Qwen Harvest</b>: generates exactly one idea per rotation angle.</li>
+      <li class="gate"><b>Attach Source URLs → Dedupe Ideas</b>: maps <code>signal_index</code> back to the article, then builds a stemmed 8-token thesis fingerprint. An idea is dropped if its fingerprint overlaps a known thesis by Jaccard 0.5 or more. This mirrors <code>src/lib/thesis.ts</code>.</li>
+      <li class="ai"><b>Fetch Source Articles → Craft Notes</b>: <code>/api/ideas/craft</code> fetches the article text, and the model describes only its structure. <b>Merge Craft</b> removes any sentence that contains a run of 9 or more words copied from the source.</li>
+      <li class="io"><b>Assign IDs → Sync Ideas to DB</b>: assigns global sequential <code>IDEA-0001</code> IDs, upserts with status <code>REFINED</code>, and reports COMPLETED with <code>harvestedCount</code>.</li>
+    </ol>
+
+    <article class="llm" id="p-refine">
+  <div class="llm-top"><div><h4><span class="tag">LLM</span>Refine human notes</h4><p>Turns rough notes a team member typed into the Ideas page into structured ideas, grounded in the tenant's priority 1–2 brand directives.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">01_idea_harvester › Build Refine Payload → Render Refine Prompt → Qwen Refine</p></div>
+  <div class="params"><span>model</span><b>qwen-flash</b><span>temperature</span><b>0.6</b><span>max tokens</span><b>1,500</b></div></div>
+  <div class="io"><div><h5>Input</h5>The tenant's directives (from /api/brand/context) and every NEW idea row.</div><div><h5>Output</h5>JSON array: angle, audience, pillar, priority, batch_rank, evidence_required, why, icp_relevance per row.</div></div>
+  <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">189 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-refine-0">Copy</button></div><pre class="p" id="p-refine-0">You are the idea refiner for the current tenant's brand. Use the supplied Brand Context as the source of truth.
+Your job is to take raw, unshaped notes entered by a human team member and sharpen each into a strategic content idea.
+
+Brand context:
+[<span class="v">{{category}}</span>] <span class="v">{{key}}</span>: <span class="v">{{content}}</span>
+
+Rules:
+- NEVER use em dashes ('—' or '--') anywhere. Use commas, periods, or parentheses.
+- Make the idea specific and useful, but do not force contrarian framing or operational friction when the source note calls for a story, observation, tutorial, or reflective point.
+- Never invent evidence, results, statistics, customer anecdotes, or market facts.
+
+Return a valid JSON array of objects with schema:
+[
+  {
+    &quot;row_index&quot;: number (0-based matching input array),
+    &quot;idea_id&quot;: string,
+    &quot;angle&quot;: &quot;sharp one-sentence angle&quot;,
+    &quot;audience&quot;: &quot;ICP&quot; | &quot;PEER&quot; | &quot;BRIDGE&quot;,
+    &quot;pillar&quot;: &quot;Operational Focus&quot; | &quot;AI Strategy&quot; | &quot;Building in Public&quot; | &quot;Contractor Realities&quot;,
+    &quot;priority&quot;: &quot;HIGH&quot; | &quot;MEDIUM&quot; | &quot;LOW&quot;,
+    &quot;batch_rank&quot;: number (1-3 relative rank),
+    &quot;evidence_required&quot;: &quot;Y&quot; | &quot;N&quot;,
+    &quot;why&quot;: &quot;one sentence explaining why this angle works&quot;,
+    &quot;icp_relevance&quot;: number (1-5)
+  }
+]
+No preamble, no markdown fences.</pre><div class="plabel"><span>User message</span><button class="copy" type="button" data-for="p-refine-1">Copy</button></div><pre class="p" id="p-refine-1">Raw ideas to refine:
+[
+  {
+    &quot;idea_id&quot;: &quot;<span class="v">{{idea_id}}</span>&quot;,
+    &quot;raw_idea&quot;: &quot;<span class="v">{{raw_idea}}</span>&quot;
+  }
+]</pre></div></details>
+</article>
+    <article class="llm" id="p-harvest">
+  <div class="llm-top"><div><h4><span class="tag">LLM</span>Harvest ideas</h4><p>The main idea generator: exactly one idea per angle in this run's pillar rotation, using a market signal only when it is directly relevant. High temperature keeps runs varied; the thesis dedupe filters repeats afterwards.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">01_idea_harvester › Build Harvest Payload → Render Harvest Prompt → Qwen Harvest</p></div>
+  <div class="params"><span>model</span><b>qwen3.7-max</b><span>temperature</span><b>0.9</b><span>max tokens</span><b>2,500</b></div></div>
+  <div class="io"><div><h5>Input</h5>Brand context (positioning, author standing, directive blocks, proof, forbidden words, rotation, recent theses) and up to 18 RSS signals.</div><div><h5>Output</h5>{&quot;ideas&quot;:[…]}, one per angle, with signal_index, priority and icp_relevance 0–100.</div></div>
+  <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">533 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-harvest-0">Copy</button></div><pre class="p" id="p-harvest-0">You are the Lead Content Strategist for <span class="v">{{company_name}}</span>.
+Generate sharp, authoritative, citable B2B content ideas aligned with this company's positioning and editorial philosophy.
+
+COMPANY POSITIONING &amp; TARGET AUDIENCE:
+<span class="v">{{positioning}}</span>
+
+AUTHOR STANDING (governs what each idea may claim as evidence, NOT how technical it is -- depth comes from the audience above):
+<span class="v">{{writer_expertise_guidance}}</span>
+
+CORE EDITORIAL PHILOSOPHY:
+- <span class="v">{{key}}</span>: <span class="v">{{instruction}}</span>
+
+CORE CONTENT THEMES:
+- <span class="v">{{key}}</span>: <span class="v">{{instruction}}</span>
+
+TARGET AUDIENCE LANES:
+- <span class="v">{{key}}</span>: <span class="v">{{instruction}}</span>
+
+VOICE &amp; STYLE DIRECTIVES:
+- <span class="v">{{instruction}}</span>
+Cadence: <span class="v">{{cadence}}</span>
+
+VERIFIED PROOF WE CAN POINT TO:
+- <span class="v">{{allowed_proof}}</span>
+
+FORBIDDEN BUZZWORDS:
+Never use: <span class="v">{{forbidden_word}}</span>
+
+
+Generate EXACTLY 3 distinct ideas, one for each angle below, in order.
+
+ANGLE 1 — <span class="v">{{pillar_1}}</span>
+<span class="v">{{brief_1}}</span>
+
+ANGLE 2 — <span class="v">{{pillar_2}}</span>
+<span class="v">{{brief_2}}</span>
+
+ANGLE 3 — <span class="v">{{pillar_3}}</span>
+<span class="v">{{brief_3}}</span>
+
+STRICT CONSTRAINTS:
+1. Ideas MUST be grounded in <span class="v">{{company_name}}</span>'s domain.
+2. Every idea must be a NEW argument. The RECENTLY COVERED list below is what this brand has already published or queued — do not restate any of it, even in different words. If your idea's core claim matches one of those fingerprints, discard it and find another.
+3. State a clear, specific thesis for each idea. Usefulness and credibility are mandatory.
+4. Use a market signal only when its title and excerpt are directly relevant. Otherwise set signal_index to null and derive the idea from positioning.
+5. Never invent a metric, result, customer anecdote, product capability, or quotation. A signal's excerpt supports only what it literally says.
+6. Each idea must take its assigned angle. Do not collapse all three into the same shape.
+7. Set signal_index to the 1-based number of the signal that inspired it, or null.
+8. Set priority per idea, not the same value every time: HIGH only for an idea tied to a time-sensitive or high-stakes signal the audience must act on now; MEDIUM for a solid, evergreen argument; LOW for a minor or speculative angle.
+9. Set icp_relevance to your own 0-100 estimate of how directly this idea matches <span class="v">{{company_name}}</span>'s positioning and audience above: 90+ only for a bullseye match, 40-60 for a plausible but generic fit, under 30 if the signal barely relates. Vary it per idea -- do not default to a fixed number.
+
+Return ONLY this JSON:
+{
+  &quot;ideas&quot;: [
+    { &quot;raw_idea&quot;: &quot;1-2 sentences&quot;, &quot;angle&quot;: &quot;One sharp, concrete claim&quot;, &quot;audience&quot;: &quot;ICP&quot;, &quot;pillar&quot;: &quot;<span class="v">{{pillar_1}}</span>&quot;, &quot;priority&quot;: &quot;HIGH | MEDIUM | LOW&quot;, &quot;target_trade&quot;: &quot;&quot;, &quot;geo_metro&quot;: &quot;National&quot;, &quot;why&quot;: &quot;Why this lands with this audience&quot;, &quot;icp_relevance&quot;: &quot;0-100 integer&quot;, &quot;evidence_required&quot;: &quot;Y&quot;, &quot;signal_index&quot;: null },
+    { &quot;raw_idea&quot;: &quot;1-2 sentences&quot;, &quot;angle&quot;: &quot;One sharp, concrete claim&quot;, &quot;audience&quot;: &quot;ICP&quot;, &quot;pillar&quot;: &quot;<span class="v">{{pillar_2}}</span>&quot;, &quot;priority&quot;: &quot;HIGH | MEDIUM | LOW&quot;, &quot;target_trade&quot;: &quot;&quot;, &quot;geo_metro&quot;: &quot;National&quot;, &quot;why&quot;: &quot;Why this lands with this audience&quot;, &quot;icp_relevance&quot;: &quot;0-100 integer&quot;, &quot;evidence_required&quot;: &quot;Y&quot;, &quot;signal_index&quot;: null },
+    { &quot;raw_idea&quot;: &quot;1-2 sentences&quot;, &quot;angle&quot;: &quot;One sharp, concrete claim&quot;, &quot;audience&quot;: &quot;ICP&quot;, &quot;pillar&quot;: &quot;<span class="v">{{pillar_3}}</span>&quot;, &quot;priority&quot;: &quot;HIGH | MEDIUM | LOW&quot;, &quot;target_trade&quot;: &quot;&quot;, &quot;geo_metro&quot;: &quot;National&quot;, &quot;why&quot;: &quot;Why this lands with this audience&quot;, &quot;icp_relevance&quot;: &quot;0-100 integer&quot;, &quot;evidence_required&quot;: &quot;Y&quot;, &quot;signal_index&quot;: null }
+  ]
+}
+Return ONLY valid JSON. No markdown code fences.</pre><div class="plabel"><span>User message</span><button class="copy" type="button" data-for="p-harvest-1">Copy</button></div><pre class="p" id="p-harvest-1">MARKET SIGNALS:
+[1] [<span class="v">{{source}}</span>] <span class="v">{{title}}</span>
+URL: <span class="v">{{url}}</span>
+Excerpt: <span class="v">{{excerpt}}</span>
+
+RECENTLY COVERED (do not repeat these arguments — each line is a keyword fingerprint of an idea already in the pipeline):
+<span class="v">{{thesis_fingerprint}}</span>
+
+Generate exactly 3 ideas for <span class="v">{{company_name}}</span>, one per assigned angle.</pre></div></details>
+</article>
+    <article class="llm" id="p-craft">
+  <div class="llm-top"><div><h4><span class="tag">LLM</span>Craft notes</h4><p>Studies how each source article is built (opening, argument order, evidence types, objections, close) without borrowing its words or claims. Merge Craft Into Ideas then strips any 9-word run copied from the source.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">01_idea_harvester › Build Craft Payload → Render Craft Prompt → Qwen Craft Notes</p></div>
+  <div class="params"><span>model</span><b>qwen3.7-max</b><span>temperature</span><b>0.4</b><span>max tokens</span><b>1,200</b></div></div>
+  <div class="io"><div><h5>Input</h5>The fetched text of each idea's source article.</div><div><h5>Output</h5>{&quot;notes&quot;:[{&quot;index&quot;,&quot;craft_notes&quot;}]}, stored on the idea with craft_source_url.</div></div>
+  <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">157 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-craft-0">Copy</button></div><pre class="p" id="p-craft-0">You are studying how a piece of writing is BUILT, the way a musician studies a song's arrangement rather than its lyrics.
+
+Describe ONLY the structure and technique:
+- How it opens, and what makes that opening earn attention.
+- The order it develops the argument in.
+- What kinds of evidence it uses (data, anecdote, analogy, authority, counterexample).
+- How it handles the reader's likely objection.
+- How it closes.
+
+HARD RULES:
+1. Never reproduce a sentence, phrase, or distinctive wording from the source. Describe the move, not the words.
+2. Never restate the source's actual claims as if they were ours. We are learning its shape, not borrowing its conclusions.
+3. Never invent detail that is not present in the source.
+4. Write at most 120 words, as terse technique notes.
+
+Return ONLY JSON: {&quot;craft_notes&quot;: &quot;...&quot;}
+
+You will receive several numbered articles. Return {&quot;notes&quot;:[{&quot;index&quot;:1,&quot;craft_notes&quot;:&quot;...&quot;}]} with one entry per article.</pre><div class="plabel"><span>User message</span><button class="copy" type="button" data-for="p-craft-1">Copy</button></div><pre class="p" id="p-craft-1">[1] <span class="v">{{title}}</span>
+URL: <span class="v">{{url}}</span>
+---
+<span class="v">{{article_text}}</span></pre></div></details>
+</article>
+  </div>
+</section>
+
+<!-- ============ DRAFT ============ -->
+<section id="draft">
+  <div class="sec-head"><h2>02 · Idea to asset</h2><p><code>0ZeUkMgGXpBKVB2A</code> · 52 nodes. The strategist writes the brief, the writer drafts, the editor fact-checks, and the distributor adapts the piece per platform. Brand voice comes from three sources: <code>brand_directives</code> (priority 1–2 and audience-scoped), <code>brand_profile</code>, and up to 5 <code>tone_examples</code>.</p></div>
+  <div class="wfblock">
+    <ol class="steps">
+      <li class="io"><b>Generate run_id</b>: carries <code>idea_id</code>, <code>client_id</code> and the callback details from the dashboard. It starts only from the webhook or a manual run.</li>
+      <li class="gate"><b>Select Target → Claim Idea Row</b>: chooses the idea, then PATCHes it to <code>PICKED</code> only if <code>status</code>, <code>claimed_at</code> and a null <code>draft_asset_id</code> still match. If another run already claimed it, this run does nothing. If there is nothing to draft, it fires the harvester (<code>SCHEDULER_CASCADE_EMPTY_QUEUE</code>).</li>
+      <li class="io"><b>Read Brand · Brand Profile · Tone Examples · Posting Schedule</b>: loaded in parallel.</li>
+      <li class="gate"><b>Assemble Brand Context</b>: picks the hook archetype deterministically from the pillar. <em>Myth / contrarian / architecture / systems</em> gives INVERSION. <em>Stakes / economics</em> gives DIRECT COST. Anything else gives SCENE-FIRST. Brand context is capped at 8,000 characters, and only PROOF rows with <code>approved: true</code> and an http(s) source are included as verified proof.</li>
+      <li class="ai"><b>Executive Strategist</b>: produces the brief and the cover-card copy.</li>
+      <li class="gate"><b>Need Evidence?</b>: if the idea is <code>evidence_required = Y</code> or the strategist listed <code>evidence_needs</code>, the signals are formatted as <code>SUPPLIED_SOURCE_n</code> leads and each need becomes an <code>UNVERIFIED_NEED_n</code> marker that must not be stated as fact.</li>
+      <li class="ai"><b>Writer</b>: drafts the article. <b>Editor</b>: tightens it and extracts claims.</li>
+      <li class="gate"><b>Parse Claims and Gate</b>: matches each claim against approved proof (at least 3 shared significant words and ≥40% overlap). An unbacked STATISTIC, FACT, MARKET_CLAIM or PRODUCT_CLAIM sets <code>claims_ok = N</code>. An unapproved CUSTOMER_RESULT sets it to <code>BLOCKED</code>.</li>
+      <li class="ai"><b>Variants</b>: writes the LinkedIn, Facebook and X posts. The same node assembles the <b>cover image prompt</b>.</li>
+      <li class="gate"><b>Validate Social Variants</b>: checks for empty variants, X over 280 characters or more than 1 hashtag, LinkedIn over 2 hashtags, the Minions brand appearing in another tenant's copy, and invented client stories.</li>
+      <li class="gate"><b>Prepare Asset Row</b>: runs a word-boundary scan for FORBIDDEN directives, and any hit makes the draft <code>BLOCKED</code>. It assigns a byline (a random founder for tenant zero, otherwise “{Brand} Team”) and sets <code>hero_status: PENDING</code>. Auto-publish requires claims Y, no review, and a permanent hero, so in practice drafts are never auto-published.</li>
+      <li class="io"><b>Sync Idea (REVIEW) → Sync Asset → Asset Write OK?</b>: any non-2xx response throws, so the error workflow marks the run FAILED. The run then writes claims, sends a Telegram notice, and reports COMPLETED with the <code>assetId</code>, while in parallel <b>Dispatch Hero Generation</b> fires 04.</li>
+    </ol>
+
+    <div class="note" style="--c:var(--violet)"><b>Hook archetype instructions</b> are injected into the strategist prompt as <code>${hookArchetype}</code> and <code>${archetypeInstruction}</code>:<br>
+      INVERSION: “Contrast a common industry assumption against a practical architectural observation… Never use dramatic or arrogant words like ‘dogma’.”<br>
+      DIRECT COST: “Open with the concrete, immediate consequence of inaction or bad architecture, stated clearly and objectively.”<br>
+      SCENE-FIRST: “Open inside a specific, recognizable operational moment the reader has lived, then reveal what is actually happening underneath it.”</div>
+
+    <article class="llm" id="p-strategist">
+  <div class="llm-top"><div><h4><span class="tag">LLM</span>Executive strategist</h4><p>Settles the argument before any writing: the hook (archetype picked in code from the pillar), reader, content mode, key points, SEO keyword, throughline, and the cover brief.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">02_idea_to_asset › Assemble Brand Context → Render Strategist Prompt → Executive Strategist Agent</p></div>
+  <div class="params"><span>model</span><b>qwen3.7-max</b><span>temperature</span><b>0.5</b><span>max tokens</span><b>2,000</b></div></div>
+  <div class="io"><div><h5>Input</h5>The idea, the assembled brand block (≤8,000 chars, with verified proof) and the author standing.</div><div><h5>Output</h5>title, inversion_hook, core_argument, content_mode, reader, reader_objection, key_points, thumbnail_card, seo_keyword, narrative_thread, cta, evidence_needs.</div></div>
+  <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">586 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-strategist-0">Copy</button></div><pre class="p" id="p-strategist-0">You are the lead strategist and visual art director for <span class="v">{{brand_name}}</span>, setting a distinctive, evidence-aware standard rooted in this brand's own voice and audience.
+
+You decide the intellectual argument and visual metaphor before writing begins.
+
+Reasoning process:
+Step 1 — The Hook: For THIS idea, you MUST use the INVERSION hook archetype: Contrast a common industry assumption against a practical architectural observation, using thoughtful, grounded engineering language (e.g. &quot;Common assumption: X. Practical observation: Y.&quot;). Never use dramatic or arrogant words like &quot;dogma&quot; or &quot;undeniable truth&quot;. Write 1-2 punchy sentences in exactly that style.
+Step 2 — The Reader: Describe the most specific real person implied by the Brand Context and this idea. Never default to a software or engineering persona unless the brand and idea support it.
+Step 3 — The Visual Art Direction for Cover Art:
+  - First decide the visual register from the article's ACTUAL subject matter: PHYSICAL_TRADE or ABSTRACT_DATA.
+  - Cover Headline: 3 to 5 bold words written like a Wall Street Journal or Apple Newsroom cover line: a sharp, concrete claim or consequence in this brand's own voice. Never an abstract category-level pairing (do not write things like 'Fluency Vs Accuracy', 'Speed Versus Quality', or 'AI Scheduling Explained'). Name the specific thing that breaks, or the specific outcome, not the abstraction it belongs to.
+  - Cover Subtitle: One short sentence, under 90 characters, stating the concrete stake or consequence for the reader in plain editorial-magazine language, the way a magazine dek reads. NEVER start with 'Explaining', 'Understanding', 'A look at', 'How to', or any other explainer-caption framing. State the point directly.
+  - Secondary Visual Motif: One vivid sentence describing a SINGLE small flat line-icon detail that echoes this topic. Never a full studio scene, never multiple objects, never a table or professional-photography setup.
+Step 4 — SEO &amp; GEO Targeting: Identify the exact keyword phrase (2-5 words) and state the single narrative throughline.
+Step 5 — Headline Craft: Write a clear, specific title in this brand's voice. Lead with the reader's problem, a useful claim, or a concrete consequence. Avoid imitation, clickbait, and abstract X-versus-Y framing.
+
+Formatting Rules:
+- NEVER use em dashes ('—' or '--'). Use periods, commas, colons, or parentheses.
+- Avoid pretentious or guru jargon: never use words like 'dogma', 'undeniable truth', 'guru', 'revolutionizing'.
+
+Evidence Discipline:
+- Only state a statistic, percentage, or dollar figure as fact if it is grounded in the Brand Context or Evidence provided.
+
+Author Standing (governs what this draft may claim as evidence and how assertive it may be, NOT how technical it is -- depth comes from the Brand Context audience):
+<span class="v">{{writer_standing}}</span>
+
+
+Return ONLY this JSON:
+{
+  &quot;title&quot;: &quot;string, a sharp headline&quot;,
+  &quot;inversion_hook&quot;: &quot;1-2 punchy sentences using the hook archetype&quot;,
+  &quot;core_argument&quot;: &quot;one sentence, sharp and direct&quot;,
+  &quot;content_mode&quot;: &quot;INSIGHT | STORY | HOW_TO | CASE_NOTE | OPINION&quot;,
+  &quot;reader&quot;: &quot;one sentence, maximally specific&quot;,
+  &quot;reader_objection&quot;: &quot;the specific skeptical thought&quot;,
+  &quot;key_points&quot;: [&quot;3-5 items, each a specific concrete point&quot;],
+  &quot;thumbnail_card&quot;: {
+    &quot;badge&quot;: &quot;FIELD PLAYBOOK&quot;,
+    &quot;headline&quot;: &quot;3-5 BOLD WORDS, a sharp concrete claim, never an abstract X Vs Y pairing&quot;,
+    &quot;subtitle&quot;: &quot;one short editorial dek sentence, under 90 characters, stating the stake directly&quot;,
+    &quot;visual_register&quot;: &quot;PHYSICAL_TRADE or ABSTRACT_DATA&quot;,
+    &quot;physical_scene&quot;: &quot;one vivid sentence describing a single small flat line-icon motif, not a full scene&quot;
+  },
+  &quot;seo_keyword&quot;: &quot;string, 2-5 word search phrase&quot;,
+  &quot;narrative_thread&quot;: &quot;one sentence describing the single throughline argument&quot;,
+  &quot;cta&quot;: &quot;string&quot;,
+  &quot;evidence_needs&quot;: []
+}
+
+Return ONLY valid JSON. No markdown code fences.</pre><div class="plabel"><span>User message</span><button class="copy" type="button" data-for="p-strategist-1">Copy</button></div><pre class="p" id="p-strategist-1">Target Idea:
+ID: <span class="v">{{idea_id}}</span>
+Audience: <span class="v">{{audience}}</span>
+Pillar: The Myth
+Raw Idea: <span class="v">{{raw_idea}}</span>
+Angle: <span class="v">{{angle}}</span>
+Why: <span class="v">{{why}}</span>
+
+Brand Context:
+<span class="v">{{brand_context}}</span></pre></div></details>
+</article>
+    <article class="llm" id="p-writer">
+  <div class="llm-top"><div><h4><span class="tag">LLM</span>Writer</h4><p>Writes the article as one argument in 3–5 sections shaped by the content mode, with an SEO/GEO answer passage, 1–3 sentence paragraphs and no invented evidence.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">02_idea_to_asset › Build Writer Payload → Render Writer Prompt → Qwen Call 2 Writer</p></div>
+  <div class="params"><span>model</span><b>qwen3-max</b><span>temperature</span><b>0.7</b><span>max tokens</span><b>4,000</b></div></div>
+  <div class="io"><div><h5>Input</h5>Strategy JSON, evidence block, brand context, tone questionnaire and up to 5 tone examples.</div><div><h5>Output</h5>{&quot;hook&quot;,&quot;body_text&quot;}; a non-JSON reply becomes the body.</div></div>
+  <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">826 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-writer-0">Copy</button></div><pre class="p" id="p-writer-0">You are the lead writer for <span class="v">{{company_name}}</span>. Write in this brand's own voice for its actual audience. Prioritize specificity, usefulness, and an earned point of view over imitation or generic polish.
+
+THE NARRATIVE ARC: Build one continuous argument around strategy.narrative_thread. Choose 3 to 5 sections based on strategy.content_mode and the evidence actually available. Do not force every idea into the same template. Each section needs a short, specific '## ' heading in this brand's own language, never an imitation of another company and never a generic label such as 'Introduction' or 'How It Works'.
+
+CONTENT-MODE STRUCTURE:
+- INSIGHT: observation, mechanism, consequence, practical implication.
+- STORY: scene, tension, turning point, earned lesson. Never invent first-person experience or a customer story.
+- HOW_TO: problem definition, method, concrete steps, checks or tradeoffs.
+- CASE_NOTE: context, intervention, result, limitations. Use only when supplied evidence supports every factual detail and result.
+- OPINION: clear position, reasons, strongest counterpoint, practical conclusion.
+Use only the sections the idea earns. Open with strategy.inversion_hook, then make each section advance the same argument instead of restarting. End with 2 to 4 concrete actions when useful; do not manufacture a checklist for a reflective story or opinion.
+
+SEO &amp; GEO (Generative Engine Optimization):
+- Weave strategy.seo_keyword naturally into the hook and once more in the takeaways. Never force it in an unnatural sentence.
+- At least one '## ' heading must closely echo the seo_keyword or the literal question a searcher or AI assistant would type about this topic, paraphrased naturally (not the raw keyword stuffed in), so it can be extracted as a direct answer to that query.
+- Near the top, include one self-contained 2-3 sentence passage that directly and definitively answers the reader's core question in plain language, written so it could be quoted standalone by Google or an AI assistant without needing the rest of the article for context.
+- Headings must read as real, specific chapter titles a human editor would write (concrete nouns, numbers, or stakes), never generic labels like 'Introduction' or 'Conclusion'.
+
+TARGET LENGTH: Match depth to evidence and reader need. Aim for 350 to 700 words for a substantial article, but prefer a shorter honest note over padded prose. Every sentence must add evidence, interpretation, or practical value.
+
+STYLE &amp; VELOCITY RULES:
+- STRICT CADENCE: Maximum 1 to 3 sentences per paragraph. This creates high reading velocity. Never allow dense blocks of text.
+- NO EM DASHES: Zero em dashes ('—' or '--'). Use periods, commas, colons, or parentheses.
+- PRECISE VERBS OVER HYPE WORDS: Use concrete, literal language for every claim, saying exactly what changes and for whom. Avoid inflated marketing words such as 'revolutionizing', 'game changer', 'paradigm shift', 'seamless', 'delve', 'testament', 'in today's world', 'beacon'.
+- NO INVENTED EVIDENCE: Never create statistics, customer stories, measured results, quotations, source titles, or URLs. A strategy key point is not evidence. Only repeat a factual detail when it appears verbatim in a supplied source excerpt or verified Brand Context proof. Otherwise write it as analysis, opinion, or an explicitly hypothetical example without fake precision.
+- STAY ON THE READER'S PROBLEM: Keep body_text entirely about the reader's operational problem and the mechanism that solves it. Founders, the bootstrap story, and phone numbers belong only in the site's CTA footer, never in article content. Describe only real, current <span class="v">{{company_name}}</span> capabilities.
+- VARY YOUR CONTRAST SENTENCES: Do not open more than one paragraph in this article with 'There is no', 'This is not a', or 'It is not a'. These phrasings are overused across our content already; use direct, differently-shaped phrasing every time instead.
+- STRUCTURAL MARKDOWN REQUIRED: Every section must open with its own '## ' heading as a standalone paragraph, separated by a blank line from surrounding text. When the selected structure earns tactical actions, put each in its own paragraph with a short bolded action phrase followed by a colon. Do not use decorative markdown or repetitive section counts.
+
+FORMAT EXAMPLE (structure and cadence only; invent your own topic, claims, wording, and bridge sentence every time, never reuse any sentence from these instructions verbatim): '## The Real Cost of Idle Trucks
+Fleet dispatchers treat idle time as a scheduling nuisance. It is actually a fuel-cost sinkhole that compounds every week a route goes unoptimized.' End each beat with a bridge sentence whose SHAPE varies between beats: sometimes restate the stake, sometimes pose the implicit next question, sometimes name the mechanism to come. Never use the fixed phrase 'that gap is where' as a bridge; invent fresh phrasing specific to this article every time.
+
+Return ONLY this JSON:
+{
+  &quot;hook&quot;: &quot;two punchy sentences attacking the acute pain point directly&quot;,
+  &quot;body_text&quot;: &quot;the complete article with a structure chosen for this idea and 1-3 sentence paragraph cadence&quot;
+}
+
+Return ONLY valid JSON. No preamble, no code fences.</pre><div class="plabel"><span>User message</span><button class="copy" type="button" data-for="p-writer-1">Copy</button></div><pre class="p" id="p-writer-1">Strategy:
+{
+  &quot;…&quot;: &quot;<span class="v">{{strategy_json}}</span>&quot;
+}
+
+Evidence:
+<span class="v">{{evidence_block}}</span>
+
+Brand Context:
+<span class="v">{{brand_context}}</span>
+
+Tone profile: {&quot;…&quot;:&quot;<span class="v">{{tone_questionnaire}}</span>&quot;}
+
+Match this voice (few-shot examples of how <span class="v">{{company_name}}</span> actually writes):
+[Example 1]
+<span class="v">{{tone_example}}</span></pre></div></details>
+</article>
+    <article class="llm" id="p-editor">
+  <div class="llm-top"><div><h4><span class="tag">LLM</span>Editor &amp; claim extractor</h4><p>Tightens the draft while keeping its structure, then lists and classifies every checkable assertion. Its claims feed the deterministic claims gate.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">02_idea_to_asset › Parse Writer Output → Render Editor Prompt → Qwen Call 3 Editor</p></div>
+  <div class="params"><span>model</span><b>qwen3.7-flash</b><span>temperature</span><b>0.3</b><span>max tokens</span><b>4,000</b></div></div>
+  <div class="io"><div><h5>Input</h5>Hook, draft body, brand context, supplied evidence.</div><div><h5>Output</h5>hook, body, claims[] (claim_text, claim_type, source_url/title/date), forbidden_hits[].</div></div>
+  <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">344 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-editor-0">Copy</button></div><pre class="p" id="p-editor-0">You are the editor for <span class="v">{{company_name}}</span>. Preserve the brand's point of view while improving clarity, specificity, accuracy, and platform-ready readability.
+
+Editing Rules:
+1. REMOVE ALL EM DASHES: Replace every em dash ('—' or '--') with standard punctuation (periods, commas, colons, or parentheses). No em dashes are allowed.
+2. PRESERVE STRUCTURAL MARKDOWN, STRIP DECORATIVE MARKDOWN: Keep every '## ' heading line and every 'Rule 1:'/'Rule 2:'/'Rule 3:' line exactly as-is, each on its own standalone paragraph. These map directly to the live site's visual components (heading dividers and tactical rule cards); deleting or merging them flattens the article into plain paragraphs. Outside of those, strip decorative asterisks (* or **) and backticks. Keep text clean and natural.
+3. SHARPEN THE OPENING: Make it specific, credible, and relevant. Do not manufacture drama or use clickbait.
+4. EXTRACT CLAIMS: Extract every externally checkable assertion, including numbers, benchmarks, technical statements, product capabilities, market statements, and customer anecdotes. Never invent a source URL. Attach a source only when it appears in the supplied Evidence and supports the exact wording.
+5. PRESERVE NARRATIVE FLOW: Do not delete or reorder the bridge sentences connecting each section to the next section's premise. If a cut is necessary for clarity, keep the connective transition intact.
+
+Classify claims:
+STATISTIC | FACT | CUSTOMER_RESULT | MARKET_CLAIM | PRODUCT_CLAIM | OPINION
+
+Classification guidance: if a number or claim is phrased with hedge language (&quot;could&quot;, &quot;for example&quot;, &quot;a shop like this&quot;, &quot;might&quot;), classify it as OPINION, never STATISTIC/FACT/PRODUCT_CLAIM/MARKET_CLAIM, since it was deliberately written as an illustrative example, not a verified measurement. Only use STATISTIC/FACT/PRODUCT_CLAIM/MARKET_CLAIM when the sentence asserts something as real, current, measured fact.
+
+Return ONLY this JSON:
+{
+  &quot;hook&quot;: &quot;two punchy sentences directly attacking the acute pain point&quot;,
+  &quot;body&quot;: &quot;the fully edited article, retaining useful ## headings and minimal structural markdown&quot;,
+  &quot;claims&quot;: [
+    {
+      &quot;claim_text&quot;: &quot;verbatim claim sentence&quot;,
+      &quot;claim_type&quot;: &quot;STATISTIC|FACT|CUSTOMER_RESULT|MARKET_CLAIM|PRODUCT_CLAIM|OPINION&quot;,
+      &quot;source_url&quot;: &quot;string or null&quot;,
+      &quot;source_title&quot;: &quot;string or null&quot;,
+      &quot;source_date&quot;: &quot;string or null&quot;
+    }
+  ],
+  &quot;forbidden_hits&quot;: []
+}
+
+Return ONLY valid JSON. No markdown code fences.</pre><div class="plabel"><span>User message</span><button class="copy" type="button" data-for="p-editor-1">Copy</button></div><pre class="p" id="p-editor-1">Hook:
+<span class="v">{{hook}}</span>
+
+Draft Body:
+<span class="v">{{draft_body}}</span>
+
+Brand Context:
+<span class="v">{{brand_context}}</span>
+
+Supplied Evidence:
+<span class="v">{{evidence_block}}</span></pre></div></details>
+</article>
+    <article class="llm" id="p-variants">
+  <div class="llm-top"><div><h4><span class="tag">LLM</span>Platform variants</h4><p>Rewrites the article as LinkedIn, Facebook and X posts. LinkedIn must open with the strategist's hook; links are added as first comments at publish time.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">02_idea_to_asset › Parse Claims and Gate → Render Variants Prompt → Qwen Call 4 Variants</p></div>
+  <div class="params"><span>model</span><b>qwen-flash</b><span>temperature</span><b>0.55</b><span>max tokens</span><b>2,500</b></div></div>
+  <div class="io"><div><h5>Input</h5>Hook, edited body, brand context, tone profile and examples, audience, title.</div><div><h5>Output</h5>{&quot;li_variant&quot;,&quot;fb_variant&quot;,&quot;x_variant&quot;}, then markdown-stripped and validated.</div></div>
+  <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">538 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-variants-0">Copy</button></div><pre class="p" id="p-variants-0">You are the platform-distribution stage for a <span class="v">{{company_name}}</span> content asset.
+You must generate 3 platform variants (LinkedIn, Facebook, and Twitter/X), each precisely shaped to the authentic voice, reader attitude, and algorithm of that specific platform.
+
+CRITICAL VOICE &amp; PERSONA RULES (MANDATORY):
+- Persona: Use the identity, expertise, audience, and cadence from the Brand Context. Never default every brand to a software engineer or generic creator.
+- Banned Tone &amp; Posture:
+  • NEVER sound arrogant, overconfident, or guru-like.
+  • NEVER use phrases like &quot;You are doing X wrong&quot;, &quot;Industry dogma&quot;, &quot;Undeniable truth&quot;, or &quot;Stuck in quicksand&quot;.
+  • NEVER use fake engagement/lead-magnet bait such as &quot;DM me for the template&quot; or &quot;Comment 'X' to receive my guide&quot;.
+  • Ground each point in the brand's real expertise, supplied proof, and the audience's practical context. Never imply first-person testing or experience unless it was supplied.
+  • End naturally. A question is optional, never mandatory.
+
+Platform Attitudes:
+1. LINKEDIN VARIANT:
+   - Target Reader Mindset: The specific professional audience described in Brand Context and the idea.
+   - Structure: Short paragraphs of 1-2 sentences each, separated by a blank line. The opening paragraph must be a single standalone hook line. Follow with 4-5 short paragraphs, building the argument step by step with clear technical nuance.
+   - Opening hook: The Pre-Crafted Hook below was already built by the strategy stage using a deliberate archetype (a specific consequence, a scene the reader recognizes, or a sharp contrast). Open with it verbatim or lightly sharpened for LinkedIn's cadence. Do NOT discard it in favor of a generic thesis restatement like &quot;X does not equal Y&quot; or &quot;X is not the same as Y&quot; -- that abstraction is exactly what makes a hook forgettable. The hook must name a concrete, recognizable moment or stake the reader has actually lived, not a category-level claim.
+   - Style: Usually 80-220 words, adapting to the idea. Deliver professional knowledge, a distinctive point of view, or practical advice without empty hooks.
+   - Closing: End with a useful observation or a natural discussion question. Max 2 relevant hashtags.
+
+2. FACEBOOK VARIANT:
+   - Style &amp; Structure: Usually 60-180 words in plain language for a broader audience. Never invent a customer story or first-person experience.
+   - Closing: A question is optional and should appear only when it invites a real perspective.
+
+3. TWITTER / X VARIANT:
+   - Style &amp; Structure: One clear observation or useful takeaway, conversational and concise.
+   - Strict Limit: 280 characters. Use no hashtags by default and at most one only when the Brand Context asks for it.
+
+Universal Rules:
+- NEVER state statistics not in the body.
+- NEVER use em dashes ('—' or '--').
+- NO RAW MARKDOWN (*, **, ###, `). Write clean, natural text.
+- Never include links in main text.
+
+Return ONLY this JSON:
+{
+  &quot;li_variant&quot;: &quot;the full clean LinkedIn post text&quot;,
+  &quot;fb_variant&quot;: &quot;the full clean Facebook post text&quot;,
+  &quot;x_variant&quot;: &quot;the full clean Twitter / X post text&quot;
+}
+Return ONLY valid JSON. No markdown fences.</pre><div class="plabel"><span>User message</span><button class="copy" type="button" data-for="p-variants-1">Copy</button></div><pre class="p" id="p-variants-1">Pre-Crafted Hook (from the strategy stage -- open the LinkedIn variant with this, verbatim or lightly sharpened, instead of writing a new one):
+<span class="v">{{hook}}</span>
+
+Final Body:
+<span class="v">{{edited_body}}</span>
+
+Brand Context:
+<span class="v">{{brand_context}}</span>
+
+Tone Profile:
+{&quot;…&quot;:&quot;<span class="v">{{tone_questionnaire}}</span>&quot;}
+
+Voice Examples:
+[Example 1] <span class="v">{{tone_example}}</span>
+
+Idea Audience: <span class="v">{{audience}}</span>
+Title: <span class="v">{{title}}</span></pre></div></details>
+</article>
+  </div>
+</section>
+
+<!-- ============ HERO ============ -->
+<section id="hero">
+  <div class="sec-head"><h2>04 · Hero image</h2><p><code>10vre0a16gvu32Hu</code> · 12 nodes. 02 (Parse Variants and Prepare Rows) sends <code>cover_inputs</code>: the strategist's <code>thumbnail_card</code>, the title and the tenant's brand colors. 04 renders the prompt through <code>/api/internal/prompts/cover</code>.</p></div>
+  <div class="wfblock">
+    <div class="twocol">
+      <div class="note" style="--c:var(--coral)"><b>Headline</b> comes from <code>thumbnail_card.headline</code> (3–5 bold words); one word is rendered in brand coral. <b>Kicker</b> is <code>thumbnail_card.subtitle</code>, cut at a word boundary to 90 characters or fewer. <b>Wordmark</b> is the company name, set in top-right ink.</div>
+      <div class="note" style="--c:var(--coral)"><b>Corner icon</b>: the strategist's <code>physical_scene</code> is used unless it mentions trade hardware on a non-trade account, is shorter than 25 characters, or mentions a “clipboard”. In those cases a keyword router picks a line glyph instead: chat bubble, soundwave, bar chart, node flow or dashboard card for abstract topics, and wrench+droplet, gauge, headset, bolt, roof or magnifier for trade topics.</div>
+    </div>
+    <ol class="steps">
+      <li class="io"><b>Read Hero Request → Render Cover Prompt</b>: reads <code>asset_id</code> and <code>cover_inputs</code>, then renders the cover prompt. A pre-rendered <code>image_prompt</code> from an older 02 run skips the render.</li>
+      <li class="ai"><b>Qwen Image 3.0 Pro</b>: <code>size 1280*720</code>, <code>prompt_extend: true</code>, 120s timeout.</li>
+      <li class="gate"><b>Needs Safe Image Retry? → Render Safe Cover Prompt</b>: if no image URL comes back, it retries with the fixed safe prompt and <code>prompt_extend: false</code>.</li>
+      <li class="io"><b>Upload Hero to R2</b>: calls <code>/api/media/ingest</code>, which downloads the image, converts it with sharp to WebP, and stores it under <code>assets/</code>.</li>
+      <li class="gate"><b>Resolve Hero Outcome</b>: sets READY only when the R2 upload succeeded. An Alibaba URL alone never counts, because it expires in about 24h. A safety refusal (DataInspectionFailed) sets BLOCKED_BY_SAFETY; anything else sets FAILED.</li>
+      <li class="io"><b>Attach Hero to Asset → Attach OK?</b>: throws on a non-2xx response so a cover that silently never arrives becomes a visible error.</li>
+    </ol>
+    <article class="llm" id="p-cover">
+  <div class="llm-top"><div><h4><span class="tag img">image</span>Cover image</h4><p>A type-led editorial cover on a cream ground: headline with one word in brand coral, a short kicker, a small wordmark and one corner line icon (the strategist's motif, or the keyword router's). Sent with prompt_extend on, 1280×720.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">04_hero_image › Read Hero Request → Render Cover Prompt → Qwen Image 3.0 Pro Generation</p></div>
+  <div class="params"><span>model</span><b>qwen-image-3.0-pro</b><span>size</span><b>1280×720</b></div></div>
+  <div class="io"><div><h5>Input</h5>thumbnail_card, title, idea text and trade, brand colors and name.</div><div><h5>Output</h5>Signed image URL → /api/media/ingest (R2 WebP) → asset hero.</div></div>
+  <details class="prompt"><summary><span>Show full prompt</span><span class="n">344 words</span></summary><div class="pbody"><div class="plabel"><span>Image prompt</span><button class="copy" type="button" data-for="p-cover-0">Copy</button></div><pre class="p" id="p-cover-0">High-end editorial blog cover and thumbnail (16:9 widescreen, 1K resolution, clean commercial graphic design, NOT photorealistic studio photography):
+
+Background &amp; Canvas: Warm, light, off-white/cream backdrop (<span class="v">{{brand_cream}}</span>), evenly lit, minimal texture, soft and airy. Generous negative space. Never dark, never a studio table, never a photographic backdrop.
+
+Typography &amp; Branding (Type-Led -- this is the dominant element of the entire composition, filling most of the left/center of the frame):
+1. Bold Headline: Large, bold, ultra-clean geometric sans-serif headline: &quot;<span class="v">{{headline}}</span>&quot; filling the left ~60% of the frame, tight kerning, generous line spacing. Render it mostly in solid high-contrast near-black (<span class="v">{{primary_ink}}</span>), except render the single most important word of the headline in solid <span class="v">{{brand_coral}}</span> for emphasis, exactly like a magazine pull-quote.
+2. Small Kicker Line: One short line of regular-weight text directly beneath the headline, in a muted gray, roughly a third the headline's size: &quot;<span class="v">{{kicker}}</span>&quot;
+3. Small Top-Right Brand Wordmark: a small, sharp, high-contrast wordmark reading &quot;<span class="v">{{company_name}}</span>&quot; in solid <span class="v">{{primary_ink}}</span> with tight, clean letterforms. Keep it modest in size, never competing with the headline.
+
+Secondary Visual Accent (small, corner-positioned, NEVER the focal point -- a quiet supporting detail only, no larger than roughly 12% of the frame's width and height combined):
+<span class="v">{{corner_icon (strategist motif or router text)}}</span>
+Render it as a single flat, thin two-color line icon with no shading, no gradients, no drop shadow, no 3D pedestal or perspective -- flat vector iconography, not a small illustration or product render.
+
+STRICT TEXT RULE: The headline, the kicker line, and the wordmark are the ONLY text allowed anywhere in the image. Do NOT render any badges, tags, category pills, author name, byline, date, caption, watermark, or fine print. If you are not certain an element belongs to those, omit it entirely.
+
+Aesthetic Style: The exact editorial standard of a modern SaaS/dev-tools blog (Stripe, Linear, Wall Street Journal digital covers): light, minimal, bold confident typography that carries the design, huge negative space, one small quiet supporting graphic. No dark studio tables, no flat-lay of physical objects, no holograms, no glowing effects, no stock-photo product-shot look, no clutter.</pre></div></details>
+</article>
+    <article class="llm" id="p-cover_safe">
+  <div class="llm-top"><div><h4><span class="tag img">image</span>Safe retry cover</h4><p>Used only when the main cover returns no image, usually a content-safety refusal. Fixed, text-free and tenant-neutral; sent with prompt_extend off.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">04_hero_image › Needs Safe Image Retry? → Render Safe Cover Prompt → Qwen Image Safe Retry</p></div>
+  <div class="params"><span>model</span><b>qwen-image-3.0-pro</b><span>size</span><b>1280×720</b></div></div>
+  <div class="io"><div><h5>Input</h5>None.</div><div><h5>Output</h5>Same path as the main cover; hero_provider QWEN_IMAGE_SAFE_RETRY.</div></div>
+  <details class="prompt"><summary><span>Show full prompt</span><span class="n">63 words</span></summary><div class="pbody"><div class="plabel"><span>Image prompt</span><button class="copy" type="button" data-for="p-cover_safe-0">Copy</button></div><pre class="p" id="p-cover_safe-0">Create a premium 16:9 editorial still-life photograph for a business publication. Use a deep graphite desk, a clean unmarked paper document, a matte metal paperweight, and a red pen. Use restrained teal and coral accent lighting, crisp softbox shadows, realistic materials, generous negative space, and no text. Do not include people, logos, brand names, interfaces, legal claims, headlines, badges, watermarks, or readable writing.</pre></div></details>
+</article>
+  </div>
+</section>
+
+<!-- ============ PUBLISH ============ -->
+<section id="publish">
+  <div class="sec-head"><h2>03 · Review publisher</h2><p><code>4GNbfvmveKtbJrVd</code> · 34 nodes No model calls. It publishes what a human approved.</p></div>
+  <div class="wfblock">
+    <ol class="steps">
+      <li class="io"><b>Read Approved Assets</b>: <code>claims_ok=Y · status=PUBLISHED · published_at is null</code>, oldest first, 3 at a time. The webhook and the 5-minute cron run the same query.</li>
+      <li class="gate"><b>Filter Approved Assets</b>: puts the hero image at the top of the markdown body if none is embedded, and maps the <code>facebook_variant</code> and <code>linkedin_variant</code> columns.</li>
+      <li class="io"><b>Resolve Blog Channel</b>: if the tenant set a blog webhook, POSTs the article there. Otherwise, the hosted <code>blogs</code> upsert applies only to <code>tenant-zero-getminions-ai</code>, and every other tenant is tagged “skipped”.</li>
+      <li class="io"><b>Resolve Facebook Channel</b>: <code>/api/channels/credential?channel=facebook</code>. If it is active and has a token, posts the hero image with <code>fb_variant</code> as the caption to <code>/{page}/photos</code>, then comments with the blog link.</li>
+      <li class="io"><b>Resolve LinkedIn Channel</b>: downloads the hero, calls <code>images?action=initializeUpload</code>, PUTs the binary, then POSTs to <code>/rest/posts</code> with the image URN and <code>li_variant</code> as commentary.</li>
+      <li class="io"><b>Merge Publish Results → Mark Asset Published</b>: stamps <code>published_at</code>, <code>published_urls</code>, and the Facebook and LinkedIn post IDs with their timestamps, then sends a Telegram alert.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ FRAGMENTS ============ -->
+<section id="fragments">
+  <div class="sec-head"><h2>Injected prompt fragments</h2><p>Several parts of the prompts above are not written in the prompt itself. Code chooses or assembles them at run time and splices them in: the author-standing text, this run's angles, the hook archetype, the brand, evidence and voice blocks, and the cover's corner icon. Every variant is listed here.</p></div>
+  <div class="wfblock">
+  <article class="llm" id="f-expertise"><div class="llm-top"><div><h4><span class="tag">fragment</span>Author standing</h4><p><code>src/constants/writerExpertise.ts</code>. The tenant's choice is injected word for word into the harvest, strategist and brand-copilot prompts. It bounds what the author may claim as evidence, not reading level. Default: PRACTITIONER.</p></div></div><details class="prompt"><summary><span>Show all 3 variants</span></summary><div class="pbody"><div class="plabel"><span>EXPLORER · “Still learning”</span></div><pre class="p">The AUTHOR is early in this field and has no track record to draw on. This constrains EVIDENCE, not reading level -- the audience directives alone decide how technical the writing gets. Never write a sentence that implies years of experience, a personal war story, a client engagement, or an operational result the author achieved ('when I ran...', 'every team I've worked with...', 'in my experience...'). Never invent a metric, benchmark, named company, or quotation to fill the gap. Ground every claim in something external and checkable: the source article, public documentation, published benchmarks, or clearly-labeled reasoning. Curiosity is the honest posture -- 'here is what this changes and why it matters' rather than 'here is what I have learned the hard way'. Prefer explaining a development accurately over ruling on it. Where a judgment is genuinely warranted, mark it as a reading of the evidence, not a verdict from experience. This is a constraint on claims, never a licence to be vague or hedge everything.</pre><div class="plabel"><span>PRACTITIONER · “Working in it”</span></div><pre class="p">The AUTHOR works in this field hands-on and may speak from direct experience with their own projects and builds. First-person operational claims are available ('when we wired this up', 'the failure mode we kept hitting'), but they must stay generic to the author's own work -- never invent a named client, a specific revenue figure, or a quantified result that was not supplied. Judgments should be stated plainly and defended with the reasoning or the mechanism behind them. Confident where the author has actually done the work; explicitly provisional where they are reasoning about something they have only read about.</pre><div class="plabel"><span>AUTHORITY · “Deep expertise”</span></div><pre class="p">The AUTHOR has deep, long-standing expertise and the standing to make strong calls. Definitive judgments are appropriate and expected -- state the position first and support it, rather than building up to a cautious maybe. Pattern claims across many cases are available ('this fails the same way every time'), as is disagreeing directly with prevailing practice. Still never fabricate a specific metric, named client, or quotation. The distinguishing move is the confident, well-reasoned verdict a newcomer could not credibly deliver.</pre></div></details></article>
+<article class="llm" id="f-angles"><div class="llm-top"><div><h4><span class="tag">fragment</span>Pillar rotation</h4><p><code>src/constants/contentAngles.ts</code>. Each harvest takes 3 of these 10 angles, starting at <code>runIndex % 10</code> and taking every 3rd, so consecutive runs get different combinations. The pillar later decides the strategist's hook archetype.</p></div></div><div class="tbl" style="border:0;border-top:1px solid var(--line);border-radius:0"><table><thead><tr><th>Pillar</th><th>id</th><th>Brief (injected verbatim)</th></tr></thead><tbody><tr><td>The Stakes</td><td><code>stakes</code></td><td>Make the cost of inaction or a bad decision concrete. Show a specific, recognizable scenario where the wrong choice costs money, downtime, or trust. Ground it in realistic operational consequences, not invented figures.</td></tr><tr><td>The Myth</td><td><code>myth</code></td><td>Name a widespread belief in this field that is wrong or outdated, and argue against it. Contrarian and debate-worthy, but the argument must stand on reasoning the reader can check.</td></tr><tr><td>How It Works</td><td><code>mechanism</code></td><td>Explain a real mechanism, workflow, or sequence that solves a genuine operational headache. Deep and specific enough that a practitioner recognizes it as true.</td></tr><tr><td>The Trade-off</td><td><code>tradeoff</code></td><td>Take two credible options this audience actually chooses between and lay out where each one wins. Refuse the easy 'it depends' -- state which conditions decide it.</td></tr><tr><td>What Went Wrong</td><td><code>postmortem</code></td><td>Walk through a failure pattern this audience recognizes: what looked reasonable at the time, where it broke, and the earliest signal that would have caught it. No invented case studies -- describe the pattern, not a fabricated client.</td></tr><tr><td>What Changed</td><td><code>shift</code></td><td>Identify something that recently changed in this field -- a rule, a price, a capability, a norm -- and explain what it makes newly possible or newly foolish. Timely interpretation, not news summary.</td></tr><tr><td>The Uncomfortable Truth</td><td><code>counterintuitive</code></td><td>Say the thing practitioners privately agree on but rarely publish. It must be defensible and specific, not merely provocative.</td></tr><tr><td>Decision Guide</td><td><code>decision</code></td><td>Give the reader a way to decide something they are currently stuck on. Name the criteria in the order they actually matter and what disqualifies an option outright.</td></tr><tr><td>First Principles</td><td><code>firstprinciples</code></td><td>Strip a widely-copied practice back to why it exists, then show which parts are essential and which are cargo cult carried over from a context that no longer applies.</td></tr><tr><td>What Good Looks Like</td><td><code>benchmark</code></td><td>Describe the standard a competent operation actually hits, concretely enough that a reader can measure themselves against it and find the gap.</td></tr></tbody></table></div></article>
+<article class="llm" id="f-hooks"><div class="llm-top"><div><h4><span class="tag">fragment</span>Hook archetypes</h4><p><code>hookArchetypeFor()</code> in <code>src/lib/prompts/strategist.ts</code>, matched on the idea's pillar.</p></div></div><div class="tbl" style="border:0;border-top:1px solid var(--line);border-radius:0"><table><thead><tr><th>Archetype</th><th>Pillar contains</th><th>Instruction</th></tr></thead><tbody><tr><td><code>INVERSION</code></td><td>myth / contrarian / architecture / systems</td><td>Contrast a common industry assumption against a practical architectural observation, using thoughtful, grounded engineering language (e.g. &quot;Common assumption: X. Practical observation: Y.&quot;). Never use dramatic or arrogant words like &quot;dogma&quot; or &quot;undeniable truth&quot;.</td></tr><tr><td><code>DIRECT COST</code></td><td>stakes / econom…</td><td>Open with the concrete, immediate consequence of inaction or bad architecture, stated clearly and objectively.</td></tr><tr><td><code>SCENE-FIRST</code></td><td>anything else</td><td>Open inside a specific, recognizable operational moment the reader has lived, then reveal what is actually happening underneath it.</td></tr></tbody></table></div></article>
+<article class="llm" id="f-icons"><div class="llm-top"><div><h4><span class="tag img">fragment</span>Cover corner-icon router</h4><p>In <code>src/lib/prompts/cover.ts</code>. Replaces the strategist's <code>physical_scene</code> when it is empty, shorter than 25 characters, mentions a clipboard, or shows trade hardware on a non-trade topic. Keywords match title + idea + angle + trade; first match wins.</p></div></div><div class="tbl" style="border:0;border-top:1px solid var(--line);border-radius:0"><table><thead><tr><th>Register</th><th>Keywords</th><th>Injected text</th></tr></thead><tbody><tr><td>abstract</td><td><code>conversation · chatbot · agent · ai · prompt · llm · intent</code></td><td>A small, minimal line-art glyph in the bottom-right corner only: a simple rounded chat-bubble outline with a single checkmark inside, rendered in thin #7C8CFF strokes on transparent ground. No monitors, no printed documents, no photographed hardware -- a small icon only, a supporting detail, not the main composition.</td></tr><tr><td>abstract</td><td><code>voice · call · latency · telecom · audio · phone · dispatch</code></td><td>A small, minimal line-art glyph in the bottom-right corner only: a simple soundwave icon inside a rounded call-bubble outline, rendered in thin #7C8CFF strokes on transparent ground. No monitors, no tablets, no printed diagrams -- a small icon only, a supporting detail, not the main composition.</td></tr><tr><td>abstract</td><td><code>price · pricing · revenue · cost · econom · margin · roi</code></td><td>A small, minimal line-art glyph in the bottom-right corner only: a simple upward bar-chart icon with one bar filled solid in #7C8CFF, thin outline strokes on transparent ground. No monitors, no ledgers, no invoices -- a small icon only, a supporting detail, not the main composition.</td></tr><tr><td>abstract</td><td><code>architect · system · infrastructure · pipeline · workflow · automation</code></td><td>A small, minimal line-art glyph in the bottom-right corner only: three simple connected-node dots forming a small flow diagram, rendered in thin #7C8CFF strokes on transparent ground. No monitors, no blueprints, no geometric object clusters -- a small icon only, a supporting detail, not the main composition.</td></tr><tr><td>abstract</td><td><code>(fallback)</code></td><td>A small, minimal line-art glyph in the bottom-right corner only: a simple dashboard-card icon with a single checkmark, rendered in thin #7C8CFF strokes on transparent ground. No monitors, no printed pages, no brass objects -- a small icon only, a supporting detail, not the main composition.</td></tr><tr><td>trade</td><td><code>slab · leak · pipe · plumb · water</code></td><td>A small, single line-art icon in the bottom-right corner only: a simple wrench crossed with a water-droplet outline, rendered in thin #0E5C63 strokes on transparent ground. Not a photograph, not a full flat-lay, not multiple objects -- one small icon only, a supporting detail, not the main composition.</td></tr><tr><td>trade</td><td><code>attic · heat · capacitor · compressor · hvac · refrigerant</code></td><td>A small, single line-art icon in the bottom-right corner only: a simple gauge-dial outline with a temperature glyph, rendered in thin #0E5C63 strokes on transparent ground. Not a photograph, not a full flat-lay, not multiple objects -- one small icon only, a supporting detail, not the main composition.</td></tr><tr><td>trade</td><td><code>voice · call · telecom · latency · audio · phone</code></td><td>A small, single line-art icon in the bottom-right corner only: a simple headset outline with a soundwave glyph, rendered in thin #0E5C63 strokes on transparent ground. Not a photograph, not a full flat-lay, not multiple objects -- one small icon only, a supporting detail, not the main composition.</td></tr><tr><td>trade</td><td><code>electric · wire · volt · panel · breaker</code></td><td>A small, single line-art icon in the bottom-right corner only: a simple lightning-bolt outline inside a circuit-node glyph, rendered in thin #0E5C63 strokes on transparent ground. Not a photograph, not a full flat-lay, not multiple objects -- one small icon only, a supporting detail, not the main composition.</td></tr><tr><td>trade</td><td><code>roof · storm · hail · flashing</code></td><td>A small, single line-art icon in the bottom-right corner only: a simple house-roof outline with a shield glyph, rendered in thin #0E5C63 strokes on transparent ground. Not a photograph, not a full flat-lay, not multiple objects -- one small icon only, a supporting detail, not the main composition.</td></tr><tr><td>trade</td><td><code>pest · termite · moisture</code></td><td>A small, single line-art icon in the bottom-right corner only: a simple magnifying-glass outline over a leaf glyph, rendered in thin #0E5C63 strokes on transparent ground. Not a photograph, not a full flat-lay, not multiple objects -- one small icon only, a supporting detail, not the main composition.</td></tr><tr><td>trade</td><td><code>(fallback)</code></td><td>A small, single line-art icon in the bottom-right corner only: a simple gear-and-checkmark glyph, rendered in thin #0E5C63 strokes on transparent ground. Not a photograph, not a full flat-lay, not multiple objects -- one small icon only, a supporting detail, not the main composition.</td></tr></tbody></table></div></article>
+  </div>
+</section>
+
+<!-- ============ ONBOARDING ============ -->
+<section id="onboarding">
+  <div class="sec-head"><h2>Onboarding prompts (dashboard)</h2><p>These are the only model calls made from the Next.js app itself (<code>DASHSCOPE_API_KEY</code>). They run once per tenant during onboarding, and their output becomes the <code>brand_directives</code> that every pipeline prompt reads later.</p></div>
+  <div class="wfblock">
+    <article class="llm" id="p-onboarding_suggestions">
+  <div class="llm-top"><div><h4><span class="tag">LLM</span>Brand interview suggestions</h4><p>Onboarding step 2: tap-to-use suggestion chips for the three brand-interview questions. Single user message; on failure the static INDUSTRY_SUGGESTIONS map is used.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">dashboard · src/lib/ai/brandCopilot.ts → POST /api/onboarding/brand-suggestions</p></div>
+  <div class="params"><span>model</span><b>qwen-plus</b><span>temperature</span><b>0.7</b><span>max tokens</span><b>800</b></div></div>
+  <div class="io"><div><h5>Input</h5>Business name, industry, headline, website summary (≤800 chars), up to 3 post samples.</div><div><h5>Output</h5>{&quot;myths&quot;:[3],&quot;differentiators&quot;:[3],&quot;avoids&quot;:[3]}</div></div>
+  <details class="prompt"><summary><span>Show full prompt</span><span class="n">207 words</span></summary><div class="pbody"><div class="plabel"><span>User message (only message)</span><button class="copy" type="button" data-for="p-onboarding_suggestions-0">Copy</button></div><pre class="p" id="p-onboarding_suggestions-0">You are a world-class brand strategist calibrating a personalized content engine during onboarding.
+
+Business: <span class="v">{{business_name}}</span>
+Industry: <span class="v">{{industry}}</span>
+Role / Headline: <span class="v">{{linkedin_headline}}</span>
+Their Website (real content, use this as your primary source of truth):
+<span class="v">{{website_summary}}</span>
+
+User's Pasted Post / Writing Sample:
+Sample 1: &quot;<span class="v">{{post_sample}}</span>&quot;
+
+Task:
+Generate 3 highly relevant, non-generic suggestions for each of the 3 brand interview questions below, grounded specifically in this business and industry -- not generic marketing boilerplate.
+1. A common myth or bad advice in their industry they might disagree with.
+2. Their likely #1 differentiator (why clients would hire them).
+3. Topics or claims they should strictly avoid.
+
+Style rules -- these are short tap-to-use suggestions shown as UI chips, not essays:
+- Each suggestion is ONE plain-language sentence, 6-14 words.
+- Write like a sharp human colleague talking, not a press release. No jargon, no buzzwords (&quot;seamless&quot;, &quot;revolutionize&quot;, &quot;game-changing&quot;), no filler adjectives.
+- Be concrete and specific to the business/industry given -- a suggestion that could apply to any company is a failure.
+
+Return ONLY a single valid JSON object (no markdown, no explanation, no fake company names):
+{
+  &quot;myths&quot;: [&quot;myth 1&quot;, &quot;myth 2&quot;, &quot;myth 3&quot;],
+  &quot;differentiators&quot;: [&quot;diff 1&quot;, &quot;diff 2&quot;, &quot;diff 3&quot;],
+  &quot;avoids&quot;: [&quot;avoid 1&quot;, &quot;avoid 2&quot;, &quot;avoid 3&quot;]
+}</pre></div></details>
+</article>
+    <article class="llm" id="p-onboarding_directives">
+  <div class="llm-top"><div><h4><span class="tag">LLM</span>Brand copilot directives</h4><p>Onboarding step 3: turns the user's three answers into the 5–6 brand directives and positioning summary every later prompt reads. Single user message; on failure the route uses fixed templates.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">dashboard · src/lib/ai/brandCopilot.ts → POST /api/onboarding/brand-copilot</p></div>
+  <div class="params"><span>model</span><b>qwen-plus</b><span>temperature</span><b>0.7</b><span>max tokens</span><b>800</b></div></div>
+  <div class="io"><div><h5>Input</h5>Business, industry, audience, content focus, headline, website summary, the three answers, voice sample, author standing.</div><div><h5>Output</h5>{&quot;positioningSummary&quot;,&quot;directives&quot;:[{category,rule_key,instruction,priority}]}, capped at 6.</div></div>
+  <details class="prompt"><summary><span>Show full prompt</span><span class="n">193 words</span></summary><div class="pbody"><div class="plabel"><span>User message (only message)</span><button class="copy" type="button" data-for="p-onboarding_directives-0">Copy</button></div><pre class="p" id="p-onboarding_directives-0">You are a world-class editorial strategist setting up a brand's content guardrails during onboarding.
+
+Business: <span class="v">{{business_name}}</span>
+Industry: <span class="v">{{industry}}</span>
+Audience: <span class="v">{{audience}}</span>
+Content territory they want to own: <span class="v">{{content_focus}}</span>
+Founder/operator's professional headline: <span class="v">{{linkedin_headline}}</span>
+Their website (real content, use this as your primary source of truth):
+<span class="v">{{website_summary}}</span>
+
+Myth they disagree with: <span class="v">{{myth_answer}}</span>
+Their #1 differentiator: <span class="v">{{differentiator_answer}}</span>
+Topics/claims to strictly avoid: <span class="v">{{avoid_answer}}</span>
+Writing sample to match, if present: <span class="v">{{voice_sample}}</span>
+
+Author standing (governs what the directives may claim as evidence, NOT how technical they are -- reading level comes from the audience above):
+<span class="v">{{writer_expertise_guidance}}</span>
+
+Task:
+Write 5-6 sharp, specific brand directives grounded in the answers above (do not invent facts not implied by them), plus a 1-2 sentence positioning summary. Each directive's &quot;instruction&quot; must be a concrete, actionable rule for an AI writer -- not vague marketing language.
+
+Categories to use (exactly these strings): &quot;POSITIONING&quot; (who they are / their differentiator), &quot;TOPICS&quot; (the subject-matter territory to generate ideas within), &quot;VOICE&quot; (tone and cadence), &quot;FORBIDDEN&quot; (topics/claims/buzzwords to never use).
+
+Return ONLY a single valid JSON object (no markdown, no explanation):
+{
+  &quot;positioningSummary&quot;: &quot;1-2 sentence summary&quot;,
+  &quot;directives&quot;: [
+    { &quot;category&quot;: &quot;POSITIONING&quot;, &quot;rule_key&quot;: &quot;short_snake_case_key&quot;, &quot;instruction&quot;: &quot;...&quot;, &quot;priority&quot;: 1 }
+  ]
+}</pre></div></details>
+</article>
+  </div>
+</section>
+
+<!-- ============ GUARDS ============ -->
+<section id="guards">
+  <div class="sec-head"><h2>Guardrails that don't rely on the prompt</h2><p>The prompts ask for good behavior, and these code checks enforce it. None of them uses a model.</p></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Guard</th><th>Where</th><th>Rule</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td>Harvest budget</td><td>00 → /api/internal/harvest-slot</td><td>System-wide daily run limit across tenants</td><td>Tenant skipped for the day</td></tr>
+      <tr><td>Backlog guard</td><td>01 Backlog Guard</td><td>More than 12 unclaimed REFINED ideas</td><td>Harvest skipped</td></tr>
+      <tr><td>Degraded context</td><td>01 Build Harvest Payload</td><td><code>context_complete=false</code> or empty rotation</td><td>Run throws</td></tr>
+      <tr><td>Thesis dedupe</td><td>01 Dedupe Ideas</td><td>Stemmed 8-token fingerprint, Jaccard ≥ 0.5 vs recent theses + backlog</td><td>Idea dropped</td></tr>
+      <tr><td>Verbatim guard</td><td>01 Merge Craft</td><td>Any 9-word run found in the source</td><td>Sentence replaced by […]</td></tr>
+      <tr><td>Atomic claim</td><td>02 Claim Idea Row</td><td>PATCH only if status, claimed_at and draft_asset_id unchanged</td><td>Concurrent run no-ops</td></tr>
+      <tr><td>One idea, one asset</td><td>02 Select Target</td><td>draft_asset_id already set</td><td>ALREADY_DRAFTED</td></tr>
+      <tr><td>Claims gate</td><td>02 Parse Claims and Gate</td><td>Unbacked stat/fact/market/product claim; unapproved customer result</td><td><code>N</code> / <code>BLOCKED</code></td></tr>
+      <tr><td>Banned words</td><td>02 Prepare Asset Row</td><td>FORBIDDEN directive found in body or any variant</td><td><code>BLOCKED</code></td></tr>
+      <tr><td>Variant validation</td><td>02 Validate Social Variants</td><td>Empty, X &gt; 280 chars or &gt; 1 hashtag, LinkedIn &gt; 2 hashtags, brand leak, fake client story</td><td>Errors listed in Telegram</td></tr>
+      <tr><td>Em-dash scrub</td><td>every parse node</td><td><code>—</code> and <code>--</code> → <code>, </code></td><td>Rewritten in place</td></tr>
+      <tr><td>Write verification</td><td>02 Asset Write OK? · 04 Attach OK?</td><td>Non-2xx from PostgREST / hero attach</td><td>Throws → run FAILED</td></tr>
+      <tr><td>Permanent hero</td><td>04 Resolve Hero Outcome</td><td>Only an R2 URL is READY</td><td>Expiring URL never stored</td></tr>
+      <tr><td>Stale claim</td><td>00c sweeper</td><td>PICKED more than 30 min with no asset</td><td>Reset to HARVESTED</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ DATA ============ -->
+<section id="data">
+  <div class="sec-head"><h2>Data &amp; services</h2><p>n8n talks to Supabase directly through PostgREST for bulk reads and writes. Anything that needs app logic, secrets or tenant-scoped credentials goes through the dashboard's API.</p></div>
+  <div class="twocol">
+    <div class="tbl"><table style="min-width:0">
+      <thead><tr><th>Supabase table</th><th>Read by</th><th>Written by</th></tr></thead>
+      <tbody>
+        <tr><td><code>clients</code></td><td>00</td><td>—</td></tr>
+        <tr><td><code>ideas</code></td><td>01, 02</td><td>01, 02, sweeper</td></tr>
+        <tr><td><code>brand_directives</code></td><td>02</td><td>dashboard</td></tr>
+        <tr><td><code>brand_profile</code></td><td>02</td><td>dashboard</td></tr>
+        <tr><td><code>tone_examples</code></td><td>02</td><td>dashboard</td></tr>
+        <tr><td><code>posting_schedules</code></td><td>02, 00b</td><td>00b</td></tr>
+        <tr><td><code>assets</code></td><td>02, 03</td><td>02, 03, 04 (via API)</td></tr>
+        <tr><td><code>claims</code></td><td>—</td><td>02</td></tr>
+        <tr><td><code>blogs</code></td><td>getminions.ai</td><td>03 (tenant zero)</td></tr>
+        <tr><td><code>pipeline_runs</code></td><td>dashboard HUD</td><td>callbacks, 00b, 00c</td></tr>
+      </tbody>
+    </table></div>
+    <div class="tbl"><table style="min-width:0">
+      <thead><tr><th>Dashboard endpoint</th><th>Called by</th></tr></thead>
+      <tbody>
+        <tr><td><code>/api/internal/harvest-slot</code></td><td>00</td></tr>
+        <tr><td><code>/api/brand/context</code></td><td>01</td></tr>
+        <tr><td><code>/api/ideas/craft</code></td><td>01</td></tr>
+        <tr><td><code>/api/internal/source-status</code></td><td>01</td></tr>
+        <tr><td><code>/api/media/ingest</code></td><td>04</td></tr>
+        <tr><td><code>/api/internal/assets/hero</code></td><td>04</td></tr>
+        <tr><td><code>/api/channels/credential</code></td><td>03</td></tr>
+        <tr><td><code>/api/pipeline/runs/{id}</code></td><td>01, 02, 00c (callbacks)</td></tr>
+        <tr><td><code>/api/internal/schedule/eligible-tenants</code></td><td>00b</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <div class="tbl" style="margin-top:14px"><table>
+    <thead><tr><th>Dashboard → n8n</th><th>Webhook</th><th>trigger_source</th></tr></thead>
+    <tbody>
+      <tr><td><code>/api/pipeline/harvest</code>, onboarding complete</td><td><code>/webhook/test-harvester</code></td><td>MINIONS_COCKPIT_EDITORIAL · TENANT_DISPATCHER_SCHEDULED · SCHEDULER_CASCADE_EMPTY_QUEUE</td></tr>
+      <tr><td><code>/api/pipeline/draft</code></td><td><code>/webhook/test-idea-to-asset</code></td><td>MINIONS_COCKPIT_EDITORIAL · POSTING_SCHEDULER</td></tr>
+      <tr><td><code>/api/pipeline/publish</code></td><td><code>/webhook/publish-approved-asset</code></td><td>MINIONS_COCKPIT_EDITORIAL</td></tr>
+      <tr><td>02 Dispatch Hero Generation</td><td><code>/webhook/hero-image</code></td><td>—</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ RISKS ============ -->
+<section id="risks">
+  <div class="sec-head"><h2>Open risks</h2><p>Known bugs the n8n lint currently tolerates: <code>lintAllow</code> entries marked <code>OPEN RISK</code> in <code>n8n/manifest.json</code>. Fixing one means fixing the workflow and deleting its entry.</p></div>
+  <div class="findings"><div class="f"><span class="sev md">Open</span><div><h4>02_idea_to_asset › Dispatch Hero Generation</h4><p>if 04 cannot be reached the asset's cover stays PENDING with no alert.</p></div></div>
+<div class="f"><span class="sev md">Open</span><div><h4>01_idea_harvester › Sync Ideas to DB</h4><p>a rejected upsert still reports the harvest COMPLETED with ideas that were never stored.</p></div></div>
+<div class="f"><span class="sev md">Open</span><div><h4>01_idea_harvester › Sync Refined Ideas to DB</h4><p>a rejected upsert leaves the idea at NEW with no alert.</p></div></div>
+<div class="f"><span class="sev md">Open</span><div><h4>02_idea_to_asset › Sync Idea to DB</h4><p>the idea may stay PICKED while its asset exists; the sweeper does not release it because draft_asset_id is unset.</p></div></div>
+<div class="f"><span class="sev md">Open</span><div><h4>02_idea_to_asset › Sync Claims to DB</h4><p>claims can be lost while the draft reports COMPLETED.</p></div></div>
+<div class="f"><span class="sev md">Open</span><div><h4>03_review_publisher › Mark_Asset_Published_DB</h4><p>if this fails, published_at stays null and the 5-min poll re-posts the asset to Facebook and LinkedIn.</p></div></div>
+<div class="f"><span class="sev md">Open</span><div><h4>03_review_publisher › Publish_to_Blog</h4><p>a failed hosted-blog upsert is still marked published.</p></div></div>
+<div class="f"><span class="sev md">Open</span><div><h4>03_review_publisher › Publish_to_LinkedIn</h4><p>a failed LinkedIn post is still marked published, with linkedin_post_id null.</p></div></div></div>
+</section>
+
+<footer>Generated by <code>npm run n8n:docs</code> from <code>n8n/</code> and <code>src/lib/prompts</code>. Edit those, not this file.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var pre=document.getElementById(b.dataset.for);
+    var text=pre.innerText;
+    var done=function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)};
+    try{navigator.clipboard.writeText(text).then(done,function(){sel(pre)})}catch(e){sel(pre)}
+  });
+});
+function sel(el){var r=document.createRange();r.selectNodeContents(el);var s=getSelection();s.removeAllRanges();s.addRange(r)}
+var tog=document.getElementById('toggleAll');
+</script>
