@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { RUN_CALLBACK_STATUSES } from "@/constants/pipelineContracts";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireClientId } from "@/lib/tenant";
@@ -54,7 +55,7 @@ export async function PATCH(
     metadata?: Record<string, unknown>;
   };
 
-  const allowed = ["RUNNING", "COMPLETED", "FAILED"];
+  const allowed: readonly string[] = RUN_CALLBACK_STATUSES;
   if (!status || !allowed.includes(status)) {
     return apiFailure(`status must be one of ${allowed.join(", ")}`, 400);
   }

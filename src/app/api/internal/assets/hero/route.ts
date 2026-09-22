@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { verifyWebhookSecret } from "@/lib/security";
+import { TERMINAL_HERO_STATUSES, type TerminalHeroStatus } from "@/constants/pipelineContracts";
 
 /** Terminal states the hero workflow may report. PENDING is set by the drafter. */
-const TERMINAL = ["READY", "BLOCKED_BY_SAFETY", "FAILED"] as const;
-type TerminalHeroStatus = (typeof TERMINAL)[number];
+const TERMINAL = TERMINAL_HERO_STATUSES;
 
 /**
  * Attaches a generated cover image to an asset that was drafted without one.
