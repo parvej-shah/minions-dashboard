@@ -29,6 +29,21 @@ n8n/
 Credentials: set `N8N_API_URL` and `N8N_API_KEY` in `.env.local`. Secrets
 never live in the graph; nodes reference n8n credentials or `$env`.
 
+## Prompts
+
+n8n does not build prompts. A Code node gathers the data a stage needs into
+`prompt_inputs`, a `Render … Prompt` node POSTs it to
+`/api/internal/prompts/<stage>`, and the model call sends the returned
+`payload` unchanged. The prompts live in `src/lib/prompts/`.
+
+`src/test/n8n/prompts.test.ts` runs each real Code node, renders its inputs,
+and compares the result against `src/test/n8n/golden/`. Changing a prompt
+therefore changes a golden file, and that diff is what gets reviewed:
+
+```
+UPDATE_GOLDEN=1 npx vitest run src/test/n8n
+```
+
 ## Lint rules
 
 Every rule exists because the problem it catches shipped at least once.
@@ -42,6 +57,7 @@ Every rule exists because the problem it catches shipped at least once.
 | `secret-literal` | Tokens and keys pasted into parameters | Would leak into git |
 | `missing-error-workflow` | Active workflows with no error workflow | 00 and 01 failures left runs RUNNING with no alert |
 | `unchecked-write` | Writes with `neverError` and no status check after | A rejected asset write reported success for a full day |
+| `prompt-outside-repo` | Model calls not fed by a `Render … Prompt` node, or prompt text in a Code node | Prompts lived in n8n where no review or test could see them |
 | `code-syntax` | Code nodes that do not parse | Only surfaced when a live run reached the node |
 | `disabled-node` | Disabled nodes | Git keeps the history; delete instead |
 

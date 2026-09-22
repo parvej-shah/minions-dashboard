@@ -1,0 +1,16 @@
+{
+  "model": "qwen3.7-max",
+  "enable_thinking": false,
+  "temperature": 0.4,
+  "max_tokens": 1200,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are studying how a piece of writing is BUILT, the way a musician studies a song's arrangement rather than its lyrics.\n\nDescribe ONLY the structure and technique:\n- How it opens, and what makes that opening earn attention.\n- The order it develops the argument in.\n- What kinds of evidence it uses (data, anecdote, analogy, authority, counterexample).\n- How it handles the reader's likely objection.\n- How it closes.\n\nHARD RULES:\n1. Never reproduce a sentence, phrase, or distinctive wording from the source. Describe the move, not the words.\n2. Never restate the source's actual claims as if they were ours. We are learning its shape, not borrowing its conclusions.\n3. Never invent detail that is not present in the source.\n4. Write at most 120 words, as terse technique notes.\n\nReturn ONLY JSON: {\"craft_notes\": \"...\"}\n\nYou will receive several numbered articles. Return {\"notes\":[{\"index\":1,\"craft_notes\":\"...\"}]} with one entry per article."
+    },
+    {
+      "role": "user",
+      "content": "[1] Cold snap hits Ohio\nURL: https://news.example/cold\n---\nTemperatures drop below zero across the state.\n\n=====\n\n[2] Tankless sales climb\nURL: https://blog.example/tankless\n---\nHomeowners are switching."
+    }
+  ]
+}

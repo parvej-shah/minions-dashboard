@@ -23,12 +23,30 @@
         ]
       ]
     },
+    "Needs Cover Render?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Render Cover Prompt",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Qwen Image 3.0 Pro Generation",
+            "type": "main"
+          }
+        ]
+      ]
+    },
     "Needs Safe Image Retry?": {
       "main": [
         [
           {
             "index": 0,
-            "node": "Prepare Safe Image Retry",
+            "node": "Render Safe Cover Prompt",
             "type": "main"
           }
         ],
@@ -36,17 +54,6 @@
           {
             "index": 0,
             "node": "Upload Hero to R2",
-            "type": "main"
-          }
-        ]
-      ]
-    },
-    "Prepare Safe Image Retry": {
-      "main": [
-        [
-          {
-            "index": 0,
-            "node": "Qwen Image Safe Retry",
             "type": "main"
           }
         ]
@@ -79,7 +86,29 @@
         [
           {
             "index": 0,
+            "node": "Needs Cover Render?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Render Cover Prompt": {
+      "main": [
+        [
+          {
+            "index": 0,
             "node": "Qwen Image 3.0 Pro Generation",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Render Safe Cover Prompt": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Qwen Image Safe Retry",
             "type": "main"
           }
         ]
@@ -182,6 +211,40 @@
       "webhookId": "b7c1e9a4-2d53-47f8-9e21-4a6d8c3f1b90"
     },
     {
+      "id": "9a6efcd1-af70-5859-a18b-7e8e3a5549e2",
+      "name": "Needs Cover Render?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "needs-cover-render",
+              "leftValue": "={{ $json.needs_render }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": true
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "position": [
+        -160,
+        300
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2
+    },
+    {
       "id": "hero-needs-retry-04",
       "name": "Needs Safe Image Retry?",
       "parameters": {
@@ -212,19 +275,6 @@
         300
       ],
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2
-    },
-    {
-      "id": "hero-prep-retry-04",
-      "name": "Prepare Safe Image Retry",
-      "parameters": {
-        "jsCode": "@file:code/prepare-safe-image-retry.js"
-      },
-      "position": [
-        320,
-        180
-      ],
-      "type": "n8n-nodes-base.code",
       "typeVersion": 2
     },
     {
@@ -293,7 +343,7 @@
             }
           ]
         },
-        "jsonBody": "={{ JSON.stringify({ model: \"qwen-image-3.0-pro\", input: { messages: [{ role: \"user\", content: [{ text: $json.safe_image_prompt }] }] }, parameters: { prompt_extend: false, size: \"1280*720\" } }) }}",
+        "jsonBody": "={{ JSON.stringify({ model: \"qwen-image-3.0-pro\", input: { messages: [{ role: \"user\", content: [{ text: $json.image_prompt }] }] }, parameters: { prompt_extend: false, size: \"1280*720\" } }) }}",
         "method": "POST",
         "options": {
           "response": {
@@ -327,6 +377,62 @@
       ],
       "type": "n8n-nodes-base.code",
       "typeVersion": 2
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "bd59190f-18c0-532c-b0be-aaa28566ea04",
+      "name": "Render Cover Prompt",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ JSON.stringify($json.cover_inputs) }}",
+        "method": "POST",
+        "options": {
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/prompts/cover"
+      },
+      "position": [
+        60,
+        460
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "13e7c6d1-2901-5bb0-a388-80f70476129d",
+      "name": "Render Safe Cover Prompt",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ JSON.stringify({}) }}",
+        "method": "POST",
+        "options": {
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/prompts/cover_safe"
+      },
+      "position": [
+        320,
+        180
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
     },
     {
       "id": "hero-resolve-04",

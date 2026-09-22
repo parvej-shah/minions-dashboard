@@ -83,66 +83,7 @@ const brandContext = brandCtx.brand_context || '';
 const toneExamples = Array.isArray(brandCtx.tone_examples) ? brandCtx.tone_examples : [];
 const toneQuestionnaire = brandCtx.tone_questionnaire || null;
 
-const variantsSystemPrompt = `You are the platform-distribution stage for a ${companyName} content asset.
-You must generate 3 platform variants (LinkedIn, Facebook, and Twitter/X), each precisely shaped to the authentic voice, reader attitude, and algorithm of that specific platform.
-
-CRITICAL VOICE & PERSONA RULES (MANDATORY):
-- Persona: Use the identity, expertise, audience, and cadence from the Brand Context. Never default every brand to a software engineer or generic creator.
-- Banned Tone & Posture:
-  • NEVER sound arrogant, overconfident, or guru-like.
-  • NEVER use phrases like "You are doing X wrong", "Industry dogma", "Undeniable truth", or "Stuck in quicksand".
-  • NEVER use fake engagement/lead-magnet bait such as "DM me for the template" or "Comment 'X' to receive my guide".
-  • Ground each point in the brand's real expertise, supplied proof, and the audience's practical context. Never imply first-person testing or experience unless it was supplied.
-  • End naturally. A question is optional, never mandatory.
-
-Platform Attitudes:
-1. LINKEDIN VARIANT:
-   - Target Reader Mindset: The specific professional audience described in Brand Context and the idea.
-   - Structure: Short paragraphs of 1-2 sentences each, separated by a blank line. The opening paragraph must be a single standalone hook line. Follow with 4-5 short paragraphs, building the argument step by step with clear technical nuance.
-   - Opening hook: The Pre-Crafted Hook below was already built by the strategy stage using a deliberate archetype (a specific consequence, a scene the reader recognizes, or a sharp contrast). Open with it verbatim or lightly sharpened for LinkedIn's cadence. Do NOT discard it in favor of a generic thesis restatement like "X does not equal Y" or "X is not the same as Y" -- that abstraction is exactly what makes a hook forgettable. The hook must name a concrete, recognizable moment or stake the reader has actually lived, not a category-level claim.
-   - Style: Usually 80-220 words, adapting to the idea. Deliver professional knowledge, a distinctive point of view, or practical advice without empty hooks.
-   - Closing: End with a useful observation or a natural discussion question. Max 2 relevant hashtags.
-
-2. FACEBOOK VARIANT:
-   - Style & Structure: Usually 60-180 words in plain language for a broader audience. Never invent a customer story or first-person experience.
-   - Closing: A question is optional and should appear only when it invites a real perspective.
-
-3. TWITTER / X VARIANT:
-   - Style & Structure: One clear observation or useful takeaway, conversational and concise.
-   - Strict Limit: 280 characters. Use no hashtags by default and at most one only when the Brand Context asks for it.
-
-Universal Rules:
-- NEVER state statistics not in the body.
-- NEVER use em dashes ('—' or '--').
-- NO RAW MARKDOWN (*, **, ###, \`). Write clean, natural text.
-- Never include links in main text.
-
-Return ONLY this JSON:
-{
-  "li_variant": "the full clean LinkedIn post text",
-  "fb_variant": "the full clean Facebook post text",
-  "x_variant": "the full clean Twitter / X post text"
-}
-Return ONLY valid JSON. No markdown fences.`;
-
-const userMessage = `Pre-Crafted Hook (from the strategy stage -- open the LinkedIn variant with this, verbatim or lightly sharpened, instead of writing a new one):
-${hook}
-
-Final Body:
-${editedBody}
-
-Brand Context:
-${brandContext}
-
-Tone Profile:
-${JSON.stringify(toneQuestionnaire)}
-
-Voice Examples:
-${toneExamples.map((example, index) => `[Example ${index + 1}] ${example}`).join('\n') || 'None supplied'}
-
-Idea Audience: ${audience}
-Title: ${strategy.title || idea.angle}`;
-
+// The variants prompt is rendered by the dashboard (src/lib/prompts/variants.ts).
 return [{
   json: {
     asset_id: assetId,
@@ -154,15 +95,15 @@ return [{
     edited_body: editedBody,
     claims_ok: claimsOk,
     claims: formattedClaims,
-    prompt_payload: {
-      model: "qwen-flash",
-      enable_thinking: false,
-      temperature: 0.55,
-      max_tokens: 2500,
-      messages: [
-        { role: "system", content: variantsSystemPrompt },
-        { role: "user", content: userMessage }
-      ]
+    prompt_inputs: {
+      company_name: companyName,
+      hook: hook,
+      edited_body: editedBody,
+      brand_context: brandContext,
+      tone_questionnaire: toneQuestionnaire,
+      tone_examples: toneExamples,
+      audience: audience,
+      title: strategy.title || idea.angle
     }
   }
 }];

@@ -50,7 +50,7 @@
         [
           {
             "index": 0,
-            "node": "Qwen Harvest",
+            "node": "Render Harvest Prompt",
             "type": "main"
           }
         ]
@@ -72,7 +72,7 @@
         [
           {
             "index": 0,
-            "node": "Qwen Craft Notes",
+            "node": "Render Craft Prompt",
             "type": "main"
           }
         ],
@@ -161,7 +161,7 @@
         [
           {
             "index": 0,
-            "node": "Qwen Refine",
+            "node": "Render Refine Prompt",
             "type": "main"
           }
         ],
@@ -313,6 +313,39 @@
           {
             "index": 0,
             "node": "NoOp Refine Parse Failed",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Render Craft Prompt": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Qwen Craft Notes",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Render Harvest Prompt": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Qwen Harvest",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Render Refine Prompt": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Qwen Refine",
             "type": "main"
           }
         ]
@@ -839,32 +872,6 @@
       "typeVersion": 1
     },
     {
-      "id": "c1d2e3f4-a5b6-4c7d-8e9f-0a1b2c3d4e5f",
-      "name": "Parse Harvest JSON",
-      "parameters": {
-        "jsCode": "@file:code/parse-harvest-json.js"
-      },
-      "position": [
-        1200,
-        240
-      ],
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2
-    },
-    {
-      "id": "f2a3b4c5-d6e7-4f8a-9b0c-1d2e3f4a5b6c",
-      "name": "Parse Refine JSON",
-      "parameters": {
-        "jsCode": "@file:code/parse-refine-json.js"
-      },
-      "position": [
-        768,
-        -48
-      ],
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2
-    },
-    {
       "alwaysOutputData": true,
       "credentials": {
         "httpHeaderAuth": {
@@ -900,6 +907,32 @@
       "typeVersion": 4.2
     },
     {
+      "id": "c1d2e3f4-a5b6-4c7d-8e9f-0a1b2c3d4e5f",
+      "name": "Parse Harvest JSON",
+      "parameters": {
+        "jsCode": "@file:code/parse-harvest-json.js"
+      },
+      "position": [
+        1200,
+        240
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "f2a3b4c5-d6e7-4f8a-9b0c-1d2e3f4a5b6c",
+      "name": "Parse Refine JSON",
+      "parameters": {
+        "jsCode": "@file:code/parse-refine-json.js"
+      },
+      "position": [
+        768,
+        -48
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
       "alwaysOutputData": true,
       "credentials": {
         "httpHeaderAuth": {
@@ -924,7 +957,7 @@
             }
           ]
         },
-        "jsonBody": "={{ JSON.stringify($json.prompt_payload || {}) }}",
+        "jsonBody": "={{ JSON.stringify($json.payload || {}) }}",
         "method": "POST",
         "options": {
           "response": {
@@ -962,7 +995,7 @@
       "parameters": {
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "jsonBody": "={{ $json.prompt_payload }}",
+        "jsonBody": "={{ $json.payload }}",
         "method": "POST",
         "options": {
           "timeout": 60000
@@ -994,7 +1027,7 @@
       "parameters": {
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "jsonBody": "={{ $json.prompt_payload }}",
+        "jsonBody": "={{ $json.payload }}",
         "method": "POST",
         "options": {
           "timeout": 60000
@@ -1011,6 +1044,25 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "waitBetweenTries": 5000
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "d8b2f3a5-6c7e-4f99-8b4d-2e3f4a5b6c71",
+      "maxTries": 2,
+      "name": "RSS - Tenant Sources",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "options": {},
+        "url": "={{ $json.feed_url }}"
+      },
+      "position": [
+        112,
+        640
+      ],
+      "retryOnFail": true,
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "waitBetweenTries": 3000
     },
     {
       "alwaysOutputData": true,
@@ -1152,6 +1204,96 @@
       "typeVersion": 2.2
     },
     {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "bdc3451e-59ee-5a38-8fe8-108de13a19d3",
+      "name": "Render Craft Prompt",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ JSON.stringify($json.prompt_inputs) }}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/prompts/craft"
+      },
+      "position": [
+        1920,
+        640
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "5b918466-8674-58af-9dda-32525ee15cab",
+      "name": "Render Harvest Prompt",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ JSON.stringify($json.prompt_inputs) }}",
+        "method": "POST",
+        "options": {
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/prompts/harvest"
+      },
+      "position": [
+        872,
+        400
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "30fd46ba-f11b-59ed-abd1-9878f62a4554",
+      "name": "Render Refine Prompt",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ JSON.stringify($json.prompt_inputs) }}",
+        "method": "POST",
+        "options": {
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/prompts/refine"
+      },
+      "position": [
+        424,
+        112
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
       "id": "report-source-status-code",
       "name": "Report Source Status",
       "parameters": {
@@ -1176,25 +1318,6 @@
       ],
       "type": "n8n-nodes-base.code",
       "typeVersion": 2
-    },
-    {
-      "alwaysOutputData": true,
-      "id": "d8b2f3a5-6c7e-4f99-8b4d-2e3f4a5b6c71",
-      "maxTries": 2,
-      "name": "RSS - Tenant Sources",
-      "onError": "continueRegularOutput",
-      "parameters": {
-        "options": {},
-        "url": "={{ $json.feed_url }}"
-      },
-      "position": [
-        112,
-        640
-      ],
-      "retryOnFail": true,
-      "type": "n8n-nodes-base.rssFeedRead",
-      "typeVersion": 1.2,
-      "waitBetweenTries": 3000
     },
     {
       "id": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",

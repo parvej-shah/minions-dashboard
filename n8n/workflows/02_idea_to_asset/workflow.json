@@ -6,7 +6,7 @@
         [
           {
             "index": 0,
-            "node": "Executive Strategist Agent",
+            "node": "Render Strategist Prompt",
             "type": "main"
           }
         ]
@@ -44,7 +44,7 @@
         [
           {
             "index": 0,
-            "node": "Qwen Call 2 Writer",
+            "node": "Render Writer Prompt",
             "type": "main"
           }
         ]
@@ -269,7 +269,7 @@
         [
           {
             "index": 0,
-            "node": "Qwen Call 4 Variants",
+            "node": "Render Variants Prompt",
             "type": "main"
           }
         ]
@@ -313,7 +313,7 @@
         [
           {
             "index": 0,
-            "node": "Qwen Call 3 Editor",
+            "node": "Render Editor Prompt",
             "type": "main"
           }
         ]
@@ -391,6 +391,50 @@
           {
             "index": 0,
             "node": "Select Target",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Render Editor Prompt": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Qwen Call 3 Editor",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Render Strategist Prompt": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Executive Strategist Agent",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Render Variants Prompt": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Qwen Call 4 Variants",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Render Writer Prompt": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Qwen Call 2 Writer",
             "type": "main"
           }
         ]
@@ -823,7 +867,7 @@
             }
           ]
         },
-        "jsonBody": "={{ JSON.stringify({\n  asset_id: $('Prepare Asset Row').first().json.asset_id,\n  image_prompt: $('Parse Variants and Prepare Rows').first().json.image_prompt,\n  callback_secret: $('Generate run_id').first().json.callback_secret,\n  app_url: 'https://minions.getminions.ai'\n}) }}",
+        "jsonBody": "={{ JSON.stringify({\n  asset_id: $('Prepare Asset Row').first().json.asset_id,\n  cover_inputs: $('Parse Variants and Prepare Rows').first().json.cover_inputs,\n  callback_secret: $('Generate run_id').first().json.callback_secret,\n  app_url: 'https://minions.getminions.ai'\n}) }}",
         "method": "POST",
         "options": {
           "response": {
@@ -858,7 +902,7 @@
       "parameters": {
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "jsonBody": "={{ $json.prompt_payload }}",
+        "jsonBody": "={{ $json.payload }}",
         "method": "POST",
         "options": {
           "timeout": 60000
@@ -1265,7 +1309,7 @@
       "parameters": {
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "jsonBody": "={{ $json.prompt_payload }}",
+        "jsonBody": "={{ $json.payload }}",
         "method": "POST",
         "options": {
           "timeout": 90000
@@ -1293,7 +1337,7 @@
       "parameters": {
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "jsonBody": "={{ $json.prompt_payload }}",
+        "jsonBody": "={{ $json.payload }}",
         "method": "POST",
         "options": {
           "timeout": 90000
@@ -1321,7 +1365,7 @@
       "parameters": {
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "jsonBody": "={{ $json.prompt_payload }}",
+        "jsonBody": "={{ $json.payload }}",
         "method": "POST",
         "options": {
           "timeout": 60000
@@ -1519,6 +1563,118 @@
       "position": [
         816,
         160
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "e7eb8ad8-5a1b-5b55-a7a6-a69d2592e6ad",
+      "name": "Render Editor Prompt",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ JSON.stringify($json.prompt_inputs) }}",
+        "method": "POST",
+        "options": {
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/prompts/editor"
+      },
+      "position": [
+        2936,
+        176
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "d32b1179-8607-5069-8129-bd740b9ea452",
+      "name": "Render Strategist Prompt",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ JSON.stringify($json.prompt_inputs) }}",
+        "method": "POST",
+        "options": {
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/prompts/strategist"
+      },
+      "position": [
+        1144,
+        176
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "8f3df02d-5a3a-5ab8-960a-c85886d786bf",
+      "name": "Render Variants Prompt",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ JSON.stringify($json.prompt_inputs) }}",
+        "method": "POST",
+        "options": {
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/prompts/variants"
+      },
+      "position": [
+        4056,
+        176
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "96dfcf91-29c7-517e-af58-226013ed2563",
+      "name": "Render Writer Prompt",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ JSON.stringify($json.prompt_inputs) }}",
+        "method": "POST",
+        "options": {
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/prompts/writer"
+      },
+      "position": [
+        2488,
+        176
       ],
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2

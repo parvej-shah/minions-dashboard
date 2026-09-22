@@ -156,6 +156,33 @@ const RULES: Record<string, (w: Workflow, entry: ManifestWorkflow, all: Workflow
       }
     }),
 
+  /**
+   * Prompts live in src/lib/prompts, where they are reviewed and pinned by
+   * golden tests. A model call must take its body from a "Render … Prompt"
+   * node; anything else means a prompt is being built inside n8n again.
+   */
+  "prompt-outside-repo": (w, e) => {
+    const findings: Finding[] = [];
+    const incoming = (name: string) =>
+      Object.entries(w.connections).flatMap(([src, c]) =>
+        (c.main || []).flatMap((outs) => (outs || []).filter((t) => t.node === name).map(() => src))
+      );
+    for (const n of w.nodes) {
+      if (n.type.endsWith(".httpRequest") && MODEL_ENDPOINT.test(String(n.parameters.url || ""))) {
+        for (const src of incoming(n.name)) {
+          if (!/^Render .+ Prompt$/.test(src)) {
+            findings.push({ rule: "prompt-outside-repo", workflow: e.slug, node: n.name, message: `Model call fed by "${src}", not a Render … Prompt node. Build the prompt in src/lib/prompts.` });
+          }
+        }
+      }
+      const code = n.parameters.jsCode;
+      if (typeof code === "string" && /`[^`]*\b(You are (?:the|a|an) |Return ONLY)/.test(code)) {
+        findings.push({ rule: "prompt-outside-repo", workflow: e.slug, node: n.name, message: "Code node contains prompt text. Move it to src/lib/prompts." });
+      }
+    }
+    return findings;
+  },
+
   "disabled-node": (w, e) =>
     w.nodes
       .filter((n) => n.disabled)

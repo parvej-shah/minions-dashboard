@@ -4,6 +4,8 @@ import { brandContext, harvestContext } from "./fixtures";
 import { thesisKey, isRedundantThesis } from "@/lib/thesis";
 import { verbatimGuard } from "@/lib/ai/craftExtract";
 import { RUN_CALLBACK_STATUSES, TERMINAL_HERO_STATUSES } from "@/constants/pipelineContracts";
+import { renderPrompt, type PromptStage } from "@/lib/prompts";
+import type { ChatPayload } from "@/lib/prompts/types";
 
 /**
  * Contracts between the dashboard and the n8n workflows. Each test feeds a
@@ -14,8 +16,9 @@ import { RUN_CALLBACK_STATUSES, TERMINAL_HERO_STATUSES } from "@/constants/pipel
 
 const H = "01_idea_harvester";
 
-function systemPrompt(out: Record<string, unknown>): string {
-  const payload = out.prompt_payload as { messages: { role: string; content: string }[] };
+/** Renders the node's prompt_inputs the way /api/internal/prompts does. */
+function systemPrompt(out: Record<string, unknown>, stage: PromptStage): string {
+  const { payload } = renderPrompt(stage, out.prompt_inputs) as { payload: ChatPayload };
   return payload.messages.find((m) => m.role === "system")!.content;
 }
 
@@ -30,7 +33,7 @@ describe("/api/brand/context -> 01_idea_harvester", () => {
       input: [brandContext()],
       nodes: { "Backlog Guard": [{ existing_rows: [newRow] }] },
     });
-    const prompt = systemPrompt(out);
+    const prompt = systemPrompt(out, "refine");
     expect(prompt).toContain("[POSITIONING] core_positioning: We fix it the same day or the visit is free.");
     expect(prompt).toContain("[FORBIDDEN] no_fear_selling:");
     expect(prompt).not.toContain("low_priority_note");
@@ -43,7 +46,7 @@ describe("/api/brand/context -> 01_idea_harvester", () => {
       input: [{ title: "Pipes freeze", link: "https://news.example/a", contentSnippet: "Cold snap" }],
       nodes: { "Fetch Brand Context": [ctx] },
     });
-    const prompt = systemPrompt(out);
+    const prompt = systemPrompt(out, "harvest");
     for (const angle of harvestContext.pillarRotation) {
       expect(prompt).toContain(angle.pillar);
       expect(prompt).toContain(angle.brief);

@@ -205,6 +205,12 @@
     },
     {
       "rule": "unchecked-write",
+      "workflow": "01_idea_harvester",
+      "node": "Render Craft Prompt",
+      "reason": "Craft notes are an enhancement, never a gate: a failed render falls through to Merge Craft Into Ideas, which stores no notes, exactly as a failed model call does."
+    },
+    {
+      "rule": "unchecked-write",
       "workflow": "00b_posting_scheduler_dispatcher",
       "node": "Create PipelineRun Row",
       "reason": "Workflow deactivated 2026-09-21. Add status checks before reactivating."
@@ -280,6 +286,12 @@
       "workflow": "03_review_publisher",
       "node": "Publish_to_LinkedIn",
       "reason": "OPEN RISK: a failed LinkedIn post is still marked published, with linkedin_post_id null."
+    },
+    {
+      "rule": "prompt-outside-repo",
+      "workflow": "04_hero_image",
+      "node": "Qwen Image 3.0 Pro Generation",
+      "reason": "Back-compat path for a draft already in flight during the prompt migration, which still sends a pre-rendered image_prompt. Remove the Needs Cover Render? branch and this entry after 2026-10-01."
     }
   ]
 }
