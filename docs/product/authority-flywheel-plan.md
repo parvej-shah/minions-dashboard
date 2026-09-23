@@ -810,6 +810,21 @@ regenerated.
 2. Push the dashboard.
 3. Push n8n 02, then 01 (the signal excerpts).
 
+**Deployed and verified live (2026-09-24)** on the user's second workspace
+(bsse1610@…, "Parvej Shah").
+
+- **ICP.** Saved a structured ICP there, taken from the workspace's own
+  positioning and directives, through the same steps as the Brand page.
+- **Harvest.** One live harvest produced IDEA-0231..0233: all PASS, resting
+  on the workspace's proof claims, scores 74–81.
+- **Drafts.** Two drafts ran with `skip_hero`. Both are PENDING_REVIEW,
+  claims-OK, with the idea's pillar and the cover FAILED ("Skipped: test
+  draft"). 04 did not run.
+- **Known gap.** A number written as a word ("two seconds of silence is the
+  threshold where buyers assume the line dropped") escapes the figure check,
+  which reads only digits. Nothing this workspace has saved states that
+  threshold.
+
 **Exit criterion still open:** 5 live drafts on tenant zero, reviewed by the
 user. They need tenant zero's experience items. Until then its ideas carry no
 experience and draft on the older path.
