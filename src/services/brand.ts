@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { DEFAULT_BRAND_SETTINGS, STATIC_BANNED_LEXICON } from "@/constants/brand";
+import { STATIC_BANNED_LEXICON } from "@/constants/brand";
 import { toDirectiveDTO } from "@/lib/mappers/directive";
 import { toBrandSettingsDTO } from "@/lib/mappers/brandProfile";
 import type { BrandProfileInput, BrandSettings } from "@/types";

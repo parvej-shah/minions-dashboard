@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { User, Hash, Users2, Mic, Plus, X, Loader2, Pencil, Sparkles, Check, Palette } from "lucide-react";
-import type { BrandDirectiveItem, BrandCategory, BrandSettings, BrandProfileInput } from "@/types";
+import type { BrandDirectiveItem, BrandCategory, BrandSettings, BrandProfileInput, IcpProfileItem } from "@/types";
 import { useApiResource } from "@/hooks/useApiResource";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { LoadingState } from "@/components/ui/EmptyState";
@@ -56,6 +56,8 @@ function toProfileInput(settings: BrandSettings): BrandProfileInput {
 interface OverviewTabProps {
   directives: BrandDirectiveItem[];
   setDirectives: React.Dispatch<React.SetStateAction<BrandDirectiveItem[]>>;
+  /** Opens the Audience & Experience tab, where the ICP is edited. */
+  onEditAudience: () => void;
 }
 
 /**
@@ -65,7 +67,10 @@ interface OverviewTabProps {
  * drafting pipeline (/api/brand/context) read -- this is a presentation
  * layer over that data, not a separate store.
  */
-export default function OverviewTab({ directives, setDirectives }: OverviewTabProps) {
+export default function OverviewTab({ directives, setDirectives, onEditAudience }: OverviewTabProps) {
+  const { data: icp } = useApiResource<IcpProfileItem | null>("/api/brand/icp", null, {
+    errorMessage: "Could not load your ideal customer",
+  });
   const {
     data: profile,
     isLoading: profileLoading,
@@ -345,14 +350,26 @@ export default function OverviewTab({ directives, setDirectives }: OverviewTabPr
             <Users2 className="w-4 h-4 text-[#00C9A7]" />
             <h3 className="text-sm font-bold text-[#F1F5F9]">Audience</h3>
           </div>
-          <p className="text-sm text-[#94A3B8]">Who you&apos;re trying to reach.</p>
-          <TagList
-            category="AUDIENCE"
-            items={activeByCategory("AUDIENCE")}
-            onAdd={addToCategory}
-            onRemove={removeDirective}
-            placeholder="Add an audience (e.g. Founders)…"
-          />
+          <p className="text-sm text-[#94A3B8]">The one customer every idea is written for.</p>
+          {/* The ICP profile is the source of truth; the AUDIENCE directive
+              the prompts read is derived from it on save. */}
+          {icp?.who ? (
+            <div className="space-y-1.5">
+              <p className="text-sm text-[#F1F5F9] line-clamp-3">{icp.who}</p>
+              {icp.pains.length > 0 && (
+                <p className="text-xs text-[#94A3B8] line-clamp-2">Biggest problem: {icp.pains[0]}</p>
+              )}
+            </div>
+          ) : (
+            <p className="text-xs text-[#64748B]">Not described yet.</p>
+          )}
+          <button
+            type="button"
+            onClick={onEditAudience}
+            className="text-xs font-semibold text-[#00C9A7] hover:underline cursor-pointer"
+          >
+            {icp?.who ? "Edit ideal customer" : "Describe your ideal customer"}
+          </button>
         </div>
 
         {/* Voice */}

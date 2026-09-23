@@ -407,10 +407,11 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
 
 <!-- ============ ONBOARDING ============ -->
 <section id="onboarding">
-  <div class="sec-head"><h2>Onboarding prompts (dashboard)</h2><p>These are the only model calls made from the Next.js app itself (<code>DASHSCOPE_API_KEY</code>). They run once per tenant during onboarding, and their output becomes the <code>brand_directives</code> that every pipeline prompt reads later.</p></div>
+  <div class="sec-head"><h2>Dashboard prompts</h2><p>Model calls made from the Next.js app itself (<code>DASHSCOPE_API_KEY</code>). The two onboarding calls run once per tenant, and their output becomes the <code>brand_directives</code> every pipeline prompt reads later. The memory check runs each time someone saves an experience item on the Brand page.</p></div>
   <div class="wfblock">
     {{PROMPT:onboarding_suggestions}}
     {{PROMPT:onboarding_directives}}
+    {{PROMPT:memory_check}}
   </div>
 </section>
 

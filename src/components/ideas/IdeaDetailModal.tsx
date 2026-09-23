@@ -12,8 +12,6 @@ import {
   X,
   ExternalLink,
   Radio,
-  Globe,
-  FileText,
 } from "lucide-react";
 
 import { getAudienceBadgeClass, getSourceTag } from "@/constants/ideaBadges";

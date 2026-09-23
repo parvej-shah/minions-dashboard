@@ -17,6 +17,7 @@ import { renderCover } from "@/lib/prompts/cover";
 import { CONTENT_ANGLES, ANGLES_PER_RUN } from "@/constants/contentAngles";
 import { WRITER_EXPERTISE_OPTIONS, DEFAULT_WRITER_EXPERTISE } from "@/constants/writerExpertise";
 import { buildBrandDirectivesPrompt, buildBrandSuggestionsPrompt, ONBOARDING_MODEL } from "@/lib/ai/brandCopilot";
+import { buildMemoryCheckPrompt, MEMORY_CHECK_MODEL } from "@/lib/ai/memoryCheck";
 import { N8N_DIR, readManifest, readWorkflowFiles, type Workflow } from "./lib";
 
 const OUT = path.join(N8N_DIR, "architecture.html");
@@ -239,6 +240,19 @@ const ONBOARDING_CARDS: Record<string, Card> = {
     params: onboardingParams,
     blocks: [["User message (only message)", buildBrandDirectivesPrompt(onboardingSample)]],
   },
+};
+
+ONBOARDING_CARDS.memory_check = {
+  id: "memory_check", kind: "LLM", title: "Experience generalization check",
+  node: "dashboard · src/lib/ai/memoryCheck.ts → POST /api/brand/memory/check",
+  description: "Brand page › Audience & Experience: runs before an experience item is saved (decision D4, no confidential data). Code first finds contact details, secrets, money and links; the model adds names, places and anything confidential, and each span it flags is kept only if it really occurs in the text. Contact details, secrets and confidential items block the save.",
+  input: "The item text and its disclosure (PUBLIC or GENERALIZE, which changes the rule). The item is fenced as data.",
+  output: '{"issues":[{text,kind,reason}],"confidential":bool,"generalized":"rewrite without the specifics"}',
+  params: [["model", MEMORY_CHECK_MODEL.model], ["temperature", String(MEMORY_CHECK_MODEL.temperature)], ["max tokens", String(MEMORY_CHECK_MODEL.max_tokens)]],
+  blocks: [
+    ["User message, disclosure = GENERALIZE", buildMemoryCheckPrompt(ph("experience_item"), "GENERALIZE")],
+    ["User message, disclosure = PUBLIC", buildMemoryCheckPrompt(ph("experience_item"), "PUBLIC")],
+  ],
 };
 
 function renderCard(c: Card): string {

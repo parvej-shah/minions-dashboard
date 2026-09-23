@@ -50,3 +50,27 @@ export type MemoryKind = (typeof MEMORY_KINDS)[number];
 /** No PRIVATE: confidential material is never stored at all (decision D4). */
 export const MEMORY_DISCLOSURES = ["PUBLIC", "GENERALIZE"] as const;
 export type MemoryDisclosure = (typeof MEMORY_DISCLOSURES)[number];
+
+/** What each memory kind means, shown in the Experience editor. */
+export const MEMORY_KIND_META: Record<MemoryKind, { label: string; hint: string }> = {
+  CURRENT_WORK: { label: "Current work", hint: "What you are building or doing right now." },
+  PAST_EXPERIENCE: { label: "Past experience", hint: "Roles, industries and projects behind you." },
+  STORY: { label: "Story", hint: "Something that happened, with a before and after." },
+  LESSON: { label: "Lesson", hint: "What failed or surprised you, and what you changed." },
+  OPINION: { label: "Opinion", hint: "A view you hold that others in your field might not." },
+  ICP_QUESTION: { label: "Customer question", hint: "A question your customers keep asking." },
+  EXPERIMENT: { label: "Experiment", hint: "Something you are testing, and what you have seen so far." },
+  BUILD_IN_PUBLIC: { label: "Build in public", hint: "Progress you are happy to share openly." },
+};
+
+export const MEMORY_DISCLOSURE_META: Record<MemoryDisclosure, { label: string; hint: string }> = {
+  PUBLIC: { label: "Public", hint: "Minions may mention the specifics." },
+  GENERALIZE: { label: "Generalize", hint: "Use the lesson, never names, places or figures." },
+};
+
+export const MEMORY_MIN_CHARS = 20;
+export const MEMORY_MAX_CHARS = 1000;
+export const MAX_MEMORY_ITEMS = 200;
+/** Each ICP list (pains, decisions, ...) is capped so the prompt stays bounded. */
+export const ICP_LIST_MAX = 8;
+export const ICP_ITEM_MAX_CHARS = 200;

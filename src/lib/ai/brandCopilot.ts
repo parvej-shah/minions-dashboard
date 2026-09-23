@@ -33,7 +33,15 @@ export interface GeneratedDirective {
 /** Model settings for both onboarding calls (single user message, no system prompt). */
 export const ONBOARDING_MODEL = { model: "qwen-plus", temperature: 0.7, max_tokens: 800 } as const;
 
-async function callQwen(prompt: string, timeoutMs = DEFAULT_TIMEOUT_MS): Promise<string | null> {
+/**
+ * One user-message Qwen call that degrades to null on any failure. Exported
+ * for the Brand page's memory check, which follows the same never-throw rule.
+ */
+export async function callQwen(
+  prompt: string,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+  settings: { model: string; temperature: number; max_tokens: number } = ONBOARDING_MODEL
+): Promise<string | null> {
   const apiKey = process.env.DASHSCOPE_API_KEY;
   if (!apiKey) return null;
 
@@ -48,10 +56,10 @@ async function callQwen(prompt: string, timeoutMs = DEFAULT_TIMEOUT_MS): Promise
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: ONBOARDING_MODEL.model,
+        model: settings.model,
         messages: [{ role: "user", content: prompt }],
-        temperature: ONBOARDING_MODEL.temperature,
-        max_tokens: ONBOARDING_MODEL.max_tokens,
+        temperature: settings.temperature,
+        max_tokens: settings.max_tokens,
       }),
       signal: controller.signal,
     });

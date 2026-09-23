@@ -1,16 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, Mic2, Sparkles , Rss} from "lucide-react";
+import { AlertTriangle, Mic2, Sparkles, Rss, BookOpen } from "lucide-react";
 import { BrandDirectiveItem, BrandTab } from "@/types";
 import LexiconTab from "@/components/brand/LexiconTab";
 import OverviewTab from "@/components/brand/OverviewTab";
 import VoiceProofTab from "@/components/brand/VoiceProofTab";
 import SourcesTab from "@/components/brand/SourcesTab";
+import ExperienceTab from "@/components/brand/ExperienceTab";
+import CompletenessCard from "@/components/brand/CompletenessCard";
 import { useApiResource } from "@/hooks/useApiResource";
 
 export default function BrandStudioPage() {
   const [activeTab, setActiveTab] = useState<BrandTab>("overview");
+  // Bumped after any profile edit so the completeness card re-reads.
+  const [profileVersion, setProfileVersion] = useState(0);
+  const bumpProfile = () => setProfileVersion((v) => v + 1);
   const {
     data: directives,
     isLoading: directivesLoading,
@@ -110,6 +115,17 @@ export default function BrandStudioPage() {
             Overview
           </button>
           <button
+            onClick={() => setActiveTab("experience")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === "experience"
+                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
+                : "text-[#94A3B8] hover:text-[#F1F5F9]"
+            }`}
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            Audience &amp; Experience
+          </button>
+          <button
             onClick={() => setActiveTab("sources")}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "sources"
@@ -134,12 +150,16 @@ export default function BrandStudioPage() {
         </div>
       </div>
 
+      <CompletenessCard version={profileVersion} onGo={setActiveTab} />
+
       {/* ======================================================== */}
       {/* OVERVIEW: plain-language summary, the default landing view */}
       {/* ======================================================== */}
       {activeTab === "overview" && (
-        <OverviewTab directives={directives} setDirectives={setDirectives} />
+        <OverviewTab directives={directives} setDirectives={setDirectives} onEditAudience={() => setActiveTab("experience")} />
       )}
+
+      {activeTab === "experience" && <ExperienceTab onChange={bumpProfile} />}
 
       {activeTab === "voice-proof" && <VoiceProofTab />}
 

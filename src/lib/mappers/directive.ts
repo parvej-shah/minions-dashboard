@@ -1,5 +1,5 @@
 import type { BrandDirective } from "@prisma/client";
-import type { AudienceScope, BrandCategory, BrandDirectiveItem } from "@/types";
+import type { BrandCategory, BrandDirectiveItem } from "@/types";
 
 /** Prisma row -> the brand-directive wire shape. */
 export function toDirectiveDTO(row: BrandDirective): BrandDirectiveItem {

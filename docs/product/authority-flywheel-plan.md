@@ -1,6 +1,6 @@
 # Authority flywheel: product plan
 
-Status: phases 0 and 1 BUILT (2026-09-23); see "Progress" at the end. Written 2026-09-23 from
+Status: phases 0, 1 and 2 BUILT (2026-09-23); see "Progress" at the end. Written 2026-09-23 from
 [the strategy conversation](2026-09-23-strategy-conversation.md) and a read of
 the code as of commit `26c0b42`.
 
@@ -525,4 +525,65 @@ the harvester refuse to run):
 1. Apply the SQL file.
 2. Push the dashboard.
 3. Push n8n 01 and 02.
+
+### Phase 2 — built 2026-09-23
+
+**Brand page › Audience & Experience** (`src/components/brand/ExperienceTab.tsx`):
+
+- **ICP editor** (`GET/PUT /api/brand/icp`): who they are, role, company,
+  pains, decisions, questions, triggers and vocabulary.
+  - Each save rewrites the one AUDIENCE directive the current prompts read
+    (`DIR-ICP-<client>`, in `src/lib/icpDirective.ts`) and retires the old
+    audience tags.
+  - The Overview card now shows the ICP and links to this editor.
+- **Experience & activity** (`/api/brand/memory`, `/api/brand/memory/[id]`):
+  - Items are grouped by kind, and each has a Public/Generalize toggle, an
+    on/off switch, edit and delete.
+  - Each item shows "used in N ideas", counted live from `ideas.memory_ids`.
+    It reads 0 until the phase 3 harvester writes that field.
+- **Generalization check** (`POST /api/brand/memory/check`,
+  `src/lib/ai/memoryCheck.ts`):
+  - Code catches the certain cases: contact details, keys and passwords
+    always block; money and links count only under Generalize.
+  - The model adds names, places and anything confidential. It sees the item
+    as fenced data, and a span it flags is kept only if it really occurs in
+    the text.
+  - The page offers "Use this version", with the specifics removed.
+  - The server re-applies the blocking code checks on every save.
+  - The prompt is listed in `n8n/architecture.html`.
+- **Brand completeness** (`GET /api/brand/completeness`,
+  `src/lib/brandCompleteness.ts`): a score, plus at most 3 next steps, each
+  linking to its tab. The card sits at the top of the Brand page on every tab.
+- Onboarding is unchanged (D3).
+
+**Exit criterion still open:** tenant zero needs its ICP and at least 10 real
+experience items, entered through the page. Only the author can write them.
+
+### Security fixes found along the way (2026-09-23)
+
+- **The public site served other customers' posts.** getminions.ai/blog listed
+  8 posts from 3 other workspaces, under Minions founder bylines. The site now
+  reads only tenant zero's posts, and those 8 URLs return 404.
+  - The dashboard now credits each workspace's posts to its own brand.
+  - Blog upserts, deletes and edits are scoped to the workspace, so a shared
+    slug can't overwrite another workspace's post.
+  - `prisma/sql/2026-09-23-security-lockdown.sql` re-credits the old posts.
+- **Anyone with the public anon key could read every workspace's data.**
+  "Public read" RLS policies (USING true) covered ideas, assets, claims and
+  brand_directives. Blogs is now public only for tenant zero's published
+  posts. This is in the lockdown SQL.
+- **The vault RPCs were callable with the anon key.** `get_channel_secret` and
+  `create_channel_secret` were SECURITY DEFINER and executable by anon.
+  Revoked in the lockdown SQL.
+- **The webhook secret was public.** Its value was committed to the public
+  minions-ai repo, and it authenticated the dashboard's internal API.
+  - The dashboard now reads a new `MINIONS_WEBHOOK_SECRET`.
+  - The public site refuses the old value.
+  - n8n passes the secret only through its credential, to fixed URLs.
+- **All four n8n trigger webhooks were unauthenticated.** They now use header
+  auth.
+- **Three unused webhooks were removed.** They weren't tenant-aware and could
+  create unowned rows.
+- New lint rules `webhook-without-auth` and `secret-in-payload` keep these
+  from coming back.
 
