@@ -5,6 +5,7 @@ import { toDirectiveDTO } from "@/lib/mappers/directive";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 import { refuseOnboardingOverwrite } from "@/lib/onboardingGuard";
+import { resolveAudienceScope, RETIRED_SCOPE_MESSAGE } from "@/constants/audience";
 
 export async function GET() {
   const ctx = await requireClientId();
@@ -37,6 +38,8 @@ export async function POST(request: Request) {
     if (!body.category || !body.key || !body.content) {
       return apiFailure("category, key, and content are required", 400);
     }
+    const audienceScope = resolveAudienceScope(body.audience_scope);
+    if (!audienceScope) return apiFailure(RETIRED_SCOPE_MESSAGE, 400);
 
     const isForbidden = body.category === "FORBIDDEN";
     const PER_CATEGORY_LIMIT = 6;
@@ -69,7 +72,7 @@ export async function POST(request: Request) {
         ruleKey: String(body.key).toLowerCase().replace(/\s+/g, "_"),
         instruction: String(body.content).trim(),
         priority: body.priority || 1,
-        audienceScope: body.audience_scope || "ALL",
+        audienceScope,
         isActive: true,
       },
     });

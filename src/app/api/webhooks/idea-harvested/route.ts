@@ -41,9 +41,9 @@ export async function POST(request: Request) {
     const data = {
       rawIdea,
       angle,
-      targetTrade: body.trade || body.target_trade || body.targetTrade || "HVAC",
+      targetTrade: body.trade || body.target_trade || body.targetTrade || "",
       audience: body.audience || "ICP",
-      pillar: body.pillar || "Contractor Realities",
+      pillar: body.pillar || "",
       source: body.source || "GOOGLE_TRENDS",
       priority: body.priority || "HIGH",
       tags: Array.isArray(body.tags) ? body.tags : body.tags ? [body.tags] : [],

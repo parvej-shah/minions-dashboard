@@ -7,6 +7,7 @@ import { resolveWriterExpertise, DEFAULT_WRITER_EXPERTISE, type WriterExpertise 
 import { resolveSourceFeedUrl } from "@/constants/ideaSources";
 import { selectAnglesForRun } from "@/constants/contentAngles";
 import { thesisKey, restemKey } from "@/lib/thesis";
+import { getAuthorContext, EMPTY_ICP, type AuthorContext } from "@/services/authorContext";
 
 /**
  * Brand settings plus the live directive set, scoped to one tenant.
@@ -190,6 +191,8 @@ export interface HarvestContext {
   pillarRotation: { id: string; pillar: string; brief: string }[];
   /** Monotonic per-tenant harvest counter, used to rotate feed windows. */
   runIndex: number;
+  /** ICP, professional memory and content lanes (authority flywheel, phase 1). */
+  author: AuthorContext;
 }
 
 /**
@@ -225,7 +228,7 @@ export async function getHarvestContext(clientId: string): Promise<HarvestContex
     return fallback;
   };
 
-  const [profile, sourceRows, recentIdeas, runCount] = await Promise.all([
+  const [profile, sourceRows, recentIdeas, runCount, author] = await Promise.all([
     prisma.brandProfile
       .findUnique({ where: { clientId }, select: { writerExpertise: true } })
       .catch(soft("writerExpertise", null)),
@@ -243,6 +246,9 @@ export async function getHarvestContext(clientId: string): Promise<HarvestContex
     prisma.pipelineRun
       .count({ where: { clientId, type: "HARVEST" } })
       .catch(soft("harvestRunCount", 0)),
+    // A missing table here (migration not applied yet) must degrade loudly:
+    // the harvester refuses to run rather than harvest without lanes.
+    getAuthorContext(clientId).catch(soft("authorContext", { icp: EMPTY_ICP, memory: [], lanes: [] } as AuthorContext)),
   ]);
 
   const sources = sourceRows
@@ -271,5 +277,6 @@ export async function getHarvestContext(clientId: string): Promise<HarvestContex
     recentTheses: Array.from(new Set(recentTheses)),
     pillarRotation: selectAnglesForRun(runCount),
     runIndex: runCount,
+    author,
   };
 }

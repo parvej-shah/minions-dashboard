@@ -75,7 +75,7 @@ export function renderHarvest(input: HarvestInput): ChatPayload {
   const jsonSkeleton = rotation
     .map(
       (a) =>
-        `    { "raw_idea": "1-2 sentences", "angle": "One sharp, concrete claim", "audience": "ICP", "pillar": "${a.pillar}", "priority": "HIGH | MEDIUM | LOW", "target_trade": "", "geo_metro": "National", "why": "Why this lands with this audience", "icp_relevance": "0-100 integer", "evidence_required": "Y", "signal_index": null }`
+        `    { "raw_idea": "1-2 sentences", "angle": "One sharp, concrete claim", "pillar": "${a.pillar}", "priority": "HIGH | MEDIUM | LOW", "target_trade": "", "geo_metro": "National", "why": "Why this lands with this audience", "icp_relevance": "0-100 integer", "evidence_required": "Y", "signal_index": null }`
     )
     .join(",\n");
 

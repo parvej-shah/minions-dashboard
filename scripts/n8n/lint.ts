@@ -99,6 +99,21 @@ const RULES: Record<string, (w: Workflow, entry: ManifestWorkflow, all: Workflow
       return out;
     }),
 
+  /**
+   * One tenant's values used as another tenant's defaults. A missing client_id
+   * that falls back to tenant zero writes one tenant's work into another's
+   * brand; a missing trade that falls back to "HVAC" makes every tenant a
+   * home-services company. Comparing against tenant zero (a deliberate
+   * identity check) is fine; defaulting TO it is not.
+   */
+  "tenant-literal-fallback": (w, e) =>
+    w.nodes.flatMap((n) =>
+      strings(n.parameters)
+        .filter((s) => /(\|\||\?\?)\s*['"](tenant-zero-getminions-ai|HVAC|Contractor Realities)['"]/.test(s) || /(?<![=!])=\s*['"]tenant-zero-getminions-ai['"]\s*;/.test(s))
+        .slice(0, 1)
+        .map(() => ({ rule: "tenant-literal-fallback", workflow: e.slug, node: n.name, message: "Falls back to one tenant's value (tenant zero / HVAC / Contractor Realities). Fail loudly or use a neutral default." }))
+    ),
+
   /** Secrets live in n8n credentials or $env, never in the graph (and so never in git). */
   "secret-literal": (w, e) =>
     w.nodes.flatMap((n) =>

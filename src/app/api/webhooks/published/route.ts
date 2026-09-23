@@ -89,7 +89,7 @@ export async function POST(request: Request) {
               coreArgument: body.core_argument || "",
               content: body.content || body.blog?.content || "",
               audience: body.audience || "ICP",
-              pillar: body.pillar || "Contractor Realities",
+              pillar: body.pillar || "",
               author: body.author || {
                 name: "Minions Editorial Staff",
                 role: "AI Operations Partner",

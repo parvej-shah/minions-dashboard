@@ -62,6 +62,14 @@ describe("POST /api/brand/directives (shared by onboarding and the Brand page)",
     expect(directiveCreate).not.toHaveBeenCalled();
   });
 
+  it.each(["PEER", "BRIDGE", "peer"])("refuses the retired %s audience scope", async (scope) => {
+    state({});
+    const res = await post({ ...directive, audience_scope: scope });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/ALL or ICP/);
+    expect(directiveCreate).not.toHaveBeenCalled();
+  });
+
   it("still lets the Brand page add a directive to an established workspace", async () => {
     state({ idea: true });
     directiveCount.mockResolvedValue(0);

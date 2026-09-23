@@ -1,5 +1,12 @@
 const rawInput = $input.all()[0]?.json || {};
-const newRows = $('Build Refine Payload').first().json.new_rows || [];
+const built = $('Build Refine Payload').first().json;
+const newRows = built.new_rows || [];
+const lanes = Array.isArray(built.content_lanes) ? built.content_lanes : [];
+const laneIdFor = name => {
+  const wanted = (name || '').toString().trim().toLowerCase();
+  const lane = lanes.find(l => (l.name || '').toLowerCase() === wanted);
+  return lane ? lane.id : null;
+};
 
 if (rawInput.error || !rawInput.choices || !rawInput.choices[0] || !rawInput.choices[0].message) {
   return [{
@@ -39,8 +46,11 @@ for (let i = 0; i < refinedItems.length; i++) {
     json: {
       idea_id: targetRow.idea_id,
       angle: (ref.angle || targetRow.angle || '').replace(/—/g, ', ').replace(/--/g, ', '),
-      audience: ref.audience || targetRow.audience || 'ICP',
-      pillar: ref.pillar || targetRow.pillar || 'Operational Focus',
+      // One ICP per tenant (PEER/BRIDGE were retired on 2026-09-23).
+      audience: 'ICP',
+      pillar: ref.pillar || targetRow.pillar || '',
+      // Unknown lane names become null rather than a guess.
+      lane_id: laneIdFor(ref.lane),
       priority: ref.priority || 'HIGH',
       batch_rank: ref.batch_rank || 1,
       evidence_required: ref.evidence_required || 'N',

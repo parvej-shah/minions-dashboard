@@ -4,6 +4,7 @@ import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 
 import { toDirectiveDTO } from "@/lib/mappers/directive";
+import { resolveAudienceScope, RETIRED_SCOPE_MESSAGE } from "@/constants/audience";
 
 export async function PATCH(
   request: Request,
@@ -15,6 +16,8 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
+    const audienceScope = body.audience_scope !== undefined ? resolveAudienceScope(body.audience_scope) : null;
+    if (body.audience_scope !== undefined && !audienceScope) return apiFailure(RETIRED_SCOPE_MESSAGE, 400);
 
     const owned = await prisma.brandDirective.findFirst({
       where: { id, clientId: ctx.clientId },
@@ -32,7 +35,7 @@ export async function PATCH(
         ...(body.key !== undefined && { ruleKey: String(body.key).toLowerCase().replace(/\s+/g, "_") }),
         ...(body.content !== undefined && { instruction: body.content }),
         ...(body.priority !== undefined && { priority: Number(body.priority) }),
-        ...(body.audience_scope !== undefined && { audienceScope: body.audience_scope }),
+        ...(body.audience_scope !== undefined && { audienceScope: audienceScope! }),
       },
     });
 

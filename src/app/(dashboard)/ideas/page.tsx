@@ -20,7 +20,7 @@ import {
   LayoutGrid,
   CalendarDays,
 } from "lucide-react";
-import { IdeaItem, AudienceLane, IdeaStatus } from "@/types";
+import { IdeaItem, IdeaStatus } from "@/types";
 import CalendarView from "@/components/ideas/CalendarView";
 import ScheduleModal from "@/components/ideas/ScheduleModal";
 import QueueBuilderView from "@/components/ideas/QueueBuilderView";
@@ -34,7 +34,6 @@ import { apiClient } from "@/lib/api-client";
 import { useApiResource } from "@/hooks/useApiResource";
 
 import {
-  getAudienceBadgeClass,
 } from "@/constants/ideaBadges";
 import {
   IDEA_STAGES,
@@ -52,7 +51,6 @@ import { FALLBACK_TOPICS } from "@/constants/topics";
  * industry, so an AI consultancy was asked to file its ideas under "Roofing".
  */
 
-const AUDIENCES: AudienceLane[] = ["ICP", "PEER", "BRIDGE"];
 
 /**
  * Filter on the STAGE an idea is in, not its raw status string.
@@ -82,7 +80,6 @@ export default function IdeaStreamPage() {
   );
   const TRADES = topicData.topics.length > 0 ? topicData.topics : FALLBACK_TOPICS;
 
-  const [selectedAudience, setSelectedAudience] = useState<string>("ALL");
   const [selectedTrade, setSelectedTrade] = useState<string>("ALL");
   const [selectedStage, setSelectedStage] = useState<"ALL" | IdeaStage>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
@@ -112,7 +109,6 @@ export default function IdeaStreamPage() {
   const [editTitle, setEditTitle] = useState("");
   const [editExcerpt, setEditExcerpt] = useState("");
   const [editTrade, setEditTrade] = useState<string>("");
-  const [editAudience, setEditAudience] = useState<AudienceLane>("ICP");
   const [editStatus, setEditStatus] = useState<IdeaStatus>("REFINED");
   const [isUpdating, setIsUpdating] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -202,7 +198,6 @@ export default function IdeaStreamPage() {
   const [formSourceUrl, setFormSourceUrl] = useState("");
   const [formSourceTitle, setFormSourceTitle] = useState("");
   const [formTrade, setFormTrade] = useState<string>("");
-  const [formAudience, setFormAudience] = useState<AudienceLane>("ICP");
   const [formTagsInput, setFormTagsInput] = useState("");
   const [formTags, setFormTags] = useState<string[]>(["Manual"]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -270,7 +265,6 @@ export default function IdeaStreamPage() {
     setEditTitle(idea.title || idea.raw_idea || "");
     setEditExcerpt(idea.excerpt || idea.angle || "");
     setEditTrade(idea.target_trade || "");
-    setEditAudience((idea.audience as AudienceLane) || "ICP");
     setEditStatus((idea.status as IdeaStatus) || "REFINED");
   };
 
@@ -286,7 +280,6 @@ export default function IdeaStreamPage() {
       angle: editExcerpt.trim(),
       target_trade: editTrade,
       trade: editTrade,
-      audience: editAudience,
       status: editStatus,
     };
 
@@ -308,7 +301,6 @@ export default function IdeaStreamPage() {
                   excerpt: payload.excerpt,
                   angle: payload.angle,
                   target_trade: payload.trade,
-                  audience: payload.audience,
                   status: payload.status,
                 }
               : item
@@ -406,7 +398,8 @@ export default function IdeaStreamPage() {
       angle: formExcerpt.trim() || "Manual editorial topic injected for automated strategy and drafting pipeline.",
       trade: formTrade,
       target_trade: formTrade,
-      audience: formAudience,
+      // One ICP per tenant; PEER/BRIDGE were retired on 2026-09-23.
+      audience: "ICP",
       source: formSourceUrl.trim() ? "MANUAL_REFERENCE" : "MANUAL",
       source_url: formSourceUrl.trim() || null,
       source_title: formSourceTitle.trim() || null,
@@ -515,7 +508,6 @@ export default function IdeaStreamPage() {
   const filteredIdeas = useMemo(() => {
     return ideas.filter(idea => {
       // Audience filter
-      if (selectedAudience !== "ALL" && idea.audience !== selectedAudience) return false;
 
       // Trade filter
       if (selectedTrade !== "ALL") {
@@ -538,7 +530,7 @@ export default function IdeaStreamPage() {
 
       return true;
     });
-  }, [ideas, selectedAudience, selectedTrade, selectedStage, searchQuery]);
+  }, [ideas, selectedTrade, selectedStage, searchQuery]);
 
   // Audience Badge Styling Helper
   return (
@@ -662,43 +654,6 @@ export default function IdeaStreamPage() {
                 )}
               </div>
 
-              {/* Audience Filter Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-[#64748B] mr-1 shrink-0">
-                  Audience:
-                </span>
-                <button
-                  onClick={() => setSelectedAudience("ALL")}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                    selectedAudience === "ALL"
-                      ? "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/40 shadow-sm"
-                      : "bg-[#0F1419] text-[#94A3B8] border-[#1F2D3D] hover:text-[#F1F5F9] hover:border-[#2A3D52]"
-                  }`}
-                >
-                  All
-                </button>
-                {AUDIENCES.map((aud) => {
-                  const isActive = selectedAudience === aud;
-                  let activeStyle = "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/40";
-                  if (aud === "ICP") activeStyle = "bg-[#3B82F6]/20 text-[#3B82F6] border-[#3B82F6]/50 shadow-sm";
-                  if (aud === "PEER") activeStyle = "bg-[#8B5CF6]/20 text-[#8B5CF6] border-[#8B5CF6]/50 shadow-sm";
-                  if (aud === "BRIDGE") activeStyle = "bg-[#F59E0B]/20 text-[#F59E0B] border-[#F59E0B]/50 shadow-sm";
-
-                  return (
-                    <button
-                      key={aud}
-                      onClick={() => setSelectedAudience(aud)}
-                      className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                        isActive
-                          ? activeStyle
-                          : "bg-[#0F1419] text-[#94A3B8] border-[#1F2D3D] hover:text-[#F1F5F9] hover:border-[#2A3D52]"
-                      }`}
-                    >
-                      {aud}
-                    </button>
-                  );
-                })}
-              </div>
             </div>
 
             {/* Row 2: Scrolling Trades Pill Row */}
@@ -827,11 +782,10 @@ export default function IdeaStreamPage() {
               <AlertCircle className="w-8 h-8 text-[#64748B] mx-auto" />
               <h3 className="text-base font-bold text-[#F1F5F9]">No ideas found matching filters</h3>
               <p className="text-xs text-[#94A3B8] max-w-sm mx-auto">
-                Try adjusting your Audience, Topic, or Stage filters, or inject a new manual editorial signal.
+                Try adjusting your Topic or Stage filters, or inject a new manual editorial signal.
               </p>
               <button
                 onClick={() => {
-                  setSelectedAudience("ALL");
                   setSelectedTrade("ALL");
                   setSelectedStage("ALL");
                   setSearchQuery("");
@@ -946,37 +900,6 @@ export default function IdeaStreamPage() {
                   <p className="text-[11px] text-[#64748B] mt-1">
                     This drives the asset&apos;s trade label end to end. It does not default to HVAC, pick the one that actually matches the topic.
                   </p>
-                </div>
-
-                {/* Field: Audience */}
-                <div>
-                  <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
-                    Target Audience
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {AUDIENCES.map((aud) => {
-                      const isSelected = formAudience === aud;
-                      let badge = "ICP (Contractors)";
-                      if (aud === "PEER") badge = "PEER (Architects)";
-                      if (aud === "BRIDGE") badge = "BRIDGE (Cross-Tech)";
-
-                      return (
-                        <button
-                          type="button"
-                          key={aud}
-                          onClick={() => setFormAudience(aud)}
-                          className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
-                            isSelected
-                              ? getAudienceBadgeClass(aud) + " font-bold shadow-sm ring-1 ring-[#00C9A7]/30"
-                              : "bg-[#161D26] text-[#94A3B8] border-[#1F2D3D] hover:border-[#2A3D52]"
-                          }`}
-                        >
-                          <div className="text-xs font-bold">{aud}</div>
-                          <div className="text-[10px] opacity-80">{badge}</div>
-                        </button>
-                      );
-                    })}
-                  </div>
                 </div>
 
                 {/* Field: Source & Verification URL */}
@@ -1154,7 +1077,7 @@ export default function IdeaStreamPage() {
                   />
                 </div>
 
-                {/* Target Trade & Audience Lane */}
+                {/* Target Trade */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-[#94A3B8]">
@@ -1173,22 +1096,6 @@ export default function IdeaStreamPage() {
                     </select>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-[#94A3B8]">
-                      Audience Lane
-                    </label>
-                    <select
-                      value={editAudience}
-                      onChange={(e) => setEditAudience(e.target.value as AudienceLane)}
-                      className="w-full bg-[#070B0F] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3 py-2.5 text-xs text-[#F1F5F9] outline-none transition-colors cursor-pointer"
-                    >
-                      {AUDIENCES.map((a) => (
-                        <option key={a} value={a} className="bg-[#0F1419] text-[#F1F5F9]">
-                          {a} ({a === "ICP" ? "Contractor" : a === "PEER" ? "Engineer" : "Bridge"})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
                 </div>
 
                 {/* Status Selector */}

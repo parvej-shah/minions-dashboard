@@ -435,7 +435,7 @@ export default function QueueBuilderView({
                           {idea.audience || "ICP"}
                         </span>
                         <span className="text-[10px] font-medium bg-[#070B0F] text-[#94A3B8] px-2 py-0.2 rounded border border-[#1F2D3D]">
-                          {idea.target_trade || "HVAC"}
+                          {idea.target_trade || "—"}
                         </span>
                       </div>
 
@@ -552,7 +552,7 @@ export default function QueueBuilderView({
                           {idea.audience || "ICP"}
                         </span>
                         <span className="text-[9px] font-mono text-[#64748B] whitespace-nowrap shrink-0">
-                          {idea.target_trade || "HVAC"}
+                          {idea.target_trade || "—"}
                         </span>
                       </div>
 

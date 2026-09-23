@@ -68,6 +68,14 @@ export function buildBrandContextResponse(
     // Rotates which slice of each feed the harvester reads, so consecutive
     // runs see different signals even when a slow feed publishes nothing new.
     harvest_run_index: harvest.runIndex,
+    // The authority flywheel inputs (docs/product/authority-flywheel-plan.md).
+    // icp: the ONE reader this tenant writes for. professional_memory: what
+    // the author has actually lived; an idea must rest on it (or on approved
+    // proof) to pass the authority gate. content_lanes: what the tenant
+    // publishes and why -- refine assigns every idea to one of these.
+    icp: harvest.author.icp,
+    professional_memory: harvest.author.memory,
+    content_lanes: harvest.author.lanes,
     // Health of this response. `context_complete` is false when any piece of
     // harvest context fell back to a default -- a missing column, an
     // unmigrated database, a stale Prisma client. The harvester checks it and

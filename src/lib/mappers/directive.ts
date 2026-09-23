@@ -9,7 +9,7 @@ export function toDirectiveDTO(row: BrandDirective): BrandDirectiveItem {
     key: row.ruleKey,
     content: row.instruction,
     priority: row.priority as 1 | 2 | 3,
-    audience_scope: row.audienceScope as AudienceScope,
+    audience_scope: row.audienceScope as BrandDirectiveItem["audience_scope"],
     is_active: row.isActive,
     updated_at: row.updatedAt.toISOString(),
   };

@@ -52,7 +52,7 @@ export default function IdeaDetailModal({
                 {detailIdea.audience || "ICP"}
               </span>
               <span className="text-[10px] font-medium bg-[#161D26] text-[#94A3B8] border border-[#1F2D3D] px-2.5 py-0.5 rounded-full">
-                {detailIdea.target_trade || "HVAC"}
+                {detailIdea.target_trade || "—"}
               </span>
               {detailIdea.source_url ? (
                 <a

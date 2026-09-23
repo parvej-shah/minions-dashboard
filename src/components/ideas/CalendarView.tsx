@@ -274,7 +274,7 @@ export default function CalendarView({
                     <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${getAudienceColor(idea.audience)}`}>
                       {idea.audience || "ICP"}
                     </span>
-                    <span className="text-[9px] font-mono text-[#64748B]">{idea.target_trade || "HVAC"}</span>
+                    <span className="text-[9px] font-mono text-[#64748B]">{idea.target_trade || "—"}</span>
                   </div>
                   <div className="text-xs font-semibold text-white truncate">
                     {idea.title || idea.raw_idea}

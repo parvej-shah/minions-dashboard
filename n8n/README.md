@@ -61,6 +61,7 @@ Every rule exists because the problem it catches shipped at least once.
 | `unapproved-schedule` | Schedule triggers without a manifest `schedule` reason | 01 and 02 each ran a hidden tenant-zero-only schedule |
 | `dangling-node-ref` | `$('X')` pointing at a node that does not exist | Throws at runtime, often after paid LLM calls |
 | `hardcoded-chat-id` | Telegram destinations not taken from `$env` | Chat ID copied into 4 nodes |
+| `tenant-literal-fallback` | Defaulting a missing client_id, trade or pillar to tenant zero's value | A missing client_id drafted into tenant zero; every trade defaulted to HVAC |
 | `secret-literal` | Tokens and keys pasted into parameters | Would leak into git |
 | `missing-error-workflow` | Active workflows with no error workflow | 00 and 01 failures left runs RUNNING with no alert |
 | `unchecked-write` | Writes with `neverError` and no status check after | A rejected asset write reported success for a full day |

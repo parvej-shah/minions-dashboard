@@ -1378,7 +1378,7 @@
             }
           ]
         },
-        "jsonBody": "={{ JSON.stringify({\n  id: $json.idea_id,\n  client_id: $('Resolve Client ID').first().json.client_id,\n  raw_idea: $json.raw_idea || '',\n  angle: $json.angle || '',\n  audience: $json.audience || 'ICP',\n  target_trade: $json.target_trade || 'HVAC',\n  pillar: $json.pillar || 'Contractor Realities',\n  source: $json.source || 'HARVESTER',\n  source_url: $json.source_url || null,\n  source_title: $json.source_title || null,\n  signals: $json.signals || [],\n  status: $json.status || 'REFINED',\n  priority: $json.priority || 'HIGH',\n  geo_metro: $json.geo_metro || null,\n  why: $json.why || null,\n  icp_relevance: Number($json.icp_relevance) || 50,\n  evidence_required: $json.evidence_required || 'N',\n  thesis_key: $json.thesis_key || null,\n  craft_notes: $json.craft_notes || null,\n  craft_source_url: $json.craft_source_url || null,\n  updated_at: new Date().toISOString()\n}) }}",
+        "jsonBody": "={{ JSON.stringify({\n  id: $json.idea_id,\n  client_id: $('Resolve Client ID').first().json.client_id,\n  raw_idea: $json.raw_idea || '',\n  angle: $json.angle || '',\n  audience: $json.audience || 'ICP',\n  target_trade: $json.target_trade || '',\n  pillar: $json.pillar || '',\n  source: $json.source || 'HARVESTER',\n  source_url: $json.source_url || null,\n  source_title: $json.source_title || null,\n  signals: $json.signals || [],\n  status: $json.status || 'REFINED',\n  priority: $json.priority || 'HIGH',\n  geo_metro: $json.geo_metro || null,\n  why: $json.why || null,\n  icp_relevance: Number($json.icp_relevance) || 50,\n  evidence_required: $json.evidence_required || 'N',\n  thesis_key: $json.thesis_key || null,\n  craft_notes: $json.craft_notes || null,\n  craft_source_url: $json.craft_source_url || null,\n  updated_at: new Date().toISOString()\n}) }}",
         "method": "POST",
         "options": {
           "response": {
@@ -1427,7 +1427,7 @@
             }
           ]
         },
-        "jsonBody": "={{ JSON.stringify({\n  id: $json.idea_id,\n  client_id: $('Resolve Client ID').first().json.client_id,\n  raw_idea: $json.raw_idea || $json.angle || '',\n  angle: $json.angle || '',\n  audience: $json.audience || 'ICP',\n  pillar: $json.pillar || 'Contractor Realities',\n  source: 'MANUAL',\n  status: 'REFINED',\n  priority: $json.priority || 'HIGH',\n  why: $json.why || null,\n  icp_relevance: Number($json.icp_relevance) || 4,\n  evidence_required: $json.evidence_required || 'N',\n  updated_at: new Date().toISOString()\n}) }}",
+        "jsonBody": "={{ JSON.stringify({\n  id: $json.idea_id,\n  client_id: $('Resolve Client ID').first().json.client_id,\n  raw_idea: $json.raw_idea || $json.angle || '',\n  angle: $json.angle || '',\n  audience: 'ICP',\n  pillar: $json.pillar || '',\n  lane_id: $json.lane_id || null,\n  source: 'MANUAL',\n  status: 'REFINED',\n  priority: $json.priority || 'HIGH',\n  why: $json.why || null,\n  icp_relevance: Number($json.icp_relevance) || 4,\n  evidence_required: $json.evidence_required || 'N',\n  updated_at: new Date().toISOString()\n}) }}",
         "method": "POST",
         "options": {
           "response": {

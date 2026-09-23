@@ -2,12 +2,14 @@ const brand = $('Fetch Brand Context').first().json || {};
 const directiveRows = $('Read Brand').all().map(item => item.json).filter(row => row && row.category);
 const toneRows = $('Fetch Tone Examples').all().map(item => item.json).filter(row => row && row.content);
 const target = $('Select Target').first().json;
-const targetAudience = (target.audience || 'ICP').toUpperCase();
 
+// One ICP per tenant: only ALL and ICP directives apply. PEER/BRIDGE were
+// retired on 2026-09-23, and an old idea still labelled PEER must not pull
+// in a retired lane's rules.
 const filtered = directiveRows.filter(r => {
   const scope = (r.audience_scope || 'ALL').toUpperCase();
   const priority = parseInt(r.priority, 10);
-  const scopeMatch = scope === 'ALL' || scope === targetAudience;
+  const scopeMatch = scope === 'ALL' || scope === 'ICP';
   const prioMatch = priority === 1 || priority === 2;
   return scopeMatch && prioMatch;
 });
@@ -48,7 +50,7 @@ return [{
     idea: target,
     brand_context: cappedBrand,
     company_name: brand.brand_name || 'the brand',
-    client_id: $('Generate run_id').first().json.client_id || 'tenant-zero-getminions-ai',
+    client_id: $('Generate run_id').first().json.client_id,
     primary_logo_url: brand.primary_logo_url || '',
     brand_teal: brand.brand_teal || '#0E5C63',
     brand_coral: brand.brand_coral || '#FF6B4A',

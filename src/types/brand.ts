@@ -15,7 +15,8 @@ export type BrandCategory =
   | "VOICE"
   | "FORBIDDEN";
 
-export type AudienceScope = "ALL" | "ICP" | "PEER" | "BRIDGE";
+import type { AudienceScope, RetiredAudienceScope } from "@/constants/audience";
+export type { AudienceScope } from "@/constants/audience";
 
 export interface BrandDirectiveItem {
   id: string;
@@ -23,7 +24,8 @@ export interface BrandDirectiveItem {
   key: string;
   content: string;
   priority: 1 | 2 | 3 | number;
-  audience_scope: AudienceScope;
+  /** Retired values only appear on old, deactivated rows. */
+  audience_scope: AudienceScope | RetiredAudienceScope;
   is_active: boolean;
   updated_at: string;
 }

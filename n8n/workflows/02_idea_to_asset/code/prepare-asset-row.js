@@ -5,8 +5,8 @@ const blog = prep.supabase_payload || {};
 let idea = {};
 try { idea = $('Select Target').first().json || {}; } catch (e) {}
 
-let clientId = 'tenant-zero-getminions-ai';
-try { clientId = $('Generate run_id').first().json.client_id || clientId; } catch (e) {}
+// Generate run_id refuses to run without a client_id, so this is always set.
+const clientId = $('Generate run_id').first().json.client_id;
 
 // Cover generation no longer runs here. Qwen Image 3.0 Pro took ~43s of a ~98s
 // draft (51%), so the writer waited nearly a minute after the prose was done

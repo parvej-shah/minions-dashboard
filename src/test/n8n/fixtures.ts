@@ -6,6 +6,8 @@
  */
 import { buildBrandContextResponse } from "@/services/brandContext";
 import { selectAnglesForRun } from "@/constants/contentAngles";
+import { DEFAULT_LANES, defaultLaneId } from "@/constants/contentLanes";
+import type { AuthorContext } from "@/services/authorContext";
 import type { BrandSettings } from "@/types/brand";
 import type { HarvestContext, WriterVoiceConfig } from "@/services/brand";
 
@@ -49,6 +51,31 @@ export const voiceConfig: WriterVoiceConfig = {
   allowCustomerResultClaims: false,
 };
 
+export const authorContext: AuthorContext = {
+  icp: {
+    who: "Homeowners in Columbus with an aging water heater or plumbing.",
+    role: "Homeowner",
+    company_type: "",
+    pains: ["No hot water on a winter morning"],
+    decisions: ["Repair or replace a 10-year-old water heater"],
+    questions: ["Is a tankless heater worth it?"],
+    buying_triggers: ["A leak or a cold shower"],
+    vocabulary: ["water heater", "tankless"],
+  },
+  memory: [
+    { id: "MEM-1", kind: "STORY", content: "Replaced 14 water heaters in one January week after a cold snap.", disclosure: "PUBLIC", used_count: 0 },
+    { id: "MEM-2", kind: "LESSON", content: "A customer's anode rod had dissolved in six years because of softened water.", disclosure: "GENERALIZE", used_count: 2 },
+  ],
+  lanes: DEFAULT_LANES.map((l) => ({
+    id: defaultLaneId("tenant-acme", l.slug),
+    name: l.name,
+    purpose: l.purpose,
+    brief: l.brief,
+    weight: l.weight,
+    profile_target: "PERSONAL" as const,
+  })),
+};
+
 export const harvestContext: HarvestContext = {
   degraded: [],
   writerExpertise: "PRACTITIONER",
@@ -59,6 +86,7 @@ export const harvestContext: HarvestContext = {
   recentTheses: [],
   pillarRotation: selectAnglesForRun(4),
   runIndex: 4,
+  author: authorContext,
 };
 
 /** Exactly what GET /api/brand/context returns for the fixtures above. */

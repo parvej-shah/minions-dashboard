@@ -1,0 +1,857 @@
+{
+  "label": "baseline",
+  "date": "2026-09-23T15:17:12.133Z",
+  "runs": 3,
+  "judge_model": "qwen3-max",
+  "overall": {
+    "ideas": 27,
+    "authority_pass": 15,
+    "icp_problem": 100,
+    "author_advantage": 15,
+    "beyond_source": 100,
+    "generic": 26,
+    "invented_facts": 26,
+    "off_positioning": 0
+  },
+  "tenants": {
+    "minions": {
+      "summary": {
+        "ideas": 9,
+        "authority_pass": 0,
+        "icp_problem": 100,
+        "author_advantage": 0,
+        "beyond_source": 100,
+        "generic": 33,
+        "invented_facts": 44,
+        "off_positioning": 0
+      },
+      "ideas": [
+        {
+          "run": 0,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "Voice agents fail most often not because of AI comprehension, but because calendar write-backs succeed technically while creating logical conflicts that humans must untangle later.",
+            "angle": "The '200 OK' Trap: When Calendar Syncs Succeed But Bookings Fail",
+            "why": "Directly addresses the operational nightmare of double-bookings (Signal 14) using our specific build experience with tool-calling failures, distinguishing us from generic AI hype.",
+            "signal": "Calendar double-booking remains top complaint in scheduling apps"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "calendar write-backs succeed technically while creating logical conflicts that humans must untangle later",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M2",
+              "M9"
+            ],
+            "author_advantage_quote": "calendar write-backs succeed technically while creating logical conflicts",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strong link to author’s experience with silent webhook/calendar failures."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [
+            "14"
+          ],
+          "invented": true,
+          "authority_pass": false
+        },
+        {
+          "run": 0,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "For service businesses under 50 staff, voice latency matters more than naturalness; prioritize sub-2s turnaround over human-like prosody because silence kills conversion faster than robotic tone.",
+            "angle": "Latency vs. Naturalness: The Hierarchy for Service Business Voice Agents",
+            "why": "Provides a concrete evaluation framework leveraging our verified sub-1.8s latency proof point against newer 600ms model claims (Signal 2), helping buyers avoid over-indexing on vanity metrics.",
+            "signal": "New model cuts voice agent latency to 600ms"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "voice latency matters more than naturalness; prioritize sub-2s turnaround over human-like prosody because silence kills conversion faster than robotic tone",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "PROOF",
+              "M4"
+            ],
+            "author_advantage_quote": "sub-2s turnaround",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Uses verified latency proof and author’s opinion on what callers actually tolerate."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false
+        },
+        {
+          "run": 0,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "During demand spikes like heat waves, relying on human-only after-hours coverage creates a compounding backlog where Monday morning dispatch becomes triage rather than scheduling.",
+            "angle": "The Monday Morning Triage Tax: Cost of After-Hours Gaps During Demand Spikes",
+            "why": "Connects current HVAC demand signals (Signal 6) to the dispatcher hiring crisis (Signal 7), making the cost of inaction visceral for owners currently drowning in missed calls.",
+            "signal": "HVAC demand spikes as heat wave hits the Midwest"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "relying on human-only after-hours coverage creates a compounding backlog where Monday morning dispatch becomes triage rather than scheduling",
+            "author_advantage": false,
+            "author_advantage_refs": [],
+            "author_advantage_quote": "",
+            "beyond_source": true,
+            "generic": true,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Plausible but lacks any specific detail from the author’s memory or proof—any competitor could say this."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false
+        },
+        {
+          "run": 1,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "Voice agents fail most often not because of model intelligence, but because calendar integrations lack atomic write locks during high-concurrency booking windows. When we build dispatchers, the primary failure signal is always overlapping appointment creation, not conversational incoherence.",
+            "angle": "The 'smartest' AI agent fails if it treats calendar APIs as read-only suggestions rather than transactional databases requiring strict concurrency control.",
+            "why": "Directly addresses the operational pain of double-booking (Signal 14) which destroys trust in home services, distinguishing getminions.ai from generic chatbot vendors who ignore backend race conditions.",
+            "signal": "Calendar double-booking remains top complaint in scheduling apps"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "overlapping appointment creation",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M2",
+              "M9"
+            ],
+            "author_advantage_quote": "the primary failure signal is always overlapping appointment creation",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strongly grounded in the author's experience with booking failures and validation logic."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [
+            "14"
+          ],
+          "invented": true,
+          "authority_pass": false
+        },
+        {
+          "run": 1,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "When evaluating voice AI for after-hours overflow, prioritize latency under 800ms and barge-in capability over natural language understanding benchmarks. In our builds, callers tolerate robotic phrasing but hang up immediately when turn-taking lag exceeds human conversational cadence.",
+            "angle": "Latency and interruption handling are binary qualifiers for voice AI retention; superior reasoning capabilities cannot compensate for unnatural pause timing in live service calls.",
+            "why": "Provides a concrete technical filter for owners overwhelmed by vendor claims, leveraging getminions.ai's verified sub-1.8s latency as a baseline while explaining why even faster models (Signal 2) matter specifically for holding impatient homeowners.",
+            "signal": "New model cuts voice agent latency to 600ms"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "hang up immediately when turn-taking lag exceeds human conversational cadence",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "PROOF",
+              "M4"
+            ],
+            "author_advantage_quote": "callers tolerate robotic phrasing but hang up immediately when turn-taking lag exceeds human conversational cadence",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Uses verified latency proof and author’s opinion on what callers actually forgive."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [
+            "800"
+          ],
+          "invented": true,
+          "authority_pass": false
+        },
+        {
+          "run": 1,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "Relying on human dispatchers for heat-wave surges creates a compounding revenue loss where missed calls degrade brand reputation precisely when demand peaks. The cost is not just the lost job, but the permanent exclusion from future emergency rotations due to perceived unreliability.",
+            "angle": "Human staffing rigidity during predictable demand spikes converts temporary capacity constraints into long-term market share erosion that persists after weather normalizes.",
+            "why": "Reframes dispatcher hiring struggles (Signal 7) and demand spikes (Signal 6) as an existential reliability problem rather than a mere staffing expense, validating AI as infrastructure insurance for ICPs facing seasonal volatility.",
+            "signal": "HVAC demand spikes as heat wave hits the Midwest"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "missed calls degrade brand reputation precisely when demand peaks",
+            "author_advantage": false,
+            "author_advantage_refs": [],
+            "author_advantage_quote": "",
+            "beyond_source": true,
+            "generic": true,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Insightful but generic—any HVAC tech or consultant could say this without the author’s specific build experience."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false
+        },
+        {
+          "run": 2,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "The 'silent success' failure mode: When AI voice agents successfully transcribe calls and update CRMs but fail to actually commit calendar slots due to unhandled API race conditions, creating phantom leads that look qualified in reports but never generate revenue.",
+            "angle": "Automation logs can show 100% uptime while your booking rate quietly collapses because the agent lacks atomic write confirmation from the scheduling platform.",
+            "why": "Directly addresses the operational risk of trusting AI for bookings without verification mechanisms, leveraging signal 12 and 14 to validate a specific technical failure pattern relevant to getminions.ai's core promise.",
+            "signal": "Why automations fail silently in production"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "fail to actually commit calendar slots due to unhandled API race conditions, creating phantom leads that look qualified in reports but never generate revenue",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M2",
+              "M9"
+            ],
+            "author_advantage_quote": "lack atomic write confirmation from the scheduling platform",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strong alignment with author’s lived debugging of silent booking failures."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [
+            "100",
+            "12",
+            "14"
+          ],
+          "invented": true,
+          "authority_pass": false
+        },
+        {
+          "run": 2,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "Evaluating AI voice partners requires testing live latency under load and verifying calendar integration depth before signing, as sub-2s response time and atomic booking writes are non-negotiable thresholds that disqualify vendors relying solely on demo scripts or generic LLM benchmarks.",
+            "angle": "Vendor selection criteria must prioritize verifiable infrastructure performance over conversational fluency, using live stress tests and integration audits as primary filters.",
+            "why": "Provides actionable evaluation framework tied directly to getminions.ai's verified proof points (sub-1.8s latency, live demo) while addressing market noise from funding hype (signal 1) and new model releases (signal 2).",
+            "signal": "New model cuts voice agent latency to 600ms"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "sub-2s response time and atomic booking writes are non-negotiable thresholds that disqualify vendors relying solely on demo scripts or generic LLM benchmarks",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "PROOF"
+            ],
+            "author_advantage_quote": "sub-2s response time",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Leverages verified sub-1.8s latency as a concrete differentiator."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false
+        },
+        {
+          "run": 2,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "During demand spikes like heat waves, every missed after-hours call represents permanent revenue loss to competitors who answer first, as homeowners in urgent distress do not callback, they simply book with whoever responds immediately.",
+            "angle": "The cost of inadequate after-hours coverage compounds exponentially during peak demand events because urgency eliminates customer patience and loyalty.",
+            "why": "Grounds abstract speed-to-lead statistics (signal 8) in concrete seasonal pressure (signal 6), making the financial consequence of inaction visceral for HVAC and emergency service operators facing imminent demand surges.",
+            "signal": "HVAC demand spikes as heat wave hits the Midwest"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "every missed after-hours call represents permanent revenue loss to competitors who answer first, as homeowners in urgent distress do not callback",
+            "author_advantage": false,
+            "author_advantage_refs": [],
+            "author_advantage_quote": "",
+            "beyond_source": true,
+            "generic": true,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Insightful but generic—any voice AI vendor could say this without unique experience."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false
+        }
+      ]
+    },
+    "keystone": {
+      "summary": {
+        "ideas": 9,
+        "authority_pass": 33,
+        "icp_problem": 100,
+        "author_advantage": 33,
+        "beyond_source": 100,
+        "generic": 0,
+        "invented_facts": 11,
+        "off_positioning": 0
+      },
+      "ideas": [
+        {
+          "run": 0,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "The failure pattern isn't that ISAs stop working, but that they silently degrade into 'lead qualifiers' who protect agent calendars from unready buyers rather than converting them. When I managed a 30-agent team's ISA desk, the earliest signal of this rot was a rising 'nurtured' status count with flat showing volume, indicating the team had optimized for clean CRM data over actual appointments.",
+            "angle": "What Went Wrong",
+            "why": "Team leaders often blame lead quality when showings drop, missing that their own ISA protocols have shifted toward administrative gatekeeping instead of sales conversion during market slowdowns.",
+            "signal": "ISA teams shrink as brokerages cut costs"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "ISA protocols have shifted toward administrative gatekeeping instead of sales conversion",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M1"
+            ],
+            "author_advantage_quote": "When I managed a 30-agent team's ISA desk, the earliest signal of this rot was a rising 'nurtured' status count with flat showing volume",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strong use of firsthand ISA management experience to diagnose a subtle operational drift."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true
+        },
+        {
+          "run": 0,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "Deciding between AI call handling and human ISAs requires prioritizing calendar integration depth over conversational nuance as the primary selection criterion. An option should be disqualified immediately if it cannot check live agent availability and book a specific time slot on the first interaction, regardless of how natural the voice synthesis sounds.",
+            "angle": "Decision Guide",
+            "why": "With top brokerages deploying AI assistants, mid-sized teams are evaluating vendors based on demo polish rather than the operational mechanic that actually drives revenue: reducing the friction between inquiry and booked appointment.",
+            "signal": "AI assistants now answer calls for top brokerages"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "Deciding between AI call handling and human ISAs requires prioritizing calendar integration depth over conversational nuance",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M3"
+            ],
+            "author_advantage_quote": "cannot check live agent availability and book a specific time slot on the first interaction",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Leverages the author’s current work building AI that books callbacks, making the insight non-generic."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true
+        },
+        {
+          "run": 0,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "In a low-inventory market where buyer commitment is fragile, relying on asynchronous texting for initial response creates a false sense of speed that actively increases showing no-show rates. The cost isn't just a missed connection; it is the operational burnout of agents driving to properties for buyers who never verbally confirmed intent because the text-based nurture loop lacked the accountability of a real-time conversation.",
+            "angle": "The Stakes",
+            "why": "Vendors are currently pushing texting superiority metrics, but team leaders need to understand that optimizing for response rate over confirmation rate directly inflates agent churn by wasting their most scarce resource: field time.",
+            "signal": "Showing no-show rates climb in buyer's market"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "relying on asynchronous texting for initial response creates a false sense of speed that actively increases showing no-show rates",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M4"
+            ],
+            "author_advantage_quote": "lacked the accountability of a real-time conversation",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Connects texting’s lack of verbal confirmation to agent burnout using the author’s observed link between confirmation method and no-shows."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false
+        },
+        {
+          "run": 1,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "When ISA teams are reduced during downturns, relying on remaining agents to absorb lead response duties creates a hidden failure mode where speed metrics stay green while actual conversation quality collapses due to cognitive overload.",
+            "angle": "The 'Absorption Trap': Why distributing ISA volume to active agents preserves response time KPIs but destroys conversion rates",
+            "why": "Directly addresses Signal 8 (ISA cuts) by warning against the specific operational error of assuming agent capacity is elastic; validates the need for dedicated response infrastructure even when headcount shrinks.",
+            "signal": "ISA teams shrink as brokerages cut costs"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "relying on remaining agents to absorb lead response duties creates a hidden failure mode where speed metrics stay green while actual conversation quality collapses due to cognitive overload",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M1"
+            ],
+            "author_advantage_quote": "When ISA teams are reduced during downturns, relying on remaining agents to absorb lead response duties",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strong alignment with author’s ISA team experience and current ICP pain point."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true
+        },
+        {
+          "run": 1,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "Evaluating AI call handlers requires testing disqualification logic and appointment-setting accuracy over general conversational fluency, as polite bots that fail to filter unqualified leads create more downstream waste than silence.",
+            "angle": "Selection criteria for AI voice assistants: Prioritize strict qualification gating and calendar integration over natural language sophistication",
+            "why": "Counters the hype in Signal 3 by providing an operational rubric for teams who cannot afford to test multiple vendors; focuses on the specific outcome (booked showings) rather than tech novelty.",
+            "signal": "AI assistants now answer calls for top brokerages"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "polite bots that fail to filter unqualified leads create more downstream waste than silence",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M3",
+              "M6"
+            ],
+            "author_advantage_quote": "Evaluating AI call handlers requires testing disqualification logic and appointment-setting accuracy",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Leverages author’s hands-on AI deployment and client questions about bot behavior."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false
+        },
+        {
+          "run": 1,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "In a market with rising no-show rates, failing to implement automated re-confirmation workflows turns booked inventory into unrecoverable sunk costs because the slot was held exclusively based on outdated buyer intent.",
+            "angle": "The compounding cost of stale appointments: How missing re-confirmation protocols wastes finite showing capacity in low-transaction markets",
+            "why": "Connects Signal 9 (no-shows) and Signal 4 (low sales) to make the operational consequence concrete; frames confirmation not as admin work but as revenue protection when transaction volume is scarce.",
+            "signal": "Showing no-show rates climb in buyer's market"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "failing to implement automated re-confirmation workflows turns booked inventory into unrecoverable sunk costs",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M4"
+            ],
+            "author_advantage_quote": "In a market with rising no-show rates, failing to implement automated re-confirmation workflows",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Directly builds on author’s observed impact of personalized confirmations on no-shows."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false
+        },
+        {
+          "run": 2,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "The 'Speed-to-Lead' Illusion: Why Sub-Minute Response Fails Without Pre-Written Conversation Paths. Most teams hit speed benchmarks by deploying auto-texts or rushed agent outreach, but conversion stalls because the initial contact lacks a specific qualification hook that bridges to a showing request.",
+            "angle": "What Went Wrong",
+            "why": "Addresses the operational gap between hitting a vanity metric (response time) and achieving the actual business outcome (booked showings), drawing on ISA management experience where speed without structure yields low appointment set rates.",
+            "signal": ""
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "conversion stalls because the initial contact lacks a specific qualification hook that bridges to a showing request",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M1"
+            ],
+            "author_advantage_quote": "drawing on ISA management experience where speed without structure yields low appointment set rates",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strong alignment with author’s ISA experience and ICP’s follow-up problem."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false
+        },
+        {
+          "run": 2,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "Evaluating AI Call Handlers: Prioritize Showing Calendar Integration Over Natural Language Fluency. When selecting voice AI for inbound leads, disqualify vendors that cannot write directly to your scheduling platform in real-time; conversational sophistication is irrelevant if the bot requires human follow-up to lock in an appointment slot.",
+            "angle": "Decision Guide",
+            "why": "Directly applies the author's ISA background to the current influx of AI voice tools (Signal 4), providing a concrete technical filter that prevents leaders from buying impressive demos that fail at the specific job of booking showings autonomously.",
+            "signal": "AI assistants now answer calls for top brokerages"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "disqualify vendors that cannot write directly to your scheduling platform in real-time",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M3"
+            ],
+            "author_advantage_quote": "cannot write directly to your scheduling platform in real-time",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Specific technical requirement mirrors author’s current AI deployment work."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false
+        },
+        {
+          "run": 2,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "The Compounding Cost of Round-Robin Latency: How Fairness Algorithms Create Unrecoverable Response Gaps During Peak Hours. Distributing leads strictly by rotation rather than immediate availability creates micro-delays that accumulate during high-volume windows, permanently degrading connection rates regardless of how fast individual agents eventually respond.",
+            "angle": "The Stakes",
+            "why": "Challenges a sacred cow in team management (fair distribution) by quantifying its hidden tax on speed-to-lead, leveraging Signal 11 and the author's operational experience managing ISA workflows where equitable routing often sacrificed conversion velocity.",
+            "signal": "Round-robin lead distribution under scrutiny"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "Fairness Algorithms Create Unrecoverable Response Gaps During Peak Hours",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M1",
+              "M7"
+            ],
+            "author_advantage_quote": "managing ISA workflows where equitable routing often sacrificed conversion velocity",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Ties round-robin critique to author’s observed trade-offs in lead routing."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [
+            "11"
+          ],
+          "invented": true,
+          "authority_pass": false
+        }
+      ]
+    },
+    "ledgerline": {
+      "summary": {
+        "ideas": 9,
+        "authority_pass": 11,
+        "icp_problem": 100,
+        "author_advantage": 11,
+        "beyond_source": 100,
+        "generic": 44,
+        "invented_facts": 22,
+        "off_positioning": 0
+      },
+      "ideas": [
+        {
+          "run": 0,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "The failure pattern of treating equipment lease payments as fixed overhead rather than variable production costs, which masks true chair profitability until cash reserves are depleted during seasonal dips.",
+            "angle": "What Went Wrong",
+            "why": "Independent owners often approve financing based on monthly affordability without modeling how that fixed obligation interacts with insurance reimbursement lags and seasonal revenue variance, creating a solvency gap that P&L statements hide.",
+            "signal": "Equipment financing demand climbs"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "creating a solvency gap that P&L statements hide",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M9",
+              "M4"
+            ],
+            "author_advantage_quote": "financing more than two major items in a year were cash-negative for the next two quarters",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strongly grounded in author’s observed pattern linking equipment financing to cash negativity and P&L misdirection."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false
+        },
+        {
+          "run": 0,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "A decision framework for evaluating in-house membership plans that prioritizes administrative labor cost and collection friction over gross enrollment numbers, disqualifying any plan structure where recurring billing requires manual intervention.",
+            "angle": "Decision Guide",
+            "why": "Practices adopt membership plans to reduce insurance dependency but frequently underestimate the ongoing bookkeeping burden; this guide forces owners to validate operational sustainability before chasing top-line revenue.",
+            "signal": "Membership plans grow among uninsured patients"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "underestimate the ongoing bookkeeping burden",
+            "author_advantage": false,
+            "author_advantage_refs": [],
+            "author_advantage_quote": "",
+            "beyond_source": true,
+            "generic": true,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Reasonable insight but lacks specific detail from author’s experience; any dental consultant could say this."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false
+        },
+        {
+          "run": 0,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "The concrete operational cost of delaying hygienist wage adjustments when local market rates have shifted, measured not in recruitment fees but in lost billable hours and schedule gaps that compound weekly.",
+            "angle": "The Stakes",
+            "why": "Owners often defer compensation reviews to protect margins, but the resulting unfilled hygiene schedule creates immediate, unrecoverable revenue loss that exceeds the cost of proactive adjustment; this makes the tradeoff tangible using production capacity rather than abstract retention metrics.",
+            "signal": "Hygienist shortage drives wages up"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "lost billable hours and schedule gaps that compound weekly",
+            "author_advantage": false,
+            "author_advantage_refs": [],
+            "author_advantage_quote": "",
+            "beyond_source": true,
+            "generic": true,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Makes a logical point but doesn’t draw on any specific observation or data from the author’s practice."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false
+        },
+        {
+          "run": 1,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "Practices often mistake rising accounts receivable for growth until insurance reimbursements slow and cash dries up, because they track production instead of collections velocity. The failure pattern is treating lagging AR as an asset rather than a warning signal that monthly spendable cash is about to contract.",
+            "angle": "Rising AR during reimbursement slowdowns is a liquidity trap, not a growth indicator",
+            "why": "Directly addresses the collision between current market signals on slow reimbursements and the core Ledgerline promise of knowing what owners can actually spend",
+            "signal": "Dental insurers slow reimbursements"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "mistake rising accounts receivable for growth until insurance reimbursements slow and cash dries up",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M4",
+              "M2"
+            ],
+            "author_advantage_quote": "track production instead of collections velocity",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strong alignment with author’s lived insight that P&L misleads because production ≠ collections."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false
+        },
+        {
+          "run": 1,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "When deciding whether to finance new equipment or pay cash, prioritize current debt service coverage ratio over interest rates, and disqualify any option where the monthly payment exceeds 50% of average monthly net collections after overhead. This sequence prevents financing decisions based on affordable-looking rates that still break monthly cash flow.",
+            "angle": "Debt service coverage must gate equipment financing decisions before rate comparison",
+            "why": "Provides a concrete, ordered framework for the exact financing dilemma independent owners face when demand climbs but cash flow remains their top worry",
+            "signal": "Equipment financing demand climbs"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "deciding whether to finance new equipment or pay cash",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M9"
+            ],
+            "author_advantage_quote": "monthly payment exceeds 50% of average monthly net collections after overhead",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Uses specific cash-flow threshold observed in M9 about practices going cash-negative after multiple financings."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [
+            "50"
+          ],
+          "invented": true,
+          "authority_pass": false
+        },
+        {
+          "run": 1,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "Outsourcing bookkeeping without verifying dental-specific categorization accuracy creates silent overhead leakage, where misclassified supply or lab costs distort the one-page cash report and lead owners to authorize spending that doesn't actually exist. The stake is not bad books but real-time operational decisions made against false financial visibility.",
+            "angle": "Inaccurate expense categorization in outsourced bookkeeping directly corrupts spendable-cash calculations",
+            "why": "Defends Ledgerline's specialized positioning by showing the tangible cost of generic AI-driven bookkeeping adoption in a niche with unique expense structures",
+            "signal": "Bookkeeping firms adopt AI categorisation"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "misclassified supply or lab costs distort the one-page cash report and lead owners to authorize spending that doesn't actually exist",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M3",
+              "M7"
+            ],
+            "author_advantage_quote": "misclassified supply or lab costs distort the one-page cash report",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Ties generic AI bookkeeping risk to dental-specific cost structures and the author’s cash-report product."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true
+        },
+        {
+          "run": 2,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "Practices often misdiagnose cash crunches as insurance delays when the actual failure mode is uncollected patient copays accumulating silently in accounts receivable. The earliest signal is not the insurer's EOB timeline, but a rising ratio of patient-balance AR over 60 days relative to total production.",
+            "angle": "Cash flow crises frequently stem from internal collection process decay rather than external payer lag, yet owners default to blaming insurers because it feels less actionable.",
+            "why": "Directly addresses the #1 owner worry (cash flow) by correcting a common diagnostic error that prevents effective intervention, leveraging 12 years of bookkeeping patterns.",
+            "signal": "Cash flow tops owner worries in new survey"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "misdiagnose cash crunches as insurance delays",
+            "author_advantage": false,
+            "author_advantage_refs": [],
+            "author_advantage_quote": "",
+            "beyond_source": true,
+            "generic": true,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Lacks specific detail from author’s actual experience despite claiming 12 years of patterns."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [
+            "60",
+            "12"
+          ],
+          "invented": true,
+          "authority_pass": false
+        },
+        {
+          "run": 2,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "When evaluating equipment financing versus cash purchase during rate plateaus, prioritize the equipment's revenue-generating certainty and maintenance risk over the interest rate spread. Disqualify any financing option where the monthly payment exceeds the conservative net margin of the specific procedure the equipment enables.",
+            "angle": "Financing decisions should be gated by unit economics of the specific clinical application, not just favorable macro lending conditions or vendor terms.",
+            "why": "Provides a concrete underwriting framework for independent owners facing increased financing demand, preventing over-leverage based on misleading 'low rate' narratives.",
+            "signal": "Equipment financing demand climbs"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "evaluating equipment financing versus cash purchase",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M9"
+            ],
+            "author_advantage_quote": "monthly payment exceeds the conservative net margin of the specific procedure the equipment enables",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strongly grounded in M9’s observation about over-financing leading to cash negativity."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false
+        },
+        {
+          "run": 2,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "Relying solely on automated AI claim coding without reconciling against monthly bank deposits creates a false sense of security that masks reimbursement denials until cash reserves are depleted. The operational cost is not just lost revenue, but the compounding administrative burden of rebilling aged claims that have exceeded timely filing limits.",
+            "angle": "Adopting automation for claims submission without integrating it with cash reconciliation converts minor coding errors into permanent write-offs through missed appeal windows.",
+            "why": "Counters current vendor hype with a specific operational risk relevant to dental bookkeeping, protecting owners from trusting black-box tools over verified cash position.",
+            "signal": "AI tools promise faster insurance claims"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "masks reimbursement denials until cash reserves are depleted",
+            "author_advantage": false,
+            "author_advantage_refs": [],
+            "author_advantage_quote": "",
+            "beyond_source": true,
+            "generic": true,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Makes a plausible point but doesn’t draw on any specific memory or proof from the author."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false
+        }
+      ]
+    }
+  },
+  "rescored_at": "2026-09-23T15:18:15.866Z"
+}

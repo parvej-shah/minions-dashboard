@@ -56,7 +56,8 @@ return ideas.map(idea => {
 
   const clIdea = {
     ...idea,
-    audience: ['ICP', 'PEER', 'BRIDGE'].includes(idea.audience) ? idea.audience : 'ICP',
+    // One ICP per tenant (PEER/BRIDGE were retired on 2026-09-23).
+    audience: 'ICP',
     raw_idea: (idea.raw_idea || '').replace(/—/g, ', ').replace(/--/g, ', '),
     angle: (idea.angle || '').replace(/—/g, ', ').replace(/--/g, ', '),
     why: (idea.why || '').replace(/—/g, ', ').replace(/--/g, ', '),

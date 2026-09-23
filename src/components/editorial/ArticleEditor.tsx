@@ -254,7 +254,7 @@ export default function ArticleEditor({
                 {/* Article Header */}
                 <div className="space-y-2 border-b border-[#1F2D3D]/60 pb-4">
                   <div className="flex items-center gap-2 text-xs font-mono text-[#00C9A7] flex-wrap">
-                    <span>{activeAsset.pillar || "Contractor Realities"}</span>
+                    <span>{activeAsset.pillar || "—"}</span>
                     <span>•</span>
                     <span>{readingTimeMinutes} min read</span>
                     <span>•</span>

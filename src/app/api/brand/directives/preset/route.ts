@@ -80,19 +80,6 @@ export async function POST(request: Request) {
       });
     }
 
-    if (preset.audienceLanes?.business) {
-      directivesToCreate.push({
-        id: `DIR-${crypto.randomUUID()}`,
-        clientId: ctx.clientId,
-        category: "AUDIENCE",
-        ruleKey: "lane_business",
-        instruction: preset.audienceLanes.business,
-        priority: 3,
-        audienceScope: "PEER",
-        isActive: true,
-      });
-    }
-
     if (preset.forbiddenWords?.length) {
       directivesToCreate.push({
         id: `DIR-${crypto.randomUUID()}`,

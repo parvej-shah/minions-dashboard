@@ -11,7 +11,9 @@ const triggerBody = trigger.body || trigger;
 // The Cockpit "Refine & Draft" button POSTs a specific idea_id. Carry it through so
 // Select Target can honor it instead of silently drafting whatever it would auto-pick.
 const requestedIdeaId = (triggerBody.idea_id || '').toString().trim() || null;
-const clientId = (triggerBody.client_id || '').toString().trim() || 'tenant-zero-getminions-ai';
+const clientId = (triggerBody.client_id || '').toString().trim();
+// Never default to a tenant: a missing client_id used to draft into tenant zero.
+if (!clientId) throw new Error('Draft trigger has no client_id; refusing to guess a tenant.');
 
 const runId = triggerBody.run_id || generateUUID();
 const callbackUrl = triggerBody.callback_url || null;

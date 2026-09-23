@@ -9,9 +9,9 @@ export interface BrandPreset {
   toneCadence: string;
   corePhilosophy: string;
   coreThemes: string;
+  /** The one ICP (PEER/BRIDGE audiences were retired on 2026-09-23). */
   audienceLanes: {
     builders?: string;
-    business?: string;
   };
   forbiddenWords: string[];
   proofPoints: string[];
@@ -35,8 +35,6 @@ export const BRAND_PRESETS: BrandPreset[] = [
     audienceLanes: {
       builders:
         "Lane A — Builders: Software engineers, AI engineers, and technical founders. Explain what is technically interesting, why the architecture matters, what it enables, and what trade-offs exist.",
-      business:
-        "Lane B — Operators: Technical leaders and founders. Explain what workflow changes, what repetitive work can be automated, and what economics change.",
     },
     forbiddenWords: [
       "seamless",
@@ -78,8 +76,6 @@ export const BRAND_PRESETS: BrandPreset[] = [
     audienceLanes: {
       builders:
         "Lane A — Practitioners: Practical frameworks, better workflows, and lessons from doing the work.",
-      business:
-        "Lane B — Buyers & Decision-Makers: Clear trade-offs, proof, and high-leverage decisions for their business.",
     },
     forbiddenWords: [
       "all-in-one solution",
@@ -116,8 +112,6 @@ export const BRAND_PRESETS: BrandPreset[] = [
     audienceLanes: {
       builders:
         "Lane A — Service Managers & Dispatchers: Practical tips on routing, call triage, and software sync between field and office.",
-      business:
-        "Lane B — Business Owners: Increasing ticket averages, capturing missed emergency revenue, and managing seasonal demand spikes.",
     },
     forbiddenWords: [
       "synergy",
