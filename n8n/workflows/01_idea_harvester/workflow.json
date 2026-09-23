@@ -17,7 +17,7 @@
         [
           {
             "index": 0,
-            "node": "Dedupe Ideas",
+            "node": "Gate Harvest Ideas",
             "type": "main"
           }
         ]
@@ -80,17 +80,6 @@
           {
             "index": 0,
             "node": "Merge Craft Into Ideas",
-            "type": "main"
-          }
-        ]
-      ]
-    },
-    "Dedupe Ideas": {
-      "main": [
-        [
-          {
-            "index": 0,
-            "node": "Fetch Source Articles",
             "type": "main"
           }
         ]
@@ -305,7 +294,7 @@
         [
           {
             "index": 0,
-            "node": "Sync Refined Ideas to DB",
+            "node": "Gate Refined Ideas",
             "type": "main"
           }
         ],
@@ -412,6 +401,50 @@
           }
         ]
       ]
+    },
+    "Gate Harvest Ideas": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Apply Harvest Gate",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Apply Harvest Gate": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Fetch Source Articles",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Gate Refined Ideas": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Apply Refine Gate",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Apply Refine Gate": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Sync Refined Ideas to DB",
+            "type": "main"
+          }
+        ]
+      ]
     }
   },
   "id": "Ykpl0pQTzBdZlDcA",
@@ -508,7 +541,7 @@
       "onError": "continueRegularOutput",
       "parameters": {
         "authentication": "genericCredentialType",
-        "jsonBody": "={{ JSON.stringify({ status: 'COMPLETED', metadata: { harvestedCount: $input.all().length } }) }}",
+        "jsonBody": "={{ JSON.stringify({ status: 'COMPLETED', metadata: { harvestedCount: $('Apply Harvest Gate').all().filter(i => i.json.gate_verdict !== 'REJECT').length, gate: $('Gate Harvest Ideas').first().json.summary } }) }}",
         "method": "PATCH",
         "options": {
           "response": {
@@ -602,19 +635,6 @@
       "typeVersion": 2
     },
     {
-      "id": "d2e3f4a5-b6c7-4d8e-9f0a-1b2c3d4e5f6a",
-      "name": "Dedupe Ideas",
-      "parameters": {
-        "jsCode": "@file:code/dedupe-ideas.js"
-      },
-      "position": [
-        1424,
-        240
-      ],
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2
-    },
-    {
       "id": "c7a1e2f4-5b6d-4e88-9a3c-1d2e3f4a5b60",
       "name": "Expand Tenant Sources",
       "parameters": {
@@ -686,7 +706,7 @@
             }
           ]
         },
-        "jsonBody": "={{ JSON.stringify({ client_id: $('Resolve Client ID').first().json.client_id, urls: $input.all().map(i => i.json.source_url).filter(Boolean) }) }}",
+        "jsonBody": "={{ JSON.stringify({ client_id: $('Resolve Client ID').first().json.client_id, urls: $input.all().filter(i => i.json.gate_verdict !== 'REJECT').map(i => i.json.source_url).filter(Boolean) }) }}",
         "method": "POST",
         "options": {
           "response": {
@@ -1374,7 +1394,7 @@
             }
           ]
         },
-        "jsonBody": "={{ JSON.stringify({\n  id: $json.idea_id,\n  client_id: $('Resolve Client ID').first().json.client_id,\n  raw_idea: $json.raw_idea || '',\n  angle: $json.angle || '',\n  audience: $json.audience || 'ICP',\n  target_trade: $json.target_trade || '',\n  pillar: $json.pillar || '',\n  source: $json.source || 'HARVESTER',\n  source_url: $json.source_url || null,\n  source_title: $json.source_title || null,\n  signals: $json.signals || [],\n  status: $json.status || 'REFINED',\n  priority: $json.priority || 'HIGH',\n  geo_metro: $json.geo_metro || null,\n  why: $json.why || null,\n  icp_relevance: Number($json.icp_relevance) || 50,\n  evidence_required: $json.evidence_required || 'N',\n  thesis_key: $json.thesis_key || null,\n  craft_notes: $json.craft_notes || null,\n  craft_source_url: $json.craft_source_url || null,\n  updated_at: new Date().toISOString()\n}) }}",
+        "jsonBody": "={{ JSON.stringify({\n  id: $json.idea_id,\n  client_id: $('Resolve Client ID').first().json.client_id,\n  raw_idea: $json.raw_idea || '',\n  angle: $json.angle || '',\n  audience: $json.audience || 'ICP',\n  target_trade: $json.target_trade || '',\n  pillar: $json.pillar || '',\n  source: $json.source || 'HARVESTER',\n  source_url: $json.source_url || null,\n  source_title: $json.source_title || null,\n  signals: $json.signals || [],\n  status: $json.status || 'REFINED',\n  rejection_reason: $json.rejection_reason || null,\n  priority: $json.priority || 'HIGH',\n  geo_metro: $json.geo_metro || null,\n  why: $json.why || null,\n  icp_relevance: Number($json.icp_relevance) || 50,\n  evidence_required: $json.evidence_required || 'N',\n  thesis_key: $json.thesis_key || null,\n  craft_notes: $json.craft_notes || null,\n  craft_source_url: $json.craft_source_url || null,\n  source_type: $json.source_type || null,\n  lane_id: $json.lane_id || null,\n  profile_target: $json.profile_target || null,\n  recommended_format: $json.recommended_format || null,\n  memory_ids: $json.memory_ids || [],\n  trust_basis: $json.trust_basis || [],\n  icp_problem: $json.icp_problem || null,\n  reader_context: $json.reader_context || null,\n  author_advantage: $json.author_advantage || null,\n  white_space: $json.white_space || null,\n  fresh_perspective: $json.fresh_perspective || null,\n  vision: $json.vision || null,\n  gate_verdict: $json.gate_verdict || null,\n  gate_reasons: $json.gate_reasons || [],\n  score_breakdown: $json.score_breakdown || null,\n  updated_at: new Date().toISOString()\n}) }}",
         "method": "POST",
         "options": {
           "response": {
@@ -1423,7 +1443,7 @@
             }
           ]
         },
-        "jsonBody": "={{ JSON.stringify({\n  id: $json.idea_id,\n  client_id: $('Resolve Client ID').first().json.client_id,\n  raw_idea: $json.raw_idea || $json.angle || '',\n  angle: $json.angle || '',\n  audience: 'ICP',\n  pillar: $json.pillar || '',\n  lane_id: $json.lane_id || null,\n  source: 'MANUAL',\n  status: 'REFINED',\n  priority: $json.priority || 'HIGH',\n  why: $json.why || null,\n  icp_relevance: Number($json.icp_relevance) || 4,\n  evidence_required: $json.evidence_required || 'N',\n  updated_at: new Date().toISOString()\n}) }}",
+        "jsonBody": "={{ JSON.stringify({\n  id: $json.idea_id,\n  client_id: $('Resolve Client ID').first().json.client_id,\n  raw_idea: $json.raw_idea || $json.angle || '',\n  angle: $json.angle || '',\n  audience: 'ICP',\n  pillar: $json.pillar || '',\n  source: 'MANUAL',\n  status: 'REFINED',\n  priority: $json.priority || 'MEDIUM',\n  why: $json.why || null,\n  icp_relevance: Number.isFinite($json.icp_relevance) ? $json.icp_relevance : 50,\n  evidence_required: $json.evidence_required || 'N',\n  source_type: $json.source_type || null,\n  lane_id: $json.lane_id || null,\n  profile_target: $json.profile_target || null,\n  recommended_format: $json.recommended_format || null,\n  memory_ids: $json.memory_ids || [],\n  trust_basis: $json.trust_basis || [],\n  icp_problem: $json.icp_problem || null,\n  reader_context: $json.reader_context || null,\n  author_advantage: $json.author_advantage || null,\n  white_space: $json.white_space || null,\n  fresh_perspective: $json.fresh_perspective || null,\n  vision: $json.vision || null,\n  gate_verdict: $json.gate_verdict || null,\n  gate_reasons: $json.gate_reasons || [],\n  score_breakdown: $json.score_breakdown || null,\n  updated_at: new Date().toISOString()\n}) }}",
         "method": "POST",
         "options": {
           "response": {
@@ -1440,7 +1460,7 @@
         "url": "https://kneafaxwkopodiausljf.supabase.co/rest/v1/ideas?on_conflict=id"
       },
       "position": [
-        1216,
+        1250,
         -48
       ],
       "type": "n8n-nodes-base.httpRequest",
@@ -1469,6 +1489,90 @@
           "name": "Minions Cockpit API (webhook secret)"
         }
       }
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "executeOnce": true,
+      "id": "6f1d2a3b-4c5d-4e6f-8a9b-0c1d2e3f4a51",
+      "name": "Gate Harvest Ideas",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ JSON.stringify({ client_id: $('Resolve Client ID').first().json.client_id, mode: 'harvest', ideas: $input.all().map(i => i.json), context: $('Fetch Brand Context').first().json, market_signals: $('Build Harvest Payload').first().json.market_signals }) }}",
+        "method": "POST",
+        "options": {
+          "timeout": 20000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/harvest/gate"
+      },
+      "position": [
+        1424,
+        240
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "6f1d2a3b-4c5d-4e6f-8a9b-0c1d2e3f4a52",
+      "name": "Apply Harvest Gate",
+      "parameters": {
+        "jsCode": "@file:code/apply-harvest-gate.js"
+      },
+      "position": [
+        1536,
+        400
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "executeOnce": true,
+      "id": "6f1d2a3b-4c5d-4e6f-8a9b-0c1d2e3f4a53",
+      "name": "Gate Refined Ideas",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ JSON.stringify({ client_id: $('Resolve Client ID').first().json.client_id, mode: 'refine', ideas: $input.all().map(i => i.json), context: $('Fetch Brand Context').first().json, notes: $input.all().map(i => i.json.note || '') }) }}",
+        "method": "POST",
+        "options": {
+          "timeout": 20000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/harvest/gate"
+      },
+      "position": [
+        1000,
+        -160
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "6f1d2a3b-4c5d-4e6f-8a9b-0c1d2e3f4a54",
+      "name": "Apply Refine Gate",
+      "parameters": {
+        "jsCode": "@file:code/apply-refine-gate.js"
+      },
+      "position": [
+        1100,
+        -48
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
     }
   ],
   "settings": {

@@ -8,6 +8,7 @@ import { resolveSourceFeedUrl } from "@/constants/ideaSources";
 import { selectAnglesForRun } from "@/constants/contentAngles";
 import { thesisKey, restemKey } from "@/lib/thesis";
 import { getAuthorContext, EMPTY_ICP, type AuthorContext } from "@/services/authorContext";
+import { resolveSourceMix, type SourceBucket } from "@/constants/sourceMix";
 
 /**
  * Brand settings plus the live directive set, scoped to one tenant.
@@ -193,6 +194,11 @@ export interface HarvestContext {
   runIndex: number;
   /** ICP, professional memory and content lanes (authority flywheel, phase 1). */
   author: AuthorContext;
+  /** Target share per idea source; the harvest plan keeps to it (phase 3). */
+  sourceMix: Record<SourceBucket, number>;
+  /** source_type and memory_ids of the same recent ideas, newest first: what the mix and memory rotation count. */
+  recentSourceTypes: (string | null)[];
+  recentMemoryIds: string[][];
 }
 
 /**
@@ -230,17 +236,20 @@ export async function getHarvestContext(clientId: string): Promise<HarvestContex
 
   const [profile, sourceRows, recentIdeas, runCount, author] = await Promise.all([
     prisma.brandProfile
-      .findUnique({ where: { clientId }, select: { writerExpertise: true } })
+      .findUnique({ where: { clientId }, select: { writerExpertise: true, harvestSourceMix: true } })
       .catch(soft("writerExpertise", null)),
     prisma.ideaSource
       .findMany({ where: { clientId, isActive: true }, orderBy: { createdAt: "asc" } })
       .catch(soft("ideaSources", [])),
     prisma.idea
       .findMany({
-        where: { clientId },
+        // Ideas the gate dropped were never produced, so they count toward
+        // neither the mix nor the do-not-repeat list. Ideas a PERSON rejected
+        // still count: they are exactly what should not come back.
+        where: { clientId, OR: [{ gateVerdict: null }, { gateVerdict: { not: "REJECT" } }] },
         orderBy: { createdAt: "desc" },
         take: 60,
-        select: { rawIdea: true, angle: true, thesisKey: true },
+        select: { rawIdea: true, angle: true, thesisKey: true, sourceType: true, memoryIds: true },
       })
       .catch(soft("recentTheses", [])),
     prisma.pipelineRun
@@ -278,5 +287,8 @@ export async function getHarvestContext(clientId: string): Promise<HarvestContex
     pillarRotation: selectAnglesForRun(runCount),
     runIndex: runCount,
     author,
+    sourceMix: resolveSourceMix(profile?.harvestSourceMix),
+    recentSourceTypes: recentIdeas.map((i) => i.sourceType),
+    recentMemoryIds: recentIdeas.map((i) => i.memoryIds),
   };
 }

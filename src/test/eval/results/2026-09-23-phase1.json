@@ -5,11 +5,11 @@
   "judge_model": "qwen3-max",
   "overall": {
     "ideas": 27,
-    "authority_pass": 4,
+    "authority_pass": 7,
     "icp_problem": 100,
-    "author_advantage": 4,
+    "author_advantage": 7,
     "beyond_source": 100,
-    "generic": 30,
+    "generic": 33,
     "invented_facts": 22,
     "off_positioning": 0
   },
@@ -17,9 +17,9 @@
     "minions": {
       "summary": {
         "ideas": 9,
-        "authority_pass": 0,
+        "authority_pass": 11,
         "icp_problem": 100,
-        "author_advantage": 0,
+        "author_advantage": 11,
         "beyond_source": 100,
         "generic": 44,
         "invented_facts": 22,
@@ -42,13 +42,14 @@
             "author_advantage_refs": [
               "PROOF"
             ],
-            "author_advantage_quote": "Sub-1.8s voice turnaround latency",
+            "memory_quote": "Sub-1.8s voice turnaround latency",
+            "author_advantage_quote": "2+ second processing gap",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Strong alignment with author’s verified latency benchmark and ICP’s real-world frustration."
+            "note": "Strong alignment with author’s verified latency benchmark and ICP’s conversational expectations."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -70,15 +71,16 @@
             "author_advantage": true,
             "author_advantage_refs": [
               "M2",
-              "M9"
+              "M1"
             ],
-            "author_advantage_quote": "every booking is written, read back, and only then confirmed to the caller",
+            "memory_quote": "every booking is written, read back, and only then confirmed to the caller",
+            "author_advantage_quote": "atomic booking transactions that prevent double-entries",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Directly reflects author’s hard-won lesson on silent webhook failures and validation logic."
+            "note": "Directly reflects the author’s hard-won lesson on silent webhook failures and calendar sync."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -99,13 +101,14 @@
             "icp_problem_quote": "missed organic calls",
             "author_advantage": false,
             "author_advantage_refs": [],
+            "memory_quote": "",
             "author_advantage_quote": "",
             "beyond_source": true,
             "generic": true,
             "invented_facts": true,
             "invented_facts_quote": "permanently inflated CAC that makes the business unprofitable at scale",
             "off_positioning": false,
-            "note": "Makes a causal financial claim not grounded in author memory or signals; could be written by any SaaS marketer."
+            "note": "Invents a causal financial claim not grounded in author memory or signals; any consultant could say this."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -128,18 +131,19 @@
             "author_advantage_refs": [
               "M2"
             ],
-            "author_advantage_quote": "the booking API returns ambiguous errors that the LLM interprets as success; we see this constantly when wiring calendar integrations without explicit confirmation logic",
+            "memory_quote": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently. Now every booking is written, read back, and only then confirmed to the caller.",
+            "author_advantage_quote": "voice agents confidently confirm appointments that never actually posted to the calendar due to unhandled API edge cases",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Strong alignment with M2’s lesson on silent webhook failures and confirmation logic."
+            "note": "Strong alignment with author’s lived failure and fix."
           },
-          "author_advantage": false,
+          "author_advantage": true,
           "unsupported_numbers": [],
           "invented": false,
-          "authority_pass": false
+          "authority_pass": true
         },
         {
           "run": 1,
@@ -157,13 +161,14 @@
             "author_advantage_refs": [
               "PROOF"
             ],
-            "author_advantage_quote": "prioritize deterministic slot-checking latency over conversational naturalness",
+            "memory_quote": "Sub-1.8s voice turnaround latency",
+            "author_advantage_quote": "within 2 seconds",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Leverages verified sub-1.8s latency as operational proof, not just citing the 600ms signal."
+            "note": "Uses verified proof of sub-1.8s latency to ground the 2-second claim."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -181,16 +186,17 @@
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "relying on voicemail or after-hours overflow [...] converts emergency revenue into low-margin maintenance tickets",
+            "icp_problem_quote": "emergency calls during peak events are queued instead of booked instantly",
             "author_advantage": false,
             "author_advantage_refs": [],
+            "memory_quote": "",
             "author_advantage_quote": "",
             "beyond_source": true,
             "generic": true,
             "invented_facts": true,
             "invented_facts_quote": "converts emergency revenue into low-margin maintenance tickets",
             "off_positioning": false,
-            "note": "Makes a specific causal claim about margin erosion not found in any source or memory."
+            "note": "Makes an unsupported causal claim about margin erosion not found in any source or memory."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -211,13 +217,14 @@
             "icp_problem_quote": "voice agents fail when callers deviate from the script",
             "author_advantage": false,
             "author_advantage_refs": [],
+            "memory_quote": "",
             "author_advantage_quote": "",
             "beyond_source": true,
             "generic": true,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Insightful but generic—any voice AI builder could say this without unique experience."
+            "note": "Insightful but generic—any voice AI builder could say this; no specific detail from author’s work."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -235,19 +242,20 @@
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "double-booking is a top complaint in scheduling apps",
+            "icp_problem_quote": "double-booking prevention mechanism",
             "author_advantage": true,
             "author_advantage_refs": [
               "M2",
-              "M9"
+              "PROOF"
             ],
-            "author_advantage_quote": "atomic booking transactions",
+            "memory_quote": "every booking is written, read back, and only then confirmed to the caller",
+            "author_advantage_quote": "atomic booking transactions or explain their double-booking prevention mechanism",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Strong link to author’s hard-won lessons on reliable booking writes and validation."
+            "note": "Strong alignment with author’s hard-won lesson on reliable booking confirmation."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -268,13 +276,14 @@
             "icp_problem_quote": "routing night calls to voicemail bleeds revenue during demand spikes",
             "author_advantage": false,
             "author_advantage_refs": [],
+            "memory_quote": "",
             "author_advantage_quote": "",
             "beyond_source": true,
             "generic": true,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Uses market signals well but lacks any specific detail from the author’s work or proof."
+            "note": "Uses market signal well but lacks any unique insight or experience from the author."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -286,9 +295,9 @@
     "keystone": {
       "summary": {
         "ideas": 9,
-        "authority_pass": 0,
+        "authority_pass": 11,
         "icp_problem": 100,
-        "author_advantage": 0,
+        "author_advantage": 11,
         "beyond_source": 100,
         "generic": 11,
         "invented_facts": 0,
@@ -311,13 +320,14 @@
             "author_advantage_refs": [
               "M1"
             ],
+            "memory_quote": "Ran an inside-sales (ISA) team of four for a 30-agent brokerage for three years.",
             "author_advantage_quote": "When we managed ISAs, the earliest signal of this breakdown was not missed calls, but a spike in 'callback requested' tags where the initial contact attempt happened after the 5-minute conversion window had already closed.",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Strong alignment with author’s ISA management experience and ICP’s systemic follow-up issue."
+            "note": "Strong alignment with author’s ISA experience and ICP’s systemic follow-up issue."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -339,15 +349,16 @@
             "author_advantage": true,
             "author_advantage_refs": [
               "M3",
-              "M4"
+              "M10"
             ],
-            "author_advantage_quote": "calendar integration depth... requires post-call manual confirmation to lock in appointments",
+            "memory_quote": "Setting up an AI voice agent that answers portal leads at night, asks three qualifying questions and books a callback slot on the agent's calendar.",
+            "author_advantage_quote": "Disqualify any vendor immediately if their system cannot handle real-time double-booking prevention or requires post-call manual confirmation to lock in appointments.",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Leverages author’s hands-on work with AI call handling and real-world confirmation mechanics."
+            "note": "Leverages author’s hands-on AI deployment and MLS sync failure story to ground vendor evaluation criteria."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -368,13 +379,14 @@
             "icp_problem_quote": "failing to implement immediate pre-showing reconfirmation protocols",
             "author_advantage": false,
             "author_advantage_refs": [],
+            "memory_quote": "",
             "author_advantage_quote": "",
             "beyond_source": true,
             "generic": true,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Connects market signals insightfully but lacks any specific detail from the author’s experience."
+            "note": "Connects market signals insightfully but lacks any specific detail from the author’s lived experience."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -398,18 +410,19 @@
               "M1",
               "M5"
             ],
-            "author_advantage_quote": "ISAs waste peak energy on unqualified inquiries because the team lacks a pre-response filter",
+            "memory_quote": "Ran an inside-sales (ISA) team of four for a 30-agent brokerage for three years.",
+            "author_advantage_quote": "Team leaders with 5-40 agents frequently hire ISAs to solve speed issues but end up with high turnover and low ROI",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Strong alignment with author’s ISA experience and follow-up philosophy."
+            "note": "Strong alignment with author’s ISA experience and core follow-up philosophy."
           },
-          "author_advantage": false,
+          "author_advantage": true,
           "unsupported_numbers": [],
           "invented": false,
-          "authority_pass": false
+          "authority_pass": true
         },
         {
           "run": 1,
@@ -425,16 +438,16 @@
             "icp_problem_quote": "team leaders need a practical framework to distinguish marketing-grade chatbots from operationally functional scheduling infrastructure",
             "author_advantage": true,
             "author_advantage_refs": [
-              "M3",
-              "M6"
+              "M3"
             ],
+            "memory_quote": "Setting up an AI voice agent that answers portal leads at night, asks three qualifying questions and books a callback slot on the agent's calendar.",
             "author_advantage_quote": "whether the tool can autonomously commit calendar slots and hand off frustrated prospects within seconds",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Directly reflects author’s current AI voice agent work and client questions."
+            "note": "Directly reflects the author’s hands-on AI deployment work."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -457,13 +470,14 @@
             "author_advantage_refs": [
               "M7"
             ],
+            "memory_quote": "How do I stop agents cherry-picking the best leads from the round-robin?",
             "author_advantage_quote": "Enforcing strict rotation equity forces leads into voicemail when the assigned agent is busy",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Ties directly to author’s observed ICP question about cherry-picking and fairness."
+            "note": "Tackles a real operational tension the author’s ICP explicitly questions."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -487,13 +501,14 @@
               "M3",
               "M5"
             ],
-            "author_advantage_quote": "neglect the operational handoff... leads are contacted instantly but lost during the transition to booking",
+            "memory_quote": "Setting up an AI voice agent that answers portal leads at night, asks three qualifying questions and books a callback slot on the agent's calendar.",
+            "author_advantage_quote": "neglect the operational handoff... lost during the transition to booking",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Strong alignment with author’s work on AI booking and follow-up philosophy."
+            "note": "Strong alignment with author’s work on AI booking systems and follow-up philosophy."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -514,16 +529,16 @@
             "icp_problem_quote": "if the AI cannot navigate live agent availability to secure a confirmed showing slot without human intervention, it is merely a receptionist, not a conversion tool",
             "author_advantage": true,
             "author_advantage_refs": [
-              "M3",
-              "M10"
+              "M3"
             ],
-            "author_advantage_quote": "navigate live agent availability to secure a confirmed showing slot",
+            "memory_quote": "Setting up an AI voice agent that answers portal leads at night, asks three qualifying questions and books a callback slot on the agent's calendar.",
+            "author_advantage_quote": "secure a confirmed showing slot without human intervention",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Leverages author’s hands-on AI deployment experience and MLS sync lessons."
+            "note": "Leverages author’s hands-on AI implementation experience beyond generic market signal."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -547,13 +562,14 @@
               "M1",
               "M5"
             ],
-            "author_advantage_quote": "loses the nuanced follow-up required to re-engage cold leads",
+            "memory_quote": "Ran an inside-sales (ISA) team of four for a 30-agent brokerage for three years.",
+            "author_advantage_quote": "Replacing human ISAs with automation preserves speed metrics but destroys the relational follow-up cadence",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Rooted in author’s ISA management experience and belief in multi-call conversion."
+            "note": "Rooted in author’s direct ISA management experience and belief in multi-call conversion."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -565,11 +581,11 @@
     "ledgerline": {
       "summary": {
         "ideas": 9,
-        "authority_pass": 11,
+        "authority_pass": 0,
         "icp_problem": 100,
-        "author_advantage": 11,
+        "author_advantage": 0,
         "beyond_source": 100,
-        "generic": 33,
+        "generic": 44,
         "invented_facts": 44,
         "off_positioning": 0
       },
@@ -586,23 +602,21 @@
           "verdict": {
             "icp_problem": true,
             "icp_problem_quote": "treating insurance aging reports as a cash flow proxy",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M2",
-              "M4"
-            ],
-            "author_advantage_quote": "insurance aging reports as a cash flow proxy",
+            "author_advantage": false,
+            "author_advantage_refs": [],
+            "memory_quote": "",
+            "author_advantage_quote": "",
             "beyond_source": true,
-            "generic": false,
+            "generic": true,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Strong alignment with author’s lived experience on reimbursement timing vs. cash reality."
+            "note": "Insightful but generic—any dental accountant could say this; lacks the author’s specific experience like M2 or M4."
           },
-          "author_advantage": true,
+          "author_advantage": false,
           "unsupported_numbers": [],
           "invented": false,
-          "authority_pass": true
+          "authority_pass": false
         },
         {
           "run": 0,
@@ -620,13 +634,14 @@
             "author_advantage_refs": [
               "M9"
             ],
-            "author_advantage_quote": "where the payment exceeds the asset's verified monthly net production margin",
+            "memory_quote": "practices that financed more than two major items in a year were cash-negative for the next two quarters",
+            "author_advantage_quote": "disqualifying any loan where the payment exceeds the asset's verified monthly net production margin",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Builds directly on author’s observation about over-financing leading to cash-negative quarters."
+            "note": "Strong use of M9’s observed consequence to shape a non-obvious decision rule tied to cash flow."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -647,13 +662,14 @@
             "icp_problem_quote": "Relying on AI claim tools without first reconciling historical fee schedule data",
             "author_advantage": false,
             "author_advantage_refs": [],
+            "memory_quote": "",
             "author_advantage_quote": "",
             "beyond_source": true,
             "generic": true,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Insightful but not tied to author’s specific experience; any dental consultant could say this."
+            "note": "Plausible risk, but no evidence the author has seen this happen (not in memories); any consultant could posit it."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -671,16 +687,17 @@
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "When insurance reimbursements slow, practices often tighten vendor payment terms to preserve cash, but this creates a hidden failure mode where critical supply deliveries are deprioritized during shortages",
+            "icp_problem_quote": "When insurance reimbursements slow, practices often tighten vendor payment terms to preserve cash, but this creates a hidden failure mode where critical supply deliveries are deprioritized during shortages.",
             "author_advantage": false,
             "author_advantage_refs": [],
+            "memory_quote": "",
             "author_advantage_quote": "",
             "beyond_source": true,
             "generic": true,
             "invented_facts": true,
-            "invented_facts_quote": "The earliest signal is not a missed shipment, but a change in the distributor rep’s communication cadence or credit hold warnings that precede actual stockouts",
+            "invented_facts_quote": "The earliest signal is not a missed shipment, but a change in the distributor rep’s communication cadence or credit hold warnings that precede actual stockouts.",
             "off_positioning": false,
-            "note": "Invents specific operational details about distributor behavior not grounded in author memory or signals."
+            "note": "Invents specific operational details about distributor behavior not found in author memory or signals."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -698,18 +715,19 @@
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "Evaluate equipment financing offers first by prepayment penalty structure and second by maintenance inclusion, rather than monthly payment amount",
+            "icp_problem_quote": "Evaluate equipment financing offers first by prepayment penalty structure and second by maintenance inclusion, rather than monthly payment amount.",
             "author_advantage": true,
             "author_advantage_refs": [
               "M9"
             ],
-            "author_advantage_quote": "Any lease that locks you into a specific repair vendor or lacks an early buyout option should be disqualified outright regardless of rate",
+            "memory_quote": "Equipment financing looks cheap monthly but practices that financed more than two major items in a year were cash-negative for the next two quarters.",
+            "author_advantage_quote": "Any lease that locks you into a specific repair vendor or lacks an early buyout option should be disqualified outright regardless of rate.",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Strong use of author’s observed consequence of over-financing (M9) applied to a real ICP decision."
+            "note": "Strong alignment with M9, though adds new specifics about repair vendors and buyout options not explicitly in memory."
           },
           "author_advantage": false,
           "unsupported_numbers": [
@@ -729,16 +747,17 @@
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "Relying on AI claim tools without first reconciling your fee schedule against current payer allowances creates automated submissions of incorrect fees that accelerate denials rather than payments",
+            "icp_problem_quote": "Relying on AI claim tools without first reconciling your fee schedule against current payer allowances creates automated submissions of incorrect fees that accelerate denials rather than payments.",
             "author_advantage": false,
             "author_advantage_refs": [],
+            "memory_quote": "",
             "author_advantage_quote": "",
             "beyond_source": true,
             "generic": true,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Insightful but generic caution about AI claims; no evidence this author has seen or proven this specific failure mode."
+            "note": "Insightful but generic to any dental billing advisor; no unique detail from author’s experience."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -756,19 +775,21 @@
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "mistake a positive bank balance for liquidity during insurance reimbursement lags",
+            "icp_problem_quote": "failing to realize that cash on hand is already encumbered by pending payables and accrued taxes",
             "author_advantage": true,
             "author_advantage_refs": [
               "M2",
+              "M4",
               "M7"
             ],
-            "author_advantage_quote": "cash on hand is already encumbered by pending payables and accrued taxes... work performed 45-60 days prior",
+            "memory_quote": "insurance reimbursements arriving 47 days late",
+            "author_advantage_quote": "receivables are stretched beyond 45 days",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Strong alignment with author’s lived experience on reimbursement delays and cash reporting."
+            "note": "Strong alignment with author’s lived experience and ICP pain point."
           },
           "author_advantage": false,
           "unsupported_numbers": [
@@ -789,18 +810,19 @@
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "evaluating equipment financing versus cash purchase",
+            "icp_problem_quote": "When evaluating equipment financing versus cash purchase, the primary decision criterion must be current accounts receivable aging",
             "author_advantage": true,
             "author_advantage_refs": [
               "M9"
             ],
-            "author_advantage_quote": "average AR days exceed 45",
+            "memory_quote": "practices that financed more than two major items in a year were cash-negative for the next two quarters",
+            "author_advantage_quote": "Any financing option should be immediately disqualified if the practice’s average AR days exceed 45",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Uses specific threshold (45 days) tied to author’s observed cash-negative outcomes."
+            "note": "Uses specific operational insight from author’s observation about financing timing."
           },
           "author_advantage": false,
           "unsupported_numbers": [
@@ -826,13 +848,14 @@
             "author_advantage_refs": [
               "M3"
             ],
-            "author_advantage_quote": "obscures true cost-per-procedure margins",
+            "memory_quote": "The most common surprise is supplies: owners guess 5% of revenue and it is usually closer to 8%",
+            "author_advantage_quote": "supply price increases are misclassified as general expenses",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Connects AI miscategorization to the author’s observed supply-cost surprise (8% vs 5%)."
+            "note": "Connects AI categorization risk to the author’s documented finding about supply cost surprises."
           },
           "author_advantage": false,
           "unsupported_numbers": [],
@@ -841,5 +864,7 @@
         }
       ]
     }
-  }
+  },
+  "rejudged_at": "2026-09-23T17:50:26.355Z",
+  "rescored_at": "2026-09-23T17:50:26.371Z"
 }

@@ -4,6 +4,7 @@
  * field shows up as a type error here or a failing test, not a silent blank
  * in a production prompt.
  */
+import { DEFAULT_SOURCE_MIX } from "@/constants/sourceMix";
 import { buildBrandContextResponse } from "@/services/brandContext";
 import { selectAnglesForRun } from "@/constants/contentAngles";
 import { DEFAULT_LANES, defaultLaneId } from "@/constants/contentLanes";
@@ -87,6 +88,9 @@ export const harvestContext: HarvestContext = {
   pillarRotation: selectAnglesForRun(4),
   runIndex: 4,
   author: authorContext,
+  sourceMix: { ...DEFAULT_SOURCE_MIX },
+  recentSourceTypes: [],
+  recentMemoryIds: [],
 };
 
 /** Exactly what GET /api/brand/context returns for the fixtures above. */

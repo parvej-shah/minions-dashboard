@@ -33,6 +33,12 @@ if (!Array.isArray(brandContext.pillar_rotation) || !brandContext.pillar_rotatio
     'older than the rotation change -- harvesting now would repeat the fixed pillar set.'
   );
 }
+if (!Array.isArray(brandContext.harvest_plan) || !brandContext.harvest_plan.length) {
+  throw new Error(
+    'Brand context returned no harvest_plan. The API is running a build older than ' +
+    'the authority harvester -- harvesting now would ignore the source mix.'
+  );
+}
 const rssSignalsRaw = $input.all().map(item => item.json);
 
 const sources = Array.isArray(brandContext.idea_sources) ? brandContext.idea_sources : [];

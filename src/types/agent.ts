@@ -3,7 +3,7 @@ export interface AgentWorkerItem {
   name: string;
   role: string;
   type: string;
-  /** Exact model string sent by the n8n node, e.g. "qwen3.7-max". */
+  /** Exact model string sent by the n8n node, e.g. "qwen3.8-max". */
   model: string;
   status: "ACTIVE" | "IDLE" | "PAUSED";
   system_prompt?: string;

@@ -1,6 +1,21 @@
 import type { Idea } from "@prisma/client";
 import { DEFAULT_GENERATION_COST, UNSPECIFIED_TRADE } from "@/constants/config";
-import type { AudienceLane, IdeaItem, IdeaSignal, IdeaStatus } from "@/types";
+import type { AudienceLane, GateVerdict, IdeaAuthority, IdeaItem, IdeaSignal, IdeaStatus } from "@/types";
+
+function toAuthority(idea: Idea): IdeaAuthority | null {
+  if (!idea.gateVerdict) return null;
+  const breakdown = idea.scoreBreakdown as { score?: unknown } | null;
+  return {
+    verdict: idea.gateVerdict as GateVerdict,
+    reasons: idea.gateReasons ?? [],
+    score: typeof breakdown?.score === "number" ? breakdown.score : null,
+    icp_problem: idea.icpProblem ?? null,
+    author_advantage: idea.authorAdvantage ?? null,
+    source_type: idea.sourceType ?? null,
+    trust_basis: idea.trustBasis ?? [],
+    memory_ids: idea.memoryIds ?? [],
+  };
+}
 
 /**
  * The single Prisma-row -> wire-shape conversion for an idea.
@@ -35,6 +50,8 @@ export function toIdeaDTO(idea: Idea): IdeaItem {
     scheduled_for: idea.scheduledFor ? idea.scheduledFor.toISOString() : null,
     queue_order: idea.queueOrder ?? null,
     draftAssetId: idea.draftAssetId ?? null,
+    rejection_reason: idea.rejectionReason ?? null,
+    authority: toAuthority(idea),
     created_at: idea.createdAt.toISOString(),
     updated_at: idea.updatedAt.toISOString(),
   };

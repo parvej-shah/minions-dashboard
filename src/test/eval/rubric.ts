@@ -5,9 +5,16 @@
  * one reviewed place.
  *
  * Changing the rubric invalidates stored results: re-run the baseline in the
- * same PR.
+ * same PR, or re-judge the stored ideas (`npm run eval -- --rejudge <file>`).
+ *
+ * v2 (phase 3): the judge also quotes the memory item. Under v1 it often
+ * copied the memory text into author_advantage_quote, which the code check
+ * (quote must be in the idea) then threw out, undercounting real advantage.
  */
 import type { EvalTenant } from "./corpus";
+import { contentWords, isFactualNumber, norm, numbersIn } from "@/lib/harvest/text";
+
+export { numbersIn };
 
 type Json = Record<string, unknown>;
 
@@ -22,6 +29,8 @@ export interface Verdict {
   author_advantage_refs: string[];
   /** The exact words IN THE IDEA that carry the author-specific detail. */
   author_advantage_quote: string;
+  /** The words in the cited memory item that detail comes from (rubric v2; lets the judge show both sides). */
+  memory_quote?: string;
   beyond_source: boolean;
   generic: boolean;
   invented_facts: boolean;
@@ -41,35 +50,6 @@ export interface IdeaScore {
   invented: boolean;
   /** The authority gate the plan asks for: a real ICP problem, a real author advantage, nothing generic or invented. */
   authority_pass: boolean;
-}
-
-const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9%]+/g, " ").trim();
-
-const STOPWORDS = new Set(
-  "a an the and or but if of to in on at by for with from into over under about as is are was were be been being it its this that these those their there they them our we you your he she his her not no than then so such can will would should could may might do does did have has had just only more most very what when where which who why how all any each every other some own same too up out".split(" ")
-);
-
-/** Content words (lowercased, no stopwords, length >= 3), crudely stemmed. */
-export function contentWords(text: string): Set<string> {
-  return new Set(
-    norm(text)
-      .split(" ")
-      .filter((w) => w.length >= 3 && !STOPWORDS.has(w))
-      .map((w) => w.replace(/(ing|ed|es|s)$/, ""))
-  );
-}
-
-/** Every number in a text, normalised ("47 days" -> "47", "2,5" -> "2.5"). */
-export function numbersIn(text: string): string[] {
-  return Array.from(new Set((text.match(/\d+(?:[.,]\d+)?/g) ?? []).map((n) => n.replace(",", "."))));
-}
-
-/**
- * A number that states a fact rather than counts steps: anything with a %, or
- * any number from 10 up. "3 questions" or "2 steps" is structure, not a claim.
- */
-function isFactualNumber(n: string, text: string): boolean {
-  return Number(n) >= 10 || new RegExp(`\\b${n.replace(".", "\\.")}\\s*%`).test(text);
 }
 
 /** How many content words a quote must share with the memory item it cites. */
@@ -137,7 +117,7 @@ const RUBRIC = `Answer these questions about EACH idea. Be strict; when unsure, 
 
 icp_problem: Does the idea name a SPECIFIC problem, question, or decision this ICP actually faces (not a broad theme like "AI is changing the industry")? Quote the words that name it in icp_problem_quote, or "" if none.
 
-author_advantage: Does the idea rest on something THIS author has specifically lived, built, observed, or proven, as listed under AUTHOR MEMORY or VERIFIED PROOF? It counts only if the idea actually uses that item, not just the same topic. Sharing a TOPIC with a memory item is NOT enough: the idea must carry a specific detail from it (the event, the finding, the mechanism, the number). List the ids in author_advantage_refs (e.g. ["M3"] or ["PROOF"]) and copy the exact words FROM THE IDEA that carry that detail into author_advantage_quote. If you cannot quote such words, answer false.
+author_advantage: Does the idea rest on something THIS author has specifically lived, built, observed, or proven, as listed under AUTHOR MEMORY or VERIFIED PROOF? It counts only if the idea actually uses that item, not just the same topic. Sharing a TOPIC with a memory item is NOT enough: the idea must carry a specific detail from it (the event, the finding, the mechanism, the number). List the ids in author_advantage_refs (e.g. ["M3"] or ["PROOF"]). Then give two quotes: memory_quote = the words in the memory item the detail comes from; author_advantage_quote = the words IN THE IDEA TEXT (raw_idea, angle or why above) that carry that same detail, copied exactly from the idea, never from the memory. If the idea contains no such words, answer false.
 
 beyond_source: If the idea came from a market signal, does it add a point of view or implication the signal itself does not state? If it used no signal, answer true only if it says something non-obvious.
 
@@ -187,7 +167,7 @@ ${signals}
 ${RUBRIC}
 
 Return ONLY JSON, no fences:
-{"verdicts": [{"icp_problem": bool, "icp_problem_quote": "", "author_advantage": bool, "author_advantage_refs": [], "author_advantage_quote": "", "beyond_source": bool, "generic": bool, "invented_facts": bool, "invented_facts_quote": "", "off_positioning": bool, "note": ""}]}
+{"verdicts": [{"icp_problem": bool, "icp_problem_quote": "", "author_advantage": bool, "author_advantage_refs": [], "memory_quote": "", "author_advantage_quote": "", "beyond_source": bool, "generic": bool, "invented_facts": bool, "invented_facts_quote": "", "off_positioning": bool, "note": ""}]}
 One verdict per idea, in order.`,
       },
       { role: "user", content: list },

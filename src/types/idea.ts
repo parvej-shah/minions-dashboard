@@ -78,8 +78,26 @@ export interface IdeaItem {
   scheduled_for: string | null;
   queue_order: number | null;
   draftAssetId: string | null;
+  /** Why a person or the authority gate rejected it. */
+  rejection_reason?: string | null;
+  /** What the authority gate decided (phase 3); null for ideas from before it. */
+  authority?: IdeaAuthority | null;
   created_at: string;
   updated_at: string;
+}
+
+export type GateVerdict = "PASS" | "BELOW_BAR" | "REJECT";
+
+export interface IdeaAuthority {
+  verdict: GateVerdict;
+  reasons: string[];
+  /** 0-100, computed in code (src/lib/harvest/gate.ts). */
+  score: number | null;
+  icp_problem: string | null;
+  author_advantage: string | null;
+  source_type: string | null;
+  trust_basis: string[];
+  memory_ids: string[];
 }
 
 /** A drafting run kicked off from the Ideas page. */

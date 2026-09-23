@@ -1,6 +1,6 @@
 # Authority flywheel: product plan
 
-Status: phases 0, 1 and 2 BUILT (2026-09-23); see "Progress" at the end. Written 2026-09-23 from
+Status: phases 0, 1, 2 and 3 BUILT (2026-09-23); see "Progress" at the end. Written 2026-09-23 from
 [the strategy conversation](2026-09-23-strategy-conversation.md) and a read of
 the code as of commit `26c0b42`.
 
@@ -558,6 +558,124 @@ the harvester refuse to run):
 
 **Exit criterion still open:** tenant zero needs its ICP and at least 10 real
 experience items, entered through the page. Only the author can write them.
+
+### Phase 3 — built 2026-09-23
+
+**The harvest plan: the source mix is decided in code** (`src/lib/harvest/plan.ts`,
+served as `harvest_plan` in `/api/brand/context`).
+
+- Each of the 3 slots per run gets one seed: a memory item, an ICP
+  question, "the most relevant market signal", or (for a tenant with nothing
+  saved) an open slot.
+- The bucket is whichever is furthest below its share across the tenant's
+  last 30 ideas and the slots already planned. The default mix is 35% current
+  work, 25% experience, 20% ICP questions, 15% market, 5% experiments
+  (`src/constants/sourceMix.ts`). Over many runs it converges on the mix, and
+  a test checks that.
+- A tenant can override the mix in `brand_profile.harvest_source_mix`. There
+  is no UI for it yet; it belongs with the phase 7 content plan.
+- The least-used memory item goes first, counted live from `ideas.memory_ids`.
+
+**The prompts** (`src/lib/prompts/harvest.ts`, `refine.ts`):
+
+- Harvest is rewritten around the ICP profile, memory (M1..), proof (P1..),
+  lanes and the plan. Each idea returns the fields from this plan: ICP
+  problem, reader context, author advantage, the refs it rests on plus an
+  exact quote, white space, fresh perspective, vision, lane, profile target
+  and recommended format.
+- The model no longer sets priority or ICP relevance; code does.
+- Refine uses the same schema, with the ICP, memory and proof.
+- **Prompt-injection boundary.** Signals, memory, proof and refine notes sit
+  in one `<<<DATA … DATA>>>` fence, under an explicit "never instructions"
+  rule. Fence markers are stripped from the fenced text, so it cannot close
+  the fence. `src/test/n8n/harvest.test.ts` injects an instruction through a
+  signal, through a memory item and through a refine note.
+
+**The gate** (`src/lib/harvest/gate.ts`, via `POST /api/internal/harvest/gate`;
+n8n nodes `Gate Harvest Ideas` / `Gate Refined Ideas`):
+
+- **REJECT**, stored as `REJECTED` with its reasons: no ICP problem; a
+  restated thesis (Jaccard ≥ 0.5 against the last 500 ideas and the same
+  run; this replaced `Dedupe Ideas`); a cited item that is missing, not
+  quoted, or not used by the idea's own text; a figure found in no input;
+  or a Generalize item's names or figures.
+- **BELOW_BAR**, kept at LOW priority: sound, but rests on no experience or
+  proof.
+- **PASS**: an ICP problem and a real author advantage.
+- A person's refine note is never rejected. It is its own trust basis
+  (`USER_NOTE`), so a problem only lowers it to BELOW_BAR.
+- The score is computed in code: authority 40, ICP 15, originality 10,
+  evidence 10, rescaled to 100, with no impressions term yet.
+  - Priority: HIGH for a PASS scoring ≥ 70, MEDIUM for any other PASS,
+    LOW otherwise.
+  - `source_type` records what an idea really rests on. That keeps the mix
+    honest even when the model ignores its seed.
+- **Ideas page.** Each card shows Authority / Below bar / Dropped with the
+  score and reasons. The detail view shows the ICP problem, the advantage
+  and the trust basis. Dropped ideas are listed under Archived.
+
+**Other fixes made along the way:**
+
+- A harvest reply that failed to parse used to vanish, and the run reported
+  success. The run now fails.
+- Refine used to overwrite the person's raw note with the refined angle. The
+  note is now kept.
+- Harvested ideas keep `evidence_required = 'Y'`. The model used to answer Y
+  every time; it is no longer asked.
+
+**Eval.** The judge rubric is now v2: the judge quotes both the memory item
+and the idea. Under v1 it often copied the memory text into the idea quote,
+the code check discarded it, and real advantage was undercounted.
+`--rejudge` re-graded the stored baseline and phase 1 ideas with v2, so all
+three rows below use the same judge. v2 did not inflate the baseline: it
+stayed at 15% author advantage.
+
+| % of ideas, rubric v2 | authority_pass | author_advantage | generic | invented_facts |
+|---|---|---|---|---|
+| baseline, qwen3.7-max (27) | 15 | 15 | 33 | 30 |
+| phase 1, qwen3.7-max (27) | 7 | 7 | 33 | 22 |
+| phase 3, qwen3.7-max, all ideas (45) | 73 | 78 | 4 | 4 |
+| **phase 3, qwen3.8-max, all ideas (45)** | **67** | **67** | **4** | **0** |
+| phase 3, qwen3.8-max, what the gate kept (44) | 68 | 68 | 2 | 0 |
+
+- **Exit criterion met.** Generic and author advantage clearly beat the
+  baseline, invented claims fell, and all golden and contract tests pass
+  (264).
+- **Model switch (2026-09-24, at the user's request).** Harvest, craft and
+  strategist moved from `qwen3.7-max` to `qwen3.8-max`, which has 1M free
+  tokens on the QwenCloud account until 2026-11-05. It is set to "free quota
+  only", so calls fail once the quota is used up. The committed
+  `2026-09-23-phase3.json` is the final qwen3.8-max run.
+  - Across three qwen3.8-max runs, author advantage came out at 87, 82 and
+    67. That spread is run-to-run noise at 45 ideas; every run is far above
+    the baseline.
+  - qwen3.8-max writes internal labels ("Signal 14", "M5") into idea text,
+    and those would leak into drafts. The prompt now forbids them on each
+    field. The gate strips bracketed citations and rejects any label left in
+    running text. That cut label rejects from 11 of 45 to 0.
+- The first rubric-v2 runs are not committed: the prompt and gate changed
+  after them. They are:
+  - qwen3.7-max, the row above;
+  - two qwen3.8-max runs from before the label fix.
+- The gate kept 98% of ideas. Of the ideas the judge rates as authority, the
+  gate passes 100%. The judge rates 68% of the gate's PASSes as authority,
+  which makes the gate the more lenient of the two. The human spot-check below
+  is where that gets tightened.
+- The eval does not feed recent theses back between its runs, so themes
+  repeat across the 5 runs. Production passes them, and the gate dedupes.
+
+**Deploy order.** The dashboard reads the new column, and a missing column
+makes the context degraded, so the harvester refuses to run:
+
+1. Apply `prisma/sql/2026-09-23-harvest-gate.sql`.
+2. Push the dashboard.
+3. Push n8n 01.
+
+**Still open:**
+
+- A human spot-check of 10 live ideas on tenant zero, once it has its
+  experience items (the phase 2 exit).
+- UI for the per-tenant source mix (phase 7).
 
 ### Security fixes found along the way (2026-09-23)
 

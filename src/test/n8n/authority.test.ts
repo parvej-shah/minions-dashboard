@@ -53,18 +53,16 @@ describe("refine assigns the tenant's own lanes, not tenant zero's pillars", () 
     expect(system).not.toMatch(/PEER|BRIDGE/);
   });
 
-  it("Parse Refine JSON maps the chosen lane name to its id, and an unknown one to null", async () => {
+  it("Parse Refine JSON keeps the person's note and the lane the model chose, and forces ICP", async () => {
     const built = await build();
     const out = await runCodeNode(H, "Parse Refine JSON", {
-      input: [llm([
-        { row_index: 0, angle: "Flush it yearly", lane: "decision guides", pillar: "Decision Guide", audience: "PEER" },
-        { row_index: 0, angle: "Second", lane: "Made Up Lane", pillar: "The Myth" },
-      ])],
+      input: [llm([{ row_index: 0, angle: "Flush it yearly", lane: "decision guides", pillar: "Decision Guide", audience: "PEER" }])],
       nodes: { "Build Refine Payload": [built] },
     });
-    expect(out[0].lane_id).toBe(authorContext.lanes.find((l) => l.name === "Decision Guides")!.id);
+    expect(out[0].lane).toBe("decision guides");
+    expect(out[0].raw_idea).toBe("Water heaters fail in winter");
+    expect(out[0].note).toContain("Water heaters fail in winter");
     expect(out[0].audience).toBe("ICP");
-    expect(out[1].lane_id).toBeNull();
   });
 
   it("Sync Refined Ideas to DB writes the lane and never a retired audience", () => {

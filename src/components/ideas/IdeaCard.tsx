@@ -17,7 +17,7 @@ import {
   Radio,
 } from "lucide-react";
 import { formatRelativeTime } from "@/utils/date";
-import { getAudienceBadgeClass, getSourceTag } from "@/constants/ideaBadges";
+import { GATE_VERDICT_BADGE, getAudienceBadgeClass, getSourceTag } from "@/constants/ideaBadges";
 import type { AudienceLane, IdeaItem } from "@/types";
 
 export interface IdeaCardProps {
@@ -67,6 +67,10 @@ export default function IdeaCard({
     ideaStatus === "DRAFTED" || ideaStatus === "REVIEW" || Boolean(idea.draftAssetId);
   const isPublished = ideaStatus === "PUBLISHED";
   const isRejected = ideaStatus === "REJECTED";
+  const verdict = idea.authority ? GATE_VERDICT_BADGE[idea.authority.verdict] : null;
+  const verdictTitle = idea.authority
+    ? [verdict?.hint, ...idea.authority.reasons].filter(Boolean).join("\n")
+    : undefined;
 
   return (
             <div
@@ -90,6 +94,17 @@ export default function IdeaCard({
                     >
                       {ideaAudience}
                     </span>
+
+                    {/* Authority gate verdict (phase 3) */}
+                    {verdict && (
+                      <span
+                        className={`text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full border ${verdict.className}`}
+                        title={verdictTitle}
+                      >
+                        {verdict.label}
+                        {idea.authority?.score != null && idea.authority.verdict !== "REJECT" ? ` · ${idea.authority.score}` : ""}
+                      </span>
+                    )}
 
                     {/* Trade Tag (Gray Pill) */}
                     <span className="text-[10px] font-medium bg-[#161D26] text-[#94A3B8] border border-[#1F2D3D] px-2 py-0.5 rounded-full">
@@ -184,6 +199,14 @@ export default function IdeaCard({
                 <p className="text-[13px] text-[#94A3B8] leading-relaxed line-clamp-3 break-words">
                   {ideaExcerpt}
                 </p>
+
+                {/* Why it was dropped, or why it is below the bar */}
+                {idea.authority && idea.authority.verdict !== "PASS" && idea.authority.reasons.length > 0 && (
+                  <p className={`text-[12px] leading-relaxed break-words ${idea.authority.verdict === "REJECT" ? "text-[#94A3B8]" : "text-[#F59E0B]"}`}>
+                    {idea.authority.verdict === "REJECT" ? "Dropped: " : ""}
+                    {idea.authority.reasons.join(" ")}
+                  </p>
+                )}
 
                 {/* Optional Tags */}
                 {idea.tags && idea.tags.length > 0 && (

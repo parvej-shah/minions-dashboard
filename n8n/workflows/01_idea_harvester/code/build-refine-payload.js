@@ -23,12 +23,15 @@ return [{
     has_new: true,
     count: newRows.length,
     new_rows: newRows,
-    // Parse Refine JSON maps the lane name the model picks back to its id.
-    content_lanes: lanes,
     prompt_inputs: {
       directives: Array.isArray(brandCtx.directives) ? brandCtx.directives : [],
       new_rows: newRows,
-      lanes: lanes.map(l => ({ name: l.name, brief: l.brief }))
+      lanes: lanes.map(l => ({ name: l.name, brief: l.brief })),
+      // The ICP, memory and proof let a note be tied to the author's
+      // experience; the gate (Gate Refined Ideas) checks any such tie.
+      icp: brandCtx.icp,
+      memory: Array.isArray(brandCtx.professional_memory) ? brandCtx.professional_memory : [],
+      proof: (brandCtx.voice_guidelines && brandCtx.voice_guidelines.allowed_proof) || []
     }
   }
 }];

@@ -16,7 +16,7 @@ export function renderCraft(input: CraftInput): ChatPayload {
   const userMessage = articles.map((a, i) => `[${i + 1}] ${a.title}\nURL: ${a.url}\n---\n${a.text}`).join("\n\n=====\n\n");
 
   return {
-    model: "qwen3.7-max",
+    model: "qwen3.8-max",
     enable_thinking: false,
     temperature: 0.4,
     max_tokens: 1200,

@@ -200,65 +200,65 @@ model UsageEvent {
 }
 
 model Idea {
-  id               String    @id // e.g. "IDEA-0001"
-  clientId         String?   @map("client_id") // nullable until Phase 1 backfill lands, see note above
-  rawIdea          String    @map("raw_idea")
-  angle            String?
-  audience         String    @default("ICP")
+  id                String    @id // e.g. "IDEA-0001"
+  clientId          String?   @map("client_id") // nullable until Phase 1 backfill lands, see note above
+  rawIdea           String    @map("raw_idea")
+  angle             String?
+  audience          String    @default("ICP")
   // Neutral defaults: these were tenant zero's trade and pillar, so any row
   // written without one silently became a home-services idea.
-  targetTrade      String    @default("") @map("target_trade")
+  targetTrade       String    @default("") @map("target_trade")
   // The rhetorical angle (The Myth, The Stakes, ...) the strategist keys its
   // hook off. WHAT the idea is about and why is laneId.
-  pillar           String    @default("")
-  source           String    @default("GOOGLE_TRENDS")
-  sourceUrl        String?   @map("source_url")
-  sourceTitle      String?   @map("source_title")
-  signals          Json?     @default("[]")
-  status           String    @default("HARVESTED")
-  priority         String    @default("HIGH")
-  geoMetro         String?   @map("geo_metro")
-  why              String?
-  icpRelevance     Int       @default(90) @map("icp_relevance")
-  evidenceRequired String?   @map("evidence_required")
-  claimedByRunId   String?   @map("claimed_by_run_id")
-  claimedAt        DateTime? @map("claimed_at")
-  draftAssetId     String?   @map("draft_asset_id")
-  rejectionReason  String?   @map("rejection_reason")
-  scheduledFor     DateTime? @map("scheduled_for")
-  queueOrder       Int?      @map("queue_order")
-  tags             String[]  @default([])
+  pillar            String    @default("")
+  source            String    @default("GOOGLE_TRENDS")
+  sourceUrl         String?   @map("source_url")
+  sourceTitle       String?   @map("source_title")
+  signals           Json?     @default("[]")
+  status            String    @default("HARVESTED")
+  priority          String    @default("HIGH")
+  geoMetro          String?   @map("geo_metro")
+  why               String?
+  icpRelevance      Int       @default(90) @map("icp_relevance")
+  evidenceRequired  String?   @map("evidence_required")
+  claimedByRunId    String?   @map("claimed_by_run_id")
+  claimedAt         DateTime? @map("claimed_at")
+  draftAssetId      String?   @map("draft_asset_id")
+  rejectionReason   String?   @map("rejection_reason")
+  scheduledFor      DateTime? @map("scheduled_for")
+  queueOrder        Int?      @map("queue_order")
+  tags              String[]  @default([])
   // "Steal like an artist": the structural lesson taken from the source
   // article -- how it opens, what evidence it leans on, how it closes --
   // never its wording. 02_idea_to_asset feeds this to the writer as craft
   // guidance, paired with a hard no-verbatim rule. See craftSourceUrl for
   // the piece it was learned from, which must be attributed if quoted.
-  craftNotes       String?   @map("craft_notes") @db.Text
-  craftSourceUrl   String?   @map("craft_source_url")
+  craftNotes        String?   @map("craft_notes") @db.Text
+  craftSourceUrl    String?   @map("craft_source_url")
   // Normalized thesis used for semantic dedupe across runs -- lowercase,
   // stopworded, sorted keyword fingerprint of the idea's actual claim.
-  thesisKey        String?   @map("thesis_key")
+  thesisKey         String?   @map("thesis_key")
   // Thought-leadership flywheel metadata (docs/product/authority-flywheel-plan.md,
-  // phase 3 writes these). sourceType: CURRENT_WORK | PAST_EXPERIENCE |
-  // ICP_QUESTION | PROFESSIONAL_OPINION | MARKET_SIGNAL | BUILD_IN_PUBLIC | USER_NOTE.
-  sourceType       String?   @map("source_type")
-  icpProblem       String?   @map("icp_problem")
-  readerContext    String?   @map("reader_context")
-  authorAdvantage  String?   @map("author_advantage")
-  whiteSpace       String?   @map("white_space")
-  freshPerspective String?   @map("fresh_perspective")
-  vision           String?
-  trustBasis       String[]  @default([]) @map("trust_basis")
+  // phase 3 writes these). sourceType: see SOURCE_TYPES in src/constants/sourceMix.ts.
+  sourceType        String?   @map("source_type")
+  icpProblem        String?   @map("icp_problem")
+  readerContext     String?   @map("reader_context")
+  authorAdvantage   String?   @map("author_advantage")
+  whiteSpace        String?   @map("white_space")
+  freshPerspective  String?   @map("fresh_perspective")
+  vision            String?
+  trustBasis        String[]  @default([]) @map("trust_basis")
   // ProfessionalMemory ids the idea rests on.
-  memoryIds        String[]  @default([]) @map("memory_ids")
-  laneId           String?   @map("lane_id")
-  profileTarget    String?   @map("profile_target") // PERSONAL | COMPANY | BOTH
+  memoryIds         String[]  @default([]) @map("memory_ids")
+  laneId            String?   @map("lane_id")
+  profileTarget     String?   @map("profile_target") // PERSONAL | COMPANY | BOTH
+  recommendedFormat String?   @map("recommended_format") // POST | ARTICLE
   // Set by the code gate, never by the model: PASS | REJECT | BELOW_BAR.
-  gateVerdict      String?   @map("gate_verdict")
-  gateReasons      String[]  @default([]) @map("gate_reasons")
-  scoreBreakdown   Json?     @map("score_breakdown")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
+  gateVerdict       String?   @map("gate_verdict")
+  gateReasons       String[]  @default([]) @map("gate_reasons")
+  scoreBreakdown    Json?     @map("score_breakdown")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
 
   client Client?      @relation(fields: [clientId], references: [id], onDelete: SetNull)
   lane   ContentLane? @relation(fields: [laneId], references: [id], onDelete: SetNull)
@@ -371,6 +371,9 @@ model BrandProfile {
   // and how assertive it may be -- reading level is a separate axis and comes
   // from the audience/positioning directives.
   writerExpertise           String   @default("PRACTITIONER") @map("writer_expertise")
+  // Harvest source mix override, e.g. {"CURRENT_WORK":35,...}; null = the
+  // default in src/constants/sourceMix.ts.
+  harvestSourceMix          Json?    @map("harvest_source_mix")
   visualAssets              Json?    @default("{}") @map("visual_assets")
   updatedAt                 DateTime @default(now()) @updatedAt @map("updated_at")
 

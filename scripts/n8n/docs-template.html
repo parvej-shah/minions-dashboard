@@ -220,7 +220,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
       <div class="spine"><span class="dot" style="--c:var(--violet)"></span>
         <div class="stage"><h3>Harvest ideas <span class="wf">01_idea_harvester</span></h3>
           <p>Skips if more than 12 unclaimed REFINED ideas already exist. It refines any human-entered NEW notes, reads the tenant's RSS sources, and generates one idea per pillar in the rotation. It then drops ideas whose thesis duplicates an earlier one and studies each source article's structure ("craft notes").</p>
-          <div class="chips"><span class="chip llm">Refine · qwen-flash</span><span class="chip llm">Harvest · qwen3.7-max</span><span class="chip llm">Craft · qwen3.7-max</span></div></div>
+          <div class="chips"><span class="chip llm">Refine · qwen-flash</span><span class="chip llm">Harvest · qwen3.8-max</span><span class="chip llm">Craft · qwen3.8-max</span></div></div>
       </div>
       <div class="writes"><div class="w"><span class="arrow">→</span><b>ideas</b> status REFINED</div><div class="w"><span class="arrow">←</span>/api/brand/context</div><div class="w"><span class="arrow">→</span>/api/ideas/craft</div><div class="w"><span class="arrow">→</span>/api/internal/source-status</div></div>
     </div>
@@ -229,7 +229,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
       <div class="spine"><span class="dot" style="--c:var(--violet)"></span>
         <div class="stage"><h3>Draft asset <span class="wf">02_idea_to_asset</span></h3>
           <p>Picks one idea and claims it with a compare-and-set PATCH to <code>PICKED</code>. Four model calls follow: the strategist sets the angle and cover brief, the writer drafts the article, the editor cleans it and extracts claims, and the distributor writes the LinkedIn, Facebook and X versions. Deterministic gates check claims, banned words and variant rules. The asset is saved with its cover <code>PENDING</code>, and cover generation is handed off without waiting for it to finish.</p>
-          <div class="chips"><span class="chip llm">Strategist · qwen3.7-max</span><span class="chip llm">Writer · qwen3-max</span><span class="chip llm">Editor · qwen3.7-flash</span><span class="chip llm">Variants · qwen-flash</span></div></div>
+          <div class="chips"><span class="chip llm">Strategist · qwen3.8-max</span><span class="chip llm">Writer · qwen3-max</span><span class="chip llm">Editor · qwen3.7-flash</span><span class="chip llm">Variants · qwen-flash</span></div></div>
       </div>
       <div class="writes"><div class="w"><span class="arrow">→</span><b>assets</b> PENDING_REVIEW</div><div class="w"><span class="arrow">→</span><b>claims</b></div><div class="w"><span class="arrow">→</span><b>ideas</b> status REVIEW</div><div class="w"><span class="arrow">→</span>Telegram “draft ready”</div></div>
     </div>
@@ -308,20 +308,20 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
 
 <!-- ============ HARVEST ============ -->
 <section id="harvest">
-  <div class="sec-head"><h2>01 · Idea harvester</h2><p><code>Ykpl0pQTzBdZlDcA</code> · {{NODES:01_idea_harvester}}. Brand context comes from <code>/api/brand/context</code>, which supplies positioning, directives, author standing, tenant RSS sources, the pillar rotation for this run, and fingerprints of the 60 most recent theses. If that context is incomplete (<code>context_complete: false</code>) or has no <code>pillar_rotation</code>, the run fails instead of falling back to generic sources.</p></div>
+  <div class="sec-head"><h2>01 · Idea harvester</h2><p><code>Ykpl0pQTzBdZlDcA</code> · {{NODES:01_idea_harvester}}. Brand context comes from <code>/api/brand/context</code>, which supplies positioning, directives, author standing, tenant RSS sources, the pillar rotation for this run, and fingerprints of the 60 most recent theses, and the author context: the ICP, professional memory, content lanes, and the <code>harvest_plan</code>. The plan (<code>src/lib/harvest/plan.ts</code>) picks what each idea is built on so the tenant's source mix holds: 35% current work, 25% experience, 20% ICP questions, 15% market, 5% experiments. If that context is incomplete (<code>context_complete: false</code>) or has no <code>pillar_rotation</code> or <code>harvest_plan</code>, the run fails instead of falling back to generic sources.</p></div>
   <div class="wfblock">
     <ol class="steps">
-      <li class="io"><b>Resolve Client ID</b>: takes <code>client_id</code>, <code>callback_url</code> and <code>callback_secret</code> from the webhook body. It starts only from the webhook (dispatcher, dashboard, or 02 when the queue is empty) or a manual run.</li>
+      <li class="io"><b>Resolve Client ID</b>: takes <code>client_id</code> and the run id from the webhook body. It starts only from the webhook (dispatcher, dashboard, or 02 when the queue is empty) or a manual run.</li>
       <li class="io"><b>Read Ideas</b>: loads up to 2,000 of the tenant's ideas.</li>
       <li class="gate"><b>Backlog Guard</b>: if more than 12 REFINED ideas are unclaimed, the run skips and reports <code>skipped: true</code> in the callback.</li>
       <li class="io"><b>Fetch Brand Context</b>: branches into two parallel paths, A and B.</li>
-      <li class="ai"><b>A · Refine</b>: any <code>NEW</code> rows are sent to the refiner (prompt below) and saved as <code>REFINED</code> with source <code>MANUAL</code>.</li>
+      <li class="ai"><b>A · Refine</b>: any <code>NEW</code> rows are sent to the refiner (prompt below), gated in <code>refine</code> mode (a person's note is never dropped, only marked below the bar), and saved as <code>REFINED</code> with source <code>MANUAL</code>.</li>
       <li class="io"><b>B · Expand Tenant Sources → RSS</b>: reads one feed per active source. Without sources it falls back to Hacker News, TechCrunch AI and the n8n blog. Feed health goes to <code>/api/internal/source-status</code>.</li>
       <li class="gate"><b>Build Harvest Payload</b>: groups signals by source, takes a rotating window of each source's <code>max_items</code> (offset by <code>harvest_run_index</code>), and caps the total at 18.</li>
-      <li class="ai"><b>Qwen Harvest</b>: generates exactly one idea per rotation angle.</li>
-      <li class="gate"><b>Attach Source URLs → Dedupe Ideas</b>: maps <code>signal_index</code> back to the article, then builds a stemmed 8-token thesis fingerprint. An idea is dropped if its fingerprint overlaps a known thesis by Jaccard 0.5 or more. This mirrors <code>src/lib/thesis.ts</code>.</li>
+      <li class="ai"><b>Qwen Harvest</b>: generates exactly one idea per plan slot. Each idea cites the memory or proof it rests on and quotes it. Signals and memory are fenced as data.</li>
+      <li class="gate"><b>Attach Source URLs → Gate Harvest Ideas → Apply Harvest Gate</b>: maps <code>signal_index</code> back to the article, then <code>/api/internal/harvest/gate</code> (<code>src/lib/harvest/gate.ts</code>) decides each idea in code. PASS: an ICP problem and a quoted, used memory item or proof. BELOW_BAR: sound but resting on no experience. REJECT: no ICP problem, a restated thesis (Jaccard ≥ 0.5 against the last 500 ideas), a cited item that is missing, misquoted or unused, an unsupported figure, or a Generalize item's specifics. Rejects are stored as <code>REJECTED</code> with their reasons. The score and priority are computed in code.</li>
       <li class="ai"><b>Fetch Source Articles → Craft Notes</b>: <code>/api/ideas/craft</code> fetches the article text, and the model describes only its structure. <b>Merge Craft</b> removes any sentence that contains a run of 9 or more words copied from the source.</li>
-      <li class="io"><b>Assign IDs → Sync Ideas to DB</b>: assigns global sequential <code>IDEA-0001</code> IDs, upserts with status <code>REFINED</code>, and reports COMPLETED with <code>harvestedCount</code>.</li>
+      <li class="io"><b>Assign IDs → Sync Ideas to DB</b>: assigns global sequential <code>IDEA-0001</code> IDs, upserts every idea with its verdict and flywheel fields, and reports COMPLETED with <code>harvestedCount</code> (kept ideas) and the gate summary.</li>
     </ol>
 
     {{PROMPT:refine}}
@@ -424,7 +424,8 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
       <tr><td>Harvest budget</td><td>00 → /api/internal/harvest-slot</td><td>System-wide daily run limit across tenants</td><td>Tenant skipped for the day</td></tr>
       <tr><td>Backlog guard</td><td>01 Backlog Guard</td><td>More than 12 unclaimed REFINED ideas</td><td>Harvest skipped</td></tr>
       <tr><td>Degraded context</td><td>01 Build Harvest Payload</td><td><code>context_complete=false</code> or empty rotation</td><td>Run throws</td></tr>
-      <tr><td>Thesis dedupe</td><td>01 Dedupe Ideas</td><td>Stemmed 8-token fingerprint, Jaccard ≥ 0.5 vs recent theses + backlog</td><td>Idea dropped</td></tr>
+      <tr><td>Authority gate</td><td>01 Gate Harvest Ideas → /api/internal/harvest/gate</td><td>No ICP problem; restated thesis (Jaccard ≥ 0.5); cited memory missing, misquoted or unused; unsupported figure; Generalize specifics</td><td>Stored REJECTED with reasons</td></tr>
+      <tr><td>Below the bar</td><td>same</td><td>No quoted, used memory item or proof</td><td>Kept, <code>BELOW_BAR</code>, LOW priority</td></tr>
       <tr><td>Verbatim guard</td><td>01 Merge Craft</td><td>Any 9-word run found in the source</td><td>Sentence replaced by […]</td></tr>
       <tr><td>Atomic claim</td><td>02 Claim Idea Row</td><td>PATCH only if status, claimed_at and draft_asset_id unchanged</td><td>Concurrent run no-ops</td></tr>
       <tr><td>One idea, one asset</td><td>02 Select Target</td><td>draft_asset_id already set</td><td>ALREADY_DRAFTED</td></tr>

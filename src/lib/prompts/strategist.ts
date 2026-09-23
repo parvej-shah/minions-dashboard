@@ -100,7 +100,7 @@ Brand Context:
 ${cappedBrand}`;
 
   return {
-    model: "qwen3.7-max",
+    model: "qwen3.8-max",
     enable_thinking: false,
     temperature: 0.5,
     max_tokens: 2000,

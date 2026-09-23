@@ -32,7 +32,8 @@ function verbatimGuard(notes, sourceText) {
     .trim();
 }
 
-const ideas = $('Dedupe Ideas').all().map(i => i.json);
+// Every gated idea, rejects included: they are stored too, archived.
+const ideas = $('Apply Harvest Gate').all().map(i => i.json);
 const craftInput = $('Build Craft Payload').first()?.json || {};
 
 // No fetchable sources this run -- pass the ideas through untouched.

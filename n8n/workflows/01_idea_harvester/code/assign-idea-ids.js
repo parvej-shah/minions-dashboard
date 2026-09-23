@@ -24,22 +24,43 @@ const rowsToAppend = ideas.map((idea, idx) => {
     raw_idea: idea.raw_idea || '',
     angle: idea.angle || '',
     audience: idea.audience || 'ICP',
-    pillar: idea.pillar || 'Operational Focus',
-    priority: idea.priority || 'HIGH',
+    pillar: idea.pillar || '',
+    // Set by the gate from the idea's score, not by the model.
+    priority: idea.priority || 'LOW',
     batch_rank: idea.batch_rank || (idx + 1),
-    evidence_required: idea.evidence_required || 'N',
-    target_trade: idea.target_trade || 'UNSPECIFIED',
+    // Harvested ideas always go through 02's evidence step (the model used
+    // to answer "Y" for every one; the field is no longer asked of it).
+    evidence_required: 'Y',
+    target_trade: idea.target_trade || '',
     geo_metro: idea.geo_metro || '',
-    status: 'REFINED',
+    // REJECTED for ideas the gate dropped (archived, with their reasons).
+    status: idea.status || 'REFINED',
+    rejection_reason: idea.rejection_reason || null,
     claimed_at: '',
     run_id: '',
     asset_id: '',
     why: idea.why || '',
-    icp_relevance: idea.icp_relevance || 4,
-    // Fingerprint of this idea's claim, computed in Dedupe Ideas. Storing it
+    icp_relevance: Number.isFinite(idea.icp_relevance) ? idea.icp_relevance : 50,
+    // Fingerprint of this idea's claim, computed by the gate. Storing it
     // lets the NEXT run recognize a reworded restatement without recomputing
     // keys for the whole backlog.
     thesis_key: idea.thesis_key || null,
+    // The authority flywheel fields, all set or checked by the gate.
+    source_type: idea.source_type || null,
+    lane_id: idea.lane_id || null,
+    profile_target: idea.profile_target || null,
+    recommended_format: idea.recommended_format || null,
+    memory_ids: idea.memory_ids || [],
+    trust_basis: idea.trust_basis || [],
+    icp_problem: idea.icp_problem || null,
+    reader_context: idea.reader_context || null,
+    author_advantage: idea.author_advantage || null,
+    white_space: idea.white_space || null,
+    fresh_perspective: idea.fresh_perspective || null,
+    vision: idea.vision || null,
+    gate_verdict: idea.gate_verdict || null,
+    gate_reasons: idea.gate_reasons || [],
+    score_breakdown: idea.score_breakdown || null,
     // "Steal like an artist": the structural lesson drawn from the source
     // article, never its wording. Attribution travels with craft_source_url.
     craft_notes: idea.craft_notes || null,

@@ -5,6 +5,12 @@
 // this the source link was lost and every idea landed with source_url null.
 
 const ideas = $input.all().map(i => i.json);
+
+// A reply that did not parse used to vanish here and the run reported
+// success with no ideas. Fail it instead, so the error workflow says so.
+if (ideas.length === 1 && ideas[0].ok === false) {
+  throw new Error('The harvest reply could not be parsed: ' + ideas[0].error);
+}
 const signals = $('Build Harvest Payload').first()?.json?.market_signals || [];
 
 return ideas.map(idea => {

@@ -491,7 +491,7 @@ export const DEMO_FLEET: AgentWorkerItem[] = [
     name: "Marketing Strategist",
     role: "Angle Formulation & Thesis Defense",
     type: "Marketing & Strategy",
-    model: "qwen3.7-max",
+    model: "qwen3.8-max",
     status: "ACTIVE",
     system_prompt: "You are the Lead Marketing Strategist for getminions.ai. Formulate high-entropy thesis angles for US home service operators (HVAC, plumbing, electrical) and systems engineers. Enforce zero AI cheerleading and strict 1–3 sentence prose.",
     last_active: "Active · Schedule Tue/Fri 06:00 Asia/Dhaka",

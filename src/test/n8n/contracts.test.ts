@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import { readCode, runCodeNode, workflowNodes } from "./harness";
 import { SCENARIOS } from "./scenarios";
 import { brandContext, harvestContext } from "./fixtures";
-import { thesisKey, isRedundantThesis } from "@/lib/thesis";
 import { verbatimGuard } from "@/lib/ai/craftExtract";
 import { RUN_CALLBACK_STATUSES, TERMINAL_HERO_STATUSES } from "@/constants/pipelineContracts";
 import { renderPrompt, type PromptStage } from "@/lib/prompts";
@@ -65,6 +64,15 @@ describe("/api/brand/context -> 01_idea_harvester", () => {
     ).rejects.toThrow(/degraded/);
   });
 
+  it("Build Harvest Payload refuses a context without a harvest plan", async () => {
+    await expect(
+      runCodeNode(H, "Build Harvest Payload", {
+        input: [{}],
+        nodes: { "Fetch Brand Context": [{ ...brandContext(), harvest_plan: [] }] },
+      })
+    ).rejects.toThrow(/harvest_plan/);
+  });
+
   it("Expand Tenant Sources emits one feed per tenant source", async () => {
     const out = await runCodeNode(H, "Expand Tenant Sources", {
       nodes: { "Fetch Brand Context": [brandContext()] },
@@ -74,40 +82,13 @@ describe("/api/brand/context -> 01_idea_harvester", () => {
 });
 
 describe("logic duplicated between n8n and src/lib", () => {
-  const recent = [
-    { raw_idea: "Water heaters fail in winter because sediment builds up", angle: "Flush the tank every year" },
-  ];
-  const candidates = [
-    // Same argument, reworded.
-    { raw_idea: "Sediment buildup is why water heaters fail each winter", angle: "Flush tanks yearly" },
-    // A different argument.
-    { raw_idea: "Low-flow toilets clog more when drain slope is wrong", angle: "Check slope before replacing" },
-  ];
-
-  it("Dedupe Ideas agrees with isRedundantThesis in src/lib/thesis.ts", async () => {
-    const ctx = { ...brandContext(), recent_theses: recent.map((r) => thesisKey(r.raw_idea, r.angle)) };
-    const out = await runCodeNode(H, "Dedupe Ideas", {
-      input: candidates,
-      nodes: { "Fetch Brand Context": [ctx], "Backlog Guard": [{ existing_rows: [] }] },
-    });
-    const kept = new Set(out.map((o) => o.raw_idea));
-    for (const c of candidates) {
-      const redundant = isRedundantThesis(
-        { rawIdea: c.raw_idea, angle: c.angle },
-        recent.map((r) => ({ thesisKey: thesisKey(r.raw_idea, r.angle) }))
-      );
-      expect(kept.has(c.raw_idea)).toBe(!redundant);
-    }
-    for (const o of out) expect(o.thesis_key).toBe(thesisKey(o.raw_idea as string, o.angle as string));
-  });
-
   it("Merge Craft Into Ideas applies the same verbatim guard as craftExtract.ts", async () => {
     const source = "The fastest way to lose a customer is to show up late without calling ahead first thing.";
     const notes = "Opens with a warning. The fastest way to lose a customer is to show up late without calling. Closes on a checklist.";
     const idea = { raw_idea: "x", source_url: "https://news.example/a" };
     const [out] = await runCodeNode(H, "Merge Craft Into Ideas", {
       nodes: {
-        "Dedupe Ideas": [idea],
+        "Apply Harvest Gate": [idea],
         "Build Craft Payload": [{ skip_craft: false, article_urls: [idea.source_url], article_texts: [source] }],
         "Qwen Craft Notes": [{ choices: [{ message: { content: JSON.stringify({ notes: [{ index: 1, craft_notes: notes }] }) } }] }],
       },

@@ -2,6 +2,7 @@ import { BLOG_BASE_URL, normalizeDomain } from "@/constants/config";
 import { writerExpertisePromptGuidance } from "@/constants/writerExpertise";
 import type { BrandSettings } from "@/types/brand";
 import type { HarvestContext, WriterVoiceConfig } from "@/services/brand";
+import { planHarvest } from "@/lib/harvest/plan";
 
 /**
  * The body of GET /api/brand/context: everything the n8n harvester and
@@ -76,6 +77,20 @@ export function buildBrandContextResponse(
     icp: harvest.author.icp,
     professional_memory: harvest.author.memory,
     content_lanes: harvest.author.lanes,
+    // What each idea this run is built on, chosen in code to keep the
+    // tenant's source mix (phase 3). One slot per angle in pillar_rotation.
+    // Memory is referred to as M1.. in professional_memory order, proof as
+    // P1.. in voice_guidelines.allowed_proof order.
+    harvest_plan: planHarvest({
+      memory: harvest.author.memory,
+      icp: harvest.author.icp,
+      angles: harvest.pillarRotation,
+      mix: harvest.sourceMix,
+      recentSourceTypes: harvest.recentSourceTypes,
+      recentMemoryIds: harvest.recentMemoryIds,
+      hasMarketSources: harvest.sources.length > 0,
+      runIndex: harvest.runIndex,
+    }),
     // Health of this response. `context_complete` is false when any piece of
     // harvest context fell back to a default -- a missing column, an
     // unmigrated database, a stale Prisma client. The harvester checks it and

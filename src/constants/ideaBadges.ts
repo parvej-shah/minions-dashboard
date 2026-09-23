@@ -1,4 +1,4 @@
-import type { AudienceLane } from "@/types";
+import type { AudienceLane, GateVerdict } from "@/types";
 
 /**
  * Audience and source badge styling for the Idea Stream.
@@ -68,3 +68,26 @@ export function getSourceTag(source: string): { label: string; className: string
     className: "bg-[#1E2733] text-[#94A3B8] border-[#2A3D52]"
   };
 }
+
+/**
+ * The authority gate's verdict (src/lib/harvest/gate.ts), as the Idea Stream
+ * shows it. BELOW_BAR is labelled plainly: such an idea is never presented as
+ * a strong one (D1, D17 in docs/product/authority-flywheel-plan.md).
+ */
+export const GATE_VERDICT_BADGE: Record<GateVerdict, { label: string; hint: string; className: string }> = {
+  PASS: {
+    label: "Authority",
+    hint: "Names an ICP problem and rests on your own experience or proof.",
+    className: "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/30",
+  },
+  BELOW_BAR: {
+    label: "Below bar",
+    hint: "Sound, but rests on none of your experience. Add experience on the Brand page to lift ideas like this.",
+    className: "bg-[#F59E0B]/15 text-[#F59E0B] border-[#F59E0B]/30",
+  },
+  REJECT: {
+    label: "Dropped",
+    hint: "The authority check dropped this idea.",
+    className: "bg-[#161D26] text-[#94A3B8] border-[#1F2D3D]",
+  },
+};

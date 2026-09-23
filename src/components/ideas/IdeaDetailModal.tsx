@@ -14,7 +14,7 @@ import {
   Radio,
 } from "lucide-react";
 
-import { getAudienceBadgeClass, getSourceTag } from "@/constants/ideaBadges";
+import { GATE_VERDICT_BADGE, getAudienceBadgeClass, getSourceTag } from "@/constants/ideaBadges";
 import type {
   IdeaItem,
 } from "@/types";
@@ -191,6 +191,46 @@ export default function IdeaDetailModal({
               </div>
             ) : null}
           </div>
+
+          {/* Authority check (phase 3 gate) */}
+          {detailIdea.authority && (
+            <div className="p-3.5 rounded-xl bg-[#161D26]/60 border border-[#1F2D3D] space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-[10px] font-mono text-[#64748B] uppercase">Authority check</div>
+                <span
+                  className={`text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full border ${GATE_VERDICT_BADGE[detailIdea.authority.verdict].className}`}
+                  title={GATE_VERDICT_BADGE[detailIdea.authority.verdict].hint}
+                >
+                  {GATE_VERDICT_BADGE[detailIdea.authority.verdict].label}
+                  {detailIdea.authority.score != null ? ` · ${detailIdea.authority.score}/100` : ""}
+                </span>
+              </div>
+              {detailIdea.authority.icp_problem && (
+                <div className="text-xs">
+                  <span className="text-[#64748B]">ICP problem: </span>
+                  <span className="text-[#CBD5E1]">{detailIdea.authority.icp_problem}</span>
+                </div>
+              )}
+              {detailIdea.authority.author_advantage && (
+                <div className="text-xs">
+                  <span className="text-[#64748B]">Your advantage: </span>
+                  <span className="text-[#CBD5E1]">{detailIdea.authority.author_advantage}</span>
+                </div>
+              )}
+              {detailIdea.authority.trust_basis.length > 0 && (
+                <div className="text-[10px] font-mono text-[#64748B]">
+                  Rests on: {detailIdea.authority.trust_basis.map((t) => t.toLowerCase().replace(/_/g, " ")).join(", ")}
+                </div>
+              )}
+              {detailIdea.authority.reasons.length > 0 && (
+                <ul className="text-xs text-[#F59E0B] list-disc pl-4 space-y-0.5">
+                  {detailIdea.authority.reasons.map((r) => (
+                    <li key={r}>{r}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
 
           {/* Metadata Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
