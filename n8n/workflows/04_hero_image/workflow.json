@@ -204,7 +204,8 @@
         "httpMethod": "POST",
         "options": {},
         "path": "hero-image",
-        "responseMode": "onReceived"
+        "responseMode": "onReceived",
+        "authentication": "headerAuth"
       },
       "position": [
         -600,
@@ -212,7 +213,13 @@
       ],
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "webhookId": "b7c1e9a4-2d53-47f8-9e21-4a6d8c3f1b90"
+      "webhookId": "b7c1e9a4-2d53-47f8-9e21-4a6d8c3f1b90",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      }
     },
     {
       "id": "9a6efcd1-af70-5859-a18b-7e8e3a5549e2",

@@ -78,10 +78,6 @@
             {
               "name": "Content-Type",
               "value": "application/json"
-            },
-            {
-              "name": "X-Webhook-Secret",
-              "value": "={{ $env.BLOG_API_SECRET }}"
             }
           ]
         },
@@ -99,7 +95,9 @@
         "sendBody": true,
         "sendHeaders": true,
         "specifyBody": "json",
-        "url": "https://minions.getminions.ai/api/internal/harvest-slot"
+        "url": "https://minions.getminions.ai/api/internal/harvest-slot",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "position": [
         -464,
@@ -107,7 +105,13 @@
       ],
       "retryOnFail": false,
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      }
     },
     {
       "id": "manual-dispatcher",
@@ -239,7 +243,7 @@
       "name": "Trigger Harvest for Tenant",
       "onError": "continueRegularOutput",
       "parameters": {
-        "jsonBody": "={{ JSON.stringify({ client_id: $('Read Active Clients').item.json.id, run_id: $json.body.run_id, callback_url: 'https://minions.getminions.ai/api/pipeline/runs/' + $json.body.run_id, callback_secret: $env.BLOG_API_SECRET, trigger_source: 'TENANT_DISPATCHER_SCHEDULED' }) }}",
+        "jsonBody": "={{ JSON.stringify({ client_id: $('Read Active Clients').item.json.id, run_id: $json.body.run_id, callback_url: 'https://minions.getminions.ai/api/pipeline/runs/' + $json.body.run_id, trigger_source: 'TENANT_DISPATCHER_SCHEDULED' }) }}",
         "method": "POST",
         "options": {
           "response": {
@@ -251,7 +255,10 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "url": "https://n8n.getminions.ai/webhook/test-harvester"
+        "url": "https://n8n.getminions.ai/webhook/test-harvester",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": false
       },
       "position": [
         -240,
@@ -260,7 +267,13 @@
       "retryOnFail": true,
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "waitBetweenTries": 3000
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      }
     }
   ],
   "settings": {

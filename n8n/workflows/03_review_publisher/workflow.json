@@ -1530,7 +1530,8 @@
       "name": "Webhook_Trigger",
       "parameters": {
         "httpMethod": "POST",
-        "path": "publish-approved-asset"
+        "path": "publish-approved-asset",
+        "authentication": "headerAuth"
       },
       "position": [
         -100,
@@ -1538,7 +1539,13 @@
       ],
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "webhookId": "publish-approved-asset"
+      "webhookId": "publish-approved-asset",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      }
     }
   ],
   "settings": {

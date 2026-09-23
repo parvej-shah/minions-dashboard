@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { requireOneOfEnv } from "./env";
+import { requireEnv } from "./env";
 import { checkRateLimit } from "./rate-limit";
 
 /**
@@ -16,7 +16,12 @@ export function constantTimeEqual(a: string, b: string): boolean {
 }
 
 /**
- * Validates incoming webhook requests against BLOG_API_SECRET / MINIONS_WEBHOOK_SECRET.
+ * Validates incoming webhook requests against MINIONS_WEBHOOK_SECRET.
+ *
+ * Deliberately NOT BLOG_API_SECRET any more: that variable held a value that
+ * was committed to the public getminions.ai repo, so it authenticated this
+ * API for anyone. n8n holds the same secret in its "Minions Cockpit API
+ * (webhook secret)" credential; rotate both together.
  * Uses constant-time comparison to protect against side-channel timing attacks, and
  * rate-limits by the hash of the provided secret so a leaked/brute-forced token can't
  * be hammered without limit.
@@ -29,7 +34,7 @@ export async function verifyWebhookSecret(
   const authHeader = request.headers.get("authorization");
   const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.substring(7).trim() : null;
 
-  const validSecret = requireOneOfEnv("BLOG_API_SECRET", "MINIONS_WEBHOOK_SECRET");
+  const validSecret = requireEnv("MINIONS_WEBHOOK_SECRET");
   const provided = (secretHeader || bearerToken || "").trim();
 
   if (!provided) {

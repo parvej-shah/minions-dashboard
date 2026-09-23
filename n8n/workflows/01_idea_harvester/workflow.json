@@ -497,20 +497,17 @@
     },
     {
       "alwaysOutputData": true,
-      "credentials": {},
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
       "id": "281fef05-57e5-4b1c-bf2b-08edeab183e1",
       "name": "Callback Harvested",
       "onError": "continueRegularOutput",
       "parameters": {
-        "authentication": "none",
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Webhook-Secret",
-              "value": "={{ $('Resolve Client ID').first().json.callback_secret }}"
-            }
-          ]
-        },
+        "authentication": "genericCredentialType",
         "jsonBody": "={{ JSON.stringify({ status: 'COMPLETED', metadata: { harvestedCount: $input.all().length } }) }}",
         "method": "PATCH",
         "options": {
@@ -522,9 +519,10 @@
           }
         },
         "sendBody": true,
-        "sendHeaders": true,
+        "sendHeaders": false,
         "specifyBody": "json",
-        "url": "={{ $('Resolve Client ID').first().json.callback_url }}"
+        "url": "=https://minions.getminions.ai/api/pipeline/runs/{{ $('Resolve Client ID').first().json.callback_run_id }}",
+        "genericAuthType": "httpHeaderAuth"
       },
       "position": [
         2500,
@@ -535,20 +533,17 @@
     },
     {
       "alwaysOutputData": true,
-      "credentials": {},
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
       "id": "2b599ba3-882f-423a-b61a-92af5320028c",
       "name": "Callback Skipped",
       "onError": "continueRegularOutput",
       "parameters": {
-        "authentication": "none",
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Webhook-Secret",
-              "value": "={{ $('Resolve Client ID').first().json.callback_secret }}"
-            }
-          ]
-        },
+        "authentication": "genericCredentialType",
         "jsonBody": "={{ JSON.stringify({ status: 'COMPLETED', metadata: { harvestedCount: 0, skipped: true } }) }}",
         "method": "PATCH",
         "options": {
@@ -560,9 +555,10 @@
           }
         },
         "sendBody": true,
-        "sendHeaders": true,
+        "sendHeaders": false,
         "specifyBody": "json",
-        "url": "={{ $('Resolve Client ID').first().json.callback_url }}"
+        "url": "=https://minions.getminions.ai/api/pipeline/runs/{{ $('Resolve Client ID').first().json.callback_run_id }}",
+        "genericAuthType": "httpHeaderAuth"
       },
       "position": [
         450,
@@ -723,7 +719,7 @@
           "conditions": [
             {
               "id": "1",
-              "leftValue": "={{ $('Resolve Client ID').first().json.callback_url }}",
+              "leftValue": "={{ $('Resolve Client ID').first().json.callback_run_id }}",
               "operator": {
                 "operation": "notEmpty",
                 "singleValue": true,
@@ -756,7 +752,7 @@
           "conditions": [
             {
               "id": "1",
-              "leftValue": "={{ $('Resolve Client ID').first().json.callback_url }}",
+              "leftValue": "={{ $('Resolve Client ID').first().json.callback_run_id }}",
               "operator": {
                 "operation": "notEmpty",
                 "singleValue": true,
@@ -1457,7 +1453,8 @@
         "httpMethod": "POST",
         "options": {},
         "path": "test-harvester",
-        "responseMode": "onReceived"
+        "responseMode": "onReceived",
+        "authentication": "headerAuth"
       },
       "position": [
         -1008,
@@ -1465,7 +1462,13 @@
       ],
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "webhookId": "f2731848-9b7c-463a-9b55-38093c090176"
+      "webhookId": "f2731848-9b7c-463a-9b55-38093c090176",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      }
     }
   ],
   "settings": {

@@ -626,20 +626,17 @@
     },
     {
       "alwaysOutputData": true,
-      "credentials": {},
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
       "id": "55089ef5-9ef6-47e9-b464-735483bf4b16",
       "name": "Callback Drafted",
       "onError": "continueRegularOutput",
       "parameters": {
-        "authentication": "none",
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Webhook-Secret",
-              "value": "={{ $('Generate run_id').first().json.callback_secret }}"
-            }
-          ]
-        },
+        "authentication": "genericCredentialType",
         "jsonBody": "={{ JSON.stringify({ status: 'COMPLETED', metadata: { assetId: $('Prepare Asset Row').first().json.asset_id || null } }) }}",
         "method": "PATCH",
         "options": {
@@ -651,9 +648,10 @@
           }
         },
         "sendBody": true,
-        "sendHeaders": true,
+        "sendHeaders": false,
         "specifyBody": "json",
-        "url": "={{ $('Generate run_id').first().json.callback_url }}"
+        "url": "=https://minions.getminions.ai/api/pipeline/runs/{{ $('Generate run_id').first().json.callback_run_id }}",
+        "genericAuthType": "httpHeaderAuth"
       },
       "position": [
         2800,
@@ -664,20 +662,17 @@
     },
     {
       "alwaysOutputData": true,
-      "credentials": {},
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
       "id": "780385ab-751f-494f-a821-758aa9b090d2",
       "name": "Callback Skipped",
       "onError": "continueRegularOutput",
       "parameters": {
-        "authentication": "none",
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Webhook-Secret",
-              "value": "={{ $('Generate run_id').first().json.callback_secret }}"
-            }
-          ]
-        },
+        "authentication": "genericCredentialType",
         "jsonBody": "={{ JSON.stringify({ status: 'COMPLETED', metadata: { skipped: true, reason: 'NoOp Nothing to Draft' } }) }}",
         "method": "PATCH",
         "options": {
@@ -689,9 +684,10 @@
           }
         },
         "sendBody": true,
-        "sendHeaders": true,
+        "sendHeaders": false,
         "specifyBody": "json",
-        "url": "={{ $('Generate run_id').first().json.callback_url }}"
+        "url": "=https://minions.getminions.ai/api/pipeline/runs/{{ $('Generate run_id').first().json.callback_run_id }}",
+        "genericAuthType": "httpHeaderAuth"
       },
       "position": [
         450,
@@ -867,7 +863,7 @@
             }
           ]
         },
-        "jsonBody": "={{ JSON.stringify({\n  asset_id: $('Prepare Asset Row').first().json.asset_id,\n  cover_inputs: $('Parse Variants and Prepare Rows').first().json.cover_inputs,\n  callback_secret: $('Generate run_id').first().json.callback_secret,\n  app_url: 'https://minions.getminions.ai'\n}) }}",
+        "jsonBody": "={{ JSON.stringify({\n  asset_id: $('Prepare Asset Row').first().json.asset_id,\n  cover_inputs: $('Parse Variants and Prepare Rows').first().json.cover_inputs,\n  app_url: 'https://minions.getminions.ai'\n}) }}",
         "method": "POST",
         "options": {
           "response": {
@@ -881,14 +877,22 @@
         "sendBody": true,
         "sendHeaders": true,
         "specifyBody": "json",
-        "url": "https://n8n.getminions.ai/webhook/hero-image"
+        "url": "https://n8n.getminions.ai/webhook/hero-image",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "position": [
         7000,
         620
       ],
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      }
     },
     {
       "credentials": {
@@ -1061,7 +1065,7 @@
           "conditions": [
             {
               "id": "1",
-              "leftValue": "={{ $('Generate run_id').first().json.callback_url }}",
+              "leftValue": "={{ $('Generate run_id').first().json.callback_run_id }}",
               "operator": {
                 "operation": "notEmpty",
                 "singleValue": true,
@@ -1094,7 +1098,7 @@
           "conditions": [
             {
               "id": "1",
-              "leftValue": "={{ $('Generate run_id').first().json.callback_url }}",
+              "leftValue": "={{ $('Generate run_id').first().json.callback_run_id }}",
               "operator": {
                 "operation": "notEmpty",
                 "singleValue": true,
@@ -1965,7 +1969,8 @@
       "parameters": {
         "httpMethod": "POST",
         "options": {},
-        "path": "test-idea-to-asset"
+        "path": "test-idea-to-asset",
+        "authentication": "headerAuth"
       },
       "position": [
         -1264,
@@ -1973,7 +1978,13 @@
       ],
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "webhookId": "wh-idea-to-asset-test"
+      "webhookId": "wh-idea-to-asset-test",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      }
     },
     {
       "alwaysOutputData": true,
@@ -1993,14 +2004,23 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "url": "https://n8n.getminions.ai/webhook/test-harvester"
+        "url": "https://n8n.getminions.ai/webhook/test-harvester",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": false
       },
       "position": [
         140,
         560
       ],
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      }
     },
     {
       "id": "c1a2b3c4-d5e6-4f70-8a9b-1c2d3e4f5a6b",

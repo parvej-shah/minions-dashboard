@@ -24,7 +24,6 @@ const heroStatus = uploadedUrl ? 'READY' : (isSafety ? 'BLOCKED_BY_SAFETY' : 'FA
 return [{ json: {
   asset_id: req.asset_id,
   app_url: req.app_url,
-  callback_secret: req.callback_secret,
   hero_status: heroStatus,
   hero_image_url: uploadedUrl || null,
   hero_error_code: rawError ? String(rawError).slice(0, 240) : null,

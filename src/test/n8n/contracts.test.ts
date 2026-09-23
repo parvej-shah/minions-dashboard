@@ -123,7 +123,7 @@ describe("n8n -> dashboard callbacks", () => {
     let checked = 0;
     for (const slug of ["01_idea_harvester", "02_idea_to_asset", "00c_pipeline_error_alert"]) {
       for (const node of workflowNodes(slug)) {
-        if (!String(node.parameters.url ?? "").includes("callback_url")) continue;
+        if (!String(node.parameters.url ?? "").includes("/api/pipeline/runs/")) continue;
         const status = String(node.parameters.jsonBody ?? "").match(/status:\s*'([A-Z_]+)'/)?.[1];
         expect(status, `${slug} › ${node.name}`).toBeDefined();
         expect(allowed, `${slug} › ${node.name}`).toContain(status);
@@ -133,7 +133,7 @@ describe("n8n -> dashboard callbacks", () => {
     expect(checked).toBeGreaterThanOrEqual(5);
   });
 
-  const hero = { "Read Hero Request": [{ asset_id: "a1", app_url: "https://app.example", callback_secret: "s" }] };
+  const hero = { "Read Hero Request": [{ asset_id: "a1", app_url: "https://app.example" }] };
 
   it.each([
     ["uploaded to R2", { "Qwen Image 3.0 Pro Generation": [{ output: { choices: [{ message: { content: [{ image: "https://oss.example/x.png" }] } }] } }], "Upload Hero to R2": [{ url: "https://r2.example/x.webp" }] }, "READY"],

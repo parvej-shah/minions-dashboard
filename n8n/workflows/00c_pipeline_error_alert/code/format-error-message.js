@@ -13,15 +13,16 @@ const text = `⚠️ <b>Pipeline Failure</b>\n\n<b>Workflow:</b> ${workflowName}
 // run. Recover the callback_url the failing workflow was given and mark the run
 // FAILED so the UI can say so.
 const runData = data.execution?.data?.resultData?.runData || {};
-let callbackUrl = '';
-let callbackSecret = '';
+// Only the validated run id is reused: Mark Run Failed posts to a fixed
+// dashboard URL with the n8n credential, never to a URL from the trigger.
+let callbackRunId = '';
 for (const n of ['Generate run_id', 'Resolve Client ID']) {
   const out = runData[n]?.[0]?.data?.main?.[0]?.[0]?.json;
-  if (out && out.callback_url) {
-    callbackUrl = String(out.callback_url);
-    callbackSecret = String(out.callback_secret || '');
+  const id = out && typeof out.callback_run_id === 'string' ? out.callback_run_id : '';
+  if (/^[A-Za-z0-9_-]{8,64}$/.test(id)) {
+    callbackRunId = id;
     break;
   }
 }
 
-return [{ json: { text, callback_url: callbackUrl, callback_secret: callbackSecret, has_callback: !!callbackUrl, failed_node: nodeName, error_message: errorMessage } }];
+return [{ json: { text, callback_run_id: callbackRunId, has_callback: !!callbackRunId, failed_node: nodeName, error_message: errorMessage } }];

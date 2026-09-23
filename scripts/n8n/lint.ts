@@ -114,6 +114,29 @@ const RULES: Record<string, (w: Workflow, entry: ManifestWorkflow, all: Workflow
         .map(() => ({ rule: "tenant-literal-fallback", workflow: e.slug, node: n.name, message: "Falls back to one tenant's value (tenant zero / HVAC / Contractor Realities). Fail loudly or use a neutral default." }))
     ),
 
+  /**
+   * Every trigger webhook needs header auth. All four were open, so anyone
+   * with the URL could start paid harvests and drafts for any workspace,
+   * publish approved posts, or attach images to any asset.
+   */
+  "webhook-without-auth": (w, e) =>
+    w.nodes
+      .filter((n) => n.type.endsWith(".webhook") && (!n.parameters.authentication || n.parameters.authentication === "none"))
+      .map((n) => ({ rule: "webhook-without-auth", workflow: e.slug, node: n.name, message: "Webhook trigger with no authentication. Use headerAuth with the Minions Cockpit API credential." })),
+
+  /**
+   * The webhook secret travelled in request bodies (callback_secret) and in
+   * $env, so it was written in plain text into every execution log. Calls to
+   * the dashboard and between workflows use the credential instead.
+   */
+  "secret-in-payload": (w, e) =>
+    w.nodes.flatMap((n) =>
+      strings(n.parameters)
+        .filter((s) => /callback_secret|\$env\.(BLOG_API_SECRET|MINIONS_WEBHOOK_SECRET)/.test(s))
+        .slice(0, 1)
+        .map(() => ({ rule: "secret-in-payload", workflow: e.slug, node: n.name, message: "Passes the webhook secret as data. Attach the credential instead." }))
+    ),
+
   /** Secrets live in n8n credentials or $env, never in the graph (and so never in git). */
   "secret-literal": (w, e) =>
     w.nodes.flatMap((n) =>

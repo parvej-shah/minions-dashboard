@@ -1,3 +1,13 @@
+// The dashboard run this execution reports back to. Callbacks go to a FIXED
+// dashboard URL with the n8n credential attached, so only the run id comes
+// from the trigger, and only in a strict shape: a crafted "../" id must never
+// steer the credential to another route.
+function runIdFrom(url, explicit) {
+  const fromUrl = (url.match(/\/api\/pipeline\/runs\/([^/?#]+)$/) || [])[1] || '';
+  const id = (fromUrl || explicit || '').toString().trim();
+  return /^[A-Za-z0-9_-]{8,64}$/.test(id) ? id : '';
+}
+
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     const r = Math.random() * 16 | 0;
@@ -17,10 +27,7 @@ if (!clientId) throw new Error('Draft trigger has no client_id; refusing to gues
 
 const runId = triggerBody.run_id || generateUUID();
 const callbackUrl = triggerBody.callback_url || null;
-// The Cockpit sends the webhook secret alongside callback_url so the callback
-// can authenticate. Without it the run-status route answers 401 and the run is
-// stranded at RUNNING, which is what made the progress HUD spin forever.
-const callbackSecret = triggerBody.callback_secret || '';
+const callbackRunId = callbackUrl ? runIdFrom(callbackUrl, triggerBody.run_id) : '';
 const nowIso = new Date().toISOString();
 return [{
   json: {
@@ -29,6 +36,6 @@ return [{
     requested_idea_id: requestedIdeaId,
     client_id: clientId,
     callback_url: callbackUrl,
-    callback_secret: callbackSecret
+    callback_run_id: callbackRunId
   }
 }];

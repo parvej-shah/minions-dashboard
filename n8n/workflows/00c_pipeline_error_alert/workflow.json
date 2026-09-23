@@ -106,14 +106,6 @@
       "name": "Mark Run Failed",
       "onError": "continueRegularOutput",
       "parameters": {
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Webhook-Secret",
-              "value": "={{ $json.callback_secret }}"
-            }
-          ]
-        },
         "jsonBody": "={{ JSON.stringify({ status: 'FAILED', metadata: { failedNode: $json.failed_node, error: $json.error_message } }) }}",
         "method": "PATCH",
         "options": {
@@ -125,16 +117,24 @@
           }
         },
         "sendBody": true,
-        "sendHeaders": true,
+        "sendHeaders": false,
         "specifyBody": "json",
-        "url": "={{ $json.callback_url }}"
+        "url": "=https://minions.getminions.ai/api/pipeline/runs/{{ $json.callback_run_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "position": [
         320,
         200
       ],
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      }
     },
     {
       "credentials": {
