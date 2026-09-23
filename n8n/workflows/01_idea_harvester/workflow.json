@@ -952,8 +952,8 @@
       "alwaysOutputData": true,
       "credentials": {
         "httpHeaderAuth": {
-          "id": "7woVA2ycgDGlIipS",
-          "name": "Qwen API"
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
         }
       },
       "disabled": false,
@@ -981,12 +981,12 @@
               "neverError": true
             }
           },
-          "timeout": 60000
+          "timeout": 290000
         },
         "sendBody": true,
         "sendHeaders": true,
         "specifyBody": "json",
-        "url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+        "url": "https://minions.getminions.ai/api/internal/llm/chat/completions"
       },
       "position": [
         2040,
@@ -1001,8 +1001,8 @@
       "alwaysOutputData": true,
       "credentials": {
         "httpHeaderAuth": {
-          "id": "7woVA2ycgDGlIipS",
-          "name": "Qwen API"
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
         }
       },
       "id": "b0c1d2e3-f4a5-4b6c-7d8e-9f0a1b2c3d4e",
@@ -1014,11 +1014,11 @@
         "jsonBody": "={{ $json.payload }}",
         "method": "POST",
         "options": {
-          "timeout": 60000
+          "timeout": 290000
         },
         "sendBody": true,
         "specifyBody": "json",
-        "url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+        "url": "https://minions.getminions.ai/api/internal/llm/chat/completions"
       },
       "position": [
         992,
@@ -1033,8 +1033,8 @@
       "alwaysOutputData": true,
       "credentials": {
         "httpHeaderAuth": {
-          "id": "7woVA2ycgDGlIipS",
-          "name": "Qwen API"
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
         }
       },
       "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b",
@@ -1046,11 +1046,11 @@
         "jsonBody": "={{ $json.payload }}",
         "method": "POST",
         "options": {
-          "timeout": 60000
+          "timeout": 290000
         },
         "sendBody": true,
         "specifyBody": "json",
-        "url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+        "url": "https://minions.getminions.ai/api/internal/llm/chat/completions"
       },
       "position": [
         544,

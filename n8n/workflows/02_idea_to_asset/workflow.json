@@ -897,8 +897,8 @@
     {
       "credentials": {
         "httpHeaderAuth": {
-          "id": "7woVA2ycgDGlIipS",
-          "name": "Qwen API"
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
         }
       },
       "id": "qwen-call-1-strategist-02",
@@ -909,11 +909,11 @@
         "jsonBody": "={{ $json.payload }}",
         "method": "POST",
         "options": {
-          "timeout": 60000
+          "timeout": 290000
         },
         "sendBody": true,
         "specifyBody": "json",
-        "url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+        "url": "https://minions.getminions.ai/api/internal/llm/chat/completions"
       },
       "position": [
         1264,
@@ -1304,8 +1304,8 @@
     {
       "credentials": {
         "httpHeaderAuth": {
-          "id": "7woVA2ycgDGlIipS",
-          "name": "Qwen API"
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
         }
       },
       "id": "qwen-call-2-writer-02",
@@ -1316,11 +1316,11 @@
         "jsonBody": "={{ $json.payload }}",
         "method": "POST",
         "options": {
-          "timeout": 90000
+          "timeout": 290000
         },
         "sendBody": true,
         "specifyBody": "json",
-        "url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+        "url": "https://minions.getminions.ai/api/internal/llm/chat/completions"
       },
       "position": [
         2608,
@@ -1332,8 +1332,8 @@
     {
       "credentials": {
         "httpHeaderAuth": {
-          "id": "7woVA2ycgDGlIipS",
-          "name": "Qwen API"
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
         }
       },
       "id": "qwen-call-3-editor-02",
@@ -1344,11 +1344,11 @@
         "jsonBody": "={{ $json.payload }}",
         "method": "POST",
         "options": {
-          "timeout": 90000
+          "timeout": 290000
         },
         "sendBody": true,
         "specifyBody": "json",
-        "url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+        "url": "https://minions.getminions.ai/api/internal/llm/chat/completions"
       },
       "position": [
         3056,
@@ -1360,8 +1360,8 @@
     {
       "credentials": {
         "httpHeaderAuth": {
-          "id": "7woVA2ycgDGlIipS",
-          "name": "Qwen API"
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
         }
       },
       "id": "qwen-call-4-variants-02",
@@ -1372,11 +1372,11 @@
         "jsonBody": "={{ $json.payload }}",
         "method": "POST",
         "options": {
-          "timeout": 60000
+          "timeout": 290000
         },
         "sendBody": true,
         "specifyBody": "json",
-        "url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+        "url": "https://minions.getminions.ai/api/internal/llm/chat/completions"
       },
       "position": [
         4176,

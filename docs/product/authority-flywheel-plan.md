@@ -653,6 +653,17 @@ stayed at 15% author advantage.
     and those would leak into drafts. The prompt now forbids them on each
     field. The gate strips bracketed citations and rejects any label left in
     running text. That cut label rejects from 11 of 45 to 0.
+- **Automatic model fallback (2026-09-24, at the user's request).** Every
+  chat call from 01 and 02 now goes through
+  `POST /api/internal/llm/chat/completions`, which calls DashScope and walks
+  a chain when a model is unavailable (free quota used up, not offered, or
+  rate-limited). The chain for `qwen3.8-max` is deepseek-v4-pro, glm-5.2,
+  deepseek-v3.2, and finally the paid qwen3.7-max (`src/lib/ai/modelChain.ts`).
+  - Other errors pass through unchanged, so a bad request is never hidden
+    behind a different model.
+  - The `x-model-used` response header names the model that answered.
+  - The eval still calls DashScope directly, so it always measures the
+    primary model.
 - The first rubric-v2 runs are not committed: the prompt and gate changed
   after them. They are:
   - qwen3.7-max, the row above;

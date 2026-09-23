@@ -980,6 +980,7 @@ Return ONLY JSON, no markdown:
       <tr><td>Degraded context</td><td>01 Build Harvest Payload</td><td><code>context_complete=false</code> or empty rotation</td><td>Run throws</td></tr>
       <tr><td>Authority gate</td><td>01 Gate Harvest Ideas → /api/internal/harvest/gate</td><td>No ICP problem; restated thesis (Jaccard ≥ 0.5); cited memory missing, misquoted or unused; unsupported figure; Generalize specifics</td><td>Stored REJECTED with reasons</td></tr>
       <tr><td>Below the bar</td><td>same</td><td>No quoted, used memory item or proof</td><td>Kept, <code>BELOW_BAR</code>, LOW priority</td></tr>
+      <tr><td>Model fallback</td><td>every chat call → /api/internal/llm/chat/completions</td><td>Model's free quota used up, model unavailable, or rate-limited (<code>src/lib/ai/modelChain.ts</code>)</td><td>Next model in the chain answers; <code>x-model-used</code> names it</td></tr>
       <tr><td>Verbatim guard</td><td>01 Merge Craft</td><td>Any 9-word run found in the source</td><td>Sentence replaced by […]</td></tr>
       <tr><td>Atomic claim</td><td>02 Claim Idea Row</td><td>PATCH only if status, claimed_at and draft_asset_id unchanged</td><td>Concurrent run no-ops</td></tr>
       <tr><td>One idea, one asset</td><td>02 Select Target</td><td>draft_asset_id already set</td><td>ALREADY_DRAFTED</td></tr>

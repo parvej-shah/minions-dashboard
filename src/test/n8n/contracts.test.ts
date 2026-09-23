@@ -169,3 +169,17 @@ describe("02_idea_to_asset: fields read from Assemble Brand Context", () => {
     expect(colors.accent_blue).toBe("#123456");
   });
 });
+
+describe("model calls", () => {
+  it("every chat model call goes through the dashboard's fallback endpoint, never straight to DashScope", () => {
+    let checked = 0;
+    for (const slug of ["01_idea_harvester", "02_idea_to_asset"]) {
+      for (const node of workflowNodes(slug)) {
+        const url = String(node.parameters.url ?? "");
+        expect(url, `${slug} › ${node.name}`).not.toMatch(/dashscope.*chat\/completions/);
+        if (url.endsWith("/api/internal/llm/chat/completions")) checked++;
+      }
+    }
+    expect(checked).toBe(7);
+  });
+});
