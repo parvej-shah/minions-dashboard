@@ -2,20 +2,42 @@ import type { Asset } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { BLOG_AUTHOR_AVATAR } from "@/constants/config";
 
-/** Founders the public blog byline is drawn from. */
+/** The workspace whose posts are getminions.ai's own. */
+export const TENANT_ZERO_ID = "tenant-zero-getminions-ai";
+
+/** Founders the getminions.ai byline is drawn from. */
 const FOUNDER_NAMES = ["Parvej", "Rakib"] as const;
 
-function buildAuthor() {
+/**
+ * The byline stored on a blog row. Only getminions.ai's own posts carry a
+ * Minions founder; every other workspace's posts are credited to that brand.
+ * Every customer's published post used to be signed "Co-Founder, Minions.AI".
+ */
+export async function buildAuthor(clientId: string | null) {
+  if (clientId === TENANT_ZERO_ID) {
+    return {
+      name: FOUNDER_NAMES[Math.floor(Math.random() * FOUNDER_NAMES.length)],
+      role: "Co-Founder, Minions.AI",
+      avatar: BLOG_AUTHOR_AVATAR,
+    };
+  }
+  const brand = clientId
+    ? await prisma.brandProfile.findUnique({ where: { clientId }, select: { brandName: true, primaryLogoUrl: true } })
+    : null;
   return {
-    name: FOUNDER_NAMES[Math.floor(Math.random() * FOUNDER_NAMES.length)],
-    role: "Co-Founder, Minions.AI",
-    avatar: BLOG_AUTHOR_AVATAR,
+    name: `${brand?.brandName || "Editorial"} Team`,
+    role: "Editorial Team",
+    avatar: brand?.primaryLogoUrl || "",
   };
 }
 
-/** Removes an asset from the public blogs table, leaving the asset row intact. */
-export async function removeFromBlog(assetId: string, slug: string): Promise<void> {
-  await prisma.blog.deleteMany({ where: { OR: [{ assetId }, { slug }] } });
+/**
+ * Removes an asset from the public blogs table, leaving the asset row intact.
+ * Scoped to the asset's workspace: matching on slug alone could delete another
+ * workspace's post.
+ */
+export async function removeFromBlog(assetId: string, slug: string, clientId: string | null): Promise<void> {
+  await prisma.blog.deleteMany({ where: { clientId, OR: [{ assetId }, { slug }] } });
 }
 
 /**
@@ -50,6 +72,13 @@ export async function upsertToBlog(asset: Asset): Promise<void> {
     return;
   }
 
+  // `slug` is the blogs primary key across ALL workspaces. Never let one
+  // workspace's publish overwrite another's row that happens to share it.
+  const owner = await prisma.blog.findUnique({ where: { slug: asset.slug }, select: { clientId: true } });
+  if (owner && owner.clientId !== asset.clientId) {
+    throw new Error(`Blog slug "${asset.slug}" belongs to another workspace; refusing to overwrite it.`);
+  }
+
   await prisma.blog.upsert({
     where: { slug: asset.slug },
     create: {
@@ -61,7 +90,7 @@ export async function upsertToBlog(asset: Asset): Promise<void> {
       content: asset.content,
       audience: asset.audience,
       pillar: asset.pillar,
-      author: buildAuthor(),
+      author: await buildAuthor(asset.clientId),
       assetId: asset.id,
       docUrl: asset.docUrl,
       publishedAt: asset.publishedAt || new Date(),
@@ -95,10 +124,11 @@ export interface BlogEditFields {
 export async function syncBlogEdit(
   assetId: string,
   slug: string,
+  clientId: string | null,
   fields: BlogEditFields
 ): Promise<void> {
   const existing = await prisma.blog.findFirst({
-    where: { OR: [{ assetId }, { slug }] },
+    where: { clientId, OR: [{ assetId }, { slug }] },
   });
   if (!existing) return;
 
@@ -122,11 +152,11 @@ export async function syncAssetToBlog(
     const effectiveStatus = status ?? asset.status;
 
     if (effectiveStatus === "UNPUBLISHED") {
-      await removeFromBlog(asset.id, asset.slug);
+      await removeFromBlog(asset.id, asset.slug, asset.clientId);
     } else if (effectiveStatus === "PUBLISHED") {
       await upsertToBlog(asset);
     } else if (Object.keys(edits).length > 0) {
-      await syncBlogEdit(asset.id, asset.slug, edits);
+      await syncBlogEdit(asset.id, asset.slug, asset.clientId, edits);
     }
   } catch (error) {
     console.warn("[publishing] Non-fatal: could not sync asset to blogs table:", error);

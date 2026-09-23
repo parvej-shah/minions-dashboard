@@ -23,7 +23,7 @@ describe("session gate public paths", () => {
     "/api/brand/context",
     "/api/media/ingest",
     "/api/ideas/craft",
-    "/api/webhooks/idea-harvested",
+    "/api/webhooks/stripe",
     "/api/internal/schedule/eligible-tenants",
     // The run-status callback. While this was gated, every n8n callback was
     // answered 307 and no pipeline_runs row ever left RUNNING.

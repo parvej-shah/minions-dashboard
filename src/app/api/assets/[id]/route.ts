@@ -118,7 +118,7 @@ export async function DELETE(
     // Take it down from the public blog first, in both modes. A mirror failure
     // must not block the delete, so it is logged rather than propagated.
     try {
-      await removeFromBlog(asset.id, asset.slug);
+      await removeFromBlog(asset.id, asset.slug, asset.clientId);
     } catch (blogError) {
       console.warn("[assets] Could not delete from blogs table:", blogError);
     }
