@@ -77,6 +77,7 @@ export function toAssetDTO(
     target_trade: asset.targetTrade || UNSPECIFIED_TRADE,
     status: asset.status as AssetStatus,
     claims_ok: asset.claimsOk,
+    review_notes: asset.reviewNotes ?? [],
     hero_image_url: asset.heroImageUrl,
     hero_status: (asset.heroStatus || "READY") as AssetItem["hero_status"],
     hero_error_code: asset.heroErrorCode,

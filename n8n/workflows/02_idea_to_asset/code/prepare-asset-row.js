@@ -16,12 +16,16 @@ const clientId = $('Generate run_id').first().json.client_id;
 // PENDING is deliberately NOT permanent: autoPublish multiplies against
 // heroIsPermanent below, so a draft can never publish while its cover is still
 // being generated. It becomes publishable when the hero lands READY.
+//
+// A test draft (skip_hero) gets no cover at all. FAILED, not PENDING, so it
+// never waits on a cover that is not coming; the cover can be regenerated.
+const skipHero = $('Generate run_id').first().json.skip_hero === true;
 const heroImageUrl = null;
 const heroIsPermanent = false;
-const heroStatus = 'PENDING';
+const heroStatus = skipHero ? 'FAILED' : 'PENDING';
 const heroProvider = null;
 const heroAttempts = 0;
-const rawImageError = null;
+const rawImageError = skipHero ? 'Skipped: test draft (skip_hero)' : null;
 
 // Deterministic banned-word gate: a FORBIDDEN-category BrandDirective was previously
 // only folded into generic prompt text (soft guidance the model wasn't reliable about
@@ -117,9 +121,10 @@ const blogPayload = {
   core_argument: coreArgument,
   content: contentWithHero,
   audience: prep.audience,
-  pillar: 'Operations',
+  // Was the literal 'Operations' for every tenant.
+  pillar: idea.pillar || '',
   author: author,
-  tags: [prep.audience, 'Operations'],
+  tags: [idea.pillar].filter(Boolean),
   asset_id: prep.asset_id,
   doc_url: docUrl || null,
   meta_description: (hook || prep.title || '').slice(0, 160)
@@ -152,6 +157,7 @@ return [{
     published_urls: autoPublish ? blogUrl : '',
     version: 1,
     claims_ok: claimsOk,
+    review_notes: [...(hasBannedWord ? ['Uses banned words: ' + bannedWordHits.join(', ')] : []), ...(gate.review_notes || [])],
     banned_word_hits: bannedWordHits,
     status: autoPublish ? 'PUBLISHED' : 'PENDING_REVIEW',
     blog_payload: blogPayload,

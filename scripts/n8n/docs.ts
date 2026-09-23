@@ -12,7 +12,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { renderPrompt, type PromptStage } from "@/lib/prompts";
 import type { ChatPayload } from "@/lib/prompts/types";
-import { hookArchetypeFor } from "@/lib/prompts/strategist";
+import { hookFor } from "@/lib/drafts/strategy";
 import { renderCover } from "@/lib/prompts/cover";
 import { CONTENT_ANGLES, ANGLES_PER_RUN } from "@/constants/contentAngles";
 import { WRITER_EXPERTISE_OPTIONS, DEFAULT_WRITER_EXPERTISE } from "@/constants/writerExpertise";
@@ -332,13 +332,25 @@ function fragments(): string {
   const angles = CONTENT_ANGLES.map((a) => `<tr><td>${esc(a.pillar)}</td><td><code>${esc(a.id)}</code></td><td>${esc(a.brief)}</td></tr>`).join("");
   out.push(`<article class="llm" id="f-angles"><div class="llm-top"><div><h4><span class="tag">fragment</span>Pillar rotation</h4><p><code>src/constants/contentAngles.ts</code>. Each harvest takes ${ANGLES_PER_RUN} of these ${CONTENT_ANGLES.length} angles, starting at <code>runIndex % ${CONTENT_ANGLES.length}</code> and taking every 3rd, so consecutive runs get different combinations. The pillar later decides the strategist's hook archetype.</p></div></div><div class="tbl" style="border:0;border-top:1px solid var(--line);border-radius:0"><table><thead><tr><th>Pillar</th><th>id</th><th>Brief (injected verbatim)</th></tr></thead><tbody>${angles}</tbody></table></div></article>`);
 
-  const hooks = [["myth / contrarian / architecture / systems", "The Myth"], ["stakes / econom…", "The Stakes"], ["anything else", "How It Works"]]
-    .map(([when, sample]) => {
-      const h = hookArchetypeFor(sample);
-      return `<tr><td><code>${esc(h.hookArchetype)}</code></td><td>${esc(when)}</td><td>${esc(h.archetypeInstruction)}</td></tr>`;
+  const hookCases: [string, Parameters<typeof hookFor>[0]][] = [
+    ["source: past experience", { sourceType: "PAST_EXPERIENCE" }],
+    ["source: current work / build in public", { sourceType: "CURRENT_WORK" }],
+    ["source: professional opinion", { sourceType: "PROFESSIONAL_OPINION" }],
+    ["source: experiment", { sourceType: "EXPERIMENT" }],
+    ["lane purpose DEMAND (otherwise)", { sourceType: "ICP_QUESTION", lanePurpose: "DEMAND" }],
+    ["source: ICP question", { sourceType: "ICP_QUESTION" }],
+    ["source: market signal", { sourceType: "MARKET_SIGNAL" }],
+    ["older idea, angle The Myth / Uncomfortable Truth / First Principles", { pillar: "The Myth" }],
+    ["older idea, angle The Stakes", { pillar: "The Stakes" }],
+    ["older idea, anything else", { pillar: "How It Works" }],
+  ];
+  const hooks = hookCases
+    .map(([when, input]) => {
+      const h = hookFor(input);
+      return `<tr><td><code>${esc(h.archetype)}</code></td><td>${esc(when)}</td><td>${esc(h.instruction)}</td></tr>`;
     })
     .join("");
-  out.push(`<article class="llm" id="f-hooks"><div class="llm-top"><div><h4><span class="tag">fragment</span>Hook archetypes</h4><p><code>hookArchetypeFor()</code> in <code>src/lib/prompts/strategist.ts</code>, matched on the idea's pillar.</p></div></div><div class="tbl" style="border:0;border-top:1px solid var(--line);border-radius:0"><table><thead><tr><th>Archetype</th><th>Pillar contains</th><th>Instruction</th></tr></thead><tbody>${hooks}</tbody></table></div></article>`);
+  out.push(`<article class="llm" id="f-hooks"><div class="llm-top"><div><h4><span class="tag">fragment</span>Hook archetypes</h4><p><code>hookFor()</code> in <code>src/lib/drafts/strategy.ts</code>: from what the idea rests on (source type) and its lane, first match wins.</p></div></div><div class="tbl" style="border:0;border-top:1px solid var(--line);border-radius:0"><table><thead><tr><th>Archetype</th><th>When</th><th>Instruction</th></tr></thead><tbody>${hooks}</tbody></table></div></article>`);
 
   // Probe the real router: an empty physical_scene forces it, and the title
   // carries the keyword being tested.

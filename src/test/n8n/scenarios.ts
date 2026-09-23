@@ -8,7 +8,8 @@
  * intended change: UPDATE_GOLDEN=1 npx vitest run src/test/n8n
  */
 import { CRAFT_EXTRACT_INSTRUCTION } from "@/lib/ai/craftExtract";
-import { brandContext } from "./fixtures";
+import { brandContext, draftAuthor, legacyDraftAuthor } from "./fixtures";
+import { checkDraft } from "@/lib/drafts/check";
 import type { RunOptions } from "./harness";
 import type { PromptStage } from "@/lib/prompts";
 
@@ -73,8 +74,9 @@ function target(pillar: string, extra: Json = {}): Json {
   };
 }
 
-function strategistNodes(pillar: string): Record<string, Json[]> {
+function strategistNodes(pillar: string, author: Json = legacyDraftAuthor(pillar) as unknown as Json): Record<string, Json[]> {
   return {
+    "Fetch Author Context": [{ author }],
     "Fetch Brand Context": [brandProfileRow],
     "Read Brand": directiveRows,
     "Fetch Tone Examples": toneRows,
@@ -184,6 +186,23 @@ export const SCENARIOS: Scenario[] = [
       },
     },
   },
+  {
+    name: "strategist-authority",
+    slug: "02_idea_to_asset",
+    node: "Assemble Brand Context",
+    stage: "strategist",
+    opts: { nodes: strategistNodes("What Went Wrong", draftAuthor as unknown as Json) },
+  },
+  {
+    name: "writer-authority",
+    slug: "02_idea_to_asset",
+    node: "Build Writer Payload",
+    stage: "writer",
+    opts: {
+      input: [{ ok: true, strategy: { ...strategy, content_mode: "STORY" }, idea: target("What Went Wrong"), brand_context: assembled.brand_context, evidence_block: evidenceBlock }],
+      nodes: { "Assemble Brand Context": [{ ...assembled, author: draftAuthor }], "Parse Strategy JSON": [{ strategy }], "Select Target": [target("What Went Wrong")] },
+    },
+  },
   ...(["The Myth", "The Stakes", "How It Works"] as const).map((pillar) => ({
     name: `strategist-${pillar.toLowerCase().replace(/\s+/g, "-")}`,
     slug: "02_idea_to_asset",
@@ -243,6 +262,7 @@ export const SCENARIOS: Scenario[] = [
     node: "Parse Claims and Gate",
     stage: "variants",
     opts: {
+      input: [checkDraft({ hook: editorOut.hook, body: editorOut.edited_body, claims: editorOut.claims, approvedProofs: [], allowCustomerResult: false, trustBasis: [], memory: [], knownText: [] }) as unknown as Json],
       nodes: { "Parse Editor Output": [editorOut], "Select Target": [target("How It Works")], "Assemble Brand Context": [assembled], "Read Brand": directiveRows },
     },
   },

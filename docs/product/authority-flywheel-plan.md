@@ -1,6 +1,6 @@
 # Authority flywheel: product plan
 
-Status: phases 0, 1, 2 and 3 BUILT (2026-09-23); see "Progress" at the end. Written 2026-09-23 from
+Status: phases 0–4 BUILT (2026-09-23/24); see "Progress" at the end. Written 2026-09-23 from
 [the strategy conversation](2026-09-23-strategy-conversation.md) and a read of
 the code as of commit `26c0b42`.
 
@@ -637,6 +637,7 @@ stayed at 15% author advantage.
 | phase 3, qwen3.7-max, all ideas (45) | 73 | 78 | 4 | 4 |
 | **phase 3, qwen3.8-max, all ideas (45)** | **67** | **67** | **4** | **0** |
 | phase 3, qwen3.8-max, what the gate kept (44) | 68 | 68 | 2 | 0 |
+| **phase 3 + "never embellish experience" rule (2026-09-24), all (45)** | **93** | **93** | **2** | **0** |
 
 - **Exit criterion met.** Generic and author advantage clearly beat the
   baseline, invented claims fell, and all golden and contract tests pass
@@ -687,6 +688,131 @@ makes the context degraded, so the harvester refuses to run:
 - A human spot-check of 10 live ideas on tenant zero, once it has its
   experience items (the phase 2 exit).
 - UI for the per-tenant source mix (phase 7).
+
+### Phase 4 — built 2026-09-24
+
+**What the drafter now knows** (`POST /api/internal/drafts/context`,
+`src/services/draftContext.ts`; the new 02 node `Fetch Author Context`):
+
+- The idea's ICP problem, reader context, author advantage, white space,
+  fresh perspective, vision, lane and format.
+- The experience items the idea cites, inactive ones excluded.
+  - GENERALIZE items arrive only as a lesson-only rewrite: the memory
+    check's rewrite, used only if code confirms no name, figure or link
+    survived, otherwise redacted in code (`src/lib/drafts/generalize.ts`).
+  - The rewrite is cached on the row (`generalized_content`), keyed by a hash
+    of the text it came from.
+- The ICP and the author's standing.
+  - Found along the way: 02 read `writer_expertise_guidance` from a
+    brand_profile query that never selected it, so the standing never
+    reached a single draft.
+- An idea from before phase 3 gets `found: false` and drafts as before.
+
+**Strategist, writer, editor** (`src/lib/prompts/strategist.ts`, `writer.ts`,
+`editor.ts`):
+
+- **Hook.** Chosen in code from the source type and lane (`hookFor`,
+  `src/lib/drafts/strategy.ts`):
+  - an author scene for past experience;
+  - "work in progress" for current work;
+  - a position for an opinion;
+  - "the question" for ICP questions;
+  - "what changed" for signals;
+  - "the decision" for DEMAND lanes.
+
+  Older ideas match their angle exactly. The pillar substring match is gone:
+  "Systems Architecture" no longer silently becomes an INVERSION.
+- **Content modes.** STORY needs lived experience or the author's own note.
+  CASE_NOTE needs proof or experience. A mode the evidence cannot carry is
+  moved in code to the nearest honest one.
+- **Writer.** One argument, carrying the author's specific detail. Evidence
+  rules come from the trust basis: first person only about the listed
+  experience, never embellished, and none at all when the idea rests on no
+  experience.
+  - There is no required section list (D12).
+  - POST is 250–450 words; ARTICLE is 350–800.
+- **Editor.** Keeps one central argument, cuts for mobile (hook ≤ 2 sentences
+  and 200 characters), and never adds facts.
+
+**The draft check** (`POST /api/internal/drafts/check`, `src/lib/drafts/check.ts`;
+the 02 node `Check Draft` feeds `Parse Claims and Gate`):
+
+- **Loophole closed:** the old gate saw only the claims the editor chose to
+  extract, and passed a hedged "could cut failures by 40%" as OPINION.
+  Figures are now found in code, and any number the draft states that
+  appears in no input BLOCKS it. Years are not statistics.
+- **BLOCKED** also for a Generalize item's names or figures, and for a
+  customer result with no approved proof or experience item behind it.
+- **N (needs review)** for an unbacked claim, or for first-person experience
+  ("we built", "our clients") on an idea that rests on none.
+- **Claims are sourced** to approved proof, to the author's own experience,
+  or to a supplied signal. Signals now keep their excerpt (01's Attach Source
+  URLs used to keep only the title).
+- **Paragraph reflow.** A paragraph over 3 sentences is split at a sentence
+  boundary in code, and never inside a run of short fragments. The prompts
+  asked for this and the models broke it in about one paragraph in three.
+- **Review notes.** The reasons and readability notes go to
+  `assets.review_notes` and show in the Editorial page's Claims Gate panel.
+
+**Test drafts skip the cover image:** a trigger with `skip_hero: true` never
+reaches 04. The asset's cover is FAILED ("Skipped: test draft") and can be
+regenerated.
+
+**Other bugs fixed:**
+
+- A strategist, writer or editor reply that failed to parse flowed on as an
+  empty draft, which passed the claims gate, so an empty draft could be saved
+  as claims-OK. The models regularly put raw line breaks inside JSON strings.
+  The parse nodes now repair that (`src/lib/modelJson.ts`), and fail the run
+  when a reply is still unusable.
+- Every asset was filed under pillar "Operations", with tags
+  ["ICP", "Operations"]. They now carry the idea's pillar.
+
+**Draft eval** (`npm run eval:drafts`, `src/test/eval/drafts.ts`,
+`draftRubric.ts`):
+
+- 9 fixed ideas (`draft-ideas.json`, 3 per corpus tenant) go through the
+  real 02 nodes, then a judge answers the draft rubric. Code checks its
+  quotes, and code measures readability.
+- The baseline is the pre-phase-4 prompts, with the parse fix applied so they
+  could run at all.
+
+| 9 drafts | draft_pass | author_advantage | invented | claims_ok Y | hook over 210 chars | paragraphs over 3 sentences | words |
+|---|---|---|---|---|---|---|---|
+| baseline | 44 | 67 | 33 | 0 | 56 | 2.3 per draft | 319 |
+| **phase 4 (final)** | **67** | **89** | 33 | **78** | **0** | **0** | 263 |
+
+- **Across the three phase 4 runs:**
+  - author advantage came out at 78, 67 and 89;
+  - draft_pass at 78, 67 and 67;
+  - claims-OK at 11, 56 and 78 (the reflow and source matching landed between
+    runs).
+
+  At 9 drafts, one draft is 11 points, so read the direction, not the
+  decimals.
+- **"Invented" is 33% in the final run, but none of it could publish.**
+  - One draft stated figures found in no input, and the check BLOCKED it.
+  - The judge's other two flags are reasoning ("they arrive at the first
+    meeting skeptical") and a proposed rule of thumb ("three straight
+    quarters"), not stated facts.
+  - Every draft with an invented number or story in any run was BLOCKED or
+    sent to review.
+- The harvest prompt gained a rule after the draft ideas were made: never add
+  events, failures or results to an experience item. Some eval ideas had
+  embellished "we are building X" into "our first version of X failed".
+  Re-running the idea eval with the rule gave 93% authority_pass (the last
+  row of the phase 3 table); the committed `2026-09-23-phase3.json` is that
+  run.
+
+**Deploy order:**
+
+1. Apply `prisma/sql/2026-09-24-draft-check.sql`.
+2. Push the dashboard.
+3. Push n8n 02, then 01 (the signal excerpts).
+
+**Exit criterion still open:** 5 live drafts on tenant zero, reviewed by the
+user. They need tenant zero's experience items. Until then its ideas carry no
+experience and draft on the older path.
 
 ### Security fixes found along the way (2026-09-23)
 

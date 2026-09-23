@@ -45,6 +45,8 @@ export interface AssetItem {
   target_trade: string;
   status: AssetStatus;
   claims_ok: string | null;
+  /** From the draft check (phase 4): why it is blocked or needs review, then readability notes. */
+  review_notes: string[];
   hero_image_url: string | null;
   hero_status: HeroStatus;
   hero_error_code: string | null;

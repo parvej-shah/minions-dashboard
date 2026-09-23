@@ -9,6 +9,10 @@ export interface EditorInput {
   brand_context: string;
   /** Supplied evidence, or "No external evidence supplied." */
   evidence_block: string;
+  /** The strategist's one-sentence argument; the edit keeps the piece on it (phase 4). */
+  core_argument?: string;
+  /** The author's experience the draft rests on (disclosure applied), for claim sourcing. */
+  author_experience?: string[];
 }
 
 export function renderEditor(input: EditorInput): ChatPayload {
@@ -17,6 +21,8 @@ export function renderEditor(input: EditorInput): ChatPayload {
   const bodyText = input.body || "";
   const brandContext = input.brand_context || "";
   const evidenceBlock = input.evidence_block || "No external evidence supplied.";
+  const coreArgument = (input.core_argument || "").trim();
+  const experience = (input.author_experience || []).filter(Boolean);
 
   const editorSystemPrompt = `You are the editor for ${companyName}. Preserve the brand's point of view while improving clarity, specificity, accuracy, and platform-ready readability.
 
@@ -26,6 +32,9 @@ Editing Rules:
 3. SHARPEN THE OPENING: Make it specific, credible, and relevant. Do not manufacture drama or use clickbait.
 4. EXTRACT CLAIMS: Extract every externally checkable assertion, including numbers, benchmarks, technical statements, product capabilities, market statements, and customer anecdotes. Never invent a source URL. Attach a source only when it appears in the supplied Evidence and supports the exact wording.
 5. PRESERVE NARRATIVE FLOW: Do not delete or reorder the bridge sentences connecting each section to the next section's premise. If a cut is necessary for clarity, keep the connective transition intact.
+6. ONE CENTRAL ARGUMENT:${coreArgument ? ` The piece argues: "${coreArgument}".` : ""} Cut any paragraph that makes a second, unrelated point. Do not add new points.
+7. BREVITY FOR MOBILE: The hook is at most two sentences and 200 characters. Split any paragraph over 3 sentences. Split or shorten any sentence over 30 words. Remove filler and repetition; never remove the author's specific details.
+8. NEVER ADD FACTS: Editing may cut and tighten, never add a number, result, example or claim that is not already in the draft.
 
 Classify claims:
 STATISTIC | FACT | CUSTOMER_RESULT | MARKET_CLAIM | PRODUCT_CLAIM | OPINION
@@ -34,7 +43,7 @@ Classification guidance: if a number or claim is phrased with hedge language ("c
 
 Return ONLY this JSON:
 {
-  "hook": "two punchy sentences directly attacking the acute pain point",
+  "hook": "at most two sentences and 200 characters",
   "body": "the fully edited article, retaining useful ## headings and minimal structural markdown",
   "claims": [
     {
@@ -60,7 +69,7 @@ Brand Context:
 ${brandContext}
 
 Supplied Evidence:
-${evidenceBlock}`;
+${evidenceBlock}${experience.length ? `\n\nThe author's own experience (a claim resting on it is sourced to the author):\n${experience.map((e) => `- ${e}`).join("\n")}` : ""}`;
 
   return {
     model: "qwen3.7-flash",

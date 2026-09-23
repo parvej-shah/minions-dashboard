@@ -4,6 +4,7 @@ import type { IcpContext, LaneContext, MemoryContext } from "@/services/authorCo
 import { restemKey, thesisKey, tokenOverlap } from "@/lib/thesis";
 import { contentWords, numbersIn, sharedWords, unsupportedNumbers } from "./text";
 import { memoryRef, proofRef, type HarvestSlot } from "./plan";
+import { properNouns } from "@/lib/drafts/generalize";
 
 /**
  * The authority gate (phase 3 of docs/product/authority-flywheel-plan.md).
@@ -133,13 +134,6 @@ export function stripCitations(s: string): string {
 }
 
 const text = (v: unknown) => (typeof v === "string" ? v.replace(/—/g, ", ").trim() : "");
-
-/** Capitalised words that are not at the start of a sentence: names, places, brands. */
-function properNouns(s: string): string[] {
-  const out = new Set<string>();
-  for (const m of s.matchAll(/(?<![.!?:]\s|^)\b([A-Z][a-zA-Z0-9&'-]{2,})/g)) out.add(m[1]);
-  return [...out];
-}
 
 function quoteMatches(quote: string, item: string): boolean {
   const q = [...contentWords(quote)];

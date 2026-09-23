@@ -25,7 +25,9 @@ return ideas.map(idea => {
       source_url: signal?.url || null,
       source_title: signal?.title || null,
       source: signal?.source_name || idea.source || 'HARVESTER',
-      signals: signal ? [{ title: signal.title, url: signal.url, source: signal.source_name }] : []
+      // The excerpt travels with the signal: 02 cites it as evidence and the
+      // draft check sources claims to it. Only the title used to be kept.
+      signals: signal ? [{ title: signal.title, url: signal.url, source: signal.source_name, snippet: signal.snippet || '', published_at: signal.published_at || '' }] : []
     }
   };
 });

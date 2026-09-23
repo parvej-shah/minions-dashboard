@@ -5,6 +5,8 @@
  * in a production prompt.
  */
 import { DEFAULT_SOURCE_MIX } from "@/constants/sourceMix";
+import { emptyDraftContext, type DraftAuthorContext } from "@/lib/drafts/authorContext";
+import { allowedContentModes, hookFor } from "@/lib/drafts/strategy";
 import { buildBrandContextResponse } from "@/services/brandContext";
 import { selectAnglesForRun } from "@/constants/contentAngles";
 import { DEFAULT_LANES, defaultLaneId } from "@/constants/contentLanes";
@@ -97,3 +99,29 @@ export const harvestContext: HarvestContext = {
 export function brandContext(overrides: Partial<HarvestContext> = {}) {
   return buildBrandContextResponse(brandSettings, voiceConfig, { ...harvestContext, ...overrides });
 }
+
+/** POST /api/internal/drafts/context for an idea from before phase 3. */
+export const legacyDraftAuthor = (pillar: string) => emptyDraftContext(authorContext.icp, "The AUTHOR works in this field hands-on.", pillar);
+
+/** POST /api/internal/drafts/context for a phase 3 idea built on a story, with one GENERALIZE item. */
+export const draftAuthor: DraftAuthorContext = {
+  found: true,
+  source_type: "PAST_EXPERIENCE",
+  trust_basis: ["LIVED_EXPERIENCE", "MARKET_SIGNAL"],
+  icp_problem: "No hot water on a winter morning",
+  reader_context: "Standing in a cold shower before work in January",
+  author_advantage: "Replaced 14 water heaters in one January week after a cold snap.",
+  white_space: "Most advice blames age; the failures cluster after cold snaps.",
+  fresh_perspective: "A cold snap does not break heaters, it exposes the ones already failing.",
+  vision: null,
+  recommended_format: "POST",
+  lane: { name: "Lessons From the Work", purpose: "CREDIBILITY", brief: "What the author learned from real work." },
+  memory: [
+    { kind: "STORY", text: "Replaced 14 water heaters in one January week after a cold snap.", disclosure: "PUBLIC" },
+    { kind: "LESSON", text: "A customer's anode rod had dissolved early because of softened water.", disclosure: "GENERALIZE" },
+  ],
+  icp: authorContext.icp,
+  writer_standing: "The AUTHOR works in this field hands-on.",
+  hook: hookFor({ sourceType: "PAST_EXPERIENCE", lanePurpose: "CREDIBILITY" }),
+  allowed_modes: allowedContentModes(["LIVED_EXPERIENCE", "MARKET_SIGNAL"]),
+};

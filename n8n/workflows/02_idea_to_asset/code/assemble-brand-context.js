@@ -41,10 +41,15 @@ const cappedBrand = brandContext.length > 8000 ? brandContext.substring(0, 8000)
 // piece gets comes from the positioning/ICP directives in brandContext above.
 // Until now the writer ignored this entirely, so a beginner's drafts were free
 // to invent war stories the author had never lived.
-const writerStanding = brand.writer_expertise_guidance || '';
+//
+// It comes from the dashboard's author context: brand_profile has no
+// writer_expertise_guidance column, so the old read here was always empty.
+const author = $('Fetch Author Context').first().json.author || {};
+const writerStanding = author.writer_standing || '';
 
-// The strategist prompt is rendered by the dashboard (src/lib/prompts/strategist.ts),
-// which also picks the hook archetype from the pillar.
+// The strategist prompt is rendered by the dashboard (src/lib/prompts/strategist.ts).
+// The hook, the allowed content modes and the author's experience come in
+// `author` (POST /api/internal/drafts/context), decided there in code.
 return [{
   json: {
     idea: target,
@@ -64,6 +69,7 @@ return [{
     tone_questionnaire: brand.tone_questionnaire || null,
     tone_examples: toneRows.slice(0, 5).map(row => row.content),
     allow_customer_result_claims: !!brand.allow_customer_result_claims,
+    author: author,
     prompt_inputs: {
       brand_name: brand.brand_name,
       target: {
@@ -75,7 +81,8 @@ return [{
         why: target.why
       },
       brand_context: cappedBrand,
-      writer_standing: writerStanding
+      writer_standing: writerStanding,
+      author: author
     }
   }
 }];

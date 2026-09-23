@@ -1,36 +1,36 @@
 {
   "label": "phase3",
-  "date": "2026-09-23T18:23:43.309Z",
+  "date": "2026-09-23T19:54:01.058Z",
   "runs": 5,
   "judge_model": "qwen3-max",
   "overall": {
     "ideas": 45,
     "gate_pass": 98,
-    "gate_below": 0,
-    "gate_reject": 2,
-    "authority_pass": 67,
+    "gate_below": 2,
+    "gate_reject": 0,
+    "authority_pass": 93,
     "icp_problem": 100,
-    "author_advantage": 67,
+    "author_advantage": 93,
     "beyond_source": 98,
-    "generic": 4,
+    "generic": 2,
     "invented_facts": 0,
     "off_positioning": 0
   },
   "kept": {
-    "ideas": 44,
-    "gate_pass": 100,
-    "gate_below": 0,
+    "ideas": 45,
+    "gate_pass": 98,
+    "gate_below": 2,
     "gate_reject": 0,
-    "authority_pass": 68,
+    "authority_pass": 93,
     "icp_problem": 100,
-    "author_advantage": 68,
-    "beyond_source": 100,
+    "author_advantage": 93,
+    "beyond_source": 98,
     "generic": 2,
     "invented_facts": 0,
     "off_positioning": 0
   },
   "gate_agreement": {
-    "gate_pass_judged_authority": 68,
+    "gate_pass_judged_authority": 95,
     "judged_authority_gate_pass": 100
   },
   "tenants": {
@@ -38,13 +38,13 @@
       "summary": {
         "ideas": 15,
         "gate_pass": 93,
-        "gate_below": 0,
-        "gate_reject": 7,
-        "authority_pass": 60,
+        "gate_below": 7,
+        "gate_reject": 0,
+        "authority_pass": 93,
         "icp_problem": 100,
-        "author_advantage": 60,
+        "author_advantage": 93,
         "beyond_source": 93,
-        "generic": 13,
+        "generic": 7,
         "invented_facts": 0,
         "off_positioning": 0
       },
@@ -53,32 +53,32 @@
           "run": 0,
           "idea": {
             "pillar": "What Went Wrong",
-            "raw_idea": "When we wired a voice agent to book roofing inspections straight into a calendar through n8n, the failure mode we kept hitting was not the AI sounding robotic. It was the booking vanishing after the caller hung up.",
-            "angle": "The part of an AI booking system that fails first is usually the automation plumbing, not the conversation.",
-            "why": "Recent industry reports show webhooks failing silently in production while returning success codes, and calendar double-booking remains a top complaint. This connects those infrastructure realities directly to the author's live build work, proving that the plumbing matters more than the polish.",
-            "signal": "Why automations fail silently in production"
+            "raw_idea": "When we wired a voice agent to book roofing inspections straight into a calendar, the first failure was not bad conversation but silent webhook timeouts that left callers thinking they had an appointment when nothing was saved.",
+            "angle": "The part of a voice booking agent that fails first is never the voice, it is the write path between the call and the calendar.",
+            "why": "New automation nodes for tool calling make building these pipelines faster, but the underlying risk of silent webhook failures remains invisible to owners until a booking disappears.",
+            "signal": "n8n adds AI agent node with tool calling"
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "the booking vanishing after the caller hung up",
+            "icp_problem_quote": "silent webhook timeouts that left callers thinking they had an appointment when nothing was saved",
             "author_advantage": true,
             "author_advantage_refs": [
               "M2",
               "M1"
             ],
-            "memory_quote": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently. Now every booking is written, read back, and only then confirmed to the caller.",
-            "author_advantage_quote": "the booking vanishing after the caller hung up",
+            "memory_quote": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently.",
+            "author_advantage_quote": "the first failure was not bad conversation but silent webhook timeouts that left callers thinking they had an appointment when nothing was saved",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Strong grounding in author’s real failure and fix."
+            "note": "Strongly grounded in lived failure and specific to the author’s integration work."
           },
-          "author_advantage": false,
+          "author_advantage": true,
           "unsupported_numbers": [],
           "invented": false,
-          "authority_pass": false,
+          "authority_pass": true,
           "gate": {
             "verdict": "PASS",
             "reasons": [],
@@ -89,380 +89,26 @@
           "run": 0,
           "idea": {
             "pillar": "Decision Guide",
-            "raw_idea": "Owners constantly ask if callers will hang up when they realize they are speaking to an AI. The decision you actually need to make is whether to disclose it upfront or let them figure it out, and the criteria for choosing have nothing to do with deception.",
-            "angle": "Deciding whether to tell callers they are talking to an AI should be based on booking reliability and upcoming compliance rules, not on fear of hang-ups.",
-            "why": "Regulators are actively weighing draft guidance that would require businesses to disclose AI on phone calls, while consumer surveys show 42% of callers can already tell. Owners need a grounded way to decide how to handle this right now, backed by the author's actual disclosure testing.",
-            "signal": "Regulators weigh disclosure rules for AI phone calls"
+            "raw_idea": "Choosing between answering calls with a human dispatcher, an after-hours overflow service, or an AI agent comes down to one disqualifying test: does the option guarantee every call ends with a written note in your CRM even if no booking happens?",
+            "angle": "If your call handling option cannot guarantee a CRM note on every single interaction, it is disqualified before you compare price or speed.",
+            "why": "Dispatcher turnover is currently cited as the biggest operational headache for home service firms, forcing owners to evaluate alternatives right now.",
+            "signal": "Home service firms struggle to hire dispatchers"
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "Owners constantly ask if callers will hang up when they realize they are speaking to an AI",
+            "icp_problem_quote": "does the option guarantee every call ends with a written note in your CRM even if no booking happens?",
             "author_advantage": true,
             "author_advantage_refs": [
-              "M5",
-              "M8"
+              "M3"
             ],
-            "memory_quote": "Testing whether a two-sentence disclosure that the caller is speaking to an AI changes booking rate. Early data: no measurable drop.",
-            "author_advantage_quote": "backed by the author's actual disclosure testing",
+            "memory_quote": "the real win was not answering, it was that every call ended with a note in the CRM.",
+            "author_advantage_quote": "guarantee every call ends with a written note in your CRM",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Uses real experiment data not stated in the signal."
-          },
-          "author_advantage": false,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": false,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 88
-          }
-        },
-        {
-          "run": 0,
-          "idea": {
-            "pillar": "The Stakes",
-            "raw_idea": "If your voice agent confirms a booking on the phone before verifying the calendar write actually succeeded, you are not automating your dispatch. You are systematically lying to your customers and burning the trust required to enter their home.",
-            "angle": "A silent webhook timeout that causes a false booking confirmation costs a home-service business far more than a missed call ever could.",
-            "why": "With speed to lead deciding 78% of home service jobs and HVAC demand spiking during heat waves, owners are rushing to deploy AI phones. This addresses the specific, costly failure mode that happens when they prioritize speed over verification, grounded in the author's direct operational lesson.",
-            "signal": "Study: first company to respond wins 78% of home service jobs"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "If your voice agent confirms a booking on the phone before verifying the calendar write actually succeeded",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M2",
-              "M4"
-            ],
-            "memory_quote": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently. Now every booking is written, read back, and only then confirmed to the caller.",
-            "author_advantage_quote": "confirms a booking on the phone before verifying the calendar write actually succeeded",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Directly reflects author’s operational lesson about verification."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 86
-          }
-        },
-        {
-          "run": 1,
-          "idea": {
-            "pillar": "What Went Wrong",
-            "raw_idea": "Owners worry callers will hang up on an AI, but the pattern we see is that callers stay on the line and only leave when the booking fails silently behind the scenes.",
-            "angle": "The thing that makes callers hang up is not discovering an AI answered; it is discovering the appointment they just made does not actually exist.",
-            "why": "Owners keep asking if callers will hang up when they realize it is an AI, and new survey data shows many callers can already tell. This reframes the anxiety around detection into the actual operational risk: silent booking failures.",
-            "signal": "Survey: 42% of callers can tell they are talking to AI"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "Owners keep asking if callers will hang up when they realize it is an AI",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M2",
-              "M5"
-            ],
-            "memory_quote": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently. Now every booking is written, read back, and only then confirmed to the caller.",
-            "author_advantage_quote": "the booking fails silently behind the scenes",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Strong alignment with lived experience and reframes a real ICP fear using observed failure patterns."
-          },
-          "author_advantage": false,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": false,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 90
-          }
-        },
-        {
-          "run": 1,
-          "idea": {
-            "pillar": "Decision Guide",
-            "raw_idea": "When you wire an AI agent to your CRM or calendar, you have to decide what happens when the model outputs broken JSON. Retry the tool call locally, or push the bad payload forward and clean it up later.",
-            "angle": "A malformed tool call should be caught and retried before it ever touches your CRM, which means choosing an automation layer that supports local validation loops.",
-            "why": "Build updates show that handling malformed JSON is a daily reality in production. ICPs need a concrete way to evaluate integration tools based on error handling, not just feature lists.",
-            "signal": ""
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "what happens when the model outputs broken JSON",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M9"
-            ],
-            "memory_quote": "Rewrote our agent's JSON output validation so a malformed tool call is retried instead of reaching the CRM.",
-            "author_advantage_quote": "Retry the tool call locally, or push the bad payload forward and clean it up later",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Directly reflects a specific engineering fix the author implemented in production."
-          },
-          "author_advantage": false,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": false,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 84
-          }
-        },
-        {
-          "run": 1,
-          "idea": {
-            "pillar": "The Stakes",
-            "raw_idea": "During a demand spike like a heat wave, call volumes double. If your after hours overflow plan relies on voicemail or a basic routing tree, every unanswered emergency call goes straight to the competitor who picks up.",
-            "angle": "When volume doubles overnight, the cost of having no AI overflow is not a missed chat; it is handing emergency revenue to the next contractor on the list.",
-            "why": "HVAC demand spikes are doubling call volumes right now. Owners feel this pressure immediately, making the cost of inaction painfully concrete rather than theoretical.",
-            "signal": "HVAC demand spikes as heat wave hits the Midwest"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "every unanswered emergency call goes straight to the competitor who picks up",
-            "author_advantage": false,
-            "author_advantage_refs": [],
-            "memory_quote": "",
-            "author_advantage_quote": "",
-            "beyond_source": false,
-            "generic": true,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Uses a market signal but adds no unique insight or author-specific observation; any competitor could say this."
-          },
-          "author_advantage": false,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": false,
-          "gate": {
-            "verdict": "REJECT",
-            "reasons": [
-              "Cites experience the idea does not actually use."
-            ],
-            "score": 30
-          }
-        },
-        {
-          "run": 2,
-          "idea": {
-            "pillar": "What Went Wrong",
-            "raw_idea": "When call volumes double during a heat wave, the failure is not that you missed the phone. It is that your booking system confirmed appointments that never actually reached the calendar.",
-            "angle": "The first sign your voice agent is failing under load is not a dropped call but a silent webhook timeout that tells callers they are booked when they are not.",
-            "why": "A recent report on HVAC call volumes doubling during extreme weather makes this the exact moment owners worry their systems will break. The author has already lived that break and knows where it actually happens.",
-            "signal": "HVAC demand spikes as heat wave hits the Midwest"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "confirmed appointments that never actually reached the calendar",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M2"
-            ],
-            "memory_quote": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently.",
-            "author_advantage_quote": "confirmed appointments that never actually reached the calendar",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Strong alignment with author’s lived failure and ICP pain point during peak demand."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 90
-          }
-        },
-        {
-          "run": 2,
-          "idea": {
-            "pillar": "Decision Guide",
-            "raw_idea": "Owners ask if callers will hang up when they realize it is an AI, but the real decision is whether you disclose it upfront or let them figure it out mid call.",
-            "angle": "Testing a two sentence disclosure against hiding it shows that telling callers they are speaking to an AI does not measurably hurt your booking rate.",
-            "why": "Draft guidance requiring businesses to tell callers when an AI answers is forcing owners to make a choice they have been avoiding. This gives them a tested framework to decide instead of guessing.",
-            "signal": "Regulators weigh disclosure rules for AI phone calls"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "Owners ask if callers will hang up when they realize it is an AI",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M8"
-            ],
-            "memory_quote": "Testing whether a two-sentence disclosure that the caller is speaking to an AI changes booking rate. Early data: no measurable drop.",
-            "author_advantage_quote": "Testing a two sentence disclosure against hiding it shows that telling callers they are speaking to an AI does not measurably hurt your booking rate.",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Directly uses author’s experiment to answer a real ICP anxiety triggered by regulation."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 88
-          }
-        },
-        {
-          "run": 2,
-          "idea": {
-            "pillar": "The Stakes",
-            "raw_idea": "If your voice agent sends a malformed tool call straight into your CRM, you do not just get bad data. You get a dispatcher driving to the wrong address or calling a lead that was never qualified.",
-            "angle": "A single unvalidated JSON payload from a voice agent can corrupt your dispatch board and waste a crew's entire morning before anyone notices.",
-            "why": "CRM vendors opening APIs for AI integrations means more home service businesses are connecting voice agents directly to their operational systems right now, making this failure mode imminent for anyone building without guardrails.",
-            "signal": "CRM vendors open APIs for AI integrations"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "a dispatcher driving to the wrong address or calling a lead that was never qualified",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M9"
-            ],
-            "memory_quote": "Rewrote our agent's JSON output validation so a malformed tool call is retried instead of reaching the CRM.",
-            "author_advantage_quote": "If your voice agent sends a malformed tool call straight into your CRM",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Ties a technical failure mode to operational consequences only someone who’s fixed it would emphasize."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 88
-          }
-        },
-        {
-          "run": 3,
-          "idea": {
-            "pillar": "What Went Wrong",
-            "raw_idea": "When we first built booking agents, we confirmed appointments on the call before verifying the calendar write succeeded. The webhook timed out silently, the caller thought they were booked, and the crew showed up to an empty house.",
-            "angle": "The earliest signal that your booking agent is losing leads is not a complaint but a calendar slot that stays empty after a confirmed call.",
-            "why": "Calendar double booking and silent automation failures are active pain points right now, and this post gives owners a concrete mechanism to audit their current setup instead of just trusting the software.",
-            "signal": "Calendar double-booking remains top complaint in scheduling apps"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "calendar slot that stays empty after a confirmed call",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M2"
-            ],
-            "memory_quote": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently.",
-            "author_advantage_quote": "The webhook timed out silently, the caller thought they were booked, and the crew showed up to an empty house.",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Strong use of specific failure mode from author’s experience."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 90
-          }
-        },
-        {
-          "run": 3,
-          "idea": {
-            "pillar": "Decision Guide",
-            "raw_idea": "If you are deciding how to wire an AI voice agent into your scheduling system, you have to choose between pushing data directly through webhooks or routing it through an automation platform like n8n. We build ours to push inspection requests straight into Google Calendar through n8n so we can validate the JSON output before it ever reaches the calendar.",
-            "angle": "Choose your booking architecture based on where you can intercept a malformed tool call, not on which method is fastest to set up.",
-            "why": "With automation platforms adding native AI nodes and CRM APIs opening up, owners are currently stuck choosing between direct integrations and middleware, and they need operational criteria to make that call safely.",
-            "signal": "n8n adds AI agent node with tool calling"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "deciding how to wire an AI voice agent into your scheduling system",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M1",
-              "M9"
-            ],
-            "memory_quote": "Building a Retell voice agent for a roofing company that books inspections straight into their Google Calendar through n8n.",
-            "author_advantage_quote": "We build ours to push inspection requests straight into Google Calendar through n8n so we can validate the JSON output before it ever reaches the calendar.",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Ties architecture choice to author’s real implementation and validation logic."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 86
-          }
-        },
-        {
-          "run": 3,
-          "idea": {
-            "pillar": "The Stakes",
-            "raw_idea": "Everyone obsesses over shaving milliseconds off voice agent response times, but callers forgive a one second pause. They never forgive being told they are booked when they are not, and chasing lower latency often means skipping the verification step that prevents that exact failure.",
-            "angle": "Optimizing for speed over booking reliability guarantees you will eventually tell a homeowner a crew is coming when nobody is scheduled.",
-            "why": "New model releases boasting 600ms latency are pushing owners to question their current setups, creating urgency to explain why reliability must dictate the architecture, not speed benchmarks.",
-            "signal": "New model cuts voice agent latency to 600ms"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "chasing lower latency often means skipping the verification step that prevents that exact failure",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M4"
-            ],
-            "memory_quote": "Latency matters less than people think. Callers forgive a one-second pause; they never forgive being told they are booked when they are not.",
-            "author_advantage_quote": "callers forgive a one second pause. They never forgive being told they are booked when they are not",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Directly leverages author’s counterintuitive insight about latency vs. reliability."
+            "note": "Directly echoes a client outcome only this author observed."
           },
           "author_advantage": true,
           "unsupported_numbers": [],
@@ -475,30 +121,379 @@
           }
         },
         {
-          "run": 4,
+          "run": 0,
           "idea": {
-            "pillar": "What Went Wrong",
-            "raw_idea": "New speech models promise sub-second latency, but the failure mode that actually costs home-service businesses bookings is not a slow response. It is an agent confirming an appointment that never reached the calendar because the webhook timed out silently.",
-            "angle": "Callers forgive a one-second pause; they never forgive being told they are booked when they are not.",
-            "why": "A new model release promising 600ms latency will tempt owners to chase speed. This uses that signal as the occasion to explain why the author's own build proved that verification matters more than turnaround time.",
-            "signal": "New model cuts voice agent latency to 600ms"
+            "pillar": "The Stakes",
+            "raw_idea": "Owners hesitate to deploy AI agents because they fear callers will hang up the moment they realize it is not a person, but early testing shows a two-sentence disclosure does not measurably drop the booking rate while silence guarantees the lead goes to a competitor.",
+            "angle": "The risk of telling a caller they are speaking to an AI is statistically zero compared to the guaranteed loss of letting the phone ring out.",
+            "why": "Regulators are actively weighing draft guidance that would require businesses to disclose AI callers, making this specific fear urgent and unavoidable for owners.",
+            "signal": "Regulators weigh disclosure rules for AI phone calls"
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "an agent confirming an appointment that never reached the calendar because the webhook timed out silently",
+            "icp_problem_quote": "Owners hesitate to deploy AI agents because they fear callers will hang up the moment they realize it is not a person",
             "author_advantage": true,
             "author_advantage_refs": [
-              "M2",
-              "M4"
+              "M8"
             ],
-            "memory_quote": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently. Now every booking is written, read back, and only then confirmed to the caller.",
-            "author_advantage_quote": "an agent confirming an appointment that never reached the calendar because the webhook timed out silently",
+            "memory_quote": "Testing whether a two-sentence disclosure that the caller is speaking to an AI changes booking rate. Early data: no measurable drop.",
+            "author_advantage_quote": "early testing shows a two-sentence disclosure does not measurably drop the booking rate",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Strong alignment with author’s lived failure and counterintuitive insight."
+            "note": "Uses the author’s proprietary test result, not just public signals."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 87
+          }
+        },
+        {
+          "run": 1,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "Voice AI funding is surging and new models promise faster responses, but when we built our first booking agent the webhook timed out silently and confirmed appointments that never reached the calendar. The earliest signal was not speed, it was a missing calendar entry.",
+            "angle": "Chasing lower latency before your booking pipeline can prove a write happened will cost you real jobs.",
+            "why": "Record funding and sub-second latency claims are pushing owners to obsess over speed, but the author's direct build experience proves that unverified writes are the actual failure mode costing them jobs.",
+            "signal": "Voice AI startups raise record funding in Q3"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "confirmed appointments that never reached the calendar",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M2"
+            ],
+            "memory_quote": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently.",
+            "author_advantage_quote": "the webhook timed out silently and confirmed appointments that never reached the calendar",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strong alignment with author’s lived failure and ICP pain point."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 90
+          }
+        },
+        {
+          "run": 1,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "When we rewrote our agent's JSON output validation so a malformed tool call is retried instead of reaching the CRM, it solved a decision every service business faces: where should your AI handle its own errors?",
+            "angle": "If your AI agent sends broken data straight to your CRM instead of catching and retrying it, you are choosing manual cleanup over automation.",
+            "why": "CRM vendors opening their APIs makes direct connection tempting, but the author's hands-on work building Retell agents through n8n proves that middleware validation is what keeps operations clean.",
+            "signal": "CRM vendors open APIs for AI integrations"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "where should your AI handle its own errors?",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M9"
+            ],
+            "memory_quote": "Rewrote our agent's JSON output validation so a malformed tool call is retried instead of reaching the CRM.",
+            "author_advantage_quote": "When we rewrote our agent's JSON output validation so a malformed tool call is retried instead of reaching the CRM",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Directly uses author’s build-in-public detail; not generic."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 89
+          }
+        },
+        {
+          "run": 1,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "Owners worry about pauses, but callers forgive a one-second delay while they never forgive being told they are booked when they are not. When call volumes double during a heat wave, sending those missed calls to voicemail costs you the job because the first company to respond wins 78% of them.",
+            "angle": "Optimizing for zero latency while ignoring booking accuracy means you answer fast and still lose the job to the competitor who answers second but books correctly.",
+            "why": "HVAC demand spikes are forcing owners to choose between overwhelmed staff and AI agents. This uses the author's operational stance on latency versus accuracy to reframe the fear of pauses during peak volume.",
+            "signal": "HVAC demand spikes as heat wave hits the Midwest"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "callers forgive a one-second delay while they never forgive being told they are booked when they are not",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M4"
+            ],
+            "memory_quote": "Callers forgive a one-second pause; they never forgive being told they are booked when they are not.",
+            "author_advantage_quote": "callers forgive a one-second delay while they never forgive being told they are booked when they are not",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Combines author’s opinion with market signal effectively."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 88
+          }
+        },
+        {
+          "run": 2,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "When we rewrote our agent's JSON output validation, it was because malformed tool calls were reaching the CRM instead of being retried. The earliest signal that your booking pipeline has this problem is not a failed appointment but a corrupted record sitting in your database.",
+            "angle": "A malformed AI response does not just fail to book; it writes garbage into your CRM if you validate after the call instead of before the write.",
+            "why": "The author's build-in-public update about rewriting JSON validation reveals a failure mode every home-service owner relying on automated booking needs to understand before it corrupts their CRM.",
+            "signal": ""
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "corrupted record sitting in your database",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M9"
+            ],
+            "memory_quote": "Rewrote our agent's JSON output validation so a malformed tool call is retried instead of reaching the CRM.",
+            "author_advantage_quote": "malformed tool calls were reaching the CRM instead of being retried",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strong alignment with author’s build-in-public work and ICP’s data integrity concerns."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 85
+          }
+        },
+        {
+          "run": 2,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "Owners constantly ask what happens when the agent does not know the answer to a pricing question. You have three options: let the AI estimate, hardcode a price sheet, or route to a human hold queue. Here is how to choose without losing the lead or your reputation.",
+            "angle": "Your decision framework for handling unknown pricing questions should prioritize keeping the caller on the line over delivering a perfect number on the spot.",
+            "why": "Pricing transparency is a daily friction point for home-service businesses, and the author's direct experience fielding this exact customer question provides the credibility to offer a real decision framework.",
+            "signal": ""
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "what happens when the agent does not know the answer to a pricing question",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M6"
+            ],
+            "memory_quote": "What happens when the agent does not know the answer to a pricing question?",
+            "author_advantage_quote": "Owners constantly ask what happens when the agent does not know the answer to a pricing question",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Directly addresses a documented ICP question with author-specific context."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 82
+          }
+        },
+        {
+          "run": 2,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "We tested whether telling callers they are speaking to an AI changes the booking rate, and early data shows no measurable drop. If regulators mandate disclosure and you delay implementing it out of fear, you will lose leads during the transition while competitors who already tested it keep booking.",
+            "angle": "Waiting for disclosure rules to force your hand means you will implement a two-sentence AI warning under panic rather than testing it while you control the rollout.",
+            "why": "With regulators actively weighing disclosure rules for AI phone calls, the author's live experiment testing a two-sentence disclosure gives the ICP concrete proof to act now instead of waiting in fear.",
+            "signal": "Regulators weigh disclosure rules for AI phone calls"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "you will lose leads during the transition while competitors who already tested it keep booking",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M8"
+            ],
+            "memory_quote": "Testing whether a two-sentence disclosure that the caller is speaking to an AI changes booking rate. Early data: no measurable drop.",
+            "author_advantage_quote": "We tested whether telling callers they are speaking to an AI changes the booking rate, and early data shows no measurable drop",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Leverages author’s experiment to reframe regulatory risk as a competitive opportunity."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 88
+          }
+        },
+        {
+          "run": 3,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "When we wired a voice agent to book roofing inspections straight into Google Calendar through n8n, the first failure pattern we hit was not bad AI responses but silent webhook timeouts that left appointments stranded. The fix was forcing every booking to be written, read back, and only then confirmed to the caller.",
+            "angle": "The most dangerous failure in an AI booking agent is not a bad conversation but a silent calendar write that never happens.",
+            "why": "With scheduling apps reporting double-bookings as a top complaint and automations failing silently in production, owners are right to doubt whether an AI can reliably manage their calendar. This addresses that exact doubt with a proven architectural fix.",
+            "signal": ""
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "silent webhook timeouts that left appointments stranded",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M2"
+            ],
+            "memory_quote": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently. Now every booking is written, read back, and only then confirmed to the caller.",
+            "author_advantage_quote": "the first failure pattern we hit was not bad AI responses but silent webhook timeouts that left appointments stranded. The fix was forcing every booking to be written, read back, and only then confirmed to the caller.",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strong alignment with author’s lived failure and fix."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 85
+          }
+        },
+        {
+          "run": 3,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "After spending two years building dispatch software for a field-service company, the decision framework I use for choosing between a human dispatcher, a basic phone tree, and an AI voice agent comes down to three criteria: after-hours coverage cost, CRM note consistency, and speed to lead.",
+            "angle": "You should choose your call-handling method based on what happens after the call ends, not just who answers the phone.",
+            "why": "Dispatcher turnover is currently cited as the biggest operational headache for home service firms, making this a decision owners are actively stuck on right now.",
+            "signal": "Home service firms struggle to hire dispatchers"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "dispatcher turnover is currently cited as the biggest operational headache",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M7"
+            ],
+            "memory_quote": "Spent two years building dispatch software for a field-service company before starting Minions.",
+            "author_advantage_quote": "After spending two years building dispatch software for a field-service company, the decision framework I use for choosing between a human dispatcher, a basic phone tree, and an AI voice agent comes down to three criteria",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Uses author’s specific background to reframe a current ICP pain point."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 88
+          }
+        },
+        {
+          "run": 3,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "When call volumes double during events like a Midwest heat wave, the companies relying on manual answering lose those leads instantly because the first contractor to respond wins 78% of home service jobs. An AI voice agent is not a luxury for peak times; it is the only way to capture demand when your lines are overwhelmed.",
+            "angle": "During a demand spike, unanswered calls are not missed opportunities; they are guaranteed revenue handed directly to your competitors.",
+            "why": "Recent reports of HVAC demand spiking due to heat waves, combined with data proving the first responder wins 78% of jobs, makes the financial stakes of unanswered calls painfully concrete for service owners today.",
+            "signal": "HVAC demand spikes as heat wave hits the Midwest"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "unanswered calls are not missed opportunities; they are guaranteed revenue handed directly to your competitors",
+            "author_advantage": false,
+            "author_advantage_refs": [],
+            "memory_quote": "",
+            "author_advantage_quote": "",
+            "beyond_source": false,
+            "generic": true,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Relies entirely on public market signals without injecting author-specific insight or experience."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false,
+          "gate": {
+            "verdict": "BELOW_BAR",
+            "reasons": [
+              "Rests on none of the author's experience or proof."
+            ],
+            "score": 29
+          }
+        },
+        {
+          "run": 4,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "Owners worry callers will hang up on an AI, but the real reason callers disconnect is a silent failure that leaves them stranded mid-booking. The pattern we kept hitting was agents confirming appointments that never reached the calendar because the webhook timed out silently.",
+            "angle": "Callers do not hang up because they detect an AI; they hang up because the system fails to confirm what it just promised.",
+            "why": "Owners keep asking if callers will hang up on AI, and recent survey data shows many callers can identify bots, which makes this fear more acute right now.",
+            "signal": "Survey: 42% of callers can tell they are talking to AI"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "Owners worry callers will hang up on an AI",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M2"
+            ],
+            "memory_quote": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently.",
+            "author_advantage_quote": "The pattern we kept hitting was agents confirming appointments that never reached the calendar because the webhook timed out silently.",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strong alignment with author’s lived failure and reframes a common ICP fear with specific technical insight."
           },
           "author_advantage": true,
           "unsupported_numbers": [],
@@ -514,59 +509,26 @@
           "run": 4,
           "idea": {
             "pillar": "Decision Guide",
-            "raw_idea": "When a caller asks for a price your AI agent was not trained to quote, you have to decide between three options: guessing from a range, transferring to a human, or collecting details for a callback. Only one of these avoids losing the lead or destroying trust.",
-            "angle": "An AI agent that guesses a price destroys trust faster than one that admits it needs a human to quote accurately.",
-            "why": "Pricing questions are the exact moment an AI agent can lose a lead. Owners are stuck on this decision daily, and giving them a clear criteria order prevents costly misconfigurations.",
-            "signal": ""
+            "raw_idea": "When your AI agent tries to book a job or log a lead, you have to decide whether to let a messy output hit your CRM or block it and retry. We rewrote our agent's JSON output validation so a malformed tool call is retried instead of reaching the CRM.",
+            "angle": "A malformed tool call should never touch your CRM; the decision between blocking and retrying determines whether your database stays clean or fills with junk.",
+            "why": "With platforms adding native AI agent nodes and tool calling, more home-service businesses are wiring these up themselves without knowing where the data corruption happens.",
+            "signal": "n8n adds AI agent node with tool calling"
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "When a caller asks for a price your AI agent was not trained to quote, you have to decide between three options",
-            "author_advantage": false,
-            "author_advantage_refs": [],
-            "memory_quote": "",
-            "author_advantage_quote": "",
-            "beyond_source": true,
-            "generic": true,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Addresses a real ICP dilemma but offers no unique detail from the author’s experience."
-          },
-          "author_advantage": false,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": false,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 83
-          }
-        },
-        {
-          "run": 4,
-          "idea": {
-            "pillar": "The Stakes",
-            "raw_idea": "If you run a roofing business and rely on manual scheduling, a call coming in after hours means a lost inspection. Wiring a voice agent to book directly into your calendar through automation changes the math entirely.",
-            "angle": "Every missed after-hours call for a roof inspection is a lost job because homeowners move on to the next company instantly.",
-            "why": "Roofing and home service owners feel the pain of after-hours missed calls acutely. Grounding the stakes in the exact build the author is doing right now makes the cost of inaction concrete and undeniable.",
-            "signal": ""
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "a call coming in after hours means a lost inspection",
+            "icp_problem_quote": "you have to decide whether to let a messy output hit your CRM or block it and retry",
             "author_advantage": true,
             "author_advantage_refs": [
-              "M1"
+              "M9"
             ],
-            "memory_quote": "Building a Retell voice agent for a roofing company that books inspections straight into their Google Calendar through n8n.",
-            "author_advantage_quote": "Wiring a voice agent to book directly into your calendar through automation",
+            "memory_quote": "Rewrote our agent's JSON output validation so a malformed tool call is retried instead of reaching the CRM.",
+            "author_advantage_quote": "We rewrote our agent's JSON output validation so a malformed tool call is retried instead of reaching the CRM.",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Tied directly to the author’s current build for a roofing client."
+            "note": "Directly uses a specific engineering fix from the author’s build-in-public log, not just generic advice."
           },
           "author_advantage": true,
           "unsupported_numbers": [],
@@ -575,7 +537,42 @@
           "gate": {
             "verdict": "PASS",
             "reasons": [],
-            "score": 81
+            "score": 88
+          }
+        },
+        {
+          "run": 4,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "Real estate portal leads go cold within minutes, and relying on an AI agent to close them outright wastes the window. The agent's actual job is to hold the lead until a human agent calls back, not to close it.",
+            "angle": "Treating an inbound portal lead like a full sales conversation instead of a holding action burns the only window you have to earn their trust.",
+            "why": "Agents are actively reporting falling portal lead quality, making the cost of mishandling those fast-decaying leads higher than ever.",
+            "signal": "Real estate agents report portal lead quality falling"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "Real estate portal leads go cold within minutes",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M10"
+            ],
+            "memory_quote": "Real-estate leads from portals go cold within minutes; the agent's job is to hold the lead until a human agent calls back, not to close it.",
+            "author_advantage_quote": "The agent's actual job is to hold the lead until a human agent calls back, not to close it.",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Precisely echoes the author’s stated lesson about lead handling strategy for real estate."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 88
           }
         }
       ]
@@ -586,9 +583,9 @@
         "gate_pass": 100,
         "gate_below": 0,
         "gate_reject": 0,
-        "authority_pass": 73,
+        "authority_pass": 100,
         "icp_problem": 100,
-        "author_advantage": 73,
+        "author_advantage": 100,
         "beyond_source": 100,
         "generic": 0,
         "invented_facts": 0,
@@ -599,31 +596,31 @@
           "run": 0,
           "idea": {
             "pillar": "What Went Wrong",
-            "raw_idea": "When we wired up an AI voice agent to answer portal leads at night and book callbacks, we found that the booking step is only as reliable as your MLS sync frequency. If the feed updates once a day, the AI will confidently schedule showings on homes that went under contract hours ago.",
-            "angle": "An AI assistant that books showings faster than your listing data refreshes will destroy agent trust in one night.",
-            "why": "Brokerages are actively deploying AI call assistants right now, and team leaders need to know the specific infrastructure trap that causes these rollouts to fail on day one.",
+            "raw_idea": "When we wired up an AI voice agent to answer portal leads at night, ask three qualifying questions and book a callback slot on the agent's calendar, we learned that automation does not fix a broken process. The failure pattern is teams deploying the bot without auditing what happens when the lead answers the third question with something unexpected, and the earliest signal is the bot hanging up or looping instead of booking.",
+            "angle": "An AI voice agent that qualifies and books callbacks will fail silently if you do not map the edge cases before turning it on.",
+            "why": "With brokerages actively deploying AI call assistants right now, team leaders are making the jump without knowing where the setup typically fails operationally.",
             "signal": "AI assistants now answer calls for top brokerages"
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "the AI will confidently schedule showings on homes that went under contract hours ago",
+            "icp_problem_quote": "the bot hanging up or looping instead of booking",
             "author_advantage": true,
             "author_advantage_refs": [
-              "M10"
+              "M3"
             ],
-            "memory_quote": "the agent booked a showing on a property that had gone under contract that morning, because the MLS feed synced once a day",
-            "author_advantage_quote": "the AI will confidently schedule showings on homes that went under contract hours ago",
+            "memory_quote": "Setting up an AI voice agent that answers portal leads at night, asks three qualifying questions and books a callback slot on the agent's calendar.",
+            "author_advantage_quote": "When we wired up an AI voice agent to answer portal leads at night, ask three qualifying questions and book a callback slot on the agent's calendar",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Strong alignment with author’s lived failure and current work."
+            "note": "Strong alignment with author’s current work and ICP pain point."
           },
-          "author_advantage": false,
+          "author_advantage": true,
           "unsupported_numbers": [],
           "invented": false,
-          "authority_pass": false,
+          "authority_pass": true,
           "gate": {
             "verdict": "PASS",
             "reasons": [],
@@ -634,26 +631,26 @@
           "run": 0,
           "idea": {
             "pillar": "Decision Guide",
-            "raw_idea": "Deciding whether to build an in-house ISA team or route portal leads through an AI caller comes down to three criteria: your overnight lead volume, your current cost per booked showing, and your tolerance for unworked Sunday evening leads. If your inside sales reps are shrinking due to budget cuts, the decision makes itself.",
-            "angle": "Hiring another inside sales rep is the wrong move if your most valuable leads arrive when no human wants to work.",
-            "why": "Inside sales teams are being cut as brokerages consolidate costs, forcing team leaders to choose between fewer humans and new automation for lead follow-up.",
+            "raw_idea": "If you are deciding between hiring an inside sales rep or deploying software to handle lead follow-up, the choice comes down to volume and script complexity. Having run a four-person ISA desk for thirty agents over three years, I know the exact thresholds where human callers outperform automated systems and where they become a cost center you cannot sustain.",
+            "angle": "Do not choose between an ISA team and automation based on vendor promises; choose based on your daily lead volume and how many touches your typical conversion requires.",
+            "why": "Inside sales teams are shrinking as brokerages cut costs, forcing owners to make this exact build-versus-buy decision right now under pressure.",
             "signal": "ISA teams shrink as brokerages cut costs"
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "tolerance for unworked Sunday evening leads",
+            "icp_problem_quote": "deciding between hiring an inside sales rep or deploying software to handle lead follow-up",
             "author_advantage": true,
             "author_advantage_refs": [
-              "M9"
+              "M1"
             ],
-            "memory_quote": "Leads that come in on Sunday evening are the most likely to be real buyers and the least likely to get a call before Monday noon",
-            "author_advantage_quote": "unworked Sunday evening leads",
+            "memory_quote": "Ran an inside-sales (ISA) team of four for a 30-agent brokerage for three years.",
+            "author_advantage_quote": "Having run a four-person ISA desk for thirty agents over three years",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Leverages specific insight about Sunday evening lead value from author memory."
+            "note": "Uses specific past experience to address a timely cost-cutting dilemma."
           },
           "author_advantage": true,
           "unsupported_numbers": [],
@@ -662,33 +659,34 @@
           "gate": {
             "verdict": "PASS",
             "reasons": [],
-            "score": 89
+            "score": 88
           }
         },
         {
           "run": 0,
           "idea": {
             "pillar": "The Stakes",
-            "raw_idea": "When team leaders ask if their AI should pretend to be the agent or admit it is an assistant, they are weighing short-term pickup rates against long-term buyer trust. Under new rules where buyers sign agreements before showings, a lead who feels tricked on the first call will refuse to sign anything on the second.",
-            "angle": "Faking your identity on an AI call might get the appointment, but it kills the signed agreement you need to actually get paid.",
-            "why": "Buyer agents now must secure signed agreements before showings, meaning the trust established on the very first call has direct financial consequences that did not exist a year ago.",
-            "signal": "Settlement reshapes buyer agent commissions"
+            "raw_idea": "Team leaders constantly ask whether the AI should tell the lead it is an assistant or pretend to be the agent. If you choose deception, you risk a scenario where the bot books a showing on a property that went under contract that morning because the MLS feed synced once a day, and the lead realizes they were talking to a machine that just cost them their trust.",
+            "angle": "Pretending your AI caller is the listing agent turns a data-sync delay into a relationship-ending event.",
+            "why": "The question of AI disclosure is the most frequent hesitation point for team leaders adopting these tools, and recent cancellations prove the stakes are operational, not just ethical.",
+            "signal": "AI assistants now answer calls for top brokerages"
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "team leaders ask if their AI should pretend to be the agent or admit it is an assistant",
+            "icp_problem_quote": "whether the AI should tell the lead it is an assistant or pretend to be the agent",
             "author_advantage": true,
             "author_advantage_refs": [
-              "M6"
+              "M6",
+              "M10"
             ],
-            "memory_quote": "Team leaders ask: should the AI tell the lead it is an assistant, or pretend to be the agent?",
-            "author_advantage_quote": "When team leaders ask if their AI should pretend to be the agent or admit it is an assistant",
+            "memory_quote": "A team leader cancelled an AI rollout after the agent booked a showing on a property that had gone under contract that morning, because the MLS feed synced once a day.",
+            "author_advantage_quote": "the bot books a showing on a property that went under contract that morning because the MLS feed synced once a day",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Directly uses the exact ICP question the author has heard and documented."
+            "note": "Directly ties an ICP question to a real failure the author witnessed."
           },
           "author_advantage": true,
           "unsupported_numbers": [],
@@ -704,32 +702,32 @@
           "run": 1,
           "idea": {
             "pillar": "What Went Wrong",
-            "raw_idea": "When ISAs get cut to save money, the leads that were already bleeding from slow follow-up vanish completely. The failure pattern we saw running a four-person ISA desk was not laziness but a queue that grew faster than calls could be made, and the earliest warning sign was always the same: first-call times slipping past the one-hour mark on weekends.",
-            "angle": "Cutting your ISA team without fixing the underlying response-time bottleneck just accelerates lead waste during a downturn.",
-            "why": "Reports of shrinking ISA teams and falling home sales make this the exact anxiety keeping brokerage owners up at night. The author has lived the operational reality of managing that desk and knows where the breakdown actually happens.",
+            "raw_idea": "Brokerages are cutting ISA teams to save money, but the failure pattern we see is that speed drops before headcount does. When we ran a four-person ISA desk for thirty agents, the earliest warning sign was not missed calls but delayed first touches on weekend leads.",
+            "angle": "Cutting your ISA team does not save money if it pushes your first response past the window where portal leads still answer.",
+            "why": "Inside sales teams are shrinking across brokerages right now due to cost cuts, making this the exact moment leaders need to understand what breaks operationally when callers disappear.",
             "signal": "ISA teams shrink as brokerages cut costs"
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "first-call times slipping past the one-hour mark on weekends",
+            "icp_problem_quote": "delayed first touches on weekend leads",
             "author_advantage": true,
             "author_advantage_refs": [
               "M1",
               "M9"
             ],
             "memory_quote": "Ran an inside-sales (ISA) team of four for a 30-agent brokerage for three years.",
-            "author_advantage_quote": "The failure pattern we saw running a four-person ISA desk",
+            "author_advantage_quote": "When we ran a four-person ISA desk for thirty agents",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Strong alignment with author’s past experience and ICP pain point."
+            "note": "Strong use of specific past experience and observed pattern."
           },
-          "author_advantage": false,
+          "author_advantage": true,
           "unsupported_numbers": [],
           "invented": false,
-          "authority_pass": false,
+          "authority_pass": true,
           "gate": {
             "verdict": "PASS",
             "reasons": [],
@@ -740,62 +738,26 @@
           "run": 1,
           "idea": {
             "pillar": "Decision Guide",
-            "raw_idea": "Team leaders keep asking whether the AI voice agent should identify itself or pretend to be the agent. Based on our current build answering portal leads at night, the deciding factor is not ethics but calendar integrity: if the AI cannot see real-time MLS status, pretending to be the agent guarantees you will book showings on homes already under contract.",
-            "angle": "The decision to have your AI disclose its identity should be driven by your data-sync latency, not your brand preferences.",
-            "why": "With large brokerages deploying AI assistants and team leaders actively asking this exact question, the ICP needs a framework for choosing. The author is building this system right now and has seen the specific failure mode that makes the wrong choice costly.",
+            "raw_idea": "Team leaders keep asking whether the AI voice agent should introduce itself as an assistant or pretend to be the agent. The decision comes down to one thing: trust at the point of booking. If the lead thinks they are talking to the agent and later finds out otherwise, the showing falls through.",
+            "angle": "Pretending the AI is the agent buys you a warmer first call but costs you the showing when the lead feels tricked by a human handoff.",
+            "why": "Large brokerages are deploying AI call assistants now, so team leaders are actively making configuration choices this week that will determine if their booked showings actually happen.",
             "signal": "AI assistants now answer calls for top brokerages"
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "whether the AI voice agent should identify itself or pretend to be the agent",
+            "icp_problem_quote": "whether the AI voice agent should introduce itself as an assistant or pretend to be the agent",
             "author_advantage": true,
             "author_advantage_refs": [
-              "M3",
-              "M10"
+              "M6"
             ],
-            "memory_quote": "A team leader cancelled an AI rollout after the agent booked a showing on a property that had gone under contract that morning, because the MLS feed synced once a day.",
-            "author_advantage_quote": "if the AI cannot see real-time MLS status, pretending to be the agent guarantees you will book showings on homes already under contract",
+            "memory_quote": "Team leaders ask: should the AI tell the lead it is an assistant, or pretend to be the agent?",
+            "author_advantage_quote": "Team leaders keep asking whether the AI voice agent should introduce itself as an assistant or pretend to be the agent.",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Directly leverages author’s current work and observed failure mode."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 89
-          }
-        },
-        {
-          "run": 1,
-          "idea": {
-            "pillar": "The Stakes",
-            "raw_idea": "You think your agents are calling portal leads instantly, but when we audited a CRM, forty percent had no first call logged within twenty-four hours. In a market where buyer agents must now sign agreements before showings, that gap means your paid leads are signing those agreements with whoever answered the phone first.",
-            "angle": "Unlogged calls are not a CRM hygiene issue anymore; they are the exact mechanism by which you pay for leads that legally bind themselves to another agent.",
-            "why": "The new buyer agent commission rules mean the first agent to connect wins a signed agreement. Combined with rising portal referral fees, the cost of unlogged, unmade calls is higher than ever, and the author has the audit data proving agents lie about their speed.",
-            "signal": "Settlement reshapes buyer agent commissions"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "forty percent had no first call logged within twenty-four hours",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M2"
-            ],
-            "memory_quote": "Audited a team's CRM and found 40% of portal leads had no first call logged within 24 hours, although every agent swore they called within minutes.",
-            "author_advantage_quote": "forty percent had no first call logged within twenty-four hours",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Uses exact audit finding from author memory tied to new market rules."
+            "note": "Directly addresses a documented ICP question with author-specific context."
           },
           "author_advantage": true,
           "unsupported_numbers": [],
@@ -808,205 +770,29 @@
           }
         },
         {
-          "run": 2,
-          "idea": {
-            "pillar": "What Went Wrong",
-            "raw_idea": "When we wired up an AI voice agent to answer portal leads at night, the first failure was not the conversation. It was the calendar slot it booked for a property that had already gone under contract because the MLS feed only synced once a day.",
-            "angle": "An AI that answers fast but books showings from stale listing data destroys trust faster than no answer at all.",
-            "why": "Brokerages are deploying AI assistants now while MLS feeds are finally shifting toward real-time, making the gap between call handling speed and data freshness a live operational risk.",
-            "signal": "AI assistants now answer calls for top brokerages"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "the calendar slot it booked for a property that had already gone under contract because the MLS feed only synced once a day",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M10"
-            ],
-            "memory_quote": "the agent booked a showing on a property that had gone under contract that morning, because the MLS feed synced once a day",
-            "author_advantage_quote": "the calendar slot it booked for a property that had already gone under contract because the MLS feed only synced once a day",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Strong alignment with author’s lived failure and timely market shift."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 90
-          }
-        },
-        {
-          "run": 2,
-          "idea": {
-            "pillar": "Decision Guide",
-            "raw_idea": "Team leaders constantly ask how to stop agents from cherry-picking the best leads out of a round-robin rotation. The fix is not stricter rules; it is removing the window where human discretion can override the system.",
-            "angle": "If your round-robin relies on agents choosing to work the lead they were assigned, you do not have distribution, you have a suggestion box.",
-            "why": "Lead distribution fairness is actively being debated in operations journals right now, and team leaders are looking for structural fixes rather than motivational ones.",
-            "signal": "Round-robin lead distribution under scrutiny"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "how to stop agents from cherry-picking the best leads out of a round-robin rotation",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M7"
-            ],
-            "memory_quote": "How do I stop agents cherry-picking the best leads from the round-robin?",
-            "author_advantage_quote": "Team leaders constantly ask how to stop agents from cherry-picking the best leads out of a round-robin rotation",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Directly addresses an ICP question the author has documented."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 89
-          }
-        },
-        {
-          "run": 2,
+          "run": 1,
           "idea": {
             "pillar": "The Stakes",
-            "raw_idea": "We are comparing text-first versus call-first responses to Zillow leads across two teams this month. Choosing the wrong default channel does not just lower response rates; it burns the one shot you get with a buyer who expects a phone call.",
-            "angle": "Following a vendor claim that texting outperforms calling without testing it against your specific lead source can cost you the only impression you get with a motivated buyer.",
-            "why": "A vendor just published data claiming texting outperforms calling, which will tempt cash-strapped teams to abandon phones right as ISA teams are shrinking and every lead matters more.",
-            "signal": "Texting leads outperforms calling, vendor claims"
+            "raw_idea": "A team leader recently cancelled an entire AI rollout because the system booked a showing on a house that went under contract that morning. The MLS feed only synced once a day. That single error destroyed the agent's credibility with the buyer and cost the team the software investment.",
+            "angle": "Automating lead response without real-time listing data does not make you faster. It makes you wrong at scale.",
+            "why": "MLSs are finally shifting to near real-time data feeds, which proves that daily sync delays have been a known, expensive bottleneck for teams trying to automate responses.",
+            "signal": "MLS data feeds move toward real-time updates"
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "Choosing the wrong default channel does not just lower response rates; it burns the one shot you get with a buyer who expects a phone call",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M8"
-            ],
-            "memory_quote": "Comparing a text-first versus call-first response to Zillow leads across two teams this month",
-            "author_advantage_quote": "We are comparing text-first versus call-first responses to Zillow leads across two teams this month",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Rooted in author’s active experiment, not just vendor claims."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 89
-          }
-        },
-        {
-          "run": 3,
-          "idea": {
-            "pillar": "What Went Wrong",
-            "raw_idea": "When we wired up an AI voice agent to answer portal leads at night, the first failure was not the conversation but the data behind it. A team leader cancelled the rollout after the agent booked a showing on a property that had gone under contract that morning because the MLS feed only synced once a day.",
-            "angle": "An AI voice agent that answers leads in under a minute will destroy trust faster than no answer at all if your listing data is stale.",
-            "why": "Brokerages are actively deploying AI call assistants right now, and team leaders buying into the promise need to know the specific infrastructure failure that will burn their credibility with a buyer on day one.",
-            "signal": "AI assistants now answer calls for top brokerages"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "A team leader cancelled the rollout after the agent booked a showing on a property that had gone under contract that morning because the MLS feed only synced once a day.",
+            "icp_problem_quote": "booked a showing on a house that went under contract that morning",
             "author_advantage": true,
             "author_advantage_refs": [
               "M10"
             ],
             "memory_quote": "A team leader cancelled an AI rollout after the agent booked a showing on a property that had gone under contract that morning, because the MLS feed synced once a day.",
-            "author_advantage_quote": "A team leader cancelled the rollout after the agent booked a showing on a property that had gone under contract that morning because the MLS feed only synced once a day.",
+            "author_advantage_quote": "A team leader recently cancelled an entire AI rollout because the system booked a showing on a house that went under contract that morning. The MLS feed only synced once a day.",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Strong alignment with author’s lived failure and ICP’s current AI deployment decisions."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 90
-          }
-        },
-        {
-          "run": 3,
-          "idea": {
-            "pillar": "Decision Guide",
-            "raw_idea": "Team leaders constantly ask whether the AI should tell the lead it is an assistant or pretend to be the agent. The deciding factor is not ethics but confirmation behavior: we already know that showing no-shows dropped by half when confirmations came from the listing agent's own number instead of a generic system number.",
-            "angle": "If your AI pretends to be the agent during the initial call, you lose the single most effective lever for getting buyers to actually show up.",
-            "why": "With brokerages cutting costs and ISA teams shrinking, leaders are rushing to deploy AI assistants and hitting this exact configuration question daily without a framework grounded in actual showing behavior.",
-            "signal": "ISA teams shrink as brokerages cut costs"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "Team leaders constantly ask whether the AI should tell the lead it is an assistant or pretend to be the agent.",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M4",
-              "M6"
-            ],
-            "memory_quote": "Showing no-shows dropped by half when confirmations came from the listing agent's own number instead of a generic system number.",
-            "author_advantage_quote": "showing no-shows dropped by half when confirmations came from the listing agent's own number instead of a generic system number.",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Directly ties an ICP configuration dilemma to the author’s observed behavioral result."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 89
-          }
-        },
-        {
-          "run": 3,
-          "idea": {
-            "pillar": "The Stakes",
-            "raw_idea": "Buyer agents must now sign agreements before showings, which means every unqualified appointment carries direct legal and financial exposure. Leads that come in on Sunday evening are the most likely to be real buyers and the least likely to get a call before Monday noon, leaving your most serious prospects sitting unsigned and unscheduled through the highest-intent window.",
-            "angle": "The new requirement to sign buyer agreements before showings turns your slowest follow-up window into your largest liability.",
-            "why": "The settlement reshaping buyer agent commissions forces agreements before showings, making the Sunday evening response gap a concrete revenue and compliance threat rather than just a missed opportunity.",
-            "signal": "Settlement reshapes buyer agent commissions"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "Leads that come in on Sunday evening are the most likely to be real buyers and the least likely to get a call before Monday noon, leaving your most serious prospects sitting unsigned and unscheduled through the highest-intent window.",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M9"
-            ],
-            "memory_quote": "Leads that come in on Sunday evening are the most likely to be real buyers and the least likely to get a call before Monday noon.",
-            "author_advantage_quote": "Leads that come in on Sunday evening are the most likely to be real buyers and the least likely to get a call before Monday noon",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Combines regulatory change with the author’s specific observation about Sunday leads."
+            "note": "Faithfully recounts a real incident from author memory without embellishment."
           },
           "author_advantage": true,
           "unsupported_numbers": [],
@@ -1019,29 +805,242 @@
           }
         },
         {
-          "run": 4,
+          "run": 2,
           "idea": {
             "pillar": "What Went Wrong",
-            "raw_idea": "When agents cherry-pick the best leads from a round-robin, the failure usually starts with giving them access to the full list before assignment happens. The earliest signal is when your highest-converting agents suddenly stop logging activity on their assigned leads but keep closing deals from portal sources.",
-            "angle": "Cherry-picking survives because team leaders audit assignments after the fact instead of restricting visibility before the lead lands.",
-            "why": "Team leaders are currently debating fairness and speed in lead assignment, making this the exact moment to address the mechanical root cause of cherry-picking.",
-            "signal": "Round-robin lead distribution under scrutiny"
+            "raw_idea": "We are wiring up an AI voice agent to answer portal leads at night, ask three qualifying questions and book a callback slot on the agent's calendar. The failure pattern that kills this setup is not the AI, it is the data behind it.",
+            "angle": "An AI voice agent that books callbacks at night will destroy trust if your listing data is stale.",
+            "why": "ISA teams are being cut right now, pushing leaders toward AI answering tools. This post uses the author's current build and a specific operational failure to give them a safety check they cannot find in vendor demos.",
+            "signal": "ISA teams shrink as brokerages cut costs"
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "agents cherry-pick the best leads from a round-robin",
+            "icp_problem_quote": "The failure pattern that kills this setup is not the AI, it is the data behind it.",
             "author_advantage": true,
             "author_advantage_refs": [
-              "M7"
+              "M3",
+              "M10"
             ],
-            "memory_quote": "How do I stop agents cherry-picking the best leads from the round-robin?",
-            "author_advantage_quote": "When agents cherry-pick the best leads from a round-robin",
+            "memory_quote": "Setting up an AI voice agent that answers portal leads at night, asks three qualifying questions and books a callback slot on the agent's calendar.",
+            "author_advantage_quote": "We are wiring up an AI voice agent to answer portal leads at night, ask three qualifying questions and book a callback slot on the agent's calendar.",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Strong alignment with author’s direct ICP question and adds a diagnostic detail (activity logging pattern) not in the signal."
+            "note": "Strong alignment with author’s current work and a specific failure observed."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 90
+          }
+        },
+        {
+          "run": 2,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "Team leaders constantly ask how to stop agents from cherry-picking the best leads out of a round-robin rotation. The fix is not policing behavior, it is changing the criteria for who gets routed what.",
+            "angle": "You cannot fix lead cherry-picking by watching agents closer; you fix it by removing their ability to choose.",
+            "why": "Round-robin fairness is actively debated in industry journals right now. Leaders need a concrete decision framework to evaluate whether their current routing software actually enforces follow-up or just distributes contacts.",
+            "signal": "Round-robin lead distribution under scrutiny"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "Team leaders constantly ask how to stop agents from cherry-picking the best leads out of a round-robin rotation.",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M7"
+            ],
+            "memory_quote": "How do I stop agents cherry-picking the best leads from the round-robin?",
+            "author_advantage_quote": "Team leaders constantly ask how to stop agents from cherry-picking the best leads out of a round-robin rotation.",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Directly addresses a documented ICP question with a non-obvious solution."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 89
+          }
+        },
+        {
+          "run": 2,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "We are running an experiment comparing text-first versus call-first responses to Zillow leads across two teams this month. The cost of guessing wrong on this is not just a missed connection, it is paying for leads that convert for someone else.",
+            "angle": "Choosing between texting and calling portal leads is not a preference test; it is a math problem where the wrong answer burns your ad budget daily.",
+            "why": "A major vendor just published claims that texting outperforms calling, which creates immediate confusion for leaders paying for portal leads. This post grounds the debate in the author's active experiment rather than vendor marketing.",
+            "signal": "Texting leads outperforms calling, vendor claims"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "The cost of guessing wrong on this is not just a missed connection, it is paying for leads that convert for someone else.",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M8"
+            ],
+            "memory_quote": "Comparing a text-first versus call-first response to Zillow leads across two teams this month.",
+            "author_advantage_quote": "We are running an experiment comparing text-first versus call-first responses to Zillow leads across two teams this month.",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Leverages active experiment; avoids regurgitating vendor claims."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 89
+          }
+        },
+        {
+          "run": 3,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "We are wiring up an AI voice agent to answer portal leads at night, ask three qualifying questions and book a callback slot on the agent's calendar. The failure pattern we keep hitting is not the AI itself but the data it reads from.",
+            "angle": "An AI that books showings faster than your MLS updates will destroy agent trust in one weekend.",
+            "why": "Brokerages are deploying AI assistants for inbound inquiries right now, and leaders assume the tech stack is ready. The author has already hit the exact failure mode they are about to walk into.",
+            "signal": "AI assistants now answer calls for top brokerages"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "The failure pattern we keep hitting is not the AI itself but the data it reads from.",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M3",
+              "M10"
+            ],
+            "memory_quote": "Setting up an AI voice agent that answers portal leads at night, asks three qualifying questions and books a callback slot on the agent's calendar.",
+            "author_advantage_quote": "We are wiring up an AI voice agent to answer portal leads at night, ask three qualifying questions and book a callback slot on the agent's calendar.",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strong alignment with author’s lived failure (M10) and current work (M3)."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 90
+          }
+        },
+        {
+          "run": 3,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "Team leaders constantly ask whether the AI should tell the lead it is an assistant or pretend to be the agent. Having run an ISA team of four for a 30-agent brokerage for three years, here is how we think about that choice.",
+            "angle": "Pretending to be the agent solves a conversion problem today by creating a retention problem tomorrow.",
+            "why": "With large brokerages rolling out AI call assistants, every team leader paying for portal leads is making this configuration choice right now and getting bad advice from vendors.",
+            "signal": "AI assistants now answer calls for top brokerages"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "Team leaders constantly ask whether the AI should tell the lead it is an assistant or pretend to be the agent.",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M6",
+              "PROOF"
+            ],
+            "memory_quote": "Team leaders ask: should the AI tell the lead it is an assistant, or pretend to be the agent?",
+            "author_advantage_quote": "Team leaders constantly ask whether the AI should tell the lead it is an assistant or pretend to be the agent.",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Directly uses ICP question from memory (M6) and author’s ISA leadership proof."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 89
+          }
+        },
+        {
+          "run": 3,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "Inside sales teams are being cut across brokerages as transactions fall, but most teams never had a lead volume problem to begin with. They had a follow-up problem, because the fifth call converts more than the first.",
+            "angle": "Cutting your ISA team to save money while leaving your follow-up process broken means you are paying full price for leads you will never convert.",
+            "why": "ISA teams are shrinking as brokerages cut costs during the third straight month of falling sales. Leaders are making cuts based on payroll math while ignoring their own conversion data.",
+            "signal": "ISA teams shrink as brokerages cut costs"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "Cutting your ISA team to save money while leaving your follow-up process broken means you are paying full price for leads you will never convert.",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M5"
+            ],
+            "memory_quote": "Most teams do not have a lead problem, they have a follow-up problem: the fifth call converts more than the first.",
+            "author_advantage_quote": "They had a follow-up problem, because the fifth call converts more than the first.",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Leverages the author’s core lesson (M5) to reframe a cost-cutting trend."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 89
+          }
+        },
+        {
+          "run": 4,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "When we audited a team's CRM, 40% of portal leads had no first call logged within 24 hours even though every agent swore they called within minutes. The failure pattern is not laziness but the gap between what agents remember doing and what the system actually recorded.",
+            "angle": "Agent confidence about follow-up speed is worthless without a timestamp in the CRM proving it happened.",
+            "why": "Portal referral fees are changing and ISA teams are shrinking, so leaders paying for leads need to audit their actual follow-up before cutting staff or software.",
+            "signal": "Portal giant changes lead routing fees"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "40% of portal leads had no first call logged within 24 hours even though every agent swore they called within minutes",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M2"
+            ],
+            "memory_quote": "Audited a team's CRM and found 40% of portal leads had no first call logged within 24 hours, although every agent swore they called within minutes.",
+            "author_advantage_quote": "When we audited a team's CRM, 40% of portal leads had no first call logged within 24 hours even though every agent swore they called within minutes.",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strong alignment with author memory and ICP pain point."
           },
           "author_advantage": true,
           "unsupported_numbers": [],
@@ -1057,31 +1056,31 @@
           "run": 4,
           "idea": {
             "pillar": "Decision Guide",
-            "raw_idea": "Deciding whether your AI voice assistant should identify itself as an AI or pretend to be the agent comes down to one criterion first: does it have real-time MLS access. If it does not, disqualify the impersonation approach immediately because it will book showings on properties that are no longer available.",
-            "angle": "The choice between transparency and impersonation for an AI caller is actually a data-latency decision, not an ethics debate.",
-            "why": "Large brokerages are deploying AI call assistants right now, forcing every team leader to make this exact scripting decision while MLS feeds are still transitioning.",
-            "signal": "AI assistants now answer calls for top brokerages"
+            "raw_idea": "Team leaders keep asking whether the AI voice agent should tell the lead it is an assistant or pretend to be the agent. When you are setting up a system to answer portal leads at night and book callbacks, this decision determines whether the lead trusts the next interaction.",
+            "angle": "Pretending the AI is the agent solves the first call and breaks the second one.",
+            "why": "Buyer agents must now sign agreements before showings, which means establishing clear identity and trust from the very first touchpoint matters more than ever.",
+            "signal": "Settlement reshapes buyer agent commissions"
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "whether your AI voice assistant should identify itself as an AI or pretend to be the agent",
+            "icp_problem_quote": "Team leaders keep asking whether the AI voice agent should tell the lead it is an assistant or pretend to be the agent",
             "author_advantage": true,
             "author_advantage_refs": [
-              "M10"
+              "M6"
             ],
-            "memory_quote": "the agent booked a showing on a property that had gone under contract that morning, because the MLS feed synced once a day",
-            "author_advantage_quote": "it will book showings on properties that are no longer available",
+            "memory_quote": "Team leaders ask: should the AI tell the lead it is an assistant, or pretend to be the agent?",
+            "author_advantage_quote": "Team leaders keep asking whether the AI voice agent should tell the lead it is an assistant or pretend to be the agent.",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Leverages a specific failure mode from the author’s experience that reframes the AI transparency debate around data latency."
+            "note": "Directly uses a real ICP question from author memory."
           },
-          "author_advantage": false,
+          "author_advantage": true,
           "unsupported_numbers": [],
           "invented": false,
-          "authority_pass": false,
+          "authority_pass": true,
           "gate": {
             "verdict": "PASS",
             "reasons": [],
@@ -1092,35 +1091,35 @@
           "run": 4,
           "idea": {
             "pillar": "The Stakes",
-            "raw_idea": "Treating your lead flow as a volume problem instead of a follow-up problem means you are paying portal fees for buyers who would have converted on the fifth call if anyone had made it. The cost is not just lost commissions; it is training buyers to ignore your team entirely because they learned early that calling you back is pointless.",
-            "angle": "Stopping after the first call does not just lose a single deal; it permanently damages your team's reputation with the most motivated buyers in your market.",
-            "why": "Inside sales teams are shrinking as brokerages cut costs, meaning the remaining agents are handling more leads with fewer touches, exactly when persistence matters most.",
-            "signal": "ISA teams shrink as brokerages cut costs"
+            "raw_idea": "A team leader cancelled an entire AI rollout after the system booked a showing on a property that went under contract that morning because the MLS feed only synced once a day. That single failure cost them the tool, the momentum, and the agents' willingness to try again.",
+            "angle": "An automated booking system running on a daily data sync is a liability, not an asset.",
+            "why": "Several MLSs are finally replacing nightly syncs with near real-time feeds, making this the exact moment leaders need to understand why their previous automation attempts failed.",
+            "signal": "MLS data feeds move toward real-time updates"
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "Treating your lead flow as a volume problem instead of a follow-up problem",
+            "icp_problem_quote": "A team leader cancelled an entire AI rollout after the system booked a showing on a property that went under contract that morning because the MLS feed only synced once a day",
             "author_advantage": true,
             "author_advantage_refs": [
-              "M5"
+              "M10"
             ],
-            "memory_quote": "Most teams do not have a lead problem, they have a follow-up problem: the fifth call converts more than the first.",
-            "author_advantage_quote": "The fifth call converts more than the first",
+            "memory_quote": "A team leader cancelled an AI rollout after the agent booked a showing on a property that had gone under contract that morning, because the MLS feed synced once a day.",
+            "author_advantage_quote": "A team leader cancelled an entire AI rollout after the system booked a showing on a property that went under contract that morning because the MLS feed only synced once a day.",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Directly echoes the author’s core lesson about follow-up depth versus lead volume, reinforced by current market pressure on ISA teams."
+            "note": "Faithfully reflects a specific failure story from the author’s experience."
           },
-          "author_advantage": false,
+          "author_advantage": true,
           "unsupported_numbers": [],
           "invented": false,
-          "authority_pass": false,
+          "authority_pass": true,
           "gate": {
             "verdict": "PASS",
             "reasons": [],
-            "score": 89
+            "score": 88
           }
         }
       ]
@@ -1131,9 +1130,9 @@
         "gate_pass": 100,
         "gate_below": 0,
         "gate_reject": 0,
-        "authority_pass": 67,
+        "authority_pass": 87,
         "icp_problem": 100,
-        "author_advantage": 67,
+        "author_advantage": 87,
         "beyond_source": 100,
         "generic": 0,
         "invented_facts": 0,
@@ -1144,21 +1143,235 @@
           "run": 0,
           "idea": {
             "pillar": "What Went Wrong",
-            "raw_idea": "When we built the one-page cash report, we kept seeing owners look at production numbers to decide what they could spend. That habit broke every month because production is not collections, and the earliest signal was a bank balance that never matched the profit number on their screen.",
-            "angle": "If your spending decisions start with production instead of collections, you are planning with money you do not have yet.",
-            "why": "Cash flow is currently ranked as the top worry for small business owners, and dental insurers are slowing reimbursements further. Owners need to hear directly from someone building the tool why their current metric fails them right now.",
+            "raw_idea": "We are building a one-page monthly cash report that ends with the owner's safe-to-spend number, because standard profit and loss statements hide the lag between production and actual collections. The failure pattern is trusting a P&L that says you are profitable while your bank account drains due to insurance reimbursement delays.",
+            "angle": "A profit and loss statement will tell you a practice is making money on the exact day it cannot make payroll because production is not collections.",
+            "why": "Owners currently rank cash flow as their top worry, and insurers are slowing reimbursements further. This makes the gap between reported profit and actual bank balance wider and more painful right now.",
             "signal": "Cash flow tops owner worries in new survey"
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "how they would know if they can afford a second location",
+            "icp_problem_quote": "Owners currently rank cash flow as their top worry",
             "author_advantage": true,
             "author_advantage_refs": [
               "M4",
               "M7"
             ],
             "memory_quote": "Profit and loss statements mislead dentists because production is not collections.",
-            "author_advantage_quote": "production is not collections",
+            "author_advantage_quote": "standard profit and loss statements hide the lag between production and actual collections",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strong alignment with author’s work and ICP pain point."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 90
+          }
+        },
+        {
+          "run": 0,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "When deciding whether to lease or buy a major piece of equipment, do not look at the monthly payment first. Look at how many other items you financed this year, because stacking more than two major financings in twelve months reliably puts a practice in a cash-negative position for the following two quarters.",
+            "angle": "An affordable monthly equipment payment becomes unaffordable the moment it is the third one you signed this year.",
+            "why": "Equipment financing demand is climbing among small businesses, meaning more practice owners are being pitched monthly payment structures right now.",
+            "signal": "Equipment financing demand climbs"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "When deciding whether to lease or buy a major piece of equipment",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M9"
+            ],
+            "memory_quote": "practices that financed more than two major items in a year were cash-negative for the next two quarters.",
+            "author_advantage_quote": "stacking more than two major financings in twelve months reliably puts a practice in a cash-negative position for the following two quarters",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Uses specific observed pattern from author’s experience."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 89
+          }
+        },
+        {
+          "run": 0,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "Owners ask if they can afford a second location, but they usually guess their supply costs at five percent of revenue when the real number is closer to eight percent. Opening a second office while running on a three percent margin error means duplicating a leak you did not know you had.",
+            "angle": "You cannot safely duplicate a practice until you know exactly where its current cash goes, and most owners are wrong about their largest variable expense.",
+            "why": "With DSOs continuing to acquire independents, practice owners feel pressure to scale quickly to stay competitive, making the question of affording a second location urgent and emotionally charged.",
+            "signal": "DSOs keep buying independent practices"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "Owners ask if they can afford a second location",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M3",
+              "M5"
+            ],
+            "memory_quote": "The most common surprise is supplies: owners guess 5% of revenue and it is usually closer to 8%.",
+            "author_advantage_quote": "they usually guess their supply costs at five percent of revenue when the real number is closer to eight percent",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Directly draws on author’s documented insight about supply cost misconception."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 88
+          }
+        },
+        {
+          "run": 1,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "Dental insurers are paying slower this year, and most practice owners respond by cutting staff hours or delaying hires. The real failure pattern is trusting the profit and loss statement instead of tracking when insurance money actually lands in the bank.",
+            "angle": "When reimbursements slow down, a profit and loss statement will tell you to fire someone while your cash report tells you to wait forty seven days.",
+            "why": "Reports of dental insurers slowing reimbursements are making owners anxious about overhead. This uses the author's direct experience with a 47-day lag to reframe the anxiety as a reporting failure rather than a revenue failure.",
+            "signal": "Dental insurers slow reimbursements"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "how to know if they can afford a second location",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M2",
+              "M4"
+            ],
+            "memory_quote": "insurance reimbursements arriving 47 days late, not a revenue problem",
+            "author_advantage_quote": "wait forty seven days",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strong use of specific observed lag (47 days) and author’s critique of P&L."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 90
+          }
+        },
+        {
+          "run": 1,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "Owners keep asking how to know if they can afford a second location, and the answer is never found in their accountant's profit number. You decide by building a monthly view that isolates collections, total overhead, and the exact amount safe to spend before committing to a lease.",
+            "angle": "You cannot evaluate a second location until you stop confusing your accountant's profit number with the cash you can actually spend.",
+            "why": "With loan rates holding steady and equipment financing demand climbing, owners are actively evaluating growth. This gives them the exact criteria to use, drawn directly from the tool the author is currently building.",
+            "signal": "Small business loan rates hold steady"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "how to know if they can afford a second location",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M5",
+              "M7"
+            ],
+            "memory_quote": "Owners ask: can I afford a second location, and how would I know?",
+            "author_advantage_quote": "You decide by building a monthly view that isolates collections, total overhead, and the exact amount safe to spend",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Directly uses the author’s active work on a cash report template tied to a real ICP question."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 89
+          }
+        },
+        {
+          "run": 1,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "Equipment financing looks affordable when you only read the monthly payment, but buying more than two major items in a single year quietly drains your cash for the next six months. The cost of ignoring this is not bankruptcy; it is the inability to make payroll or order supplies without stress.",
+            "angle": "Financing more than two major pieces of equipment in twelve months turns a profitable practice into a cash-negative one for the next two quarters.",
+            "why": "More small businesses are choosing to finance equipment right now. This draws on twelve years of bookkeeping to name the exact threshold where financing stops being a tool and starts becoming a trap.",
+            "signal": "Equipment financing demand climbs"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "inability to make payroll or order supplies without stress",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M9"
+            ],
+            "memory_quote": "practices that financed more than two major items in a year were cash-negative for the next two quarters",
+            "author_advantage_quote": "Financing more than two major pieces of equipment in twelve months turns a profitable practice into a cash-negative one for the next two quarters",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Precise threshold ('two items') and consequence ('two quarters') come directly from author’s observation."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 89
+          }
+        },
+        {
+          "run": 2,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "We are building a one-page monthly cash report template that shows collections, overhead and the owner's safe-to-spend number because profit and loss statements mislead dentists by treating production as if it were money in the bank.",
+            "angle": "A profit and loss statement will tell you your practice is healthy while your checking account proves otherwise.",
+            "why": "Cash flow currently ranks as the top worry for small business owners, making the gap between reported profit and actual bank balance an urgent daily frustration.",
+            "signal": "Cash flow tops owner worries in new survey"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "profit and loss statements mislead dentists by treating production as if it were money in the bank",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M4",
+              "M7"
+            ],
+            "memory_quote": "Profit and loss statements mislead dentists because production is not collections.",
+            "author_advantage_quote": "profit and loss statements mislead dentists by treating production as if it were money in the bank",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
@@ -1166,10 +1379,10 @@
             "off_positioning": false,
             "note": "Strong alignment with author’s lived insight and current work."
           },
-          "author_advantage": false,
+          "author_advantage": true,
           "unsupported_numbers": [],
           "invented": false,
-          "authority_pass": false,
+          "authority_pass": true,
           "gate": {
             "verdict": "PASS",
             "reasons": [],
@@ -1177,137 +1390,30 @@
           }
         },
         {
-          "run": 0,
+          "run": 2,
           "idea": {
             "pillar": "Decision Guide",
-            "raw_idea": "Owners constantly ask how they would know if they can afford a second location. After twelve years doing books for dental practices, the answer is never about projected production at the new site. It is about whether your first location generates enough collected cash to survive the financing drag of the second.",
-            "angle": "You can afford a second location only when your first location stays cash-positive while carrying the financing weight of the new one for two quarters.",
-            "why": "DSOs keep acquiring independent offices, pushing owners to consider a second location to stay competitive. Simultaneously, equipment financing demand is climbing. Owners need a concrete framework to evaluate this move without guessing.",
-            "signal": "DSOs keep buying independent practices"
+            "raw_idea": "When owners ask if they can afford a second location, the decision should not start with projected revenue but with whether their current practice generates enough collected cash after overhead to survive two quarters of financing drag.",
+            "angle": "Do not evaluate a second location until you know what your equipment financing schedule will do to your cash for the next six months.",
+            "why": "Equipment financing demand is climbing among small businesses right now, meaning more owners are tempted to borrow for expansion without modeling the quarterly cash drag.",
+            "signal": "Equipment financing demand climbs"
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "how they would know if they can afford a second location",
+            "icp_problem_quote": "When owners ask if they can afford a second location",
             "author_advantage": true,
             "author_advantage_refs": [
               "M5",
               "M9"
             ],
             "memory_quote": "Equipment financing looks cheap monthly but practices that financed more than two major items in a year were cash-negative for the next two quarters.",
-            "author_advantage_quote": "stay cash-positive while carrying the financing weight of the new one for two quarters",
+            "author_advantage_quote": "whether their current practice generates enough collected cash after overhead to survive two quarters of financing drag",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Uses specific financing observation from author’s experience."
-          },
-          "author_advantage": false,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": false,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 89
-          }
-        },
-        {
-          "run": 0,
-          "idea": {
-            "pillar": "The Stakes",
-            "raw_idea": "An owner thought hiring a new hygienist was out of the question because the bank balance was too low. The real cost of waiting was not just lost appointments. It was running the schedule short while insurance reimbursements sat uncollected for weeks, which meant the practice bled capacity it could not get back.",
-            "angle": "Delaying a hire because your bank balance looks thin often costs more than the salary, especially when the missing cash is stuck in an insurance lag you have not measured.",
-            "why": "Hygienist wages are rising due to shortages, making owners even more hesitant to hire. At the same time, insurers are slowing reimbursements. This creates a paralyzing squeeze where owners misread their own cash position and delay necessary hires.",
-            "signal": "Hygienist shortage drives wages up"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "hiring a new hygienist was out of the question because the bank balance was too low",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M2"
-            ],
-            "memory_quote": "A practice owner thought a new hygienist was unaffordable; the cash report showed insurance reimbursements arriving 47 days late, not a revenue problem.",
-            "author_advantage_quote": "insurance reimbursements sat uncollected for weeks",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Directly echoes a real story from the author’s practice."
-          },
-          "author_advantage": false,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": false,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 87
-          }
-        },
-        {
-          "run": 1,
-          "idea": {
-            "pillar": "What Went Wrong",
-            "raw_idea": "Owners ask if they can afford a second location, but the real failure pattern is looking at production instead of collections and missing the insurance lag that starves cash. The earliest signal is not a low profit number on your accountant's report; it is the gap between what you produced and what actually hit the bank.",
-            "angle": "You cannot answer whether you can afford a second location until you stop using production numbers to make the decision.",
-            "why": "Owners are actively asking this question right now, and broader reports confirm cash flow is their top worry while insurers slow reimbursements further, making production-based expansion math even more dangerous.",
-            "signal": "Cash flow tops owner worries in new survey"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "can I afford a second location",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M5",
-              "M4"
-            ],
-            "memory_quote": "Owners ask: can I afford a second location, and how would I know?",
-            "author_advantage_quote": "Owners ask if they can afford a second location",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Strong alignment with author’s lived experience and ICP question."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 90
-          }
-        },
-        {
-          "run": 1,
-          "idea": {
-            "pillar": "Decision Guide",
-            "raw_idea": "When deciding how to get your monthly financials, choose the format that guarantees you actually read it on time. A one-page report showing collections, overhead, and your safe-to-spend number beats a multi-page PDF every time, especially when delivering it as a short text message pushes open rates from about a third to nearly all.",
-            "angle": "The best financial report format is the one that changes how fast you see your actual safe-to-spend number.",
-            "why": "With cash flow topping owner worries, the friction of reading traditional reports is a solvable problem. Showing the exact delivery test gives owners a concrete criterion for choosing how they receive their numbers.",
-            "signal": "Cash flow tops owner worries in new survey"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "how to get your monthly financials",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M7",
-              "M8"
-            ],
-            "memory_quote": "Sending owners a 3-line text summary on the 5th of each month instead of a PDF; open rates went from about a third to nearly all.",
-            "author_advantage_quote": "delivering it as a short text message pushes open rates from about a third to nearly all",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Uses specific delivery experiment and report design from author’s work."
+            "note": "Uses specific observation about financing drag from author’s experience."
           },
           "author_advantage": true,
           "unsupported_numbers": [],
@@ -1317,350 +1423,246 @@
             "verdict": "PASS",
             "reasons": [],
             "score": 89
-          }
-        },
-        {
-          "run": 1,
-          "idea": {
-            "pillar": "The Stakes",
-            "raw_idea": "Insurers are slowing reimbursements, but the hidden cost is not just waiting longer for checks. When we looked at one practice, the cash report showed insurance reimbursements arriving 47 days late, which made the owner think a new hygienist was unaffordable when it was purely a timing problem.",
-            "angle": "Slower insurance payments do not mean you lack revenue; they mean your hiring decisions are being made on a distorted timeline.",
-            "why": "Reports confirm dental insurers are slowing reimbursements and hygienist wages are rising simultaneously. This creates a specific trap where owners mistakenly believe they cannot afford to hire, based on a lag they have not measured.",
-            "signal": "Dental insurers slow reimbursements"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "think a new hygienist was unaffordable",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M2"
-            ],
-            "memory_quote": "A practice owner thought a new hygienist was unaffordable; the cash report showed insurance reimbursements arriving 47 days late, not a revenue problem.",
-            "author_advantage_quote": "the cash report showed insurance reimbursements arriving 47 days late, which made the owner think a new hygienist was unaffordable",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Directly lifts a specific story and number from author memory."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 88
-          }
-        },
-        {
-          "run": 2,
-          "idea": {
-            "pillar": "What Went Wrong",
-            "raw_idea": "When we built the one-page cash report, we kept seeing owners look at their profit and loss statement to decide if they could hire or buy equipment, then wonder why the bank account was empty. The failure pattern is trusting production numbers as if they were cash in hand.",
-            "angle": "A profit and loss statement will tell you a dental practice is healthy on the exact day it cannot make payroll.",
-            "why": "Cash flow is currently ranked as the top worry for small business owners, and insurers are slowing reimbursements, which makes the gap between production and collections wider and more dangerous right now.",
-            "signal": "Cash flow tops owner worries in new survey"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "decide if they could hire or buy equipment",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M4",
-              "M7"
-            ],
-            "memory_quote": "Profit and loss statements mislead dentists because production is not collections.",
-            "author_advantage_quote": "The failure pattern is trusting production numbers as if they were cash in hand.",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Strong alignment with author’s lived insight and ICP decision point."
-          },
-          "author_advantage": false,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": false,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 90
-          }
-        },
-        {
-          "run": 2,
-          "idea": {
-            "pillar": "Decision Guide",
-            "raw_idea": "Owners constantly ask why their accountant's profit number never matches their bank balance, and the answer determines whether they should be looking at tax returns or cash reports to run the practice. Here is how to choose which financial view governs your daily decisions.",
-            "angle": "Your accountant's profit number is correct for taxes and useless for deciding what you can spend on Tuesday.",
-            "why": "This is the most frequent question the author receives directly from practice owners, meaning the confusion is widespread and actively blocking decisions.",
-            "signal": ""
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "why their accountant's profit number never matches their bank balance",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M6"
-            ],
-            "memory_quote": "Why does my accountant's profit number never match my bank balance?",
-            "author_advantage_quote": "Owners constantly ask why their accountant's profit number never matches their bank balance",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Directly uses a verbatim ICP question from author memory."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 83
           }
         },
         {
           "run": 2,
           "idea": {
             "pillar": "The Stakes",
-            "raw_idea": "We tested sending owners a three-line text summary on the fifth of each month instead of a PDF, and open rates went from about a third to nearly all. That gap means two-thirds of owners were previously making mid-month spending decisions without knowing their actual cash position.",
-            "angle": "If your financial report lives in a PDF you do not open until week three, you are running your practice blind for twenty days a month.",
-            "why": "Late payments and rising supply costs mean margins are tighter, so the cost of operating on stale or unseen financial data is higher than it used to be.",
-            "signal": "Late payments strain service businesses"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "making mid-month spending decisions without knowing their actual cash position",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M8"
-            ],
-            "memory_quote": "Sending owners a 3-line text summary on the 5th of each month instead of a PDF; open rates went from about a third to nearly all.",
-            "author_advantage_quote": "We tested sending owners a three-line text summary on the fifth of each month instead of a PDF, and open rates went from about a third to nearly all.",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Uses exact experiment detail from author memory, not just the topic."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 89
-          }
-        },
-        {
-          "run": 3,
-          "idea": {
-            "pillar": "What Went Wrong",
-            "raw_idea": "When we built the one-page monthly cash report, the hardest field to wire up was not collections or overhead but the safe-to-spend number, because most practices had no single place where those two lines met. The failure pattern is treating production as money you can spend, and the earliest signal that it broke was a bank balance dropping while the profit and loss statement looked fine.",
-            "angle": "The first thing to break when an owner runs a practice without a safe-to-spend number is not the budget but the belief that the profit and loss statement tells the truth about cash.",
-            "why": "Owners rank cash flow above hiring and growth as their top concern right now, and insurers are slowing reimbursements. This post answers the specific confusion between accounting profit and actual cash using the author's current build work.",
-            "signal": "Cash flow tops owner worries in new survey"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "the belief that the profit and loss statement tells the truth about cash",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M4",
-              "M7"
-            ],
-            "memory_quote": "Profit and loss statements mislead dentists because production is not collections.",
-            "author_advantage_quote": "treating production as money you can spend",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Strong alignment with author’s current work and observed confusion."
-          },
-          "author_advantage": false,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": false,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 90
-          }
-        },
-        {
-          "run": 3,
-          "idea": {
-            "pillar": "Decision Guide",
-            "raw_idea": "When deciding whether to buy a new chair or CBCT with financing or cash, the monthly payment looks cheap until you stack more than two major financed items in a single year. The decision rule is to count how many major items you have already financed in the last twelve months; if the answer is two, paying cash or waiting is the only option that keeps the next two quarters solvent.",
-            "angle": "Financing dental equipment looks affordable per month, but stacking more than two major items in a year will make your practice cash-negative for the following two quarters.",
-            "why": "Equipment financing demand is climbing among small businesses, and steady loan rates make the monthly payments look deceptively manageable. Owners need a hard rule before they sign.",
-            "signal": "Equipment financing demand climbs"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "whether to buy a new chair or CBCT with financing or cash",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M9"
-            ],
-            "memory_quote": "practices that financed more than two major items in a year were cash-negative for the next two quarters.",
-            "author_advantage_quote": "stacking more than two major items in a year will make your practice cash-negative for the following two quarters",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Uses specific finding from author’s experience, not just market trend."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 89
-          }
-        },
-        {
-          "run": 3,
-          "idea": {
-            "pillar": "The Stakes",
-            "raw_idea": "Distributors are raising prices on consumables, but the real cost of inaction is not the price hike itself. It is running your practice assuming supplies are five percent of revenue when our work consistently shows they sit closer to eight percent, which means every month you delay updating your numbers, you are planning your spending around three percent of revenue that is already gone.",
-            "angle": "If you still estimate your supply costs at five percent of revenue while distributors raise prices, you are making every other financial decision in the practice based on money that is already spent.",
-            "why": "Distributors just announced price increases on consumables, making supply costs a timely anxiety. But the author's verified experience shows the deeper problem is the baseline guess owners use, which makes this response unique to Ledgerline.",
-            "signal": "Supply costs rise for dental offices"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "you are planning your spending around three percent of revenue that is already gone",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M3"
-            ],
-            "memory_quote": "owners guess 5% of revenue and it is usually closer to 8%",
-            "author_advantage_quote": "assuming supplies are five percent of revenue when our work consistently shows they sit closer to eight percent",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Directly leverages author’s verified observation about supply cost misconception."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 89
-          }
-        },
-        {
-          "run": 4,
-          "idea": {
-            "pillar": "What Went Wrong",
-            "raw_idea": "When owners ask if they can afford a second location, they usually look at production numbers from their first office. But production is not collections, and a P&L built on production will tell you that you are ready to expand months before your bank account actually is.",
-            "angle": "The earliest signal that a second location is unaffordable is not low revenue but a gap between what the schedule says you produced and what actually cleared the bank.",
-            "why": "Owners are asking this exact question right now while insurers are slowing reimbursements further, making the gap between production and cash wider than usual.",
-            "signal": "Dental insurers slow reimbursements"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "can I afford a second location",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M5",
-              "M4"
-            ],
-            "memory_quote": "Owners ask: can I afford a second location, and how would I know?",
-            "author_advantage_quote": "When owners ask if they can afford a second location",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Strong alignment with author’s lived experience and ICP question."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 90
-          }
-        },
-        {
-          "run": 4,
-          "idea": {
-            "pillar": "Decision Guide",
-            "raw_idea": "If your monthly financial review is a PDF report you never open, you are flying blind until something breaks. We tested sending owners a three line text summary on the fifth of each month instead, and nearly all of them read it compared to about a third who opened the file.",
-            "angle": "The format of your monthly cash report matters more than its depth because a report you do not read cannot stop a bad decision.",
-            "why": "Cash flow is currently the top worry for small business owners, and dental owners are no exception. The bottleneck is rarely data availability but attention.",
-            "signal": "Cash flow tops owner worries in new survey"
-          },
-          "verdict": {
-            "icp_problem": true,
-            "icp_problem_quote": "flying blind until something breaks",
-            "author_advantage": true,
-            "author_advantage_refs": [
-              "M8"
-            ],
-            "memory_quote": "Sending owners a 3-line text summary on the 5th of each month instead of a PDF; open rates went from about a third to nearly all.",
-            "author_advantage_quote": "We tested sending owners a three line text summary on the fifth of each month instead, and nearly all of them read it compared to about a third who opened the file.",
-            "beyond_source": true,
-            "generic": false,
-            "invented_facts": false,
-            "invented_facts_quote": "",
-            "off_positioning": false,
-            "note": "Directly uses author’s experiment with specific results."
-          },
-          "author_advantage": true,
-          "unsupported_numbers": [],
-          "invented": false,
-          "authority_pass": true,
-          "gate": {
-            "verdict": "PASS",
-            "reasons": [],
-            "score": 90
-          }
-        },
-        {
-          "run": 4,
-          "idea": {
-            "pillar": "The Stakes",
-            "raw_idea": "One owner discovered two staff members were paid through both payroll and a reimbursement account for eight months. When you do not know where your cash goes every month, duplicate payments hide in plain sight until the bank balance forces you to notice.",
-            "angle": "Double paying employees does not start with fraud. It starts with two disconnected payment systems and no single monthly report checking both.",
-            "why": "Auditors are reporting a rise in duplicate payment schemes in small firms right now. For independent dental practices, the most common version is not malicious but structural.",
+            "raw_idea": "Sending owners a three-line text summary on the fifth of each month instead of a PDF changed open rates from about a third to nearly all, which matters because unread financial reports allow duplicate payroll errors to persist for months.",
+            "angle": "If your financial summary lives in a PDF you never open, you are paying people twice and finding out eight months later.",
+            "why": "Auditors are reporting a rise in duplicate-payment schemes in small firms, making the cost of missing a payroll overlap a timely and concrete fear.",
             "signal": "Payroll fraud cases rise in small firms"
           },
           "verdict": {
             "icp_problem": true,
-            "icp_problem_quote": "do not know where your cash goes every month",
+            "icp_problem_quote": "unread financial reports allow duplicate payroll errors to persist for months",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M8",
+              "M10"
+            ],
+            "memory_quote": "Sending owners a 3-line text summary on the 5th of each month instead of a PDF; open rates went from about a third to nearly all.",
+            "author_advantage_quote": "Sending owners a three-line text summary on the fifth of each month instead of a PDF changed open rates from about a third to nearly all",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Combines author’s experiment with real fraud story from memory."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 90
+          }
+        },
+        {
+          "run": 3,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "When we build the one-page cash report, the hardest line to get right is the safe-to-spend number because it has to absorb the gap between production and actual collections before telling you anything useful.",
+            "angle": "A profit and loss statement will tell you a practice is healthy while the bank account proves otherwise, and the failure pattern always starts with trusting production numbers over collected cash.",
+            "why": "Owners rank cash flow above hiring and growth as their top concern right now, making the disconnect between reported profit and actual bank balance an urgent, daily frustration.",
+            "signal": "Cash flow tops owner worries in new survey"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "the disconnect between reported profit and actual bank balance",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M4",
+              "M7"
+            ],
+            "memory_quote": "Profit and loss statements mislead dentists because production is not collections.",
+            "author_advantage_quote": "A profit and loss statement will tell you a practice is healthy while the bank account proves otherwise",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strong alignment with author’s lived insight on P&L vs. cash."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 90
+          }
+        },
+        {
+          "run": 3,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "If you are deciding whether to finance new equipment or pay cash, the monthly payment looks manageable until you stack more than two major items in a single year and watch your cash turn negative for the next six months.",
+            "angle": "The decision to finance dental equipment should be based on how many other financed items are still draining your cash, not on whether the monthly payment fits this month's budget.",
+            "why": "Equipment financing demand is climbing among small businesses, meaning more dental owners are currently staring at these contracts without a framework to evaluate the compounding risk.",
+            "signal": "Equipment financing demand climbs"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "deciding whether to finance new equipment or pay cash",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M9"
+            ],
+            "memory_quote": "practices that financed more than two major items in a year were cash-negative for the next two quarters",
+            "author_advantage_quote": "stack more than two major items in a single year and watch your cash turn negative for the next six months",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Uses specific observation from author’s experience with timing and volume of financing."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 89
+          }
+        },
+        {
+          "run": 3,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "When insurers slow down reimbursements, the first thing most owners do is freeze hiring, but the real problem is often a forty-seven-day lag hiding behind what looks like a revenue shortfall.",
+            "angle": "Hiring freezes triggered by slow insurance payments solve the wrong problem and cost you production capacity while the cash is just stuck in transit.",
+            "why": "Practices are reporting longer waits for insurance payments this year, which directly triggers the panic-hiring-freeze cycle the author has already proven is based on a misread of the cash situation.",
+            "signal": "Dental insurers slow reimbursements"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "insurers slow down reimbursements",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M2"
+            ],
+            "memory_quote": "insurance reimbursements arriving 47 days late, not a revenue problem",
+            "author_advantage_quote": "a forty-seven-day lag hiding behind what looks like a revenue shortfall",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Directly pulls the exact 47-day detail from a real client story."
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": false,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 89
+          }
+        },
+        {
+          "run": 4,
+          "idea": {
+            "pillar": "What Went Wrong",
+            "raw_idea": "When an owner asks why the accountant's profit number never matches the bank balance, the failure pattern is trusting production-based reports while insurance reimbursements lag. The earliest signal is a widening gap between what the software says you earned and what cleared the bank over two consecutive months.",
+            "angle": "The profit number your accountant hands you is built on production, but your bank account only sees collections, and that gap is where cash disappears without warning.",
+            "why": "A customer question about the profit-to-bank mismatch combined with industry reporting on slower insurance reimbursements makes this the exact moment owners feel the gap most acutely.",
+            "signal": "Dental insurers slow reimbursements"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "why the accountant's profit number never matches the bank balance",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M4",
+              "M2"
+            ],
+            "memory_quote": "Profit and loss statements mislead dentists because production is not collections.",
+            "author_advantage_quote": "The profit number your accountant hands you is built on production, but your bank account only sees collections",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Strong alignment with author’s lived insight on production vs. collections."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 90
+          }
+        },
+        {
+          "run": 4,
+          "idea": {
+            "pillar": "Decision Guide",
+            "raw_idea": "To decide if you can afford a second location, ignore projected production and look at three things in order: your current safe-to-spend number after all overhead, whether your first location runs without your daily presence, and if insurance lag would double before new collections stabilize. Financing more than two major items in a year disqualifies you outright.",
+            "angle": "You cannot evaluate a second location until you know exactly what your current practice leaves you safe to spend each month, because that number funds the gap before the new office collects anything.",
+            "why": "Owners are asking about second locations while DSOs continue buying independents, creating urgency to grow. Pairing that question with the reality of equipment financing drag gives them a concrete way to decide rather than guess.",
+            "signal": "DSOs keep buying independent practices"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "can I afford a second location",
+            "author_advantage": true,
+            "author_advantage_refs": [
+              "M5",
+              "M9"
+            ],
+            "memory_quote": "Financing more than two major items in a year were cash-negative for the next two quarters.",
+            "author_advantage_quote": "Financing more than two major items in a year disqualifies you outright.",
+            "beyond_source": true,
+            "generic": false,
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "off_positioning": false,
+            "note": "Uses specific author observation about equipment financing impact on cash flow."
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "authority_pass": true,
+          "gate": {
+            "verdict": "PASS",
+            "reasons": [],
+            "score": 90
+          }
+        },
+        {
+          "run": 4,
+          "idea": {
+            "pillar": "The Stakes",
+            "raw_idea": "If you do not reconcile how staff are paid every month, duplicate payments through both payroll and a reimbursement account can run silently for eight months. The cost is not just the lost cash; it is discovering you cannot trust your own books when you finally need to make a hiring or spending decision.",
+            "angle": "Duplicate staff payments survive for months not because anyone is stealing, but because payroll and expense reimbursements live in two separate systems that no one cross-checks against the bank.",
+            "why": "Rising payroll fraud cases in small firms make owners nervous about internal controls, but independent dental practices face a specific version of this where legitimate systems overlap rather than malicious actors steal. Naming the exact mechanism builds immediate trust.",
+            "signal": "Payroll fraud cases rise in small firms"
+          },
+          "verdict": {
+            "icp_problem": true,
+            "icp_problem_quote": "duplicate payments through both payroll and a reimbursement account can run silently for eight months",
             "author_advantage": true,
             "author_advantage_refs": [
               "M10"
             ],
             "memory_quote": "One owner found two staff were paid through both payroll and a reimbursement account for eight months.",
-            "author_advantage_quote": "One owner discovered two staff members were paid through both payroll and a reimbursement account for eight months.",
+            "author_advantage_quote": "duplicate payments through both payroll and a reimbursement account can run silently for eight months",
             "beyond_source": true,
             "generic": false,
             "invented_facts": false,
             "invented_facts_quote": "",
             "off_positioning": false,
-            "note": "Uses a specific story from author memory with no embellishment."
+            "note": "Directly lifts a specific incident from the author’s experience."
           },
           "author_advantage": true,
           "unsupported_numbers": [],
@@ -1669,7 +1671,7 @@
           "gate": {
             "verdict": "PASS",
             "reasons": [],
-            "score": 88
+            "score": 87
           }
         }
       ]

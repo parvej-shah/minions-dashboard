@@ -119,6 +119,7 @@ describe("no tenant is ever defaulted to tenant zero", () => {
         "Fetch Tone Examples": [],
         "Select Target": [{ idea_id: "IDEA-1", audience: "PEER", pillar: "The Myth" }],
         "Generate run_id": [{ client_id: "tenant-acme" }],
+        "Fetch Author Context": [{ author: {} }],
       },
     });
     expect(out.brand_context).toContain("all_rule");

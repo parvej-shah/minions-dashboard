@@ -25,43 +25,18 @@ import { runCodeNode } from "@/test/n8n/harness";
 import { renderPrompt } from "@/lib/prompts";
 import { buildBrandContextResponse } from "@/services/brandContext";
 import { TENANTS, authorFor, type EvalTenant } from "./corpus";
+import { arg, chat, content } from "./llm";
 import { JUDGE_MODEL, renderJudge, scoreIdea, type Verdict, type IdeaScore as RubricScore } from "./rubric";
 import { gateIdeas, gateInputFromContext, type GateVerdict } from "@/lib/harvest/gate";
 
 /** A judged idea plus what the phase 3 gate decided about it (absent on results from before the gate). */
 type IdeaScore = RubricScore & { gate?: { verdict: GateVerdict; reasons: string[]; score: number } };
 /** The source types and memory ids of earlier runs, fed back like production's recent ideas. */
-type History = { sourceTypes: (string | null)[]; memoryIds: string[][] };
+export type History = { sourceTypes: (string | null)[]; memoryIds: string[][] };
 
-const ENDPOINT = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions";
 const RESULTS_DIR = path.join(process.cwd(), "src/test/eval/results");
 
 type Json = Record<string, unknown>;
-
-function arg(name: string, fallback: string): string {
-  const i = process.argv.indexOf(`--${name}`);
-  return i > -1 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
-}
-
-async function chat(payload: Json): Promise<Json> {
-  const key = process.env.DASHSCOPE_API_KEY;
-  if (!key) throw new Error("DASHSCOPE_API_KEY is not set (run with --env-file=.env.local)");
-  for (let attempt = 1; ; attempt++) {
-    const res = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(180_000),
-    });
-    if (res.ok) return (await res.json()) as Json;
-    if (attempt >= 3 || res.status < 500) throw new Error(`DashScope ${res.status}: ${(await res.text()).slice(0, 300)}`);
-  }
-}
-
-function content(response: Json): string {
-  const choices = response.choices as { message?: { content?: string } }[] | undefined;
-  return (choices?.[0]?.message?.content ?? "").replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
-}
 
 /** Exactly what GET /api/brand/context would return for this tenant. */
 export function contextFor(tenant: EvalTenant, runIndex: number, history: History = { sourceTypes: [], memoryIds: [] }) {
@@ -75,7 +50,7 @@ export function contextFor(tenant: EvalTenant, runIndex: number, history: Histor
 }
 
 /** One harvest through the real path: plan, prompt, model, parse, and the gate. */
-async function harvestOnce(tenant: EvalTenant, runIndex: number, history: History): Promise<Json[]> {
+export async function harvestOnce(tenant: EvalTenant, runIndex: number, history: History): Promise<Json[]> {
   const ctx = contextFor(tenant, runIndex, history);
   const [built] = await runCodeNode("01_idea_harvester", "Build Harvest Payload", {
     input: tenant.signals as unknown as Json[],
@@ -248,7 +223,8 @@ async function main() {
   console.log(`\nwrote ${path.relative(process.cwd(), file)}`);
 }
 
-main().catch((e) => {
+// Only when run directly: drafts.ts imports harvestOnce from here.
+if (process.argv[1]?.endsWith("run.ts")) main().catch((e) => {
   console.error(e instanceof Error ? e.message : e);
   process.exitCode = 1;
 });

@@ -16,7 +16,8 @@ return [{
       evidence_block: evidenceBlock,
       brand_context: brandContext,
       tone_examples: Array.isArray(brandCtx.tone_examples) ? brandCtx.tone_examples : [],
-      tone_questionnaire: brandCtx.tone_questionnaire || null
+      tone_questionnaire: brandCtx.tone_questionnaire || null,
+      author: brandCtx.author || null
     }
   }
 }];

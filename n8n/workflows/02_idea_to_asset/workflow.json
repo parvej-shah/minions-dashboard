@@ -22,7 +22,7 @@
           },
           {
             "index": 0,
-            "node": "Dispatch Hero Generation",
+            "node": "Cover Wanted?",
             "type": "main"
           }
         ]
@@ -135,7 +135,7 @@
         [
           {
             "index": 0,
-            "node": "Assemble Brand Context",
+            "node": "Fetch Author Context",
             "type": "main"
           }
         ]
@@ -280,7 +280,7 @@
         [
           {
             "index": 0,
-            "node": "Parse Claims and Gate",
+            "node": "Check Draft",
             "type": "main"
           }
         ]
@@ -566,6 +566,40 @@
             "type": "main"
           }
         ]
+      ]
+    },
+    "Fetch Author Context": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Assemble Brand Context",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Check Draft": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Parse Claims and Gate",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Cover Wanted?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Dispatch Hero Generation",
+            "type": "main"
+          }
+        ],
+        []
       ]
     }
   },
@@ -1793,7 +1827,7 @@
             }
           ]
         },
-        "jsonBody": "={{ (() => {\n  const row = $('Prepare Asset Row').first().json;\n  return JSON.stringify({\n    id: row.asset_id,\n    client_id: row.client_id || null,\n    idea_id: row.idea_id || null,\n    title: row.title,\n    slug: row.slug,\n    hook: row.hook,\n    core_argument: row.core_argument,\n    content: row.content_with_hero,\n    audience: row.audience || 'ICP',\n    pillar: 'Operations',\n    target_trade: row.target_trade || null,\n    status: row.status,\n    claims_ok: row.claims_ok,\n    hero_image_url: row.hero_image_url || null,\n    hero_status: row.hero_status || 'READY',\n    hero_error_code: row.hero_error_code || null,\n    hero_provider: row.hero_provider || null,\n    hero_attempts: row.hero_attempts || 0,\n    doc_url: row.doc_url,\n    linkedin_variant: row.li_variant || null,\n    facebook_variant: row.fb_variant || null,\n    x_variant: row.x_variant || null,\n    version: row.version || 1,\n    generation_cost: 0.041,\n    published_at: row.claims_ok === 'Y' ? row.updated_at : null,\n    published_urls: row.published_urls || null,\n    updated_at: row.updated_at\n  });\n})() }}",
+        "jsonBody": "={{ (() => {\n  const row = $('Prepare Asset Row').first().json;\n  return JSON.stringify({\n    id: row.asset_id,\n    client_id: row.client_id || null,\n    idea_id: row.idea_id || null,\n    title: row.title,\n    slug: row.slug,\n    hook: row.hook,\n    core_argument: row.core_argument,\n    content: row.content_with_hero,\n    audience: row.audience || 'ICP',\n    pillar: $('Select Target').first().json.pillar || '',\n    target_trade: row.target_trade || null,\n    status: row.status,\n    claims_ok: row.claims_ok,\n    review_notes: row.review_notes || [],\n    hero_image_url: row.hero_image_url || null,\n    hero_status: row.hero_status || 'READY',\n    hero_error_code: row.hero_error_code || null,\n    hero_provider: row.hero_provider || null,\n    hero_attempts: row.hero_attempts || 0,\n    doc_url: row.doc_url,\n    linkedin_variant: row.li_variant || null,\n    facebook_variant: row.fb_variant || null,\n    x_variant: row.x_variant || null,\n    version: row.version || 1,\n    generation_cost: 0.041,\n    published_at: row.claims_ok === 'Y' ? row.updated_at : null,\n    published_urls: row.published_urls || null,\n    updated_at: row.updated_at\n  });\n})() }}",
         "method": "POST",
         "options": {
           "response": {
@@ -2034,6 +2068,98 @@
       ],
       "type": "n8n-nodes-base.code",
       "typeVersion": 2
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "executeOnce": true,
+      "id": "7a1d2a3b-4c5d-4e6f-8a9b-0c1d2e3f4a61",
+      "name": "Fetch Author Context",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ JSON.stringify({ client_id: $('Generate run_id').first().json.client_id, idea_id: $('Select Target').first().json.idea_id }) }}",
+        "method": "POST",
+        "options": {
+          "timeout": 60000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/drafts/context"
+      },
+      "position": [
+        1312,
+        16
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "executeOnce": true,
+      "id": "7a1d2a3b-4c5d-4e6f-8a9b-0c1d2e3f4a62",
+      "name": "Check Draft",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "={{ JSON.stringify({ client_id: $('Generate run_id').first().json.client_id, idea_id: $('Select Target').first().json.idea_id, hook: $json.hook, body: $json.edited_body, claims: $json.claims, evidence_block: $('Parse Writer Output').first().json.evidence_block, brand_context: $('Assemble Brand Context').first().json.brand_context }) }}",
+        "method": "POST",
+        "options": {
+          "timeout": 30000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/drafts/check"
+      },
+      "position": [
+        3392,
+        176
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "7a1d2a3b-4c5d-4e6f-8a9b-0c1d2e3f4a63",
+      "name": "Cover Wanted?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $('Generate run_id').first().json.skip_hero }}",
+              "operator": {
+                "operation": "false",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "position": [
+        6872,
+        672
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
     }
   ],
   "settings": {

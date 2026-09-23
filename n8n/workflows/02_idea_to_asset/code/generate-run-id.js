@@ -28,6 +28,8 @@ if (!clientId) throw new Error('Draft trigger has no client_id; refusing to gues
 const runId = triggerBody.run_id || generateUUID();
 const callbackUrl = triggerBody.callback_url || null;
 const callbackRunId = callbackUrl ? runIdFrom(callbackUrl, triggerBody.run_id) : '';
+// Test drafts skip the cover image (04_hero_image) to save its cost.
+const skipHero = triggerBody.skip_hero === true || triggerBody.skip_hero === 'true';
 const nowIso = new Date().toISOString();
 return [{
   json: {
@@ -36,6 +38,7 @@ return [{
     requested_idea_id: requestedIdeaId,
     client_id: clientId,
     callback_url: callbackUrl,
-    callback_run_id: callbackRunId
+    callback_run_id: callbackRunId,
+    skip_hero: skipHero
   }
 }];
