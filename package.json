@@ -17,7 +17,9 @@
     "n8n:docs": "tsx scripts/n8n/docs.ts",
     "eval": "tsx --env-file=.env.local src/test/eval/run.ts",
     "eval:drafts": "tsx --env-file=.env.local src/test/eval/drafts.ts",
-    "eval:covers": "tsx --env-file=.env.local src/test/eval/covers.ts"
+    "eval:covers": "tsx --env-file=.env.local src/test/eval/covers.ts",
+    "eval:pulse": "tsx --env-file=.env.local src/test/eval/pulse.ts",
+    "pulse:report": "tsx --env-file=.env.local scripts/pulse-report.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1111.0",

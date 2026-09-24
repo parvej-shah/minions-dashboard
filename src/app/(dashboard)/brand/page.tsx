@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AlertTriangle, Mic2, Sparkles, Rss, BookOpen } from "lucide-react";
 import { BrandDirectiveItem, BrandTab } from "@/types";
 import LexiconTab from "@/components/brand/LexiconTab";
@@ -11,8 +12,23 @@ import ExperienceTab from "@/components/brand/ExperienceTab";
 import CompletenessCard from "@/components/brand/CompletenessCard";
 import { useApiResource } from "@/hooks/useApiResource";
 
+const BRAND_TABS: BrandTab[] = ["overview", "voice-proof", "experience", "sources", "lexicon"];
+
+// useSearchParams needs a Suspense boundary on a prerendered route.
 export default function BrandStudioPage() {
-  const [activeTab, setActiveTab] = useState<BrandTab>("overview");
+  return (
+    <Suspense>
+      <BrandStudio />
+    </Suspense>
+  );
+}
+
+function BrandStudio() {
+  // ?tab=experience opens a tab directly (the home page's weekly question links here).
+  const requested = useSearchParams().get("tab");
+  const [activeTab, setActiveTab] = useState<BrandTab>(
+    BRAND_TABS.includes(requested as BrandTab) ? (requested as BrandTab) : "overview"
+  );
   // Bumped after any profile edit so the completeness card re-reads.
   const [profileVersion, setProfileVersion] = useState(0);
   const bumpProfile = () => setProfileVersion((v) => v + 1);

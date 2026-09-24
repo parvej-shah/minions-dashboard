@@ -93,3 +93,24 @@ describe("resolveSourceMix", () => {
     expect(resolveSourceMix({ CURRENT_WORK: 50, MARKET: 50 })).toEqual({ CURRENT_WORK: 50, EXPERIENCE: 0, ICP_QUESTION: 0, MARKET: 50, EXPERIMENTAL: 0 });
   });
 });
+
+describe("a weekly answer seeds the next harvest (phase 6)", () => {
+  const fresh = { ...mem("wk", "LESSON"), fresh: true };
+
+  it("puts an unused fresh item in slot 1, whatever the mix says", () => {
+    const plan = planHarvest(input({ memory: [...MEMORY, fresh] }));
+    expect(plan[0].seed).toEqual({ kind: "MEMORY", ref: `M${MEMORY.length + 1}`, memory_id: "wk" });
+    expect(plan[0].bucket).toBe("EXPERIENCE");
+    // The other slots still follow the mix, and never reuse it.
+    expect(plan.slice(1).some((s) => s.seed.kind === "MEMORY" && s.seed.memory_id === "wk")).toBe(false);
+  });
+
+  it("stops forcing it once a recent idea has used it", () => {
+    const plan = planHarvest(input({ memory: [...MEMORY, fresh], recentMemoryIds: [["wk"]] }));
+    expect(plan[0].seed).not.toEqual(expect.objectContaining({ memory_id: "wk" }));
+  });
+
+  it("changes nothing when no item is fresh", () => {
+    expect(planHarvest(input({ memory: [...MEMORY, mem("wk", "LESSON")] }))[0]).toEqual(planHarvest(input())[0]);
+  });
+});

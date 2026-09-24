@@ -29,6 +29,8 @@ export interface MemoryContext {
    */
   disclosure: MemoryDisclosure;
   used_count: number;
+  /** From a weekly answer in the last PULSE_FRESH_DAYS days: the next harvest builds on it first. */
+  fresh?: boolean;
 }
 
 export interface LaneContext {
@@ -70,7 +72,10 @@ type IcpRow = {
   buyingTriggers: string[];
   vocabulary: string[];
 };
-type MemoryRow = { id: string; kind: string; content: string; disclosure: string; usedCount: number };
+type MemoryRow = { id: string; kind: string; content: string; disclosure: string; usedCount: number; source?: string; createdAt?: Date };
+
+/** How long a weekly-answer item counts as new this week (phase 6). */
+export const PULSE_FRESH_DAYS = 14;
 type LaneRow = { id: string; name: string; purpose: string; brief: string; weight: number; profileTarget: string };
 
 export function toIcpContext(row: IcpRow | null): IcpContext {
@@ -87,13 +92,15 @@ export function toIcpContext(row: IcpRow | null): IcpContext {
   };
 }
 
-export function toMemoryContext(row: MemoryRow): MemoryContext {
+export function toMemoryContext(row: MemoryRow, now = Date.now()): MemoryContext {
+  const fresh = row.source === "WEEKLY_PULSE" && !!row.createdAt && now - row.createdAt.getTime() < PULSE_FRESH_DAYS * 86_400_000;
   return {
     id: row.id,
     kind: row.kind as MemoryKind,
     content: row.content,
     disclosure: row.disclosure as MemoryDisclosure,
     used_count: row.usedCount,
+    ...(fresh ? { fresh: true } : {}),
   };
 }
 
@@ -165,5 +172,5 @@ export async function getAuthorContext(clientId: string): Promise<AuthorContext>
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     }),
   ]);
-  return { icp: toIcpContext(icp), memory: memory.map(toMemoryContext), lanes: lanes.map(toLaneContext) };
+  return { icp: toIcpContext(icp), memory: memory.map((m) => toMemoryContext(m)), lanes: lanes.map(toLaneContext) };
 }

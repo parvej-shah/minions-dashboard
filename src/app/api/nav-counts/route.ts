@@ -5,6 +5,7 @@ import { apiError } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 import { findPlan } from "@/constants/plans";
 import type { NavCounts } from "@/types";
+import { getPulse } from "@/services/pulse";
 
 /**
  * Sidebar badge counts in one round trip.
@@ -22,7 +23,7 @@ export async function GET() {
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
-    const [ideasReady, pendingReview, publishedLive, directivesCount, fleet, assetsThisMonth, subscription, client] =
+    const [ideasReady, pendingReview, publishedLive, directivesCount, fleet, assetsThisMonth, subscription, client, pulse] =
       await Promise.all([
         prisma.idea.count({
           where: { clientId: ctx.clientId, status: { in: ["HARVESTED", "REFINED"] } },
@@ -34,6 +35,7 @@ export async function GET() {
         prisma.asset.count({ where: { clientId: ctx.clientId, createdAt: { gte: startOfMonth } } }),
         prisma.subscription.findUnique({ where: { clientId: ctx.clientId }, select: { planKey: true } }),
         prisma.client.findUnique({ where: { id: ctx.clientId }, select: { assetsPerMonthOverride: true } }),
+        getPulse(ctx.clientId).catch(() => null),
       ]);
 
     // No Subscription row yet (tenant-zero, or a trial that hasn't hit
@@ -51,6 +53,7 @@ export async function GET() {
       publishedLive,
       directivesCount,
       activeAgents: fleet.filter((a) => a.status === "ACTIVE").length,
+      pulseDue: pulse?.state === "DUE" || pulse?.state === "CONFIRM",
       quota: {
         used: assetsThisMonth,
         limit: assetsPerMonthLimit,

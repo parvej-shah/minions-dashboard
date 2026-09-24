@@ -29,8 +29,11 @@ export function buildNavItems(counts: NavCounts | null): NavItem[] {
       name: "Mission Control",
       href: "/",
       icon: LayoutDashboard,
-      badge: "Live",
-      badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
+      // The weekly question waiting on the home page outranks "Live".
+      badge: counts?.pulseDue ? "1 question" : "Live",
+      badgeColor: counts?.pulseDue
+        ? "bg-[#ff6b4a]/10 text-[#ff6b4a] border-[#ff6b4a]/30"
+        : "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
     },
     {
       name: "Idea Stream",

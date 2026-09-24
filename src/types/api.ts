@@ -10,6 +10,8 @@ export interface NavCounts {
   publishedLive: number;
   directivesCount: number;
   activeAgents: number;
+  /** The weekly question is open (or answered and waiting to be confirmed). */
+  pulseDue?: boolean;
   quota: {
     used: number;
     limit: number;

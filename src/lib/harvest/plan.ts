@@ -73,6 +73,11 @@ export function planHarvest(input: HarvestPlanInput): HarvestSlot[] {
     .sort((a, b) => a.use - b.use || a.i - b.i);
   const memoryIn = (b: SourceBucket) => ranked.filter(({ m }) => MEMORY_KIND_SOURCE[m.kind]?.bucket === b);
 
+  // Phase 6: an item from a recent weekly answer that no recent idea has used
+  // seeds the first slot, whatever the mix says. The author just told us what
+  // happened this week; waiting for its bucket to fall behind would bury it.
+  const freshPick = ranked.find(({ m, use }) => m.fresh && use === 0 && MEMORY_KIND_SOURCE[m.kind]);
+
   const icpPrompts = [...icp.questions, ...icp.pains, ...icp.decisions].map((s) => s.trim()).filter(Boolean);
   const taken = new Set<string>();
   let icpUsed = 0;
@@ -84,6 +89,20 @@ export function planHarvest(input: HarvestPlanInput): HarvestSlot[] {
   };
 
   return angles.map((angle, idx) => {
+    if (idx === 0 && freshPick) {
+      const { bucket, sourceType } = MEMORY_KIND_SOURCE[freshPick.m.kind];
+      taken.add(freshPick.m.id);
+      counts[bucket]++;
+      counted++;
+      return {
+        slot: 1,
+        pillar: angle.pillar,
+        pillar_brief: angle.brief,
+        bucket,
+        source_type: sourceType,
+        seed: { kind: "MEMORY", ref: memoryRef(freshPick.i), memory_id: freshPick.m.id },
+      };
+    }
     let best: SourceBucket | null = null;
     let bestScore = -Infinity;
     for (const b of SOURCE_BUCKETS) {

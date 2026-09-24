@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import WeeklyUpdatesPanel from "@/components/pulse/WeeklyUpdatesPanel";
 import {
   AlertTriangle,
   BookOpen,
@@ -59,6 +60,7 @@ export default function ExperienceTab({ onChange }: ExperienceTabProps) {
     <div className="space-y-6">
       <IcpEditor onChange={onChange} />
       <MemorySection onChange={onChange} />
+      <WeeklyUpdatesPanel />
     </div>
   );
 }

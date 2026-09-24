@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import EmptyState, { LoadingState } from "@/components/ui/EmptyState";
+import WeeklyPulseCard from "@/components/pulse/WeeklyPulseCard";
 import { formatDate } from "@/utils/date";
 import { AssetItem, IdeaItem, PublishedPostRecord } from "@/types";
 
@@ -82,6 +83,9 @@ export default function MissionControlPage() {
           </Link>
         </div>
       </div>
+
+      {/* THE WEEKLY QUESTION (phase 6): shown only on the weeks it is open */}
+      <WeeklyPulseCard />
 
       {/* TOP STAT TILES ROW (4 KPI TILES PER PRD) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -1,0 +1,194 @@
+{
+  "summary": {
+    "label": "phase6",
+    "cases": 8,
+    "raw_items": 11,
+    "raw_faithful_pct": 100,
+    "kept_items": 11,
+    "count_in_range_pct": 100,
+    "kind_fit_pct": 100,
+    "generalize_honoured": "1/1"
+  },
+  "rows": [
+    {
+      "id": "one-lesson",
+      "raw": [
+        {
+          "kind": "BUILD_IN_PUBLIC",
+          "content": "Shipped the call-summary validator for our real estate pilot.",
+          "invented": []
+        },
+        {
+          "kind": "LESSON",
+          "content": "I assumed agents wanted transcripts. They only open the 3-line summary. I changed my mind about building a transcript viewer.",
+          "invented": []
+        }
+      ],
+      "kept": [
+        {
+          "kind": "BUILD_IN_PUBLIC",
+          "content": "Shipped the call-summary validator for our real estate pilot.",
+          "disclosure": "GENERALIZE"
+        },
+        {
+          "kind": "LESSON",
+          "content": "I assumed agents wanted transcripts. They only open the 3-line summary. I changed my mind about building a transcript viewer.",
+          "disclosure": "GENERALIZE"
+        }
+      ],
+      "dropped": [],
+      "fallback": false
+    },
+    {
+      "id": "three-points",
+      "raw": [
+        {
+          "kind": "LESSON",
+          "content": "We moved our booking agent off a single-prompt setup and split it into talk and validate. Failed bookings dropped from about 1 in 10 to 1 in 40.",
+          "invented": []
+        },
+        {
+          "kind": "ICP_QUESTION",
+          "content": "A plumber asked me whether the AI can refuse emergency jobs outside the service area. I hadn't thought about that scenario before.",
+          "invented": []
+        },
+        {
+          "kind": "OPINION",
+          "content": "I now think voice demos are a bad sales tool. They only show the easy path.",
+          "invented": []
+        }
+      ],
+      "kept": [
+        {
+          "kind": "LESSON",
+          "content": "We moved our booking agent off a single-prompt setup and split it into talk and validate. Failed bookings dropped from about 1 in 10 to 1 in 40.",
+          "disclosure": "PUBLIC"
+        },
+        {
+          "kind": "ICP_QUESTION",
+          "content": "A plumber asked me whether the AI can refuse emergency jobs outside the service area. I hadn't thought about that scenario before.",
+          "disclosure": "GENERALIZE"
+        },
+        {
+          "kind": "OPINION",
+          "content": "I now think voice demos are a bad sales tool. They only show the easy path.",
+          "disclosure": "PUBLIC"
+        }
+      ],
+      "dropped": [],
+      "fallback": false
+    },
+    {
+      "id": "client-not-named",
+      "raw": [
+        {
+          "kind": "STORY",
+          "content": "A dental practice in Austin told us our AI receptionist booked 14 new patients in its first week. But two of them were double-booked because the calendar sync lags by minutes.",
+          "invented": []
+        },
+        {
+          "kind": "LESSON",
+          "content": "Our AI receptionist booked 14 new patients for a dental practice in its first week, but two were double-booked. The cause was our calendar sync lagging by minutes. A few minutes of delay is enough to break scheduling.",
+          "invented": []
+        }
+      ],
+      "kept": [
+        {
+          "kind": "STORY",
+          "content": "A dental practice in Austin told us our AI receptionist booked 14 new patients in its first week. But two of them were double-booked because the calendar sync lags by minutes.",
+          "disclosure": "GENERALIZE"
+        },
+        {
+          "kind": "LESSON",
+          "content": "Our AI receptionist booked 14 new patients for a dental practice in its first week, but two were double-booked. The cause was our calendar sync lagging by minutes. A few minutes of delay is enough to break scheduling.",
+          "disclosure": "GENERALIZE"
+        }
+      ],
+      "dropped": [],
+      "fallback": false
+    },
+    {
+      "id": "vague",
+      "raw": [],
+      "kept": [],
+      "dropped": [],
+      "fallback": false
+    },
+    {
+      "id": "changed-mind",
+      "raw": [
+        {
+          "kind": "LESSON",
+          "content": "I used to tell people to automate the whole dispatch flow at once. After watching a customer roll back after two days, I now think you automate the confirmation call first and leave assignment to people until the data is clean.",
+          "invented": []
+        }
+      ],
+      "kept": [
+        {
+          "kind": "LESSON",
+          "content": "I used to tell people to automate the whole dispatch flow at once. After watching a customer roll back after two days, I now think you automate the confirmation call first and leave assignment to people until the data is clean.",
+          "disclosure": "GENERALIZE"
+        }
+      ],
+      "dropped": [],
+      "fallback": false
+    },
+    {
+      "id": "experiment-with-evidence",
+      "raw": [
+        {
+          "kind": "EXPERIMENT",
+          "content": "I'm testing whether posting the cover as a quote instead of a headline changes reach. Our headline covers look alike and get skipped. Two quote covers so far, both above my median impressions; too early to say.",
+          "invented": []
+        }
+      ],
+      "kept": [
+        {
+          "kind": "EXPERIMENT",
+          "content": "I'm testing whether posting the cover as a quote instead of a headline changes reach. Our headline covers look alike and get skipped. Two quote covers so far, both above my median impressions; too early to say.",
+          "disclosure": "PUBLIC"
+        }
+      ],
+      "dropped": [],
+      "fallback": false
+    },
+    {
+      "id": "customer-questions",
+      "raw": [
+        {
+          "kind": "ICP_QUESTION",
+          "content": "Two landlords asked the same thing this week: if a tenant calls at 2am about a leak, does the AI wake someone up or just log it? We route it to the on-call phone, but nobody knows that until they ask.",
+          "invented": []
+        }
+      ],
+      "kept": [
+        {
+          "kind": "ICP_QUESTION",
+          "content": "Two landlords asked the same thing this week: if a tenant calls at 2am about a leak, does the AI wake someone up or just log it? We route it to the on-call phone, but nobody knows that until they ask.",
+          "disclosure": "GENERALIZE"
+        }
+      ],
+      "dropped": [],
+      "fallback": false
+    },
+    {
+      "id": "build-in-public",
+      "raw": [
+        {
+          "kind": "BUILD_IN_PUBLIC",
+          "content": "I launched the weekly question in Minions today. It asks what you built or learned, turns your answer into notes, and you confirm them before anything is saved.",
+          "invented": []
+        }
+      ],
+      "kept": [
+        {
+          "kind": "BUILD_IN_PUBLIC",
+          "content": "I launched the weekly question in Minions today. It asks what you built or learned, turns your answer into notes, and you confirm them before anything is saved.",
+          "disclosure": "PUBLIC"
+        }
+      ],
+      "dropped": [],
+      "fallback": false
+    }
+  ]
+}

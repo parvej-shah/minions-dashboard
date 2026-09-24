@@ -25,6 +25,11 @@ model Client {
   name                   String
   status                 String   @default("TRIAL") // TRIAL | ACTIVE | PAST_DUE | SUSPENDED | CANCELED
   timezone               String   @default("America/New_York")
+  // Phase 6: the weekly question. pulseDay is 1 = Monday ... 7 = Sunday.
+  pulseEnabled           Boolean  @default(true) @map("pulse_enabled")
+  pulseDay               Int      @default(5) @map("pulse_day") @db.SmallInt
+  // False until the user confirms the timezone (every tenant started on the default).
+  timezoneConfirmed      Boolean  @default(false) @map("timezone_confirmed")
   // Maintainer-set manual usage-cap override (platform-admin dashboard), independent of
   // Subscription/Stripe -- NULL means "use the plan default". See findPlan()/plans.ts.
   assetsPerMonthOverride Int?     @map("assets_per_month_override")
@@ -48,6 +53,7 @@ model Client {
   icpProfile      IcpProfile?
   memories        ProfessionalMemory[]
   contentLanes    ContentLane[]
+  weeklyPulses    WeeklyPulse[]
 
   @@map("clients")
 }
@@ -542,6 +548,28 @@ model ProfessionalMemory {
 
   @@index([clientId, isActive], map: "professional_memories_client_active_idx")
   @@map("professional_memories")
+}
+
+/// The weekly question (phase 6): one row per tenant per week, keyed by that
+/// week's Monday in the tenant's timezone. See src/lib/pulse.
+model WeeklyPulse {
+  id           String    @id @default(cuid())
+  clientId     String    @map("client_id")
+  weekStart    DateTime  @map("week_start") @db.Date
+  status       String // SNOOZED | SKIPPED | EXTRACTED | ANSWERED
+  snoozedUntil DateTime? @map("snoozed_until")
+  answer       String?   @db.Text
+  followups    Json      @default("{}")
+  candidates   Json      @default("[]")
+  memoryIds    String[]  @default([]) @map("memory_ids")
+  answeredAt   DateTime? @map("answered_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, weekStart])
+  @@map("weekly_pulses")
 }
 
 /// WHAT a tenant publishes and why (an idea's pillar is only its rhetorical
