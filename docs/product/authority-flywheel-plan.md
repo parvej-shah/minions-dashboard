@@ -825,8 +825,9 @@ regenerated.
   which reads only digits. Nothing this workspace has saved states that
   threshold.
 
-**Exit criterion still open:** 5 live drafts on tenant zero, reviewed by the
-user. They need tenant zero's experience items. Until then its ideas carry no
+**Closed by the user on 2026-09-24.** The phase 4 exit was accepted on the
+eval results and the live test drafts. Review of 5 live tenant-zero drafts
+moves to after tenant zero's experience items are in. They need tenant zero's experience items. Until then its ideas carry no
 experience and draft on the older path.
 
 ### Security fixes found along the way (2026-09-23)
