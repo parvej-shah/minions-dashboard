@@ -1,0 +1,284 @@
+import { prisma } from "@/lib/prisma";
+import { uploadToR2 } from "@/lib/r2";
+import { coverBrand } from "@/lib/covers/brand";
+import { audienceLabel, chooseCoverCopy, scoreHeadline, pickQuote, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
+import { COVER_LAYOUTS, CoverFitError, type CoverLayout, type CoverSpec } from "@/lib/covers/layouts";
+import { renderCoverPng } from "@/lib/covers/render";
+import { numbersIn } from "@/lib/harvest/text";
+
+/**
+ * Draws an asset's cover in code and attaches it (phase 5 of
+ * docs/product/authority-flywheel-plan.md). Called by 02_idea_to_asset once
+ * the draft is saved, and by the dashboard when a reviewer edits the cover.
+ * No image model is involved, so a cover costs nothing and takes about a
+ * second; 04_hero_image's Qwen path is kept, bypassed, for optional artwork.
+ */
+
+export const COVER_PROVIDER = "template";
+
+/** What a reviewer may change on a cover. Everything else comes from the draft and the brand. */
+export interface CoverEdit {
+  layout?: CoverLayout;
+  headline?: string;
+  kicker?: string;
+  emphasis?: string;
+}
+
+/** The stored record: the spec without the embedded photo, plus how the copy was chosen. */
+export type StoredCoverSpec = Omit<CoverSpec, "author"> & {
+  author: { name: string; role?: string; has_photo: boolean };
+  card: CoverCard;
+  headline_source: CoverCopy["headline_source"] | "reviewer";
+  score: CoverCopy["score"];
+  notes: string[];
+  rendered_at: string;
+};
+
+export type CoverResult =
+  | { ok: true; url: string; spec: StoredCoverSpec }
+  | { ok: false; error: string };
+
+const PHOTO_TYPES = new Set(["image/png", "image/jpeg"]);
+const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
+
+/**
+ * The photo URL is typed by a user and fetched by the server, so only a
+ * public https host by name is fetched: no localhost, no IP literal, no
+ * redirects to somewhere else.
+ */
+function isPublicHttps(url: string): boolean {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.toLowerCase();
+    return u.protocol === "https:" && !u.port && host.includes(".") && !/^[\d.]+$/.test(host) && !host.includes(":") && !/(^|\.)(localhost|local|internal)$/.test(host);
+  } catch {
+    return false;
+  }
+}
+
+async function fetchImage(url: string): Promise<{ data: Buffer; type: string } | null> {
+  if (!isPublicHttps(url)) return null;
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(8000), redirect: "error" });
+    const type = (res.headers.get("content-type") ?? "").split(";")[0].trim();
+    if (!res.ok || !PHOTO_TYPES.has(type)) return null;
+    const data = Buffer.from(await res.arrayBuffer());
+    return data.length <= PHOTO_MAX_BYTES ? { data, type } : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The logo or headshot as a data URL, copied into R2 the first time a given
+ * logo URL is seen (an imported LinkedIn photo URL expires within weeks).
+ * Undefined when there is none or it cannot be fetched: the cover then shows
+ * an initials monogram rather than failing.
+ */
+const onOurStorage = (url: string) => {
+  const domain = process.env.NEXT_PUBLIC_R2_PUBLIC_DOMAIN;
+  return Boolean(domain && url.startsWith(`${domain}/`));
+};
+
+const asDataUrl = (img: { data: Buffer; type: string }) => `data:${img.type};base64,${img.data.toString("base64")}`;
+
+async function coverPhoto(profile: { id: string; clientId: string | null; primaryLogoUrl: string; coverPhotoUrl: string | null; coverPhotoSource: string | null }): Promise<string | undefined> {
+  const source = profile.primaryLogoUrl.trim();
+  if (!/^https:\/\//.test(source)) return undefined;
+  // An uploaded photo already lives in R2; only an outside URL is copied.
+  const hosted = onOurStorage(source) ? source : profile.coverPhotoSource === source ? profile.coverPhotoUrl : null;
+  if (!hosted) {
+    const original = await fetchImage(source);
+    if (!original) return undefined;
+    const ext = original.type === "image/png" ? "png" : "jpg";
+    const { url } = await uploadToR2(`brand/${profile.clientId ?? profile.id}/cover-photo-${Date.now()}.${ext}`, original.data, original.type);
+    await prisma.brandProfile.update({ where: { id: profile.id }, data: { coverPhotoUrl: url, coverPhotoSource: source } });
+    return asDataUrl(original);
+  }
+  const img = await fetchImage(hosted);
+  return img ? asDataUrl(img) : undefined;
+}
+
+/** "Founder of Minions.AI." -- the positioning's first sentence, if it is short enough for the author line. */
+export function defaultByline(positioning: string): string | undefined {
+  const first = positioning.trim().split(/(?<=[.!?])\s+(?=[A-Z])/)[0]?.trim();
+  return first && first.length <= 90 ? first.replace(/\.$/, "") : undefined;
+}
+
+/** The draft body without the cover image line it carries once a cover is attached. */
+const bodyOf = (content: string) => content.replace(/^!\[[^\]]*\]\([^)]*\)\s*/, "");
+
+/** The asset's content with its cover line set to url (replacing an old one). */
+export function withCoverLine(content: string, title: string, url: string): string {
+  const alt = (title || "Cover image").replace(/[[\]]/g, "");
+  return `![${alt}](${url})\n\n${bodyOf(content)}`;
+}
+
+/**
+ * Specs to try, best first. A spec throws CoverFitError when its copy cannot
+ * fit; the next one drops the kicker, then uses the title, then the plain
+ * HEADLINE layout, so a draft always gets a cover when any honest copy fits.
+ */
+function attempts(spec: CoverSpec, title: string): CoverSpec[] {
+  const out = [spec];
+  if (spec.kicker) out.push({ ...spec, kicker: undefined });
+  if (title && title !== spec.headline) out.push({ ...spec, layout: spec.layout === "STATEMENT" ? "STATEMENT" : "HEADLINE", headline: title, emphasis: undefined, kicker: undefined, quote: undefined, number: undefined });
+  out.push({ ...spec, layout: "HEADLINE", headline: title || spec.headline, emphasis: undefined, kicker: undefined, quote: undefined, number: undefined, label: undefined });
+  return out;
+}
+
+export async function renderAssetCover(assetId: string, input: { card?: CoverCard; edit?: CoverEdit } = {}): Promise<CoverResult> {
+  const asset = await prisma.asset.findUnique({
+    where: { id: assetId },
+    select: { id: true, clientId: true, title: true, hook: true, content: true, claimsOk: true, coverSpec: true, heroAttempts: true },
+  });
+  if (!asset) return { ok: false, error: `Asset ${assetId} not found` };
+  if (!asset.clientId) return { ok: false, error: `Asset ${assetId} has no workspace` };
+
+  const [profile, icp, recent] = await Promise.all([
+    prisma.brandProfile.findUnique({ where: { clientId: asset.clientId } }),
+    prisma.icpProfile.findUnique({ where: { clientId: asset.clientId } }),
+    prisma.asset.findMany({
+      where: { clientId: asset.clientId, id: { not: asset.id }, heroProvider: COVER_PROVIDER },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+      select: { coverSpec: true },
+    }),
+  ]);
+  if (!profile) return { ok: false, error: "The workspace has no brand profile" };
+
+  const previous = (asset.coverSpec ?? null) as Partial<StoredCoverSpec> | null;
+  const card: CoverCard = input.card ?? previous?.card ?? {};
+  const body = bodyOf(asset.content ?? "");
+  const icpFields = { who: icp?.who ?? "", role: icp?.role ?? "", company_type: icp?.companyType ?? "" };
+  const copy = chooseCoverCopy({
+    card,
+    title: asset.title ?? "",
+    hook: asset.hook ?? "",
+    body,
+    claimsOk: asset.claimsOk ?? "N",
+    icp: icpFields,
+    recentLayouts: recent.map((r) => (r.coverSpec as { layout?: string } | null)?.layout ?? "").filter(Boolean),
+  });
+
+  const { brand, notes: brandNotes } = coverBrand({ ink: profile.primaryInk, paper: profile.brandCream, accent: profile.brandCoral, secondary: profile.brandTeal });
+  const author = {
+    name: profile.brandName,
+    role: profile.coverByline?.trim() || defaultByline(profile.positioning ?? ""),
+    photo: await coverPhoto(profile),
+  };
+
+  let spec: CoverSpec = { layout: copy.layout, label: copy.label, headline: copy.headline, emphasis: copy.emphasis, kicker: copy.kicker, quote: copy.quote, number: copy.number, author, brand };
+  const notes = [...copy.notes, ...brandNotes];
+  let headlineSource: StoredCoverSpec["headline_source"] = copy.headline_source;
+  let score = copy.score;
+
+  // A reviewer's edit. It passes the same honesty checks as generated copy:
+  // no figure the draft does not state, a quote only from the body.
+  const edit = input.edit;
+  if (edit) {
+    const figures = (t: string) => numbersIn(t).filter((n) => !numbersIn(body).includes(n));
+    if (edit.headline !== undefined) {
+      const bad = figures(edit.headline);
+      if (bad.length) return { ok: false, error: `The headline states ${bad.join(", ")}, which the draft does not.` };
+      spec = { ...spec, headline: edit.headline.trim(), emphasis: edit.emphasis };
+      score = scoreHeadline(spec.headline, { body, icp: icpFields });
+      headlineSource = "reviewer";
+    } else if (edit.emphasis !== undefined) spec = { ...spec, emphasis: edit.emphasis || undefined };
+    if (edit.kicker !== undefined) {
+      const bad = figures(edit.kicker);
+      if (bad.length) return { ok: false, error: `The subtitle states ${bad.join(", ")}, which the draft does not.` };
+      spec = { ...spec, kicker: edit.kicker.trim() || undefined };
+    }
+    if (edit.layout) {
+      if (!COVER_LAYOUTS.includes(edit.layout)) return { ok: false, error: `Unknown layout ${edit.layout}` };
+      if (edit.layout === "NUMBER" && !spec.number) return { ok: false, error: "This draft has no verified figure for a NUMBER cover." };
+      if (edit.layout === "QUOTE" && !spec.quote) {
+        const quote = pickQuote(body);
+        if (!quote) return { ok: false, error: "No sentence in the draft works as a pull quote." };
+        spec = { ...spec, quote };
+      }
+      spec = { ...spec, layout: edit.layout };
+    }
+  }
+
+  let png: Buffer | null = null;
+  let used = spec;
+  for (const attempt of attempts(spec, asset.title ?? "")) {
+    try {
+      png = await renderCoverPng(attempt);
+      used = attempt;
+      break;
+    } catch (e) {
+      if (!(e instanceof CoverFitError)) throw e;
+      notes.push(e.message);
+    }
+  }
+  if (!png) return { ok: false, error: `No cover copy fits: ${notes.slice(-1)[0] ?? "unknown"}` };
+
+  const { url } = await uploadToR2(`covers/${asset.clientId}/${asset.id}-${Date.now()}.png`, png, "image/png");
+  const stored: StoredCoverSpec = {
+    ...used,
+    author: { name: author.name, role: author.role, has_photo: Boolean(author.photo) },
+    card,
+    headline_source: used.headline === spec.headline ? headlineSource : "title",
+    score,
+    notes,
+    rendered_at: new Date().toISOString(),
+  };
+  await prisma.asset.update({
+    where: { id: asset.id },
+    data: {
+      heroStatus: "READY",
+      heroImageUrl: url,
+      heroProvider: COVER_PROVIDER,
+      heroErrorCode: null,
+      heroAttempts: (asset.heroAttempts ?? 0) + 1,
+      coverSpec: stored as object,
+      content: withCoverLine(asset.content ?? "", asset.title ?? "", url),
+      updatedAt: new Date(),
+    },
+  });
+  return { ok: true, url, spec: stored };
+}
+
+/** Records a cover that could not be drawn, so the draft does not wait on it forever. */
+export async function markCoverFailed(assetId: string, error: string): Promise<void> {
+  await prisma.asset.updateMany({
+    where: { id: assetId, heroStatus: "PENDING" },
+    data: { heroStatus: "FAILED", heroErrorCode: error.slice(0, 240), heroProvider: COVER_PROVIDER, updatedAt: new Date() },
+  });
+}
+
+/**
+ * A sample cover in the workspace's look, for the Brand page: the same
+ * renderer, frame and checks as a real cover, with unsaved colours, byline
+ * and photo applied, so a change is seen exactly as it will be posted.
+ */
+export async function renderCoverPreview(
+  clientId: string,
+  look: { brand_name?: string; primary_ink?: string; brand_cream?: string; brand_coral?: string; brand_teal?: string; cover_byline?: string; primary_logo_url?: string; positioning?: string }
+): Promise<{ png: Buffer; notes: string[] }> {
+  const [profile, icp] = await Promise.all([prisma.brandProfile.findUnique({ where: { clientId } }), prisma.icpProfile.findUnique({ where: { clientId } })]);
+  const { brand, notes } = coverBrand({
+    ink: look.primary_ink ?? profile?.primaryInk,
+    paper: look.brand_cream ?? profile?.brandCream,
+    accent: look.brand_coral ?? profile?.brandCoral,
+    secondary: look.brand_teal ?? profile?.brandTeal,
+  });
+  const logo = (look.primary_logo_url ?? profile?.primaryLogoUrl ?? "").trim();
+  // Only https images; an unsaved outside URL is fetched for the preview but not copied.
+  const image = /^https:\/\//.test(logo) ? await fetchImage(logo) : null;
+  const byline = (look.cover_byline ?? profile?.coverByline ?? "").trim() || defaultByline(look.positioning ?? profile?.positioning ?? "");
+  const png = await renderCoverPng({
+    layout: "HEADLINE",
+    label: audienceLabel({ who: icp?.who ?? "", role: icp?.role ?? "", company_type: icp?.companyType ?? "" }),
+    headline: "Your post's claim appears here, in your type",
+    emphasis: "claim",
+    kicker: "One line under it says what the reader gets.",
+    author: { name: (look.brand_name ?? profile?.brandName ?? "Your name").trim() || "Your name", role: byline, photo: image ? asDataUrl(image) : undefined },
+    brand,
+  });
+  if (logo && !image) notes.push("The logo or photo could not be loaded (it must be a PNG or JPEG at an https address); initials are shown instead.");
+  return { png, notes };
+}

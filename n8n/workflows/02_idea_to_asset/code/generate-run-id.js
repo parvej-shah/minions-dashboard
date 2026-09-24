@@ -28,7 +28,11 @@ if (!clientId) throw new Error('Draft trigger has no client_id; refusing to gues
 const runId = triggerBody.run_id || generateUUID();
 const callbackUrl = triggerBody.callback_url || null;
 const callbackRunId = callbackUrl ? runIdFrom(callbackUrl, triggerBody.run_id) : '';
-// Test drafts skip the cover image (04_hero_image) to save its cost.
+// Covers are drawn in code by the dashboard (TEMPLATE, the default, free).
+// AI_IMAGE sends the cover to 04_hero_image's Qwen path instead; that path is
+// kept, not deleted, so it can come back. skip_hero keeps a test draft off
+// the paid AI_IMAGE path; it still gets a (free) template cover.
+const coverMode = (triggerBody.cover_mode || '').toString().toUpperCase() === 'AI_IMAGE' ? 'AI_IMAGE' : 'TEMPLATE';
 const skipHero = triggerBody.skip_hero === true || triggerBody.skip_hero === 'true';
 const nowIso = new Date().toISOString();
 return [{
@@ -39,6 +43,7 @@ return [{
     client_id: clientId,
     callback_url: callbackUrl,
     callback_run_id: callbackRunId,
-    skip_hero: skipHero
+    skip_hero: skipHero,
+    cover_mode: coverMode
   }
 }];

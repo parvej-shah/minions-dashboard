@@ -51,6 +51,7 @@ export async function POST(request: Request) {
       company_domain: (body.company_domain || "").trim(),
       positioning: (body.positioning || "").trim(),
       primary_logo_url: (body.primary_logo_url || "").trim(),
+      ...(typeof body.cover_byline === "string" ? { cover_byline: body.cover_byline.trim().slice(0, 120) } : {}),
       primary_ink: body.primary_ink || "#0B0F14",
       brand_teal: body.brand_teal || "#00D4AA",
       brand_coral: body.brand_coral || "#FF6B4A",

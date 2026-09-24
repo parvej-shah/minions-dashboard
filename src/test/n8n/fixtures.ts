@@ -20,6 +20,7 @@ export const brandSettings: BrandSettings = {
   company_domain: "acmeplumbing.example",
   positioning: "Same-day plumbing for homeowners in Columbus.",
   primary_logo_url: "https://cdn.example/logo.svg",
+  cover_byline: "",
   primary_ink: "#12242A",
   brand_teal: "#0E5C63",
   brand_coral: "#FF6B4A",

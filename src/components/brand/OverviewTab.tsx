@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User, Hash, Users2, Mic, Plus, X, Loader2, Pencil, Sparkles, Check, Palette } from "lucide-react";
+import { User, Hash, Users2, Mic, Plus, X, Loader2, Pencil, Sparkles, Check, Palette, Upload } from "lucide-react";
 import type { BrandDirectiveItem, BrandCategory, BrandSettings, BrandProfileInput, IcpProfileItem } from "@/types";
 import { useApiResource } from "@/hooks/useApiResource";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
@@ -16,25 +16,21 @@ const TONE_LABELS: Record<string, string> = {
   conversational_peer: "Conversational Peer",
 };
 
-// Ordered and labeled to match each color's actual role in a generated
-// cover (see 02_idea_to_asset's "Parse Variants and Prepare Rows" node):
-// cream canvas, ink headline + wordmark, coral highlight word, then one of
-// two small corner-icon colors depending on the article's topic register
-// (accent_blue for software/data topics, brand_teal for the five physical
-// trades). Generic names like "Accent" vs "Blue" didn't say why there were
-// two near-identical-sounding accent colors.
+// Ordered and labeled by each colour's role on a cover (src/lib/covers):
+// the paper, the text, the accent word and quote mark, the big number and the
+// initials badge. accent_blue is only used by the older AI image covers.
 const LOOK_COLOR_FIELDS: { key: "primary_ink" | "brand_teal" | "brand_coral" | "brand_cream" | "accent_blue"; label: string }[] = [
-  { key: "brand_cream", label: "Background" },
+  { key: "brand_cream", label: "Paper" },
   { key: "primary_ink", label: "Text" },
-  { key: "brand_coral", label: "Highlight word" },
-  { key: "accent_blue", label: "Icon (digital)" },
-  { key: "brand_teal", label: "Icon (trade)" },
+  { key: "brand_coral", label: "Accent word" },
+  { key: "brand_teal", label: "Number & initials" },
+  { key: "accent_blue", label: "AI image icon" },
 ];
 
 type LookDraft = Pick<
   BrandProfileInput,
   "primary_logo_url" | "primary_ink" | "brand_teal" | "brand_coral" | "brand_cream" | "accent_blue"
->;
+> & { cover_byline: string };
 
 function toProfileInput(settings: BrandSettings): BrandProfileInput {
   return {
@@ -42,6 +38,7 @@ function toProfileInput(settings: BrandSettings): BrandProfileInput {
     company_domain: settings.company_domain,
     positioning: settings.positioning,
     primary_logo_url: settings.primary_logo_url,
+    cover_byline: settings.cover_byline,
     primary_ink: settings.primary_ink,
     brand_teal: settings.brand_teal,
     brand_coral: settings.brand_coral,
@@ -158,6 +155,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
     if (!profile) return;
     setLookDraft({
       primary_logo_url: profile.primary_logo_url,
+      cover_byline: profile.cover_byline,
       primary_ink: profile.primary_ink,
       brand_teal: profile.brand_teal,
       brand_coral: profile.brand_coral,
@@ -179,6 +177,30 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
       setEditingLook(false);
     } finally {
       setSavingLook(false);
+    }
+  };
+
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+
+  /** Uploads a headshot or logo to our storage; covers use it from the next draft on. */
+  const uploadPhoto = async (file: File | undefined) => {
+    if (!file || !lookDraft) return;
+    setPhotoError(null);
+    if (!["image/png", "image/jpeg"].includes(file.type)) return setPhotoError("Use a PNG or JPEG image.");
+    if (file.size > 5 * 1024 * 1024) return setPhotoError("Use an image under 5 MB.");
+    setUploadingPhoto(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/media/upload", { method: "POST", body: form });
+      const body = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !body.url) throw new Error(body.error || `Upload failed (HTTP ${res.status})`);
+      setLookDraft((d) => (d ? { ...d, primary_logo_url: body.url! } : d));
+    } catch (e) {
+      setPhotoError(toErrorMessage(e, "Upload failed"));
+    } finally {
+      setUploadingPhoto(false);
     }
   };
 
@@ -405,17 +427,39 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
               </button>
             )}
           </div>
-          <p className="text-sm text-[#94A3B8]">Logo and colors used on generated thumbnails and covers.</p>
+          <p className="text-sm text-[#94A3B8]">
+            Every post&apos;s cover is drawn in this look: the same type, colours, photo and byline each time, so readers learn to recognise your posts.
+          </p>
 
           {editingLook && lookDraft ? (
             <div className="space-y-3">
               <div>
-                <label className="text-[11px] font-medium text-[#94A3B8] block mb-1">Logo URL</label>
+                <label className="text-[11px] font-medium text-[#94A3B8] block mb-1">Photo or logo on covers (a headshot builds personal authority)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={lookDraft.primary_logo_url}
+                    onChange={(e) => setLookDraft({ ...lookDraft, primary_logo_url: e.target.value })}
+                    placeholder="https://… (PNG or JPEG)"
+                    className="flex-1 min-w-0 bg-[#161D26] border border-[#1F2D3D] rounded-lg px-3 py-1.5 text-xs text-[#F1F5F9] font-mono focus:outline-none focus:border-[#00C9A7]"
+                  />
+                  <label className={`shrink-0 px-3 py-1.5 rounded-lg bg-[#161D26] border border-[#1F2D3D] text-xs text-[#00C9A7] hover:border-[#00C9A7] cursor-pointer inline-flex items-center gap-1.5 ${uploadingPhoto ? "opacity-50 pointer-events-none" : ""}`}>
+                    {uploadingPhoto ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                    Upload
+                    <input type="file" accept="image/png,image/jpeg" className="hidden" onChange={(e) => void uploadPhoto(e.target.files?.[0])} />
+                  </label>
+                </div>
+                {photoError && <p className="text-[11px] text-[#F87171] mt-1">{photoError}</p>}
+              </div>
+              <div>
+                <label className="text-[11px] font-medium text-[#94A3B8] block mb-1">Byline under your name (empty: the first sentence of your positioning)</label>
                 <input
                   type="text"
-                  value={lookDraft.primary_logo_url}
-                  onChange={(e) => setLookDraft({ ...lookDraft, primary_logo_url: e.target.value })}
-                  className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-lg px-3 py-1.5 text-xs text-[#F1F5F9] font-mono focus:outline-none focus:border-[#00C9A7]"
+                  value={lookDraft.cover_byline}
+                  maxLength={90}
+                  onChange={(e) => setLookDraft({ ...lookDraft, cover_byline: e.target.value })}
+                  placeholder="e.g. Builds AI voice agents for real estate teams"
+                  className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-lg px-3 py-1.5 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]"
                 />
               </div>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
@@ -436,7 +480,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
                   </div>
                 ))}
               </div>
-              <BrandLookPreview colors={lookDraft} brandName={profile?.brand_name} />
+              <BrandLookPreview colors={lookDraft} brandName={profile?.brand_name} byline={lookDraft.cover_byline} logoUrl={lookDraft.primary_logo_url} />
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setEditingLook(false)}
@@ -455,6 +499,8 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
               </div>
             </div>
           ) : (
+            <div className="space-y-3">
+            {profile && <BrandLookPreview colors={profile} brandName={profile.brand_name} byline={profile.cover_byline} logoUrl={profile.primary_logo_url} />}
             <div className="flex flex-wrap items-center gap-2">
               {profile &&
                 LOOK_COLOR_FIELDS.map(({ key, label }) => (
@@ -471,8 +517,9 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
                 </span>
               )}
               {profile && !profile.primary_logo_url && (
-                <span className="text-[11px] text-[#64748B] ml-2">No logo set yet.</span>
+                <span className="text-[11px] text-[#64748B] ml-2">No photo or logo yet: covers show your initials.</span>
               )}
+            </div>
             </div>
           )}
         </div>

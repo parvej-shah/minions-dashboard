@@ -22,7 +22,7 @@
           },
           {
             "index": 0,
-            "node": "Cover Wanted?",
+            "node": "AI Image Cover?",
             "type": "main"
           }
         ]
@@ -590,16 +590,22 @@
         ]
       ]
     },
-    "Cover Wanted?": {
+    "AI Image Cover?": {
       "main": [
         [
           {
-            "index": 0,
             "node": "Dispatch Hero Generation",
-            "type": "main"
+            "type": "main",
+            "index": 0
           }
         ],
-        []
+        [
+          {
+            "node": "Render Cover",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -2129,13 +2135,22 @@
     },
     {
       "id": "7a1d2a3b-4c5d-4e6f-8a9b-0c1d2e3f4a63",
-      "name": "Cover Wanted?",
+      "name": "AI Image Cover?",
       "parameters": {
         "conditions": {
           "combinator": "and",
           "conditions": [
             {
               "id": "1",
+              "leftValue": "={{ $('Generate run_id').first().json.cover_mode }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "AI_IMAGE"
+            },
+            {
+              "id": "2",
               "leftValue": "={{ $('Generate run_id').first().json.skip_hero }}",
               "operator": {
                 "operation": "false",
@@ -2160,6 +2175,36 @@
       ],
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "id": "7a1d2a3b-4c5d-4e6f-8a9b-0c1d2e3f4a64",
+      "name": "Render Cover",
+      "position": [
+        7000,
+        820
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "POST",
+        "url": "https://minions.getminions.ai/api/internal/covers",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ asset_id: $('Prepare Asset Row').first().json.asset_id, card: ($('Parse Variants and Prepare Rows').first().json.cover_inputs || {}).thumbnail_card || {} }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      }
     }
   ],
   "settings": {

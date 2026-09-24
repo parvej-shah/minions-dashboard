@@ -1,6 +1,6 @@
 # Authority flywheel: product plan
 
-Status: phases 0–4 BUILT (2026-09-23/24); see "Progress" at the end. Written 2026-09-23 from
+Status: phases 0–4 BUILT (2026-09-23/24), phase 5 built (2026-09-24); see "Progress" at the end. Written 2026-09-23 from
 [the strategy conversation](2026-09-23-strategy-conversation.md) and a read of
 the code as of commit `26c0b42`.
 
@@ -252,6 +252,20 @@ Exit: the eval passes, and 5 live drafts on tenant zero are reviewed by the user
 - The 04 back-compat branch is removed on its 2026-10-01 expiry, in the same PR.
 
 Exit: no generated text inside images, and the cover cost for a text-only cover is about $0.
+
+**Decided 2026-09-24 (user):**
+- **Portrait 1080×1350** for the LinkedIn feed. The blog size is rendered from the same spec.
+- **AI artwork off** by default.
+- **Keep 04's Qwen image nodes.** They are bypassed, not deleted, because we may go back to them.
+- **One fixed type system for every tenant**, so a reader learns to recognise the author's covers:
+  - Newsreader for headlines and quotes;
+  - Inter for labels and the author line;
+  - both under the SIL OFL.
+- **Logo or headshot on the cover when the tenant uploaded one.** Otherwise an initials monogram.
+  - LinkedIn photo URLs expire (tenant cmtvi4a7r…'s returned 404), so an uploaded image must be copied to R2.
+- **Layouts:** HEADLINE, STATEMENT (dark), QUOTE, NUMBER.
+  - All four share one frame: topic label, centre, author signature.
+  - Headline line breaks are set in code (`src/lib/covers/fit.ts`), so copy that cannot fit is rejected, never cut.
 
 ### Phase 6: Weekly alignment (about 1 week)
 
@@ -829,6 +843,104 @@ regenerated.
 eval results and the live test drafts. Review of 5 live tenant-zero drafts
 moves to after tenant zero's experience items are in. They need tenant zero's experience items. Until then its ideas carry no
 experience and draft on the older path.
+
+### Phase 5 — built 2026-09-24 (not yet deployed)
+
+**Covers are drawn in code** (`src/lib/covers`, `src/services/cover.ts`):
+portrait 1080×1350 PNGs rendered with `next/og` (Satori and resvg). No image
+model is called, so a cover costs nothing and takes about a second.
+
+- **One frame for every post:**
+  - an audience label taken from the ICP ("For real estate brokerages and teams");
+  - the centre, which changes with the layout;
+  - the author signature: photo or initials, name and byline.
+- **Four layouts:** HEADLINE, STATEMENT (dark), QUOTE and NUMBER.
+- **One type system for every tenant:** Newsreader for headlines and quotes,
+  Inter for the rest (OFL, in `src/lib/covers/fonts`).
+- **Text is fitted from the fonts' real advance widths.** A small TrueType
+  reader in `metrics.ts` measures width, line count and height. Copy that
+  cannot fit is refused, never cut; the service then retries with no kicker,
+  then with the title.
+- **Brand colours are checked for contrast:**
+  - text on paper must reach 7:1, or the default colours are used;
+  - an accent word below 3:1 is deepened toward the ink, keeping its hue;
+  - the dark layout keeps the original accent.
+
+**Copy and layout are chosen in code** (`copy.ts`):
+
+- The strategist's headline is used if it passes these checks:
+  - 3–14 words;
+  - not a topic label or an X-vs-Y pairing;
+  - no figure that the draft doesn't state.
+- Otherwise the title is used. ALL CAPS is set in sentence case.
+- NUMBER is used only for a figure the body states, and never on a BLOCKED
+  draft.
+- QUOTE is a body sentence taken word for word:
+  - 7–22 words, with no figures;
+  - it must stand alone, so it can't open with "Not", "They" and similar;
+  - contrast lines and closing lines are preferred.
+- Layouts rotate per tenant: the least recently used wins, and a layout never
+  repeats the last one.
+
+**Strategist prompt:**
+
+- The cover headline is now 6–10 words in sentence case: a claim or promise,
+  not a label.
+- It also returns an `emphasis_word` and an optional `number`, which code
+  verifies.
+
+**Cover eval** (`npm run eval:covers`): the strategist only, on the 9 fixed
+draft ideas, scored in code.
+
+| | Baseline | Phase 5 |
+|---|---|---|
+| Headlines of 6–10 words | 0% | 100% |
+| Average words | 4.6 | 9.4 |
+| Strategist headline used | 100% | 100% |
+| Fits on the first try | 100% | 100% |
+| Shares a word with the ICP (crude) | 44% | 33% |
+
+The NUMBER guard fired in the eval: the strategist offered "40%", the draft
+never stated it, and code refused it.
+
+**Pipeline** (02):
+
+- `Asset Write OK? → AI Image Cover? → Render Cover` calls
+  `/api/internal/covers`, which always leaves the cover READY or FAILED.
+- **The Qwen image path is kept, not deleted (user, 2026-09-24).** A trigger
+  with `cover_mode: "AI_IMAGE"` and no `skip_hero` still goes to
+  `Dispatch Hero Generation` and 04.
+- Test drafts now get a free template cover.
+
+**Dashboard:**
+
+- The Editorial cover card shows the portrait cover for every channel. It lets
+  a reviewer switch layout or edit the headline, subtitle or accent word, and
+  redraws the cover in about a second (`POST /api/assets/[id]/cover`). Edits
+  pass the same figure check.
+- The Brand look section now has:
+  - a live preview drawn by the real renderer (`/api/brand/cover-preview`);
+  - a byline field;
+  - a photo upload to R2. An outside logo URL is copied to R2 once, because
+    imported LinkedIn photo URLs expire. Tenant cmtvi4a7r's already returned
+    404.
+- Server-side photo fetches only reach public https hosts by name (no IP
+  literals or localhost, no redirects).
+
+**Schema** (`prisma/sql/2026-09-24-covers.sql`, additive):
+
+- `assets.cover_spec`;
+- `brand_profile.cover_byline`, `cover_photo_url` and `cover_photo_source`.
+
+**Open:**
+
+- The blog gets the same portrait image. A 1200×630 variant for blog headers
+  and OG needs a second column and publisher changes.
+- The label only uses the ICP's company type or role.
+- Number words ("three quarters") still escape the figure check (the known
+  gap from phase 4).
+- Exit criteria: covers reviewed live on two workspaces; no generated text in
+  images (met by construction); $0 per text-only cover (met).
 
 ### Security fixes found along the way (2026-09-23)
 

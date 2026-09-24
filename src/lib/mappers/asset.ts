@@ -5,7 +5,7 @@ import {
   UNSPECIFIED_TRADE,
   blogUrl,
 } from "@/constants/config";
-import type { AssetItem, AssetStatus, ClaimCheckItem } from "@/types";
+import type { AssetItem, AssetStatus, ClaimCheckItem, CoverSpecDTO } from "@/types";
 import type { AudienceLane } from "@/types";
 
 type AssetWithClaims = Asset & { claims: Claim[] };
@@ -59,6 +59,25 @@ export function toClaimDTO(claim: Claim): ClaimCheckItem {
  * "UNSPECIFIED" in the other. It is UNSPECIFIED everywhere now — a missing
  * trade is never presented as a real one.
  */
+function toCoverDTO(raw: unknown): CoverSpecDTO | null {
+  if (!raw || typeof raw !== "object") return null;
+  const c = raw as Record<string, unknown>;
+  const str = (v: unknown) => (typeof v === "string" && v ? v : null);
+  if (!str(c.layout) || !str(c.headline)) return null;
+  const number = c.number && typeof c.number === "object" ? (c.number as { value: string; unit?: string }) : null;
+  return {
+    layout: c.layout as CoverSpecDTO["layout"],
+    label: str(c.label),
+    headline: String(c.headline),
+    emphasis: str(c.emphasis),
+    kicker: str(c.kicker),
+    quote: str(c.quote),
+    number,
+    headline_source: str(c.headline_source) ?? "strategist",
+    notes: Array.isArray(c.notes) ? c.notes.filter((n): n is string => typeof n === "string") : [],
+  };
+}
+
 export function toAssetDTO(
   asset: AssetWithClaims,
   liveBlogSlug?: string | null,
@@ -83,6 +102,7 @@ export function toAssetDTO(
     hero_error_code: asset.heroErrorCode,
     hero_provider: asset.heroProvider,
     hero_attempts: asset.heroAttempts ?? 0,
+    cover: toCoverDTO(asset.coverSpec),
     doc_url: asset.docUrl || blogUrl(asset.slug, domain),
     version: asset.version || 1,
     generation_cost: Number(asset.generationCost) || DEFAULT_GENERATION_COST,

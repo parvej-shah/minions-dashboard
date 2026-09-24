@@ -1,0 +1,284 @@
+{
+  "label": "phase5",
+  "date": "2026-09-24T13:51:00.796Z",
+  "overall": {
+    "covers": 9,
+    "strategist_headline_used": 100,
+    "words_6_to_10": 100,
+    "avg_words": 9.4,
+    "icp_relevant": 33,
+    "subtitle_usable": 100,
+    "fits_first_try": 100
+  },
+  "rows": [
+    {
+      "tenant": "minions",
+      "card": {
+        "headline": "Your voice agent confirms bookings that never reach the calendar",
+        "emphasis_word": "never",
+        "subtitle": "A silent webhook timeout costs you the lead while the caller thinks they are set.",
+        "number": {
+          "value": "",
+          "unit": "",
+          "caption": ""
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A flat line icon of a calendar page with a broken arrow pointing toward it."
+      },
+      "copy": {
+        "layout": "HEADLINE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 10,
+          "length": 1,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Your voice agent confirms bookings that never reach the calendar",
+        "emphasis": "never",
+        "kicker": "A silent webhook timeout costs you the lead while the caller thinks they are set."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "minions",
+      "card": {
+        "headline": "A two-sentence AI disclosure did not drop our booking rate",
+        "emphasis_word": "disclosure",
+        "subtitle": "Transparency costs you nothing while draft rules may soon force your hand.",
+        "number": {
+          "value": "",
+          "unit": "",
+          "caption": ""
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a speech bubble containing two short horizontal lines representing a brief statement."
+      },
+      "copy": {
+        "layout": "STATEMENT",
+        "headline_source": "strategist",
+        "score": {
+          "words": 10,
+          "length": 1,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "A two-sentence AI disclosure did not drop our booking rate",
+        "emphasis": "disclosure",
+        "kicker": "Transparency costs you nothing while draft rules may soon force your hand."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "minions",
+      "card": {
+        "headline": "A false confirmation burns your lead before you notice",
+        "emphasis_word": "burns",
+        "subtitle": "Silent calendar timeouts hand ready customers to competitors who answer reliably.",
+        "number": {
+          "value": "78",
+          "unit": "percent",
+          "caption": "Jobs won by the first response"
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a calendar page with a broken checkmark striking through the date box."
+      },
+      "copy": {
+        "layout": "QUOTE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 9,
+          "length": 1,
+          "icp_relevant": true,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "A false confirmation burns your lead before you notice",
+        "quote": "They miss the mechanical flaw: the system confirms a slot it never actually reserved."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "keystone",
+      "card": {
+        "headline": "An AI caller faster than your data destroys agent trust",
+        "emphasis_word": "faster",
+        "subtitle": "Speed to lead is a systems problem, and stale inventory breaks the whole thing.",
+        "number": {
+          "value": "",
+          "unit": "",
+          "caption": ""
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a calendar page with a broken clock face overlapping its corner."
+      },
+      "copy": {
+        "layout": "HEADLINE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 10,
+          "length": 1,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "An AI caller faster than your data destroys agent trust",
+        "emphasis": "faster",
+        "kicker": "Speed to lead is a systems problem, and stale inventory breaks the whole thing."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "keystone",
+      "card": {
+        "headline": "Your CRM logs decide if ISAs or AI work",
+        "emphasis_word": "logs",
+        "subtitle": "Adding headcount or software only hides the leak if calls go unrecorded.",
+        "number": {
+          "value": "40%",
+          "unit": "of leads",
+          "caption": "No first call logged within 24 hours"
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a clipboard with a checkmark missing from the top row."
+      },
+      "copy": {
+        "layout": "STATEMENT",
+        "headline_source": "strategist",
+        "score": {
+          "words": 9,
+          "length": 1,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [
+          "No NUMBER cover: 40% is not stated in the draft."
+        ],
+        "headline": "Your CRM logs decide if ISAs or AI work",
+        "emphasis": "logs",
+        "kicker": "Adding headcount or software only hides the leak if calls go unrecorded."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "keystone",
+      "card": {
+        "headline": "Pretending to be the agent kills your signed buyer agreements",
+        "emphasis_word": "kills",
+        "subtitle": "A fake identity on the first call destroys the trust needed to get paid.",
+        "number": {
+          "value": "",
+          "unit": "",
+          "caption": ""
+        },
+        "visual_register": "PHYSICAL_TRADE",
+        "physical_scene": "A single flat line icon of a pen crossing out a signature line on a document."
+      },
+      "copy": {
+        "layout": "QUOTE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 10,
+          "length": 1,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Pretending to be the agent kills your signed buyer agreements",
+        "quote": "Not because regulators demand it, but because hidden identities cost signed agreements."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "ledgerline",
+      "card": {
+        "headline": "Your monthly report fails when it hides your spending limit",
+        "emphasis_word": "spending",
+        "subtitle": "Owners ignore reports that list expenses but never state what they can safely take out.",
+        "number": {
+          "value": "",
+          "unit": "",
+          "caption": ""
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a document page with all text lines crossed out except the final bold number at the bottom."
+      },
+      "copy": {
+        "layout": "HEADLINE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 10,
+          "length": 1,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Your monthly report fails when it hides your spending limit",
+        "emphasis": "spending",
+        "kicker": "Owners ignore reports that list expenses but never state what they can safely take out."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "ledgerline",
+      "card": {
+        "headline": "Three quarters of surplus cash before you sign",
+        "emphasis_word": "surplus",
+        "subtitle": "Most owners start with the real estate and force the math to fit.",
+        "number": {
+          "value": "",
+          "unit": "",
+          "caption": ""
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A flat line icon of a single ledger page with three consecutive checkmarks drawn down the margin."
+      },
+      "copy": {
+        "layout": "STATEMENT",
+        "headline_source": "strategist",
+        "score": {
+          "words": 8,
+          "length": 1,
+          "icp_relevant": true,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Three quarters of surplus cash before you sign",
+        "emphasis": "surplus",
+        "kicker": "Most owners start with the real estate and force the math to fit."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "ledgerline",
+      "card": {
+        "headline": "Your profit number hides the cash leaving your practice",
+        "emphasis_word": "hides",
+        "subtitle": "Reported income stays clean while duplicate payments drain your bank account for months.",
+        "number": {
+          "value": "",
+          "unit": "",
+          "caption": ""
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line-icon of a bank statement row splitting into two identical outgoing arrows."
+      },
+      "copy": {
+        "layout": "QUOTE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 9,
+          "length": 1,
+          "icp_relevant": true,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Your profit number hides the cash leaving your practice",
+        "quote": "Not what they earned on paper, but what’s actually available."
+      },
+      "fits": true
+    }
+  ]
+}

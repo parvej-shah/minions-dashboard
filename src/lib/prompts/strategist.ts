@@ -65,8 +65,10 @@ Step 2 — The Reader: Describe the most specific real person implied by the ICP
 Step 2b — The Argument: One central argument, built on the author's advantage when one is given. Every key point must serve it.
 Step 3 — The Visual Art Direction for Cover Art:
   - First decide the visual register from the article's ACTUAL subject matter: PHYSICAL_TRADE or ABSTRACT_DATA.
-  - Cover Headline: 3 to 5 bold words written like a Wall Street Journal or Apple Newsroom cover line: a sharp, concrete claim or consequence in this brand's own voice. Never an abstract category-level pairing (do not write things like 'Fluency Vs Accuracy', 'Speed Versus Quality', or 'AI Scheduling Explained'). Name the specific thing that breaks, or the specific outcome, not the abstraction it belongs to.
-  - Cover Subtitle: One short sentence, under 90 characters, stating the concrete stake or consequence for the reader in plain editorial-magazine language, the way a magazine dek reads. NEVER start with 'Explaining', 'Understanding', 'A look at', 'How to', or any other explainer-caption framing. State the point directly.
+  - Cover Headline: 6 to 10 words in sentence case. It is the whole cover: a specific, believable claim or promise to the reader, naming the concrete thing that breaks or the outcome, and it must make sense with no other context. Write it for the ICP reader's own situation. Never an abstract category pairing (not 'Fluency Vs Accuracy', 'Speed Versus Quality', or 'AI Scheduling Explained'), never a topic label.
+  - Emphasis Word: the one word of the cover headline the claim turns on. It is set in the accent colour.
+  - Cover Subtitle: One sentence under 90 characters: what the reader gets or what it costs them, in plain editorial-magazine language. NEVER start with 'Explaining', 'Understanding', 'A look at', 'How to', or any other explainer-caption framing. No figure the idea does not state.
+  - Cover Number: only when the author's experience or the evidence states one striking figure this post turns on, give it with a 4 to 10 word caption. Otherwise leave every field empty. Never invent or round a figure.
   - Secondary Visual Motif: One vivid sentence describing a SINGLE small flat line-icon detail that echoes this topic. Never a full studio scene, never multiple objects, never a table or professional-photography setup.
 Step 4 — SEO & GEO Targeting: Identify the exact keyword phrase (2-5 words) and state the single narrative throughline.
 Step 5 — Headline Craft: Write a clear, specific title in this brand's voice. Lead with the reader's problem, a useful claim, or a concrete consequence. Avoid imitation, clickbait, and abstract X-versus-Y framing.
@@ -94,9 +96,10 @@ Return ONLY this JSON:
   "reader_objection": "the specific skeptical thought",
   "key_points": ["3-5 items, each a specific concrete point"],
   "thumbnail_card": {
-    "badge": "FIELD PLAYBOOK",
-    "headline": "3-5 BOLD WORDS, a sharp concrete claim, never an abstract X Vs Y pairing",
-    "subtitle": "one short editorial dek sentence, under 90 characters, stating the stake directly",
+    "headline": "6-10 words, sentence case: a specific claim or promise to the reader, never a topic label",
+    "emphasis_word": "the one headline word the claim turns on",
+    "subtitle": "one sentence under 90 characters, stating what the reader gets or what it costs them",
+    "number": { "value": "a figure the idea states, or empty", "unit": "e.g. seconds, or empty", "caption": "4-10 words, or empty" },
     "visual_register": "PHYSICAL_TRADE or ABSTRACT_DATA",
     "physical_scene": "one vivid sentence describing a single small flat line-icon motif, not a full scene"
   },

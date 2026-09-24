@@ -1,0 +1,237 @@
+{
+  "label": "baseline",
+  "date": "2026-09-24T13:48:36.289Z",
+  "overall": {
+    "covers": 9,
+    "strategist_headline_used": 100,
+    "words_6_to_10": 0,
+    "avg_words": 4.6,
+    "icp_relevant": 44,
+    "has_kicker": 67,
+    "fits_first_try": 100
+  },
+  "rows": [
+    {
+      "tenant": "minions",
+      "card": {
+        "badge": "FIELD PLAYBOOK",
+        "headline": "Silent Webhooks Lose Bookings",
+        "subtitle": "A confirmed call means nothing if the calendar write times out.",
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A flat line icon of a calendar page with a broken link chain draped across the date grid."
+      },
+      "copy": {
+        "layout": "HEADLINE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 4,
+          "length": 0.5,
+          "icp_relevant": true,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Silent Webhooks Lose Bookings",
+        "emphasis": "Webhooks",
+        "kicker": "A confirmed call means nothing if the calendar write times out."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "minions",
+      "card": {
+        "badge": "FIELD PLAYBOOK",
+        "headline": "Disclosure Does Not Kill Bookings",
+        "subtitle": "Early tests show a two sentence AI greeting costs you zero completed jobs.",
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a speech bubble containing a small checkmark."
+      },
+      "copy": {
+        "layout": "STATEMENT",
+        "headline_source": "strategist",
+        "score": {
+          "words": 5,
+          "length": 0.5,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Disclosure Does Not Kill Bookings",
+        "emphasis": "Disclosure",
+        "kicker": "Early tests show a two sentence AI greeting costs you zero completed jobs."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "minions",
+      "card": {
+        "badge": "FIELD PLAYBOOK",
+        "headline": "Silent Timeouts Burn Leads",
+        "subtitle": "A false confirmation costs more than a missed call because the lead never calls back.",
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a calendar page with a broken checkmark inside it."
+      },
+      "copy": {
+        "layout": "QUOTE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 4,
+          "length": 0.5,
+          "icp_relevant": true,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Silent Timeouts Burn Leads",
+        "quote": "They miss the mechanical flaw: the system confirms a slot it never actually reserved."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "keystone",
+      "card": {
+        "badge": "FIELD PLAYBOOK",
+        "headline": "Stale Data Kills AI Rollouts",
+        "subtitle": "One bad booking on a dead listing destroys agent trust in a weekend.",
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A flat line icon of a calendar page with a broken chain link stamped across the date grid."
+      },
+      "copy": {
+        "layout": "HEADLINE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 5,
+          "length": 0.5,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Stale Data Kills AI Rollouts",
+        "emphasis": "Rollouts",
+        "kicker": "One bad booking on a dead listing destroys agent trust in a weekend."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "keystone",
+      "card": {
+        "badge": "FIELD PLAYBOOK",
+        "headline": "Unlogged Calls Waste Portal Leads",
+        "subtitle": "Hiring ISAs or AI before fixing CRM habits just scales the same leak.",
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A flat line icon of a telephone handset overlaid with a small warning triangle inside a blank list row."
+      },
+      "copy": {
+        "layout": "STATEMENT",
+        "headline_source": "strategist",
+        "score": {
+          "words": 5,
+          "length": 0.5,
+          "icp_relevant": true,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Unlogged Calls Waste Portal Leads",
+        "emphasis": "Unlogged",
+        "kicker": "Hiring ISAs or AI before fixing CRM habits just scales the same leak."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "keystone",
+      "card": {
+        "badge": "FIELD PLAYBOOK",
+        "headline": "Hidden Bots Kill Signed Agreements",
+        "subtitle": "A fake identity on the first call costs you the signature you need before the showing.",
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A flat line icon of a speech bubble containing a small mask, drawn with clean uniform strokes."
+      },
+      "copy": {
+        "layout": "QUOTE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 5,
+          "length": 0.5,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Hidden Bots Kill Signed Agreements",
+        "quote": "Not because regulators demand it, but because hidden identities cost signed agreements."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "ledgerline",
+      "card": {
+        "badge": "FIELD PLAYBOOK",
+        "headline": "One Number Decides Everything",
+        "subtitle": "Owners ignore spreadsheets that do not end with a safe-to-spend figure.",
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a receipt with one bold number circled at the bottom."
+      },
+      "copy": {
+        "layout": "HEADLINE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 4,
+          "length": 0.5,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "One Number Decides Everything",
+        "emphasis": "Everything",
+        "kicker": "Owners ignore spreadsheets that do not end with a safe-to-spend figure."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "ledgerline",
+      "card": {
+        "badge": "FIELD PLAYBOOK",
+        "headline": "Surplus Before Second Lease",
+        "subtitle": "Three flat quarters of cash prove you can fund a new buildout.",
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a ledger page with three consecutive checkmarks drawn beside the bottom row."
+      },
+      "copy": {
+        "layout": "STATEMENT",
+        "headline_source": "strategist",
+        "score": {
+          "words": 4,
+          "length": 0.5,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Surplus Before Second Lease",
+        "emphasis": "Surplus",
+        "kicker": "Three flat quarters of cash prove you can fund a new buildout."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "ledgerline",
+      "card": {
+        "badge": "FIELD PLAYBOOK",
+        "headline": "Profit Hides The Cash Leak",
+        "subtitle": "Reported income stays clean while duplicate payments drain your accounts for months.",
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a ledger page with two identical arrows pointing down toward a bank symbol, indicating a duplicated outflow."
+      },
+      "copy": {
+        "layout": "QUOTE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 5,
+          "length": 0.5,
+          "icp_relevant": true,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Profit Hides The Cash Leak",
+        "quote": "Not what they earned on paper, but what’s actually available."
+      },
+      "fits": true
+    }
+  ]
+}

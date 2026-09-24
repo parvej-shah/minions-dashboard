@@ -67,8 +67,8 @@ async function call(stage: "strategist" | "writer" | "editor", promptInputs: unk
   return chat(payload);
 }
 
-/** One draft through strategist -> evidence -> writer -> editor -> claims gate. */
-export async function draftOnce(tenant: EvalTenant, idea: Json, index: number): Promise<Draft> {
+/** The strategist stage alone, as 02 runs it. The cover eval uses it. */
+export async function strategyOnce(tenant: EvalTenant, idea: Json, index: number) {
   const nodes = upstream(tenant, idea, index);
   if (hasNode("Fetch Author Context")) nodes["Fetch Author Context"] = [{ author: draftContextFor(tenant, idea) as unknown as Json }];
   const [assembled] = await runCodeNode(D, "Assemble Brand Context", { nodes });
@@ -77,6 +77,12 @@ export async function draftOnce(tenant: EvalTenant, idea: Json, index: number): 
   const [strategy] = await runCodeNode(D, "Parse Strategy JSON", { input: [await call("strategist", assembled.prompt_inputs)], nodes });
   if (!strategy.ok) throw new Error(`strategist: ${strategy.error}`);
   nodes["Parse Strategy JSON"] = [strategy];
+  return { nodes, assembled, strategy };
+}
+
+/** One draft through strategist -> evidence -> writer -> editor -> claims gate. */
+export async function draftOnce(tenant: EvalTenant, idea: Json, index: number): Promise<Draft> {
+  const { nodes, assembled, strategy } = await strategyOnce(tenant, idea, index);
 
   const [evidence] = await runCodeNode(D, "Format Evidence Context", { input: [strategy], nodes });
   nodes["Need Evidence?"] = [strategy];

@@ -66,6 +66,8 @@ export interface BrandSettings {
   company_domain: string;
   positioning: string;
   primary_logo_url: string;
+  /** The author line under the name on every cover; empty uses the positioning's first sentence. */
+  cover_byline: string;
   primary_ink: string;
   brand_teal: string;
   brand_coral: string;
@@ -96,6 +98,8 @@ export interface BrandProfileInput {
   company_domain: string;
   positioning: string;
   primary_logo_url: string;
+  /** Omitted: left as it is. */
+  cover_byline?: string;
   primary_ink: string;
   brand_teal: string;
   brand_coral: string;

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { blogUrl, normalizeDomain } from "@/constants/config";
 import { useBrandSettings } from "@/hooks/useBrandSettings";
-import type { AssetItem, AssetStatus } from "@/types";
+import type { AssetItem, AssetStatus, CoverSpecDTO } from "@/types";
 
 export type PublishState = "idle" | "pending" | "success" | "error";
 
@@ -49,6 +49,22 @@ export interface EditorialDraftState {
   permanentlyDelete: () => Promise<string>;
 
   toggleClaim: (claimId: string) => Promise<void>;
+
+  /** Re-draws the active draft's cover in code, optionally with a reviewer's edit. Returns a toast message. */
+  isRenderingCover: boolean;
+  rerenderCover: (edit?: CoverEditInput) => Promise<string>;
+}
+
+export interface CoverEditInput {
+  layout?: CoverSpecDTO["layout"];
+  headline?: string;
+  kicker?: string;
+  emphasis?: string;
+}
+
+/** The body with its leading cover image line pointed at url (the editor may hold an older one). */
+function withCoverUrl(body: string, url: string): string {
+  return /^!\[[^\]]*\]\([^)]*\)/.test(body) ? body.replace(/^(!\[[^\]]*\]\()[^)]*(\))/, `$1${url}$2`) : body;
 }
 
 const EMPTY_EDITS = { title: "", hook: "", body: "", linkedin: "", facebook: "", twitter: "" };
@@ -79,6 +95,7 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
   const [publishError, setPublishError] = useState<string | null>(null);
   const [isTogglingLive, setIsTogglingLive] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isRenderingCover, setIsRenderingCover] = useState(false);
 
   const activeAsset = useMemo(
     () => assets.find((a) => a.id === selectedAssetId) ?? assets[0] ?? null,
@@ -337,6 +354,27 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
     [activeAsset, patchActive]
   );
 
+  const rerenderCover = useCallback(
+    async (edit: CoverEditInput = {}): Promise<string> => {
+      if (!activeAsset || isRenderingCover) return "";
+      setIsRenderingCover(true);
+      try {
+        const res = await apiClient.post<{ hero_image_url: string }>(`/api/assets/${activeAsset.id}/cover`, edit);
+        const fresh = await apiClient.get<AssetItem>(`/api/assets/${activeAsset.id}`);
+        setAssets((prev) => prev.map((a) => (a.id === fresh.id ? fresh : a)));
+        // Keep unsaved edits, but point their cover line at the new image, or
+        // the next save would restore the old cover.
+        setEdited((p) => ({ ...p, body: withCoverUrl(p.body, res.hero_image_url) }));
+        return "Cover updated";
+      } catch (err) {
+        return toErrorMessage(err, "Could not update the cover");
+      } finally {
+        setIsRenderingCover(false);
+      }
+    },
+    [activeAsset, isRenderingCover]
+  );
+
   return {
     assets,
     isLoading,
@@ -371,5 +409,8 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
     permanentlyDelete,
 
     toggleClaim,
+
+    isRenderingCover,
+    rerenderCover,
   };
 }

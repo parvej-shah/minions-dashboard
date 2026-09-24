@@ -10,6 +10,13 @@ const r2Hostname = r2PublicDomain ? new URL(r2PublicDomain).hostname : null;
 const nextConfig: NextConfig = {
   reactCompiler: true,
   serverExternalPackages: ["@prisma/client", "pg", "@prisma/adapter-pg"],
+  // The cover renderer reads its fonts from disk (src/lib/covers/fonts.ts), a
+  // path the tracer cannot see, so the routes that draw covers include them.
+  outputFileTracingIncludes: {
+    "/api/internal/covers": ["src/lib/covers/fonts/**/*"],
+    "/api/assets/\\[id\\]/cover": ["src/lib/covers/fonts/**/*"],
+    "/api/brand/cover-preview": ["src/lib/covers/fonts/**/*"],
+  },
   images: {
     remotePatterns: [
       ...(r2Hostname ? [{ protocol: "https" as const, hostname: r2Hostname }] : []),

@@ -30,6 +30,20 @@ export interface SocialVariants {
   twitter: string;
 }
 
+/** How a code-drawn cover was made (phase 5), for the cover editor. */
+export interface CoverSpecDTO {
+  layout: "HEADLINE" | "STATEMENT" | "QUOTE" | "NUMBER";
+  label: string | null;
+  headline: string;
+  emphasis: string | null;
+  kicker: string | null;
+  quote: string | null;
+  number: { value: string; unit?: string } | null;
+  headline_source: string;
+  /** Why an option was not used: a strategist headline that failed, a figure the draft does not state. */
+  notes: string[];
+}
+
 /**
  * The single wire shape for an editorial asset, emitted by every
  * /api/assets endpoint.
@@ -52,6 +66,8 @@ export interface AssetItem {
   hero_error_code: string | null;
   hero_provider: string | null;
   hero_attempts: number;
+  /** Set when the cover was drawn in code; null for an AI image cover or none. */
+  cover: CoverSpecDTO | null;
   doc_url: string;
   version: number;
   generation_cost: number;

@@ -8,24 +8,20 @@ try { idea = $('Select Target').first().json || {}; } catch (e) {}
 // Generate run_id refuses to run without a client_id, so this is always set.
 const clientId = $('Generate run_id').first().json.client_id;
 
-// Cover generation no longer runs here. Qwen Image 3.0 Pro took ~43s of a ~98s
-// draft (51%), so the writer waited nearly a minute after the prose was done
-// before anything was reviewable. The asset is now saved with the cover
-// PENDING and 04_hero_image fills it in via /api/internal/assets/hero.
+// The cover is not made here. The asset is saved with the cover PENDING, and
+// once it is written either the dashboard draws it in code (TEMPLATE, about a
+// second, /api/internal/covers) or 04_hero_image makes it with Qwen
+// (AI_IMAGE). Both always leave it READY or FAILED.
 //
 // PENDING is deliberately NOT permanent: autoPublish multiplies against
 // heroIsPermanent below, so a draft can never publish while its cover is still
-// being generated. It becomes publishable when the hero lands READY.
-//
-// A test draft (skip_hero) gets no cover at all. FAILED, not PENDING, so it
-// never waits on a cover that is not coming; the cover can be regenerated.
-const skipHero = $('Generate run_id').first().json.skip_hero === true;
+// being made.
 const heroImageUrl = null;
 const heroIsPermanent = false;
-const heroStatus = skipHero ? 'FAILED' : 'PENDING';
+const heroStatus = 'PENDING';
 const heroProvider = null;
 const heroAttempts = 0;
-const rawImageError = skipHero ? 'Skipped: test draft (skip_hero)' : null;
+const rawImageError = null;
 
 // Deterministic banned-word gate: a FORBIDDEN-category BrandDirective was previously
 // only folded into generic prompt text (soft guidance the model wasn't reliable about

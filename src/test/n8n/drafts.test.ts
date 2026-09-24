@@ -80,19 +80,34 @@ describe("02 fetches the author context and runs the dashboard's draft check", (
   });
 });
 
-describe("test drafts skip the cover image", () => {
-  it("Generate run_id carries skip_hero from the trigger", async () => {
-    const [on] = await runCodeNode(D, "Generate run_id", { input: [{ body: { client_id: "c1", skip_hero: true } }] });
-    const [off] = await runCodeNode(D, "Generate run_id", { input: [{ body: { client_id: "c1" } }] });
-    expect(on.skip_hero).toBe(true);
-    expect(off.skip_hero).toBe(false);
+describe("covers are drawn in code; the AI image path is kept behind cover_mode", () => {
+  it("Generate run_id carries skip_hero and cover_mode (TEMPLATE unless AI_IMAGE is asked for)", async () => {
+    const [on] = await runCodeNode(D, "Generate run_id", { input: [{ body: { client_id: "c1", skip_hero: true, cover_mode: "ai_image" } }] });
+    const [off] = await runCodeNode(D, "Generate run_id", { input: [{ body: { client_id: "c1", cover_mode: "anything" } }] });
+    expect(on).toMatchObject({ skip_hero: true, cover_mode: "AI_IMAGE" });
+    expect(off).toMatchObject({ skip_hero: false, cover_mode: "TEMPLATE" });
   });
 
-  it("the cover is dispatched only through Cover Wanted?", () => {
-    expect(conn("Asset Write OK?")[0]).toContain("Cover Wanted?");
+  it("the saved asset goes to Render Cover unless AI_IMAGE is asked for without skip_hero", () => {
+    expect(conn("Asset Write OK?")[0]).toContain("AI Image Cover?");
     expect(conn("Asset Write OK?")[0]).not.toContain("Dispatch Hero Generation");
-    expect(conn("Cover Wanted?")[0]).toEqual(["Dispatch Hero Generation"]);
-    expect(conn("Cover Wanted?")[1] ?? []).toEqual([]);
-    expect(JSON.stringify(node("Cover Wanted?").parameters)).toContain("skip_hero");
+    expect(conn("AI Image Cover?")[0]).toEqual(["Dispatch Hero Generation"]);
+    expect(conn("AI Image Cover?")[1]).toEqual(["Render Cover"]);
+    const condition = JSON.stringify(node("AI Image Cover?").parameters);
+    expect(condition).toContain("AI_IMAGE");
+    expect(condition).toContain("skip_hero");
+  });
+
+  it("Render Cover posts the asset and the strategist's cover card to the dashboard", () => {
+    const p = node("Render Cover").parameters as Record<string, unknown>;
+    expect(p.url).toBe("https://minions.getminions.ai/api/internal/covers");
+    expect(String(p.jsonBody)).toContain("thumbnail_card");
+    expect(String(p.jsonBody)).toContain("asset_id");
+  });
+
+  it("Prepare Asset Row always saves the cover PENDING; the renderer settles it", () => {
+    const src = fs.readFileSync(`n8n/workflows/${D}/code/prepare-asset-row.js`, "utf8");
+    expect(src).toContain("const heroStatus = 'PENDING';");
+    expect(src).not.toContain("Skipped: test draft");
   });
 });
