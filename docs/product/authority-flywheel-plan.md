@@ -1,6 +1,6 @@
 # Authority flywheel: product plan
 
-Status: phases 0–5 BUILT (2026-09-23/24); see "Progress" at the end. Phase 5 awaits the user's review of live covers; see "Progress" at the end. Written 2026-09-23 from
+Status: phases 0–6 BUILT (2026-09-23/24); phase 5 closed by the user on 2026-09-24. Phase 6 is live and awaits its exit (two answered weeks in a row on tenant zero); see "Progress" at the end. Written 2026-09-23 from
 [the strategy conversation](2026-09-23-strategy-conversation.md) and a read of
 the code as of commit `26c0b42`.
 
@@ -956,6 +956,74 @@ never stated it, and code refused it.
 - **04 did not run.** Its last execution is still 2026-09-22.
 - The accent coral is deepened from #ff6b4a to #e76447 on the light layouts,
   because the brand coral is 2.67:1 on cream.
+
+### Phase 6 — built and deployed 2026-09-24
+
+Decisions (the user took all four recommendations):
+
+- The question opens on **Friday** in the workspace timezone and stays open to
+  Sunday. A missed week is not carried over. Day and on/off are per workspace
+  (`clients.pulse_day`, `clients.pulse_enabled`, which is also the phase flag).
+- **Timezone** is detected from the browser and confirmed once
+  (`clients.timezone_confirmed`). Every workspace was on the
+  `America/New_York` default; the timezone was not editable anywhere before.
+- Saving notes **starts a harvest right away** (`trigger_source:
+  WEEKLY_PULSE`, the same daily budget as every trigger).
+- Follow-ups are **fixed optional fields** (problem, who it helps, can it be
+  named, evidence). "Can it be named: no" makes every note GENERALIZE.
+
+Built:
+
+- `weekly_pulses` table, one row per workspace per week
+  (prisma/sql/2026-09-24-weekly-pulse.sql).
+- `src/lib/pulse/week.ts` (week and timezone maths, the card's state) and
+  `src/lib/pulse/extract.ts`: the model proposes 0–3 notes; code drops any that
+  add a figure, link or capitalised name the answer lacks, and a valid empty
+  reply means "nothing specific", never the vague answer saved as a note.
+- `src/lib/prompts/pulse.ts`, `src/services/pulse.ts`, routes `/api/pulse`,
+  `/api/pulse/confirm`, `/api/pulse/settings`, `/api/pulse/history`. The
+  Phase 2 privacy check runs on every proposed note; the save re-runs the
+  blocking floor.
+- Harvester: a weekly note from the last 14 days that no recent idea has used
+  seeds slot 1 of the next run, whatever the source mix says
+  (`src/lib/harvest/plan.ts`, `MemoryContext.fresh`). Decided in code.
+- Home card, "1 question" badge on Mission Control, and a Weekly updates
+  panel (settings and history) on Brand › Audience & Experience.
+- `startHarvest` moved to `src/services/harvestRun.ts`, shared with the Idea
+  Stream button.
+- `npm run eval:pulse` (8 fixed answers) and `npm run pulse:report` (the exit
+  check).
+
+Eval (8 answers, one model call each, scored in code):
+
+| | first prompt | shipped |
+|---|---|---|
+| Raw notes adding no figure/name/link | 100% | 100% |
+| Notes within the expected count | 100% | 100% |
+| Kinds that fit | 91% | 100% |
+| Vague answer ("busy week, meetings") saved as a note | yes | no |
+| Commentary the answer did not make | 2 notes | 1 mild inference |
+
+The first prompt's results were not kept on disk; the shipped run is
+`src/test/eval/results/pulse-2026-09-24-phase6.json`.
+
+Live test on the test workspace (day set to Thursday, then back to Friday):
+a true two-point answer gave two faithful notes (Current work, Lesson) in
+about 15 s; saving them started a harvest, which produced IDEA-0246 and
+IDEA-0247, each resting on one note and passing the gate. The exit is one
+answered week of two.
+
+Found along the way:
+
+- `professional_memories.used_count` is never updated. Harmless for the
+  planner, which ranks by use in recent ideas, but the 40-item fetch is simply
+  newest first.
+- The harvester stretches a note to fit the ICP: IDEA-0246 turned a lesson
+  about the blog writer into a claim about production voice agents and "most
+  brokerages". A gate check that the idea's claims stay within the cited note
+  belongs to phase 3's gate.
+- IDEA-0247's angle uses "deterministic", a banned word for that workspace;
+  02's scrub step will reword it at drafting.
 
 ### Security fixes found along the way (2026-09-23)
 
