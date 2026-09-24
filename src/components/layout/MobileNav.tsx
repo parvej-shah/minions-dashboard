@@ -56,6 +56,9 @@ export function MobileDrawer({
   const liveBlogUrl = brandSettings?.company_domain
     ? (brandSettings.company_domain.startsWith("http") ? brandSettings.company_domain : `https://${brandSettings.company_domain}`)
     : BLOG_BASE_URL;
+  // A signed-in workspace without its own domain has no public blog; the
+  // fallback would send it to the Minions blog, where its posts do not exist.
+  const hasOwnBlog = !brandSettings || Boolean(brandSettings.company_domain);
 
   return (
     <>
@@ -145,7 +148,7 @@ export function MobileDrawer({
             </Link>
           )}
 
-          {blogEnabled && (
+          {blogEnabled && hasOwnBlog && (
             <a
               href={liveBlogUrl === BLOG_BASE_URL ? `${liveBlogUrl}/blog` : liveBlogUrl}
               target="_blank"
@@ -212,6 +215,9 @@ export function MobileTopBar({
   const liveBlogUrl = brandSettings?.company_domain
     ? (brandSettings.company_domain.startsWith("http") ? brandSettings.company_domain : `https://${brandSettings.company_domain}`)
     : BLOG_BASE_URL;
+  // A signed-in workspace without its own domain has no public blog; the
+  // fallback would send it to the Minions blog, where its posts do not exist.
+  const hasOwnBlog = !brandSettings || Boolean(brandSettings.company_domain);
 
   return (
   <header className="h-14 border-b border-[#1f2b37] bg-[#0f1419]/95 backdrop-blur-md px-4 flex items-center justify-between sticky top-0 z-30 md:hidden">
@@ -242,7 +248,7 @@ export function MobileTopBar({
         <Search className="w-4 h-4 text-[#00C9A7]" />
       </button>
 
-      {blogEnabled && (
+      {blogEnabled && hasOwnBlog && (
         <a
           href={liveBlogUrl === BLOG_BASE_URL ? `${liveBlogUrl}/blog` : liveBlogUrl}
           target="_blank"

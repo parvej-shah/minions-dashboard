@@ -111,3 +111,51 @@ describe("covers are drawn in code; the AI image path is kept behind cover_mode"
     expect(src).not.toContain("Skipped: test draft");
   });
 });
+
+describe("banned words are reworded before the gate, which still blocks what is left", () => {
+  const prepare = (scrub?: Json) =>
+    runCodeNode(D, "Prepare Asset Row", {
+      nodes: {
+        "Parse Variants and Prepare Rows": [
+          {
+            asset_id: "a1",
+            slug: "s",
+            title: "T",
+            edited_body: "Checks run against a deterministic schema.",
+            li_variant: "Only deterministic checks pass.",
+            fb_variant: "fb",
+            x_variant: "x",
+            supabase_payload: { hook: "Hook" },
+          },
+        ],
+        "Parse Claims and Gate": [{ claims_ok: "Y", review_notes: [] }],
+        "Generate run_id": [{ client_id: "c1" }],
+        "Read Brand": [{ category: "FORBIDDEN", content: "Deterministic" }],
+        ...(scrub ? { "Scrub Banned Words": [scrub] } : {}),
+      },
+    });
+
+  it("wires Scrub Banned Words between the variant check and Prepare Asset Row", () => {
+    expect(conn("Validate Social Variants")[0]).toEqual(["Scrub Banned Words"]);
+    expect(conn("Scrub Banned Words")[0]).toEqual(["Prepare Asset Row"]);
+    const n = node("Scrub Banned Words") as unknown as { onError?: string; parameters: Json };
+    expect(n.parameters.url).toBe("https://minions.getminions.ai/api/internal/drafts/scrub");
+    expect(n.onError).toBe("continueRegularOutput");
+  });
+
+  it("saves the reworded texts, and the draft is no longer blocked", async () => {
+    const [row] = await prepare({
+      texts: { body: "Checks run against a fixed schema.", li_variant: "Only fixed checks pass.", fb_variant: "fb", x_variant: "x", hook: "Hook" },
+      rewritten: [{ from: "a", to: "b" }, { from: "c", to: "d" }],
+      remaining: [],
+    });
+    expect(row).toMatchObject({ content: "Checks run against a fixed schema.", li_variant: "Only fixed checks pass.", claims_ok: "Y", banned_word_hits: [] });
+    expect(row.review_notes).toContain("Reworded 2 sentences to avoid banned words");
+  });
+
+  it("blocks as before when the scrub failed and returned no texts", async () => {
+    const [row] = await prepare({ error: "timeout" });
+    expect(row).toMatchObject({ claims_ok: "BLOCKED", banned_word_hits: ["Deterministic"] });
+    expect(row.content).toBe("Checks run against a deterministic schema.");
+  });
+});

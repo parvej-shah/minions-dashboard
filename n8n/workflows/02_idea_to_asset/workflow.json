@@ -561,9 +561,9 @@
       "main": [
         [
           {
-            "index": 0,
-            "node": "Prepare Asset Row",
-            "type": "main"
+            "node": "Scrub Banned Words",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -602,6 +602,17 @@
         [
           {
             "node": "Render Cover",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrub Banned Words": {
+      "main": [
+        [
+          {
+            "node": "Prepare Asset Row",
             "type": "main",
             "index": 0
           }
@@ -2203,6 +2214,36 @@
         "jsonBody": "={{ JSON.stringify({ asset_id: $('Prepare Asset Row').first().json.asset_id, card: ($('Parse Variants and Prepare Rows').first().json.cover_inputs || {}).thumbnail_card || {} }) }}",
         "options": {
           "timeout": 60000
+        }
+      }
+    },
+    {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "id": "7a1d2a3b-4c5d-4e6f-8a9b-0c1d2e3f4a65",
+      "name": "Scrub Banned Words",
+      "position": [
+        5030,
+        400
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "POST",
+        "url": "https://minions.getminions.ai/api/internal/drafts/scrub",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ (() => { const p = $('Parse Variants and Prepare Rows').first().json; const b = p.supabase_payload || {}; return JSON.stringify({ client_id: $('Generate run_id').first().json.client_id, texts: { body: p.edited_body || b.content || '', hook: b.hook || '', li_variant: p.li_variant || '', fb_variant: p.fb_variant || '', x_variant: p.x_variant || '' } }); })() }}",
+        "options": {
+          "timeout": 120000
         }
       }
     }

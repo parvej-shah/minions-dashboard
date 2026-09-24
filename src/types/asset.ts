@@ -40,6 +40,8 @@ export interface CoverSpecDTO {
   quote: string | null;
   number: { value: string; unit?: string } | null;
   headline_source: string;
+  /** Who the cover is signed by, so the feed preview can show the real author. */
+  author: { name: string; role: string | null } | null;
   /** Why an option was not used: a strategist headline that failed, a figure the draft does not state. */
   notes: string[];
 }

@@ -76,7 +76,7 @@ const SIZES: Record<keyof typeof BOX, readonly [number, number]> = {
   label: [26, 30],
   headline: [72, 150],
   kicker: [32, 42],
-  quote: [56, 96],
+  quote: [56, 124],
   numberHeadline: [52, 80],
   name: [32, 38],
   role: [26, 30],

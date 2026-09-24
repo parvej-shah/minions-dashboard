@@ -65,6 +65,8 @@ function toCoverDTO(raw: unknown): CoverSpecDTO | null {
   const str = (v: unknown) => (typeof v === "string" && v ? v : null);
   if (!str(c.layout) || !str(c.headline)) return null;
   const number = c.number && typeof c.number === "object" ? (c.number as { value: string; unit?: string }) : null;
+  const a = c.author && typeof c.author === "object" ? (c.author as Record<string, unknown>) : null;
+  const author = a && str(a.name) ? { name: String(a.name), role: str(a.role) } : null;
   return {
     layout: c.layout as CoverSpecDTO["layout"],
     label: str(c.label),
@@ -74,6 +76,7 @@ function toCoverDTO(raw: unknown): CoverSpecDTO | null {
     quote: str(c.quote),
     number,
     headline_source: str(c.headline_source) ?? "strategist",
+    author,
     notes: Array.isArray(c.notes) ? c.notes.filter((n): n is string => typeof n === "string") : [],
   };
 }
@@ -103,7 +106,7 @@ export function toAssetDTO(
     hero_provider: asset.heroProvider,
     hero_attempts: asset.heroAttempts ?? 0,
     cover: toCoverDTO(asset.coverSpec),
-    doc_url: asset.docUrl || blogUrl(asset.slug, domain),
+    doc_url: asset.docUrl || blogUrl(asset.slug, domain) || "",
     version: asset.version || 1,
     generation_cost: Number(asset.generationCost) || DEFAULT_GENERATION_COST,
     published_at: asset.publishedAt ? asset.publishedAt.toISOString() : null,

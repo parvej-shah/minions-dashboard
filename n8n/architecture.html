@@ -285,7 +285,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
 <tr><td><code>00c_stale_claim_sweeper</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">every 15 min</span></div><div style="margin-top:4px">Every 15 min: releases ideas stuck at PICKED.</div></td><td class="num">7</td><td>✓</td></tr>
 <tr><td><code>00c_pipeline_error_alert</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">error trigger</span></div></td><td class="num">5</td><td>—</td></tr>
 <tr><td><code>01_idea_harvester</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">manual</span> <span class="chip">webhook /test-harvester</span></div></td><td class="num">43</td><td>✓</td></tr>
-<tr><td><code>02_idea_to_asset</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">manual</span> <span class="chip">webhook /test-idea-to-asset</span></div></td><td class="num">56</td><td>✓</td></tr>
+<tr><td><code>02_idea_to_asset</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">manual</span> <span class="chip">webhook /test-idea-to-asset</span></div></td><td class="num">57</td><td>✓</td></tr>
 <tr><td><code>03_review_publisher</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">every 5 min</span> <span class="chip">webhook /publish-approved-asset</span></div><div style="margin-top:4px">Every 5 min: safety-net poll for approved assets the webhook missed.</div></td><td class="num">38</td><td>✓</td></tr>
 <tr><td><code>04_hero_image</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">webhook /hero-image</span></div></td><td class="num">12</td><td>✓</td></tr>
 </tbody></table></div>
@@ -538,7 +538,7 @@ URL: <span class="v">{{url}}</span>
 
 <!-- ============ DRAFT ============ -->
 <section id="draft">
-  <div class="sec-head"><h2>02 · Idea to asset</h2><p><code>0ZeUkMgGXpBKVB2A</code> · 56 nodes. The strategist writes the brief, the writer drafts, the editor fact-checks, and the distributor adapts the piece per platform. Brand voice comes from three sources: <code>brand_directives</code> (priority 1–2 and audience-scoped), <code>brand_profile</code>, and up to 5 <code>tone_examples</code>.</p></div>
+  <div class="sec-head"><h2>02 · Idea to asset</h2><p><code>0ZeUkMgGXpBKVB2A</code> · 57 nodes. The strategist writes the brief, the writer drafts, the editor fact-checks, and the distributor adapts the piece per platform. Brand voice comes from three sources: <code>brand_directives</code> (priority 1–2 and audience-scoped), <code>brand_profile</code>, and up to 5 <code>tone_examples</code>.</p></div>
   <div class="wfblock">
     <ol class="steps">
       <li class="io"><b>Generate run_id</b>: carries <code>idea_id</code>, <code>client_id</code>, the callback details, <code>skip_hero</code> and <code>cover_mode</code> (TEMPLATE by default; AI_IMAGE sends the cover to 04) from the dashboard. It starts only from the webhook or a manual run.</li>

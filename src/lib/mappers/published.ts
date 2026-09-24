@@ -21,6 +21,7 @@ export function toPublishedDTO(
   domain?: string | null
 ): PublishedPostRecord {
   const inlineImage = (blog.content || "").match(MARKDOWN_IMAGE);
+  const postUrl = blogUrl(blog.slug, domain);
 
   return {
     // Keyed on the slug: it is the blog table's primary key, so it is unique
@@ -35,7 +36,7 @@ export function toPublishedDTO(
     excerpt:
       blog.hook || blog.coreArgument || asset?.hook || (blog.content || "").slice(0, 160),
     hero_image_url: inlineImage?.[1] || asset?.heroImageUrl || PUBLISHED_FALLBACK_HERO,
-    published_url: blogUrl(blog.slug, domain),
+    published_url: postUrl ?? "",
     audience: (blog.audience || asset?.audience || "ICP") as AudienceLane,
     // No asset means no recorded cost. Showing the default here presented a
     // guess as a measurement.
@@ -45,7 +46,7 @@ export function toPublishedDTO(
       asset?.publishedAt ??
       new Date()
     ).toISOString(),
-    first_comment: `Read the full engineering deep dive: ${blogUrl(blog.slug, domain)}`,
+    first_comment: postUrl ? `Read the full engineering deep dive: ${postUrl}` : "",
     variants: {
       linkedin: asset?.linkedinVariant ?? "",
       facebook: asset?.facebookVariant ?? "",

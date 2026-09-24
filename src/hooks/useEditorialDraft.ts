@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { blogUrl, normalizeDomain } from "@/constants/config";
 import { useBrandSettings } from "@/hooks/useBrandSettings";
@@ -82,7 +82,7 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
   // publish confirmation named getminions.ai, whoever owned the post.
   const { brandSettings } = useBrandSettings();
   const tenantDomain = brandSettings?.company_domain || null;
-  const blogHost = (normalizeDomain(tenantDomain) ?? "your blog").replace(/^https?:\/\//, "");
+  const blogHost = (normalizeDomain(tenantDomain) ?? "").replace(/^https?:\/\//, "");
   const [assets, setAssets] = useState<AssetItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -184,6 +184,12 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
     setPublishError(null);
   }
 
+  // Which draft the buffers hold, for async work that finishes after a switch.
+  const bufferedAssetRef = useRef<string | null>(null);
+  useEffect(() => {
+    bufferedAssetRef.current = bufferedAssetId;
+  }, [bufferedAssetId]);
+
   const isDirty = Boolean(
     activeAsset &&
       (edited.title !== activeAsset.title ||
@@ -238,7 +244,7 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
       });
       setLastSaved(new Date());
       return activeAsset.status === "PUBLISHED"
-        ? `Live blog updated & synced to ${blogHost}`
+        ? blogHost ? `Live blog updated & synced to ${blogHost}` : "Changes saved"
         : "Changes saved";
     } catch (err) {
       return toErrorMessage(err, "Could not save changes");
@@ -265,12 +271,12 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
       patchActive({
         status: "PUBLISHED",
         claims_ok: "Y",
-        doc_url: blogUrl(activeAsset.slug, tenantDomain),
+        doc_url: blogUrl(activeAsset.slug, tenantDomain) ?? "",
         published_at: new Date().toISOString(),
       });
       setPublishState("success");
       window.dispatchEvent(new Event("minions-counts-updated"));
-      return `Published live to LinkedIn & ${blogHost}`;
+      return blogHost ? `Published live to LinkedIn & ${blogHost}` : "Published live to LinkedIn";
     } catch (err) {
       const message = toErrorMessage(err, "Publish failed");
       setPublishState("error");
@@ -297,7 +303,7 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
       window.dispatchEvent(new Event("minions-counts-updated"));
 
       return nextStatus === "PUBLISHED"
-        ? `Post restored and published live on ${blogHost}`
+        ? `Post restored and published live${blogHost ? ` on ${blogHost}` : ""}`
         : "Post unpublished and hidden from the public blog";
     } catch (err) {
       return toErrorMessage(err, "Could not change live status");
@@ -363,8 +369,12 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
         const fresh = await apiClient.get<AssetItem>(`/api/assets/${activeAsset.id}`);
         setAssets((prev) => prev.map((a) => (a.id === fresh.id ? fresh : a)));
         // Keep unsaved edits, but point their cover line at the new image, or
-        // the next save would restore the old cover.
-        setEdited((p) => ({ ...p, body: withCoverUrl(p.body, res.hero_image_url) }));
+        // the next save would restore the old cover. Only while the editor
+        // still holds this draft: if the reviewer moved on mid-draw, the
+        // buffers are another draft's and reload from `fresh` on return.
+        if (bufferedAssetRef.current === fresh.id) {
+          setEdited((p) => ({ ...p, body: withCoverUrl(p.body, res.hero_image_url) }));
+        }
         return "Cover updated";
       } catch (err) {
         return toErrorMessage(err, "Could not update the cover");

@@ -641,15 +641,17 @@ export default function PublishedPostsPage() {
                           <span>Unpublish</span>
                         </button>
 
-                        <a
-                          href={post.published_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 bg-[#00C9A7]/10 hover:bg-[#00C9A7] text-[#00C9A7] hover:text-[#070B0F] border border-[#00C9A7]/30 text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs cursor-pointer"
-                        >
-                          <span>View Live Article</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
+                        {post.published_url && (
+                          <a
+                            href={post.published_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 bg-[#00C9A7]/10 hover:bg-[#00C9A7] text-[#00C9A7] hover:text-[#070B0F] border border-[#00C9A7]/30 text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs cursor-pointer"
+                          >
+                            <span>View Live Article</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
                       </>
                     ) : (
                       <>
@@ -695,6 +697,8 @@ export default function PublishedPostsPage() {
                             )
                           )}
 
+                          {/* A share link needs a post URL; X can share the copy alone. */}
+                          {(post.published_url || activeTab === "TWITTER") && (
                           <a
                             href={shareUrl}
                             target="_blank"
@@ -704,6 +708,7 @@ export default function PublishedPostsPage() {
                             <span>{activeTab === "TWITTER" ? "Post on X" : activeTab === "LINKEDIN" ? "Share on LinkedIn" : "Share on Facebook"}</span>
                             <ExternalLink className="w-3 h-3" />
                           </a>
+                          )}
                         </div>
                       </>
                     )}

@@ -17,6 +17,7 @@ import {
   X,
   Sparkles,
 } from "lucide-react";
+import Image from "next/image";
 import type { AssetItem } from "@/types";
 
 export type SocialTab = "LINKEDIN" | "FACEBOOK" | "TWITTER";
@@ -55,6 +56,7 @@ export default function SocialVariantTabs({
   copiedKey,
   enabledTabs,
 }: SocialVariantTabsProps) {
+  const author = activeAsset.cover?.author ?? null;
   const showLinkedin = enabledTabs?.LINKEDIN ?? true;
   const showFacebook = enabledTabs?.FACEBOOK ?? true;
   const showTwitter = enabledTabs?.TWITTER ?? true;
@@ -153,13 +155,13 @@ export default function SocialVariantTabs({
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-xs font-bold text-[#F1F5F9] truncate">
-                    Editorial Author
+                    {author?.name ?? "Editorial Author"}
                   </span>
                   <span className="text-[#00C9A7] text-xs shrink-0 font-bold">✓</span>
                   <span className="text-[10px] text-[#64748B] shrink-0">• 1st</span>
                 </div>
                 <div className="text-[11px] text-[#94A3B8] truncate">
-                  Engineering & Enterprise Thought Leadership
+                  {author ? author.role ?? "" : "Engineering & Enterprise Thought Leadership"}
                 </div>
               </div>
             </div>
@@ -251,6 +253,17 @@ export default function SocialVariantTabs({
             </div>
           )}
 
+          {/* The cover 03 attaches to the post, shown the way the feed crops it. */}
+          {activeAsset.hero_image_url && activeAsset.hero_status === "READY" && (
+            <div
+              className={`relative w-full overflow-hidden rounded-xl border border-[#1F2D3D] bg-[#0B0F14] ${
+                activeAsset.hero_provider === "template" ? "aspect-[4/5] max-w-[420px] mx-auto" : "aspect-[16/9]"
+              }`}
+            >
+              <Image src={activeAsset.hero_image_url} alt={activeAsset.title} fill unoptimized sizes="420px" className="object-cover" />
+            </div>
+          )}
+
           {/* First Comment Link Anchor */}
           {activeAsset.doc_url && (
             <div className="bg-[#00C9A7]/5 border border-[#00C9A7]/20 rounded-xl p-3.5 space-y-1.5">
@@ -273,6 +286,11 @@ export default function SocialVariantTabs({
                 {`Read the full deep dive: ${activeAsset.doc_url}`}
               </p>
             </div>
+          )}
+          {!activeAsset.doc_url && (
+            <p className="text-[11px] text-[#64748B] leading-relaxed">
+              No blog link: this workspace has no website of its own yet. Add your domain under Brand &amp; Directives to link each post to its full article.
+            </p>
           )}
 
           {/* LinkedIn Action Bar (Realistic Mock) */}

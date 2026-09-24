@@ -29,14 +29,17 @@ export function normalizeDomain(domain: string | null | undefined): string | nul
 }
 
 /**
- * Builds the canonical public URL for a published post.
+ * Builds the canonical public URL for a published post, or null when the
+ * tenant has no site of its own.
  *
- * `domain` is the owning tenant's `BrandProfile.companyDomain`. It is optional
- * only so existing single-tenant callers keep working; pass it wherever the
- * tenant is known, or the URL will advertise the wrong company's site.
+ * `domain` is the owning tenant's `BrandProfile.companyDomain`. There is no
+ * fallback: a tenant without a domain has no public blog (03 skips the blog
+ * step for it), and falling back to getminions.ai gave its drafts a first
+ * comment linking to a Minions 404 page.
  */
-export function blogUrl(slug: string, domain?: string | null): string {
-  return `${normalizeDomain(domain) ?? BLOG_BASE_URL}/blog/${slug}`;
+export function blogUrl(slug: string, domain?: string | null): string | null {
+  const base = normalizeDomain(domain);
+  return base ? `${base}/blog/${slug}` : null;
 }
 
 /** Fallback hero image when an asset has none. */

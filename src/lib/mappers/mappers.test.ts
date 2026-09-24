@@ -142,7 +142,7 @@ describe("toAssetDTO", () => {
   });
 
   it("derives doc_url from the canonical no-www blog host", () => {
-    expect(toAssetDTO(makeAsset()).doc_url).toBe(
+    expect(toAssetDTO(makeAsset(), null, "getminions.ai").doc_url).toBe(
       "https://getminions.ai/blog/deterministic-voice-pipelines"
     );
   });
@@ -190,7 +190,7 @@ describe("toAssetDTO", () => {
 
   it("reports live_blog_url only when a blog row backs the asset", () => {
     expect(toAssetDTO(makeAsset()).live_blog_url).toBeNull();
-    expect(toAssetDTO(makeAsset(), "my-post").live_blog_url).toBe(
+    expect(toAssetDTO(makeAsset(), "my-post", "getminions.ai").live_blog_url).toBe(
       "https://getminions.ai/blog/my-post"
     );
   });
@@ -224,7 +224,7 @@ describe("toPublishedDTO", () => {
   } as unknown as Blog;
 
   it("uses the canonical no-www host for published_url and first_comment", () => {
-    const dto = toPublishedDTO(blog, makeAsset(), 0);
+    const dto = toPublishedDTO(blog, makeAsset(), 0, "getminions.ai");
     expect(dto.published_url).toBe(
       "https://getminions.ai/blog/deterministic-voice-pipelines"
     );
@@ -342,9 +342,17 @@ describe("tenant-scoped blog URLs", () => {
     );
   });
 
-  it("falls back to the default host only when the tenant has no domain", () => {
-    expect(toPublishedDTO(blog, makeAsset(), 0, "   ").published_url).toContain("getminions.ai");
-    expect(toPublishedDTO(blog, makeAsset(), 0, null).published_url).toContain("getminions.ai");
+  it("gives no link, never getminions.ai, when the tenant has no domain", () => {
+    // Other tenants' posts are not on the Minions blog; the fallback linked
+    // their first comments to a 404 page there.
+    for (const domain of ["   ", null]) {
+      const dto = toPublishedDTO(blog, makeAsset(), 0, domain);
+      expect(dto.published_url).toBe("");
+      expect(dto.first_comment).toBe("");
+    }
+    const asset = toAssetDTO(makeAsset({ docUrl: null }), "my-post", null);
+    expect(asset.doc_url).toBe("");
+    expect(asset.live_blog_url).toBeNull();
   });
 
   it("scopes asset doc_url and live_blog_url to the tenant too", () => {

@@ -47,6 +47,9 @@ export default function Sidebar({
   const liveBlogUrl = brandSettings?.company_domain
     ? (brandSettings.company_domain.startsWith("http") ? brandSettings.company_domain : `https://${brandSettings.company_domain}`)
     : BLOG_BASE_URL;
+  // A signed-in workspace without its own domain has no public blog; the
+  // fallback would send it to the Minions blog, where its posts do not exist.
+  const hasOwnBlog = !brandSettings || Boolean(brandSettings.company_domain);
   const liveBlogHostname = liveBlogUrl.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
   return (
@@ -153,7 +156,7 @@ export default function Sidebar({
 
     {/* SIDEBAR FOOTER (LIVE BLOG BUTTON + CLEAN USER PROFILE) */}
     <div className="pt-3 border-t border-[#1f2b37] space-y-2.5">
-      {blogEnabled && (
+      {blogEnabled && hasOwnBlog && (
         <a
           href={liveBlogUrl === BLOG_BASE_URL ? `${liveBlogUrl}/blog` : liveBlogUrl}
           target="_blank"

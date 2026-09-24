@@ -66,7 +66,10 @@ function MarkdownBlockView({
     : "text-[15px] sm:text-[16px] text-[#E2E8F0] leading-[1.8] font-normal tracking-normal font-sans selection:bg-[#00C9A7]/20 break-words [overflow-wrap:anywhere]";
 
   switch (block.kind) {
-    case "image":
+    case "image": {
+      // A cover drawn in code (src/services/cover.ts, stored under covers/) is
+      // portrait; a 16:9 frame would cut off its headline and signature.
+      const portrait = /\/covers\/[^/]+\/[^/]+\.png$/.test(block.src);
       return (
         <figure className={compact ? "my-3 space-y-1 w-full max-w-full" : "my-6 space-y-2 w-full max-w-full"}>
           <div
@@ -74,7 +77,7 @@ function MarkdownBlockView({
               compact
                 ? "rounded-xl border border-[#1F2D3D] bg-[#0F1419]"
                 : "rounded-2xl border border-[#1F2D3D] bg-[#070B0F] shadow-lg group"
-            } aspect-[16/9] w-full max-w-full`}
+            } ${portrait ? "aspect-[4/5] w-full max-w-[420px] mx-auto" : "aspect-[16/9] w-full max-w-full"}`}
           >
             <Image
               src={block.src}
@@ -101,6 +104,7 @@ function MarkdownBlockView({
           )}
         </figure>
       );
+    }
 
     case "rule":
       return (

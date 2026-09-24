@@ -318,15 +318,17 @@ export default function MissionControlPage() {
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
-                  <a
-                    href={post.published_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-2.5 py-1.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-medium text-[#F1F5F9] hover:bg-[#1E2733] flex items-center gap-1.5 transition-colors"
-                  >
-                    <Globe className="w-3 h-3 text-[#00C9A7]" />
-                    <span>Read on blog ↗</span>
-                  </a>
+                  {post.published_url && (
+                    <a
+                      href={post.published_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-medium text-[#F1F5F9] hover:bg-[#1E2733] flex items-center gap-1.5 transition-colors"
+                    >
+                      <Globe className="w-3 h-3 text-[#00C9A7]" />
+                      <span>Read on blog ↗</span>
+                    </a>
+                  )}
                   <Link
                     href="/published"
                     className="px-2.5 py-1.5 rounded-lg bg-[#0F1419] border border-[#1F2D3D] text-xs font-medium text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#1E2733] transition-colors"

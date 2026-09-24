@@ -1,4 +1,4 @@
-import { BLOG_BASE_URL, normalizeDomain } from "@/constants/config";
+import { normalizeDomain } from "@/constants/config";
 import { writerExpertisePromptGuidance } from "@/constants/writerExpertise";
 import type { BrandSettings } from "@/types/brand";
 import type { HarvestContext, WriterVoiceConfig } from "@/services/brand";
@@ -21,11 +21,9 @@ export function buildBrandContextResponse(
 ) {
   return {
     company_name: brand.brand_name,
-    // The tenant's OWN public site, falling back to this company's only when
-    // the tenant has not set one. It previously always returned
-    // BLOG_BASE_URL, so the publishing pipeline built every tenant's
-    // canonical post URLs on getminions.ai.
-    brand_domain: normalizeDomain(brand.company_domain) ?? BLOG_BASE_URL,
+    // The tenant's OWN public site, or null when it has none. Falling back to
+    // BLOG_BASE_URL advertised getminions.ai on other tenants' posts.
+    brand_domain: normalizeDomain(brand.company_domain),
     positioning: brand.positioning,
     primary_logo_url: brand.primary_logo_url,
     colors: {

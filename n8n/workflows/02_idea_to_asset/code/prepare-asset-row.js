@@ -2,6 +2,19 @@ const prep = $('Parse Variants and Prepare Rows').first().json;
 const gate = $('Parse Claims and Gate').first().json;
 const blog = prep.supabase_payload || {};
 
+// Scrub Banned Words rewrote the sentences that used a FORBIDDEN word
+// (/api/internal/drafts/scrub). If it failed, the texts are the originals and
+// the gate below blocks the draft as before.
+let scrub = {};
+try { scrub = $('Scrub Banned Words').first().json || {}; } catch (e) {}
+const scrubbed = scrub && scrub.texts && typeof scrub.texts === 'object' ? scrub.texts : {};
+const fromScrub = (key, original) => (typeof scrubbed[key] === 'string' && scrubbed[key].trim() ? scrubbed[key] : original);
+const rewrittenCount = Array.isArray(scrub.rewritten) ? scrub.rewritten.length : 0;
+const draftBody = fromScrub('body', prep.edited_body || blog.content || '');
+const liVariant = fromScrub('li_variant', prep.li_variant || '');
+const fbVariant = fromScrub('fb_variant', prep.fb_variant || '');
+const xVariant = fromScrub('x_variant', prep.x_variant || '');
+
 let idea = {};
 try { idea = $('Select Target').first().json || {}; } catch (e) {}
 
@@ -44,7 +57,7 @@ function textContainsPhrase(text, phrase) {
   return text.includes(phrase);
 }
 
-const scanTargets = [prep.edited_body || blog.content || '', prep.li_variant || '', prep.fb_variant || '', prep.x_variant || ''];
+const scanTargets = [draftBody, liVariant, fbVariant, xVariant, fromScrub('hook', blog.hook || '')];
 const bannedWordHits = Array.from(new Set(
   bannedPhrases.filter(phrase => scanTargets.some(t => textContainsPhrase(t, phrase)))
 ));
@@ -82,9 +95,9 @@ const nowIso = prep.now_iso || new Date().toISOString();
 
 // hook / core_argument only exist on the cleaned blog payload. Reading them off the
 // top level silently fell through to the title on every asset ever drafted.
-const hook = blog.hook || prep.title;
+const hook = fromScrub('hook', blog.hook || '') || prep.title;
 const coreArgument = blog.core_argument || prep.title;
-const body = prep.edited_body || blog.content || '';
+const body = draftBody;
 
 const safeAlt = (prep.title || 'Cover image').replace(/[\[\]]/g, '');
 const contentWithHero = heroImageUrl ? `![${safeAlt}](${heroImageUrl})\n\n${body}` : body;
@@ -147,13 +160,17 @@ return [{
     hero_is_permanent: heroIsPermanent,
     doc_url: docUrl || null,
     blog_status: autoPublish ? 'PUBLISHED' : (isClaimsOk ? 'PENDING_REVIEW' : 'BLOCKED_PENDING_REVIEW'),
-    fb_variant: prep.fb_variant || '',
-    li_variant: prep.li_variant || '',
-    x_variant: prep.x_variant || '',
+    fb_variant: fbVariant,
+    li_variant: liVariant,
+    x_variant: xVariant,
     published_urls: autoPublish ? blogUrl : '',
     version: 1,
     claims_ok: claimsOk,
-    review_notes: [...(hasBannedWord ? ['Uses banned words: ' + bannedWordHits.join(', ')] : []), ...(gate.review_notes || [])],
+    review_notes: [
+      ...(hasBannedWord ? ['Uses banned words: ' + bannedWordHits.join(', ')] : []),
+      ...(rewrittenCount ? [`Reworded ${rewrittenCount} sentence${rewrittenCount === 1 ? '' : 's'} to avoid banned words`] : []),
+      ...(gate.review_notes || [])
+    ],
     banned_word_hits: bannedWordHits,
     status: autoPublish ? 'PUBLISHED' : 'PENDING_REVIEW',
     blog_payload: blogPayload,
