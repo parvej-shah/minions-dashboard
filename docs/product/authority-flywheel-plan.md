@@ -1,6 +1,6 @@
 # Authority flywheel: product plan
 
-Status: phases 0–4 BUILT (2026-09-23/24), phase 5 built (2026-09-24); see "Progress" at the end. Written 2026-09-23 from
+Status: phases 0–5 BUILT (2026-09-23/24); see "Progress" at the end. Phase 5 awaits the user's review of live covers; see "Progress" at the end. Written 2026-09-23 from
 [the strategy conversation](2026-09-23-strategy-conversation.md) and a read of
 the code as of commit `26c0b42`.
 
@@ -844,7 +844,7 @@ eval results and the live test drafts. Review of 5 live tenant-zero drafts
 moves to after tenant zero's experience items are in. They need tenant zero's experience items. Until then its ideas carry no
 experience and draft on the older path.
 
-### Phase 5 — built 2026-09-24 (not yet deployed)
+### Phase 5 — built and deployed 2026-09-24
 
 **Covers are drawn in code** (`src/lib/covers`, `src/services/cover.ts`):
 portrait 1080×1350 PNGs rendered with `next/og` (Satori and resvg). No image
@@ -941,6 +941,21 @@ never stated it, and code refused it.
   gap from phase 4).
 - Exit criteria: covers reviewed live on two workspaces; no generated text in
   images (met by construction); $0 per text-only cover (met).
+
+**Deployed 2026-09-24** (with the user's go-ahead): the SQL, the dashboard
+(`9ecaf69`) and n8n 02. Live checks on test workspace cmtvi4a7r:
+
+- **Three existing drafts redrawn** through `/api/internal/covers`, at 2–5 s
+  each. They got QUOTE, HEADLINE and STATEMENT (the rotation). These drafts
+  have no cover card, so they fell back to their Title Case titles.
+- **One new draft end to end** (IDEA-0233): 02 saved the draft with the cover
+  PENDING, and Render Cover drew it about 20 s later.
+  - READY, provider `template`, STATEMENT layout.
+  - The strategist's 9-word headline, accent word and subtitle all passed.
+  - The draft itself was BLOCKED by the existing banned-word gate ("Deterministic").
+- **04 did not run.** Its last execution is still 2026-09-22.
+- The accent coral is deepened from #ff6b4a to #e76447 on the light layouts,
+  because the brand coral is 2.67:1 on cream.
 
 ### Security fixes found along the way (2026-09-23)
 
