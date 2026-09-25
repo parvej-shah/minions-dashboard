@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight, Image as ImageIcon, Layers } from "lucide-react";
 import type { AssetItem } from "@/types";
 
-export type QueueFilter = "ALL" | "PENDING_REVIEW" | "PUBLISHED" | "UNPUBLISHED" | "DRAFT";
+export type QueueFilter = "ALL" | "PENDING_REVIEW" | "SCHEDULED" | "PUBLISHED" | "UNPUBLISHED" | "DRAFT";
 
 export interface QueueRibbonProps {
   assets: AssetItem[];
@@ -31,6 +31,7 @@ export default function QueueRibbon({
 }: QueueRibbonProps) {
   const pendingCount = assets.filter((a) => a.status === "PENDING_REVIEW").length;
   const unpublishedCount = assets.filter((a) => a.status === "UNPUBLISHED").length;
+  const scheduledCount = assets.filter((a) => a.status === "SCHEDULED").length;
   /**
    * Drafts whose post is already on the blog while the asset still reads
    * PENDING_REVIEW. Republishing these duplicates the broadcast, so they are
@@ -79,6 +80,18 @@ export default function QueueRibbon({
           >
             All Drafts ({assets.length})
           </button>
+          {scheduledCount > 0 && (
+            <button
+              onClick={() => setListFilter("SCHEDULED")}
+              className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
+                listFilter === "SCHEDULED"
+                  ? "bg-[#3B82F6] text-[#070B0F] font-bold shadow-sm"
+                  : "text-[#93C5FD] hover:bg-[#161D26]"
+              }`}
+            >
+              Scheduled ({scheduledCount})
+            </button>
+          )}
           <button
             onClick={() => setListFilter("PUBLISHED")}
             className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
@@ -191,7 +204,9 @@ export default function QueueRibbon({
                         ? "bg-[#F59E0B]/25 text-[#F59E0B] border border-[#F59E0B]/40"
                         : asset.status === "PENDING_REVIEW"
                           ? "bg-[#F59E0B]/20 text-[#F59E0B]"
-                          : "bg-[#64748B]/20 text-[#94A3B8]"
+                          : asset.status === "SCHEDULED"
+                            ? "bg-[#3B82F6]/20 text-[#93C5FD]"
+                            : "bg-[#64748B]/20 text-[#94A3B8]"
                   }`}
                 >
                   {isCurrent
@@ -200,7 +215,9 @@ export default function QueueRibbon({
                       ? "Live · Unreviewed"
                       : asset.status === "PENDING_REVIEW"
                         ? "Needs Review"
-                        : asset.status}
+                        : asset.status === "SCHEDULED"
+                          ? "Scheduled"
+                          : asset.status}
                 </span>
               </div>
 

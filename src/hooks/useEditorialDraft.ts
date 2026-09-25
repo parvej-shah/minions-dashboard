@@ -41,6 +41,10 @@ export interface EditorialDraftState {
   publishState: PublishState;
   publishError: string | null;
   approveAndPublish: () => Promise<string>;
+  /** Approve the draft to go out at a local date and time in the workspace's timezone. */
+  schedulePost: (date: string, time: string) => Promise<string>;
+  /** Send a scheduled post back to review. */
+  unschedulePost: () => Promise<string>;
 
   isTogglingLive: boolean;
   toggleLiveStatus: () => Promise<string>;
@@ -221,10 +225,9 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
     [assets, activeAssetId]
   );
 
-  const saveDraft = useCallback(async (): Promise<string> => {
-    if (!activeAsset || isSaving) return "";
-    setIsSaving(true);
-
+  /** Writes the editor's text to the draft. Throws on failure. */
+  const persistEdits = useCallback(async (): Promise<void> => {
+    if (!activeAsset) return;
     const payload = {
       title: edited.title.trim(),
       hook: edited.hook.trim(),
@@ -236,15 +239,22 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
       },
     };
 
+    await apiClient.patch(`/api/assets/${activeAsset.id}`, payload);
+    patchActive({
+      title: payload.title,
+      hook: payload.hook,
+      body_content: payload.body_content,
+      variants: payload.variants,
+    });
+    setLastSaved(new Date());
+  }, [activeAsset, edited, patchActive]);
+
+  const saveDraft = useCallback(async (): Promise<string> => {
+    if (!activeAsset || isSaving) return "";
+    setIsSaving(true);
+
     try {
-      await apiClient.patch(`/api/assets/${activeAsset.id}`, payload);
-      patchActive({
-        title: payload.title,
-        hook: payload.hook,
-        body_content: payload.body_content,
-        variants: payload.variants,
-      });
-      setLastSaved(new Date());
+      await persistEdits();
       return activeAsset.status === "PUBLISHED"
         ? blogHost ? `Live blog updated & synced to ${blogHost}` : "Changes saved"
         : "Changes saved";
@@ -253,7 +263,7 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
     } finally {
       setIsSaving(false);
     }
-  }, [activeAsset, isSaving, edited, patchActive, blogHost]);
+  }, [activeAsset, isSaving, persistEdits, blogHost]);
 
   const approveAndPublish = useCallback(async (): Promise<string> => {
     if (!activeAsset || publishState === "pending") return "";
@@ -262,6 +272,8 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
     setPublishError(null);
 
     try {
+      // What the reviewer approved is what goes out: unsaved edits are saved first.
+      if (isDirty) await persistEdits();
       // Mark claims OK and status PUBLISHED so the publisher workflow picks the asset up and broadcasts to LinkedIn/Facebook.
       await apiClient.patch(`/api/assets/${activeAsset.id}`, {
         claims_ok: "Y",
@@ -275,6 +287,7 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
         claims_ok: "Y",
         doc_url: blogUrl(activeAsset.slug, tenantDomain) ?? "",
         published_at: new Date().toISOString(),
+        scheduled_for: null,
       });
       setPublishState("success");
       window.dispatchEvent(new Event("minions-counts-updated"));
@@ -285,7 +298,45 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
       setPublishError(message);
       return message;
     }
-  }, [activeAsset, publishState, patchActive, tenantDomain, blogHost]);
+  }, [activeAsset, publishState, patchActive, tenantDomain, blogHost, isDirty, persistEdits]);
+
+  const schedulePost = useCallback(async (date: string, time: string): Promise<string> => {
+    if (!activeAsset || publishState === "pending") return "";
+    setPublishState("pending");
+    setPublishError(null);
+
+    try {
+      if (isDirty) await persistEdits();
+      const res = await apiClient.post<{ status: AssetStatus; scheduled_for: string }>(
+        `/api/assets/${activeAsset.id}/schedule`,
+        { date, time }
+      );
+      patchActive({ status: res.status, scheduled_for: res.scheduled_for, claims_ok: "Y" });
+      setPublishState("idle");
+      window.dispatchEvent(new Event("minions-counts-updated"));
+      return "Scheduled";
+    } catch (err) {
+      const message = toErrorMessage(err, "Could not schedule the post");
+      setPublishState("error");
+      setPublishError(message);
+      return message;
+    }
+  }, [activeAsset, publishState, patchActive, isDirty, persistEdits]);
+
+  const unschedulePost = useCallback(async (): Promise<string> => {
+    if (!activeAsset || publishState === "pending") return "";
+    setPublishState("pending");
+    try {
+      await apiClient.delete(`/api/assets/${activeAsset.id}/schedule`);
+      patchActive({ status: "PENDING_REVIEW", scheduled_for: null });
+      setPublishState("idle");
+      window.dispatchEvent(new Event("minions-counts-updated"));
+      return "Schedule cancelled. The draft is back in review.";
+    } catch (err) {
+      setPublishState("idle");
+      return toErrorMessage(err, "Could not cancel the schedule");
+    }
+  }, [activeAsset, publishState, patchActive]);
 
   const toggleLiveStatus = useCallback(async (): Promise<string> => {
     if (!activeAsset) return "";
@@ -420,6 +471,8 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
     publishState,
     publishError,
     approveAndPublish,
+    schedulePost,
+    unschedulePost,
 
     isTogglingLive,
     toggleLiveStatus,

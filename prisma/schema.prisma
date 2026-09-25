@@ -305,6 +305,8 @@ model Asset {
   xVariant            String?   @map("x_variant") @db.Text
   version             Int       @default(1)
   generationCost      Decimal   @default(0.038) @map("generation_cost") @db.Decimal(10, 4)
+  // Set while status is SCHEDULED: when the reviewer chose for it to go out (phase 7).
+  scheduledFor        DateTime? @map("scheduled_for")
   publishedAt         DateTime? @map("published_at")
   publishedUrls       String?   @map("published_urls")
   facebookPostId      String?   @map("facebook_post_id")

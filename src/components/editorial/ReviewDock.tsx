@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
+  CalendarClock,
   Check,
   CheckCheck,
   CheckCircle2,
@@ -13,7 +14,10 @@ import {
   Globe,
   RefreshCw,
   Trash2,
+  Undo2,
 } from "lucide-react";
+import SchedulePicker, { useWorkspaceTimezone, zoneLabel } from "./SchedulePicker";
+import { formatPostTime } from "@/lib/postTime";
 import { formatCost } from "@/utils/format";
 import { useBrandSettings } from "@/hooks/useBrandSettings";
 import { normalizeDomain } from "@/constants/config";
@@ -33,6 +37,9 @@ export interface ReviewDockProps {
   onNext: () => void;
   onSave: () => void;
   onPublish: () => void;
+  /** Approve the draft for a local date and time; resolves true when it was scheduled. */
+  onSchedule: (date: string, time: string) => Promise<boolean>;
+  onUnschedule: () => void;
   setToggleLiveConfirmOpen: (v: boolean) => void;
   setDeleteConfirmOpen: (v: boolean) => void;
   /** Whether this tenant has the blog channel switched on. Undefined means
@@ -65,10 +72,23 @@ export default function ReviewDock({
   onNext,
   onSave,
   onPublish,
+  onSchedule,
+  onUnschedule,
   setToggleLiveConfirmOpen,
   setDeleteConfirmOpen,
   blogEnabled = true,
 }: ReviewDockProps) {
+  const [picking, setPicking] = useState(false);
+  const [pickingFor, setPickingFor] = useState<string | null>(null);
+  const timezone = useWorkspaceTimezone();
+  // Close the picker when the reviewer moves to another draft.
+  if (pickingFor !== activeAsset.id) {
+    setPickingFor(activeAsset.id);
+    setPicking(false);
+  }
+  const confirmSchedule = async (date: string, time: string) => {
+    if (await onSchedule(date, time)) setPicking(false);
+  };
   // The tenant's own blog host. This badge previously read "Live on
   // getminions.ai" for every tenant, naming the wrong company's site.
   const { brandSettings } = useBrandSettings();
@@ -186,6 +206,60 @@ export default function ReviewDock({
                 <span>Delete Permanently</span>
               </button>
             </div>
+          ) : activeAsset.status === "SCHEDULED" ? (
+            <div className="space-y-2 pt-1">
+              <div className="w-full bg-[#3B82F6]/10 border border-[#3B82F6]/40 text-[#93C5FD] p-2.5 rounded-xl text-xs space-y-1">
+                <div className="flex items-center gap-1.5 font-bold">
+                  <CalendarClock className="w-4 h-4" />
+                  <span>Scheduled</span>
+                </div>
+                <p className="text-[11px] text-[#CBD5E1]">
+                  {activeAsset.scheduled_for && timezone
+                    ? `Goes out ${formatPostTime(activeAsset.scheduled_for, timezone)} (${zoneLabel(timezone)}).`
+                    : "Goes out at the chosen time."}{" "}
+                  Edits you save before then go out with it.
+                </p>
+              </div>
+
+              {picking ? (
+                <SchedulePicker
+                  current={activeAsset.scheduled_for}
+                  busy={publishState === "pending"}
+                  confirmLabel="Move to this time"
+                  onConfirm={(d, t) => void confirmSchedule(d, t)}
+                  onCancel={() => setPicking(false)}
+                />
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setPicking(true)}
+                    disabled={publishState === "pending"}
+                    className="bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#F1F5F9] text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-60"
+                  >
+                    <CalendarClock className="w-3.5 h-3.5 text-[#00C9A7]" />
+                    Change time
+                  </button>
+                  <button
+                    onClick={onPublish}
+                    disabled={publishState === "pending"}
+                    className="bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-60"
+                  >
+                    {publishState === "pending" ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                    Publish now
+                  </button>
+                </div>
+              )}
+
+              <button
+                onClick={onUnschedule}
+                disabled={publishState === "pending"}
+                className="w-full bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 border border-[#F59E0B]/30 text-[#F59E0B] text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
+                title="Back to review; it goes nowhere until you approve it again"
+              >
+                <Undo2 className="w-3.5 h-3.5" />
+                <span>Cancel schedule</span>
+              </button>
+            </div>
           ) : activeAsset.status === "UNPUBLISHED" ? (
             <div className="space-y-2.5 pt-1">
               <div className="w-full bg-[#F59E0B]/15 border border-[#F59E0B]/40 text-[#F59E0B] p-2.5 rounded-xl font-bold text-xs flex items-center justify-between gap-2">
@@ -264,6 +338,26 @@ export default function ReviewDock({
                   </>
                 )}
               </button>
+
+              {!alreadyLive &&
+                (picking ? (
+                  <SchedulePicker
+                    current={null}
+                    busy={publishState === "pending"}
+                    confirmLabel="Approve & schedule"
+                    onConfirm={(d, t) => void confirmSchedule(d, t)}
+                    onCancel={() => setPicking(false)}
+                  />
+                ) : (
+                  <button
+                    onClick={() => setPicking(true)}
+                    disabled={publishState === "pending"}
+                    className="w-full bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#F1F5F9] text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
+                  >
+                    <CalendarClock className="w-3.5 h-3.5 text-[#00C9A7]" />
+                    <span>Approve & schedule for later</span>
+                  </button>
+                ))}
 
               <button
                 onClick={() => setDeleteConfirmOpen(true)}

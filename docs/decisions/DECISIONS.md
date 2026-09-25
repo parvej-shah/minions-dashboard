@@ -60,3 +60,24 @@ Cloudflare's cache and browsers would keep showing the old picture;
 a periodic sweep of unreferenced objects — more moving parts for the same
 result.
 **Status:** active
+
+## 2026-09-25 — Phase 7 scope as the user set it; scheduling one reviewed post
+
+**Decision:** the user answered phase 7's four questions (see the plan's
+"Phase 7 — building" entry): a slot's time stays the **drafting** time; after
+review a post goes out **now or at a picked date and time** (not tied to plan
+slots); a slot's draft follows the workspace's `requireReview`; the slot filler
+is built but stays **off**. A scheduled post is `assets.status = SCHEDULED`
+with `scheduled_for`; `POST /api/internal/schedule/release-due`, the first
+step of 03_review_publisher's existing 5-minute poll, flips due posts to
+PUBLISHED and puts them on the blog, and the same poll broadcasts them.
+**Why:** 03's poll is already active and already publishes any
+PUBLISHED-and-unbroadcast asset, so scheduling needed one new step, not a new
+scheduler — and the 00b dispatcher stays off as the user asked. The flip is a
+compare-and-set, so overlapping polls release a post once. The picked time is
+read in the workspace's timezone, not the browser's.
+**Alternatives considered:** a Vercel cron for the release — Hobby crons run
+daily at most; publishing straight from a new n8n schedule — a second poller
+for the same job. Tying scheduled posts to plan slots — the user chose not to.
+Posts go out up to 5 minutes after their time (the poll interval); accepted.
+**Status:** active

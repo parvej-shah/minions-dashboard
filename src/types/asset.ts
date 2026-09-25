@@ -4,6 +4,7 @@ export type AssetStatus =
   | "DRAFT"
   | "PENDING_REVIEW"
   | "APPROVED"
+  | "SCHEDULED"
   | "PUBLISHED"
   | "UNPUBLISHED"
   | "BLOCKED"
@@ -78,6 +79,8 @@ export interface AssetItem {
   version: number;
   generation_cost: number;
   published_at: string | null;
+  /** When a SCHEDULED post goes out (phase 7); kept after release as the record. */
+  scheduled_for: string | null;
   published_urls: string[];
   /**
    * Permalink of the blog row that already carries this asset, or null.

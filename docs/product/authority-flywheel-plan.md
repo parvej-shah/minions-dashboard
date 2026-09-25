@@ -1069,6 +1069,36 @@ Found along the way:
 - IDEA-0247's angle uses "deterministic", a banned word for that workspace;
   02's scrub step will reword it at drafting.
 
+### Phase 7 — building (started 2026-09-25)
+
+Decisions (the user's answers, 2026-09-25):
+
+- A slot's time stays the **drafting** time (unchanged). The post goes out
+  when it is approved, or at the time the reviewer picks.
+- After review a post goes out **now or at a picked date and time**. It is not
+  tied to plan slots.
+- A slot's draft follows the workspace's `requireReview`: with review off, a
+  draft that passes every check goes out on its own. A below-bar draft always
+  waits (D17).
+- The slot filler and look-ahead are built but stay **off** until the user
+  switches them on for a workspace. The 00b scheduler stays off.
+
+Slice 1, scheduling one reviewed post (built, not yet deployed):
+
+- `assets.scheduled_for` and status `SCHEDULED`
+  (prisma/sql/2026-09-25-post-scheduling.sql).
+- `POST/DELETE /api/assets/[id]/schedule`: the time is a local date and time
+  in the workspace's timezone, at least 10 minutes and at most 180 days ahead
+  (`src/lib/postTime.ts`). Scheduling counts as approval (`claims_ok = Y`).
+- `POST /api/internal/schedule/release-due` is the first step of
+  03_review_publisher's 5-minute poll: due posts become PUBLISHED and go on
+  the blog, and the same poll broadcasts them. So a post goes out up to
+  5 minutes after its time.
+- Editorial: "Approve & schedule for later" under the publish button; a
+  scheduled draft shows its time with Change time, Publish now and Cancel
+  schedule. Unsaved edits are saved before approving or scheduling. A
+  "Scheduled" filter sits in the queue.
+
 ### Security fixes found along the way (2026-09-23)
 
 - **The public site served other customers' posts.** getminions.ai/blog listed

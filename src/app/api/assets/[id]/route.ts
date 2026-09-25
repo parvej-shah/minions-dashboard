@@ -46,6 +46,11 @@ export async function PATCH(
     const body = await request.json();
     const nextContent = body.content ?? body.body_content;
 
+    // A time is set only through /schedule, which checks it.
+    if (body.status === "SCHEDULED") {
+      return apiFailure("Use POST /api/assets/{id}/schedule to schedule a post", 400);
+    }
+
     const owned = await prisma.asset.findFirst({
       where: { OR: [{ id }, { slug: id }], clientId: ctx.clientId },
       select: { id: true },
@@ -62,6 +67,8 @@ export async function PATCH(
         ...(body.hook !== undefined && { hook: body.hook }),
         ...(body.core_argument !== undefined && { coreArgument: body.core_argument }),
         ...(body.status !== undefined && { status: body.status }),
+        // Publishing now or sending it back to review replaces any scheduled time.
+        ...((body.status === "PUBLISHED" || body.status === "PENDING_REVIEW") && { scheduledFor: null }),
         ...(body.claims_ok !== undefined && { claimsOk: body.claims_ok }),
         ...(body.published_at !== undefined && { publishedAt: body.published_at ? new Date(body.published_at) : null }),
         ...(body.published_urls !== undefined && {

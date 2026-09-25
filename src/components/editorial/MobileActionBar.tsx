@@ -92,7 +92,7 @@ export default function MobileActionBar({
           ) : (
             <>
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Approve</span>
+              <span>{activeAsset.status === "SCHEDULED" ? "Publish now" : "Approve"}</span>
             </>
           )}
         </button>

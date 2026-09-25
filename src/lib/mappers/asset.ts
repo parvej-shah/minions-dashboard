@@ -112,6 +112,7 @@ export function toAssetDTO(
     version: asset.version || 1,
     generation_cost: Number(asset.generationCost) || DEFAULT_GENERATION_COST,
     published_at: asset.publishedAt ? asset.publishedAt.toISOString() : null,
+    scheduled_for: asset.scheduledFor ? asset.scheduledFor.toISOString() : null,
     published_urls: parsePublishedUrls(asset.publishedUrls),
     live_blog_url: liveBlogSlug ? blogUrl(liveBlogSlug, domain) : null,
     body_content: asset.content,

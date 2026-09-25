@@ -350,6 +350,17 @@
         ]
       ]
     },
+    "Release_Due_Scheduled": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Read_Approved_Assets_DB",
+            "type": "main"
+          }
+        ]
+      ]
+    },
     "Resolve_Blog_Channel": {
       "main": [
         [
@@ -388,7 +399,7 @@
         [
           {
             "index": 0,
-            "node": "Read_Approved_Assets_DB",
+            "node": "Release_Due_Scheduled",
             "type": "main"
           }
         ]
@@ -1526,12 +1537,18 @@
       "typeVersion": 4.2
     },
     {
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
       "id": "webhook-trigger",
       "name": "Webhook_Trigger",
       "parameters": {
+        "authentication": "headerAuth",
         "httpMethod": "POST",
-        "path": "publish-approved-asset",
-        "authentication": "headerAuth"
+        "path": "publish-approved-asset"
       },
       "position": [
         -100,
@@ -1539,13 +1556,35 @@
       ],
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "webhookId": "publish-approved-asset",
+      "webhookId": "publish-approved-asset"
+    },
+    {
+      "alwaysOutputData": true,
       "credentials": {
         "httpHeaderAuth": {
           "id": "pePrDfuS5BrzrPCk",
           "name": "Minions Cockpit API (webhook secret)"
         }
-      }
+      },
+      "id": "7c1e0d52-3f4b-4a8e-9b61-5a2d8e7f0c31",
+      "name": "Release_Due_Scheduled",
+      "notes": "Phase 7: scheduled posts that are due become PUBLISHED (not yet broadcast) and go on the blog, so Read_Approved_Assets_DB picks them up in this same run. A failure here must not stop the poll, so errors pass through.",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "POST",
+        "options": {
+          "timeout": 30000
+        },
+        "url": "https://minions.getminions.ai/api/internal/schedule/release-due"
+      },
+      "position": [
+        70,
+        0
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
     }
   ],
   "settings": {

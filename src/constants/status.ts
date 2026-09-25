@@ -22,6 +22,7 @@ export const ASSET_STATUS_STYLES: Record<AssetStatus, StatusStyle> = {
   DRAFT: { label: "Draft", className: SLATE },
   PENDING_REVIEW: { label: "Pending Review", className: AMBER },
   APPROVED: { label: "Approved", className: BLUE },
+  SCHEDULED: { label: "Scheduled", className: BLUE },
   PUBLISHED: { label: "Published", className: TEAL },
   UNPUBLISHED: { label: "Unpublished", className: SLATE },
   BLOCKED: { label: "Blocked", className: RED },

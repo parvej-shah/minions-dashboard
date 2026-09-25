@@ -98,6 +98,21 @@ export default function EditorialStudio({
     if (message) toast.show(message);
   };
 
+  const handleSchedule = async (date: string, time: string): Promise<boolean> => {
+    const message = await draft.schedulePost(date, time);
+    if (message !== "Scheduled") {
+      if (message) toast.show(message);
+      return false;
+    }
+    toast.show("Scheduled. It goes out at the time you picked.");
+    return true;
+  };
+
+  const handleUnschedule = async () => {
+    const message = await draft.unschedulePost();
+    if (message) toast.show(message);
+  };
+
   const handleToggleLive = async () => {
     const message = await draft.toggleLiveStatus();
     setToggleLiveConfirmOpen(false);
@@ -262,6 +277,8 @@ export default function EditorialStudio({
             onNext={draft.nextDraft}
             onSave={handleSave}
             onPublish={handlePublish}
+            onSchedule={handleSchedule}
+            onUnschedule={handleUnschedule}
             setToggleLiveConfirmOpen={setToggleLiveConfirmOpen}
             setDeleteConfirmOpen={setDeleteConfirmOpen}
             blogEnabled={blogEnabled}
