@@ -31,6 +31,8 @@ const LAYOUTS: { id: CoverSpecDTO["layout"]; label: string; hint: string }[] = [
 export default function CoverImageCard({ activeAsset, isRendering, onRerender, onMessage }: CoverImageCardProps) {
   const cover = activeAsset.cover;
   const isTemplate = activeAsset.hero_provider === "template";
+  // Once a post is out, its cover is the file the post points at: it can no longer be redrawn.
+  const isLocked = activeAsset.status === "PUBLISHED" || Boolean(activeAsset.published_at || activeAsset.live_blog_url);
   const isCoverPending = activeAsset.hero_status === "PENDING";
   const coverNeedsAttention = !isCoverPending && activeAsset.hero_status !== "READY";
   const coverMessage = activeAsset.hero_status === "BLOCKED_BY_SAFETY"
@@ -109,7 +111,12 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
         </div>
 
         <div className="flex-1 min-w-0 space-y-3">
-          {cover ? (
+          {isLocked ? (
+            <div className="space-y-1.5">
+              {cover && <p className="text-sm font-semibold text-[#F1F5F9] leading-snug">{cover.layout === "QUOTE" && cover.quote ? `“${cover.quote}”` : cover.headline}</p>}
+              <p className="text-xs leading-relaxed text-[#94A3B8]">This draft is published, so its cover stays exactly as it went out.</p>
+            </div>
+          ) : cover ? (
             <>
               <div>
                 <span className="text-[11px] font-medium text-[#94A3B8] block mb-1.5">Layout</span>
@@ -261,7 +268,7 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
           )}
 
           <div className="flex flex-wrap gap-2 pt-1">
-            {(!cover || coverNeedsAttention) && (
+            {!isLocked && (!cover || coverNeedsAttention) && (
               <button
                 type="button"
                 disabled={isRendering}

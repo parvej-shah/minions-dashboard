@@ -23,6 +23,7 @@ export async function POST(request: Request) {
 
   try {
     const result = await renderAssetCover(assetId, { card });
+    if (!result.ok && result.locked) return apiFailure(result.error, 409);
     if (!result.ok) {
       await markCoverFailed(assetId, result.error);
       return apiFailure(result.error, 422);

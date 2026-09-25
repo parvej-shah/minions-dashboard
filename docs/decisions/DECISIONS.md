@@ -41,3 +41,22 @@ choices (schema shape, library picks, trade-offs) across sessions and
 agents; without a running log, later sessions re-litigate settled questions
 or silently drift from them.
 **Status:** active
+
+## 2026-09-25 — Covers lock at publish; a redraw deletes the cover it replaces
+
+**Decision:** A drawn cover can be redrawn only until the draft goes out
+(asset status PUBLISHED, any `*_published_at`, or a blog row for it). Each
+redraw still uploads under a new timestamped key, and after the new cover is
+saved the previous `covers/…` object is deleted from R2. Uploaded photos and
+paid AI images are never deleted; a failed delete is logged, never fails the
+redraw.
+**Why:** every redraw left the old PNG (~100 KB) in R2 forever. Before
+publishing, nothing public links to the old file, so deleting it is safe;
+after publishing, the blog page and posts point at that exact URL, so the
+cover must stay fixed. The blog row check is needed because the asset's own
+status lags behind a live post (see `live_blog_url`).
+**Alternatives considered:** overwrite one fixed key per draft — rejected,
+Cloudflare's cache and browsers would keep showing the old picture;
+a periodic sweep of unreferenced objects — more moving parts for the same
+result.
+**Status:** active

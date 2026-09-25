@@ -32,7 +32,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const edit: CoverEdit = { layout, headline: text(body.headline, 160), kicker: text(body.kicker, 160), emphasis: text(body.emphasis, 40), art, art_reroll: body.art_reroll === true };
 
     const result = await renderAssetCover(owned.id, { edit });
-    if (!result.ok) return apiFailure(result.error, 422);
+    if (!result.ok) return apiFailure(result.error, result.locked ? 409 : 422);
     return NextResponse.json({ success: true, hero_image_url: result.url, cover: result.spec });
   } catch (error) {
     return apiError(error, "Failed to render cover");

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { uploadToR2 } from "@/lib/r2";
+import { deleteFromR2, r2KeyFromUrl, uploadToR2 } from "@/lib/r2";
 import { coverBrand } from "@/lib/covers/brand";
 import { chooseCoverCopy, scoreHeadline, pickQuote, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
 import { COVER_LAYOUTS, CoverFitError, type CoverLayout, type CoverSpec } from "@/lib/covers/layouts";
@@ -45,7 +45,7 @@ export type StoredCoverSpec = Omit<CoverSpec, "author"> & {
 
 export type CoverResult =
   | { ok: true; url: string; spec: StoredCoverSpec }
-  | { ok: false; error: string };
+  | { ok: false; error: string; locked?: boolean };
 
 const PHOTO_TYPES = new Set(["image/png", "image/jpeg"]);
 const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
@@ -145,10 +145,16 @@ function copyAttempts(spec: CoverSpec, title: string): CoverSpec[] {
 export async function renderAssetCover(assetId: string, input: { card?: CoverCard; edit?: CoverEdit } = {}): Promise<CoverResult> {
   const asset = await prisma.asset.findUnique({
     where: { id: assetId },
-    select: { id: true, clientId: true, title: true, hook: true, content: true, claimsOk: true, coverSpec: true, heroAttempts: true },
+    select: {
+      id: true, clientId: true, title: true, hook: true, content: true, claimsOk: true, coverSpec: true, heroAttempts: true,
+      heroImageUrl: true, slug: true, status: true, publishedAt: true, linkedinPublishedAt: true, facebookPublishedAt: true,
+    },
   });
   if (!asset) return { ok: false, error: `Asset ${assetId} not found` };
   if (!asset.clientId) return { ok: false, error: `Asset ${assetId} has no workspace` };
+  // A blog row is the only reliable record that a post is live; the asset's own status lags.
+  const onBlog = await prisma.blog.findFirst({ where: { clientId: asset.clientId, OR: [{ assetId: asset.id }, { slug: asset.slug }] }, select: { slug: true } });
+  if (onBlog || isPublished(asset)) return { ok: false, error: PUBLISHED_COVER_LOCKED, locked: true };
 
   const [profile, icp, recent] = await Promise.all([
     prisma.brandProfile.findUnique({ where: { clientId: asset.clientId } }),
@@ -277,7 +283,35 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
       updatedAt: new Date(),
     },
   });
+  await dropReplacedCover(asset.id, asset.heroImageUrl, url);
   return { ok: true, url, spec: stored };
+}
+
+export const PUBLISHED_COVER_LOCKED = "This draft is published, so its cover stays as it went out.";
+
+/**
+ * Once a draft has gone out anywhere, its cover is fixed: the blog page and the
+ * posts point at that exact file, so it can be neither redrawn nor deleted.
+ */
+export function isPublished(asset: { status: string; publishedAt: Date | null; linkedinPublishedAt: Date | null; facebookPublishedAt: Date | null }): boolean {
+  return asset.status === "PUBLISHED" || Boolean(asset.publishedAt || asset.linkedinPublishedAt || asset.facebookPublishedAt);
+}
+
+/**
+ * A redraw uploads under a new key (so no CDN or browser serves the old picture),
+ * which would leave the old cover in R2 forever. Redraws only happen before
+ * publishing, so nothing public points at the old file and it is deleted once the
+ * new one is saved. Only our own drawn covers are touched, never an uploaded
+ * photo or a paid AI image. A failed delete never fails the redraw.
+ */
+async function dropReplacedCover(assetId: string, oldUrl: string | null, newUrl: string): Promise<void> {
+  const key = r2KeyFromUrl(oldUrl);
+  if (!key || !key.startsWith("covers/") || oldUrl === newUrl) return;
+  try {
+    await deleteFromR2(key);
+  } catch (e) {
+    console.warn(`[cover] could not delete the replaced cover ${key} of ${assetId}:`, e);
+  }
 }
 
 /** Records a cover that could not be drawn, so the draft does not wait on it forever. */
