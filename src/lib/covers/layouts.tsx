@@ -18,8 +18,12 @@ import { drawArt, type ArtChoice } from "./art";
 export const COVER_SIZE = { width: 1080, height: 1350 } as const;
 const PAD = 88;
 const INNER = COVER_SIZE.width - PAD * 2;
-// Label row (40) + centre margins (2 x 48) + divider (2 + 40) + signature (108).
-const CENTRE_HEIGHT = COVER_SIZE.height - PAD * 2 - 40 - 96 - 42 - 108;
+/**
+ * The height between the top padding and the signature: less the label row
+ * and its gap when there is a label, the gap above the divider, the divider
+ * (2 + 40) and the signature (108).
+ */
+const centreHeight = (spec: { label?: string }) => COVER_SIZE.height - PAD * 2 - (spec.label ? 40 + 48 : 0) - 48 - 42 - 108;
 
 export const COVER_LAYOUTS = ["HEADLINE", "STATEMENT", "QUOTE", "NUMBER"] as const;
 export type CoverLayout = (typeof COVER_LAYOUTS)[number];
@@ -140,12 +144,14 @@ function Frame({ spec, paper, ink, children }: { spec: CoverSpec; paper: string;
   const role = author.role ? fitOrThrow("role", author.role) : null;
   return (
     <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: paper, padding: PAD }}>
-      <div style={{ display: "flex", alignItems: "center", height: 40 }}>
-        <div style={{ width: 44, height: 6, background: brand.accent, marginRight: 20 }} />
-        {label ? <Lines fitted={label} face="sansSemi" tracking={0.12} lineHeight={1} color={rgba(ink, 0.74)} /> : null}
-      </div>
+      {label ? (
+        <div style={{ display: "flex", alignItems: "center", height: 40, marginBottom: 48 }}>
+          <div style={{ width: 44, height: 6, background: brand.accent, marginRight: 20 }} />
+          <Lines fitted={label} face="sansSemi" tracking={0.12} lineHeight={1} color={rgba(ink, 0.74)} />
+        </div>
+      ) : null}
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", margin: "48px 0" }}>{children}</div>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", marginBottom: 48 }}>{children}</div>
 
       <div style={{ height: 2, background: rgba(ink, 0.14), marginBottom: 40 }} />
       <div style={{ display: "flex", alignItems: "center" }}>
@@ -171,25 +177,32 @@ function Frame({ spec, paper, ink, children }: { spec: CoverSpec; paper: string;
 }
 
 const KICKER_GAP = 48;
-/** Shapes are wide and light; a doodle is a figure and needs more height to read at feed size. */
-const artHeight = (spec: CoverSpec) => (!spec.art ? 0 : spec.art.choice.style === "DOODLES" ? 260 : 200);
-const ART_GAP = 56;
+/**
+ * The illustration takes the height the text leaves, between these bounds,
+ * so a short headline gets a large picture and a long one a smaller picture,
+ * never a gap. A doodle is a figure and needs more height to read at feed size.
+ */
+const ART_MIN = { SHAPES: 220, DOODLES: 260 } as const;
+/** With art the headline is capped below its usual 150px, so the picture gets room and neither shouts over the other. */
+const ART_HEADLINE_MAX = 128;
+const ART_MAX = 440;
+const ART_GAP = 64;
 /** With art, a headline set smaller than this reads worse than one without art; the caller retries without. */
 const ART_MIN_HEADLINE = 84;
 
-function Art({ spec, ink, paper }: { spec: CoverSpec; ink: string; paper: string }) {
+function Art({ spec, ink, paper, maxHeight }: { spec: CoverSpec; ink: string; paper: string; maxHeight: number }) {
   if (!spec.art) return null;
   const dark = spec.layout === "STATEMENT";
   const { src, aspect } = drawArt(spec.art.choice, spec.art.seed, {
-    main: dark ? rgba(ink, 0.8) : spec.brand.secondary,
+    main: dark ? rgba(ink, 0.82) : spec.brand.secondary,
     highlight: spec.brand.accent,
     bg: paper,
     ink,
   });
-  const height = artHeight(spec);
-  const width = Math.min(INNER, Math.round(height * aspect));
+  // As tall as the space allows, as long as it stays within the text column.
+  const width = Math.min(INNER, Math.round(maxHeight * aspect));
   return (
-    <div style={{ display: "flex", height, marginBottom: ART_GAP }}>
+    <div style={{ display: "flex" }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} width={width} height={Math.round(width / aspect)} alt="" />
     </div>
@@ -201,12 +214,16 @@ function HeadlineCentre({ spec, ink, paper }: { spec: CoverSpec; ink: string; pa
   // The kicker is fitted first; the headline gets the height that is left.
   const kicker = spec.kicker ? fitOrThrow("kicker", spec.kicker) : null;
   const kickerHeight = kicker ? KICKER_GAP + kicker.lines.length * kicker.size * 1.35 : 0;
-  const artSpace = spec.art ? artHeight(spec) + ART_GAP : 0;
-  const headline = fitOrThrow("headline", spec.headline, { maxHeight: CENTRE_HEIGHT - kickerHeight - artSpace, lineHeight: 1.05 });
+  const height = centreHeight(spec);
+  const artMin = spec.art ? ART_MIN[spec.art.choice.style] + ART_GAP : 0;
+  const headline = spec.art
+    ? fit(spec.headline, SIZES.headline[0], ART_HEADLINE_MAX, { ...BOX.headline, maxHeight: height - kickerHeight - artMin, lineHeight: 1.05 })
+    : fitOrThrow("headline", spec.headline, { maxHeight: height - kickerHeight, lineHeight: 1.05 });
+  if (!headline) throw new CoverFitError(`The headline does not fit beside the illustration: "${spec.headline.slice(0, 80)}"`);
   if (spec.art && headline.size < ART_MIN_HEADLINE) throw new CoverFitError(`With the illustration the headline would be set at ${headline.size}px; drawn without it.`);
-  return (
+  const textHeight = headline.lines.length * headline.size * 1.05 + kickerHeight;
+  const text = (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      {Art({ spec, ink, paper })}
       <Lines fitted={headline} face="serif" tracking={-0.02} lineHeight={1.05} color={ink} emphasis={spec.emphasis} accent={spec.brand.accent} />
       {kicker ? (
         <div style={{ display: "flex", marginTop: KICKER_GAP }}>
@@ -215,10 +232,18 @@ function HeadlineCentre({ spec, ink, paper }: { spec: CoverSpec; ink: string; pa
       ) : null}
     </div>
   );
+  if (!spec.art) return text;
+  // Picture then words, one block with one fixed gap, centred in the space.
+  return (
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      {Art({ spec, ink, paper, maxHeight: Math.min(ART_MAX, height - textHeight - ART_GAP) })}
+      <div style={{ display: "flex", marginTop: ART_GAP }}>{text}</div>
+    </div>
+  );
 }
 
 function QuoteCentre({ spec, ink }: { spec: CoverSpec; ink: string }) {
-  const quote = fitOrThrow("quote", spec.quote || spec.headline, { maxHeight: CENTRE_HEIGHT - QUOTE_MARK_HEIGHT, lineHeight: 1.18 });
+  const quote = fitOrThrow("quote", spec.quote || spec.headline, { maxHeight: centreHeight(spec) - QUOTE_MARK_HEIGHT, lineHeight: 1.18 });
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <div style={{ display: "flex", ...faceStyle("serif"), fontSize: 260, lineHeight: 0.8, height: QUOTE_MARK_HEIGHT, color: spec.brand.accent }}>“</div>
@@ -234,7 +259,7 @@ function NumberCentre({ spec, ink }: { spec: CoverSpec; ink: string }) {
   const unitWidth = n.unit ? textWidth(metricsFor("serifItalic"), n.unit, UNIT_SIZE) + 24 : 0;
   const value = fit(n.value, 160, 380, { face: "sansBold", maxWidth: INNER - unitWidth, maxLines: 1, tracking: -0.04 });
   if (!value || !n.value.trim()) throw new CoverFitError(`The number does not fit this cover: "${n.value}"`);
-  const headline = fitOrThrow("numberHeadline", spec.headline, { maxHeight: CENTRE_HEIGHT - value.size * 0.9 - 110, lineHeight: 1.1 });
+  const headline = fitOrThrow("numberHeadline", spec.headline, { maxHeight: centreHeight(spec) - value.size * 0.9 - 110, lineHeight: 1.1 });
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <div style={{ display: "flex", alignItems: "flex-end" }}>

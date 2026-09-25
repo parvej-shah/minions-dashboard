@@ -957,6 +957,20 @@ never stated it, and code refused it.
 - The accent coral is deepened from #ff6b4a to #e76447 on the light layouts,
   because the brand coral is 2.67:1 on cream.
 
+**Cover layout v2 (2026-09-25, user's review).**
+
+- The audience label ("For real estate teams") is gone. The illustration
+  opens the cover, and the headline and subtitle follow it.
+- Art and text are one centred block with a fixed 64px gap. The art takes
+  the height the text leaves, between 220px (260px for doodles) and 440px.
+- With art, the headline is capped at 128px so neither crowds the other.
+- There are now 15 shapes. New: funnel, chat, clock, shield, steps, spark
+  and balance. All are drawn on one 600×300 canvas with one stroke weight.
+- There are now 18 doodles. New: jumping, running, laying, selfie, loving,
+  float and chilling.
+- A test rejects any SVG with a repeated attribute. That bug blanked four
+  shapes during the build.
+
 **Cover illustrations (built 2026-09-25, follow-up to phase 5).** HEADLINE
 and STATEMENT covers carry an illustration above the headline, drawn in
 code, still with no image model.

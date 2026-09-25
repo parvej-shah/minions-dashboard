@@ -23,7 +23,7 @@ describe("the illustration is chosen in code", () => {
   it("does not repeat the last two covers' motif, and never returns the one a reviewer replaced", () => {
     const next = chooseArt("SHAPES", VOICE, "a", ["WAVEFORM"]);
     expect(next?.motif).not.toBe("WAVEFORM");
-    expect(next?.by_keyword).toBe(true); // "lead", "qualify": the next match
+    expect(next).toMatchObject({ motif: "FUNNEL", by_keyword: true }); // "lead", "qualify": the next match
     for (let i = 0; i < 20; i++) expect(chooseArt("SHAPES", "Plain words", `s${i}`, [], "GRID")?.motif).not.toBe("GRID");
     const rotated = chooseArt("SHAPES", "Plain words", "s", ["BARS", "FORK", "GRID"]);
     expect(rotated?.by_keyword).toBe(false);
@@ -47,6 +47,11 @@ describe("every illustration draws in the brand's colours", () => {
     const { svg, aspect } = artSvg(choice, "seed", colours);
     expect(svg.startsWith("<svg")).toBe(true);
     expect(svg).not.toMatch(/__INK__|__ACCENT__|NaN|undefined/);
+    // A repeated attribute makes the whole SVG invalid, and the cover shows no picture at all.
+    for (const tag of svg.match(/<[a-z]+\s[^>]*>/g) ?? []) {
+      const names = [...tag.matchAll(/\s([a-z-]+)="/g)].map((m) => m[1]);
+      expect(new Set(names).size, tag.slice(0, 80)).toBe(names.length);
+    }
     expect(svg).toContain(colours.highlight);
     expect(aspect).toBeGreaterThan(0.5);
     expect(artSvg(choice, "seed", colours).svg).toBe(svg);

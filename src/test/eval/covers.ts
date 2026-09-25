@@ -87,7 +87,7 @@ async function main() {
       }
       const copy = chooseCoverCopy({ card, title, hook: draft.hook, body: draft.body, claimsOk: draft.claims_ok, icp: { who: tenant.icp, role: "", company_type: "" }, recentLayouts: recent });
       recent.unshift(copy.layout);
-      const spec: CoverSpec = { layout: copy.layout, label: `Eval: ${tenant.id}`, headline: copy.headline, emphasis: copy.emphasis, kicker: copy.kicker, quote: copy.quote, number: copy.number, author: { name: tenant.settings.brand_name }, brand: DEFAULT_COVER_BRAND };
+      const spec: CoverSpec = { layout: copy.layout, headline: copy.headline, emphasis: copy.emphasis, kicker: copy.kicker, quote: copy.quote, number: copy.number, author: { name: tenant.settings.brand_name }, brand: DEFAULT_COVER_BRAND };
       const artText = [copy.headline, title, draft.hook].join(" ");
       const choice = copy.layout === "HEADLINE" || copy.layout === "STATEMENT" ? chooseArt(artStyle, artText, `${tenant.id}-${i}`, recentMotifs) : null;
       if (choice) {

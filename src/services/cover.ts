@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { uploadToR2 } from "@/lib/r2";
 import { coverBrand } from "@/lib/covers/brand";
-import { audienceLabel, chooseCoverCopy, scoreHeadline, pickQuote, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
+import { chooseCoverCopy, scoreHeadline, pickQuote, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
 import { COVER_LAYOUTS, CoverFitError, type CoverLayout, type CoverSpec } from "@/lib/covers/layouts";
 import { renderCoverPng } from "@/lib/covers/render";
 import { chooseArt, parseArtStyle, DEFAULT_COVER_ART_STYLE, type CoverArtStyle } from "@/lib/covers/art";
@@ -201,7 +201,8 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   // rest (layout, headline, subtitle) stays as drawn, never re-picked.
   const kept = input.edit && previous?.layout && previous.headline ? previous : null;
   const base = kept ?? copy;
-  let spec: CoverSpec = { layout: base.layout!, label: base.label, headline: base.headline!, emphasis: base.emphasis, kicker: base.kicker, quote: base.quote, number: base.number, author, brand, art };
+  // No audience label: the illustration and the headline open the cover (user decision, 2026-09-25).
+  let spec: CoverSpec = { layout: base.layout!, headline: base.headline!, emphasis: base.emphasis, kicker: base.kicker, quote: base.quote, number: base.number, author, brand, art };
   const notes = [...copy.notes, ...brandNotes];
   let headlineSource: StoredCoverSpec["headline_source"] = kept?.headline_source ?? copy.headline_source;
   let score = kept?.score ?? copy.score;
@@ -296,7 +297,7 @@ export async function renderCoverPreview(
   clientId: string,
   look: { brand_name?: string; primary_ink?: string; brand_cream?: string; brand_coral?: string; brand_teal?: string; cover_byline?: string; primary_logo_url?: string; positioning?: string; cover_art?: string }
 ): Promise<{ png: Buffer; notes: string[] }> {
-  const [profile, icp] = await Promise.all([prisma.brandProfile.findUnique({ where: { clientId } }), prisma.icpProfile.findUnique({ where: { clientId } })]);
+  const profile = await prisma.brandProfile.findUnique({ where: { clientId } });
   const { brand, notes } = coverBrand({
     ink: look.primary_ink ?? profile?.primaryInk,
     paper: look.brand_cream ?? profile?.brandCream,
@@ -312,7 +313,6 @@ export async function renderCoverPreview(
   const png = await renderCoverPng({
     layout: "HEADLINE",
     art: choice ? { choice, seed: clientId } : undefined,
-    label: audienceLabel({ who: icp?.who ?? "", role: icp?.role ?? "", company_type: icp?.companyType ?? "" }),
     headline: "Your post's claim appears here, in your type",
     emphasis: "claim",
     kicker: "One line under it says what the reader gets.",

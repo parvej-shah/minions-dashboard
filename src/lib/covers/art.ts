@@ -17,32 +17,50 @@ import type { CoverArtStyle } from "./artStyles";
 
 export { COVER_ART_STYLES, DEFAULT_COVER_ART_STYLE, COVER_ART_STYLE_META, parseArtStyle, type CoverArtStyle } from "./artStyles";
 
-export const MOTIFS = ["WAVEFORM", "FLOW", "BARS", "FORK", "GRID", "TARGET", "STACK", "LOOP"] as const;
+export const MOTIFS = ["WAVEFORM", "CHAT", "FUNNEL", "CLOCK", "SHIELD", "FLOW", "BARS", "BALANCE", "FORK", "STEPS", "LOOP", "TARGET", "STACK", "GRID", "SPARK"] as const;
 export type Motif = (typeof MOTIFS)[number];
 
 /** by_keyword: the post's words chose the motif (false: rotation by post id). */
 export type ArtChoice = ({ style: "SHAPES"; motif: Motif } | { style: "DOODLES"; motif: DoodleName }) & { by_keyword?: boolean };
 
-/** Words that point at a motif. Whole words, case-insensitive. */
+/**
+ * Words that point at a motif: whole words, case-insensitive. On a tie the
+ * earlier, more specific motif wins, so the table runs from the most
+ * specific (a call, a funnel) to the most general (a grid, a spark).
+ */
 const MOTIF_WORDS: Record<Motif, RegExp> = {
-  WAVEFORM: /\b(voice|call|calls|calling|caller|phone|speech|speak|speaking|audio|listen|listening|conversation|receptionist|podcast)\b/g,
-  FLOW: /\b(workflow|workflows|pipeline|pipelines|agent|agents|process|handoff|hand-off|automate|automation|automating|steps?|sequence|routing|dispatch)\b/g,
-  BARS: /\b(revenue|growth|metrics?|results?|conversion|rate|numbers?|data|percent|roi|pipeline value|sales|cost|costs|faster|slower)\b|\d+%/g,
-  FORK: /\b(decision|decide|choose|choice|instead|mistake|wrong|lesson|changed my mind|trade-?off|versus|either|fork|pivot|rather)\b/g,
-  GRID: /\b(scale|scaling|system|systems|team|teams|every|dozens|hundreds|library|template|templates|consistency|consistent)\b/g,
-  TARGET: /\b(focus|target|icp|niche|customer|customers|buyer|buyers|audience|clients?|positioning|leads?|qualify|qualification)\b/g,
-  STACK: /\b(stack|layer|layers|build|built|building|ship|shipped|code|tool|tools|infrastructure|architecture|model|models)\b/g,
-  LOOP: /\b(loop|feedback|iterate|iteration|weekly|habit|routine|repeat|again|cycle|follow-?ups?|retention)\b/g,
+  WAVEFORM: /\b(voice|calls?|calling|caller|phone|speech|speak|speaking|audio|listen|listening|receptionist|podcast|voicemail)\b/g,
+  CHAT: /\b(conversations?|chat|chats|messages?|repl(y|ies)|comments?|dms?|emails?|questions?|asked|answers?|sms|texts?|inbox)\b/g,
+  FUNNEL: /\b(leads?|qualify|qualification|qualified|conversion|convert|converts|funnel|inbound|prospects?|booked|bookings?|demos?|signups?)\b/g,
+  CLOCK: /\b(fast|faster|slow|slower|speed|minutes?|seconds?|hours?|delay|late|latency|response time|waiting|wait|deadline|24\/7|after-hours|overnight)\b/g,
+  SHIELD: /\b(trust|safe|safety|secure|security|risks?|compliance|privacy|protect|fraud|legal|disclosure|liability|guardrails?)\b/g,
+  FLOW: /\b(workflows?|pipelines?|agents?|process|processes|handoffs?|hand-offs?|automate|automation|automating|routing|dispatch|integrations?)\b/g,
+  BARS: /\b(revenue|growth|metrics?|results?|numbers?|data|percent|roi|sales|profit|reports?|dashboards?|kpis?)\b|\d+%/g,
+  BALANCE: /\b(trade-?offs?|balance|versus|vs|worth|pric(e|es|ing)|budget|costs?|tension|compromise)\b/g,
+  FORK: /\b(decisions?|decide|choose|choice|instead|mistakes?|wrong|changed my mind|pivot|rather)\b/g,
+  STEPS: /\b(steps?|stages?|levels?|ladder|roadmap|phases?|progress|playbook|checklist)\b/g,
+  LOOP: /\b(loop|feedback|iterate|iteration|weekly|habits?|routine|repeat|cycle|follow-?ups?|retention|recurring)\b/g,
+  TARGET: /\b(focus|target|icp|niche|customers?|buyers?|audience|clients?|positioning|goals?)\b/g,
+  STACK: /\b(stack|layers?|build|built|building|code|tools?|infrastructure|architecture|models?|software|platform|api)\b/g,
+  GRID: /\b(scale|scaling|systems?|teams?|every|dozens|hundreds|library|templates?|consistency|consistent|patterns?)\b/g,
+  SPARK: /\b(ideas?|insights?|lessons?|learned|realized|realised|secret|surprising|truth|lightbulb)\b/g,
 };
 
 const DOODLE_WORDS: Partial<Record<DoodleName, RegExp>> = {
-  READING: /\b(learn|learned|learning|lesson|lessons|research|study|read|reading)\b/g,
-  SITTING_READING: /\b(book|books|notes|documentation|docs|guide)\b/g,
-  CLUMSY: /\b(mistake|mistakes|wrong|fail|failed|fails|failure|broke|broken|mess|chaos|misspell\w*)\b/g,
+  CLUMSY: /\b(mistakes?|wrong|fail|failed|fails|failure|broke|broken|mess|chaos|misspell\w*)\b/g,
   UNBOXING: /\b(launch|launched|ship|shipped|new|release|released|built|unveil)\b/g,
+  JUMPING: /\b(wins?|won|celebrate|milestone|record|best)\b/g,
+  SPRINTING: /\b(fast|faster|speed|quick|quickly|seconds|minutes|rush)\b/g,
+  RUNNING: /\b(ahead|race|competitors?|compete|momentum|behind)\b/g,
+  LAYING: /\b(scroll|scrolling|feed|linkedin|social|mobile|posts?)\b/g,
+  SELFIE: /\b(brand|personal brand|content|followers|visibility|founder|creator)\b/g,
+  LOVING: /\b(love|loves|trust|care|thank|gratitude|loyal|loyalty|relationships?)\b/g,
+  READING: /\b(learn|learned|learning|lessons?|research|study|read|reading)\b/g,
+  SITTING_READING: /\b(book|books|notes|documentation|docs|guide)\b/g,
+  FLOAT: /\b(ideas?|imagine|think|thinking|creative|curious|wonder)\b/g,
   PLANT: /\b(grow|growth|growing|compound|nurture)\b/g,
   MEDITATING: /\b(focus|calm|simple|simpler|simplicity|patience|less)\b/g,
-  SPRINTING: /\b(fast|faster|speed|quick|quickly|seconds|minutes|rush)\b/g,
+  CHILLING: /\b(easy|effortless|relax|automatic|hands-off|autopilot)\b/g,
   COFFEE: /\b(morning|daily|routine|week|weekly|habit)\b/g,
 };
 
@@ -112,97 +130,181 @@ export interface ArtColours {
   ink: string;
 }
 
-const W = 640;
-const H = 200;
+/**
+ * Every shape is drawn on one 600 x 300 canvas with one stroke weight and
+ * round ends, in two colours (lines, and one highlight) plus tints of the
+ * line colour, so the set reads as one family whichever the post gets.
+ */
+const W = 600;
+const H = 300;
+const S = 10;
 const svg = (w: number, h: number, body: string) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">${body}</svg>`;
 const r1 = (n: number) => Math.round(n * 10) / 10;
+const line = (x1: number, y1: number, x2: number, y2: number, colour: string, extra = "", width = S) =>
+  `<line x1="${r1(x1)}" y1="${r1(y1)}" x2="${r1(x2)}" y2="${r1(y2)}" stroke="${colour}" stroke-width="${width}" stroke-linecap="round" ${extra}/>`;
+const dot = (cx: number, cy: number, r: number, fill: string, extra = "") => `<circle cx="${r1(cx)}" cy="${r1(cy)}" r="${r1(r)}" fill="${fill}" ${extra}/>`;
+const ring = (cx: number, cy: number, r: number, c: ArtColours, extra = "") => `<circle cx="${r1(cx)}" cy="${r1(cy)}" r="${r1(r)}" fill="${c.bg}" stroke="${c.main}" stroke-width="${S}" ${extra}/>`;
+const path = (d: string, colour: string, extra = "", width = S) => `<path d="${d}" fill="none" stroke="${colour}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`;
+/** n distinct integers below max. */
+const pickN = (rnd: () => number, n: number, max: number) => {
+  const out = new Set<number>();
+  while (out.size < Math.min(n, max)) out.add(Math.floor(rnd() * max));
+  return out;
+};
 
 type Draw = (rnd: () => number, c: ArtColours) => string;
 
 const DRAW: Record<Motif, Draw> = {
   WAVEFORM: (rnd, c) => {
-    const n = 22;
+    const n = 25;
     const phase = rnd() * 6;
-    const hi = new Set([Math.floor(rnd() * n), Math.floor(rnd() * n), Math.floor(rnd() * n)]);
+    const hi = pickN(rnd, 3, n);
     return Array.from({ length: n }, (_, i) => {
-      const amp = Math.abs(Math.sin(i * 0.5 + phase) * Math.cos(i * 0.19 + phase / 2));
-      const h = r1(28 + 164 * amp);
-      return `<rect x="${i * 29 + 4}" y="${r1(H / 2 - h / 2)}" width="14" height="${h}" rx="7" fill="${hi.has(i) ? c.highlight : c.main}"/>`;
+      const envelope = Math.sin((Math.PI * (i + 0.5)) / n) ** 0.7;
+      const h = r1(24 + 250 * envelope * (0.35 + 0.65 * Math.abs(Math.sin(i * 0.9 + phase))));
+      return `<rect x="${i * 24 + 6}" y="${r1(H / 2 - h / 2)}" width="12" height="${h}" rx="6" fill="${hi.has(i) ? c.highlight : c.main}"/>`;
     }).join("");
+  },
+  CHAT: (rnd, c) => {
+    const w = r1(270 + rnd() * 40);
+    const back = `<path d="M 70 30 H ${40 + w} Q ${70 + w} 30 ${70 + w} 60 V 150 Q ${70 + w} 180 ${40 + w} 180 H 140 L 84 222 V 180 H 70 Q 40 180 40 150 V 60 Q 40 30 70 30 Z" fill="${c.bg}" stroke="${c.main}" stroke-width="${S}" stroke-linejoin="round"/>`;
+    const dots = [0, 1, 2].map((i) => dot(110 + i * 46, 105, 13, c.main)).join("");
+    const front = `<path d="M 290 128 H 530 Q 560 128 560 158 V 228 Q 560 258 530 258 H 516 V 294 L 470 258 H 290 Q 260 258 260 228 V 158 Q 260 128 290 128 Z" fill="${c.highlight}"/>`;
+    const text = [0, 1].map((i) => `<rect x="296" y="${170 + i * 38}" width="${i ? 150 : 228}" height="14" rx="7" fill="${c.bg}"/>`).join("");
+    return back + dots + front + text;
+  },
+  FUNNEL: (rnd, c) => {
+    // Many leads arrive in loose rows, a few pass, one comes out.
+    const inbound = Array.from({ length: 16 }, (_, i) =>
+      dot(40 + (i % 4) * 46 + (rnd() - 0.5) * 14, 45 + Math.floor(i / 4) * 70 + (rnd() - 0.5) * 14, 10, c.main, `opacity="${r1(0.25 + (i % 4) * 0.15)}"`)
+    ).join("");
+    const shape = path("M 220 30 L 420 122 L 580 122", c.main) + path("M 220 270 L 420 178 L 580 178", c.main);
+    const inside = [0, 1, 2].map((i) => dot(270 + i * 45, 150 + (rnd() - 0.5) * (80 - i * 30), 9, c.main, `opacity="0.55"`)).join("");
+    return inbound + shape + inside + dot(525, 150, 22, c.highlight);
+  },
+  CLOCK: (rnd, c) => {
+    const cx = 430;
+    const cy = 150;
+    const r = 120;
+    const ticks = Array.from({ length: 12 }, (_, i) => {
+      const a = (i * Math.PI) / 6;
+      const inner = i % 3 === 0 ? r - 30 : r - 20;
+      return line(cx + inner * Math.sin(a), cy - inner * Math.cos(a), cx + (r - 12) * Math.sin(a), cy - (r - 12) * Math.cos(a), c.main, `opacity="${i % 3 === 0 ? 0.9 : 0.4}"`);
+    }).join("");
+    const a = 0.6 + rnd() * 1.6;
+    const hand = line(cx, cy, cx + 78 * Math.sin(a), cy - 78 * Math.cos(a), c.highlight, "", 14);
+    const speed = [100, 150, 200].map((y, i) => line(40 + i * 30 + rnd() * 20, y, 250 - i * 10, y, c.main, `opacity="${r1(0.35 + i * 0.2)}"`)).join("");
+    return speed + ring(cx, cy, r, c) + ticks + line(cx, cy, cx, cy - 92, c.main) + hand + dot(cx, cy, 14, c.main);
+  },
+  SHIELD: (rnd, c) => {
+    const shield = `<path d="M 300 20 L 425 62 V 148 C 425 220 372 262 300 288 C 228 262 175 220 175 148 V 62 Z" fill="${c.bg}" stroke="${c.main}" stroke-width="${S}" stroke-linejoin="round"/>`;
+    const check = path("M 248 152 L 287 190 L 358 112", c.highlight, "", 18);
+    const sides = [110, 150, 190]
+      .map((y, i) => line(40 + i * 15, y, 125 - rnd() * 20, y, c.main, `opacity="0.3"`) + line(475 + rnd() * 20, y, 560 - i * 15, y, c.main, `opacity="0.3"`))
+      .join("");
+    return sides + shield + check;
   },
   FLOW: (rnd, c) => {
     const n = 5;
-    const pts = Array.from({ length: n }, (_, i) => [40 + i * 140, r1(40 + rnd() * 120)]);
+    const pts = Array.from({ length: n }, (_, i) => [45 + i * 127, r1(60 + rnd() * 180)]);
     const hi = 1 + Math.floor(rnd() * (n - 1));
-    const lines = pts.slice(1).map((p, i) => `<line x1="${pts[i][0]}" y1="${pts[i][1]}" x2="${p[0]}" y2="${p[1]}" stroke="${c.main}" stroke-width="7" stroke-linecap="round"/>`).join("");
-    const dots = pts
-      .map((p, i) => (i === hi ? `<circle cx="${p[0]}" cy="${p[1]}" r="32" fill="${c.highlight}"/>` : `<circle cx="${p[0]}" cy="${p[1]}" r="22" fill="${c.bg}" stroke="${c.main}" stroke-width="7"/>`))
-      .join("");
-    return lines + dots;
+    const lines = pts.slice(1).map((p, i) => line(pts[i][0], pts[i][1], p[0], p[1], c.main)).join("");
+    return lines + pts.map((p, i) => (i === hi ? dot(p[0], p[1], 38, c.highlight) : ring(p[0], p[1], 26, c))).join("");
   },
   BARS: (rnd, c) => {
-    const n = 7;
-    return Array.from({ length: n }, (_, i) => {
-      const h = r1(30 + (150 * (i + 1)) / n - rnd() * 26);
-      return `<rect x="${i * 86 + 20}" y="${r1(H - h)}" width="56" height="${h}" rx="6" fill="${i === n - 1 ? c.highlight : c.main}" opacity="${i === n - 1 ? 1 : r1(0.45 + (0.5 * i) / n)}"/>`;
+    const n = 6;
+    const bars = Array.from({ length: n }, (_, i) => {
+      const h = r1(60 + (200 * (i + 1)) / n - rnd() * 30);
+      const last = i === n - 1;
+      return `<rect x="${24 + i * 96}" y="${r1(280 - h)}" width="64" height="${h}" rx="10" fill="${last ? c.highlight : c.main}" opacity="${last ? 1 : r1(0.3 + (0.55 * i) / n)}"/>`;
     }).join("");
+    return bars + line(10, 292, 590, 292, c.main, `opacity="0.4"`, 6);
   },
-  FORK: (rnd, c) => {
-    const splitX = r1(220 + rnd() * 80);
-    const up = r1(30 + rnd() * 20);
-    const down = r1(170 - rnd() * 20);
-    const path = (y: number) => `M ${splitX} 100 C ${splitX + 120} 100, ${splitX + 120} ${y}, ${W - 60} ${y}`;
+  BALANCE: (rnd, c) => {
+    const t = (6 + rnd() * 6) * (Math.PI / 180);
+    const [px, py, arm] = [300, 70, 210];
+    const [lx, ly, rx, ry] = [px - arm * Math.cos(t), py + arm * Math.sin(t), px + arm * Math.cos(t), py - arm * Math.sin(t)];
+    const pan = (x: number, y: number) => path(`M ${r1(x - 50)} ${r1(y + 70)} L ${r1(x)} ${r1(y)} L ${r1(x + 50)} ${r1(y + 70)}`, c.main, `opacity="0.5"`, 6) + path(`M ${r1(x - 62)} ${r1(y + 70)} A 62 34 0 0 0 ${r1(x + 62)} ${r1(y + 70)} Z`, c.main);
     return (
-      `<line x1="30" y1="100" x2="${splitX}" y2="100" stroke="${c.main}" stroke-width="8" stroke-linecap="round"/>` +
-      `<path d="${path(down)}" fill="none" stroke="${c.main}" stroke-width="8" stroke-linecap="round" stroke-dasharray="4 18" opacity="0.6"/>` +
-      `<path d="${path(up)}" fill="none" stroke="${c.main}" stroke-width="8" stroke-linecap="round"/>` +
-      `<circle cx="${W - 44}" cy="${up}" r="26" fill="${c.highlight}"/>` +
-      `<circle cx="${W - 44}" cy="${down}" r="18" fill="${c.bg}" stroke="${c.main}" stroke-width="6" opacity="0.6"/>` +
-      `<circle cx="30" cy="100" r="14" fill="${c.main}"/>`
+      line(px, py, px, 285, c.main) +
+      line(240, 288, 360, 288, c.main) +
+      line(lx, ly, rx, ry, c.main) +
+      pan(lx, ly) +
+      pan(rx, ry) +
+      dot(lx, ly + 58, 30, c.highlight) +
+      `<rect x="${r1(rx - 16)}" y="${r1(ry + 44)}" width="32" height="32" rx="6" fill="${c.main}" opacity="0.6"/>` +
+      dot(px, py, 14, c.main)
     );
   },
-  GRID: (rnd, c) => {
-    const cols = 14;
-    const rows = 5;
-    const lit = new Set(Array.from({ length: 4 }, () => Math.floor(rnd() * cols * rows)));
-    let out = "";
-    for (let y = 0; y < rows; y++)
-      for (let x = 0; x < cols; x++) {
-        const i = y * cols + x;
-        out += lit.has(i)
-          ? `<circle cx="${x * 45 + 22}" cy="${y * 40 + 20}" r="15" fill="${c.highlight}"/>`
-          : `<circle cx="${x * 45 + 22}" cy="${y * 40 + 20}" r="8" fill="${c.main}" opacity="${r1(0.35 + rnd() * 0.5)}"/>`;
-      }
-    return out;
+  FORK: (rnd, c) => {
+    const split = r1(210 + rnd() * 60);
+    const [up, down] = [r1(50 + rnd() * 20), r1(250 - rnd() * 20)];
+    const curve = (y: number) => `M ${split} 150 C ${split + 150} 150, ${split + 130} ${y}, 530 ${y}`;
+    return (
+      line(40, 150, split, 150, c.main) +
+      path(curve(down), c.main, `stroke-dasharray="2 22" opacity="0.5"`) +
+      path(curve(up), c.main) +
+      dot(40, 150, 16, c.main) +
+      ring(552, down, 20, c, `opacity="0.5"`) +
+      dot(552, up, 30, c.highlight)
+    );
+  },
+  STEPS: (rnd, c) => {
+    const rise = 44;
+    const run = r1(88 + rnd() * 8);
+    let d = `M 30 285`;
+    for (let i = 0; i < 5; i++) d += ` H ${r1(30 + run * (i + 1))} V ${285 - rise * (i + 1)}`;
+    d += ` H 570`;
+    const top = 285 - rise * 5;
+    const ghosts = [1, 2, 3].map((i) => dot(30 + run * i + run / 2, 285 - rise * i - 26, 10, c.main, `opacity="${r1(0.2 + i * 0.12)}"`)).join("");
+    return path(d, c.main) + ghosts + dot(r1(Math.min(540, 30 + run * 5 + 40)), top - 34, 26, c.highlight);
+  },
+  LOOP: (rnd, c) => {
+    const [cx, cy, r] = [150, 150, 110];
+    const a0 = -Math.PI / 2 + 0.4;
+    const a1 = a0 + Math.PI * 1.7;
+    const [x0, y0, x1, y1] = [cx + r * Math.cos(a0), cy + r * Math.sin(a0), cx + r * Math.cos(a1), cy + r * Math.sin(a1)];
+    const tip = `${r1(x1 + 30)},${r1(y1 - 2)} ${r1(x1 - 4)},${r1(y1 - 34)} ${r1(x1 - 10)},${r1(y1 + 14)}`;
+    const trail = Array.from({ length: 5 }, (_, i) => `<rect x="${310 + i * 56}" y="${r1(130 - rnd() * 8)}" width="38" height="${r1(40 + rnd() * 10)}" rx="10" fill="${i === 4 ? c.highlight : c.main}" opacity="${i === 4 ? 1 : r1(0.2 + i * 0.15)}"/>`).join("");
+    return `<path d="M ${r1(x0)} ${r1(y0)} A ${r} ${r} 0 1 1 ${r1(x1)} ${r1(y1)}" fill="none" stroke="${c.main}" stroke-width="${S}" stroke-linecap="round"/><polygon points="${tip}" fill="${c.main}"/>` + dot(cx, cy, 24, c.highlight) + trail;
   },
   TARGET: (rnd, c) => {
-    const cx = r1(100 + rnd() * 60);
-    const rings = [90, 70, 50, 30]
-      .map((r, i) => `<circle cx="${cx}" cy="100" r="${r}" fill="none" stroke="${c.main}" stroke-width="7" opacity="${r1(0.4 + i * 0.2)}"/>`)
-      .join("");
-    const dots = Array.from({ length: 9 }, (_, i) => `<circle cx="${r1(cx + 150 + i * 44)}" cy="${r1(100 + (rnd() - 0.5) * 120)}" r="${r1(7 + rnd() * 6)}" fill="${c.main}" opacity="0.4"/>`).join("");
-    return rings + `<circle cx="${cx}" cy="100" r="14" fill="${c.highlight}"/>` + dots;
+    const [cx, cy] = [170, 150];
+    const rings = [130, 96, 62].map((r, i) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c.main}" stroke-width="${S}" opacity="${r1(0.35 + i * 0.3)}"/>`).join("");
+    const [sx, sy] = [560, r1(40 + rnd() * 50)];
+    const ang = Math.atan2(sy - cy, sx - cx);
+    const fletch = [-0.5, 0.5].map((d) => line(sx, sy, sx - 36 * Math.cos(ang + Math.PI + d), sy - 36 * Math.sin(ang + Math.PI + d), c.main)).join("");
+    return rings + line(sx, sy, cx + 24 * Math.cos(ang), cy + 24 * Math.sin(ang), c.main) + fletch + dot(cx, cy, 28, c.highlight);
   },
   STACK: (rnd, c) => {
     const n = 4;
-    const hi = Math.floor(rnd() * n);
+    const hi = n - 1 - Math.floor(rnd() * 2);
     return Array.from({ length: n }, (_, i) => {
-      const x = 60 + i * 60;
-      const y = 20 + (n - 1 - i) * 34;
-      return `<rect x="${x}" y="${y}" width="${r1(300 + rnd() * 40)}" height="64" rx="12" fill="${i === hi ? c.highlight : c.bg}" stroke="${i === hi ? c.highlight : c.main}" stroke-width="7"/>`;
+      const [x, y] = [40 + i * 60, 196 - i * 56];
+      const lit = i === hi;
+      return `<rect x="${x}" y="${y}" width="${r1(310 + rnd() * 30)}" height="84" rx="18" fill="${lit ? c.highlight : c.bg}" stroke="${lit ? c.highlight : c.main}" stroke-width="${S}"/>`;
     }).join("");
   },
-  LOOP: (rnd, c) => {
-    const cx = r1(120 + rnd() * 40);
-    const r = 76;
-    // An arc of about 300 degrees with an arrowhead where it ends.
-    const a0 = -Math.PI / 2 + 0.35;
-    const a1 = a0 + Math.PI * 1.7;
-    const [x0, y0] = [cx + r * Math.cos(a0), 100 + r * Math.sin(a0)];
-    const [x1, y1] = [cx + r * Math.cos(a1), 100 + r * Math.sin(a1)];
-    const tip = `${r1(x1 + 22)},${r1(y1 - 4)} ${r1(x1 - 4)},${r1(y1 - 26)} ${r1(x1 - 8)},${r1(y1 + 10)}`;
-    const trail = Array.from({ length: 6 }, (_, i) => `<rect x="${r1(cx + 130 + i * 62)}" y="${r1(84 - rnd() * 10)}" width="40" height="${r1(32 + rnd() * 10)}" rx="8" fill="${i === 5 ? c.highlight : c.main}" opacity="${i === 5 ? 1 : r1(0.25 + i * 0.12)}"/>`).join("");
-    return `<path d="M ${r1(x0)} ${r1(y0)} A ${r} ${r} 0 1 1 ${r1(x1)} ${r1(y1)}" fill="none" stroke="${c.main}" stroke-width="9" stroke-linecap="round"/><polygon points="${tip}" fill="${c.main}"/><circle cx="${cx}" cy="100" r="16" fill="${c.highlight}"/>` + trail;
+  GRID: (rnd, c) => {
+    const [cols, rows] = [13, 6];
+    const lit = pickN(rnd, 4, cols * rows);
+    let out = "";
+    for (let y = 0; y < rows; y++)
+      for (let x = 0; x < cols; x++) {
+        const [cx, cy] = [24 + x * 46, 25 + y * 50];
+        out += lit.has(y * cols + x) ? dot(cx, cy, 17, c.highlight) : dot(cx, cy, 8, c.main, `opacity="${r1(0.3 + rnd() * 0.5)}"`);
+      }
+    return out;
+  },
+  SPARK: (rnd, c) => {
+    const [cx, cy] = [300, 150];
+    const rays = Array.from({ length: 12 }, (_, i) => {
+      const a = (i * Math.PI) / 6 + 0.1;
+      const len = i % 2 ? 36 + rnd() * 20 : 60 + rnd() * 30;
+      return line(cx + 72 * Math.cos(a), cy + 72 * Math.sin(a), cx + (72 + len) * Math.cos(a), cy + (72 + len) * Math.sin(a), c.main, `opacity="${i % 2 ? 0.45 : 0.9}"`);
+    }).join("");
+    const orbit = Array.from({ length: 6 }, () => dot(40 + rnd() * 520, 20 + rnd() * 260, 5 + rnd() * 4, c.main, `opacity="0.3"`)).join("");
+    return orbit + rays + dot(cx, cy, 44, c.highlight);
   },
 };
 
