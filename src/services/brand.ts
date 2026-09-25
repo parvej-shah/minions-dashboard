@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { STATIC_BANNED_LEXICON } from "@/constants/brand";
 import { toDirectiveDTO } from "@/lib/mappers/directive";
 import { toBrandSettingsDTO } from "@/lib/mappers/brandProfile";
+import { DEFAULT_COVER_ART_STYLE } from "@/lib/covers/artStyles";
 import type { BrandProfileInput, BrandSettings } from "@/types";
 import { resolveWriterExpertise, DEFAULT_WRITER_EXPERTISE, type WriterExpertise } from "@/constants/writerExpertise";
 import { resolveSourceFeedUrl } from "@/constants/ideaSources";
@@ -50,6 +51,7 @@ export async function getBrandSettings(clientId: string): Promise<BrandSettings>
         positioning: "",
         primary_logo_url: "",
         cover_byline: "",
+        cover_art: DEFAULT_COVER_ART_STYLE,
         primary_ink: "#0B0F14",
         brand_teal: "#00D4AA",
         brand_coral: "#FF6B4A",
@@ -118,6 +120,7 @@ export async function updateBrandSettings(
     positioning: input.positioning,
     primaryLogoUrl: input.primary_logo_url,
     ...(input.cover_byline !== undefined ? { coverByline: input.cover_byline.trim() || null } : {}),
+    ...(input.cover_art !== undefined ? { coverArt: input.cover_art } : {}),
     primaryInk: input.primary_ink,
     brandTeal: input.brand_teal,
     brandCoral: input.brand_coral,

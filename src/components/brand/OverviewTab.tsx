@@ -7,6 +7,7 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { LoadingState } from "@/components/ui/EmptyState";
 import BrandLookPreview from "@/components/brand/BrandLookPreview";
+import { COVER_ART_STYLES, COVER_ART_STYLE_META } from "@/lib/covers/artStyles";
 
 const PER_CATEGORY_LIMIT = 6;
 
@@ -30,7 +31,7 @@ const LOOK_COLOR_FIELDS: { key: "primary_ink" | "brand_teal" | "brand_coral" | "
 type LookDraft = Pick<
   BrandProfileInput,
   "primary_logo_url" | "primary_ink" | "brand_teal" | "brand_coral" | "brand_cream" | "accent_blue"
-> & { cover_byline: string };
+> & { cover_byline: string; cover_art: string };
 
 function toProfileInput(settings: BrandSettings): BrandProfileInput {
   return {
@@ -39,6 +40,7 @@ function toProfileInput(settings: BrandSettings): BrandProfileInput {
     positioning: settings.positioning,
     primary_logo_url: settings.primary_logo_url,
     cover_byline: settings.cover_byline,
+    cover_art: settings.cover_art,
     primary_ink: settings.primary_ink,
     brand_teal: settings.brand_teal,
     brand_coral: settings.brand_coral,
@@ -156,6 +158,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
     setLookDraft({
       primary_logo_url: profile.primary_logo_url,
       cover_byline: profile.cover_byline,
+      cover_art: profile.cover_art,
       primary_ink: profile.primary_ink,
       brand_teal: profile.brand_teal,
       brand_coral: profile.brand_coral,
@@ -462,6 +465,24 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
                   className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-lg px-3 py-1.5 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]"
                 />
               </div>
+              <div>
+                <label className="text-[11px] font-medium text-[#94A3B8] block mb-1">Illustration above the headline</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {COVER_ART_STYLES.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setLookDraft({ ...lookDraft, cover_art: s })}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs border transition-all text-left ${
+                        lookDraft.cover_art === s ? "bg-[#00C9A7]/15 border-[#00C9A7] text-[#00C9A7]" : "bg-[#161D26] border-[#1F2D3D] text-[#F1F5F9] hover:border-[#00C9A7]/60"
+                      }`}
+                    >
+                      <span className="font-medium">{COVER_ART_STYLE_META[s].label}</span>
+                      <span className="block text-[10px] text-[#64748B]">{COVER_ART_STYLE_META[s].description}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                 {LOOK_COLOR_FIELDS.map(({ key, label }) => (
                   <div key={key} className="space-y-1">
@@ -480,7 +501,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
                   </div>
                 ))}
               </div>
-              <BrandLookPreview colors={lookDraft} brandName={profile?.brand_name} byline={lookDraft.cover_byline} logoUrl={lookDraft.primary_logo_url} />
+              <BrandLookPreview colors={lookDraft} brandName={profile?.brand_name} byline={lookDraft.cover_byline} logoUrl={lookDraft.primary_logo_url} art={lookDraft.cover_art} />
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setEditingLook(false)}
@@ -500,7 +521,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
             </div>
           ) : (
             <div className="space-y-3">
-            {profile && <BrandLookPreview colors={profile} brandName={profile.brand_name} byline={profile.cover_byline} logoUrl={profile.primary_logo_url} />}
+            {profile && <BrandLookPreview colors={profile} brandName={profile.brand_name} byline={profile.cover_byline} logoUrl={profile.primary_logo_url} art={profile.cover_art} />}
             <div className="flex flex-wrap items-center gap-2">
               {profile &&
                 LOOK_COLOR_FIELDS.map(({ key, label }) => (

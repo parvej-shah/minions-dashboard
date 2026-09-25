@@ -4,6 +4,7 @@ import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 import type { BrandProfileInput } from "@/types";
 import { resolveWriterExpertise } from "@/constants/writerExpertise";
+import { parseArtStyle } from "@/lib/covers/artStyles";
 
 export async function GET() {
   const ctx = await requireClientId();
@@ -52,6 +53,7 @@ export async function POST(request: Request) {
       positioning: (body.positioning || "").trim(),
       primary_logo_url: (body.primary_logo_url || "").trim(),
       ...(typeof body.cover_byline === "string" ? { cover_byline: body.cover_byline.trim().slice(0, 120) } : {}),
+      ...(parseArtStyle(body.cover_art) ? { cover_art: parseArtStyle(body.cover_art)! } : {}),
       primary_ink: body.primary_ink || "#0B0F14",
       brand_teal: body.brand_teal || "#00D4AA",
       brand_coral: body.brand_coral || "#FF6B4A",

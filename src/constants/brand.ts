@@ -35,6 +35,7 @@ export const DEFAULT_BRAND_SETTINGS: Omit<BrandSettings, "directives" | "updated
   positioning: BRAND_POSITIONING,
   primary_logo_url: PRIMARY_LOGO_URL,
   cover_byline: "",
+  cover_art: "SHAPES",
   primary_ink: "#12242A",
   brand_teal: "#0E5C63",
   brand_coral: "#FF6B4A",

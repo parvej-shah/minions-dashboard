@@ -60,6 +60,8 @@ export interface CoverEditInput {
   headline?: string;
   kicker?: string;
   emphasis?: string;
+  art?: "SHAPES" | "DOODLES" | "NONE";
+  art_reroll?: boolean;
 }
 
 /** The body with its leading cover image line pointed at url (the editor may hold an older one). */

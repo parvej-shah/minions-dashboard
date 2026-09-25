@@ -957,6 +957,36 @@ never stated it, and code refused it.
 - The accent coral is deepened from #ff6b4a to #e76447 on the light layouts,
   because the brand coral is 2.67:1 on cream.
 
+**Cover illustrations (built 2026-09-25, follow-up to phase 5).** HEADLINE
+and STATEMENT covers carry an illustration above the headline, drawn in
+code, still with no image model.
+
+- **Research.** unDraw is ruled out because its licence forbids
+  redistribution "in packs or otherwise" and any AI use. Phosphor icons read
+  as UI icons on a poster. Art bled into the corner collided with long
+  headlines.
+- **Styles.** Each workspace picks one of three on Brand → Look:
+  - `SHAPES` (default): 8 abstract motifs in the brand's colours: waveform,
+    flow, bars, fork, grid, target, stack, loop.
+  - `DOODLES`: 11 work-appropriate Open Doodles figures (CC0), recoloured
+    to the brand's ink and accent.
+  - `NONE`: type only.
+- **Choosing the motif.** Keywords in the headline, title and hook pick it,
+  in code. A match used on the last two covers gives way to the next match.
+  With no usable match the post id picks one not seen in the last three.
+- **Reviewer controls** on the Editorial cover card: switch the style for
+  one cover, or "Try another".
+- **The headline comes first.** Every copy option is tried with the art,
+  then without it. Art is dropped when it would push the headline below
+  84px. QUOTE and NUMBER covers never carry art.
+- **Code:** src/lib/covers/art.ts, artStyles.ts and doodles.ts (generated),
+  plus `brand_profile.cover_art` (prisma/sql/2026-09-25-cover-art.sql).
+- **Eval.** `npm run eval:covers -- --rerender <phase5.json> --art SHAPES`
+  on the phase 5 cards:
+  - fits first try: 100%, both styles;
+  - art kept: 100%, both styles;
+  - motif chosen by keywords: 100% for SHAPES, 40% for DOODLES.
+
 ### Phase 6 — built and deployed 2026-09-24
 
 Decisions (the user took all four recommendations):

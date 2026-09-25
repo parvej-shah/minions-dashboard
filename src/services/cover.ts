@@ -4,6 +4,7 @@ import { coverBrand } from "@/lib/covers/brand";
 import { audienceLabel, chooseCoverCopy, scoreHeadline, pickQuote, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
 import { COVER_LAYOUTS, CoverFitError, type CoverLayout, type CoverSpec } from "@/lib/covers/layouts";
 import { renderCoverPng } from "@/lib/covers/render";
+import { chooseArt, parseArtStyle, DEFAULT_COVER_ART_STYLE, type CoverArtStyle } from "@/lib/covers/art";
 import { numbersIn } from "@/lib/harvest/text";
 
 /**
@@ -22,12 +23,20 @@ export interface CoverEdit {
   headline?: string;
   kicker?: string;
   emphasis?: string;
+  /** The illustration style for this cover only. */
+  art?: CoverArtStyle;
+  /** A different illustration in the same style. */
+  art_reroll?: boolean;
 }
 
 /** The stored record: the spec without the embedded photo, plus how the copy was chosen. */
 export type StoredCoverSpec = Omit<CoverSpec, "author"> & {
   author: { name: string; role?: string; has_photo: boolean };
   card: CoverCard;
+  /** The illustration style this cover was drawn with, NONE included, so a re-draw keeps it. */
+  art_style: CoverArtStyle;
+  /** False when the layout has no room for it (QUOTE, NUMBER) or the headline needed the space. */
+  art_drawn: boolean;
   headline_source: CoverCopy["headline_source"] | "reviewer";
   score: CoverCopy["score"];
   notes: string[];
@@ -120,6 +129,12 @@ export function withCoverLine(content: string, title: string, url: string): stri
  * HEADLINE layout, so a draft always gets a cover when any honest copy fits.
  */
 function attempts(spec: CoverSpec, title: string): CoverSpec[] {
+  // Each option is tried with the illustration first, then without it: the
+  // headline and subtitle carry the post, the picture does not.
+  return copyAttempts(spec, title).flatMap((s) => (s.art ? [s, { ...s, art: undefined }] : [s]));
+}
+
+function copyAttempts(spec: CoverSpec, title: string): CoverSpec[] {
   const out = [spec];
   if (spec.kicker) out.push({ ...spec, kicker: undefined });
   if (title && title !== spec.headline) out.push({ ...spec, layout: spec.layout === "STATEMENT" ? "STATEMENT" : "HEADLINE", headline: title, emphasis: undefined, kicker: undefined, quote: undefined, number: undefined });
@@ -161,6 +176,20 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     recentLayouts: recent.map((r) => (r.coverSpec as { layout?: string } | null)?.layout ?? "").filter(Boolean),
   });
 
+  // The illustration. A re-draw keeps the one the cover has unless the
+  // reviewer changes the style or asks for another.
+  const artStyle = input.edit?.art ?? parseArtStyle(previous?.art_style) ?? parseArtStyle(profile.coverArt) ?? DEFAULT_COVER_ART_STYLE;
+  const reroll = Boolean(input.edit?.art_reroll);
+  let art: CoverSpec["art"];
+  if (previous?.art && previous.art_style === artStyle && !reroll) art = previous.art;
+  else {
+    const seed = reroll ? `${asset.id}:${Date.now()}` : asset.id;
+    const recentMotifs = recent.map((r) => (r.coverSpec as Partial<StoredCoverSpec> | null)?.art?.choice.motif ?? "").filter(Boolean);
+    const exclude = reroll && previous?.art_style === artStyle ? previous?.art?.choice.motif : undefined;
+    const choice = chooseArt(artStyle, [copy.headline, asset.title, asset.hook].filter(Boolean).join(" "), seed, recentMotifs, exclude);
+    art = choice ? { choice, seed } : undefined;
+  }
+
   const { brand, notes: brandNotes } = coverBrand({ ink: profile.primaryInk, paper: profile.brandCream, accent: profile.brandCoral, secondary: profile.brandTeal });
   const author = {
     name: profile.brandName,
@@ -168,7 +197,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     photo: await coverPhoto(profile),
   };
 
-  let spec: CoverSpec = { layout: copy.layout, label: copy.label, headline: copy.headline, emphasis: copy.emphasis, kicker: copy.kicker, quote: copy.quote, number: copy.number, author, brand };
+  let spec: CoverSpec = { layout: copy.layout, label: copy.label, headline: copy.headline, emphasis: copy.emphasis, kicker: copy.kicker, quote: copy.quote, number: copy.number, author, brand, art };
   const notes = [...copy.notes, ...brandNotes];
   let headlineSource: StoredCoverSpec["headline_source"] = copy.headline_source;
   let score = copy.score;
@@ -220,6 +249,10 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   const stored: StoredCoverSpec = {
     ...used,
     author: { name: author.name, role: author.role, has_photo: Boolean(author.photo) },
+    // The chosen art is kept even when this layout or fit dropped it, so switching back restores it.
+    art: used.art ?? spec.art,
+    art_style: artStyle,
+    art_drawn: Boolean(used.art) && (used.layout === "HEADLINE" || used.layout === "STATEMENT"),
     card,
     headline_source: used.headline === spec.headline ? headlineSource : "title",
     score,
@@ -257,7 +290,7 @@ export async function markCoverFailed(assetId: string, error: string): Promise<v
  */
 export async function renderCoverPreview(
   clientId: string,
-  look: { brand_name?: string; primary_ink?: string; brand_cream?: string; brand_coral?: string; brand_teal?: string; cover_byline?: string; primary_logo_url?: string; positioning?: string }
+  look: { brand_name?: string; primary_ink?: string; brand_cream?: string; brand_coral?: string; brand_teal?: string; cover_byline?: string; primary_logo_url?: string; positioning?: string; cover_art?: string }
 ): Promise<{ png: Buffer; notes: string[] }> {
   const [profile, icp] = await Promise.all([prisma.brandProfile.findUnique({ where: { clientId } }), prisma.icpProfile.findUnique({ where: { clientId } })]);
   const { brand, notes } = coverBrand({
@@ -270,8 +303,11 @@ export async function renderCoverPreview(
   // Only https images; an unsaved outside URL is fetched for the preview but not copied.
   const image = /^https:\/\//.test(logo) ? await fetchImage(logo) : null;
   const byline = (look.cover_byline ?? profile?.coverByline ?? "").trim() || defaultByline(look.positioning ?? profile?.positioning ?? "");
+  const artStyle = parseArtStyle(look.cover_art) ?? parseArtStyle(profile?.coverArt) ?? DEFAULT_COVER_ART_STYLE;
+  const choice = chooseArt(artStyle, "", clientId);
   const png = await renderCoverPng({
     layout: "HEADLINE",
+    art: choice ? { choice, seed: clientId } : undefined,
     label: audienceLabel({ who: icp?.who ?? "", role: icp?.role ?? "", company_type: icp?.companyType ?? "" }),
     headline: "Your post's claim appears here, in your type",
     emphasis: "claim",

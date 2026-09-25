@@ -13,6 +13,7 @@ import type { ReactNode } from "react";
 import { faceStyle, metricsFor, type Face } from "./fonts";
 import { fit, type Fitted, type TextBox } from "./fit";
 import { textWidth } from "./metrics";
+import { drawArt, type ArtChoice } from "./art";
 
 export const COVER_SIZE = { width: 1080, height: 1350 } as const;
 const PAD = 88;
@@ -55,6 +56,8 @@ export interface CoverSpec {
   number?: { value: string; unit?: string };
   author: CoverAuthor;
   brand: CoverBrand;
+  /** HEADLINE and STATEMENT: an illustration above the headline (src/lib/covers/art.ts). */
+  art?: { choice: ArtChoice; seed: string };
 }
 
 export class CoverFitError extends Error {}
@@ -168,15 +171,42 @@ function Frame({ spec, paper, ink, children }: { spec: CoverSpec; paper: string;
 }
 
 const KICKER_GAP = 48;
+/** Shapes are wide and light; a doodle is a figure and needs more height to read at feed size. */
+const artHeight = (spec: CoverSpec) => (!spec.art ? 0 : spec.art.choice.style === "DOODLES" ? 260 : 200);
+const ART_GAP = 56;
+/** With art, a headline set smaller than this reads worse than one without art; the caller retries without. */
+const ART_MIN_HEADLINE = 84;
+
+function Art({ spec, ink, paper }: { spec: CoverSpec; ink: string; paper: string }) {
+  if (!spec.art) return null;
+  const dark = spec.layout === "STATEMENT";
+  const { src, aspect } = drawArt(spec.art.choice, spec.art.seed, {
+    main: dark ? rgba(ink, 0.8) : spec.brand.secondary,
+    highlight: spec.brand.accent,
+    bg: paper,
+    ink,
+  });
+  const height = artHeight(spec);
+  const width = Math.min(INNER, Math.round(height * aspect));
+  return (
+    <div style={{ display: "flex", height, marginBottom: ART_GAP }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} width={width} height={Math.round(width / aspect)} alt="" />
+    </div>
+  );
+}
 const QUOTE_MARK_HEIGHT = 150;
 
-function HeadlineCentre({ spec, ink }: { spec: CoverSpec; ink: string }) {
+function HeadlineCentre({ spec, ink, paper }: { spec: CoverSpec; ink: string; paper: string }) {
   // The kicker is fitted first; the headline gets the height that is left.
   const kicker = spec.kicker ? fitOrThrow("kicker", spec.kicker) : null;
   const kickerHeight = kicker ? KICKER_GAP + kicker.lines.length * kicker.size * 1.35 : 0;
-  const headline = fitOrThrow("headline", spec.headline, { maxHeight: CENTRE_HEIGHT - kickerHeight, lineHeight: 1.05 });
+  const artSpace = spec.art ? artHeight(spec) + ART_GAP : 0;
+  const headline = fitOrThrow("headline", spec.headline, { maxHeight: CENTRE_HEIGHT - kickerHeight - artSpace, lineHeight: 1.05 });
+  if (spec.art && headline.size < ART_MIN_HEADLINE) throw new CoverFitError(`With the illustration the headline would be set at ${headline.size}px; drawn without it.`);
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
+      {Art({ spec, ink, paper })}
       <Lines fitted={headline} face="serif" tracking={-0.02} lineHeight={1.05} color={ink} emphasis={spec.emphasis} accent={spec.brand.accent} />
       {kicker ? (
         <div style={{ display: "flex", marginTop: KICKER_GAP }}>
@@ -225,6 +255,6 @@ export function coverElement(spec: CoverSpec) {
   if (dark) spec = { ...spec, brand: { ...spec.brand, accent: spec.brand.accentOnInk } };
   // Called as functions, not rendered as components, so every fit runs now
   // and a CoverFitError throws here rather than inside Satori's render.
-  const centre = spec.layout === "QUOTE" ? QuoteCentre({ spec, ink }) : spec.layout === "NUMBER" ? NumberCentre({ spec, ink }) : HeadlineCentre({ spec, ink });
+  const centre = spec.layout === "QUOTE" ? QuoteCentre({ spec, ink }) : spec.layout === "NUMBER" ? NumberCentre({ spec, ink }) : HeadlineCentre({ spec, ink, paper });
   return Frame({ spec, paper, ink, children: centre });
 }

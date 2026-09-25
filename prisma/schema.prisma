@@ -365,6 +365,8 @@ model BrandProfile {
   coverByline               String?  @map("cover_byline")
   coverPhotoUrl             String?  @map("cover_photo_url")
   coverPhotoSource          String?  @map("cover_photo_source")
+  // SHAPES | DOODLES | NONE: the illustration above a cover's headline (src/lib/covers/art.ts).
+  coverArt                  String   @default("SHAPES") @map("cover_art")
   toneFormality             String   @default("tactile_operator") @map("tone_formality")
   toneCadence               String   @map("tone_cadence") @db.Text
   allowedProofClaims        String[] @default([]) @map("allowed_proof_claims")

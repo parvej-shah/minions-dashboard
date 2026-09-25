@@ -15,23 +15,25 @@ interface BrandLookPreviewProps {
   brandName?: string;
   byline?: string;
   logoUrl?: string;
+  /** SHAPES, DOODLES or NONE. */
+  art?: string;
 }
 
 /**
  * A real sample cover in this look: the same renderer and checks as a posted
  * cover (/api/brand/cover-preview), redrawn as the colours, byline or photo
- * change. It used to be a CSS mock of the old 16:9 AI image, which could not
+ * change, with the chosen illustration style. It used to be a CSS mock of the old 16:9 AI image, which could not
  * show what the renderer actually does (a colour deepened for contrast, a
  * photo that cannot load).
  */
-export default function BrandLookPreview({ colors, brandName, byline, logoUrl }: BrandLookPreviewProps) {
+export default function BrandLookPreview({ colors, brandName, byline, logoUrl, art }: BrandLookPreviewProps) {
   const [src, setSrc] = useState<string | null>(null);
   const [notes, setNotes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
 
   // One stable string for the effect; it is also the request body.
-  const key = JSON.stringify({ ...colors, brand_name: brandName, cover_byline: byline, primary_logo_url: logoUrl });
+  const key = JSON.stringify({ ...colors, brand_name: brandName, cover_byline: byline, primary_logo_url: logoUrl, cover_art: art });
 
   useEffect(() => {
     const controller = new AbortController();

@@ -13,6 +13,7 @@ export function toBrandSettingsDTO(
     positioning: row.positioning,
     primary_logo_url: row.primaryLogoUrl,
     cover_byline: row.coverByline ?? "",
+    cover_art: row.coverArt,
     primary_ink: row.primaryInk,
     brand_teal: row.brandTeal,
     brand_coral: row.brandCoral,

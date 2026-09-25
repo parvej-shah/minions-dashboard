@@ -21,6 +21,7 @@ export const brandSettings: BrandSettings = {
   positioning: "Same-day plumbing for homeowners in Columbus.",
   primary_logo_url: "https://cdn.example/logo.svg",
   cover_byline: "",
+  cover_art: "SHAPES",
   primary_ink: "#12242A",
   brand_teal: "#0E5C63",
   brand_coral: "#FF6B4A",

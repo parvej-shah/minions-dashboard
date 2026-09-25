@@ -77,6 +77,8 @@ function toCoverDTO(raw: unknown): CoverSpecDTO | null {
     number,
     headline_source: str(c.headline_source) ?? "strategist",
     author,
+    art_style: str(c.art_style),
+    art_drawn: c.art_drawn === true,
     notes: Array.isArray(c.notes) ? c.notes.filter((n): n is string => typeof n === "string") : [],
   };
 }

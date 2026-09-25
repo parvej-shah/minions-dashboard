@@ -25,6 +25,7 @@ export async function POST(request: Request) {
       cover_byline: str(body.cover_byline),
       primary_logo_url: str(body.primary_logo_url),
       positioning: str(body.positioning),
+      cover_art: str(body.cover_art),
     });
     return new Response(new Uint8Array(png), {
       headers: { "Content-Type": "image/png", "Cache-Control": "no-store", "X-Cover-Notes": encodeURIComponent(JSON.stringify(notes)) },

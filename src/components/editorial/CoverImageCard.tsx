@@ -2,9 +2,10 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { AlertTriangle, ExternalLink, Image as ImageIcon, Loader2, PenLine, RefreshCw } from "lucide-react";
+import { AlertTriangle, ExternalLink, Image as ImageIcon, Loader2, PenLine, RefreshCw, Shuffle } from "lucide-react";
 import type { AssetItem, CoverSpecDTO } from "@/types";
 import type { CoverEditInput } from "@/hooks/useEditorialDraft";
+import { COVER_ART_STYLES, COVER_ART_STYLE_META } from "@/lib/covers/artStyles";
 
 export interface CoverImageCardProps {
   activeAsset: AssetItem;
@@ -133,6 +134,46 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                     );
                   })}
                 </div>
+              </div>
+
+              <div>
+                <span className="text-[11px] font-medium text-[#94A3B8] block mb-1.5">Illustration</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {COVER_ART_STYLES.map((s) => {
+                    const current = (cover.art_style ?? "NONE") === s;
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        title={COVER_ART_STYLE_META[s].description}
+                        disabled={isRendering || current}
+                        onClick={() => void run({ art: s })}
+                        className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                          current
+                            ? "bg-[#00C9A7]/15 border-[#00C9A7] text-[#00C9A7]"
+                            : "bg-[#161D26] border-[#1F2D3D] text-[#F1F5F9] hover:border-[#00C9A7]/60 disabled:opacity-40"
+                        }`}
+                      >
+                        {COVER_ART_STYLE_META[s].label}
+                      </button>
+                    );
+                  })}
+                  {cover.art_style && cover.art_style !== "NONE" && (
+                    <button
+                      type="button"
+                      disabled={isRendering}
+                      onClick={() => void run({ art_reroll: true })}
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border bg-[#161D26] border-[#1F2D3D] text-[#F1F5F9] hover:border-[#00C9A7]/60 disabled:opacity-40"
+                    >
+                      <Shuffle className="w-3 h-3" /> Try another
+                    </button>
+                  )}
+                </div>
+                {cover.art_style && cover.art_style !== "NONE" && !cover.art_drawn && (
+                  <p className="text-[11px] text-[#64748B] mt-1.5">
+                    {cover.layout === "QUOTE" || cover.layout === "NUMBER" ? "Quote and Number covers have no room for it." : "Left off: the headline needed the space."}
+                  </p>
+                )}
               </div>
 
               {editing ? (
