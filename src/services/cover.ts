@@ -197,10 +197,14 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     photo: await coverPhoto(profile),
   };
 
-  let spec: CoverSpec = { layout: copy.layout, label: copy.label, headline: copy.headline, emphasis: copy.emphasis, kicker: copy.kicker, quote: copy.quote, number: copy.number, author, brand, art };
+  // A reviewer's edit changes one thing on the cover they are looking at: the
+  // rest (layout, headline, subtitle) stays as drawn, never re-picked.
+  const kept = input.edit && previous?.layout && previous.headline ? previous : null;
+  const base = kept ?? copy;
+  let spec: CoverSpec = { layout: base.layout!, label: base.label, headline: base.headline!, emphasis: base.emphasis, kicker: base.kicker, quote: base.quote, number: base.number, author, brand, art };
   const notes = [...copy.notes, ...brandNotes];
-  let headlineSource: StoredCoverSpec["headline_source"] = copy.headline_source;
-  let score = copy.score;
+  let headlineSource: StoredCoverSpec["headline_source"] = kept?.headline_source ?? copy.headline_source;
+  let score = kept?.score ?? copy.score;
 
   // A reviewer's edit. It passes the same honesty checks as generated copy:
   // no figure the draft does not state, a quote only from the body.

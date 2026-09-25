@@ -377,6 +377,13 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
         if (bufferedAssetRef.current === fresh.id) {
           setEdited((p) => ({ ...p, body: withCoverUrl(p.body, res.hero_image_url) }));
         }
+        // Say what happened, so a click that changed less than asked is not a mystery.
+        const c = fresh.cover;
+        if (edit.art && edit.art !== "NONE" && c && !c.art_drawn) {
+          return c.layout === "QUOTE" || c.layout === "NUMBER"
+            ? "Cover updated. Quote and Number covers have no illustration."
+            : "Cover updated. The illustration was left off: the headline needed the space.";
+        }
         return "Cover updated";
       } catch (err) {
         return toErrorMessage(err, "Could not update the cover");

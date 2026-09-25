@@ -472,6 +472,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
                     <button
                       key={s}
                       type="button"
+                      aria-pressed={lookDraft.cover_art === s}
                       onClick={() => setLookDraft({ ...lookDraft, cover_art: s })}
                       className={`px-2.5 py-1.5 rounded-lg text-xs border transition-all text-left ${
                         lookDraft.cover_art === s ? "bg-[#00C9A7]/15 border-[#00C9A7] text-[#00C9A7]" : "bg-[#161D26] border-[#1F2D3D] text-[#F1F5F9] hover:border-[#00C9A7]/60"
@@ -482,6 +483,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
                     </button>
                   ))}
                 </div>
+                <p className="text-[10px] text-[#64748B] mt-1">Used on new covers. To change a draft&apos;s cover, use its cover card in Editorial.</p>
               </div>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                 {LOOK_COLOR_FIELDS.map(({ key, label }) => (

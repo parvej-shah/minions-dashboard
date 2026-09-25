@@ -57,7 +57,7 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
 
   const saveEdit = async () => {
     const message = await run({ headline, kicker, emphasis });
-    if (message === "Cover updated") setEditing(false);
+    if (message.startsWith("Cover updated")) setEditing(false);
   };
 
   return (
@@ -121,6 +121,7 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                         key={l.id}
                         type="button"
                         title={unavailable ? "This draft states no figure a NUMBER cover could use" : l.hint}
+                        aria-pressed={cover.layout === l.id}
                         disabled={isRendering || unavailable || cover.layout === l.id}
                         onClick={() => void run({ layout: l.id })}
                         className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all ${
@@ -141,12 +142,14 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                 <div className="flex flex-wrap gap-1.5">
                   {COVER_ART_STYLES.map((s) => {
                     const current = (cover.art_style ?? "NONE") === s;
+                    const noRoom = cover.layout === "QUOTE" || cover.layout === "NUMBER";
                     return (
                       <button
                         key={s}
                         type="button"
-                        title={COVER_ART_STYLE_META[s].description}
-                        disabled={isRendering || current}
+                        title={noRoom ? "Quote and Number covers have no illustration" : COVER_ART_STYLE_META[s].description}
+                        aria-pressed={current}
+                        disabled={isRendering || current || noRoom}
                         onClick={() => void run({ art: s })}
                         className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                           current
@@ -158,7 +161,7 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                       </button>
                     );
                   })}
-                  {cover.art_style && cover.art_style !== "NONE" && (
+                  {cover.art_style && cover.art_style !== "NONE" && cover.art_drawn && (
                     <button
                       type="button"
                       disabled={isRendering}
@@ -169,11 +172,11 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                     </button>
                   )}
                 </div>
-                {cover.art_style && cover.art_style !== "NONE" && !cover.art_drawn && (
-                  <p className="text-[11px] text-[#64748B] mt-1.5">
-                    {cover.layout === "QUOTE" || cover.layout === "NUMBER" ? "Quote and Number covers have no room for it." : "Left off: the headline needed the space."}
-                  </p>
-                )}
+                {cover.layout === "QUOTE" || cover.layout === "NUMBER" ? (
+                  <p className="text-[11px] text-[#64748B] mt-1.5">Quote and Number covers have no illustration. Switch to Headline or Statement to add one.</p>
+                ) : cover.art_style && cover.art_style !== "NONE" && !cover.art_drawn ? (
+                  <p className="text-[11px] text-[#64748B] mt-1.5">Left off on this cover: the headline needed the space. A shorter headline makes room for it.</p>
+                ) : null}
               </div>
 
               {editing ? (
