@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { verifyWebhookSecret } from "@/lib/security";
+import { recordHeartbeat } from "@/services/jobHeartbeat";
 import { getDraftAuthorContext } from "@/services/draftContext";
 
 /**
@@ -15,6 +16,7 @@ import { getDraftAuthorContext } from "@/services/draftContext";
 export async function POST(request: Request) {
   const authCheck = await verifyWebhookSecret(request);
   if (!authCheck.isValid && authCheck.response) return authCheck.response;
+  await recordHeartbeat("02_idea_to_asset");
 
   const body = await request.json().catch(() => null);
   const clientId = typeof body?.client_id === "string" ? body.client_id.trim() : "";

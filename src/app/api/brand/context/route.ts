@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getBrandSettings, getWriterVoiceConfig, getHarvestContext } from "@/services/brand";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { verifyWebhookSecret } from "@/lib/security";
+import { recordHeartbeat } from "@/services/jobHeartbeat";
 import { buildBrandContextResponse } from "@/services/brandContext";
 import { harvestFocusLane } from "@/services/contentPlan";
 
@@ -19,6 +20,7 @@ import { harvestFocusLane } from "@/services/contentPlan";
 export async function GET(request: Request) {
   const authCheck = await verifyWebhookSecret(request);
   if (!authCheck.isValid && authCheck.response) return authCheck.response;
+  await recordHeartbeat("01_idea_harvester");
 
   const clientId = new URL(request.url).searchParams.get("clientId");
   if (!clientId) {

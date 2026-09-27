@@ -90,6 +90,8 @@ export async function PATCH(request: Request) {
     if (body.filler_enabled !== undefined) {
       if (typeof body.filler_enabled !== "boolean") return apiFailure("filler_enabled must be true or false", 400);
       data.fillerEnabled = body.filler_enabled;
+      // One switch (2026-09-28): "Schedule active" is no longer separate, so switching on can never be undone by a stale pause.
+      if (body.filler_enabled) data.isActive = true;
     }
 
     await prisma.postingSchedule.update({ where: { clientId: ctx.clientId }, data });

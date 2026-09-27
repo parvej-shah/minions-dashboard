@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { verifyWebhookSecret } from "@/lib/security";
+import { recordHeartbeat } from "@/services/jobHeartbeat";
 import { claimHarvestSlot, getHarvestBudget } from "@/lib/harvestBudget";
 
 /**
@@ -18,6 +19,7 @@ import { claimHarvestSlot, getHarvestBudget } from "@/lib/harvestBudget";
 export async function POST(request: Request) {
   const authCheck = await verifyWebhookSecret(request);
   if (!authCheck.isValid && authCheck.response) return authCheck.response;
+  await recordHeartbeat("00_tenant_dispatcher");
 
   try {
     const body = await request.json().catch(() => ({}));

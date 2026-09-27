@@ -8,6 +8,11 @@
             "index": 0,
             "node": "Format Error Message",
             "type": "main"
+          },
+          {
+            "index": 0,
+            "node": "Check In",
+            "type": "main"
           }
         ]
       ]
@@ -102,10 +107,18 @@
     },
     {
       "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
       "id": "69770c69-3c91-4234-8b72-b5c12b2f9fb7",
       "name": "Mark Run Failed",
       "onError": "continueRegularOutput",
       "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "jsonBody": "={{ JSON.stringify({ status: 'FAILED', metadata: { failedNode: $json.failed_node, error: $json.error_message } }) }}",
         "method": "PATCH",
         "options": {
@@ -119,22 +132,14 @@
         "sendBody": true,
         "sendHeaders": false,
         "specifyBody": "json",
-        "url": "=https://minions.getminions.ai/api/pipeline/runs/{{ $json.callback_run_id }}",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth"
+        "url": "=https://minions.getminions.ai/api/pipeline/runs/{{ $json.callback_run_id }}"
       },
       "position": [
         320,
         200
       ],
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "pePrDfuS5BrzrPCk",
-          "name": "Minions Cockpit API (webhook secret)"
-        }
-      }
+      "typeVersion": 4.2
     },
     {
       "credentials": {
@@ -159,6 +164,41 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "webhookId": "677058c9-f184-4245-b20e-af0b33383573"
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "check-in",
+      "name": "Check In",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "{\"job\": \"00c_pipeline_error_alert\"}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 10000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/heartbeat"
+      },
+      "position": [
+        -160,
+        200
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
     }
   ],
   "settings": {

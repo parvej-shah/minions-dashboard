@@ -5,6 +5,7 @@ import { CalendarClock, ShieldCheck, ShieldOff, Save, RefreshCw } from "lucide-r
 import { useApiResource } from "@/hooks/useApiResource";
 import { LoadingState } from "@/components/ui/EmptyState";
 import ContentPlanCard from "@/components/schedule/ContentPlanCard";
+import AutomaticDrafting from "@/components/schedule/AutomaticDrafting";
 import { useToast } from "@/hooks/useToast";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 
@@ -19,7 +20,6 @@ interface SchedulePayload {
   posts_per_day: number;
   times_of_day: string[];
   require_review: boolean;
-  is_active: boolean;
 }
 
 const EMPTY_PAYLOAD: SchedulePayload = {
@@ -31,7 +31,6 @@ const EMPTY_PAYLOAD: SchedulePayload = {
   posts_per_day: 1,
   times_of_day: ["09:00"],
   require_review: true,
-  is_active: true,
 };
 
 const CADENCE_OPTIONS: { key: CadenceType; label: string }[] = [
@@ -50,6 +49,8 @@ export default function SchedulePage() {
   const [saving, setSaving] = useState(false);
   // Remounts the content plan after a schedule save, so its week matches the new cadence.
   const [planKey, setPlanKey] = useState(0);
+  // Remounts the drafting status after a schedule save, so its next slot is current.
+  const [statusKey, setStatusKey] = useState(0);
 
   function updatePostsPerDay(next: number) {
     const clamped = Math.max(1, Math.min(4, next));
@@ -87,10 +88,10 @@ export default function SchedulePage() {
         posts_per_day: data.posts_per_day,
         times_of_day: data.times_of_day,
         require_review: data.require_review,
-        is_active: data.is_active,
       });
       toast.show("Posting schedule saved.");
       setPlanKey((k) => k + 1);
+      setStatusKey((k) => k + 1);
     } catch (err) {
       toast.show(toErrorMessage(err, "Could not save the posting schedule."));
     } finally {
@@ -119,6 +120,9 @@ export default function SchedulePage() {
           below decides which idea fills it. Times are in your account timezone ({data.timezone}).
         </p>
       </div>
+
+      {/* THE ONE SWITCH */}
+      <AutomaticDrafting key={statusKey} onChanged={() => setPlanKey((k) => k + 1)} onMessage={toast.show} />
 
       {/* CADENCE */}
       <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-5 shadow-sm">
@@ -243,27 +247,6 @@ export default function SchedulePage() {
             : "Off: a slot's draft that passes every check publishes as soon as its cover is ready, with no click."}{" "}
           Drafts that fail a check, drafts below the usual bar and drafts you start yourself always wait for review.
         </p>
-      </div>
-
-      {/* PAUSE */}
-      <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] flex items-center justify-between shadow-sm">
-        <div>
-          <h2 className="text-sm font-bold text-[#F1F5F9]">Schedule active</h2>
-          <p className="text-xs text-[#94A3B8] mt-0.5">Pause the cadence without losing your configuration.</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setData((prev) => ({ ...prev, is_active: !prev.is_active }))}
-          className={`w-11 h-6 rounded-full transition-colors p-0.5 flex items-center shrink-0 ${
-            data.is_active ? "bg-[#00C9A7]" : "bg-[#1F2D3D]"
-          }`}
-        >
-          <div
-            className={`w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${
-              data.is_active ? "translate-x-5" : "translate-x-0"
-            }`}
-          />
-        </button>
       </div>
 
       <button

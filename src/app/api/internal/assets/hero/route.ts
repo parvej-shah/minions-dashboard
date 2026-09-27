@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { verifyWebhookSecret } from "@/lib/security";
+import { recordHeartbeat } from "@/services/jobHeartbeat";
 import { settleSlotDraft } from "@/services/contentPlan";
 import { TERMINAL_HERO_STATUSES, type TerminalHeroStatus } from "@/constants/pipelineContracts";
 
@@ -24,6 +25,7 @@ const TERMINAL = TERMINAL_HERO_STATUSES;
 export async function POST(request: Request) {
   const authCheck = await verifyWebhookSecret(request);
   if (!authCheck.isValid && authCheck.response) return authCheck.response;
+  await recordHeartbeat("04_hero_image");
 
   try {
     const body = await request.json().catch(() => ({}));

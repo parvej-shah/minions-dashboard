@@ -70,7 +70,8 @@ function statusLine(s: WeekSlot): string | null {
 /**
  * The content plan (phase 7): what the plan is for, when it runs, which lane
  * each weekly slot serves, and the coming week slot by slot with the idea each
- * one will draft and how that idea was chosen. While the slot filler is off,
+ * one will draft and how that idea was chosen. While automatic drafting is off
+ * (its switch is AutomaticDrafting, at the top of the page),
  * the week is a preview: nothing is reserved, harvested or drafted.
  */
 export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) => void }) {
@@ -138,31 +139,16 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
 
   return (
     <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-5 shadow-sm">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
-            <CalendarRange className="w-4 h-4 text-[#00C9A7]" />
-            Content plan
-          </h2>
-          <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
-            {plan.filler_enabled
-              ? "On: an idea is kept for each slot in the next 7 days and drafted at the slot's time. A lane with no strong idea gets a harvest of its own ahead of time."
-              : "Off: nothing is drafted on its own. The week below shows what would be drafted if it were on."}
-          </p>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={plan.filler_enabled}
-          aria-label="Fill slots automatically"
-          disabled={saving !== null}
-          onClick={() =>
-            void save("filler", { filler_enabled: !plan.filler_enabled }, plan.filler_enabled ? "Slot filling switched off" : "Slot filling switched on: the next 7 days are planned")
-          }
-          className={`w-11 h-6 rounded-full transition-colors p-0.5 flex items-center shrink-0 disabled:opacity-60 ${plan.filler_enabled ? "bg-[#00C9A7]" : "bg-[#1F2D3D]"}`}
-        >
-          <div className={`w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${plan.filler_enabled ? "translate-x-5" : "translate-x-0"}`} />
-        </button>
+      <div>
+        <h2 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
+          <CalendarRange className="w-4 h-4 text-[#00C9A7]" />
+          Content plan
+        </h2>
+        <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
+          {plan.filler_enabled
+            ? "Automatic drafting is on: an idea is kept for each slot in the next 7 days and drafted at the slot's time. A lane with no strong idea gets a harvest of its own ahead of time."
+            : "Automatic drafting is off (switch at the top of this page), so the week below is a preview of what would be drafted."}
+        </p>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-3">
@@ -235,7 +221,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
         </div>
 
         {plan.week.slots.length === 0 ? (
-          <p className="text-xs text-[#64748B]">No slots in the next 7 days. Check the cadence above, the plan dates, or that the schedule is active.</p>
+          <p className="text-xs text-[#64748B]">No slots in the next 7 days. Check the cadence above and the plan dates.</p>
         ) : (
           <div className="space-y-4">
             {[...byDay.entries()].map(([day, slots]) => (

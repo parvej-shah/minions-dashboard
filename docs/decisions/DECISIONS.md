@@ -148,3 +148,35 @@ LinkedIn is connected. The decision stands for the reason given: turning
 auto-publish on for every draft would post hand-started drafts in any
 workspace with review off.
 **Status:** active
+
+## 2026-09-28 — One switch for automatic drafting; "Schedule active" retired
+
+**Decision:** Each workspace has one switch, "Automatic drafting"
+(`filler_enabled`), at the top of Settings › Schedule. The separate
+"Schedule active" pause is gone from the UI; `is_active` stays in the table,
+is set true on save and when drafting is switched on, and the migration set
+the one paused row back to true (its drafting was off).
+**Why:** A workspace drafted on its own only when three switches in three
+places were all on (00b in n8n, "Schedule active", slot filling). Six
+workspaces showed "Schedule active: on" while nothing drafted. `is_active`
+also gates the week preview, so mirroring it to the drafting switch would
+have blanked the preview whenever drafting was off.
+**Alternatives considered:** dropping the `is_active` column (touches the
+scheduling maths and every caller for no user-visible gain).
+**Status:** active
+
+## 2026-09-28 — Job state from check-ins, not from n8n's active flag
+
+**Decision:** Each background job checks in (`job_heartbeats`) from the
+dashboard route it already calls on every run: 00 → harvest-slot, 00b →
+eligible-tenants, 03 → release-due, 01 → brand/context, 02 → drafts/context,
+04 → assets/hero. The sweeper and the error alert never call the dashboard,
+so each got a "Check In" node posting to `/api/internal/heartbeat`. A timed
+job is "running" while its last check-in is within three of its intervals.
+The platform-admin Automations page and the Settings › Schedule status line
+("On, but the drafting service isn't running") read these.
+**Why:** a check-in is what actually ran; an active flag can be on while a
+workflow errors on every run. It also needs no n8n API key in the dashboard.
+**Alternatives considered:** reading workflow `active` and last execution
+from the n8n API (the key exists only locally, and large GETs hang).
+**Status:** active

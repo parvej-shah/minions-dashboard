@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { apiError } from "@/lib/api-response";
 import { verifyWebhookSecret } from "@/lib/security";
+import { recordHeartbeat } from "@/services/jobHeartbeat";
 import { findPlan } from "@/constants/plans";
 import { computeDueSlot } from "@/lib/scheduling";
 import { fillDueSlot, planAhead } from "@/services/contentPlan";
@@ -28,6 +29,7 @@ import { fillDueSlot, planAhead } from "@/services/contentPlan";
 export async function GET(request: Request) {
   const check = await verifyWebhookSecret(request);
   if (!check.isValid) return check.response!;
+  await recordHeartbeat("00b_posting_scheduler_dispatcher");
 
   try {
     const startOfMonth = new Date();

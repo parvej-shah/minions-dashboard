@@ -36,6 +36,9 @@ export default async function PlatformAdminLayout({ children }: { children: Reac
             <Link href="/platform-admin/users" className="text-[#94A3B8] hover:text-[#F1F5F9] transition-colors">
               Users
             </Link>
+            <Link href="/platform-admin/automations" className="text-[#94A3B8] hover:text-[#F1F5F9] transition-colors">
+              Automations
+            </Link>
           </nav>
         </div>
         <Link href="/" className="text-xs text-[#94A3B8] hover:text-[#F1F5F9] transition-colors">

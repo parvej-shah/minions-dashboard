@@ -531,6 +531,18 @@ model ScheduleSlot {
   @@map("schedule_slots")
 }
 
+/// When each background n8n job last ran, recorded by the dashboard route the
+/// job calls (src/services/jobHeartbeat.ts). Read by the platform-admin
+/// Automations page and the Settings > Schedule status line.
+model JobHeartbeat {
+  job       String   @id
+  lastRunAt DateTime @map("last_run_at")
+  runs      Int      @default(1)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("job_heartbeats")
+}
+
 /// Fixed-window request counter backing src/lib/rate-limit.ts. bucketKey is an
 /// opaque string (a hash of a webhook secret, or a caller IP) -- never a raw
 /// secret. No FK to Client: buckets can be per-secret or per-IP, not always

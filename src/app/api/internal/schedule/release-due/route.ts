@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { apiError } from "@/lib/api-response";
 import { verifyWebhookSecret } from "@/lib/security";
+import { recordHeartbeat } from "@/services/jobHeartbeat";
 import { releaseDuePosts } from "@/services/postSchedule";
 
 /**
@@ -11,6 +12,7 @@ import { releaseDuePosts } from "@/services/postSchedule";
 export async function POST(request: Request) {
   const check = await verifyWebhookSecret(request);
   if (!check.isValid) return check.response!;
+  await recordHeartbeat("03_review_publisher");
 
   try {
     const released = await releaseDuePosts();

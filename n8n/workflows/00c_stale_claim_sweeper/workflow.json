@@ -59,6 +59,11 @@
             "index": 0,
             "node": "Compute Cutoff",
             "type": "main"
+          },
+          {
+            "index": 0,
+            "node": "Check In",
+            "type": "main"
           }
         ]
       ]
@@ -244,6 +249,41 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "webhookId": "1b065956-820a-49c1-a5cc-a7fb20a45748"
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "check-in",
+      "name": "Check In",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonBody": "{\"job\": \"00c_stale_claim_sweeper\"}",
+        "method": "POST",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 10000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "https://minions.getminions.ai/api/internal/heartbeat"
+      },
+      "position": [
+        -160,
+        200
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
     }
   ],
   "settings": {
