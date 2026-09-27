@@ -53,6 +53,7 @@ model Client {
   icpProfile      IcpProfile?
   memories        ProfessionalMemory[]
   contentLanes    ContentLane[]
+  scheduleSlots   ScheduleSlot[]
   weeklyPulses    WeeklyPulse[]
 
   @@map("clients")
@@ -305,6 +306,9 @@ model Asset {
   xVariant            String?   @map("x_variant") @db.Text
   version             Int       @default(1)
   generationCost      Decimal   @default(0.038) @map("generation_cost") @db.Decimal(10, 4)
+  // D18: where this post goes (blog | linkedin | facebook), overriding the
+  // workspace's active channels for it. Empty: the workspace's channels.
+  channels            String[]  @default([])
   // Set while status is SCHEDULED: when the reviewer chose for it to go out (phase 7).
   scheduledFor        DateTime? @map("scheduled_for")
   publishedAt         DateTime? @map("published_at")
@@ -484,12 +488,47 @@ model PostingSchedule {
   requireReview Boolean   @default(true) @map("require_review")
   isActive      Boolean   @default(true) @map("is_active") // lets a tenant pause the cadence without deleting config
   lastRunAt     DateTime? @map("last_run_at") // idempotency guard: the dispatcher won't refire the same due slot twice
+  // The content plan (phase 7). Objectives are lane purposes: AUTHORITY | CREDIBILITY | DEMAND.
+  primaryObjective   String    @default("AUTHORITY") @map("primary_objective")
+  secondaryObjective String?   @map("secondary_objective")
+  planStartsOn       DateTime? @map("plan_starts_on") @db.Date
+  planEndsOn         DateTime? @map("plan_ends_on") @db.Date
+  // A lane pinned per weekly slot: {"1@09:00": "<lane id>"}, 1 = Monday ... 7 = Sunday.
+  slotLanes          Json      @default("{}") @map("slot_lanes")
+  // The phase flag: the slot filler drafts only for workspaces that switched it on.
+  fillerEnabled      Boolean   @default(false) @map("filler_enabled")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
 
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@map("posting_schedules")
+}
+
+/// One planned slot (phase 7). The look-ahead reserves an idea for each slot in
+/// the next 7 days; at the slot's time the dispatcher drafts it. See
+/// src/lib/plan/fill.ts for how an idea is chosen.
+model ScheduleSlot {
+  id                 String    @id @default(cuid())
+  clientId           String    @map("client_id")
+  slotAt             DateTime  @map("slot_at")
+  laneId             String?   @map("lane_id")
+  lanePinned         Boolean   @default(false) @map("lane_pinned")
+  ideaId             String?   @map("idea_id")
+  fillMethod         String?   @map("fill_method") // LANE | OTHER_LANE | TARGETED_HARVEST | BELOW_BAR
+  gateReasons        String[]  @default([]) @map("gate_reasons")
+  harvestRequestedAt DateTime? @map("harvest_requested_at")
+  assetId            String?   @map("asset_id")
+  status             String    @default("PLANNED") // PLANNED | HARVESTING | DRAFTING | DRAFTED | EMPTY
+  note               String?
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, slotAt])
+  @@index([ideaId], map: "schedule_slots_idea_idx")
+  @@map("schedule_slots")
 }
 
 /// Fixed-window request counter backing src/lib/rate-limit.ts. bucketKey is an

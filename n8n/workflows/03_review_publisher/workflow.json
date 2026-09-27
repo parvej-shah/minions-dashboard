@@ -467,6 +467,7 @@
     {
       "id": "7261f15d-508e-489a-b352-b615e8cc7eeb",
       "name": "Blog_Hosted_Allowed",
+      "notes": "Tenant zero's hosted blog, unless this post is kept off the blog (D18: Resolve_Blog_Channel answers post_excluded).",
       "parameters": {
         "conditions": {
           "combinator": "and",
@@ -479,6 +480,16 @@
                 "type": "string"
               },
               "rightValue": "tenant-zero-getminions-ai"
+            },
+            {
+              "id": "post-not-kept-off-blog",
+              "leftValue": "={{ $('Resolve_Blog_Channel').item.json.post_excluded === true }}",
+              "operator": {
+                "operation": "false",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
             }
           ],
           "options": {
@@ -1330,7 +1341,7 @@
           },
           "timeout": 15000
         },
-        "url": "=https://minions.getminions.ai/api/channels/credential?clientId={{ $('Filter_Approved_Assets').item.json.client_id }}&channel=blog"
+        "url": "=https://minions.getminions.ai/api/channels/credential?clientId={{ $('Filter_Approved_Assets').item.json.client_id }}&channel=blog&assetId={{ $('Filter_Approved_Assets').item.json.asset_id }}"
       },
       "position": [
         900,
@@ -1362,7 +1373,7 @@
           },
           "timeout": 15000
         },
-        "url": "=https://minions.getminions.ai/api/channels/credential?clientId={{ $('Filter_Approved_Assets').item.json.client_id }}&channel=facebook"
+        "url": "=https://minions.getminions.ai/api/channels/credential?clientId={{ $('Filter_Approved_Assets').item.json.client_id }}&channel=facebook&assetId={{ $('Filter_Approved_Assets').item.json.asset_id }}"
       },
       "position": [
         1220,
@@ -1394,7 +1405,7 @@
           },
           "timeout": 15000
         },
-        "url": "=https://minions.getminions.ai/api/channels/credential?clientId={{ $('Filter_Approved_Assets').item.json.client_id }}&channel=linkedin"
+        "url": "=https://minions.getminions.ai/api/channels/credential?clientId={{ $('Filter_Approved_Assets').item.json.client_id }}&channel=linkedin&assetId={{ $('Filter_Approved_Assets').item.json.asset_id }}"
       },
       "position": [
         1220,

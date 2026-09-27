@@ -9,4 +9,6 @@ function generateUUID() {
 const clientId = $json.client_id;
 const runId = generateUUID();
 const callbackUrl = `https://minions.getminions.ai/api/pipeline/runs/${runId}`;
-return [{ json: { client_id: clientId, run_id: runId, callback_url: callbackUrl } }];
+// Phase 7: the slot filler chose the idea in code (/api/internal/schedule/eligible-tenants);
+// 02 drafts exactly that one.
+return [{ json: { client_id: clientId, run_id: runId, callback_url: callbackUrl, idea_id: $json.idea_id || null, slot_id: $json.slot_id || null } }];

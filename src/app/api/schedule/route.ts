@@ -3,16 +3,17 @@ import { prisma } from "@/lib/prisma";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 import { refuseOnboardingOverwrite } from "@/lib/onboardingGuard";
+import { DEFAULT_CADENCE } from "@/lib/scheduling";
 
 const CADENCE_TYPES = ["DAILY", "EVERY_N_DAYS", "DAYS_OF_WEEK"] as const;
 const TIME_RE = /^([01]?\d|2[0-3]):[0-5]\d$/;
 
 const DEFAULTS = {
-  cadence_type: "EVERY_N_DAYS" as const,
-  interval_days: 3,
-  days_of_week: [] as number[],
-  posts_per_day: 1,
-  times_of_day: ["09:00"],
+  cadence_type: DEFAULT_CADENCE.cadenceType,
+  interval_days: DEFAULT_CADENCE.intervalDays,
+  days_of_week: DEFAULT_CADENCE.daysOfWeek,
+  posts_per_day: DEFAULT_CADENCE.postsPerDay,
+  times_of_day: DEFAULT_CADENCE.timesOfDay,
   require_review: true,
   is_active: true,
 };

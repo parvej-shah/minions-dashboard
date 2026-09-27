@@ -4,6 +4,7 @@ import { toAssetDTO } from "@/lib/mappers/asset";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 import { getTenantBlogDomain } from "@/lib/tenantDomain";
+import { parsePostChannels } from "@/constants/postChannels";
 import {
   releaseIdeaForRedraft,
   removeFromBlog,
@@ -53,15 +54,29 @@ export async function PATCH(
 
     const owned = await prisma.asset.findFirst({
       where: { OR: [{ id }, { slug: id }], clientId: ctx.clientId },
-      select: { id: true },
+      select: { id: true, status: true, publishedAt: true },
     });
     if (!owned) {
       return apiFailure("Asset not found", 404);
     }
 
+    // D18: where this one post goes. Fixed once it has gone out.
+    let channels: string[] | undefined;
+    if (body.channels !== undefined) {
+      const parsed = body.channels === null ? [] : parsePostChannels(body.channels);
+      if (parsed === null || (body.channels !== null && parsed.length === 0)) {
+        return apiFailure("channels must name at least one of blog, linkedin, facebook (or be null for the workspace's)", 400);
+      }
+      if (owned.status === "PUBLISHED" || owned.publishedAt) {
+        return apiFailure("This post has gone out, so its channels can't change", 409);
+      }
+      channels = parsed;
+    }
+
     const updated = await prisma.asset.update({
       where: { id: owned.id },
       data: {
+        ...(channels !== undefined && { channels }),
         ...(body.title !== undefined && { title: body.title }),
         ...(nextContent !== undefined && { content: nextContent }),
         ...(body.hook !== undefined && { hook: body.hook }),

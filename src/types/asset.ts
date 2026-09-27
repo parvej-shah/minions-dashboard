@@ -79,6 +79,8 @@ export interface AssetItem {
   version: number;
   generation_cost: number;
   published_at: string | null;
+  /** D18: channels this post is limited to; empty means the workspace's channels. */
+  channels: string[];
   /** When a SCHEDULED post goes out (phase 7); kept after release as the record. */
   scheduled_for: string | null;
   published_urls: string[];

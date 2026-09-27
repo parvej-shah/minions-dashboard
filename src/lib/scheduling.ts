@@ -17,6 +17,18 @@
 
 export type CadenceType = "DAILY" | "EVERY_N_DAYS" | "DAYS_OF_WEEK";
 
+/**
+ * A new workspace's cadence: 3 posts a week, Monday, Wednesday and Friday at
+ * 09:00 (plan decision D5). Existing schedules are never changed by it.
+ */
+export const DEFAULT_CADENCE = {
+  cadenceType: "DAYS_OF_WEEK" as const,
+  intervalDays: null,
+  daysOfWeek: [1, 3, 5],
+  postsPerDay: 1,
+  timesOfDay: ["09:00"],
+};
+
 export interface PostingScheduleConfig {
   cadenceType: string;
   intervalDays: number | null;

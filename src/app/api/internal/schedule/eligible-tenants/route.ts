@@ -4,6 +4,7 @@ import { apiError } from "@/lib/api-response";
 import { verifyWebhookSecret } from "@/lib/security";
 import { findPlan } from "@/constants/plans";
 import { computeDueSlot } from "@/lib/scheduling";
+import { fillDueSlot, planAhead } from "@/services/contentPlan";
 
 /**
  * Server-to-server only (n8n's 00b_posting_scheduler_dispatcher polls this
@@ -15,6 +16,14 @@ import { computeDueSlot } from "@/lib/scheduling";
  * (see src/app/api/billing/route.ts's docstring: no Subscription.planKey is
  * persisted anywhere yet, so every tenant resolves to "starter" today,
  * mirrored here exactly the same way).
+ *
+ * Phase 7: only workspaces with the content plan's slot filler switched on
+ * (`filler_enabled`) are drafted for. For each, every call runs the look-ahead
+ * (plan the next 7 days, reserve ideas, harvest early for an empty lane), and a
+ * due slot names the idea 02 should draft (`idea_id`), chosen in code by
+ * src/lib/plan/fill.ts. A due slot with nothing to draft is recorded EMPTY and
+ * not returned. Cadence-only drafting, with 02 picking any idea, is retired:
+ * 00b has been off since 2026-09-21 and the plan replaces it.
  */
 export async function GET(request: Request) {
   const check = await verifyWebhookSecret(request);
@@ -26,7 +35,7 @@ export async function GET(request: Request) {
     startOfMonth.setHours(0, 0, 0, 0);
 
     const schedules = await prisma.postingSchedule.findMany({
-      where: { isActive: true, client: { status: "ACTIVE" } },
+      where: { isActive: true, fillerEnabled: true, client: { status: "ACTIVE" } },
       include: {
         client: {
           select: {
@@ -41,9 +50,17 @@ export async function GET(request: Request) {
     });
 
     const now = new Date();
-    const due: { client_id: string; slug: string }[] = [];
+    const due: { client_id: string; slug: string; idea_id: string; slot_id: string; fill_method: string }[] = [];
+    const planned: Record<string, unknown> = {};
 
     for (const schedule of schedules) {
+      try {
+        planned[schedule.client.id] = await planAhead(schedule.client.id, now);
+      } catch (e) {
+        // One workspace's look-ahead failing must not stop the others' drafts.
+        console.warn(`[plan] look-ahead failed for ${schedule.client.id}:`, e);
+      }
+
       const slot = computeDueSlot(
         {
           cadenceType: schedule.cadenceType,
@@ -70,10 +87,12 @@ export async function GET(request: Request) {
       });
       if (assetsThisMonth >= assetsPerMonthLimit) continue; // over cap, skip silently
 
-      due.push({ client_id: schedule.client.id, slug: schedule.client.slug });
+      const fill = await fillDueSlot(schedule.client.id, slot, now);
+      if (!fill) continue;
+      due.push({ client_id: schedule.client.id, slug: schedule.client.slug, idea_id: fill.idea_id, slot_id: fill.slot_id, fill_method: fill.method });
     }
 
-    return NextResponse.json({ due_tenants: due });
+    return NextResponse.json({ due_tenants: due, planned });
   } catch (error) {
     return apiError(error, "Failed to compute due tenants");
   }

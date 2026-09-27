@@ -4,6 +4,7 @@ import { getBrandSettings, getWriterVoiceConfig, getHarvestContext } from "@/ser
 import { apiError, apiFailure } from "@/lib/api-response";
 import { verifyWebhookSecret } from "@/lib/security";
 import { buildBrandContextResponse } from "@/services/brandContext";
+import { harvestFocusLane } from "@/services/contentPlan";
 
 /**
  * Structured brand context for the n8n drafting pipeline to ingest.
@@ -42,11 +43,17 @@ export async function GET(request: Request) {
       return apiFailure(`Tenant ${clientId} is ${client.status}, not ACTIVE`, 409);
     }
 
-    const [brand, voiceConfig, harvest] = await Promise.all([
+    const [brand, voiceConfig, harvest, focusLane] = await Promise.all([
       getBrandSettings(clientId),
       getWriterVoiceConfig(clientId),
       getHarvestContext(clientId),
+      harvestFocusLane(clientId),
     ]);
+
+    // A targeted harvest for a content-plan slot (phase 7): the harvester sees
+    // only that slot's lane, so every idea it makes is for that lane.
+    const focused = focusLane ? harvest.author.lanes.filter((l) => l.id === focusLane) : [];
+    if (focused.length) harvest.author = { ...harvest.author, lanes: focused };
 
     return NextResponse.json(buildBrandContextResponse(brand, voiceConfig, harvest));
   } catch (error) {

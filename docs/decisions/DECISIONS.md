@@ -81,3 +81,61 @@ daily at most; publishing straight from a new n8n schedule — a second poller
 for the same job. Tying scheduled posts to plan slots — the user chose not to.
 Posts go out up to 5 minutes after their time (the poll interval); accepted.
 **Status:** active
+
+## 2026-09-27 — The slot filler lives in the dashboard; n8n only carries the idea id
+
+**Decision:** Which idea fills a slot is decided in `src/lib/plan/fill.ts`
+(pure, tested) and applied by `src/services/contentPlan.ts`. The 00b
+dispatcher's existing call to `/api/internal/schedule/eligible-tenants` runs
+the look-ahead and returns the chosen `idea_id` for a due slot; 00b passes it
+to 02, whose Select Target already drafts an explicit idea. A targeted
+harvest narrows `content_lanes` in `/api/brand/context` (read only by 01) to
+the slot's lane while it runs. The below-bar label and review-off
+auto-publish happen when the draft's cover settles (`/api/internal/covers`,
+`/api/internal/assets/hero`).
+**Why:** decisions stay in code (plan principle), and no change was needed to
+01 or 02 — 02 is the largest workflow and the n8n API currently times out on
+large reads. 02 cannot auto-publish on its own anyway: its `autoPublish`
+requires `heroIsPermanent`, which is always false since covers moved out of
+02, so "require review: off" had silently done nothing.
+**Alternatives considered:** filling slots inside 02's Select Target — the
+logic would live untested in n8n; a new n8n schedule for the look-ahead — 00b
+already polls every 5 minutes and stays the single dispatcher.
+**Trade-offs accepted:** if the chosen idea is claimed between the pick and
+02's run, 02 falls back to its own choice; the slot is then marked EMPTY
+after 30 minutes and the draft is untracked. Rare: the pick only takes
+unclaimed ideas.
+**Status:** active
+
+## 2026-09-27 — Auto-publish with review off applies to slot drafts only
+
+**Decision:** with `require_review` off, only a draft the content plan made
+for a slot publishes on its own, once every check passed and its cover is
+ready. Drafts started by hand and below-bar drafts always wait.
+**Why:** the user chose "follow require review" for a slot's draft
+(2026-09-25). Auto-publish had been dead code (see above), so turning it on
+for every draft would suddenly post hand-started test drafts — the test
+workspace has review off and LinkedIn connected.
+**Status:** active
+
+## 2026-09-27 — Cadence-only drafting retired; new workspaces default to 3 a week
+
+**Decision:** `eligible-tenants` returns only workspaces with the slot filler
+on (`posting_schedules.filler_enabled`), each with the idea to draft. The old
+behaviour — draft whatever 02 picks at every cadence tick — is gone. New
+schedules default to Mon/Wed/Fri 09:00 (D5); existing ones are unchanged.
+**Why:** 00b has been off since 2026-09-21, so nothing depended on it, and
+turning it back on would otherwise have started drafting for all six
+workspaces with an active schedule.
+**Status:** active
+
+## 2026-09-27 — Per-post channels: an override list on the asset
+
+**Decision:** `assets.channels` (empty = the workspace's active channels)
+limits one post (D18). The credential route answers "not active" for a
+channel the post is kept off when 03 passes `assetId`; tenant zero's hosted
+blog and the dashboard's own blog write check it too. X is not offered: it
+has no publisher.
+**Why:** 03 already skips a channel that resolves inactive, so the override
+needed one query parameter per channel node, not new branches.
+**Status:** active

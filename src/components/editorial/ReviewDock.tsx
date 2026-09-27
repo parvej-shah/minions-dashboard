@@ -17,6 +17,8 @@ import {
   Undo2,
 } from "lucide-react";
 import SchedulePicker, { useWorkspaceTimezone, zoneLabel } from "./SchedulePicker";
+import PostChannels from "./PostChannels";
+import type { DistributionChannelKey } from "@/types";
 import { formatPostTime } from "@/lib/postTime";
 import { formatCost } from "@/utils/format";
 import { useBrandSettings } from "@/hooks/useBrandSettings";
@@ -40,6 +42,10 @@ export interface ReviewDockProps {
   /** Approve the draft for a local date and time; resolves true when it was scheduled. */
   onSchedule: (date: string, time: string) => Promise<boolean>;
   onUnschedule: () => void;
+  /** The workspace's channel switches, for choosing where this post goes (D18). */
+  workspaceChannels: Record<DistributionChannelKey, boolean> | null;
+  onSetChannels: (channels: string[] | null) => void;
+  onMessage: (m: string) => void;
   setToggleLiveConfirmOpen: (v: boolean) => void;
   setDeleteConfirmOpen: (v: boolean) => void;
   /** Whether this tenant has the blog channel switched on. Undefined means
@@ -74,6 +80,9 @@ export default function ReviewDock({
   onPublish,
   onSchedule,
   onUnschedule,
+  workspaceChannels,
+  onSetChannels,
+  onMessage,
   setToggleLiveConfirmOpen,
   setDeleteConfirmOpen,
   blogEnabled = true,
@@ -221,6 +230,14 @@ export default function ReviewDock({
                 </p>
               </div>
 
+              <PostChannels
+                override={activeAsset.channels}
+                workspace={workspaceChannels}
+                disabled={publishState === "pending"}
+                onChange={onSetChannels}
+                onMessage={onMessage}
+              />
+
               {picking ? (
                 <SchedulePicker
                   current={activeAsset.scheduled_for}
@@ -314,6 +331,14 @@ export default function ReviewDock({
                   </a>
                 </div>
               )}
+
+              {!alreadyLive && (<PostChannels
+                override={activeAsset.channels}
+                workspace={workspaceChannels}
+                disabled={publishState === "pending"}
+                onChange={onSetChannels}
+                onMessage={onMessage}
+              />)}
 
               <button
                 onClick={onPublish}

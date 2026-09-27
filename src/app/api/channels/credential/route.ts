@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { verifyWebhookSecret } from "@/lib/security";
+import { postGoesTo } from "@/constants/postChannels";
 
 /**
  * Resolves a tenant's channel credential for n8n's publish nodes.
@@ -22,11 +23,21 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const clientId = url.searchParams.get("clientId");
   const channel = url.searchParams.get("channel");
+  const assetId = url.searchParams.get("assetId");
   if (!clientId || !channel) {
     return apiFailure("clientId and channel query params are required", 400);
   }
 
   try {
+    // D18: a post can be kept off a channel the workspace has on. 03 passes the
+    // asset; its override answers "not active" for that post, with no token.
+    if (assetId) {
+      const asset = await prisma.asset.findFirst({ where: { id: assetId, clientId }, select: { channels: true } });
+      if (asset && !postGoesTo(asset.channels, channel)) {
+        return NextResponse.json({ is_active: false, external_id: null, token: null, post_excluded: true });
+      }
+    }
+
     const channelRow = await prisma.clientChannel.findUnique({
       where: { clientId_channelKey: { clientId, channelKey: channel } },
       select: { isActive: true, credentialRef: true, externalId: true },

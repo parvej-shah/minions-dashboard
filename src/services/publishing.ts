@@ -1,6 +1,7 @@
 import type { Asset } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { BLOG_AUTHOR_AVATAR } from "@/constants/config";
+import { postGoesTo } from "@/constants/postChannels";
 
 /** The workspace whose posts are getminions.ai's own. */
 export const TENANT_ZERO_ID = "tenant-zero-getminions-ai";
@@ -154,7 +155,8 @@ export async function syncAssetToBlog(
     if (effectiveStatus === "UNPUBLISHED") {
       await removeFromBlog(asset.id, asset.slug, asset.clientId);
     } else if (effectiveStatus === "PUBLISHED") {
-      await upsertToBlog(asset);
+      // A post kept off the blog (D18) is never written to it.
+      if (postGoesTo(asset.channels, "blog")) await upsertToBlog(asset);
     } else if (Object.keys(edits).length > 0) {
       await syncBlogEdit(asset.id, asset.slug, asset.clientId, edits);
     }

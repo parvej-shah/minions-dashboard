@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { verifyWebhookSecret } from "@/lib/security";
+import { settleSlotDraft } from "@/services/contentPlan";
 import { TERMINAL_HERO_STATUSES, type TerminalHeroStatus } from "@/constants/pipelineContracts";
 
 /** Terminal states the hero workflow may report. PENDING is set by the drafter. */
@@ -81,7 +82,9 @@ export async function POST(request: Request) {
       select: { id: true, heroStatus: true, heroImageUrl: true },
     });
 
-    return NextResponse.json({ success: true, asset: updated });
+    // A content-plan slot's draft is labelled or published once its cover is settled.
+    const slot = await settleSlotDraft(assetId);
+    return NextResponse.json({ success: true, asset: updated, ...(slot && slot !== "NOT_A_SLOT" ? { slot } : {}) });
   } catch (error) {
     return apiError(error, "Failed to attach hero image");
   }

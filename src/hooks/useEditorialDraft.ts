@@ -45,6 +45,8 @@ export interface EditorialDraftState {
   schedulePost: (date: string, time: string) => Promise<string>;
   /** Send a scheduled post back to review. */
   unschedulePost: () => Promise<string>;
+  /** D18: where this post goes; null returns it to the workspace's channels. */
+  setPostChannels: (channels: string[] | null) => Promise<string>;
 
   isTogglingLive: boolean;
   toggleLiveStatus: () => Promise<string>;
@@ -323,6 +325,19 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
     }
   }, [activeAsset, publishState, patchActive, isDirty, persistEdits]);
 
+  const setPostChannels = useCallback(async (channels: string[] | null): Promise<string> => {
+    if (!activeAsset) return "";
+    const previous = activeAsset.channels;
+    patchActive({ channels: channels ?? [] });
+    try {
+      await apiClient.patch(`/api/assets/${activeAsset.id}`, { channels });
+      return "";
+    } catch (err) {
+      patchActive({ channels: previous });
+      return toErrorMessage(err, "Could not change where this post goes");
+    }
+  }, [activeAsset, patchActive]);
+
   const unschedulePost = useCallback(async (): Promise<string> => {
     if (!activeAsset || publishState === "pending") return "";
     setPublishState("pending");
@@ -473,6 +488,7 @@ export function useEditorialDraft(initialDraftId?: string): EditorialDraftState 
     approveAndPublish,
     schedulePost,
     unschedulePost,
+    setPostChannels,
 
     isTogglingLive,
     toggleLiveStatus,

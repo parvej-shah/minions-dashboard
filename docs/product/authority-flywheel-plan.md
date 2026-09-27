@@ -1099,6 +1099,35 @@ Slice 1, scheduling one reviewed post (built, not yet deployed):
   schedule. Unsaved edits are saved before approving or scheduling. A
   "Scheduled" filter sits in the queue.
 
+Slices 2–4 (built 2026-09-27, not yet deployed):
+
+- **The slot filler** (`src/lib/plan/fill.ts`, `src/services/contentPlan.ts`):
+  lane per slot (pinned, else the lane furthest behind its weight, boosted
+  ×2 for the main objective and ×1.5 for the second); then the D17 chain:
+  - a passing idea in the lane,
+  - one from another lane,
+  - one targeted harvest per slot,
+  - and, only at the slot's time, the best below-bar idea, labelled on the
+    draft and always held for review.
+
+  The look-ahead plans 7 days, reserves ideas and harvests early. It runs on
+  every dispatcher tick for workspaces with the filler on.
+- **Content plan** on the posting schedule: main and second objective,
+  optional date range, lanes pinned per weekday and time, and the filler
+  switch (`filler_enabled`, the phase flag, off by default). Stored in
+  `schedule_slots` (prisma/sql/2026-09-27-content-plan.sql).
+- **Settings › Schedule** shows the next 7 days slot by slot: the idea, how it
+  was chosen, and a lane picker. It is a preview while the filler is off, and
+  shows a nudge to add an update when slots lack strong ideas.
+- **Review off** now works for slot drafts: they publish once their cover is
+  ready (it had been dead code in 02).
+- **Per-post channels (D18):** "Post to" chips in Editorial; 03 checks them
+  per channel.
+- **The default** for new workspaces is 3 posts a week, Mon/Wed/Fri 09:00 (D5).
+- **Not done:** "generation adapts to a LinkedIn-only tenant". Covers are
+  already one portrait size for both channels, and slugs are harmless, so
+  nothing is skipped yet.
+
 ### Security fixes found along the way (2026-09-23)
 
 - **The public site served other customers' posts.** getminions.ai/blog listed

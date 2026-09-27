@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CalendarClock, ShieldCheck, ShieldOff, Save, RefreshCw } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { LoadingState } from "@/components/ui/EmptyState";
+import ContentPlanCard from "@/components/schedule/ContentPlanCard";
 import { useToast } from "@/hooks/useToast";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 
@@ -41,45 +42,14 @@ const CADENCE_OPTIONS: { key: CadenceType; label: string }[] = [
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-function formatSlot(iso: string, timezone: string): string {
-  return new Date(iso).toLocaleString("en-US", {
-    timeZone: timezone,
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
-
 export default function SchedulePage() {
   const { data, isLoading, setData } = useApiResource<SchedulePayload>("/api/schedule", EMPTY_PAYLOAD, {
     errorMessage: "Could not load posting schedule",
   });
   const toast = useToast(4000);
   const [saving, setSaving] = useState(false);
-  const [slots, setSlots] = useState<string[] | null>(null);
-  const [slotsLoading, setSlotsLoading] = useState(false);
-
-  async function loadSlots() {
-    setSlotsLoading(true);
-    try {
-      const res = await apiClient.get<{ slots: string[] }>("/api/schedule/preview?count=8");
-      setSlots(res.slots);
-    } catch {
-      setSlots([]);
-    } finally {
-      setSlotsLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    if (isLoading) return;
-    // Deferred so the effect body performs no synchronous setState, matching
-    // useApiResource's own reload pattern.
-    const timer = setTimeout(loadSlots, 0);
-    return () => clearTimeout(timer);
-  }, [isLoading]);
+  // Remounts the content plan after a schedule save, so its week matches the new cadence.
+  const [planKey, setPlanKey] = useState(0);
 
   function updatePostsPerDay(next: number) {
     const clamped = Math.max(1, Math.min(4, next));
@@ -120,7 +90,7 @@ export default function SchedulePage() {
         is_active: data.is_active,
       });
       toast.show("Posting schedule saved.");
-      await loadSlots();
+      setPlanKey((k) => k + 1);
     } catch (err) {
       toast.show(toErrorMessage(err, "Could not save the posting schedule."));
     } finally {
@@ -145,9 +115,8 @@ export default function SchedulePage() {
         </div>
         <h1 className="text-3xl font-bold tracking-tight text-[#F1F5F9]">When you post</h1>
         <p className="text-sm text-[#94A3B8] mt-1">
-          Set a real cadence. When it&apos;s time to post, an already-queued idea drafts first; if the
-          queue is empty, the next available idea drafts instead; if there are no ideas at all,
-          fresh ones are harvested first. Times are in your account timezone ({data.timezone}).
+          Set a real cadence. Each slot&apos;s time is when its draft is written; the content plan
+          below decides which idea fills it. Times are in your account timezone ({data.timezone}).
         </p>
       </div>
 
@@ -270,9 +239,9 @@ export default function SchedulePage() {
         </div>
         <p className="text-xs text-[#94A3B8] leading-relaxed">
           {data.require_review
-            ? "On: even a draft that passes the automated fact-check waits for your Approve & Publish click in Editorial Studio."
-            : "Off: drafts that pass the automated fact-check publish immediately, with no manual click."}{" "}
-          Drafts that fail the fact-check always wait for review, regardless of this setting.
+            ? "On: every draft waits for you to publish it or schedule it in Editorial Studio."
+            : "Off: a slot's draft that passes every check publishes as soon as its cover is ready, with no click."}{" "}
+          Drafts that fail a check, drafts below the usual bar and drafts you start yourself always wait for review.
         </p>
       </div>
 
@@ -307,25 +276,8 @@ export default function SchedulePage() {
         {saving ? "Saving…" : "Save schedule"}
       </button>
 
-      {/* UPCOMING SLOTS */}
-      <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-3 shadow-sm">
-        <h3 className="text-sm font-bold text-[#F1F5F9]">Upcoming posting slots</h3>
-        {slotsLoading ? (
-          <p className="text-xs text-[#64748B]">Computing…</p>
-        ) : !slots || slots.length === 0 ? (
-          <p className="text-xs text-[#64748B]">
-            {data.is_active ? "Save a schedule to see upcoming slots." : "Schedule is paused."}
-          </p>
-        ) : (
-          <ul className="space-y-1.5">
-            {slots.map((iso) => (
-              <li key={iso} className="text-xs font-mono text-[#94A3B8]">
-                {formatSlot(iso, data.timezone)}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {/* CONTENT PLAN (phase 7) */}
+      <ContentPlanCard key={planKey} onMessage={toast.show} />
 
       {toast.message && (
         <div className="fixed bottom-6 right-6 z-50 bg-[#161D26] border border-[#1F2D3D] text-[#F1F5F9] px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold">

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { verifyWebhookSecret } from "@/lib/security";
 import { markCoverFailed, renderAssetCover } from "@/services/cover";
+import { settleSlotDraft } from "@/services/contentPlan";
 
 /** Rendering is about a second; the R2 upload and photo fetch add a few more. */
 export const maxDuration = 60;
@@ -26,9 +27,19 @@ export async function POST(request: Request) {
     if (!result.ok && result.locked) return apiFailure(result.error, 409);
     if (!result.ok) {
       await markCoverFailed(assetId, result.error);
+      await settleSlotDraft(assetId);
       return apiFailure(result.error, 422);
     }
-    return NextResponse.json({ success: true, hero_status: "READY", hero_image_url: result.url, layout: result.spec.layout, notes: result.spec.notes });
+    // A content-plan slot's draft is labelled or published once its cover is drawn.
+    const slot = await settleSlotDraft(assetId);
+    return NextResponse.json({
+      success: true,
+      hero_status: "READY",
+      hero_image_url: result.url,
+      layout: result.spec.layout,
+      notes: result.spec.notes,
+      ...(slot && slot !== "NOT_A_SLOT" ? { slot } : {}),
+    });
   } catch (error) {
     await markCoverFailed(assetId, error instanceof Error ? error.message : "Cover render failed").catch(() => {});
     return apiError(error, "Failed to render cover");

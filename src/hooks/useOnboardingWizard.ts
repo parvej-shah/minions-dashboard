@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { DEFAULT_CADENCE } from "@/lib/scheduling";
 import { useRouter } from "next/navigation";
 import { apiClient, toErrorMessage, ApiRequestError } from "@/lib/api-client";
 import type { BrandPreset } from "@/constants/brandPresets";
@@ -463,11 +464,12 @@ export function useOnboardingWizard(): OnboardingWizardState {
       }
 
       await apiClient.patch("/api/schedule", {
-        cadence_type: "EVERY_N_DAYS",
-        interval_days: 3,
-        days_of_week: [],
-        posts_per_day: 1,
-        times_of_day: ["09:00"],
+        // 3 posts a week (plan decision D5).
+        cadence_type: DEFAULT_CADENCE.cadenceType,
+        interval_days: DEFAULT_CADENCE.intervalDays,
+        days_of_week: DEFAULT_CADENCE.daysOfWeek,
+        posts_per_day: DEFAULT_CADENCE.postsPerDay,
+        times_of_day: DEFAULT_CADENCE.timesOfDay,
         require_review: publishingMode === "review",
         is_active: true,
         from_onboarding: true,

@@ -279,6 +279,9 @@ export default function EditorialStudio({
             onPublish={handlePublish}
             onSchedule={handleSchedule}
             onUnschedule={handleUnschedule}
+            workspaceChannels={channels}
+            onSetChannels={(c) => void draft.setPostChannels(c).then((m) => m && toast.show(m))}
+            onMessage={toast.show}
             setToggleLiveConfirmOpen={setToggleLiveConfirmOpen}
             setDeleteConfirmOpen={setDeleteConfirmOpen}
             blogEnabled={blogEnabled}
