@@ -195,7 +195,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
   <h1>Minions Content Pipeline</h1>
   <p class="lede">How an RSS headline becomes a reviewed blog post, a cover image and three social posts. The page covers every workflow, every hand-off between n8n, the dashboard and Supabase, and every prompt the system sends to a model. That includes the n8n content pipeline, the dashboard's onboarding calls, and the text fragments that code injects into those prompts. Everything is copied word for word from the live workflow JSON and the repo.</p>
   <div class="facts">
-    <span><b>8</b> pipeline workflows (7 active)</span>
+    <span><b>8</b> pipeline workflows (8 active)</span>
     <span><b>10</b> text-model prompts</span>
     <span><b>2</b> image prompts</span>
     <span><b>1</b> human gate</span>
@@ -281,7 +281,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
   <div class="sec-head"><h2>Workflows</h2><p>From <code>n8n/manifest.json</code> and <code>n8n/workflows/</code>: what is deployed, what starts it, and why a workflow may run on a schedule. Other workflows on the same instance belong to separate projects and are listed as ignored in the manifest.</p></div>
   <div class="tbl"><table><thead><tr><th>Workflow</th><th>State</th><th>Triggers</th><th>Nodes</th><th>Error alerts</th></tr></thead><tbody>
 <tr><td><code>00_tenant_dispatcher</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">manual</span> <span class="chip">cron 0 0 * * *</span></div><div style="margin-top:4px">Daily 00:00 fan-out: one harvest per ACTIVE tenant, gated by the harvest budget.</div></td><td class="num">7</td><td>✓</td></tr>
-<tr><td><code>00b_posting_scheduler_dispatcher</code></td><td><span class="chip off">inactive</span></td><td><div class="chips"><span class="chip">manual</span> <span class="chip">every 5 min</span></div><div style="margin-top:4px">Every 5 min: drafts for tenants whose posting schedule is due. Deactivated 2026-09-21.</div></td><td class="num">8</td><td>✓</td></tr>
+<tr><td><code>00b_posting_scheduler_dispatcher</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">manual</span> <span class="chip">every 5 min</span></div><div style="margin-top:4px">Every 5 min: plans each workspace's next 7 days and drafts due slots, for workspaces with Automatic drafting on. Reactivated 2026-09-27 for the Phase 7 exit (tenant zero only).</div></td><td class="num">8</td><td>✓</td></tr>
 <tr><td><code>00c_stale_claim_sweeper</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">every 15 min</span></div><div style="margin-top:4px">Every 15 min: releases ideas stuck at PICKED.</div></td><td class="num">8</td><td>✓</td></tr>
 <tr><td><code>00c_pipeline_error_alert</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">error trigger</span></div></td><td class="num">6</td><td>—</td></tr>
 <tr><td><code>01_idea_harvester</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">manual</span> <span class="chip">webhook /test-harvester</span></div></td><td class="num">43</td><td>✓</td></tr>

@@ -180,3 +180,13 @@ workflow errors on every run. It also needs no n8n API key in the dashboard.
 **Alternatives considered:** reading workflow `active` and last execution
 from the n8n API (the key exists only locally, and large GETs hang).
 **Status:** active
+
+## 2026-09-27 — Phase 7 exit started on tenant zero
+
+**Decision:** 00b reactivated; tenant zero moved to Mon/Wed/Fri 09:00
+(America/New_York) with Automatic drafting on and review still required.
+It is the only workspace with drafting on. The exit clock (two weeks with
+every slot filled, plan D17) starts with the first Monday slot.
+**Why:** the user approved all three steps. Review stays on so a below-bar or
+unbacked draft can't post before the ICP and experience items are filled in.
+**Status:** active

@@ -8,7 +8,7 @@
     {
       "id": "7zbuDfvy3bhJLf3x",
       "slug": "00b_posting_scheduler_dispatcher",
-      "schedule": "Every 5 min: drafts for tenants whose posting schedule is due. Deactivated 2026-09-21."
+      "schedule": "Every 5 min: plans each workspace's next 7 days and drafts due slots, for workspaces with Automatic drafting on. Reactivated 2026-09-27 for the Phase 7 exit (tenant zero only)."
     },
     {
       "id": "49yAgdBe5IeO729r",
