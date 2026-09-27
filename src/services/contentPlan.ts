@@ -73,13 +73,22 @@ function pinnedLaneFor(s: PostingSchedule, at: Date, tz: string): string | null 
   return typeof map[key] === "string" ? (map[key] as string) : null;
 }
 
+/**
+ * A slot's instant on the whole minute. The cadence maths derives slot times
+ * from "now", so they carry now's seconds; stored slots are keyed on the
+ * instant, and two passes a few seconds apart must name the same slot.
+ */
+export function slotInstant(d: Date): Date {
+  return new Date(Math.floor(d.getTime() / 60_000) * 60_000);
+}
+
 /** The planned slot instants in the look-ahead window, in order. */
 export function upcomingPlanSlots(s: PostingSchedule, tz: string, now: Date): Date[] {
   const until = now.getTime() + LOOKAHEAD_DAYS * 86_400_000;
   const perDay = Math.max(1, s.timesOfDay.length);
-  return nextUpcomingSlots(scheduleConfig(s), tz, perDay * (LOOKAHEAD_DAYS + 1), now).filter(
-    (d) => d.getTime() <= until && inPlanRange(s, d, tz)
-  );
+  return nextUpcomingSlots(scheduleConfig(s), tz, perDay * (LOOKAHEAD_DAYS + 1), now)
+    .map(slotInstant)
+    .filter((d) => d.getTime() <= until && inPlanRange(s, d, tz));
 }
 
 interface PlanContext {
@@ -248,7 +257,8 @@ export interface DueFill {
 }
 
 /** At a slot's time: the idea to draft, or null (recorded as EMPTY). */
-export async function fillDueSlot(clientId: string, slotAt: Date, now: Date = new Date()): Promise<DueFill | null> {
+export async function fillDueSlot(clientId: string, due: Date, now: Date = new Date()): Promise<DueFill | null> {
+  const slotAt = slotInstant(due);
   const ctx = await loadContext(clientId);
   if (!ctx || !ctx.schedule.fillerEnabled) return null;
 

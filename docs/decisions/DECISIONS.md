@@ -139,3 +139,12 @@ has no publisher.
 **Why:** 03 already skips a channel that resolves inactive, so the override
 needed one query parameter per channel node, not new branches.
 **Status:** active
+
+## 2026-09-27 — Correction: the test workspace has review ON
+
+The "auto-publish applies to slot drafts only" entry above says the test
+workspace has review off. It has review **on** and its schedule is paused;
+LinkedIn is connected. The decision stands for the reason given: turning
+auto-publish on for every draft would post hand-started drafts in any
+workspace with review off.
+**Status:** active

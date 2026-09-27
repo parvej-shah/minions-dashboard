@@ -7,7 +7,6 @@ import {
   Sparkles,
   FileText,
   CheckCircle2,
-  DollarSign,
   ChevronRight,
   Globe,
   Radio,
@@ -42,11 +41,6 @@ export default function MissionControlPage() {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
   const ideasToday = ideas.filter((i) => new Date(i.created_at).getTime() >= startOfToday.getTime());
-
-  const assetsWithCost = assets.filter((a) => typeof a.generation_cost === "number");
-  const avgUnitCost = assetsWithCost.length > 0
-    ? assetsWithCost.reduce((sum, a) => sum + (a.generation_cost || 0), 0) / assetsWithCost.length
-    : null;
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
@@ -87,8 +81,8 @@ export default function MissionControlPage() {
       {/* THE WEEKLY QUESTION (phase 6): shown only on the weeks it is open */}
       <WeeklyPulseCard />
 
-      {/* TOP STAT TILES ROW (4 KPI TILES PER PRD) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* TOP STAT TILES ROW (3 KPI TILES) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* KPI 1 */}
         <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-2 shadow-sm">
           <div className="flex items-center justify-between text-xs font-mono text-[#94A3B8]">
@@ -133,20 +127,6 @@ export default function MissionControlPage() {
           </div>
           <div className="text-[11px] text-[#64748B]">
             Live on the blog
-          </div>
-        </div>
-
-        {/* KPI 4 */}
-        <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-2 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-mono text-[#94A3B8]">
-            <span>AVG UNIT COST</span>
-            <DollarSign className="w-4 h-4 text-[#00C9A7]" />
-          </div>
-          <div className="text-2xl font-bold text-[#F1F5F9] flex items-baseline gap-2">
-            <span>{avgUnitCost !== null ? `$${avgUnitCost.toFixed(3)}` : "—"}</span>
-          </div>
-          <div className="text-[11px] text-[#64748B]">
-            Recorded generation cost per asset
           </div>
         </div>
       </div>

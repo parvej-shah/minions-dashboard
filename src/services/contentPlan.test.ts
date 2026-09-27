@@ -20,7 +20,7 @@ vi.mock("@/services/publishing", () => ({ syncAssetToBlog }));
 vi.mock("@/services/pipeline", () => ({ triggerN8nWorkflow }));
 vi.mock("@/services/harvestRun", () => ({ startHarvest: vi.fn() }));
 
-const { onSlotDraftReady, harvestFocusLane } = await import("./contentPlan");
+const { onSlotDraftReady, harvestFocusLane, upcomingPlanSlots } = await import("./contentPlan");
 
 const draft = { id: "a1", clientId: "c1", ideaId: "i1", status: "PENDING_REVIEW", claimsOk: "Y", heroStatus: "READY", reviewNotes: ["Reads at grade 9"] };
 const slot = { id: "s1", status: "DRAFTING", assetId: null, fillMethod: "LANE", gateReasons: [] as string[] };
@@ -77,5 +77,24 @@ describe("a targeted harvest", () => {
     slotFindFirst.mockResolvedValue({ laneId: "lane-lessons" });
     expect(await harvestFocusLane("c1")).toBe("lane-lessons");
     expect(slotFindFirst).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ clientId: "c1", status: "HARVESTING" }) }));
+  });
+});
+
+describe("the look-ahead's slots", () => {
+  const schedule = {
+    cadenceType: "DAYS_OF_WEEK", intervalDays: null, daysOfWeek: [1, 3, 5], postsPerDay: 1, timesOfDay: ["09:00"],
+    isActive: true, lastRunAt: null, createdAt: new Date("2026-01-01T00:00:00Z"), planStartsOn: null, planEndsOn: null,
+  } as never;
+
+  it("names the same slots on passes seconds apart, on the whole minute", () => {
+    const a = upcomingPlanSlots(schedule, "America/New_York", new Date("2026-09-27T10:00:07.123Z"));
+    const b = upcomingPlanSlots(schedule, "America/New_York", new Date("2026-09-27T10:04:51.999Z"));
+    expect(a.map((d) => d.toISOString())).toEqual(["2026-09-28T13:00:00.000Z", "2026-09-30T13:00:00.000Z", "2026-10-02T13:00:00.000Z"]);
+    expect(b).toEqual(a);
+  });
+
+  it("keeps to the plan's dates", () => {
+    const ranged = { ...(schedule as object), planStartsOn: new Date("2026-09-29T00:00:00Z"), planEndsOn: new Date("2026-10-01T00:00:00Z") } as never;
+    expect(upcomingPlanSlots(ranged, "America/New_York", new Date("2026-09-27T10:00:00Z")).map((d) => d.toISOString())).toEqual(["2026-09-30T13:00:00.000Z"]);
   });
 });
