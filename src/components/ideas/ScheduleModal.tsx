@@ -180,7 +180,7 @@ export default function ScheduleModal({
               />
             </div>
             <p className="text-[11px] text-[#64748B]">
-              Workflow 02 will automatically pick this idea up at or after the scheduled time.
+              Minions will prepare this idea at the scheduled time.
             </p>
           </div>
         </div>

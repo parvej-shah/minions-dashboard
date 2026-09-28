@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { GATE_VERDICT_BADGE, getAudienceBadgeClass, getSourceTag } from "@/constants/ideaBadges";
+import { IDEA_STAGE_LABELS, toIdeaStage } from "@/constants/ideaStage";
 import type {
   IdeaItem,
 } from "@/types";
@@ -246,10 +247,10 @@ export default function IdeaDetailModal({
             </div>
 
             <div className="p-3.5 rounded-xl bg-[#161D26]/60 border border-[#1F2D3D] space-y-1">
-              <div className="text-[10px] font-mono text-[#64748B] uppercase">Pipeline Status</div>
+              <div className="text-[10px] font-mono text-[#64748B] uppercase">Status</div>
               <div className="text-xs font-semibold text-[#00C9A7] flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
-                <span>{detailIdea.status || "HARVESTED"}</span>
+                <span>{IDEA_STAGE_LABELS[toIdeaStage(detailIdea.status)]}</span>
               </div>
             </div>
           </div>
@@ -346,7 +347,7 @@ export default function IdeaDetailModal({
                 className="inline-flex items-center justify-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] disabled:opacity-50 text-[#070B0F] text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/15 transition-all active:scale-95 cursor-pointer"
               >
                 <Sparkles className="w-4 h-4" />
-                <span>Refine & Launch Draft Pipeline (Workflow 02)</span>
+                <span>Create Draft</span>
               </button>
             )}
           </div>

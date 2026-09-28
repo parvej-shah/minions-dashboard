@@ -36,7 +36,7 @@ export default function QueueBuilderView({
 }: QueueBuilderViewProps) {
   const [searchPool, setSearchPool] = useState("");
   const [selectedTrade, setSelectedTrade] = useState<string>("ALL");
-  const [selectedAudience, setSelectedAudience] = useState<string>("ALL");
+  // Every workspace now writes for one ICP. Keep this surface focused on the reader.
   const [draggedIdeaId, setDraggedIdeaId] = useState<string | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [isDropTargetQueue, setIsDropTargetQueue] = useState(false);
@@ -68,7 +68,6 @@ export default function QueueBuilderView({
       }
       // Apply filters
       if (selectedTrade !== "ALL" && i.target_trade !== selectedTrade) return false;
-      if (selectedAudience !== "ALL" && i.audience !== selectedAudience) return false;
       if (searchPool.trim()) {
         const query = searchPool.toLowerCase();
         const title = (i.title || i.raw_idea || "").toLowerCase();
@@ -81,7 +80,7 @@ export default function QueueBuilderView({
       }
       return true;
     });
-  }, [ideas, selectedTrade, selectedAudience, searchPool]);
+  }, [ideas, selectedTrade, searchPool]);
 
   // Sync queue state to backend API
   const persistQueueState = async (newQueueList: IdeaItem[], removedIdeaIds: string[] = []) => {
@@ -245,12 +244,8 @@ export default function QueueBuilderView({
     switch (aud) {
       case "ICP":
         return "bg-blue-500/20 text-blue-400 border-blue-500/30";
-      case "PEER":
-        return "bg-purple-500/20 text-purple-400 border-purple-500/30";
-      case "BRIDGE":
-        return "bg-amber-500/20 text-amber-400 border-amber-500/30";
       default:
-        return "bg-slate-500/20 text-slate-400 border-slate-500/30";
+        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
     }
   };
 
@@ -280,7 +275,7 @@ export default function QueueBuilderView({
               )}
             </div>
             <p className="text-[11px] text-[#94A3B8] break-words whitespace-normal mt-1">
-              Drag candidate topics into the queue. Workflow 02 automatically drafts the top #1 item on schedule.
+              Choose the next ICP topic. Minions drafts the first item on schedule.
             </p>
           </div>
         </div>
@@ -337,7 +332,7 @@ export default function QueueBuilderView({
           }`}
         >
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Candidate Pool ({poolIdeas.length})</span>
+          <span>Ideas ({poolIdeas.length})</span>
         </button>
       </div>
 
@@ -360,7 +355,7 @@ export default function QueueBuilderView({
               </h3>
             </div>
             <span className="text-[11px] font-mono text-[#64748B]">
-              Drag to Queue or tap &quot;+ Add&quot;
+              Tap Add to move an idea into production
             </span>
           </div>
 
@@ -392,23 +387,10 @@ export default function QueueBuilderView({
                 <option value="Voice AI">Voice AI</option>
               </select>
             </div>
-
-            <div className="sm:col-span-3">
-              <select
-                value={selectedAudience}
-                onChange={(e) => setSelectedAudience(e.target.value)}
-                className="w-full bg-[#070B0F] border border-[#1F2D3D] rounded-xl px-2 py-1.5 text-xs text-[#94A3B8] outline-none cursor-pointer"
-              >
-                <option value="ALL">All Audiences</option>
-                <option value="ICP">ICP (Core Target)</option>
-                <option value="PEER">PEER (Industry)</option>
-                <option value="BRIDGE">BRIDGE (Investors)</option>
-              </select>
-            </div>
           </div>
 
           {/* Pool Card Scroll Area */}
-          <div className="space-y-2.5 overflow-y-auto pr-1 flex-1 min-h-[300px]">
+          <div className="space-y-2.5 overflow-y-auto pr-1 flex-1 min-h-[240px] lg:min-h-[300px]">
             {poolIdeas.length === 0 ? (
               <div className="p-8 text-center text-xs text-[#64748B] italic space-y-1">
                 <AlertCircle className="w-5 h-5 mx-auto text-[#475569]" />
@@ -420,7 +402,7 @@ export default function QueueBuilderView({
                   key={idea.id}
                   draggable
                   onDragStart={(e) => handleDragStart(e, idea.id)}
-                  className={`p-3.5 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] hover:border-[#00C9A7]/40 transition-all flex items-center justify-between gap-3 group cursor-grab active:cursor-grabbing shadow-xs ${
+                  className={`p-3.5 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] hover:border-[#00C9A7]/40 transition-all flex items-start sm:items-center justify-between gap-3 group cursor-grab active:cursor-grabbing shadow-xs ${
                     draggedIdeaId === idea.id ? "opacity-40 border-dashed border-[#00C9A7]" : ""
                   }`}
                 >
@@ -491,7 +473,7 @@ export default function QueueBuilderView({
           </div>
 
           {/* Queue Items List */}
-          <div className="space-y-2.5 overflow-y-auto pr-1 flex-1 min-h-[300px]">
+          <div className="space-y-2.5 overflow-y-auto pr-1 flex-1 min-h-[240px] lg:min-h-[300px]">
             {queuedIdeas.length === 0 ? (
               <div className="h-48 border-2 border-dashed border-[#1F2D3D] rounded-xl flex flex-col items-center justify-center p-6 text-center space-y-2">
                 <Layers className="w-6 h-6 text-[#475569]" />
@@ -499,7 +481,7 @@ export default function QueueBuilderView({
                   Drop Ideas Here to Queue
                 </div>
                 <p className="text-[11px] text-[#64748B] max-w-xs">
-                  Drag any topic from the left pool to queue it for automated drafting.
+                  Add an idea from the Ideas tab to place it in the drafting queue.
                 </p>
               </div>
             ) : (
@@ -515,7 +497,7 @@ export default function QueueBuilderView({
                       e.preventDefault();
                       setDragOverIndex(index);
                     }}
-                    className={`p-3.5 rounded-xl border transition-all flex items-center justify-between gap-2.5 group cursor-grab active:cursor-grabbing shadow-sm relative ${
+                    className={`p-3.5 rounded-xl border transition-all flex items-start sm:items-center justify-between gap-2.5 group cursor-grab active:cursor-grabbing shadow-sm relative ${
                       isFirst
                         ? "bg-[#00C9A7]/10 border-[#00C9A7]/50 shadow-lg shadow-[#00C9A7]/5"
                         : "bg-[#161D26] hover:bg-[#1E2733] border-[#1F2D3D]"

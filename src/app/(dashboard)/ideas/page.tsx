@@ -145,7 +145,7 @@ export default function IdeaStreamPage() {
           await reloadIdeas();
           setActiveHarvestJob(null);
           if (run.status === "FAILED") {
-            setToastMessage("The harvest run failed. Nothing was added to your stream.");
+            setToastMessage("We couldn’t find new ideas this time. Please try again.");
           }
         }
       } catch {
@@ -381,7 +381,7 @@ export default function IdeaStreamPage() {
     e.preventDefault();
     if (!formTitle.trim() || isSubmitting) return;
     if (!formTrade) {
-      setToastMessage("Pick the actual Target Trade before injecting, it does not default to HVAC.");
+      setToastMessage("Choose a trade before adding this idea.");
       setTimeout(() => setToastMessage(null), 4000);
       return;
     }
@@ -394,8 +394,8 @@ export default function IdeaStreamPage() {
     const payload = {
       title: formTitle.trim(),
       raw_idea: formTitle.trim(),
-      excerpt: formExcerpt.trim() || "Manual editorial topic injected for automated strategy and drafting pipeline.",
-      angle: formExcerpt.trim() || "Manual editorial topic injected for automated strategy and drafting pipeline.",
+      excerpt: formExcerpt.trim() || "An idea added by your team.",
+      angle: formExcerpt.trim() || "An idea added by your team.",
       trade: formTrade,
       target_trade: formTrade,
       // One ICP per tenant; PEER/BRIDGE were retired on 2026-09-23.
@@ -433,15 +433,15 @@ export default function IdeaStreamPage() {
         setFormTrade("");
         setFormTags(["Manual"]);
         setFormTagsInput("");
-        setToastMessage(`Idea ${created.id} injected into the live stream.`);
+        setToastMessage(`Idea added to your stream.`);
         setTimeout(() => setToastMessage(null), 3000);
       } else {
         const errBody = await res.json().catch(() => ({}));
-        setToastMessage(`Failed to inject idea: ${errBody.error || res.statusText}`);
+        setToastMessage(`Could not add idea: ${errBody.error || res.statusText}`);
         setTimeout(() => setToastMessage(null), 5000);
       }
     } catch (err) {
-      setToastMessage(`Failed to inject idea: ${err instanceof Error ? err.message : "network error"}`);
+      setToastMessage(`Could not add idea: ${err instanceof Error ? err.message : "network error"}`);
       setTimeout(() => setToastMessage(null), 5000);
     } finally {
       setIsSubmitting(false);
@@ -492,7 +492,7 @@ export default function IdeaStreamPage() {
       );
       setJustClaimedIds(prev => new Set(prev).add(ideaId));
     } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : "Could not reach the drafting pipeline.";
+      const message = e instanceof Error ? e.message : "Could not start your draft.";
       setDraftError(message);
       setActiveDraftingJob(null);
     } finally {
@@ -557,7 +557,7 @@ export default function IdeaStreamPage() {
           <div className="flex items-center gap-2 mb-1">
             <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold tracking-widest text-[#00C9A7] uppercase px-2 py-0.5 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/20">
               <span className="w-1.5 h-1.5 rounded-full bg-[#00C9A7] animate-pulse" />
-              Workflow 01 · Signal Harvester
+              IDEA STREAM
             </span>
           </div>
           <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#F1F5F9] break-words">
@@ -565,10 +565,10 @@ export default function IdeaStreamPage() {
           </h1>
           <p className="text-xs text-[#94A3B8] mt-0.5 max-w-xl break-words">
             {viewMode === "queue" 
-              ? "Prioritize and re-order candidate topics for twice-daily automated drafting."
+              ? "Choose which idea Minions should turn into a draft next."
               : viewMode === "calendar"
               ? "Visual timeline of scheduled drafts and published playbooks."
-              : "Continuous intake stream of high-intent topics harvested across trade forums & search telemetry."}
+              : "A steady stream of relevant topics for your ideal customers."}
           </p>
         </div>
 
@@ -624,7 +624,7 @@ export default function IdeaStreamPage() {
             className="inline-flex items-center gap-1.5 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-3.5 py-2 rounded-xl shadow-md shadow-[#00C9A7]/15 transition-all active:scale-95 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>Inject Topic</span>
+            <span>Add idea</span>
           </button>
         </div>
       </div>
@@ -768,10 +768,10 @@ export default function IdeaStreamPage() {
 
           {!ideasLoading && ideas.length === 0 && (
             <EmptyState
-              title={ideasError ? "Could not load ideas" : "No ideas harvested yet"}
+              title={ideasError ? "Could not load ideas" : "No ideas yet"}
               description={
                 ideasError ??
-                "Run the harvester from the sidebar, or inject a manual editorial signal."
+                "Add your first idea to get started, or check back soon for new ideas."
               }
             />
           )}
@@ -782,7 +782,7 @@ export default function IdeaStreamPage() {
               <AlertCircle className="w-8 h-8 text-[#64748B] mx-auto" />
               <h3 className="text-base font-bold text-[#F1F5F9]">No ideas found matching filters</h3>
               <p className="text-xs text-[#94A3B8] max-w-sm mx-auto">
-                Try adjusting your Topic or Stage filters, or inject a new manual editorial signal.
+                Try adjusting your filters or add a new idea.
               </p>
               <button
                 onClick={() => {
@@ -818,7 +818,7 @@ export default function IdeaStreamPage() {
       </div>
       )}
 
-      {/* Slide-over / Modal for "+ Inject Manual Topic" */}
+      {/* Slide-over / Modal for "+ Add an Idea" */}
       {isInjectOpen && (
         <div className="fixed inset-0 z-50 flex justify-end">
           {/* Backdrop */}
@@ -828,18 +828,18 @@ export default function IdeaStreamPage() {
           />
 
           {/* Slide-over Drawer */}
-          <div className="relative w-full max-w-lg bg-[#0F1419] border-l border-[#1F2D3D] h-full shadow-2xl z-10 flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-200">
-            {/* Drawer Header */}
-            <div>
-              <div className="flex items-center justify-between p-6 border-b border-[#1F2D3D]">
+          <div className="relative z-10 flex h-[100dvh] max-h-[100dvh] w-full max-w-lg flex-col overflow-hidden border-l border-[#1F2D3D] bg-[#0F1419] shadow-2xl animate-in slide-in-from-right duration-200">
+            {/* Drawer Header and form scroll as one bounded panel region */}
+            <div className="flex min-h-0 flex-1 flex-col">
+              <div className="flex shrink-0 items-center justify-between border-b border-[#1F2D3D] px-5 py-4 sm:px-6 sm:py-5">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-[10px] font-mono uppercase font-bold text-[#00C9A7] bg-[#00C9A7]/10 px-2 py-0.5 rounded border border-[#00C9A7]/20">
-                      Manual Ingestion
+                      Add an idea
                     </span>
                   </div>
                   <h2 className="text-lg font-bold text-[#F1F5F9]">
-                    Inject Manual Topic
+                    Add an Idea
                   </h2>
                 </div>
                 <button
@@ -852,11 +852,11 @@ export default function IdeaStreamPage() {
               </div>
 
               {/* Form Content */}
-              <form id="inject-topic-form" onSubmit={handleInjectManualTopic} className="p-6 space-y-5">
+              <form id="inject-topic-form" onSubmit={handleInjectManualTopic} className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6 sm:py-6">
                 {/* Field: Title */}
                 <div>
                   <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
-                    Topic Title / Raw Signal <span className="text-[#00C9A7]">*</span>
+                    Idea title <span className="text-[#00C9A7]">*</span>
                   </label>
                   <input
                     type="text"
@@ -867,14 +867,14 @@ export default function IdeaStreamPage() {
                     className="w-full bg-[#161D26] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3.5 py-2.5 text-xs text-[#F1F5F9] placeholder:text-[#64748B] outline-none transition-all font-medium"
                   />
                   <p className="text-[11px] text-[#64748B] mt-1">
-                    Clear, punchy headline focused on trade mechanics or operational friction.
+                    Name the specific problem, question, or decision this idea tackles for your ideal customer.
                   </p>
                 </div>
 
                 {/* Field: Trade */}
                 <div>
                   <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
-                    Target Trade <span className="text-[#00C9A7]">*</span>
+                    Trade <span className="text-[#00C9A7]">*</span>
                   </label>
                   <select
                     required
@@ -898,7 +898,7 @@ export default function IdeaStreamPage() {
                     ))}
                   </select>
                   <p className="text-[11px] text-[#64748B] mt-1">
-                    This drives the asset&apos;s trade label end to end. It does not default to HVAC, pick the one that actually matches the topic.
+                    Choose the trade this idea is about.
                   </p>
                 </div>
 
@@ -906,7 +906,7 @@ export default function IdeaStreamPage() {
                 <div className="space-y-3">
                   <div>
                     <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
-                      Source URL / Reference Link <span className="text-[#64748B] font-normal">(Optional for human verification)</span>
+                      Source link <span className="text-[#64748B] font-normal">(Optional)</span>
                     </label>
                     <input
                       type="url"
@@ -919,7 +919,7 @@ export default function IdeaStreamPage() {
 
                   <div>
                     <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
-                      Source Publication / Title <span className="text-[#64748B] font-normal">(Optional)</span>
+                      Source name <span className="text-[#64748B] font-normal">(Optional)</span>
                     </label>
                     <input
                       type="text"
@@ -934,11 +934,11 @@ export default function IdeaStreamPage() {
                 {/* Field: Excerpt / Angle */}
                 <div>
                   <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
-                    Strategic Excerpt / Angle Notes
+                    Angle or notes
                   </label>
                   <textarea
                     rows={3}
-                    placeholder="Describe the unit economics, the operational failure mode, or the contrarian thesis for the Strategist agent..."
+                    placeholder="What might others be missing, and what experience or evidence gives you a useful perspective? An idea, rough angle, or source is enough; future implications are optional."
                     value={formExcerpt}
                     onChange={(e) => setFormExcerpt(e.target.value)}
                     className="w-full bg-[#161D26] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl p-3.5 text-xs text-[#F1F5F9] placeholder:text-[#64748B] outline-none transition-all resize-none"
@@ -985,12 +985,12 @@ export default function IdeaStreamPage() {
             </div>
 
             {/* Drawer Footer */}
-            <div className="p-6 border-t border-[#1F2D3D] bg-[#070B0F]/60 flex items-center justify-end gap-3">
+            <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-[#1F2D3D] bg-[#070B0F]/90 px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:flex-row sm:items-center sm:justify-end sm:gap-3 sm:px-6 sm:py-4">
               <button
                 type="button"
                 onClick={() => setIsInjectOpen(false)}
                 disabled={isSubmitting}
-                className="px-4 py-2 text-xs font-semibold text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] rounded-xl transition-colors cursor-pointer"
+                className="w-full rounded-xl px-4 py-2.5 text-xs font-semibold text-[#94A3B8] transition-colors hover:bg-[#161D26] hover:text-[#F1F5F9] cursor-pointer sm:w-auto"
               >
                 Cancel
               </button>
@@ -998,17 +998,17 @@ export default function IdeaStreamPage() {
                 type="submit"
                 form="inject-topic-form"
                 disabled={isSubmitting || !formTitle.trim() || !formTrade}
-                className="inline-flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] disabled:opacity-50 text-[#070B0F] text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/15 transition-all cursor-pointer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#00C9A7] px-5 py-3 text-xs font-bold text-[#070B0F] shadow-lg shadow-[#00C9A7]/15 transition-all hover:bg-[#00A88A] disabled:opacity-50 cursor-pointer sm:w-auto sm:py-2.5"
               >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Injecting...
+                    Adding idea…
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4 stroke-[2.5]" />
-                    Inject into Active Stream
+                    Add idea
                   </>
                 )}
               </button>
@@ -1077,11 +1077,11 @@ export default function IdeaStreamPage() {
                   />
                 </div>
 
-                {/* Target Trade */}
+                {/* Trade */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-[#94A3B8]">
-                      Target Trade
+                      Trade
                     </label>
                     <select
                       value={editTrade}
@@ -1101,7 +1101,7 @@ export default function IdeaStreamPage() {
                 {/* Status Selector */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-[#94A3B8]">
-                    Pipeline Status
+                    Status
                   </label>
                   <select
                     value={editStatus}
