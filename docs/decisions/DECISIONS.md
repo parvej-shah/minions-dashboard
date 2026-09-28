@@ -190,3 +190,18 @@ every slot filled, plan D17) starts with the first Monday slot.
 **Why:** the user approved all three steps. Review stays on so a below-bar or
 unbacked draft can't post before the ICP and experience items are filled in.
 **Status:** active
+
+## 2026-09-28 — The harvester's backlog guard counts only ideas that passed the gate
+
+**Decision:** `Backlog Guard` in 01_idea_harvester skips a harvest only when
+more than 12 refined, unclaimed ideas have `gate_verdict = PASS`. `Read Ideas`
+now selects `gate_verdict`.
+**Why:** tenant zero had 15 ungated ideas from before the gate, so every
+harvest skipped, including the targeted ones the content plan asked for. The
+plan can't use ungated or below-bar ideas ahead of a slot, so they aren't a
+real backlog. The global 10-a-day harvest budget still caps cost.
+**Alternatives considered:** bypassing the guard only for targeted harvests
+(the nightly harvest would still skip, and it is what fills later slots);
+rejecting or archiving the old ideas (they're the below-bar fallback at the
+slot's time).
+**Status:** active

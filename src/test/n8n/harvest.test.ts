@@ -199,3 +199,18 @@ describe("the workflow writes what the gate decided", () => {
     expect(body("Fetch Source Articles")).toContain("gate_verdict !== 'REJECT'");
   });
 });
+
+describe("the backlog guard", () => {
+  const rows = (n: number, extra: Json) => Array.from({ length: n }, (_, i) => ({ idea_id: `IDEA-${i}`, status: "REFINED", claimed_at: null, ...extra }));
+  const guard = async (input: Json[]) => (await runCodeNode(H, "Backlog Guard", { input }))[0];
+
+  it("does not let ideas the plan cannot use block a harvest", async () => {
+    const out = await guard([...rows(15, { gate_verdict: null }), ...rows(5, { gate_verdict: "BELOW_BAR" })]);
+    expect(out).toMatchObject({ backlog_count: 0, skip_harvest: false });
+  });
+
+  it("skips once more than 12 passing ideas are waiting", async () => {
+    expect(await guard(rows(13, { gate_verdict: "PASS" }))).toMatchObject({ backlog_count: 13, skip_harvest: true });
+    expect(await guard(rows(12, { gate_verdict: "PASS" }))).toMatchObject({ skip_harvest: false });
+  });
+});

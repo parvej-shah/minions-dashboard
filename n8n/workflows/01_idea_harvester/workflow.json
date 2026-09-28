@@ -1138,7 +1138,7 @@
           "parameters": [
             {
               "name": "select",
-              "value": "idea_id:id,client_id,raw_idea,angle,audience,target_trade,pillar,priority,geo_metro,why,icp_relevance,evidence_required,status,claimed_at,created_at"
+              "value": "idea_id:id,client_id,raw_idea,angle,audience,target_trade,pillar,priority,geo_metro,why,icp_relevance,evidence_required,status,claimed_at,gate_verdict,created_at"
             },
             {
               "name": "client_id",

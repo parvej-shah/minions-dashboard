@@ -1,18 +1,23 @@
 const items = $input.all();
 const rawRows = items.map(item => item.json).filter(r => r && r.idea_id);
 
-const unclaimedRefined = rawRows.filter(r => {
+// Only ideas the content plan can actually use count as backlog: refined,
+// unclaimed, and passed by the idea gate. Ungated ideas from before the gate,
+// and below-bar ones, never fill a slot ahead of time, so a pile of them must
+// not stop the harvest a waiting slot asked for.
+const usableBacklog = rawRows.filter(r => {
   const status = (r.status || '').trim().toUpperCase();
   const claimedAt = (r.claimed_at || '').trim();
-  return status === 'REFINED' && !claimedAt;
+  const verdict = (r.gate_verdict || '').trim().toUpperCase();
+  return status === 'REFINED' && !claimedAt && verdict === 'PASS';
 });
 
 // Spec §4: if count > 12 -> skip
-const isFull = unclaimedRefined.length > 12;
+const isFull = usableBacklog.length > 12;
 
 return [{
   json: {
-    backlog_count: unclaimedRefined.length,
+    backlog_count: usableBacklog.length,
     skip_harvest: isFull,
     existing_rows: rawRows
   }
