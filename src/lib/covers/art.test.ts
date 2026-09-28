@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { artSvg, chooseArt, MOTIFS, parseArtStyle, type ArtChoice } from "./art";
+import { artSvg, chooseArt, DOODLE_MEANING, MOTIF_MEANING, MOTIFS, parseArtStyle, type ArtChoice } from "./art";
 import { DOODLES, type DoodleName } from "./doodles";
 import { DEFAULT_COVER_BRAND } from "./brand";
 import { coverElement, CoverFitError, type CoverSpec } from "./layouts";
@@ -28,6 +28,27 @@ describe("the illustration is chosen in code", () => {
     const rotated = chooseArt("SHAPES", "Plain words", "s", ["BARS", "FORK", "GRID"]);
     expect(rotated?.by_keyword).toBe(false);
     expect(["BARS", "FORK", "GRID"]).not.toContain(rotated?.motif);
+  });
+
+  it("uses the strategist's named pick when it is in the collection, and not on the last two covers", () => {
+    expect(chooseArt("SHAPES", VOICE, "a", [], undefined, "", "calendar")).toMatchObject({ motif: "CALENDAR", by_keyword: true });
+    expect(chooseArt("DOODLES", VOICE, "a", [], undefined, "", "JUMPING")?.motif).toBe("JUMPING");
+    // Not in the collection: ignored, the words decide.
+    expect(chooseArt("SHAPES", VOICE, "a", [], undefined, "", "ROCKET")?.motif).toBe("WAVEFORM");
+    // A doodle name means nothing to a shapes workspace.
+    expect(chooseArt("SHAPES", VOICE, "a", [], undefined, "", "JUMPING")?.motif).toBe("WAVEFORM");
+    // Used on a recent cover: the next candidate instead.
+    expect(chooseArt("SHAPES", VOICE, "a", ["CALENDAR"], undefined, "", "CALENDAR")?.motif).toBe("WAVEFORM");
+  });
+
+  it("reads the strategist's motif idea before the post's words", () => {
+    expect(chooseArt("SHAPES", "Stop waiting for the next AI model", "a", [], undefined, "A flat line icon of a gear turning inside a loop arrow")?.motif).toBe("GEAR");
+    expect(chooseArt("SHAPES", "Your voice AI confirmed the showing", "a", [], undefined, "A calendar page with a broken link over one date")?.motif).toBe("CALENDAR");
+  });
+
+  it("has a meaning for every shape and figure, for the strategist to choose from", () => {
+    expect(Object.keys(MOTIF_MEANING).sort()).toEqual([...MOTIFS].sort());
+    expect(Object.keys(DOODLE_MEANING).sort()).toEqual(Object.keys(DOODLES).sort());
   });
 
   it("accepts only the three styles", () => {

@@ -21,6 +21,11 @@ export interface CoverCard {
   emphasis_word?: string;
   /** Optional big figure: code uses it only if the body states it. */
   number?: { value?: string; unit?: string; caption?: string };
+  /** The strategist's one-sentence motif idea: steers which illustration is drawn. */
+  physical_scene?: string;
+  /** The illustration the strategist named from each collection; used when the name is real. */
+  shape_motif?: string;
+  doodle_motif?: string;
 }
 
 export interface CoverCopyInput {

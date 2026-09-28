@@ -89,7 +89,7 @@ async function main() {
       recent.unshift(copy.layout);
       const spec: CoverSpec = { layout: copy.layout, headline: copy.headline, emphasis: copy.emphasis, kicker: copy.kicker, quote: copy.quote, number: copy.number, author: { name: tenant.settings.brand_name }, brand: DEFAULT_COVER_BRAND };
       const artText = [copy.headline, title, draft.hook].join(" ");
-      const choice = copy.layout === "HEADLINE" || copy.layout === "STATEMENT" ? chooseArt(artStyle, artText, `${tenant.id}-${i}`, recentMotifs) : null;
+      const choice = copy.layout === "HEADLINE" || copy.layout === "STATEMENT" ? chooseArt(artStyle, artText, `${tenant.id}-${i}`, recentMotifs, undefined, card.physical_scene ?? "", (artStyle === "DOODLES" ? card.doodle_motif : card.shape_motif) ?? "") : null;
       if (choice) {
         spec.art = { choice, seed: `${tenant.id}-${i}` };
         recentMotifs.unshift(choice.motif);

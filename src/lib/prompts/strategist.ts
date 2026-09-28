@@ -3,6 +3,7 @@ import type { DraftAuthorContext } from "@/lib/drafts/authorContext";
 import { evidenceRules } from "@/lib/drafts/authorContext";
 import { hookFor } from "@/lib/drafts/strategy";
 import { DATA_CLOSE, DATA_OPEN, fenceSafe } from "./harvest";
+import { DOODLE_MEANING, MOTIF_MEANING } from "@/lib/covers/art";
 
 /** 02_idea_to_asset › Assemble Brand Context */
 export interface StrategistInput {
@@ -70,6 +71,9 @@ Step 3 — The Visual Art Direction for Cover Art:
   - Cover Subtitle: One sentence under 90 characters: what the reader gets or what it costs them, in plain editorial-magazine language. NEVER start with 'Explaining', 'Understanding', 'A look at', 'How to', or any other explainer-caption framing. No figure the idea does not state.
   - Cover Number: only when the author's experience or the evidence states one striking figure this post turns on, give it with a 4 to 10 word caption. Otherwise leave every field empty. Never invent or round a figure.
   - Secondary Visual Motif: One vivid sentence describing a SINGLE small flat line-icon detail that echoes this topic. Never a full studio scene, never multiple objects, never a table or professional-photography setup.
+  - Illustration: pick the ONE shape and the ONE figure from the collections below whose meaning best matches what this post is about (its subject, not a word it happens to use). Prefer the most specific fit: a post about listings or showings is HOUSE, one about bookings is CALENDAR, one about CRM records is DOCUMENT. Use a general shape (GRID, SPARK) only when nothing specific fits. Use the exact name.
+    Shapes: ${Object.entries(MOTIF_MEANING).map(([k, v]) => `${k} (${v})`).join("; ")}.
+    Figures: ${Object.entries(DOODLE_MEANING).map(([k, v]) => `${k} (${v})`).join("; ")}.
 Step 4 — SEO & GEO Targeting: Identify the exact keyword phrase (2-5 words) and state the single narrative throughline.
 Step 5 — Headline Craft: Write a clear, specific title in this brand's voice. Lead with the reader's problem, a useful claim, or a concrete consequence. Avoid imitation, clickbait, and abstract X-versus-Y framing.
 
@@ -101,7 +105,9 @@ Return ONLY this JSON:
     "subtitle": "one sentence under 90 characters, stating what the reader gets or what it costs them",
     "number": { "value": "a figure the idea states, or empty", "unit": "e.g. seconds, or empty", "caption": "4-10 words, or empty" },
     "visual_register": "PHYSICAL_TRADE or ABSTRACT_DATA",
-    "physical_scene": "one vivid sentence describing a single small flat line-icon motif, not a full scene"
+    "physical_scene": "one vivid sentence describing a single small flat line-icon motif, not a full scene",
+    "shape_motif": "one exact name from the Shapes collection",
+    "doodle_motif": "one exact name from the Figures collection"
   },
   "seo_keyword": "string, 2-5 word search phrase",
   "narrative_thread": "one sentence describing the single throughline argument",

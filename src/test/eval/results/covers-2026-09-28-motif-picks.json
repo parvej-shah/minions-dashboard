@@ -1,0 +1,332 @@
+{
+  "label": "motif-picks",
+  "date": "2026-09-28T17:51:46.307Z",
+  "overall": {
+    "covers": 9,
+    "strategist_headline_used": 100,
+    "words_6_to_10": 100,
+    "avg_words": 9.3,
+    "icp_relevant": 33,
+    "subtitle_usable": 100,
+    "fits_first_try": 100,
+    "art_drawn": 100,
+    "art_by_keyword": 100
+  },
+  "rows": [
+    {
+      "tenant": "minions",
+      "card": {
+        "headline": "Your voice agent confirms bookings that never reach the calendar",
+        "emphasis_word": "never",
+        "subtitle": "The silent webhook failure that costs you jobs, and the sequence that stops it.",
+        "number": {
+          "value": "",
+          "unit": "",
+          "caption": ""
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a calendar page with a broken chain link hanging off one date square.",
+        "shape_motif": "CALENDAR",
+        "doodle_motif": "CLUMSY"
+      },
+      "copy": {
+        "layout": "QUOTE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 10,
+          "length": 1,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Your voice agent confirms bookings that never reach the calendar",
+        "quote": "Voice agents will soon be judged not by how human they sound."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "minions",
+      "card": {
+        "headline": "A two sentence disclosure did not drop our booking rate",
+        "emphasis_word": "drop",
+        "subtitle": "We tested upfront AI disclosure on live calls and measured what happened next.",
+        "number": {
+          "value": "",
+          "unit": "",
+          "caption": ""
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a speech bubble containing a small checkmark.",
+        "shape_motif": "WAVEFORM",
+        "doodle_motif": "SITTING_READING"
+      },
+      "copy": {
+        "layout": "HEADLINE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 10,
+          "length": 1,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "A two sentence disclosure did not drop our booking rate",
+        "emphasis": "drop",
+        "kicker": "We tested upfront AI disclosure on live calls and measured what happened next."
+      },
+      "fits": true,
+      "art": {
+        "motif": "CALENDAR",
+        "by_keyword": true,
+        "drawn": true
+      }
+    },
+    {
+      "tenant": "minions",
+      "card": {
+        "headline": "A silent calendar timeout loses the lead for good",
+        "emphasis_word": "silent",
+        "subtitle": "A false confirmation burns intent and gives you no chance to recover it.",
+        "number": {
+          "value": "78",
+          "unit": "percent",
+          "caption": "Jobs won by the first company to respond"
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a calendar page with a broken chain link over one time slot.",
+        "shape_motif": "CALENDAR",
+        "doodle_motif": "CLUMSY"
+      },
+      "copy": {
+        "layout": "NUMBER",
+        "headline_source": "strategist",
+        "score": {
+          "words": 9,
+          "length": 1,
+          "icp_relevant": true,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Jobs won by the first company to respond",
+        "emphasis": "company",
+        "number": {
+          "value": "78",
+          "unit": "percent"
+        }
+      },
+      "fits": true
+    },
+    {
+      "tenant": "keystone",
+      "card": {
+        "headline": "Stale listing data breaks your AI voice agent fast",
+        "emphasis_word": "breaks",
+        "subtitle": "One bad booking on a sold listing kills agent trust permanently.",
+        "number": {
+          "value": "",
+          "unit": "",
+          "caption": ""
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a clock face with a broken chain link draped across it.",
+        "shape_motif": "CLOCK",
+        "doodle_motif": "CLUMSY"
+      },
+      "copy": {
+        "layout": "STATEMENT",
+        "headline_source": "strategist",
+        "score": {
+          "words": 9,
+          "length": 1,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Stale listing data breaks your AI voice agent fast",
+        "emphasis": "breaks",
+        "kicker": "One bad booking on a sold listing kills agent trust permanently."
+      },
+      "fits": true,
+      "art": {
+        "motif": "WAVEFORM",
+        "by_keyword": true,
+        "drawn": true
+      }
+    },
+    {
+      "tenant": "keystone",
+      "card": {
+        "headline": "Your CRM logs decide if ISAs or AI work",
+        "emphasis_word": "logs",
+        "subtitle": "Adding headcount or software only hides the leak if calls go unrecorded.",
+        "number": {
+          "value": "40%",
+          "unit": "",
+          "caption": "Portal leads with no call logged in 24 hours"
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a clipboard with a checkmark next to a ringing phone handset.",
+        "shape_motif": "DOCUMENT",
+        "doodle_motif": "SITTING_READING"
+      },
+      "copy": {
+        "layout": "QUOTE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 9,
+          "length": 1,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [
+          "No NUMBER cover: 40% is not stated in the draft."
+        ],
+        "headline": "Your CRM logs decide if ISAs or AI work",
+        "quote": "Only then does the ISA vs AI leads question become meaningful."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "keystone",
+      "card": {
+        "headline": "A fake identity costs you the signed buyer agreement",
+        "emphasis_word": "costs",
+        "subtitle": "Hidden bots make buyers defensive right when you need their signature.",
+        "number": {
+          "value": "",
+          "unit": "",
+          "caption": ""
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a name badge with a small warning triangle in the corner.",
+        "shape_motif": "SHIELD",
+        "doodle_motif": "CLUMSY"
+      },
+      "copy": {
+        "layout": "HEADLINE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 9,
+          "length": 1,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "A fake identity costs you the signed buyer agreement",
+        "emphasis": "costs",
+        "kicker": "Hidden bots make buyers defensive right when you need their signature."
+      },
+      "fits": true,
+      "art": {
+        "motif": "SHIELD",
+        "by_keyword": true,
+        "drawn": true
+      }
+    },
+    {
+      "tenant": "ledgerline",
+      "card": {
+        "headline": "Your monthly report fails when it hides your spending limit",
+        "emphasis_word": "limit",
+        "subtitle": "Owners need one actionable number, not another page of accounting ratios.",
+        "number": {
+          "value": "",
+          "unit": "",
+          "caption": ""
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a dollar sign inside a circle with a check mark beside it.",
+        "shape_motif": "DOCUMENT",
+        "doodle_motif": "SITTING_READING"
+      },
+      "copy": {
+        "layout": "STATEMENT",
+        "headline_source": "strategist",
+        "score": {
+          "words": 10,
+          "length": 1,
+          "icp_relevant": false,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Your monthly report fails when it hides your spending limit",
+        "emphasis": "limit",
+        "kicker": "Owners need one actionable number, not another page of accounting ratios."
+      },
+      "fits": true,
+      "art": {
+        "motif": "BARS",
+        "by_keyword": true,
+        "drawn": true
+      }
+    },
+    {
+      "tenant": "ledgerline",
+      "card": {
+        "headline": "Three quarters of surplus cash decides your second location",
+        "emphasis_word": "surplus",
+        "subtitle": "A busy schedule means nothing if your overhead fluctuates every month.",
+        "number": {
+          "value": "",
+          "unit": "",
+          "caption": ""
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a calendar page with three consecutive days marked by small checkmarks.",
+        "shape_motif": "CALENDAR",
+        "doodle_motif": "SITTING"
+      },
+      "copy": {
+        "layout": "QUOTE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 9,
+          "length": 1,
+          "icp_relevant": true,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Three quarters of surplus cash decides your second location",
+        "quote": "Second, confirm your team can operate the original office without you onsite daily."
+      },
+      "fits": true
+    },
+    {
+      "tenant": "ledgerline",
+      "card": {
+        "headline": "Your profit number hides the cash leaving your practice",
+        "emphasis_word": "hides",
+        "subtitle": "A clean income statement will not warn you about duplicate payments draining your account.",
+        "number": {
+          "value": "",
+          "unit": "",
+          "caption": ""
+        },
+        "visual_register": "ABSTRACT_DATA",
+        "physical_scene": "A single flat line icon of a banknote slipping through a crack between two stacked ledger pages.",
+        "shape_motif": "DOCUMENT",
+        "doodle_motif": "SITTING_READING"
+      },
+      "copy": {
+        "layout": "HEADLINE",
+        "headline_source": "strategist",
+        "score": {
+          "words": 9,
+          "length": 1,
+          "icp_relevant": true,
+          "problems": []
+        },
+        "notes": [],
+        "headline": "Your profit number hides the cash leaving your practice",
+        "emphasis": "hides",
+        "kicker": "A clean income statement will not warn you about duplicate payments draining your account."
+      },
+      "fits": true,
+      "art": {
+        "motif": "STACK",
+        "by_keyword": true,
+        "drawn": true
+      }
+    }
+  ]
+}

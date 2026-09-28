@@ -17,7 +17,10 @@ import type { CoverArtStyle } from "./artStyles";
 
 export { COVER_ART_STYLES, DEFAULT_COVER_ART_STYLE, COVER_ART_STYLE_META, parseArtStyle, type CoverArtStyle } from "./artStyles";
 
-export const MOTIFS = ["WAVEFORM", "CHAT", "FUNNEL", "CLOCK", "SHIELD", "FLOW", "BARS", "BALANCE", "FORK", "STEPS", "LOOP", "TARGET", "STACK", "GRID", "SPARK"] as const;
+export const MOTIFS = [
+  "WAVEFORM", "CHAT", "FUNNEL", "CLOCK", "SHIELD", "FLOW", "BARS", "BALANCE", "FORK", "STEPS", "LOOP", "TARGET", "STACK", "GRID", "SPARK",
+  "HOUSE", "CALENDAR", "DOCUMENT", "KEY", "PEOPLE", "LINK", "MEGAPHONE", "GEAR",
+] as const;
 export type Motif = (typeof MOTIFS)[number];
 
 /** by_keyword: the post's words chose the motif (false: rotation by post id). */
@@ -29,34 +32,94 @@ export type ArtChoice = ({ style: "SHAPES"; motif: Motif } | { style: "DOODLES";
  * specific (a call, a funnel) to the most general (a grid, a spark).
  */
 const MOTIF_WORDS: Record<Motif, RegExp> = {
-  WAVEFORM: /\b(voice|calls?|calling|caller|phone|speech|speak|speaking|audio|listen|listening|receptionist|podcast|voicemail)\b/g,
-  CHAT: /\b(conversations?|chat|chats|messages?|repl(y|ies)|comments?|dms?|emails?|questions?|asked|answers?|sms|texts?|inbox)\b/g,
-  FUNNEL: /\b(leads?|qualify|qualification|qualified|conversion|convert|converts|funnel|inbound|prospects?|booked|bookings?|demos?|signups?)\b/g,
-  CLOCK: /\b(fast|faster|slow|slower|speed|minutes?|seconds?|hours?|delay|late|latency|response time|waiting|wait|deadline|24\/7|after-hours|overnight)\b/g,
-  SHIELD: /\b(trust|safe|safety|secure|security|risks?|compliance|privacy|protect|fraud|legal|disclosure|liability|guardrails?)\b/g,
-  FLOW: /\b(workflows?|pipelines?|agents?|process|processes|handoffs?|hand-offs?|automate|automation|automating|routing|dispatch|integrations?)\b/g,
-  BARS: /\b(revenue|growth|metrics?|results?|numbers?|data|percent|roi|sales|profit|reports?|dashboards?|kpis?)\b|\d+%/g,
+  HOUSE: /\b(real estate|homes?|house|houses|propert(y|ies)|listings?|showings?|brokerages?|brokers?|realtors?|mortgages?|rentals?|landlords?|tenants?)\b/g,
+  CALENDAR: /\b(calendars?|appointments?|schedul\w*|booked|bookings?|meetings?|slots?|dates?|reservations?)\b/g,
+  WAVEFORM: /\b(voice|microphones?|mic|headsets?|sound ?waves?|calls?|calling|caller|phone|speech|speak|speaking|audio|listen|listening|receptionist|podcast|voicemail)\b/g,
+  CHAT: /\b(speech bubbles?|bubbles?|conversations?|chat|chats|messages?|repl(y|ies)|comments?|dms?|emails?|questions?|asked|answers?|sms|texts?|inbox)\b/g,
+  DOCUMENT: /\b(documents?|docs|records?|crm|notes|forms?|checklists?|contracts?|paperwork|pages?|transcripts?|fields?|schemas?)\b/g,
+  MEGAPHONE: /\b(megaphones?|marketing|ads|advertis\w*|campaigns?|announc\w*|awareness|promot\w*|reach|visibility|outreach)\b/g,
+  KEY: /\b(keys?|unlock\w*|access|passwords?|permissions?|solutions?|secrets?)\b/g,
+  PEOPLE: /\b(people|humans?|staff|hir(e|es|ing)|employees?|colleagues|coworkers|users?|reps?|human agents?|salespeople|recruit\w*)\b/g,
+  LINK: /\b(links?|chains?|connect\w*|integrat\w*|handoffs?|hand-offs?|sync\w*|bridges?|together)\b/g,
+  FUNNEL: /\b(leads?|qualify|qualification|qualified|conversion|convert|converts|funnel|inbound|prospects?|demos?|signups?)\b/g,
+  CLOCK: /\b(timers?|stopwatch|hourglass|fast|faster|slow|slower|speed|minutes?|seconds?|hours?|delay|late|latency|response time|waiting|wait|deadline|24\/7|after-hours|overnight)\b/g,
+  SHIELD: /\b(locks?|padlock|checkmarks?|check marks?|badges?|trust|safe|safety|secure|security|risks?|compliance|privacy|protect|fraud|legal|disclosure|liability|guardrails?)\b/g,
+  GEAR: /\b(gears?|cogs?|machine\w*|engines?|mechanic\w*|settings|configur\w*|tuning|operations|ops|maintenance)\b/g,
+  FLOW: /\b(flowcharts?|nodes?|arrows?|workflows?|pipelines?|agents?|process|processes|automate|automation|automating|routing|dispatch)\b/g,
+  BARS: /\b(charts?|graphs?|revenue|growth|metrics?|results?|numbers?|data|percent|roi|sales|profit|reports?|dashboards?|kpis?)\b|\d+%/g,
   BALANCE: /\b(trade-?offs?|balance|versus|vs|worth|pric(e|es|ing)|budget|costs?|tension|compromise)\b/g,
-  FORK: /\b(decisions?|decide|choose|choice|instead|mistakes?|wrong|changed my mind|pivot|rather)\b/g,
-  STEPS: /\b(steps?|stages?|levels?|ladder|roadmap|phases?|progress|playbook|checklist)\b/g,
-  LOOP: /\b(loop|feedback|iterate|iteration|weekly|habits?|routine|repeat|cycle|follow-?ups?|retention|recurring)\b/g,
-  TARGET: /\b(focus|target|icp|niche|customers?|buyers?|audience|clients?|positioning|goals?)\b/g,
-  STACK: /\b(stack|layers?|build|built|building|code|tools?|infrastructure|architecture|models?|software|platform|api)\b/g,
+  FORK: /\b(branch(es|ing)?|splits?|forks?|crossroads|decisions?|decide|choose|choice|instead|mistakes?|wrong|changed my mind|pivot|rather)\b/g,
+  STEPS: /\b(stairs?|staircase|steps?|stages?|levels?|ladder|roadmap|phases?|progress|playbook)\b/g,
+  LOOP: /\b(circular|loops?|feedback|iterate|iteration|weekly|habits?|routine|repeat|cycle|follow-?ups?|retention|recurring)\b/g,
+  TARGET: /\b(bullseye|crosshairs?|focus|target|icp|niche|customers?|buyers?|audience|clients?|positioning|goals?)\b/g,
+  STACK: /\b(servers?|databases?|blocks?|stack|layers?|build|built|building|code|tools?|infrastructure|architecture|models?|software|platform|api)\b/g,
   GRID: /\b(scale|scaling|systems?|teams?|every|dozens|hundreds|library|templates?|consistency|consistent|patterns?)\b/g,
-  SPARK: /\b(ideas?|insights?|lessons?|learned|realized|realised|secret|surprising|truth|lightbulb)\b/g,
+  SPARK: /\b(light ?bulbs?|stars?|ideas?|insights?|lessons?|learned|realized|realised|secret|surprising|truth|lightbulb)\b/g,
+};
+
+/**
+ * What each illustration means, for the strategist to choose from (it names
+ * one; code checks the name is real). One line each, stated as when to use it,
+ * because a picker reading literally needs the condition, not just a label.
+ */
+export const MOTIF_MEANING: Record<Motif, string> = {
+  HOUSE: "a house: real estate, homes, listings, showings, brokerages",
+  CALENDAR: "a calendar with one booked day: bookings, appointments, scheduling",
+  WAVEFORM: "a sound wave: voice, phone calls, speech, listening",
+  CHAT: "two speech bubbles: conversations, messages, replies, questions",
+  DOCUMENT: "a page with a checklist: records, CRM data, notes, forms, schemas",
+  MEGAPHONE: "a megaphone: marketing, reach, announcements, visibility",
+  KEY: "a key: access, unlocking, the one answer that opens a problem",
+  PEOPLE: "three people, one highlighted: teams, staff, humans versus AI, hiring",
+  LINK: "two chain links: integrations, handoffs, systems connecting",
+  FUNNEL: "a funnel: leads, qualification, conversion, prospects narrowing",
+  CLOCK: "a clock with speed lines: speed, delay, latency, response time",
+  SHIELD: "a shield with a check: trust, safety, compliance, guardrails",
+  GEAR: "two gears: machinery, operations, settings, how something runs",
+  FLOW: "connected nodes: workflows, automation, pipelines, agents passing work",
+  BARS: "a rising bar chart: growth, metrics, results, revenue",
+  BALANCE: "a scale: trade-offs, cost versus value, pricing",
+  FORK: "a path that splits: a decision, a choice, a wrong turn",
+  STEPS: "a staircase: stages, progress, a sequence of steps",
+  LOOP: "a circular arrow: feedback loops, iteration, routines, follow-ups",
+  TARGET: "a target with an arrow: focus, the ICP, goals, aiming at a buyer",
+  STACK: "stacked layers: architecture, tools, software, the tech stack",
+  GRID: "a dot grid with a few lit: scale, systems, consistency, patterns",
+  SPARK: "a burst of light: an insight, a lesson, a surprising truth",
+};
+
+export const DOODLE_MEANING: Record<DoodleName, string> = {
+  READING: "a person reading: learning, research",
+  READING_SIDE: "a person reading, side view: studying a topic closely",
+  SITTING_READING: "a person reading on a chair: documents, notes, guides",
+  CLUMSY: "a person tripping: mistakes, failure, something broken",
+  UNBOXING: "a person opening a box: a launch, something new",
+  PLANT: "a person with a plant: growth, nurturing, compounding",
+  MEDITATING: "a person meditating: focus, calm, simplicity",
+  SPRINTING: "a person sprinting: speed, urgency",
+  COFFEE: "a person with coffee: routines, daily habits",
+  STROLLING: "a person walking: a journey, taking it step by step",
+  SITTING: "a person sitting and thinking: reflection, a pause",
+  JUMPING: "a person jumping: a win, a milestone",
+  RUNNING: "a person running: momentum, competition, racing ahead",
+  LAYING: "a person on their phone: social media, the feed, mobile",
+  SELFIE: "a person taking a selfie: personal brand, visibility",
+  LOVING: "a person with a heart: trust, care, relationships",
+  FLOAT: "a person floating: ideas, imagination",
+  CHILLING: "a person relaxing: automation doing the work, ease",
 };
 
 const DOODLE_WORDS: Partial<Record<DoodleName, RegExp>> = {
-  CLUMSY: /\b(mistakes?|wrong|fail|failed|fails|failure|broke|broken|mess|chaos|misspell\w*)\b/g,
+  CLUMSY: /\b(crossed[- ]out|mistakes?|wrong|fail|failed|fails|failure|broke|broken|mess|chaos|misspell\w*)\b/g,
   UNBOXING: /\b(launch|launched|ship|shipped|new|release|released|built|unveil)\b/g,
   JUMPING: /\b(wins?|won|celebrate|milestone|record|best)\b/g,
-  SPRINTING: /\b(fast|faster|speed|quick|quickly|seconds|minutes|rush)\b/g,
+  SPRINTING: /\b(stopwatch|timers?|fast|faster|speed|quick|quickly|seconds|minutes|rush)\b/g,
   RUNNING: /\b(ahead|race|competitors?|compete|momentum|behind)\b/g,
   LAYING: /\b(scroll|scrolling|feed|linkedin|social|mobile|posts?)\b/g,
   SELFIE: /\b(brand|personal brand|content|followers|visibility|founder|creator)\b/g,
   LOVING: /\b(love|loves|trust|care|thank|gratitude|loyal|loyalty|relationships?)\b/g,
   READING: /\b(learn|learned|learning|lessons?|research|study|read|reading)\b/g,
-  SITTING_READING: /\b(book|books|notes|documentation|docs|guide)\b/g,
+  SITTING_READING: /\b(documents?|pages?|checklists?|book|books|notes|documentation|docs|guide)\b/g,
   FLOAT: /\b(ideas?|imagine|think|thinking|creative|curious|wonder)\b/g,
   PLANT: /\b(grow|growth|growing|compound|nurture)\b/g,
   MEDITATING: /\b(focus|calm|simple|simpler|simplicity|patience|less)\b/g,
@@ -95,16 +158,21 @@ function ranked<K extends string>(text: string, words: Partial<Record<K, RegExp>
 }
 
 /**
- * The illustration for a post, or null for NONE. `text` is the headline,
- * title and hook; `recent` the motifs of the tenant's last covers, newest
+ * The illustration for a post, or null for NONE. `preferred` is the motif the
+ * strategist named from the collection (MOTIF_MEANING / DOODLE_MEANING); a name
+ * that is not in the collection is ignored. `hint` is the strategist's
+ * one-sentence motif idea (thumbnail_card.physical_scene): it names the
+ * picture the post is about, so its matches are tried first. `text` is the
+ * headline, title and hook; `recent` the motifs of the tenant's last covers, newest
  * first. The best keyword match is used unless it was on one of the last two
  * covers (then the next match); with no usable match the post id picks one
  * not seen in the last three. `exclude` is the motif a reviewer asked to
  * replace, never returned.
  */
-export function chooseArt(style: CoverArtStyle, text: string, seed: string, recent: string[] = [], exclude?: string): ArtChoice | null {
+export function chooseArt(style: CoverArtStyle, text: string, seed: string, recent: string[] = [], exclude?: string, hint = "", preferred = ""): ArtChoice | null {
   if (style === "NONE") return null;
   const t = text.toLowerCase();
+  const hinted = hint.toLowerCase();
   const h = hashSeed(seed);
   const lastTwo = new Set([...recent.slice(0, 2), ...(exclude ? [exclude] : [])]);
   const lastThree = new Set([...recent.slice(0, 3), ...(exclude ? [exclude] : [])]);
@@ -115,8 +183,17 @@ export function chooseArt(style: CoverArtStyle, text: string, seed: string, rece
     const from = pool.length ? pool : all.filter((k) => k !== exclude);
     return { motif: from[h % from.length], by_keyword: false };
   };
-  if (style === "DOODLES") return { style, ...pick(ranked(t, DOODLE_WORDS), Object.keys(DOODLES) as DoodleName[]) };
-  return { style, ...pick(ranked(t, MOTIF_WORDS), MOTIFS) };
+  // The strategist's named pick first (when it is in the collection), then the
+  // hint's keyword matches, then the post's own words.
+  const want = preferred.trim().toUpperCase();
+  const both = <K extends string>(words: Partial<Record<K, RegExp>>, all: readonly K[]) => [
+    ...new Set([...(all.includes(want as K) ? [want as K] : []), ...ranked(hinted, words), ...ranked(t, words)]),
+  ];
+  if (style === "DOODLES") {
+    const all = Object.keys(DOODLES) as DoodleName[];
+    return { style, ...pick(both(DOODLE_WORDS, all), all) };
+  }
+  return { style, ...pick(both(MOTIF_WORDS, MOTIFS), MOTIFS) };
 }
 
 export interface ArtColours {
@@ -305,6 +382,89 @@ const DRAW: Record<Motif, Draw> = {
     }).join("");
     const orbit = Array.from({ length: 6 }, () => dot(40 + rnd() * 520, 20 + rnd() * 260, 5 + rnd() * 4, c.main, `opacity="0.3"`)).join("");
     return orbit + rays + dot(cx, cy, 44, c.highlight);
+  },
+  HOUSE: (rnd, c) => {
+    // A house with its door lit; a few dots (buyers) walk up the path.
+    const walk = [0, 1, 2].map((i) => dot(60 + i * 44, 272 - i * 4 + (rnd() - 0.5) * 6, 9, c.main, `opacity="${r1(0.25 + i * 0.2)}"`)).join("");
+    const body = `<path d="M 205 140 V 284 H 395 V 140" fill="${c.bg}" stroke="${c.main}" stroke-width="${S}" stroke-linejoin="round"/>`;
+    const roof = path("M 170 158 L 300 44 L 430 158", c.main) + line(370, 104, 370, 62, c.main);
+    const win = (x: number) => `<rect x="${x}" y="168" width="40" height="40" rx="6" fill="${c.bg}" stroke="${c.main}" stroke-width="6" opacity="0.7"/>`;
+    const door = `<rect x="275" y="${r1(206 + rnd() * 4)}" width="50" height="78" rx="8" fill="${c.highlight}"/>`;
+    return walk + body + roof + win(222) + win(338) + door + line(130, 290, 470, 290, c.main, `opacity="0.4"`, 6);
+  },
+  CALENDAR: (rnd, c) => {
+    const [x, y, w, h] = [150, 44, 300, 244];
+    const frame = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="22" fill="${c.bg}" stroke="${c.main}" stroke-width="${S}"/>`;
+    const header = line(x, y + 62, x + w, y + 62, c.main) + line(x + 76, y - 22, x + 76, y + 20, c.main) + line(x + w - 76, y - 22, x + w - 76, y + 20, c.main);
+    const lit = Math.floor(rnd() * 21);
+    const cells = Array.from({ length: 21 }, (_, i) => {
+      const [cx, cy] = [x + 42 + (i % 7) * 36, y + 104 + Math.floor(i / 7) * 50];
+      return i === lit ? `<rect x="${cx - 18}" y="${cy - 18}" width="36" height="36" rx="9" fill="${c.highlight}"/>` : dot(cx, cy, 8, c.main, `opacity="0.35"`);
+    }).join("");
+    const sides = [110, 190].map((yy) => line(50, yy, 110, yy, c.main, `opacity="0.3"`) + line(490, yy, 550, yy, c.main, `opacity="0.3"`)).join("");
+    return sides + frame + header + cells;
+  },
+  DOCUMENT: (rnd, c) => {
+    const back = `<rect x="238" y="14" width="200" height="250" rx="16" fill="${c.bg}" stroke="${c.main}" stroke-width="${S}" opacity="0.35"/>`;
+    const page = `<path d="M 180 40 H 330 L 380 90 V 288 H 180 Z" fill="${c.bg}" stroke="${c.main}" stroke-width="${S}" stroke-linejoin="round"/>` + path("M 330 40 V 90 H 380", c.main);
+    const hi = Math.floor(rnd() * 4);
+    const rows = [0, 1, 2, 3].map((i) => {
+      const yy = 128 + i * 42;
+      const box = i === hi
+        ? `<rect x="200" y="${yy - 15}" width="30" height="30" rx="7" fill="${c.highlight}"/>` + path(`M 207 ${yy} L 213 ${yy + 7} L 224 ${yy - 7}`, c.bg, "", 5)
+        : `<rect x="200" y="${yy - 15}" width="30" height="30" rx="7" fill="none" stroke="${c.main}" stroke-width="6" opacity="0.6"/>`;
+      return box + line(248, yy, r1(350 - rnd() * 50), yy, c.main, `opacity="0.5"`, 8);
+    }).join("");
+    return back + page + rows;
+  },
+  KEY: (rnd, c) => {
+    const cy = r1(150 + (rnd() - 0.5) * 20);
+    const head = `<circle cx="170" cy="${cy}" r="74" fill="${c.highlight}"/>` + dot(170, cy, 28, c.bg);
+    const shaft = line(244, cy, 530, cy, c.main, "", 16);
+    const teeth = line(450, cy, 450, cy + 52, c.main, "", 16) + line(500, cy, 500, cy + 38, c.main, "", 16);
+    return shaft + teeth + head;
+  },
+  PEOPLE: (rnd, c) => {
+    // One figure in front and highlighted, two behind it.
+    const person = (cx: number, top: number, scale: number, lit: boolean, opacity: number) => {
+      const r = 36 * scale;
+      const head = lit ? dot(cx, top + r, r, c.highlight) : `<circle cx="${cx}" cy="${r1(top + r)}" r="${r1(r)}" fill="${c.bg}" stroke="${c.main}" stroke-width="${S}" opacity="${opacity}"/>`;
+      const w = 72 * scale;
+      const y0 = top + 2 * r + 18;
+      const body = `<path d="M ${r1(cx - w)} 286 C ${r1(cx - w)} ${r1(y0)}, ${r1(cx + w)} ${r1(y0)}, ${r1(cx + w)} 286" fill="${lit ? c.highlight : c.bg}" stroke="${lit ? c.highlight : c.main}" stroke-width="${S}" opacity="${opacity}"/>`;
+      return body + head;
+    };
+    const lift = r1(rnd() * 10);
+    return person(165, 80 + lift, 0.85, false, 0.5) + person(435, 80 - lift, 0.85, false, 0.5) + person(300, 40, 1.05, true, 1);
+  },
+  LINK: (rnd, c) => {
+    const tilt = r1((rnd() - 0.5) * 8);
+    const left = `<rect x="90" y="108" width="240" height="88" rx="44" fill="none" stroke="${c.main}" stroke-width="${S * 1.6}" transform="rotate(${tilt} 300 150)"/>`;
+    const right = `<rect x="270" y="108" width="240" height="88" rx="44" fill="none" stroke="${c.highlight}" stroke-width="${S * 1.6}" transform="rotate(${tilt} 300 150)"/>`;
+    const ends = dot(40, 150, 12, c.main, `opacity="0.4"`) + dot(560, 150, 12, c.main, `opacity="0.4"`);
+    return ends + left + right;
+  },
+  MEGAPHONE: (rnd, c) => {
+    const cone = `<path d="M 200 118 L 380 48 V 252 L 200 182 Z" fill="${c.bg}" stroke="${c.main}" stroke-width="${S}" stroke-linejoin="round"/>`;
+    const mouth = `<rect x="148" y="112" width="52" height="76" rx="12" fill="${c.main}"/>` + line(236, 196, 258, 266, c.main, "", 14);
+    const waves = [0, 1, 2].map((i) => {
+      const x = 418 + i * 42;
+      const hh = 44 + i * 30 + rnd() * 8;
+      return path(`M ${x} ${r1(150 - hh)} Q ${x + 34} 150 ${x} ${r1(150 + hh)}`, i === 0 ? c.highlight : c.main, `opacity="${i === 0 ? 1 : r1(0.7 - i * 0.2)}"`);
+    }).join("");
+    return mouth + cone + waves;
+  },
+  GEAR: (rnd, c) => {
+    const gear = (cx: number, cy: number, r: number, teeth: number, turn: number, lit: boolean, opacity: number) => {
+      const t = Array.from({ length: teeth }, (_, i) => {
+        const a = turn + (i * 2 * Math.PI) / teeth;
+        return line(cx + (r - 6) * Math.cos(a), cy + (r - 6) * Math.sin(a), cx + (r + 26) * Math.cos(a), cy + (r + 26) * Math.sin(a), c.main, `opacity="${opacity}"`, 24);
+      }).join("");
+      const body = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c.bg}" stroke="${c.main}" stroke-width="${S}" opacity="${opacity}"/>`;
+      return t + body + dot(cx, cy, r * 0.38, lit ? c.highlight : c.main, lit ? "" : `opacity="${opacity}"`);
+    };
+    const turn = rnd() * Math.PI;
+    return gear(420, 104, 52, 8, turn, false, 0.5) + gear(240, 170, 86, 10, -turn, true, 1);
   },
 };
 

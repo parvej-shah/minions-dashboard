@@ -205,7 +205,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     const seed = reroll ? `${asset.id}:${Date.now()}` : asset.id;
     const recentMotifs = recent.map((r) => (r.coverSpec as Partial<StoredCoverSpec> | null)?.art?.choice.motif ?? "").filter(Boolean);
     const exclude = reroll && previous?.art_style === artStyle ? previous?.art?.choice.motif : undefined;
-    const choice = chooseArt(artStyle, [copy.headline, asset.title, asset.hook].filter(Boolean).join(" "), seed, recentMotifs, exclude);
+    const choice = chooseArt(artStyle, [copy.headline, asset.title, asset.hook].filter(Boolean).join(" "), seed, recentMotifs, exclude, card.physical_scene ?? "", (artStyle === "DOODLES" ? card.doodle_motif : card.shape_motif) ?? "");
     art = choice ? { choice, seed } : undefined;
   }
 
