@@ -7,8 +7,9 @@ import { prisma } from "@/lib/prisma";
  *
  * HARVEST scales with tenant count rather than usage: 00_tenant_dispatcher
  * fires one run per ACTIVE client every night, each spending two Qwen calls
- * plus a per-source fetch. Nine active tenants already sit at 9/10, so a tenth
- * would cross the line without anyone changing a setting.
+ * plus a per-source fetch, so the ceiling has to leave room for the nightly
+ * fan-out plus manual runs and onboarding. Raised from 10 on 2026-09-29, when
+ * a new tenant's first harvest was refused after the nightly runs used the day.
  *
  * DRAFT is capped lower because it is the expensive half of the pipeline: two
  * writer calls, a claims-gate pass, social variants, and a hero image generated
@@ -20,8 +21,8 @@ import { prisma } from "@/lib/prisma";
  * cannot see the others. A cap that counts per tenant would let N tenants each
  * stay under their own limit while the system as a whole ran N times over.
  */
-export const DAILY_HARVEST_LIMIT = 10;
-export const DAILY_DRAFT_LIMIT = 5;
+export const DAILY_HARVEST_LIMIT = 50;
+export const DAILY_DRAFT_LIMIT = 20;
 
 export type RunType = "HARVEST" | "DRAFT";
 

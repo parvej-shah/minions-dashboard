@@ -3,9 +3,8 @@ import { DAILY_HARVEST_LIMIT, DAILY_DRAFT_LIMIT, DAILY_LIMITS, startOfUtcDay } f
 
 /**
  * The cap exists because harvest cost scales with tenant count, not usage:
- * 00_tenant_dispatcher fires one run per ACTIVE client every night. With 9
- * active tenants a daily schedule sits at 9/10 -- so a tenth tenant is the
- * thing that would quietly cross the line.
+ * 00_tenant_dispatcher fires one run per ACTIVE client every night, so enough
+ * tenants would quietly cross the line without anyone changing a setting.
  */
 
 /** Mirrors the accounting in claimHarvestSlot. */
@@ -26,17 +25,17 @@ describe("daily harvest budget", () => {
     expect(grantedFor(9)).toBe(9);
   });
 
-  it("caps the fan-out once a tenth tenant is added", () => {
-    // 11 active tenants must still only spend 10 runs.
-    expect(grantedFor(11)).toBe(DAILY_HARVEST_LIMIT);
+  it("caps the fan-out once there are more tenants than runs", () => {
+    // More active tenants than the limit must still only spend the limit.
+    expect(grantedFor(DAILY_HARVEST_LIMIT + 1)).toBe(DAILY_HARVEST_LIMIT);
   });
 
   it("refuses a manual trigger after the schedule has spent the budget", () => {
     expect(grantedFor(1, DAILY_HARVEST_LIMIT)).toBe(0);
   });
 
-  it("leaves one slot for a manual trigger when nine are used", () => {
-    expect(grantedFor(1, 9)).toBe(1);
+  it("leaves one slot for a manual trigger when all but one are used", () => {
+    expect(grantedFor(1, DAILY_HARVEST_LIMIT - 1)).toBe(1);
   });
 
   it("counts failed runs against the budget", () => {
@@ -62,16 +61,16 @@ describe("daily draft budget", () => {
   it("caps drafting below harvesting", () => {
     // Drafting is the expensive half: two writer calls, a claims gate, social
     // variants and a hero image. Harvesting only produces ideas.
-    expect(DAILY_DRAFT_LIMIT).toBe(5);
+    expect(DAILY_DRAFT_LIMIT).toBe(20);
     expect(DAILY_DRAFT_LIMIT).toBeLessThan(DAILY_HARVEST_LIMIT);
   });
 
-  it("refuses the sixth draft of the day", () => {
+  it("refuses the draft after the limit", () => {
     expect(grantedFor(1, DAILY_DRAFT_LIMIT, DAILY_DRAFT_LIMIT)).toBe(0);
   });
 
-  it("admits the fifth", () => {
-    expect(grantedFor(1, 4, DAILY_DRAFT_LIMIT)).toBe(1);
+  it("admits the last one under the limit", () => {
+    expect(grantedFor(1, DAILY_DRAFT_LIMIT - 1, DAILY_DRAFT_LIMIT)).toBe(1);
   });
 
   it("keeps the two budgets independent", () => {
