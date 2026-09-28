@@ -116,7 +116,12 @@ export default function DashboardShell({ children }: DashboardShellProps) {
     }
   }, [brandLoading, brandSettings, pathname, router, notify]);
 
-  const handleSignIn = useCallback(() => signIn("google", { callbackUrl: "/onboarding/setup" }), []);
+  const handleSignIn = useCallback(async () => {
+    // Mark a pending signup first, as the login page does, or a new Google
+    // account is refused by the signIn callback (AccessDenied).
+    await fetch("/api/onboarding/begin", { method: "POST" });
+    await signIn("google", { callbackUrl: "/onboarding/setup" });
+  }, []);
   const handleSignOut = useCallback(() => signOut({ callbackUrl: "/login" }), []);
 
   const mobileNavProps = {

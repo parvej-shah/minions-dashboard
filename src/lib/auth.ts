@@ -69,7 +69,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return true;
       }
 
-      if (!isPendingSignup) return false;
+      if (!isPendingSignup) {
+        console.warn("[NextAuth] Rejected sign-in: no User row, invite or pending signup for", cleanEmail);
+        return false;
+      }
 
       await prisma.user.create({
         data: {

@@ -53,9 +53,12 @@ function LoginContent() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      if (callbackUrl.startsWith("/onboarding")) {
-        await fetch("/api/onboarding/begin", { method: "POST" });
-      }
+      // This page is both sign-in and free-trial signup, so every click marks
+      // a pending signup. Gating it on callbackUrl rejected new accounts that
+      // arrived via the middleware redirect (callbackUrl is then an absolute
+      // URL such as https://host/, e.g. launching the PWA at start_url "/"),
+      // and the signIn callback answered AccessDenied.
+      await fetch("/api/onboarding/begin", { method: "POST" });
       await signIn("google", { callbackUrl });
     } catch (err) {
       console.error("Sign in error:", err);

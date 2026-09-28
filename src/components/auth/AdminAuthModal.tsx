@@ -47,6 +47,9 @@ export default function AdminAuthModal({
     setIsProcessing(true);
     setAuthError(null);
     try {
+      // Mark a pending signup first, as the login page does, or a new Google
+      // account is refused by the signIn callback (AccessDenied).
+      await fetch("/api/onboarding/begin", { method: "POST" });
       await signIn("google", { callbackUrl: "/" });
     } catch (err) {
       setAuthError(
