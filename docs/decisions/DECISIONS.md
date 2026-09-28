@@ -145,3 +145,16 @@ LinkedIn posts and the website, never invented.
 encryption lines; there is no evidence for them, so a directive now forbids
 them in posts.
 **Status:** active
+
+## 2026-09-29 — Blog off: the Studio shows the social post, not the article
+
+**Decision:** when a workspace has the blog channel off, the Editorial Studio
+hides the article editor and shows the social post (LinkedIn first) at the
+top of the draft, above the cover and carousel.
+**Why:** a LinkedIn-only user (Miskat, onboarded 2026-09-29) saw a full blog
+article with "Article Headline & Title" above his post and could edit it
+believing that was what goes out. The article is never published for him.
+**Trade-off:** the article is still the source the cover and carousel are
+made from, so a blog-off user can no longer edit that source directly; the
+post and carousel pages stay editable.
+**Status:** active

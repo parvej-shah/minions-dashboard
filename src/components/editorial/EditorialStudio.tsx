@@ -200,6 +200,25 @@ export default function EditorialStudio({
 
   const statusLabel = draft.isSaving ? null : toast.message;
 
+  const socialVariants = anySocialChannelActive && (
+    <SocialVariantTabs
+      activeAsset={activeAsset}
+      socialTab={displayedSocialTab}
+      setSocialTab={setSocialTab}
+      isEditingSocial={isEditingSocial}
+      setIsEditingSocial={setIsEditingSocial}
+      isSaving={draft.isSaving}
+      edited={edited}
+      setEditedLinkedin={draft.setEditedLinkedin}
+      setEditedFacebook={draft.setEditedFacebook}
+      setEditedTwitter={draft.setEditedTwitter}
+      onSave={handleSave}
+      onCopy={copy}
+      copiedKey={copiedKey}
+      enabledTabs={enabledSocialTabs}
+    />
+  );
+
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-32 lg:pb-16">
       <QueueRibbon
@@ -223,46 +242,35 @@ export default function EditorialStudio({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-8 space-y-6">
+          {/* Blog off: the article is never published, so the social post is
+              the draft and comes first; the article stays the source the cover
+              and carousel are made from, and is not shown for editing. */}
+          {!blogEnabled && socialVariants}
           {/* Shown for every channel: LinkedIn posts carry the cover too. */}
           <CoverImageCard activeAsset={activeAsset} isRendering={draft.isRenderingCover} onRerender={draft.rerenderCover} onMessage={toast.show} />
           {enabledSocialTabs.LINKEDIN && <CarouselCard key={activeAsset.id} activeAsset={activeAsset} onMessage={toast.show} />}
 
-          <ArticleEditor
-            activeAsset={activeAsset}
-            edited={edited}
-            setEditedTitle={draft.setEditedTitle}
-            setEditedHook={draft.setEditedHook}
-            setEditedBody={draft.setEditedBody}
-            editorMode={editorMode}
-            setEditorMode={setEditorMode}
-            isDirty={draft.isDirty}
-            isSaving={draft.isSaving}
-            statusLabel={statusLabel}
-            onSave={handleSave}
-            onCopy={copy}
-            copiedKey={copiedKey}
-            wordCount={wordCount}
-            readingTimeMinutes={readingTimeMinutes}
-          />
-
-          {anySocialChannelActive && (
-            <SocialVariantTabs
+          {blogEnabled && (
+            <ArticleEditor
               activeAsset={activeAsset}
-              socialTab={displayedSocialTab}
-              setSocialTab={setSocialTab}
-              isEditingSocial={isEditingSocial}
-              setIsEditingSocial={setIsEditingSocial}
-              isSaving={draft.isSaving}
               edited={edited}
-              setEditedLinkedin={draft.setEditedLinkedin}
-              setEditedFacebook={draft.setEditedFacebook}
-              setEditedTwitter={draft.setEditedTwitter}
+              setEditedTitle={draft.setEditedTitle}
+              setEditedHook={draft.setEditedHook}
+              setEditedBody={draft.setEditedBody}
+              editorMode={editorMode}
+              setEditorMode={setEditorMode}
+              isDirty={draft.isDirty}
+              isSaving={draft.isSaving}
+              statusLabel={statusLabel}
               onSave={handleSave}
               onCopy={copy}
               copiedKey={copiedKey}
-              enabledTabs={enabledSocialTabs}
+              wordCount={wordCount}
+              readingTimeMinutes={readingTimeMinutes}
             />
           )}
+
+          {blogEnabled && socialVariants}
         </div>
 
         <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-6">
