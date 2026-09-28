@@ -1,17 +1,14 @@
 # Decision log
 
-Every decision made during development — product, architectural, or
-technical — that isn't obvious from reading the code goes here, in order,
-never edited or deleted after the fact. If a later decision reverses an
-earlier one, add a new entry and mark the old one superseded; don't rewrite
-history.
+The most important product decisions: what the product does for users and
+the business, and why. Technical and implementation choices stay out; their
+reasons go in the commit message. If a later decision reverses an earlier
+one, add a new entry and mark the old one superseded.
 
-This file is append-only. Product-strategy decisions that belong to the
-authority flywheel roadmap keep living in their own D-table in
-[authority-flywheel-plan.md](../product/authority-flywheel-plan.md) — link to
-the relevant Dn from here rather than duplicating it. Everything else
-(architecture, library choices, schema shape, trade-offs, things rejected
-and why) goes here.
+Product-strategy decisions that belong to the authority flywheel roadmap keep
+living in their own D-table in
+[authority-flywheel-plan.md](../product/authority-flywheel-plan.md); link to
+the relevant Dn from here rather than duplicating it.
 
 ## Format
 
@@ -31,16 +28,6 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
-
-## 2026-09-25 — Establish this decision log
-
-**Decision:** Every non-obvious development decision must be recorded here
-as it's made, not reconstructed later from git history or memory.
-**Why:** AI-driven development produces many small irreversible-in-practice
-choices (schema shape, library picks, trade-offs) across sessions and
-agents; without a running log, later sessions re-litigate settled questions
-or silently drift from them.
-**Status:** active
 
 ## 2026-09-25 — Covers lock at publish; a redraw deletes the cover it replaces
 
@@ -82,31 +69,6 @@ for the same job. Tying scheduled posts to plan slots — the user chose not to.
 Posts go out up to 5 minutes after their time (the poll interval); accepted.
 **Status:** active
 
-## 2026-09-27 — The slot filler lives in the dashboard; n8n only carries the idea id
-
-**Decision:** Which idea fills a slot is decided in `src/lib/plan/fill.ts`
-(pure, tested) and applied by `src/services/contentPlan.ts`. The 00b
-dispatcher's existing call to `/api/internal/schedule/eligible-tenants` runs
-the look-ahead and returns the chosen `idea_id` for a due slot; 00b passes it
-to 02, whose Select Target already drafts an explicit idea. A targeted
-harvest narrows `content_lanes` in `/api/brand/context` (read only by 01) to
-the slot's lane while it runs. The below-bar label and review-off
-auto-publish happen when the draft's cover settles (`/api/internal/covers`,
-`/api/internal/assets/hero`).
-**Why:** decisions stay in code (plan principle), and no change was needed to
-01 or 02 — 02 is the largest workflow and the n8n API currently times out on
-large reads. 02 cannot auto-publish on its own anyway: its `autoPublish`
-requires `heroIsPermanent`, which is always false since covers moved out of
-02, so "require review: off" had silently done nothing.
-**Alternatives considered:** filling slots inside 02's Select Target — the
-logic would live untested in n8n; a new n8n schedule for the look-ahead — 00b
-already polls every 5 minutes and stays the single dispatcher.
-**Trade-offs accepted:** if the chosen idea is claimed between the pick and
-02's run, 02 falls back to its own choice; the slot is then marked EMPTY
-after 30 minutes and the draft is untracked. Rare: the pick only takes
-unclaimed ideas.
-**Status:** active
-
 ## 2026-09-27 — Auto-publish with review off applies to slot drafts only
 
 **Decision:** with `require_review` off, only a draft the content plan made
@@ -129,26 +91,6 @@ turning it back on would otherwise have started drafting for all six
 workspaces with an active schedule.
 **Status:** active
 
-## 2026-09-27 — Per-post channels: an override list on the asset
-
-**Decision:** `assets.channels` (empty = the workspace's active channels)
-limits one post (D18). The credential route answers "not active" for a
-channel the post is kept off when 03 passes `assetId`; tenant zero's hosted
-blog and the dashboard's own blog write check it too. X is not offered: it
-has no publisher.
-**Why:** 03 already skips a channel that resolves inactive, so the override
-needed one query parameter per channel node, not new branches.
-**Status:** active
-
-## 2026-09-27 — Correction: the test workspace has review ON
-
-The "auto-publish applies to slot drafts only" entry above says the test
-workspace has review off. It has review **on** and its schedule is paused;
-LinkedIn is connected. The decision stands for the reason given: turning
-auto-publish on for every draft would post hand-started drafts in any
-workspace with review off.
-**Status:** active
-
 ## 2026-09-28 — One switch for automatic drafting; "Schedule active" retired
 
 **Decision:** Each workspace has one switch, "Automatic drafting"
@@ -165,22 +107,6 @@ have blanked the preview whenever drafting was off.
 scheduling maths and every caller for no user-visible gain).
 **Status:** active
 
-## 2026-09-28 — Job state from check-ins, not from n8n's active flag
-
-**Decision:** Each background job checks in (`job_heartbeats`) from the
-dashboard route it already calls on every run: 00 → harvest-slot, 00b →
-eligible-tenants, 03 → release-due, 01 → brand/context, 02 → drafts/context,
-04 → assets/hero. The sweeper and the error alert never call the dashboard,
-so each got a "Check In" node posting to `/api/internal/heartbeat`. A timed
-job is "running" while its last check-in is within three of its intervals.
-The platform-admin Automations page and the Settings › Schedule status line
-("On, but the drafting service isn't running") read these.
-**Why:** a check-in is what actually ran; an active flag can be on while a
-workflow errors on every run. It also needs no n8n API key in the dashboard.
-**Alternatives considered:** reading workflow `active` and last execution
-from the n8n API (the key exists only locally, and large GETs hang).
-**Status:** active
-
 ## 2026-09-27 — Phase 7 exit started on tenant zero
 
 **Decision:** 00b reactivated; tenant zero moved to Mon/Wed/Fri 09:00
@@ -189,28 +115,6 @@ It is the only workspace with drafting on. The exit clock (two weeks with
 every slot filled, plan D17) starts with the first Monday slot.
 **Why:** the user approved all three steps. Review stays on so a below-bar or
 unbacked draft can't post before the ICP and experience items are filled in.
-**Status:** active
-
-## 2026-09-28 — The harvester's backlog guard counts only ideas that passed the gate
-
-**Decision:** `Backlog Guard` in 01_idea_harvester skips a harvest only when
-more than 12 refined, unclaimed ideas have `gate_verdict = PASS`. `Read Ideas`
-now selects `gate_verdict`.
-**Why:** tenant zero had 15 ungated ideas from before the gate, so every
-harvest skipped, including the targeted ones the content plan asked for. The
-plan can't use ungated or below-bar ideas ahead of a slot, so they aren't a
-real backlog. The global 10-a-day harvest budget still caps cost.
-**Alternatives considered:** bypassing the guard only for targeted harvests
-(the nightly harvest would still skip, and it is what fills later slots);
-rejecting or archiving the old ideas (they're the below-bar fallback at the
-slot's time).
-**Status:** active
-
-## 2026-09-28 — Focus the ideas queue on the ICP
-
-**Decision:** The ideas queue UI shows one audience, ICP, and removes the audience filter from the pool. Mobile uses shorter labels, shorter helper copy, and reduced list minimum heights so the primary queue actions fit above the fold more often.
-**Why:** PEER and BRIDGE were already retired in the audience model; exposing them in this page added cognitive load and contradicted the current product direction.
-**Alternatives considered:** Keep the legacy audience selector for historical records — rejected because it makes the active workflow look multi-audience and does not help current users choose what to publish.
 **Status:** active
 
 ## 2026-09-28 — Workspaces default to Bangladesh time
