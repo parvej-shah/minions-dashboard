@@ -8,6 +8,7 @@ import ContentPlanCard from "@/components/schedule/ContentPlanCard";
 import AutomaticDrafting from "@/components/schedule/AutomaticDrafting";
 import { useToast } from "@/hooks/useToast";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
+import { DEFAULT_TIMEZONE } from "@/constants/config";
 
 type CadenceType = "DAILY" | "EVERY_N_DAYS" | "DAYS_OF_WEEK";
 
@@ -24,7 +25,7 @@ interface SchedulePayload {
 
 const EMPTY_PAYLOAD: SchedulePayload = {
   exists: false,
-  timezone: "America/New_York",
+  timezone: DEFAULT_TIMEZONE,
   cadence_type: "EVERY_N_DAYS",
   interval_days: 3,
   days_of_week: [],

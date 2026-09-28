@@ -205,3 +205,39 @@ real backlog. The global 10-a-day harvest budget still caps cost.
 rejecting or archiving the old ideas (they're the below-bar fallback at the
 slot's time).
 **Status:** active
+
+## 2026-09-28 — Focus the ideas queue on the ICP
+
+**Decision:** The ideas queue UI shows one audience, ICP, and removes the audience filter from the pool. Mobile uses shorter labels, shorter helper copy, and reduced list minimum heights so the primary queue actions fit above the fold more often.
+**Why:** PEER and BRIDGE were already retired in the audience model; exposing them in this page added cognitive load and contradicted the current product direction.
+**Alternatives considered:** Keep the legacy audience selector for historical records — rejected because it makes the active workflow look multi-audience and does not help current users choose what to publish.
+**Status:** active
+
+## 2026-09-28 — Workspaces default to Bangladesh time
+
+**Decision:** `clients.timezone` defaults to `Asia/Dhaka` (column default and
+`DEFAULT_TIMEZONE` in `src/constants/config.ts`, used by every fallback).
+Tenant zero and bsse1610's workspace were moved to Asia/Dhaka and marked
+confirmed; other existing workspaces keep New York.
+**Why:** the user asked for Bangladesh time as the default; the team works
+from Dhaka. The Weekly Pulse card still offers the browser's timezone until a
+user confirms one, so a workspace elsewhere is not stuck on Dhaka.
+**Trade-off:** 09:00 in Dhaka is 11 pm in New York the night before, and both
+workspaces write for US and Dubai brokerages. The posting time can be moved in
+Settings › Schedule.
+**Status:** active
+
+## 2026-09-28 — Tenant zero's brand rewritten for real estate
+
+**Decision:** tenant zero's brand profile, ICP, directives and experience
+items were rewritten from getminions.ai (now real-estate voice agents) and
+the founder's LinkedIn profile. The ICP matches bsse1610's workspace. HVAC and
+regional rules are off, not deleted. The "sub-1.8s" claim was replaced with
+the measured demo-line figures (median 1.38s, p90 2.51s, 5 Sep 2026).
+**Why:** the brand still described US home-services trades, so ideas and
+drafts targeted the wrong buyer. Experience items come only from published
+LinkedIn posts and the website, never invented.
+**Rejected:** carrying over the website's SOC 2, uptime-SLA and "bank-level"
+encryption lines; there is no evidence for them, so a directive now forbids
+them in posts.
+**Status:** active

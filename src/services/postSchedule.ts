@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { checkScheduleTime } from "@/lib/postTime";
 import { syncAssetToBlog } from "@/services/publishing";
+import { DEFAULT_TIMEZONE } from "@/constants/config";
 
 /**
  * Scheduling one reviewed post (phase 7, the user's ask on 2026-09-25): after
@@ -34,7 +35,7 @@ export async function schedulePost(clientId: string, assetId: string, date: stri
     return { ok: false, error: "This post is already out, so it can't be scheduled.", status: 409 };
   }
 
-  const check = checkScheduleTime(date, time, client?.timezone ?? "America/New_York", now);
+  const check = checkScheduleTime(date, time, client?.timezone ?? DEFAULT_TIMEZONE, now);
   if (!check.ok) return { ok: false, error: check.error, status: 400 };
 
   // Scheduling is the reviewer's approval, exactly as "Approve & Publish" is.

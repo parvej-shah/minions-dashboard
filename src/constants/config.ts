@@ -127,3 +127,10 @@ export const MODEL_RATE_CARD = [
     accent: "#F59E0B",
   },
 ] as const;
+
+/**
+ * Timezone for a workspace that hasn't set its own (Bangladesh, where the
+ * team is). Matches the `clients.timezone` column default; the Weekly Pulse
+ * card still offers the browser's timezone until the user confirms one.
+ */
+export const DEFAULT_TIMEZONE = "Asia/Dhaka";

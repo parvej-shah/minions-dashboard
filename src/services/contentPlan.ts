@@ -20,6 +20,7 @@ import {
 import { startHarvest } from "@/services/harvestRun";
 import { syncAssetToBlog } from "@/services/publishing";
 import { triggerN8nWorkflow } from "@/services/pipeline";
+import { DEFAULT_TIMEZONE } from "@/constants/config";
 
 /**
  * The content plan's slots (phase 7, docs/product/authority-flywheel-plan.md).
@@ -115,7 +116,7 @@ async function loadContext(clientId: string): Promise<PlanContext | null> {
   if (!schedule) return null;
   return {
     schedule,
-    tz: client?.timezone ?? "America/New_York",
+    tz: client?.timezone ?? DEFAULT_TIMEZONE,
     lanes: lanes.map((l) => ({ id: l.id, name: l.name, purpose: l.purpose, weight: l.weight, sortOrder: l.sortOrder, isActive: l.isActive })),
     ideas: ideas.map((i) => {
       const score = Number((i.scoreBreakdown as { score?: unknown } | null)?.score);
@@ -401,7 +402,7 @@ export interface WeekSlot {
  */
 export async function previewWeek(clientId: string, now: Date = new Date()): Promise<{ timezone: string; filler_enabled: boolean; slots: WeekSlot[] }> {
   const ctx = await loadContext(clientId);
-  if (!ctx) return { timezone: "America/New_York", filler_enabled: false, slots: [] };
+  if (!ctx) return { timezone: DEFAULT_TIMEZONE, filler_enabled: false, slots: [] };
 
   const instants = upcomingPlanSlots(ctx.schedule, ctx.tz, now);
   const stored = await prisma.scheduleSlot.findMany({

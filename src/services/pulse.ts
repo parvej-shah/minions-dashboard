@@ -16,6 +16,7 @@ import {
 import { isValidTimezone, nextLocalMidnight, pulseState, PULSE_QUESTION, weekStart, type PulseState } from "@/lib/pulse/week";
 import type { MemoryCheckResult } from "@/types/author";
 import { startHarvest } from "@/services/harvestRun";
+import { DEFAULT_TIMEZONE } from "@/constants/config";
 
 /**
  * The weekly question (phase 6 of docs/product/authority-flywheel-plan.md):
@@ -47,7 +48,7 @@ async function load(clientId: string, now: Date) {
     where: { id: clientId },
     select: { timezone: true, pulseEnabled: true, pulseDay: true, timezoneConfirmed: true },
   });
-  const tz = isValidTimezone(client.timezone) ? client.timezone : "America/New_York";
+  const tz = isValidTimezone(client.timezone) ? client.timezone : DEFAULT_TIMEZONE;
   const week = weekStart(now, tz);
   const row = await prisma.weeklyPulse.findUnique({ where: { clientId_weekStart: { clientId, weekStart: new Date(week) } } });
   return { client, tz, week, row };

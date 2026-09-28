@@ -4,6 +4,7 @@ import { apiError } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 import { upcomingPlanSlots } from "@/services/contentPlan";
 import { draftingServiceRunning } from "@/services/jobHeartbeat";
+import { DEFAULT_TIMEZONE } from "@/constants/config";
 
 /**
  * The one-line answer to "is anything drafting on its own here?" for the top
@@ -21,7 +22,7 @@ export async function GET() {
       prisma.client.findUnique({ where: { id: ctx.clientId }, select: { timezone: true } }),
       draftingServiceRunning(),
     ]);
-    const tz = client?.timezone ?? "America/New_York";
+    const tz = client?.timezone ?? DEFAULT_TIMEZONE;
     const nextAt = schedule ? upcomingPlanSlots(schedule, tz, new Date())[0] ?? null : null;
     const slot = nextAt
       ? await prisma.scheduleSlot.findUnique({ where: { clientId_slotAt: { clientId: ctx.clientId, slotAt: nextAt } }, select: { laneId: true } })

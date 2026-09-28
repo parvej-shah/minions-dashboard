@@ -24,7 +24,7 @@ model Client {
   slug                   String   @unique // subdomain / URL segment, e.g. "acme-hvac"
   name                   String
   status                 String   @default("TRIAL") // TRIAL | ACTIVE | PAST_DUE | SUSPENDED | CANCELED
-  timezone               String   @default("America/New_York")
+  timezone               String   @default("Asia/Dhaka")
   // Phase 6: the weekly question. pulseDay is 1 = Monday ... 7 = Sunday.
   pulseEnabled           Boolean  @default(true) @map("pulse_enabled")
   pulseDay               Int      @default(5) @map("pulse_day") @db.SmallInt

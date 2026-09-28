@@ -4,6 +4,7 @@ import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 import { refuseOnboardingOverwrite } from "@/lib/onboardingGuard";
 import { DEFAULT_CADENCE } from "@/lib/scheduling";
+import { DEFAULT_TIMEZONE } from "@/constants/config";
 
 const CADENCE_TYPES = ["DAILY", "EVERY_N_DAYS", "DAYS_OF_WEEK"] as const;
 const TIME_RE = /^([01]?\d|2[0-3]):[0-5]\d$/;
@@ -37,12 +38,12 @@ export async function GET() {
     ]);
 
     if (!schedule) {
-      return NextResponse.json({ exists: false, timezone: client?.timezone ?? "America/New_York", ...DEFAULTS });
+      return NextResponse.json({ exists: false, timezone: client?.timezone ?? DEFAULT_TIMEZONE, ...DEFAULTS });
     }
 
     return NextResponse.json({
       exists: true,
-      timezone: client?.timezone ?? "America/New_York",
+      timezone: client?.timezone ?? DEFAULT_TIMEZONE,
       cadence_type: schedule.cadenceType,
       interval_days: schedule.intervalDays,
       days_of_week: schedule.daysOfWeek,

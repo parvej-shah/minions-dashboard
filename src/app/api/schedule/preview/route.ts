@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { apiError } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 import { nextUpcomingSlots } from "@/lib/scheduling";
+import { DEFAULT_TIMEZONE } from "@/constants/config";
 
 /** Read-only "upcoming posting slots" list for the /settings/schedule UI --
  * computed from the stored cadence rule, not stored as individual rows. */
@@ -23,7 +24,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ slots: [] });
     }
 
-    const timezone = client?.timezone ?? "America/New_York";
+    const timezone = client?.timezone ?? DEFAULT_TIMEZONE;
     const slots = nextUpcomingSlots(
       {
         cadenceType: schedule.cadenceType,
