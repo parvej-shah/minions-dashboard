@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { apiFailure } from "@/lib/api-response";
 import type { UserRole } from "@/constants/access";
 
+/** An account that signed up but has not finished onboarding, so has no workspace yet. */
+export const NO_WORKSPACE_MESSAGE = "Your workspace is not set up yet. Finish onboarding to start using Minions.";
+
 export interface CurrentUser {
   id: string;
   email: string;
@@ -75,7 +78,7 @@ export async function requireClientId(): Promise<
     };
   }
 
-  return { error: apiFailure("Account is not yet attached to a tenant", 403) };
+  return { error: apiFailure(NO_WORKSPACE_MESSAGE, 403) };
 }
 
 /**
@@ -175,7 +178,7 @@ export async function requireRealTenantUser(autoProvision = false): Promise<
     return { clientId, user: { ...user, clientId, role: "OWNER" } };
   }
 
-  return { error: apiFailure("Account is not yet attached to a tenant", 403) };
+  return { error: apiFailure(NO_WORKSPACE_MESSAGE, 403) };
 }
 
 /**
@@ -220,7 +223,7 @@ export async function requireTenantAccess(autoProvision = false): Promise<
     };
   }
 
-  return { error: apiFailure("Account is not yet attached to a tenant", 403) };
+  return { error: apiFailure(NO_WORKSPACE_MESSAGE, 403) };
 }
 
 /**

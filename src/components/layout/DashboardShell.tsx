@@ -34,7 +34,19 @@ export interface DashboardShellProps {
 export default function DashboardShell({ children }: DashboardShellProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+
+  // A new signup has no workspace until onboarding saves its first step. If
+  // they leave onboarding (or open "/" directly) every page here would fail
+  // with "not attached to a tenant", so send them back to finish it. The
+  // session is read fresh from the database (see the jwt callback), so this
+  // never bounces someone whose workspace was just created. Staff are exempt:
+  // they work through platform-admin and view-as-tenant.
+  React.useEffect(() => {
+    if (status === "authenticated" && session?.user && !session.user.clientId && session.user.role !== "SYSTEM_ADMIN") {
+      router.replace("/onboarding/setup");
+    }
+  }, [status, session, router]);
 
   const [isHarvesting, setIsHarvesting] = useState(false);
   const [activeHarvestJob, setActiveHarvestJob] = useState<HarvestingJob | null>(null);
