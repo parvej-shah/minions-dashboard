@@ -13,7 +13,7 @@ import type { MemoryCheckResult, MemoryIssue, MemoryIssueKind } from "@/types/au
  * "issue" never reaches the user.
  */
 
-export const MEMORY_CHECK_MODEL = { model: "qwen-plus", temperature: 0, max_tokens: 700 } as const;
+export const MEMORY_CHECK_MODEL = { model: "qwen3.7-plus", temperature: 0, max_tokens: 700 } as const;
 
 /** Kinds that block saving: Minions never stores these, whatever the disclosure. */
 const BLOCKING: ReadonlySet<MemoryIssueKind> = new Set(["CONTACT", "CONFIDENTIAL"]);
@@ -110,7 +110,7 @@ export function combineFindings(code: MemoryIssue[], model: ReturnType<typeof pa
 
 export async function checkMemory(content: string, disclosure: MemoryDisclosure): Promise<MemoryCheckResult> {
   const code = codeFindings(content, disclosure);
-  const raw = await callQwen(buildMemoryCheckPrompt(content, disclosure), 15000, MEMORY_CHECK_MODEL);
+  const raw = await callQwen(buildMemoryCheckPrompt(content, disclosure), undefined, MEMORY_CHECK_MODEL);
   return combineFindings(code, parseModelReply(raw, content));
 }
 

@@ -30,6 +30,9 @@ export const MODEL_FALLBACKS: Record<string, string[]> = {
   "qwen3-max": ["qwen3.8-max", ...FREE_LARGE],
   "qwen3.7-flash": [...FREE_SMALL, "qwen-flash"],
   "qwen-flash": [...FREE_SMALL, "qwen3.7-flash"],
+  // Onboarding and the memory check (thinking off). Dated snapshots carry their
+  // own free quota; the undated qwen-plus these calls used ran out 2026-09-06.
+  "qwen3.7-plus": ["qwen-plus-2025-09-11", "qwen-flash-2025-07-28"],
 };
 
 export function modelChain(primary: string): string[] {

@@ -6,8 +6,11 @@
  * fallbacks always have somewhere safe to land.
  */
 
-const QWEN_ENDPOINT = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions";
-const DEFAULT_TIMEOUT_MS = 12000;
+import { chatWithFallback } from "./modelChain";
+
+// qwen3.7-plus answers these prompts in ~11s with thinking off; the older 12s cap
+// would have cut it off just before the answer.
+const DEFAULT_TIMEOUT_MS = 30000;
 
 export interface AiSuggestions {
   myths: string[];
@@ -31,7 +34,7 @@ export interface GeneratedDirective {
 }
 
 /** Model settings for both onboarding calls (single user message, no system prompt). */
-export const ONBOARDING_MODEL = { model: "qwen-plus", temperature: 0.7, max_tokens: 800 } as const;
+export const ONBOARDING_MODEL = { model: "qwen3.7-plus", temperature: 0.7, max_tokens: 800 } as const;
 
 /**
  * One user-message Qwen call that degrades to null on any failure. Exported
@@ -49,27 +52,28 @@ export async function callQwen(
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const res = await fetch(QWEN_ENDPOINT, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    // Through the model chain: once a model's free quota runs out, the next
+    // one answers, instead of every new signup silently getting the templates.
+    const { status, body, model } = await chatWithFallback(
+      {
         model: settings.model,
         messages: [{ role: "user", content: prompt }],
         temperature: settings.temperature,
         max_tokens: settings.max_tokens,
-      }),
-      signal: controller.signal,
-    });
+        // A thinking model spends the token budget reasoning and can return an
+        // empty answer; these are short structured calls, so answer directly.
+        enable_thinking: false,
+      },
+      apiKey,
+      { fetchImpl: (url, init) => fetch(url, { ...init, signal: init.signal ? AbortSignal.any([init.signal, controller.signal]) : controller.signal }) }
+    );
 
-    if (!res.ok) {
-      console.warn("[AI] Qwen non-200 response:", res.status, await res.text());
+    if (status !== 200) {
+      console.warn(`[AI] ${model} non-200 response:`, status, body.slice(0, 500));
       return null;
     }
 
-    const data = await res.json();
+    const data = JSON.parse(body);
     return data.choices?.[0]?.message?.content?.trim() || null;
   } catch (e) {
     console.warn("[AI] Qwen call failed:", e);
@@ -232,7 +236,7 @@ export async function generateBrandDirectivesWithLLM(
   // Heavier structured-output prompt than the suggestion-chip call; give it
   // more headroom before falling back to the template -- onboarding's
   // ≤2-minute budget can absorb a few extra seconds here.
-  const raw = await callQwen(prompt, 15000);
+  const raw = await callQwen(prompt);
   const parsed = parseJsonResponse<{ positioningSummary?: string; directives?: GeneratedDirective[] }>(raw);
   if (!parsed?.positioningSummary || !Array.isArray(parsed.directives)) return null;
 
