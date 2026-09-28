@@ -20,9 +20,10 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - icon.svg (icon file)
+     * - icon.svg and icons/ (PWA icons)
+     * - sw.js and offline.html (public PWA resources)
      * - robots.txt, sitemap.xml, llms.txt, llms-full.txt
      */
-    "/((?!api/llms|api/version|api/auth|api/webhooks|api/channels|api/brand/context|docs|login|onboarding|_next/static|_next/image|favicon.ico|icon.svg|robots.txt|sitemap.xml|llms.txt|llms-full.txt).*)",
+    "/((?!api/llms|api/version|api/auth|api/webhooks|api/channels|api/brand/context|docs|login|onboarding|_next/static|_next/image|icons/|manifest\\.webmanifest$|sw\\.js$|offline\\.html$|favicon.ico|icon.svg|robots.txt|sitemap.xml|llms.txt|llms-full.txt).*)",
   ],
 };

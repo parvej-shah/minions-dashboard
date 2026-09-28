@@ -3,9 +3,7 @@
 import React, { useEffect } from "react";
 import Link from "next/link";
 import {
-  BookOpen,
   Globe,
-  Radio,
   Share2,
   CheckCircle2,
   RefreshCw,
@@ -136,7 +134,7 @@ export function DistributionControlPanel({
                       isActive ? "bg-[#00C9A7]" : "bg-[#64748B]"
                     }`}
                   />
-                  <span className={isActive ? "text-[#00C9A7] font-semibold" : "text-[#64748B]"}>
+                  <span className={isActive ? "text-[#00C9A7] font-semibold" : "text-[#A0ACBA]"}>
                     {isActive ? "Auto Post" : "Paused"}
                   </span>
                 </div>
@@ -149,32 +147,17 @@ export function DistributionControlPanel({
   }
 
   return (
-    <div className="p-5 sm:p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-5 shadow-sm">
+    <div className="p-4 sm:p-6 rounded-2xl bg-[#0F1419]/70 border border-[#1F2D3D]/80 space-y-4 sm:space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1F2D3D]/60 pb-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-[#00C9A7] uppercase tracking-wider mb-1">
-            <Radio className="w-3.5 h-3.5 animate-pulse" />
-            <span>Omnichannel Broadcast Controls</span>
-          </div>
-          <h2 className="text-lg font-bold text-[#F1F5F9]">
-            Automated Distribution Channels
-          </h2>
-          <p className="text-xs text-[#94A3B8] mt-0.5 max-w-2xl">
-            Toggle automated broadcasting per platform. Paused channels will be skipped during approval so posts only publish to active destinations.
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#1F2D3D]/60 pb-4">
+        <div className="min-w-0">
+          <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-[#F1F5F9]">Publishing channels</h2>
+          <p className="text-sm text-[#94A3B8] mt-1 max-w-2xl leading-relaxed">Choose which connected channels receive posts when you publish.</p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Link
-            href="/docs?tab=webhooks"
-            className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/30 hover:bg-[#00C9A7]/20 transition-colors flex items-center gap-1.5"
-          >
-            <BookOpen className="w-3 h-3" />
-            <span>Setup Guides</span>
-          </Link>
-          <span className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-[#161D26] border border-[#1F2D3D] text-[#94A3B8]">
-            {channels.filter((c) => c.is_active).length}/{channels.length} Channels Active
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="min-h-10 px-3 rounded-lg bg-[#111820] border border-[#1F2D3D] text-[#CBD5E1] inline-flex items-center text-xs font-medium tabular-nums">
+            {channels.filter((c) => c.is_active).length} of {channels.length} active
           </span>
         </div>
       </div>
@@ -190,7 +173,7 @@ export function DistributionControlPanel({
       )}
 
       {/* Grid of 4 Channel Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
         {channels.map((ch) => {
           const isActive = ch.is_active;
           const isBusy = updatingKey === ch.key;
@@ -198,15 +181,15 @@ export function DistributionControlPanel({
           return (
             <div
               key={ch.id}
-              className={`p-4 rounded-xl border transition-all flex flex-col justify-between gap-3 relative ${
+              className={`p-4 sm:p-5 rounded-xl border transition-colors flex flex-col justify-between gap-4 relative ${
                 isActive
-                  ? "bg-[#161D26]/70 border-[#00C9A7]/30 shadow-sm"
-                  : "bg-[#0B0F14] border-[#1F2D3D] opacity-75 hover:opacity-100"
+                  ? "bg-[#111A20] border-[#00C9A7]/35"
+                  : "bg-[#0C1117] border-[#273342]"
               }`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-[#070B0F] border border-[#1F2D3D] flex items-center justify-center shrink-0 shadow-inner">
+                  <div className="w-10 h-10 rounded-xl bg-[#080D12] border border-[#263443] flex items-center justify-center shrink-0">
                     {getPlatformIcon(ch.platform)}
                   </div>
                   <div className="min-w-0">
@@ -218,7 +201,7 @@ export function DistributionControlPanel({
                         </span>
                       )}
                     </div>
-                    <div className="text-[11px] font-mono text-[#64748B] truncate mt-0.5">
+                    <div className="text-xs text-[#8493A5] truncate mt-1">
                       {ch.target_destination}
                     </div>
                   </div>
@@ -229,8 +212,10 @@ export function DistributionControlPanel({
                   type="button"
                   onClick={() => handleToggle(ch)}
                   disabled={isBusy}
+                  role="switch"
+                  aria-checked={isActive}
                   aria-label={`Toggle ${ch.name}`}
-                  className={`w-11 h-6 rounded-full transition-colors p-0.5 flex items-center cursor-pointer shrink-0 ${
+                  className={`w-12 h-7 rounded-full transition-colors p-1 flex items-center cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0F1419] ${
                     isActive ? "bg-[#00C9A7]" : "bg-[#1F2D3D]"
                   } ${isBusy ? "opacity-50 cursor-wait" : ""}`}
                 >
@@ -243,12 +228,12 @@ export function DistributionControlPanel({
               </div>
 
               {/* Description */}
-              <p className="text-xs text-[#94A3B8] leading-relaxed">
+              <p className="text-sm text-[#AAB6C5] leading-relaxed">
                 {ch.description}
               </p>
 
               {/* Footer Status Pill */}
-              <div className="flex items-center justify-between text-[11px] font-mono pt-2 border-t border-[#1F2D3D]/40">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs pt-3 border-t border-[#263443]/70">
                 <div className="flex items-center gap-1.5">
                   <span
                     className={`w-2 h-2 rounded-full shrink-0 ${
@@ -259,7 +244,7 @@ export function DistributionControlPanel({
                     {isActive ? "Broadcasting Active" : "Broadcast Paused"}
                   </span>
                 </div>
-                <span className="text-[#64748B] text-[10px]">
+                <span className="text-[#8190A2] sm:text-right">
                   {isActive ? "Auto-Posts on Publish" : "Skipped on Publish"}
                 </span>
               </div>
@@ -267,10 +252,10 @@ export function DistributionControlPanel({
               {/* Credential connection. Blog defaults to our own hosted blogs
                   table when nothing is connected — a webhook here redirects
                   publishing to the tenant's own site instead. */}
-              <div className="pt-2 border-t border-[#1F2D3D]/40">
-                <div className="flex items-center justify-between mb-1">
+              <div className="pt-3 border-t border-[#263443]/70">
+                <div className="flex items-center justify-between mb-2">
                   <span
-                    className={`text-[10px] font-mono ${ch.has_credential ? "text-[#00C9A7]" : "text-[#64748B]"}`}
+                    className={`text-xs ${ch.has_credential ? "text-[#00C9A7]" : "text-[#A0ACBA]"}`}
                   >
                     {ch.has_credential
                       ? ch.key === "blog"

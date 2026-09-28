@@ -19,6 +19,7 @@ import {
   Check,
   LayoutGrid,
   CalendarDays,
+  SlidersHorizontal,
 } from "lucide-react";
 import { IdeaItem, IdeaStatus } from "@/types";
 import CalendarView from "@/components/ideas/CalendarView";
@@ -78,7 +79,10 @@ export default function IdeaStreamPage() {
     { topics: [] },
     { errorMessage: "Could not load topics" }
   );
-  const TRADES = topicData.topics.length > 0 ? topicData.topics : FALLBACK_TOPICS;
+  const topicLabels = (topicData.topics.length > 0 ? topicData.topics : FALLBACK_TOPICS).filter(
+    (topic) => topic.trim().toUpperCase() !== "UNSPECIFIED"
+  );
+  const availableTopics = topicLabels.length > 0 ? topicLabels : FALLBACK_TOPICS;
 
   const [selectedTrade, setSelectedTrade] = useState<string>("ALL");
   const [selectedStage, setSelectedStage] = useState<"ALL" | IdeaStage>("ALL");
@@ -381,7 +385,7 @@ export default function IdeaStreamPage() {
     e.preventDefault();
     if (!formTitle.trim() || isSubmitting) return;
     if (!formTrade) {
-      setToastMessage("Choose a trade before adding this idea.");
+      setToastMessage("Choose a topic area before adding this idea.");
       setTimeout(() => setToastMessage(null), 4000);
       return;
     }
@@ -509,7 +513,7 @@ export default function IdeaStreamPage() {
     return ideas.filter(idea => {
       // Audience filter
 
-      // Trade filter
+      // Topic area filter
       if (selectedTrade !== "ALL") {
         const t = (idea.target_trade || "").toLowerCase();
         if (!t.includes(selectedTrade.toLowerCase())) return false;
@@ -577,7 +581,7 @@ export default function IdeaStreamPage() {
           <div className="flex items-center p-1 bg-[#161D26] border border-[#1F2D3D] rounded-xl shadow-inner">
             <button
               onClick={() => setViewMode("queue")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex min-h-11 items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 viewMode === "queue"
                   ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
                   : "text-[#94A3B8] hover:text-white"
@@ -621,7 +625,7 @@ export default function IdeaStreamPage() {
 
           <button
             onClick={() => setIsInjectOpen(true)}
-            className="inline-flex items-center gap-1.5 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-3.5 py-2 rounded-xl shadow-md shadow-[#00C9A7]/15 transition-all active:scale-95 cursor-pointer"
+            className="inline-flex min-h-11 items-center gap-1.5 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-3.5 py-2 rounded-xl shadow-md shadow-[#00C9A7]/15 transition-all active:scale-95 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>Add idea</span>
@@ -639,15 +643,15 @@ export default function IdeaStreamPage() {
                 <Search className="w-4 h-4 text-[#64748B] absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Search ideas by title, keyword, ID, or trade..."
+                  placeholder="Search ideas by title, topic, keyword, or ID..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-[#0F1419] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl pl-9 pr-8 py-2 text-xs text-[#F1F5F9] placeholder:text-[#64748B] outline-none transition-all"
+                  className="min-h-11 w-full bg-[#0F1419] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl pl-9 pr-8 py-2 text-xs text-[#F1F5F9] placeholder:text-[#64748B] outline-none transition-all"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#F1F5F9] text-xs p-1"
+                    className="absolute right-1 top-1/2 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center text-[#64748B] hover:text-[#F1F5F9]"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -656,10 +660,34 @@ export default function IdeaStreamPage() {
 
             </div>
 
-            {/* Row 2: Scrolling Trades Pill Row */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar border-t border-[#1F2D3D]/40">
+            <details className="lg:hidden rounded-xl border border-[#1F2D3D] bg-[#0F1419] px-3">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-semibold text-[#F1F5F9] [&::-webkit-details-marker]:hidden">
+                <SlidersHorizontal className="h-4 w-4 text-[#00C9A7]" />
+                <span>Filters</span>
+                {(selectedTrade !== "ALL" || selectedStage !== "ALL") && <span className="rounded-full bg-[#00C9A7]/15 px-2 py-0.5 text-xs text-[#00C9A7]">Active</span>}
+                <span className="ml-auto text-xs text-[#94A3B8]">Tap to adjust</span>
+              </summary>
+              <div className="grid grid-cols-1 gap-3 border-t border-[#1F2D3D] py-3 sm:grid-cols-2">
+                <label className="space-y-1 text-xs font-medium text-[#94A3B8]">
+                  <span>Topic area</span>
+                  <select value={selectedTrade} onChange={(e) => setSelectedTrade(e.target.value)} className="min-h-11 w-full rounded-xl border border-[#1F2D3D] bg-[#070B0F] px-3 text-sm text-[#F1F5F9]">
+                    <option value="ALL">All topics</option>
+                    {availableTopics.map((topic) => <option key={topic} value={topic}>{topic}</option>)}
+                  </select>
+                </label>
+                <label className="space-y-1 text-xs font-medium text-[#94A3B8]">
+                  <span>Stage</span>
+                  <select value={selectedStage} onChange={(e) => setSelectedStage(e.target.value as "ALL" | IdeaStage)} className="min-h-11 w-full rounded-xl border border-[#1F2D3D] bg-[#070B0F] px-3 text-sm text-[#F1F5F9]">
+                    {STAGE_FILTERS.map((stage) => <option key={stage} value={stage}>{stage === "ALL" ? "All stages" : IDEA_STAGE_LABELS[stage]}</option>)}
+                  </select>
+                </label>
+              </div>
+            </details>
+
+            {/* Row 2: Scrolling topic pills */}
+            <div className="hidden lg:flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar border-t border-[#1F2D3D]/40">
               <span className="text-[11px] font-mono uppercase tracking-wider text-[#64748B] mr-1 shrink-0">
-                Trade:
+                Topic area:
               </span>
               <button
                 onClick={() => setSelectedTrade("ALL")}
@@ -669,28 +697,28 @@ export default function IdeaStreamPage() {
                     : "bg-[#0F1419] text-[#94A3B8] border-[#1F2D3D] hover:text-[#F1F5F9] hover:border-[#2A3D52]"
                 }`}
               >
-                All Trades
+                All topics
               </button>
-              {TRADES.map((trade) => {
-                const isActive = selectedTrade === trade;
+              {availableTopics.map((topic) => {
+                const isActive = selectedTrade === topic;
                 return (
                   <button
-                    key={trade}
-                    onClick={() => setSelectedTrade(trade)}
+                    key={topic}
+                    onClick={() => setSelectedTrade(topic)}
                     className={`px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                       isActive
                         ? "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/40 font-bold"
                         : "bg-[#0F1419] text-[#94A3B8] border-[#1F2D3D] hover:text-[#F1F5F9] hover:border-[#2A3D52]"
                     }`}
                   >
-                    {trade}
+                    {topic}
                   </button>
                 );
               })}
             </div>
 
             {/* Row 3: Stage Filters */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 border-t border-[#1F2D3D]/40 scrollbar-none">
+            <div className="hidden lg:flex items-center gap-2 overflow-x-auto pb-1 pt-1 border-t border-[#1F2D3D]/40 scrollbar-none">
               <span className="text-[11px] font-mono uppercase tracking-wider text-[#64748B] mr-1 shrink-0">
                 Stage:
               </span>
@@ -871,10 +899,10 @@ export default function IdeaStreamPage() {
                   </p>
                 </div>
 
-                {/* Field: Trade */}
+                {/* Field: Topic area */}
                 <div>
                   <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
-                    Trade <span className="text-[#00C9A7]">*</span>
+                    Topic area <span className="text-[#00C9A7]">*</span>
                   </label>
                   <select
                     required
@@ -883,22 +911,22 @@ export default function IdeaStreamPage() {
                       const t = e.target.value ;
                       setFormTrade(t);
                       if (!formTags.includes(t)) {
-                        setFormTags([...formTags.filter(x => !TRADES.includes(x)), t]);
+                        setFormTags([...formTags.filter(x => !availableTopics.includes(x)), t]);
                       }
                     }}
                     className="w-full bg-[#161D26] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3.5 py-2.5 text-xs text-[#F1F5F9] outline-none transition-all cursor-pointer"
                   >
                     <option value="" disabled className="bg-[#0F1419]">
-                      Select the actual trade this topic is about...
+                      Choose a topic area...
                     </option>
-                    {TRADES.map((t) => (
+                    {availableTopics.map((t) => (
                       <option key={t} value={t} className="bg-[#0F1419]">
                         {t}
                       </option>
                     ))}
                   </select>
                   <p className="text-[11px] text-[#64748B] mt-1">
-                    Choose the trade this idea is about.
+                    Choose the topic area this idea fits.
                   </p>
                 </div>
 
@@ -1021,13 +1049,13 @@ export default function IdeaStreamPage() {
       {editingIdea && (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
           <div
-            className="w-full max-w-lg bg-[#0F1419] border-l border-[#1F2D3D] h-full flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-300 overflow-y-auto"
+            className="w-full max-w-lg bg-[#0F1419] border-l border-[#1F2D3D] h-[100dvh] flex flex-col shadow-2xl animate-in slide-in-from-right duration-300 overflow-hidden"
             role="dialog"
             aria-modal="true"
           >
             {/* Drawer Header */}
-            <div>
-              <div className="p-6 border-b border-[#1F2D3D] flex items-center justify-between">
+            <div className="flex min-h-0 flex-1 flex-col">
+              <div className="shrink-0 p-5 sm:p-6 border-b border-[#1F2D3D] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Edit3 className="w-5 h-5 text-[#00C9A7]" />
                   <div>
@@ -1041,14 +1069,16 @@ export default function IdeaStreamPage() {
                 </div>
                 <button
                   onClick={() => setEditingIdea(null)}
-                  className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] transition-colors cursor-pointer"
+                  aria-label="Close edit idea"
+                  className="min-h-11 min-w-11 rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Edit Form */}
-              <form id="edit-idea-form" onSubmit={handleSaveEdit} className="p-6 space-y-5">
+              <form id="edit-idea-form" onSubmit={handleSaveEdit} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 pb-8 sm:px-6 sm:py-6">
+                <div className="space-y-5">
                 {/* Title / Signal */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-[#94A3B8] flex items-center gap-1.5">
@@ -1060,7 +1090,7 @@ export default function IdeaStreamPage() {
                     required
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="w-full bg-[#070B0F] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3.5 py-2.5 text-xs text-[#F1F5F9] outline-none transition-colors"
+                    className="min-h-11 w-full bg-[#070B0F] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3.5 py-2.5 text-sm text-[#F1F5F9] outline-none transition-colors"
                   />
                 </div>
 
@@ -1077,18 +1107,17 @@ export default function IdeaStreamPage() {
                   />
                 </div>
 
-                {/* Trade */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
+                {/* Topic area */}
+                <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-[#94A3B8]">
-                      Trade
+                      Topic area
                     </label>
                     <select
                       value={editTrade}
                       onChange={(e) => setEditTrade(e.target.value)}
-                      className="w-full bg-[#070B0F] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3 py-2.5 text-xs text-[#F1F5F9] outline-none transition-colors cursor-pointer"
+                      className="min-h-11 w-full bg-[#070B0F] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3 py-2.5 text-sm text-[#F1F5F9] outline-none transition-colors cursor-pointer"
                     >
-                      {TRADES.map((t) => (
+                      {availableTopics.map((t) => (
                         <option key={t} value={t} className="bg-[#0F1419] text-[#F1F5F9]">
                           {t}
                         </option>
@@ -1120,11 +1149,11 @@ export default function IdeaStreamPage() {
             </div>
 
             {/* Edit Drawer Footer */}
-            <div className="p-6 border-t border-[#1F2D3D] bg-[#070B0F]/60 flex items-center justify-between gap-3">
+            <div className="shrink-0 p-4 sm:p-6 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-[#1F2D3D] bg-[#070B0F]/90 flex items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={() => setDeleteIdeaTarget({ id: editingIdea.id || editingIdea.ideaId || "", title: editTitle })}
-                className="px-3 py-2 text-xs font-semibold text-[#EF4444] hover:bg-[#EF4444]/10 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="min-h-11 px-3 py-2 text-xs font-semibold text-[#EF4444] hover:bg-[#EF4444]/10 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete</span>
@@ -1135,7 +1164,7 @@ export default function IdeaStreamPage() {
                   type="button"
                   onClick={() => setEditingIdea(null)}
                   disabled={isUpdating}
-                  className="px-4 py-2 text-xs font-semibold text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] rounded-xl transition-colors cursor-pointer"
+                  className="min-h-11 px-4 py-2 text-xs font-semibold text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] rounded-xl transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1143,7 +1172,7 @@ export default function IdeaStreamPage() {
                   type="submit"
                   form="edit-idea-form"
                   disabled={isUpdating || !editTitle.trim()}
-                  className="inline-flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] disabled:opacity-50 text-[#070B0F] text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/15 transition-all cursor-pointer"
+                  className="min-h-11 inline-flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] disabled:opacity-50 text-[#070B0F] text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/15 transition-all cursor-pointer"
                 >
                   {isUpdating ? (
                     <>

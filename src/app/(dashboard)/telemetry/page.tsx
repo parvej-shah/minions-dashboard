@@ -1,20 +1,17 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
-  DollarSign,
   Type,
   ShieldCheck,
   Zap,
-  Download,
-  CheckCircle2,
-  FileSpreadsheet,
+  FileText,
   ArrowUpRight,
 } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import EmptyState, { LoadingState } from "@/components/ui/EmptyState";
-import { formatCost, NOT_AVAILABLE } from "@/utils/format";
+import { NOT_AVAILABLE } from "@/utils/format";
 import {
   TELEMETRY_RANGES,
   TELEMETRY_RANGE_LABELS,
@@ -44,8 +41,6 @@ function formatTimestamp(iso: string): string {
 
 export default function TelemetryPage() {
   const [timeRange, setTimeRange] = useState<TelemetryRange>("7d");
-  const [isExporting, setIsExporting] = useState(false);
-  const [exportSuccess, setExportSuccess] = useState(false);
 
   // Every range is a real server-side aggregation over `assets.created_at`,
   // so switching ranges refetches rather than scaling the 7d figures.
@@ -63,49 +58,13 @@ export default function TelemetryPage() {
   const rangePhrase =
     timeRange === "all" ? "across all recorded runs" : `in the last ${rangeLabel.toLowerCase()}`;
 
-  const spendSubtext = useMemo(() => {
-    if (isLoading) return "Loading…";
-    if (summaryData.totalAssetsGenerated === 0) return `No runs recorded ${rangePhrase}`;
-    return `Live aggregation over ${summaryData.totalAssetsGenerated} assets`;
-  }, [isLoading, summaryData.totalAssetsGenerated, rangePhrase]);
-
-  const exportCSV = () => {
-    setIsExporting(true);
-    const headers = ["Asset ID", "Title", "Audience", "Generation Cost (USD)", "Created At"].join(",");
-
-    const rows = ledgerData.map((r) =>
-      [
-        `"${r.asset_id}"`,
-        `"${r.title.replace(/"/g, '""')}"`,
-        `"${r.audience}"`,
-        r.total_cost.toFixed(4),
-        `"${formatTimestamp(r.created_at)}"`,
-      ].join(",")
-    );
-
-    const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `minions_cost_telemetry_${timeRange}_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    setTimeout(() => {
-      setIsExporting(false);
-      setExportSuccess(true);
-      setTimeout(() => setExportSuccess(false), 3000);
-    }, 400);
-  };
-
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-6">
         <div>
           <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#00C9A7] uppercase mb-1">
             <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
-            Content ROI &amp; Velocity
+            Content activity
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-[#F1F5F9]">
             Content Performance
@@ -115,13 +74,13 @@ export default function TelemetryPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3 self-start md:self-auto">
-          <div className="flex items-center bg-[#0F1419] p-1 rounded-xl border border-[#1F2D3D] text-xs">
+        <div className="flex w-full items-center gap-3 self-start md:w-auto md:self-auto">
+          <div className="flex w-full items-center bg-[#0F1419] p-1 rounded-xl border border-[#1F2D3D] text-xs sm:w-auto">
             {TELEMETRY_RANGES.map((range) => (
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
-                className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
+                className={`min-h-11 flex-1 px-3 py-1.5 rounded-lg font-medium transition-all sm:flex-none ${
                   timeRange === range
                     ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
                     : "text-[#94A3B8] hover:text-[#F1F5F9]"
@@ -132,28 +91,11 @@ export default function TelemetryPage() {
             ))}
           </div>
 
-          <button
-            onClick={exportCSV}
-            disabled={isExporting || ledgerData.length === 0}
-            className="flex items-center gap-2 bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-xs font-semibold px-4 py-2 rounded-xl text-[#F1F5F9] transition-all shadow-sm active:scale-95 disabled:opacity-50"
-          >
-            {exportSuccess ? (
-              <>
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#00C9A7]" />
-                <span className="text-[#00C9A7]">Exported CSV</span>
-              </>
-            ) : (
-              <>
-                <Download className="w-3.5 h-3.5 text-[#00C9A7]" />
-                <span>Export CSV</span>
-              </>
-            )}
-          </button>
         </div>
       </div>
 
       {/* KPI TILES — content value a tenant actually cares about, not internal infra measurements. */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-2 shadow-sm">
           <div className="flex items-center justify-between text-xs font-mono text-[#94A3B8]">
             <span>WORDS GENERATED</span>
@@ -201,44 +143,50 @@ export default function TelemetryPage() {
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-2 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-mono text-[#94A3B8]">
-            <span>AVG COST / ASSET</span>
-            <DollarSign className="w-4 h-4 text-[#00C9A7]" />
-          </div>
-          <div className="text-2xl font-bold text-[#F1F5F9]">
-            {isLoading ? NOT_AVAILABLE : formatCost(summaryData.avgCostPerAsset)}
-          </div>
-          <div className="text-[11px] text-[#64748B]">{spendSubtext}</div>
-        </div>
       </div>
 
-      {/* PER-POST GENERATION LEDGER */}
+      {/* RECENT GENERATED POSTS */}
       <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
-              <FileSpreadsheet className="w-4 h-4 text-[#00C9A7]" />
-              <span>Per-Post Generation Ledger</span>
+              <FileText className="w-4 h-4 text-[#00C9A7]" />
+              <span>Recent generated posts</span>
             </h3>
             <p className="text-xs text-[#94A3B8] mt-0.5">
-              Recorded unit cost per asset. Click any row to inspect the editorial draft.
+              Select a post to open it in the Editorial Studio.
             </p>
           </div>
           <span className="text-xs font-mono text-[#64748B] self-start sm:self-auto bg-[#161D26] px-2.5 py-1 rounded-lg border border-[#1F2D3D]">
-            {isLoading ? "Loading…" : `${ledgerData.length} Audit Records`}
+            {isLoading ? "Loading…" : `${ledgerData.length} Posts`}
           </span>
         </div>
 
-        <div className="overflow-x-auto">
-          {isLoading && <LoadingState label="Loading cost ledger…" />}
-          <table className="w-full text-left text-xs min-w-[560px]">
+        {isLoading && <LoadingState label="Loading posts…" />}
+        <div className="space-y-3 sm:hidden">
+          {ledgerData.map((row) => (
+            <article key={row.asset_id} className="rounded-xl border border-[#1F2D3D] bg-[#0B1016] p-4">
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h4 className="line-clamp-2 text-sm font-semibold leading-relaxed text-[#F1F5F9]">{row.title}</h4>
+                  <p className="mt-1 text-xs text-[#8493A5]">{formatTimestamp(row.created_at)}</p>
+                </div>
+                <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${row.audience === "ICP" ? "border-[#3B82F6]/30 bg-[#3B82F6]/10 text-[#60A5FA]" : row.audience === "PEER" ? "border-[#8B5CF6]/30 bg-[#8B5CF6]/10 text-[#A78BFA]" : "border-[#00C9A7]/30 bg-[#00C9A7]/10 text-[#00C9A7]"}`}>{row.audience}</span>
+              </div>
+              <Link href={`/drafts/${row.asset_id}`} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#1F2D3D] bg-[#161D26] text-sm font-semibold text-[#F1F5F9] transition-colors hover:border-[#00C9A7] hover:bg-[#00C9A7] hover:text-[#070B0F]">
+                Open in Studio <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </article>
+          ))}
+          {!isLoading && ledgerData.length === 0 && <EmptyState title={error ? "Could not load telemetry" : `No generation runs ${rangePhrase}`} description={error ?? "Generated posts will appear here once the drafting pipeline produces an asset in this window."} />}
+        </div>
+        <div className="hidden overflow-x-auto sm:block">
+          <table className="w-full text-left text-xs min-w-[480px]">
             <thead>
               <tr className="border-b border-[#1F2D3D] text-[#94A3B8] font-mono text-[11px]">
                 <th className="pb-3 font-semibold">ASSET ID</th>
                 <th className="pb-3 font-semibold">TITLE</th>
                 <th className="pb-3 font-semibold">AUDIENCE</th>
-                <th className="pb-3 font-semibold text-right">COST</th>
                 <th className="pb-3 font-semibold text-right pr-2">STUDIO</th>
               </tr>
             </thead>
@@ -277,10 +225,6 @@ export default function TelemetryPage() {
                     </span>
                   </td>
 
-                  <td className="py-4 font-mono font-bold text-[#00C9A7] text-right text-sm">
-                    {formatCost(row.total_cost)}
-                  </td>
-
                   <td className="py-4 text-right pr-2">
                     <Link
                       href={`/drafts/${row.asset_id}`}
@@ -294,11 +238,11 @@ export default function TelemetryPage() {
               ))}
               {!isLoading && ledgerData.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-6">
+                  <td colSpan={4} className="py-6">
                     <EmptyState
                       title={error ? "Could not load telemetry" : `No generation runs ${rangePhrase}`}
                       description={
-                        error ?? "Cost rows appear once the drafting pipeline produces an asset in this window."
+                        error ?? "Generated posts will appear here once the drafting pipeline produces an asset in this window."
                       }
                     />
                   </td>

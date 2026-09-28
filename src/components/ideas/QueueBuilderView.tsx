@@ -253,86 +253,52 @@ export default function QueueBuilderView({
 
   return (
     <div className="space-y-4">
-      {/* Overview Banner - Slim & Modern */}
-      <div className="bg-[#0F1419] p-3 px-4 rounded-xl border border-[#1F2D3D] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
-        <div className="flex items-center gap-3 min-w-0 w-full">
-          <div className="w-8 h-8 rounded-lg bg-[#00C9A7]/10 border border-[#00C9A7]/30 flex items-center justify-center text-[#00C9A7] shrink-0">
-            <Layers className="w-4 h-4" />
+      {/* Queue overview */}
+      <section className="rounded-2xl border border-[#1F2D3D] bg-[#0F1419] p-4 shadow-sm sm:p-5">
+        <div className="flex items-start gap-3">
+          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#00C9A7]/25 bg-[#00C9A7]/10 text-[#00C9A7]">
+            <Layers aria-hidden="true" className="h-5 w-5" />
           </div>
-          <div className="min-w-0">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 mb-1">
-              <h2 className="text-sm font-bold text-white tracking-tight">
-                Production Queue
-              </h2>
-              <span className="text-[10px] font-mono font-bold text-[#00C9A7] bg-[#00C9A7]/10 px-2 py-0.2 rounded-full border border-[#00C9A7]/20">
-                Twice Daily (09:00 & 15:00 UTC)
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <h2 className="text-sm font-bold tracking-tight text-white">Production Queue</h2>
+              <span className="whitespace-nowrap rounded-full border border-[#00C9A7]/20 bg-[#00C9A7]/10 px-2 py-1 text-[10px] font-semibold text-[#00C9A7]">
+                Drafts twice daily · 09:00 & 15:00 UTC
               </span>
               {isSavingOrder && (
-                <span className="flex items-center gap-1 text-[10px] font-mono text-[#00C9A7]">
-                  <Loader2 className="w-2.5 h-2.5 animate-spin" />
-                  <span>Syncing...</span>
+                <span role="status" className="inline-flex items-center gap-1 text-[10px] text-[#00C9A7]">
+                  <Loader2 aria-hidden="true" className="h-3 w-3 animate-spin" /> Saving
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-[#94A3B8] break-words whitespace-normal mt-1">
-              Choose the next ICP topic. Minions drafts the first item on schedule.
+            <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">
+              Add ideas to the queue. Minions drafts the first one automatically.
             </p>
           </div>
         </div>
+      </section>
 
-        {/* Quick Execution Button for #1 Item */}
-        <div className="flex items-center gap-2 shrink-0 self-stretch sm:self-auto">
-          {queuedIdeas.length > 0 ? (
-            <button
-              onClick={() => onDraftIdea(queuedIdeas[0].id || queuedIdeas[0].ideaId || "")}
-              disabled={isDrafting}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] disabled:opacity-50 text-[#070B0F] text-xs font-extrabold px-4 py-2 rounded-xl shadow-md shadow-[#00C9A7]/20 transition-all active:scale-95 cursor-pointer"
-            >
-              {isDrafting ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Drafting #1 in Queue...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4 shrink-0" />
-                  <span className="truncate max-w-[220px] sm:max-w-xs">Draft #1 Now: &quot;{queuedIdeas[0].title || queuedIdeas[0].raw_idea}&quot;</span>
-                </>
-              )}
-            </button>
-          ) : (
-            <div className="text-[11px] text-[#64748B] italic bg-[#161D26] px-3 py-1.5 rounded-lg border border-[#1F2D3D]">
-              Queue is empty. Drag an idea below to queue it.
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Mobile Column Switcher (Visible only on mobile/tablet) */}
-      <div className="lg:hidden flex items-center p-1 bg-[#0F1419] border border-[#1F2D3D] rounded-xl shadow-md">
+      {/* Mobile Column Switcher */}
+      <div role="tablist" aria-label="Queue and ideas" className="grid grid-cols-2 gap-1 rounded-2xl border border-[#1F2D3D] bg-[#0F1419] p-1.5 shadow-sm lg:hidden">
         <button
           type="button"
+          role="tab"
+          aria-selected={mobileTab === "queue"}
           onClick={() => setMobileTab("queue")}
-          className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-            mobileTab === "queue"
-              ? "bg-[#00C9A7] text-[#070B0F] shadow-sm"
-              : "text-[#94A3B8] hover:text-white"
-          }`}
+          className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold transition-colors ${mobileTab === "queue" ? "bg-[#00C9A7] text-[#070B0F] shadow-sm" : "text-[#94A3B8] hover:bg-[#161D26] hover:text-white"}`}
         >
-          <Layers className="w-3.5 h-3.5" />
-          <span>Queue ({queuedIdeas.length})</span>
+          <Layers aria-hidden="true" className="h-4 w-4 shrink-0" />
+          <span>Queue <span className="tabular-nums">{queuedIdeas.length}</span></span>
         </button>
         <button
           type="button"
+          role="tab"
+          aria-selected={mobileTab === "pool"}
           onClick={() => setMobileTab("pool")}
-          className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-            mobileTab === "pool"
-              ? "bg-[#00C9A7] text-[#070B0F] shadow-sm"
-              : "text-[#94A3B8] hover:text-white"
-          }`}
+          className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold transition-colors ${mobileTab === "pool" ? "bg-[#00C9A7] text-[#070B0F] shadow-sm" : "text-[#94A3B8] hover:bg-[#161D26] hover:text-white"}`}
         >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Ideas ({poolIdeas.length})</span>
+          <Sparkles aria-hidden="true" className="h-4 w-4 shrink-0" />
+          <span>Ideas <span className="tabular-nums">{poolIdeas.length}</span></span>
         </button>
       </div>
 
@@ -478,10 +444,10 @@ export default function QueueBuilderView({
               <div className="h-48 border-2 border-dashed border-[#1F2D3D] rounded-xl flex flex-col items-center justify-center p-6 text-center space-y-2">
                 <Layers className="w-6 h-6 text-[#475569]" />
                 <div className="text-xs font-semibold text-[#94A3B8]">
-                  Drop Ideas Here to Queue
+                  Your queue is empty
                 </div>
                 <p className="text-[11px] text-[#64748B] max-w-xs">
-                  Add an idea from the Ideas tab to place it in the drafting queue.
+                  Choose an idea from the Ideas tab to add it here.
                 </p>
               </div>
             ) : (

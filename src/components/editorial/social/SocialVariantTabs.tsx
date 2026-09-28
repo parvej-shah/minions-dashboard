@@ -88,7 +88,7 @@ export default function SocialVariantTabs({
   };
 
   return (
-    <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-5 space-y-5 shadow-xl">
+    <div className="space-y-4 bg-transparent p-0 shadow-none sm:space-y-5 sm:rounded-2xl sm:border sm:border-[#1F2D3D] sm:bg-[#0F1419] sm:p-5 sm:shadow-xl">
       {/* Header & Platform Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1F2D3D] pb-4">
         <div className="flex items-center gap-2">
@@ -145,9 +145,9 @@ export default function SocialVariantTabs({
       {/* TAB A: LINKEDIN REALISTIC FEED MOCK & EDITOR */}
       {/* ======================================================== */}
       {showLinkedin && socialTab === "LINKEDIN" && (
-        <div className="bg-[#070B0F] rounded-2xl border border-[#1F2D3D] p-5 space-y-4 font-sans shadow-lg">
+        <div className="space-y-4 rounded-2xl border border-[#1F2D3D] bg-[#070B0F] p-4 font-sans sm:p-5 sm:shadow-lg">
           {/* Author Header */}
-          <div className="flex items-center justify-between gap-3 border-b border-[#1F2D3D]/50 pb-3.5">
+          <div className="flex flex-col gap-3 border-b border-[#1F2D3D]/50 pb-3.5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 rounded-full bg-[#0077B5]/20 border border-[#0077B5]/40 flex items-center justify-center font-bold text-xs text-[#0077B5] shrink-0">
                 in
@@ -167,24 +167,25 @@ export default function SocialVariantTabs({
             </div>
 
             {/* Action Bar */}
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex w-full items-center gap-2 sm:w-auto sm:shrink-0">
               <button
                 type="button"
                 onClick={() => setIsEditingSocial(!isEditingSocial)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border cursor-pointer ${
+                className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-xl text-xs font-semibold transition-all border cursor-pointer sm:flex-none ${
                   isEditingSocial
                     ? "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/40 shadow-xs"
                     : "bg-[#161D26] hover:bg-[#1E2733] text-[#94A3B8] hover:text-[#F1F5F9] border-[#1F2D3D]"
                 }`}
               >
                 <Edit3 className="w-3.5 h-3.5" />
-                <span>{isEditingSocial ? "Previewing" : "Edit Copy"}</span>
+                <span className="sm:hidden">{isEditingSocial ? "Preview" : "Edit"}</span>
+                <span className="hidden sm:inline">{isEditingSocial ? "Previewing" : "Edit Copy"}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => onCopy(edited.linkedin || "", "social-linkedin")}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0077B5]/20 hover:bg-[#0077B5]/30 text-[#0077B5] border border-[#0077B5]/40 text-xs font-semibold transition-all cursor-pointer"
+                className="flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-xl sm:flex-none bg-[#0077B5]/20 hover:bg-[#0077B5]/30 text-[#0077B5] border border-[#0077B5]/40 text-xs font-semibold transition-all cursor-pointer"
               >
                 {copiedKey === "social-linkedin" ? (
                   <Check className="w-3.5 h-3.5 text-[#00C9A7]" />
@@ -244,7 +245,7 @@ export default function SocialVariantTabs({
               </div>
             </div>
           ) : (
-            <div className="text-xs text-[#F1F5F9] leading-relaxed whitespace-pre-line bg-[#0B0F14] p-4.5 rounded-xl border border-[#1F2D3D]/60 font-sans select-text">
+            <div className="whitespace-pre-line break-words rounded-none border-0 bg-transparent p-0 font-sans text-[14px] leading-[1.65] text-[#F1F5F9] select-text sm:rounded-xl sm:border sm:border-[#1F2D3D]/60 sm:bg-[#0B0F14] sm:p-4.5 sm:text-xs sm:leading-relaxed">
               {edited.linkedin || (
                 <span className="text-[#64748B] italic">
                   No LinkedIn variant was generated for this draft yet.
@@ -321,7 +322,7 @@ export default function SocialVariantTabs({
       {showFacebook && socialTab === "FACEBOOK" && (
         <div className="bg-[#070B0F] rounded-2xl border border-[#1F2D3D] p-5 space-y-4 font-sans shadow-lg">
           {/* Facebook Author Header */}
-          <div className="flex items-center justify-between gap-3 border-b border-[#1F2D3D]/50 pb-3.5">
+          <div className="flex flex-col gap-3 border-b border-[#1F2D3D]/50 pb-3.5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-[#1877F2]/20 border border-[#1877F2]/40 flex items-center justify-center font-bold text-xs text-[#1877F2] shrink-0">
                 f
@@ -341,24 +342,25 @@ export default function SocialVariantTabs({
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex w-full items-center gap-2 sm:w-auto sm:shrink-0">
               <button
                 type="button"
                 onClick={() => setIsEditingSocial(!isEditingSocial)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border cursor-pointer ${
+                className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-xl text-xs font-semibold transition-all border cursor-pointer sm:flex-none ${
                   isEditingSocial
                     ? "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/40 shadow-xs"
                     : "bg-[#161D26] hover:bg-[#1E2733] text-[#94A3B8] hover:text-[#F1F5F9] border-[#1F2D3D]"
                 }`}
               >
                 <Edit3 className="w-3.5 h-3.5" />
-                <span>{isEditingSocial ? "Previewing" : "Edit Copy"}</span>
+                <span className="sm:hidden">{isEditingSocial ? "Preview" : "Edit"}</span>
+                <span className="hidden sm:inline">{isEditingSocial ? "Previewing" : "Edit Copy"}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => onCopy(edited.facebook || "", "social-facebook")}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1877F2]/20 hover:bg-[#1877F2]/30 text-[#1877F2] border border-[#1877F2]/40 text-xs font-semibold transition-all cursor-pointer"
+                className="flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-lg sm:flex-none bg-[#1877F2]/20 hover:bg-[#1877F2]/30 text-[#1877F2] border border-[#1877F2]/40 text-xs font-semibold transition-all cursor-pointer"
               >
                 {copiedKey === "social-facebook" ? (
                   <Check className="w-3.5 h-3.5 text-[#00C9A7]" />
@@ -460,7 +462,7 @@ export default function SocialVariantTabs({
       {showTwitter && socialTab === "TWITTER" && (
         <div className="bg-[#070B0F] rounded-2xl border border-[#1F2D3D] p-5 space-y-4 font-sans shadow-lg">
           {/* Twitter Author Header */}
-          <div className="flex items-center justify-between gap-3 border-b border-[#1F2D3D]/50 pb-3.5">
+          <div className="flex flex-col gap-3 border-b border-[#1F2D3D]/50 pb-3.5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center font-bold text-xs text-white shrink-0">
                 𝕏
@@ -476,24 +478,25 @@ export default function SocialVariantTabs({
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex w-full items-center gap-2 sm:w-auto sm:shrink-0">
               <button
                 type="button"
                 onClick={() => setIsEditingSocial(!isEditingSocial)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border cursor-pointer ${
+                className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-xl text-xs font-semibold transition-all border cursor-pointer sm:flex-none ${
                   isEditingSocial
                     ? "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/40 shadow-xs"
                     : "bg-[#161D26] hover:bg-[#1E2733] text-[#94A3B8] hover:text-[#F1F5F9] border-[#1F2D3D]"
                 }`}
               >
                 <Edit3 className="w-3.5 h-3.5" />
-                <span>{isEditingSocial ? "Previewing" : "Edit Copy"}</span>
+                <span className="sm:hidden">{isEditingSocial ? "Preview" : "Edit"}</span>
+                <span className="hidden sm:inline">{isEditingSocial ? "Previewing" : "Edit Copy"}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => onCopy(edited.twitter || "", "social-twitter")}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/30 text-xs font-semibold transition-all cursor-pointer"
+                className="flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-lg sm:flex-none bg-white/10 hover:bg-white/20 text-white border border-white/30 text-xs font-semibold transition-all cursor-pointer"
               >
                 {copiedKey === "social-twitter" ? (
                   <Check className="w-3.5 h-3.5 text-[#00C9A7]" />

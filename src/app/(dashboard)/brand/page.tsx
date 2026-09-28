@@ -94,73 +94,66 @@ function BrandStudio() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-6">
+      <div className="space-y-5 border-b border-[#1F2D3D] pb-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#00C9A7] uppercase mb-1">
-            <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
-            Brand Governance & Visual Asset Engine
+          <div className="mb-2 flex items-center gap-2 text-[11px] font-mono tracking-[0.16em] text-[#00C9A7] uppercase">
+            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#00C9A7]" />
+            Brand profile
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-[#F1F5F9]">Brand</h1>
-          <p className="text-sm text-[#94A3B8] mt-1">
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#94A3B8]">
             Tell the AI who you are, what you post about, and how you sound.
           </p>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="flex flex-wrap items-center bg-[#0F1419] p-1 rounded-xl border border-[#1F2D3D] self-start md:self-auto gap-1 max-w-full overflow-x-auto">
+        <div
+          role="group"
+          aria-label="Brand sections"
+          className="flex w-full max-w-full flex-nowrap items-center gap-1 overflow-x-auto overscroll-x-contain rounded-xl border border-[#1F2D3D] bg-[#0F1419] p-1"
+        >
           <button
+            type="button"
+            aria-pressed={activeTab === "voice-proof"}
             onClick={() => setActiveTab("voice-proof")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "voice-proof"
-                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
-                : "text-[#94A3B8] hover:text-[#F1F5F9]"
-            }`}
+            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] sm:px-4 sm:text-sm " + (activeTab === "voice-proof" ? "bg-[#00C9A7] text-[#070B0F]" : "text-[#94A3B8] hover:text-[#F1F5F9]")}
           >
-            <Mic2 className="w-3.5 h-3.5" />
-            Voice & Proof
+            <Mic2 className="h-4 w-4" aria-hidden="true" />
+            Voice &amp; Proof
           </button>
           <button
+            type="button"
+            aria-pressed={activeTab === "overview"}
             onClick={() => setActiveTab("overview")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "overview"
-                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
-                : "text-[#94A3B8] hover:text-[#F1F5F9]"
-            }`}
+            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] sm:px-4 sm:text-sm " + (activeTab === "overview" ? "bg-[#00C9A7] text-[#070B0F]" : "text-[#94A3B8] hover:text-[#F1F5F9]")}
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
             Overview
           </button>
           <button
+            type="button"
+            aria-pressed={activeTab === "experience"}
             onClick={() => setActiveTab("experience")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "experience"
-                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
-                : "text-[#94A3B8] hover:text-[#F1F5F9]"
-            }`}
+            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] sm:px-4 sm:text-sm " + (activeTab === "experience" ? "bg-[#00C9A7] text-[#070B0F]" : "text-[#94A3B8] hover:text-[#F1F5F9]")}
           >
-            <BookOpen className="w-3.5 h-3.5" />
+            <BookOpen className="h-4 w-4" aria-hidden="true" />
             Audience &amp; Experience
           </button>
           <button
+            type="button"
+            aria-pressed={activeTab === "sources"}
             onClick={() => setActiveTab("sources")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "sources"
-                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
-                : "text-[#94A3B8] hover:text-[#F1F5F9]"
-            }`}
+            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] sm:px-4 sm:text-sm " + (activeTab === "sources" ? "bg-[#00C9A7] text-[#070B0F]" : "text-[#94A3B8] hover:text-[#F1F5F9]")}
           >
-            <Rss className="w-3.5 h-3.5" />
+            <Rss className="h-4 w-4" aria-hidden="true" />
             Idea Sources
           </button>
           <button
+            type="button"
+            aria-pressed={activeTab === "lexicon"}
             onClick={() => setActiveTab("lexicon")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "lexicon"
-                ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
-                : "text-[#94A3B8] hover:text-[#F1F5F9]"
-            }`}
+            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] sm:px-4 sm:text-sm " + (activeTab === "lexicon" ? "bg-[#00C9A7] text-[#070B0F]" : "text-[#94A3B8] hover:text-[#F1F5F9]")}
           >
-            <AlertTriangle className="w-3.5 h-3.5" />
+            <AlertTriangle className="h-4 w-4" aria-hidden="true" />
             Banned Words ({forbiddenDirectives.length})
           </button>
         </div>

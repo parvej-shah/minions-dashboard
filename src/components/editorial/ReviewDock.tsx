@@ -20,7 +20,6 @@ import SchedulePicker, { useWorkspaceTimezone, zoneLabel } from "./SchedulePicke
 import PostChannels from "./PostChannels";
 import type { DistributionChannelKey } from "@/types";
 import { formatPostTime } from "@/lib/postTime";
-import { formatCost } from "@/utils/format";
 import { useBrandSettings } from "@/hooks/useBrandSettings";
 import { normalizeDomain } from "@/constants/config";
 import type { PublishState } from "@/hooks/useEditorialDraft";
@@ -33,8 +32,6 @@ export interface ReviewDockProps {
   isDirty: boolean;
   isSaving: boolean;
   publishState: PublishState;
-  wordCount: number;
-  readingTimeMinutes: number;
   onPrev: () => void;
   onNext: () => void;
   onSave: () => void;
@@ -72,8 +69,6 @@ export default function ReviewDock({
   isDirty,
   isSaving,
   publishState,
-  wordCount,
-  readingTimeMinutes,
   onPrev,
   onNext,
   onSave,
@@ -395,28 +390,7 @@ export default function ReviewDock({
             </div>
           )}
 
-          {/* Compact Metadata Chips */}
-          <div className="pt-2 border-t border-[#1F2D3D]/60 space-y-2">
-            <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
-              <div className="px-2.5 py-1.5 rounded-lg bg-[#070B0F] border border-[#1F2D3D]/60 flex items-center justify-between">
-                <span className="text-[#64748B]">Audience:</span>
-                <span className="text-[#F1F5F9] font-bold">{activeAsset.audience}</span>
-              </div>
-              <div className="px-2.5 py-1.5 rounded-lg bg-[#070B0F] border border-[#1F2D3D]/60 flex items-center justify-between">
-                <span className="text-[#64748B]">Length:</span>
-                <span className="text-[#F1F5F9] font-bold">{wordCount}w</span>
-              </div>
-              <div className="px-2.5 py-1.5 rounded-lg bg-[#070B0F] border border-[#1F2D3D]/60 flex items-center justify-between">
-                <span className="text-[#64748B]">Read Time:</span>
-                <span className="text-[#F1F5F9] font-bold">~{readingTimeMinutes}m</span>
-              </div>
-              <div className="px-2.5 py-1.5 rounded-lg bg-[#070B0F] border border-[#1F2D3D]/60 flex items-center justify-between">
-                <span className="text-[#64748B]">Cost:</span>
-                <span className="text-[#00C9A7] font-bold">{formatCost(activeAsset.generation_cost)}</span>
-              </div>
-            </div>
 
-          </div>
         </div>
   );
 }

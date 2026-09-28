@@ -273,8 +273,6 @@ export default function EditorialStudio({
             isDirty={draft.isDirty}
             isSaving={draft.isSaving}
             publishState={draft.publishState}
-            wordCount={wordCount}
-            readingTimeMinutes={readingTimeMinutes}
             onPrev={draft.prevDraft}
             onNext={draft.nextDraft}
             onSave={handleSave}

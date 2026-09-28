@@ -45,7 +45,7 @@ export default function MissionControlPage() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
       {/* HERO / WELCOME HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-6">
         <div>
           <div className="flex flex-wrap items-center gap-2 text-xs font-mono tracking-widest text-[#00C9A7] uppercase mb-1">
             <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse shrink-0" />
@@ -59,21 +59,25 @@ export default function MissionControlPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap w-full sm:w-auto">
+        <div className="grid w-full grid-cols-2 gap-2 lg:flex lg:w-auto lg:items-center lg:gap-2.5">
           <Link
             href="/ideas"
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-xs font-semibold text-[#F1F5F9] px-4 py-2.5 rounded-xl transition-all shadow-sm active:scale-95"
+            aria-label="Discover Ideas"
+            className="flex min-h-12 w-full min-w-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-[#1F2D3D] bg-[#161D26] px-2.5 py-3 text-xs font-semibold text-[#F1F5F9] shadow-sm transition-all hover:bg-[#1E2733] active:scale-[0.98] sm:px-4 lg:w-auto lg:flex-none"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#00C9A7]" />
-            <span>Discover Ideas</span>
+            <Sparkles aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-[#00C9A7]" />
+            <span className="lg:hidden">Ideas</span>
+            <span className="hidden lg:inline">Discover Ideas</span>
           </Link>
 
           <Link
             href="/editorial"
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/20 transition-all active:scale-95"
+            aria-label={`Open Editorial Studio: ${pendingReviewAssets.length} items to review`}
+            className="flex min-h-12 w-full min-w-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#00C9A7] px-2.5 py-3 text-xs font-bold text-[#070B0F] shadow-lg shadow-[#00C9A7]/20 transition-all hover:bg-[#00A88A] active:scale-[0.98] sm:px-4 lg:w-auto lg:flex-none"
           >
-            <FileText className="w-3.5 h-3.5" />
-            <span>Editorial Studio ({pendingReviewAssets.length})</span>
+            <FileText aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+            <span className="lg:hidden">Review ({pendingReviewAssets.length})</span>
+            <span className="hidden lg:inline">Editorial Studio ({pendingReviewAssets.length})</span>
           </Link>
         </div>
       </div>

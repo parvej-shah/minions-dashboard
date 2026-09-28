@@ -59,34 +59,45 @@ export default function ArticleEditor({
   return (
           <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-5 sm:p-6 space-y-5 shadow-xl">
             {/* Header Toolbar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1F2D3D] pb-3">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D] text-xs">
+            <div className="flex flex-col gap-3 border-b border-[#1F2D3D] pb-3 2xl:flex-row 2xl:items-center 2xl:justify-between">
+              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                <div className="flex w-full items-center bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D] text-xs sm:w-auto">
                   <button
+                    type="button"
+                    aria-label="Reading View"
+                    aria-pressed={editorMode === "preview"}
                     onClick={() => setEditorMode("preview")}
-                    className={`flex items-center gap-1.5 px-4 py-2 sm:px-3 sm:py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                    className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-2.5 py-2 sm:flex-none sm:px-3 sm:py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                       editorMode === "preview"
                         ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
                         : "text-[#94A3B8] hover:text-[#F1F5F9]"
                     }`}
                   >
                     <Eye className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                    <span className="sm:hidden">Read</span>
                     <span className="hidden sm:inline">Reading View</span>
                   </button>
                   <button
+                    type="button"
+                    aria-label="Live Editor"
+                    aria-pressed={editorMode === "edit"}
                     onClick={() => setEditorMode("edit")}
-                    className={`flex items-center gap-1.5 px-4 py-2 sm:px-3 sm:py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                    className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-2.5 py-2 sm:flex-none sm:px-3 sm:py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                       editorMode === "edit"
                         ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
                         : "text-[#94A3B8] hover:text-[#F1F5F9]"
                     }`}
                   >
                     <Edit3 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                    <span className="sm:hidden">Edit</span>
                     <span className="hidden sm:inline">Live Editor</span>
                   </button>
                   <button
+                    type="button"
+                    aria-label="Side-by-Side"
+                    aria-pressed={editorMode === "split"}
                     onClick={() => setEditorMode("split")}
-                    className={`hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                    className={`hidden 2xl:flex items-center gap-1.5 whitespace-nowrap px-2.5 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                       editorMode === "split"
                         ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
                         : "text-[#94A3B8] hover:text-[#F1F5F9]"
@@ -98,32 +109,33 @@ export default function ArticleEditor({
                 </div>
 
                 {/* Live Save Status */}
-                <div className="hidden sm:flex items-center gap-2">
+                <div className="flex min-w-0 items-center gap-2 sm:max-w-[190px]">
                   {isSaving ? (
-                    <span className="flex items-center gap-1.5 text-[11px] font-mono text-[#00C9A7]">
+                    <span className="flex min-w-0 items-center gap-1.5 truncate text-[11px] font-mono text-[#00C9A7]">
                       <RefreshCw className="w-3 h-3 animate-spin" />
-                      Saving to database...
+                      Saving changes…
                     </span>
                   ) : isDirty ? (
-                    <span className="flex items-center gap-1.5 text-[11px] font-mono text-[#F59E0B] font-semibold bg-[#F59E0B]/10 px-2 py-0.5 rounded border border-[#F59E0B]/20">
+                    <span className="flex items-center gap-1.5 whitespace-nowrap text-[11px] font-mono text-[#F59E0B] font-semibold bg-[#F59E0B]/10 px-2 py-1 rounded-lg border border-[#F59E0B]/20">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] animate-pulse" />
                       Unsaved changes
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1.5 text-[11px] font-mono text-[#00C9A7] bg-[#00C9A7]/10 px-2 py-0.5 rounded border border-[#00C9A7]/20">
+                    <span className="flex min-w-0 items-center gap-1.5 whitespace-nowrap text-[11px] font-mono text-[#00C9A7] bg-[#00C9A7]/10 px-2 py-1 rounded-lg border border-[#00C9A7]/20">
                       <Check className="w-3 h-3" />
-                      {statusLabel || "All changes saved"}
+                      <span className="truncate">{statusLabel || "All changes saved"}</span>
                     </span>
                   )}
                 </div>
               </div>
 
               {/* Action Buttons: Save Draft (Cmd+S) & Copy */}
-              <div className="flex items-center gap-2">
+              <div className="flex w-full items-center gap-2 sm:w-auto 2xl:shrink-0">
                 <button
+                  type="button"
                   onClick={onSave}
                   disabled={isSaving}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer ${
+                  className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-4 py-2 text-xs font-bold transition-all shadow-sm cursor-pointer sm:flex-none ${
                     isDirty
                       ? "bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] shadow-[#00C9A7]/20"
                       : "bg-[#161D26] hover:bg-[#1E2733] text-[#F1F5F9] border border-[#1F2D3D]"
@@ -142,8 +154,10 @@ export default function ArticleEditor({
                 </button>
 
                 <button
+                  type="button"
+                  aria-label="Copy Markdown source"
                   onClick={() => onCopy(edited.body, "raw-markdown")}
-                  className="p-1.5 rounded-xl bg-[#070B0F] hover:bg-[#161D26] text-[#94A3B8] hover:text-[#F1F5F9] border border-[#1F2D3D] transition-all"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#070B0F] text-[#94A3B8] border border-[#1F2D3D] transition-all hover:bg-[#161D26] hover:text-[#F1F5F9]"
                   title="Copy Markdown Source"
                 >
                   {copiedKey === "raw-markdown" ? (

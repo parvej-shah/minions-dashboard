@@ -58,7 +58,8 @@ export default function MobileActionBar({
       <button
         onClick={onSave}
         disabled={isSaving}
-        className={`p-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+        aria-label={isSaving ? "Saving draft" : "Save draft"}
+        className={`min-h-11 min-w-11 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
           isDirty
             ? "bg-[#00C9A7] text-[#070B0F] border-[#00C9A7]"
             : "bg-[#161D26] text-[#94A3B8] border-[#1F2D3D]"
@@ -66,6 +67,7 @@ export default function MobileActionBar({
         title="Save Draft (⌘S)"
       >
         {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+        <span>Save</span>
       </button>
 
       {activeAsset.status === "PUBLISHED" ? (
@@ -73,7 +75,7 @@ export default function MobileActionBar({
           href={activeAsset.doc_url}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-3.5 py-2 bg-[#00C9A7] text-[#070B0F] rounded-xl text-xs font-bold flex items-center gap-1 shrink-0 shadow-sm"
+          className="min-h-11 px-3.5 py-2 bg-[#00C9A7] text-[#070B0F] rounded-xl text-xs font-bold flex items-center gap-1 shrink-0 shadow-sm"
         >
           <span>Live</span>
           <ExternalLink className="w-3 h-3" />
@@ -82,7 +84,7 @@ export default function MobileActionBar({
         <button
           onClick={onPublish}
           disabled={publishState === "pending"}
-          className="px-3.5 py-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-lg shadow-[#00C9A7]/20 disabled:opacity-50 cursor-pointer"
+          className="min-h-11 px-3.5 py-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-lg shadow-[#00C9A7]/20 disabled:opacity-50 cursor-pointer"
         >
           {publishState === "pending" ? (
             <>

@@ -15,6 +15,7 @@ import {
   Sparkles,
   ShieldAlert,
   X,
+  Zap,
 } from "lucide-react";
 import { BLOG_BASE_URL } from "@/constants/config";
 import { useBrandSettings } from "@/hooks/useBrandSettings";
@@ -22,6 +23,7 @@ import type { NavItem } from "@/constants/nav";
 import type { NavCounts } from "@/types";
 import type { Session } from "next-auth";
 import QuotaMeter from "./QuotaMeter";
+import WorkspaceSwitcher from "./WorkspaceSwitcher";
 
 export interface MobileNavProps {
   navItems: NavItem[];
@@ -34,6 +36,8 @@ export interface MobileNavProps {
   onOpenAuthModal: () => void;
   onSignIn: () => void;
   onSignOut: () => void;
+  isHarvesting?: boolean;
+  onHarvest?: () => void;
   /** Whether this tenant has the blog channel switched on. Undefined means
    *  "not loaded yet"; defaults to true so the blog links don't flash away. */
   blogEnabled?: boolean;
@@ -42,6 +46,7 @@ export interface MobileNavProps {
 /** The slide-over drawer, the compact top bar, and the fixed bottom tab bar. */
 export function MobileDrawer({
   navItems,
+  navCounts,
   pathname,
   session,
   mobileMenuOpen,
@@ -50,6 +55,8 @@ export function MobileDrawer({
   onOpenAuthModal,
   onSignIn,
   onSignOut,
+  isHarvesting = false,
+  onHarvest,
   blogEnabled = true,
 }: MobileNavProps) {
   const { brandSettings } = useBrandSettings();
@@ -65,8 +72,8 @@ export function MobileDrawer({
   {mobileMenuOpen && (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md md:hidden flex animate-in fade-in duration-200">
       <div className="w-4/5 max-w-sm bg-[#0f1419] h-full p-5 flex flex-col justify-between border-r border-[#1f2b37] overflow-y-auto">
-        <div className="space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-[#1f2b37]">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#1f2b37]">
             <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-baseline">
               <span className="font-extrabold text-xl tracking-tight text-white">Minions</span>
               <span className="text-[#ff6b4a] font-bold text-xl ml-0.5">.AI</span>
@@ -79,6 +86,10 @@ export function MobileDrawer({
               <X className="w-5 h-5" />
             </button>
           </div>
+
+          {session && <WorkspaceSwitcher />}
+
+          {navCounts && <QuotaMeter quota={navCounts.quota} />}
 
           {/* Mobile Search */}
           <button
@@ -97,7 +108,25 @@ export function MobileDrawer({
             </kbd>
           </button>
 
-          <div className="space-y-1">
+          {/* QUICK TRIGGER BUTTON */}
+          {onHarvest && (
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onHarvest();
+              }}
+              disabled={isHarvesting}
+              className="w-full flex items-center justify-center gap-2 bg-[#ff6b4a] hover:bg-[#ff522b] text-white text-xs font-bold py-3 px-3 rounded-xl shadow-lg shadow-[#ff6b4a]/20 transition-all cursor-pointer disabled:opacity-50"
+            >
+              <Zap className={`w-3.5 h-3.5 ${isHarvesting ? "animate-spin" : ""}`} />
+              <span>{isHarvesting ? "Harvesting Signals..." : "Trigger Idea Harvester"}</span>
+            </button>
+          )}
+
+          <div className="space-y-1 pt-1">
+            <div className="text-[10px] font-mono font-bold tracking-wider text-[#64748B] uppercase px-3 mb-2">
+              Agent Control
+            </div>
             {navItems.map((item) => {
               const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
               const Icon = item.icon;
@@ -209,8 +238,13 @@ export function MobileTopBar({
   onOpenPalette,
   setMobileMenuOpen,
   navCounts,
+  isHarvesting = false,
+  onHarvest,
   blogEnabled = true,
-}: Pick<MobileNavProps, "onOpenPalette" | "setMobileMenuOpen" | "navCounts" | "blogEnabled">) {
+}: Pick<MobileNavProps, "onOpenPalette" | "setMobileMenuOpen" | "navCounts" | "blogEnabled"> & {
+  isHarvesting?: boolean;
+  onHarvest?: () => void;
+}) {
   const { brandSettings } = useBrandSettings();
   const liveBlogUrl = brandSettings?.company_domain
     ? (brandSettings.company_domain.startsWith("http") ? brandSettings.company_domain : `https://${brandSettings.company_domain}`)
@@ -220,28 +254,40 @@ export function MobileTopBar({
   const hasOwnBlog = !brandSettings || Boolean(brandSettings.company_domain);
 
   return (
-  <header className="h-14 border-b border-[#1f2b37] bg-[#0f1419]/95 backdrop-blur-md px-4 flex items-center justify-between sticky top-0 z-30 md:hidden">
-    <div className="flex items-center gap-2.5">
+  <header className="h-14 border-b border-[#1f2b37] bg-[#0f1419]/95 backdrop-blur-md px-3.5 sm:px-4 flex items-center justify-between sticky top-0 z-30 md:hidden">
+    <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
       <button
         onClick={() => setMobileMenuOpen(true)}
-        className="p-2 rounded-xl bg-[#161d24] text-[#94A3B8] hover:text-white border border-[#1f2b37]"
+        className="p-2 rounded-xl bg-[#161d24] text-[#94A3B8] hover:text-white border border-[#1f2b37] shrink-0"
         aria-label="Open menu"
       >
         <Menu className="w-4 h-4" />
       </button>
 
-      <Link href="/" className="flex items-baseline">
+      <Link href="/" className="flex items-baseline shrink-0">
         <span className="font-extrabold text-base tracking-tight text-white">Minions</span>
         <span className="text-[#ff6b4a] font-bold text-base ml-0.5">.AI</span>
       </Link>
     </div>
 
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5 sm:gap-2">
       {navCounts && <QuotaMeter quota={navCounts.quota} compact />}
+
+      {onHarvest && (
+        <button
+          onClick={onHarvest}
+          disabled={isHarvesting}
+          className="p-2 rounded-xl bg-[#ff6b4a]/10 hover:bg-[#ff6b4a]/20 text-[#ff6b4a] border border-[#ff6b4a]/30 transition-all disabled:opacity-50 shrink-0"
+          title="Trigger Idea Harvester"
+          aria-label="Trigger Idea Harvester"
+        >
+          <Zap className={`w-4 h-4 ${isHarvesting ? "animate-spin" : ""}`} />
+        </button>
+      )}
 
       <button
         onClick={() => onOpenPalette()}
-        className="p-2 rounded-xl bg-[#161d24] text-[#94A3B8] hover:text-white border border-[#1f2b37]"
+        className="p-2 rounded-xl bg-[#161d24] text-[#94A3B8] hover:text-white border border-[#1f2b37] shrink-0"
         title="Search"
         aria-label="Search"
       >
@@ -292,7 +338,7 @@ export function MobileBottomNav({
       }`}
     >
       <Sparkles className="w-5 h-5" />
-      <span className="text-[10px] font-medium">Queue</span>
+      <span className="text-[10px] font-medium">Ideas</span>
       {navCounts && navCounts.ideasReady > 0 && (
         <span className="absolute top-1 right-2.5 w-1.5 h-1.5 rounded-full bg-[#00C9A7]" />
       )}

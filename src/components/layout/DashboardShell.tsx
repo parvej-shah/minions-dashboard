@@ -130,6 +130,8 @@ export default function DashboardShell({ children }: DashboardShellProps) {
     onOpenAuthModal: () => setAuthModalOpen(true),
     onSignIn: handleSignIn,
     onSignOut: handleSignOut,
+    isHarvesting,
+    onHarvest: triggerHarvest,
     blogEnabled,
   };
 
@@ -167,6 +169,8 @@ export default function DashboardShell({ children }: DashboardShellProps) {
           onOpenPalette={() => setShowPalette(true)}
           setMobileMenuOpen={setMobileMenuOpen}
           navCounts={navCounts}
+          isHarvesting={isHarvesting}
+          onHarvest={triggerHarvest}
         />
 
         {notification && (
