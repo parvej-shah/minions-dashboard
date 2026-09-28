@@ -1175,7 +1175,7 @@ Slices 2–4 (built 2026-09-27, not yet deployed):
   already one portrait size for both channels, and slugs are harmless, so
   nothing is skipped yet.
 
-### Phase 11 (carousels) — built 2026-09-28, not yet deployed
+### Phase 11 (carousels) — built and deployed 2026-09-28
 
 - Renderer: `src/lib/carousel/slides.tsx` (8 code-drawn layouts on the cover
   type system; STAKES and CLOSE on the dark page), `render.ts` (PNG per page,
@@ -1202,6 +1202,10 @@ Slices 2–4 (built 2026-09-27, not yet deployed):
   document title) through the existing upload chain; a failed upload falls back
   to the normal LinkedIn text post.
 - Live check 2026-09-28: bsse1610's draft f866f093 planned in one attempt.
+- First automated carousel post 2026-09-28: bsse1610's draft 9d8e32fe, made
+  with Make carousel in the review screen (passed on the retry), published
+  with Approve & Publish; 03 posted it as a 7-page LinkedIn document
+  (urn:li:ugcPost:7510360993894678529).
 
 ### Security fixes found along the way (2026-09-23)
 
