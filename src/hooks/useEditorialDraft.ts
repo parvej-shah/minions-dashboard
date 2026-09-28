@@ -85,12 +85,13 @@ const EMPTY_EDITS = { title: "", hook: "", body: "", linkedin: "", facebook: "",
  * timers and firing the real request inside the last one, so the UI reported
  * success before — and regardless of whether — the request succeeded.
  */
-export function useEditorialDraft(initialDraftId?: string): EditorialDraftState {
+export function useEditorialDraft(initialDraftId?: string, blogEnabled = true): EditorialDraftState {
   // The tenant's own blog host. Without it every optimistic doc_url and the
   // publish confirmation named getminions.ai, whoever owned the post.
   const { brandSettings } = useBrandSettings();
   const tenantDomain = brandSettings?.company_domain || null;
-  const blogHost = (normalizeDomain(tenantDomain) ?? "").replace(/^https?:\/\//, "");
+  // With the blog channel off nothing goes to the blog, so no message names it.
+  const blogHost = blogEnabled ? (normalizeDomain(tenantDomain) ?? "").replace(/^https?:\/\//, "") : "";
   const [assets, setAssets] = useState<AssetItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);

@@ -39,10 +39,10 @@ export default function EditorialStudio({
   initialDraftId,
   isStandaloneRoute = false,
 }: EditorialStudioProps) {
-  const draft = useEditorialDraft(initialDraftId);
+  const channels = useChannelSummary();
+  const draft = useEditorialDraft(initialDraftId, channels?.blog ?? true);
   const { copiedKey, copy } = useCopyToClipboard(2200);
   const toast = useToast(3000);
-  const channels = useChannelSummary();
   // Confirmation copy names the tenant's own blog, not this company's.
   const { brandSettings: studioBrand } = useBrandSettings();
   const studioBlogHost =
@@ -216,6 +216,7 @@ export default function EditorialStudio({
       onCopy={copy}
       copiedKey={copiedKey}
       enabledTabs={enabledSocialTabs}
+      blogEnabled={blogEnabled}
     />
   );
 

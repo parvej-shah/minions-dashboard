@@ -38,6 +38,8 @@ export interface SocialVariantTabsProps {
   copiedKey: string | null;
   /** Which of the three tabs to show. */
   enabledTabs?: { LINKEDIN: boolean; FACEBOOK: boolean; TWITTER: boolean };
+  /** Blog channel off: there is no article to link, so no first-comment link. */
+  blogEnabled?: boolean;
 }
 
 export default function SocialVariantTabs({
@@ -55,6 +57,7 @@ export default function SocialVariantTabs({
   onCopy,
   copiedKey,
   enabledTabs,
+  blogEnabled = true,
 }: SocialVariantTabsProps) {
   const author = activeAsset.cover?.author ?? null;
   const showLinkedin = enabledTabs?.LINKEDIN ?? true;
@@ -266,7 +269,7 @@ export default function SocialVariantTabs({
           )}
 
           {/* First Comment Link Anchor */}
-          {activeAsset.doc_url && (
+          {blogEnabled && activeAsset.doc_url && (
             <div className="bg-[#00C9A7]/5 border border-[#00C9A7]/20 rounded-xl p-3.5 space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono font-bold text-[#00C9A7] uppercase flex items-center gap-1.5">
@@ -288,7 +291,7 @@ export default function SocialVariantTabs({
               </p>
             </div>
           )}
-          {!activeAsset.doc_url && (
+          {blogEnabled && !activeAsset.doc_url && (
             <p className="text-[11px] text-[#64748B] leading-relaxed">
               No blog link: this workspace has no website of its own yet. Add your domain under Brand &amp; Directives to link each post to its full article.
             </p>
