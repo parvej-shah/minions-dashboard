@@ -243,14 +243,12 @@ export default function EditorialStudio({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-8 space-y-6">
-          {/* Blog off: the article is never published, so the social post is
-              the draft and comes first; the article stays the source the cover
-              and carousel are made from, and is not shown for editing. */}
-          {!blogEnabled && socialVariants}
           {/* Shown for every channel: LinkedIn posts carry the cover too. */}
           <CoverImageCard activeAsset={activeAsset} isRendering={draft.isRenderingCover} onRerender={draft.rerenderCover} onMessage={toast.show} />
           {enabledSocialTabs.LINKEDIN && <CarouselCard key={activeAsset.id} activeAsset={activeAsset} onMessage={toast.show} />}
 
+          {/* Blog off: the article is never published, so it is not shown for
+              editing; it stays the source the cover and carousel are made from. */}
           {blogEnabled && (
             <ArticleEditor
               activeAsset={activeAsset}
@@ -271,7 +269,7 @@ export default function EditorialStudio({
             />
           )}
 
-          {blogEnabled && socialVariants}
+          {socialVariants}
         </div>
 
         <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-6">

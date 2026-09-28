@@ -146,11 +146,11 @@ encryption lines; there is no evidence for them, so a directive now forbids
 them in posts.
 **Status:** active
 
-## 2026-09-29 — Blog off: the Studio shows the social post, not the article
+## 2026-09-29 — Blog off: the Studio hides the article
 
 **Decision:** when a workspace has the blog channel off, the Editorial Studio
-hides the article editor and shows the social post (LinkedIn first) at the
-top of the draft, above the cover and carousel.
+hides the article editor. The cover and carousel stay at the top, with the
+social post under them (putting the post first pushed them out of sight).
 **Why:** a LinkedIn-only user (Miskat, onboarded 2026-09-29) saw a full blog
 article with "Article Headline & Title" above his post and could edit it
 believing that was what goes out. The article is never published for him.
