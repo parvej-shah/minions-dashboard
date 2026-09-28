@@ -39,14 +39,16 @@ CRITICAL VOICE & PERSONA RULES (MANDATORY):
 Platform Attitudes:
 1. LINKEDIN VARIANT:
    - Target Reader Mindset: The specific professional audience described in Brand Context and the idea.
-   - Structure: Short paragraphs of 1-2 sentences each, separated by a blank line. The opening paragraph must be a single standalone hook line. Follow with 4-5 short paragraphs, building the argument step by step with clear technical nuance.
+   - Structure: Short paragraphs of 1-2 sentences each, separated by a blank line. The opening paragraph must be a single standalone hook line. Follow with 3-4 short paragraphs, building the argument step by step with clear technical nuance.
    - Opening hook: The Pre-Crafted Hook below was already built by the strategy stage using a deliberate archetype (a specific consequence, a scene the reader recognizes, or a sharp contrast). Open with it verbatim or lightly sharpened for LinkedIn's cadence. Do NOT discard it in favor of a generic thesis restatement like "X does not equal Y" or "X is not the same as Y" -- that abstraction is exactly what makes a hook forgettable. The hook must name a concrete, recognizable moment or stake the reader has actually lived, not a category-level claim.
-   - Style: Usually 80-220 words, adapting to the idea. Deliver professional knowledge, a distinctive point of view, or practical advice without empty hooks.
+   - Style: HARD LIMIT 200 words, target 130-180. LinkedIn's own feed truncates and "see more"-collapses long posts, and readers rarely expand them -- a post that runs long loses the argument, not just style points. Cut a supporting point rather than exceed the limit. Deliver one distinctive point of view or practical insight, sharply, without empty hooks or restating the same point twice.
    - Closing: End with a useful observation or a natural discussion question. Max 2 relevant hashtags.
 
 2. FACEBOOK VARIANT:
    - Style & Structure: Usually 60-180 words in plain language for a broader audience. Never invent a customer story or first-person experience.
-   - Closing: A question is optional and should appear only when it invites a real perspective.
+   - Shareability: Facebook's algorithm weighs a private share (someone sending the post to one specific person) above any other signal, and a save above a like. Write so a reader recognizes a specific person or situation this applies to and wants to send it on -- do not ask for shares or saves directly, earn them through a concrete, self-contained point.
+   - Closing: A question is optional and should appear only when it invites a real perspective and could plausibly draw a comment, not a generic "thoughts?" tag-on.
+   - Hashtags: None, or at most 1 if the Brand Context names a specific one to use. Do not add generic hashtags.
 
 3. TWITTER / X VARIANT:
    - Style & Structure: One clear observation or useful takeaway, conversational and concise.

@@ -295,6 +295,9 @@ model Asset {
   reviewNotes         String[]  @default([]) @map("review_notes")
   // What the cover was drawn from (phase 5): layout, copy, score, notes.
   coverSpec           Json?     @map("cover_spec")
+  // A LinkedIn document carousel (phase 11): slide plan, rendered pages, PDF,
+  // and `active` (LinkedIn gets the carousel instead of the cover).
+  carouselSpec        Json?     @map("carousel_spec")
   heroImageUrl        String?   @map("hero_image_url")
   heroStatus          String    @default("READY") @map("hero_status")
   heroErrorCode       String?   @map("hero_error_code")

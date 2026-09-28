@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
     "/api/internal/covers": ["src/lib/covers/fonts/**/*"],
     "/api/assets/\\[id\\]/cover": ["src/lib/covers/fonts/**/*"],
     "/api/brand/cover-preview": ["src/lib/covers/fonts/**/*"],
+    "/api/assets/\\[id\\]/carousel": ["src/lib/covers/fonts/**/*"],
   },
   images: {
     remotePatterns: [

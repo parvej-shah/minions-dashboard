@@ -108,6 +108,19 @@ async function coverPhoto(profile: { id: string; clientId: string | null; primar
   return img ? asDataUrl(img) : undefined;
 }
 
+/**
+ * The headshot already copied to our storage, as a data URL, without copying
+ * or saving anything: for callers that must not write (the carousel). Undefined
+ * when the photo has not been hosted yet, so the slide shows the monogram.
+ */
+export async function hostedCoverPhoto(profile: { primaryLogoUrl: string; coverPhotoUrl: string | null; coverPhotoSource: string | null }): Promise<string | undefined> {
+  const source = profile.primaryLogoUrl.trim();
+  if (!/^https:\/\//.test(source)) return undefined;
+  const hosted = onOurStorage(source) ? source : profile.coverPhotoSource === source ? profile.coverPhotoUrl : null;
+  const img = hosted ? await fetchImage(hosted) : null;
+  return img ? asDataUrl(img) : undefined;
+}
+
 /** "Founder of Minions.AI." -- the positioning's first sentence, if it is short enough for the author line. */
 export function defaultByline(positioning: string): string | undefined {
   const first = positioning.trim().split(/(?<=[.!?])\s+(?=[A-Z])/)[0]?.trim();
@@ -115,7 +128,7 @@ export function defaultByline(positioning: string): string | undefined {
 }
 
 /** The draft body without the cover image line it carries once a cover is attached. */
-const bodyOf = (content: string) => content.replace(/^!\[[^\]]*\]\([^)]*\)\s*/, "");
+export const bodyOf = (content: string) => content.replace(/^!\[[^\]]*\]\([^)]*\)\s*/, "");
 
 /** The asset's content with its cover line set to url (replacing an old one). */
 export function withCoverLine(content: string, title: string, url: string): string {

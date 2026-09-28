@@ -231,13 +231,13 @@
       "rule": "unchecked-write",
       "workflow": "03_review_publisher",
       "node": "Initialize_LinkedIn_Image_Upload",
-      "reason": "Checked inside Publish_to_LinkedIn's body: a failed upload posts without the image."
+      "reason": "Checked inside Publish_to_LinkedIn's body: a failed upload posts without the image (or, for a carousel, as the normal LinkedIn post)."
     },
     {
       "rule": "unchecked-write",
       "workflow": "03_review_publisher",
       "node": "Upload_LinkedIn_Image",
-      "reason": "Checked inside Publish_to_LinkedIn's body (uploadResp.statusCode): a failed upload posts without the image."
+      "reason": "Checked inside Publish_to_LinkedIn's body (uploadResp.statusCode): a failed upload posts without the image (or, for a carousel, as the normal LinkedIn post)."
     },
     {
       "rule": "unchecked-write",

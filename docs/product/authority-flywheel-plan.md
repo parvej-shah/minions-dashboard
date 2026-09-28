@@ -33,6 +33,7 @@ impressions are the first measured signal.
 | D16 | The weekly question is an **in-app prompt**. The first version is **text only**, with no voice notes. | Q3, Q4 |
 | D17 | **Every scheduled slot gets a post idea.** Slots are never skipped. D1 still holds in this form: a below-bar idea is never passed off as a strong one (see phase 7). | Q5 |
 | D18 | **Each user picks their channels**: blog only, LinkedIn only, or both. | Q6 |
+| D19 | Carousels go out as **LinkedIn document (PDF) posts only**, never multi-image grids. v1 **suggests** a carousel and the reviewer chooses; nothing is turned into a carousel automatically until generation quality is proven. Slides are **code-drawn only** (no AI image), and must look premium. The closing slide carries the takeaway, the author's name and headshot, and a soft save line. | 2026-09-28 carousel planning |
 
 ## 2. Where I disagree with the conversation, or would tighten it
 
@@ -408,14 +409,60 @@ Exit: Standard tier is approved, and real snapshots come in for tenant zero.
 
 Exit: the first recommendation has been accepted by the user and is visible in the next harvest.
 
-### Later: carousels
+### Phase 11: Carousels (planned 2026-09-28, see D19)
 
-- One LLM call produces the slide plan and all the copy.
-- The slides are rendered with the phase 5 renderer. An image call is optional
-  and at most one per carousel.
-- The budget is ≤ 5–10 BDT, about $0.04–0.08. Check the rate when building.
-- Needs: the variants table from phase 8, and the LinkedIn document or
-  multi-image post API. Verify which one.
+A carousel earns saves and sends only when the idea has a shape worth keeping.
+The work is deciding **which** ideas become carousels as much as drawing them.
+
+What works, and what the gates enforce:
+- One idea per carousel, with a keepable structure: CHECKLIST, STEPS,
+  DECISION, CONTRAST (common assumption vs in practice) or TEARDOWN.
+- 5–10 slides (target 6–9), one point per slide, a word cap per layout
+  (about 30 words at most), type no smaller than 40px at 1080 wide.
+- Portrait 1080×1350, the cover size, so it holds the most feed space.
+- Numbers only when author memory or approved proof states them; QUOTE slides
+  only from the author's own memory.
+- A short caption (40–80 words) that points into the document, never a full
+  post on top of the slides.
+
+What is ruled out: an article chopped into slides, "N tips" listicles, AI images
+per slide, invented figures or charts, engagement bait ("comment X"), and a
+carousel for every post (STORY and OPINION ideas usually stay text posts).
+
+Build:
+1. **Selection.** `recommended_format` gains `CAROUSEL`. Code allows it only
+   when the idea has 3–7 distinct key points and a structure type. The
+   reviewer can also convert any post by hand. v1 only suggests (D19).
+2. **Slide plan.** One LLM call returns strict JSON: per slide a layout from a
+   fixed set (COVER, STAKES, POINT, CONTRAST, CHECKLIST, STEP, NUMBER, QUOTE,
+   CLOSE) and its copy, plus the caption and the document title. The model
+   never controls design.
+3. **Gates in code.** Slide count, per-layout word caps, `fit.ts` on every
+   slide, every number traced to the source, the banned-words scrub, no
+   repeated point. One retry with the error; then fall back to the normal
+   single-image post so nothing blocks.
+4. **Rendering.** The phase 5 stack (satori, brand tokens, Newsreader + Inter,
+   code-drawn art) renders each slide to PNG; `pdf-lib` joins them into one
+   PDF. Premium bar: a consistent grid, a page marker, the brand accent used
+   sparingly, generous margins, and the same art style as the cover. Checked
+   by `npm run eval:covers`-style fixtures before any prompt work.
+5. **Review.** Editorial Studio shows a swipe preview. Editing a slide's text
+   or reordering re-renders that slide only: no LLM call, no cost.
+6. **Publishing.** 03 gets a carousel branch: `/rest/documents?action=initializeUpload`,
+   PUT the PDF, then `/rest/posts` with `content.media {id, title}` and the
+   caption. A published carousel is locked like a cover.
+7. **Storage.** A `carousel_spec` JSON column on `assets`, like `cover_spec`.
+   It does not need the phase 8 variants table.
+
+Cost (estimate, re-check rates): one LLM call about 0.5 BDT, a retry about 0.5
+BDT, rendering about 0. About 1 BDT all in, inside D11.
+
+Verified 2026-09-28: the Documents API accepts the member `w_member_social`
+token (bsse1610's `urn:li:person` owner, LinkedIn-Version 202607):
+initializeUpload 200, PUT 201, status `AVAILABLE`. Nothing was posted.
+
+Exit: three reviewed carousels published from bsse1610's workspace that the
+user rates premium, each under the D11 budget.
 
 ### Dependency graph
 
@@ -1127,6 +1174,34 @@ Slices 2–4 (built 2026-09-27, not yet deployed):
 - **Not done:** "generation adapts to a LinkedIn-only tenant". Covers are
   already one portrait size for both channels, and slugs are harmless, so
   nothing is skipped yet.
+
+### Phase 11 (carousels) — built 2026-09-28, not yet deployed
+
+- Renderer: `src/lib/carousel/slides.tsx` (8 code-drawn layouts on the cover
+  type system; STAKES and CLOSE on the dark page), `render.ts` (PNG per page,
+  pdf-lib joins them). Covers and slides share `balance()` in
+  `src/lib/covers/fit.ts`, so no heading ends on a lone word.
+- Plan and gates: `src/lib/prompts/carousel.ts` (one qwen3.8-max call) and
+  `src/lib/carousel/plan.ts`: 4–9 slides after the cover, CLOSE last, word caps
+  per field, caption 30–90 words, NUMBER only for a figure the draft states,
+  QUOTE only from the author's memory, no figure the sources lack, no banned
+  phrase, dash, markdown, repeated point or engagement bait, every page fits.
+- Trust rule added after the first live carousel: the draft's **unverified
+  claims** (editor verdict ≠ Y) may not appear on a slide or caption with their
+  figure, matched by figure and unit however it is spelled ("two seconds" =
+  "2 seconds"). A slide cannot hedge the way the post can.
+- One retry, told exactly what failed; then nothing is stored and the draft
+  posts as a normal post.
+- Service `src/services/carousel.ts`; route `/api/assets/[id]/carousel`
+  (GET state and suggestion, POST make, PATCH `{active}` or `{plan}` with no
+  model call, same gates). Stored in `assets.carousel_spec`
+  (`prisma/sql/2026-09-28-carousel-spec.sql`). Locked once published.
+- Review: `CarouselCard` under the cover (LinkedIn workspaces only):
+  suggestion, swipe preview, on/off for LinkedIn, per-page editing, remake.
+- 03: when `carousel_spec.active`, LinkedIn gets a document post (PDF, caption,
+  document title) through the existing upload chain; a failed upload falls back
+  to the normal LinkedIn text post.
+- Live check 2026-09-28: bsse1610's draft f866f093 planned in one attempt.
 
 ### Security fixes found along the way (2026-09-23)
 

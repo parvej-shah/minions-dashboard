@@ -1,0 +1,252 @@
+import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+import { chatWithFallback } from "@/lib/ai/modelChain";
+import { deleteFromR2, r2KeyFromUrl, uploadToR2 } from "@/lib/r2";
+import { coverBrand } from "@/lib/covers/brand";
+import type { CoverSpec } from "@/lib/covers/layouts";
+import { evidenceRules } from "@/lib/drafts/authorContext";
+import { checkPlan, parsePlan, suggestCarousel, toDeck, type CarouselPlan, type PlanSources } from "@/lib/carousel/plan";
+import { renderCarouselPdf, renderSlidePng } from "@/lib/carousel/render";
+import type { Deck } from "@/lib/carousel/slides";
+import { renderCarousel, type CarouselInput } from "@/lib/prompts/carousel";
+import { bodyOf, defaultByline, hostedCoverPhoto, isPublished } from "./cover";
+import { tenantBannedPhrases } from "./bannedScrub";
+
+/**
+ * Carousels for a draft (phase 11, D19). The model writes a slide plan once;
+ * code gates it, draws it, and stores it. A reviewer's edits pass the same
+ * gates and are redrawn with no model call. `active` decides whether LinkedIn
+ * gets the carousel (03 posts it as a document) or the cover image. A
+ * published draft's carousel is fixed, like its cover.
+ */
+
+export interface StoredCarousel {
+  /** LinkedIn gets the carousel instead of the cover. */
+  active: boolean;
+  plan: CarouselPlan;
+  /** Every page as a PNG, cover first: the review preview. */
+  pages: string[];
+  pdf_url: string;
+  /** Copied from the plan for 03, which reads the row as it is. */
+  caption: string;
+  document_title: string;
+  model: string | null;
+  attempts: number;
+  rendered_at: string;
+}
+
+export type CarouselResult =
+  | { ok: true; carousel: StoredCarousel }
+  | { ok: false; error: string; errors: string[]; locked?: boolean };
+
+export const CAROUSEL_LOCKED = "This draft is published, so its carousel stays as it went out.";
+export const MAX_ATTEMPTS = 2;
+/** The route may run 300s; a first answer slower than this leaves no room for a second. */
+const RETRY_CUTOFF_MS = 120_000;
+
+type Chat = (payload: Record<string, unknown>) => Promise<{ status: number; body: string; model: string }>;
+
+const defaultChat: Chat = (payload) => {
+  const key = process.env.DASHSCOPE_API_KEY;
+  if (!key) throw new Error("DASHSCOPE_API_KEY is not set");
+  return chatWithFallback(payload, key);
+};
+
+interface Context {
+  assetId: string;
+  clientId: string;
+  locked: boolean;
+  stored: StoredCarousel | null;
+  input: CarouselInput;
+  sources: PlanSources;
+  base: { author: CoverSpec["author"]; brand: CoverSpec["brand"]; art?: CoverSpec["art"] };
+  body: string;
+}
+
+/** Everything a plan is written from and checked against. Reads only. */
+async function loadContext(assetId: string): Promise<Context | { error: string }> {
+  const asset = await prisma.asset.findUnique({
+    where: { id: assetId },
+    select: {
+      id: true, clientId: true, ideaId: true, slug: true, title: true, hook: true, coreArgument: true, content: true, coverSpec: true, carouselSpec: true,
+      status: true, publishedAt: true, linkedinPublishedAt: true, facebookPublishedAt: true,
+    },
+  });
+  if (!asset?.clientId) return { error: `Asset ${assetId} not found` };
+  const clientId = asset.clientId;
+
+  const [profile, icp, idea, banned, claims, onBlog] = await Promise.all([
+    prisma.brandProfile.findUnique({ where: { clientId } }),
+    prisma.icpProfile.findUnique({ where: { clientId } }),
+    asset.ideaId ? prisma.idea.findFirst({ where: { id: asset.ideaId, clientId }, select: { memoryIds: true, trustBasis: true } }) : null,
+    tenantBannedPhrases(clientId),
+    prisma.claim.findMany({ where: { assetId: asset.id, verified: { not: "Y" } }, select: { claimText: true } }),
+    prisma.blog.findFirst({ where: { clientId, OR: [{ assetId: asset.id }, { slug: asset.slug }] }, select: { slug: true } }),
+  ]);
+  if (!profile) return { error: "The workspace has no brand profile" };
+
+  // Only memory that may be shown: a GENERALIZE item only in its stored, stripped form.
+  const rows = idea?.memoryIds.length
+    ? await prisma.professionalMemory.findMany({ where: { clientId, id: { in: idea.memoryIds }, isActive: true }, select: { content: true, disclosure: true, generalizedContent: true } })
+    : [];
+  const memory = rows.map((m) => (m.disclosure === "GENERALIZE" ? m.generalizedContent ?? "" : m.content)).filter(Boolean);
+  const unverified = claims.map((c) => c.claimText).filter(Boolean);
+  const body = bodyOf(asset.content);
+
+  const input: CarouselInput = {
+    brand_name: profile.brandName,
+    author_name: profile.brandName,
+    title: asset.title,
+    hook: asset.hook ?? "",
+    core_argument: asset.coreArgument ?? "",
+    body,
+    icp: { who: icp?.who ?? "", role: icp?.role ?? "" },
+    memory,
+    evidence_rules: evidenceRules({ trust_basis: idea?.trustBasis ?? [], memory: memory.map((text) => ({ kind: "", text, disclosure: "PUBLIC" as const })) }),
+    banned,
+    unverified,
+  };
+  const sources: PlanSources = { texts: [body, asset.hook ?? "", asset.coreArgument ?? "", asset.title], memory, banned, unverified };
+
+  // The cover page keeps the post's own illustration; the author and colours are the workspace's.
+  const cover = (asset.coverSpec ?? null) as { art?: CoverSpec["art"] } | null;
+  const { brand } = coverBrand({ ink: profile.primaryInk, paper: profile.brandCream, accent: profile.brandCoral, secondary: profile.brandTeal });
+  const author = { name: profile.brandName, role: profile.coverByline?.trim() || defaultByline(profile.positioning ?? ""), photo: await hostedCoverPhoto(profile) };
+
+  return {
+    assetId: asset.id,
+    clientId,
+    locked: Boolean(onBlog) || isPublished(asset),
+    stored: (asset.carouselSpec ?? null) as StoredCarousel | null,
+    input,
+    sources,
+    base: { author, brand, art: cover?.art },
+    body,
+  };
+}
+
+/** Every gate on a plan, text and fit. Empty: the plan can be drawn. */
+function gate(ctx: Context, plan: CarouselPlan): { deck: Deck | null; errors: string[] } {
+  const errors = checkPlan(plan, ctx.sources);
+  if (errors.length) return { deck: null, errors };
+  const built = toDeck(plan, ctx.base);
+  return built.errors.length ? { deck: null, errors: built.errors } : { deck: built.deck, errors: [] };
+}
+
+/** Draws every page and the PDF, uploads them under a fresh folder, and saves the row. */
+async function renderAndStore(ctx: Context, plan: CarouselPlan, deck: Deck, meta: { active: boolean; model: string | null; attempts: number }): Promise<StoredCarousel> {
+  const pngs: Buffer[] = [];
+  for (let i = 0; i <= deck.slides.length; i++) pngs.push(await renderSlidePng(deck, i));
+  const pdf = await renderCarouselPdf(deck, pngs);
+  // A new folder per render, so no CDN or browser serves an old page.
+  const folder = `carousels/${ctx.clientId}/${ctx.assetId}-${Date.now()}`;
+  const [pdfUpload, ...pageUploads] = await Promise.all([
+    uploadToR2(`${folder}/carousel.pdf`, pdf, "application/pdf"),
+    ...pngs.map((png, i) => uploadToR2(`${folder}/${String(i + 1).padStart(2, "0")}.png`, png, "image/png")),
+  ]);
+  const carousel: StoredCarousel = {
+    active: meta.active,
+    plan,
+    pages: pageUploads.map((u) => u.url),
+    pdf_url: pdfUpload.url,
+    caption: plan.caption,
+    document_title: plan.documentTitle,
+    model: meta.model,
+    attempts: meta.attempts,
+    rendered_at: new Date().toISOString(),
+  };
+  await prisma.asset.update({ where: { id: ctx.assetId }, data: { carouselSpec: carousel as unknown as Prisma.InputJsonValue } });
+  await dropReplaced(ctx.stored);
+  return carousel;
+}
+
+/** The files of the carousel just replaced. Only before publishing, so nothing public points at them. A failed delete never fails the save. */
+async function dropReplaced(old: StoredCarousel | null): Promise<void> {
+  if (!old) return;
+  for (const url of [old.pdf_url, ...(old.pages ?? [])]) {
+    const key = r2KeyFromUrl(url);
+    if (!key?.startsWith("carousels/")) continue;
+    await deleteFromR2(key).catch((e) => console.warn(`[carousel] could not delete ${key}:`, e));
+  }
+}
+
+type Planned = { ok: true; plan: CarouselPlan; deck: Deck; attempts: number; model: string } | { ok: false; error: string; errors: string[] };
+
+/** The model's plan through every gate, with one retry told exactly what failed. */
+async function planWithModel(ctx: Context, chat: Chat): Promise<Planned> {
+  let errors: string[] = [];
+  const started = Date.now();
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    // A retry only when there is time for it inside the route's limit.
+    if (attempt > 1 && Date.now() - started > RETRY_CUTOFF_MS) break;
+    const res = await chat({ ...renderCarousel({ ...ctx.input, feedback: attempt > 1 ? errors : undefined }) });
+    if (res.status >= 400) return { ok: false, error: `The model call failed (${res.status}). Try again in a minute.`, errors: [] };
+    let content = "";
+    try {
+      content = JSON.parse(res.body)?.choices?.[0]?.message?.content ?? "";
+    } catch {
+      content = "";
+    }
+    const parsed = parsePlan(content);
+    errors = parsed.errors;
+    if (!parsed.plan || errors.length) continue;
+    const gated = gate(ctx, parsed.plan);
+    errors = gated.errors;
+    if (gated.deck) return { ok: true, plan: parsed.plan, deck: gated.deck, attempts: attempt, model: res.model };
+  }
+  return { ok: false, error: "No carousel passed the checks for this draft. It will post as a normal post.", errors };
+}
+
+/** Plans a carousel with the model, draws it and switches it on. */
+export async function generateCarousel(assetId: string, { chat = defaultChat }: { chat?: Chat } = {}): Promise<CarouselResult> {
+  const ctx = await loadContext(assetId);
+  if ("error" in ctx) return { ok: false, error: ctx.error, errors: [] };
+  if (ctx.locked) return { ok: false, error: CAROUSEL_LOCKED, errors: [], locked: true };
+  const planned = await planWithModel(ctx, chat);
+  if (!planned.ok) return planned;
+  return { ok: true, carousel: await renderAndStore(ctx, planned.plan, planned.deck, { active: true, model: planned.model, attempts: planned.attempts }) };
+}
+
+/** A reviewer's edit: the same gates, redrawn with no model call. Keeps whether it is on. */
+export async function editCarousel(assetId: string, plan: CarouselPlan): Promise<CarouselResult> {
+  const ctx = await loadContext(assetId);
+  if ("error" in ctx) return { ok: false, error: ctx.error, errors: [] };
+  if (ctx.locked) return { ok: false, error: CAROUSEL_LOCKED, errors: [], locked: true };
+  if (!ctx.stored) return { ok: false, error: "This draft has no carousel yet.", errors: [] };
+  const { deck, errors } = gate(ctx, plan);
+  if (!deck) return { ok: false, error: "The edit did not pass the checks.", errors };
+  return { ok: true, carousel: await renderAndStore(ctx, plan, deck, { active: ctx.stored.active, model: ctx.stored.model, attempts: ctx.stored.attempts }) };
+}
+
+/** Whether LinkedIn gets the carousel or the cover image. */
+export async function setCarouselActive(assetId: string, active: boolean): Promise<CarouselResult> {
+  const ctx = await loadContext(assetId);
+  if ("error" in ctx) return { ok: false, error: ctx.error, errors: [] };
+  if (ctx.locked) return { ok: false, error: CAROUSEL_LOCKED, errors: [], locked: true };
+  if (!ctx.stored) return { ok: false, error: "This draft has no carousel yet.", errors: [] };
+  const carousel = { ...ctx.stored, active };
+  await prisma.asset.update({ where: { id: ctx.assetId }, data: { carouselSpec: carousel as unknown as Prisma.InputJsonValue } });
+  return { ok: true, carousel };
+}
+
+/** The review card's view: the carousel, whether one is suggested, and whether it can change. */
+export async function carouselState(assetId: string): Promise<{ carousel: StoredCarousel | null; suggested: { yes: boolean; reason: string }; locked: boolean } | { error: string }> {
+  const asset = await prisma.asset.findUnique({
+    where: { id: assetId },
+    select: { clientId: true, slug: true, content: true, carouselSpec: true, status: true, publishedAt: true, linkedinPublishedAt: true, facebookPublishedAt: true },
+  });
+  if (!asset?.clientId) return { error: `Asset ${assetId} not found` };
+  const onBlog = await prisma.blog.findFirst({ where: { clientId: asset.clientId, OR: [{ assetId }, { slug: asset.slug }] }, select: { slug: true } });
+  return {
+    carousel: (asset.carouselSpec ?? null) as StoredCarousel | null,
+    suggested: suggestCarousel(bodyOf(asset.content)),
+    locked: Boolean(onBlog) || isPublished(asset),
+  };
+}
+
+/** For scripts: the plan and deck, storing nothing. */
+export async function planOnly(assetId: string, { chat = defaultChat }: { chat?: Chat } = {}): Promise<Planned> {
+  const ctx = await loadContext(assetId);
+  if ("error" in ctx) return { ok: false, error: ctx.error, errors: [] };
+  return planWithModel(ctx, chat);
+}

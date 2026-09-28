@@ -736,7 +736,7 @@
           },
           "timeout": 25000
         },
-        "url": "={{ $('Filter_Approved_Assets').item.json.hero_image_url }}"
+        "url": "={{ $('Filter_Approved_Assets').item.json.li_media_url }}"
       },
       "position": [
         1620,
@@ -876,7 +876,7 @@
         "sendBody": true,
         "sendHeaders": true,
         "specifyBody": "json",
-        "url": "https://api.linkedin.com/rest/images?action=initializeUpload"
+        "url": "={{ $('Filter_Approved_Assets').item.json.li_media === 'DOCUMENT' ? 'https://api.linkedin.com/rest/documents?action=initializeUpload' : 'https://api.linkedin.com/rest/images?action=initializeUpload' }}"
       },
       "position": [
         1780,
@@ -1234,7 +1234,7 @@
             }
           ]
         },
-        "jsonBody": "={{ (() => { const li = $('Filter_Approved_Assets').item.json.li_variant; const initResp = $('Initialize_LinkedIn_Image_Upload').item.json; const uploadResp = $('Upload_LinkedIn_Image').item.json; const uploadOk = uploadResp && (uploadResp.statusCode === 200 || uploadResp.statusCode === 201); const imageUrn = (uploadOk && initResp && initResp.value) ? initResp.value.image : null; const body = { author: $('Resolve_LinkedIn_Channel').item.json.external_id, commentary: li, visibility: 'PUBLIC', distribution: { feedDistribution: 'MAIN_FEED', targetEntities: [], thirdPartyDistributionChannels: [] }, lifecycleState: 'PUBLISHED', isReshareDisabledByAuthor: false }; if (imageUrn) { body.content = { media: { id: imageUrn, altText: $('Filter_Approved_Assets').item.json.title } }; } return JSON.stringify(body); })() }}",
+        "jsonBody": "={{ (() => { const a = $('Filter_Approved_Assets').item.json; const initResp = $('Initialize_LinkedIn_Image_Upload').item.json; const uploadResp = $('Upload_LinkedIn_Image').item.json; const uploadOk = uploadResp && (uploadResp.statusCode === 200 || uploadResp.statusCode === 201); const v = initResp && initResp.value; const isDoc = a.li_media === 'DOCUMENT'; const urn = uploadOk && v ? (isDoc ? v.document : v.image) : null; const body = { author: $('Resolve_LinkedIn_Channel').item.json.external_id, commentary: isDoc && urn ? a.li_carousel_caption : a.li_variant, visibility: 'PUBLIC', distribution: { feedDistribution: 'MAIN_FEED', targetEntities: [], thirdPartyDistributionChannels: [] }, lifecycleState: 'PUBLISHED', isReshareDisabledByAuthor: false }; if (urn) { body.content = { media: isDoc ? { id: urn, title: a.li_document_title } : { id: urn, altText: a.title } }; } return JSON.stringify(body); })() }}",
         "method": "POST",
         "options": {
           "response": {

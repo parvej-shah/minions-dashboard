@@ -11,13 +11,13 @@
  */
 import type { ReactNode } from "react";
 import { faceStyle, metricsFor, type Face } from "./fonts";
-import { fit, type Fitted, type TextBox } from "./fit";
+import { balance, fit, type Fitted, type TextBox } from "./fit";
 import { textWidth } from "./metrics";
 import { drawArt, type ArtChoice } from "./art";
 
 export const COVER_SIZE = { width: 1080, height: 1350 } as const;
-const PAD = 88;
-const INNER = COVER_SIZE.width - PAD * 2;
+export const PAD = 88;
+export const INNER = COVER_SIZE.width - PAD * 2;
 /**
  * The height between the top padding and the signature: less the label row
  * and its gap when there is a label, the gap above the divider, the divider
@@ -91,18 +91,19 @@ const SIZES: Record<keyof typeof BOX, readonly [number, number]> = {
 
 function fitOrThrow(what: keyof typeof BOX, text: string, height?: { maxHeight: number; lineHeight: number }): Fitted {
   const [min, max] = SIZES[what];
-  const f = fit(text, min, max, { ...BOX[what], ...height });
+  const box = { ...BOX[what], ...height };
+  const f = fit(text, min, max, box);
   if (!f) throw new CoverFitError(`The ${what} is too long for this cover: "${text.slice(0, 80)}"`);
-  return f;
+  return balance(f, box);
 }
 
-function rgba(hex: string, alpha: number): string {
+export function rgba(hex: string, alpha: number): string {
   const h = hex.replace("#", "");
   const n = parseInt(h.length === 3 ? h.replace(/./g, "$&$&") : h, 16);
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
 }
 
-const initials = (name: string) =>
+export const initials = (name: string) =>
   name
     .split(/\s+/)
     .filter(Boolean)
@@ -117,7 +118,7 @@ const wordKey = (w: string) => w.toLowerCase().replace(/[^a-z0-9']/g, "");
  * spaced by the font's real space width, so one can carry the accent colour;
  * nowrap stops Satori breaking a hyphenated word inside its item.
  */
-function Lines({ fitted, face, tracking = 0, lineHeight, color, emphasis, accent }: { fitted: Fitted; face: Face; tracking?: number; lineHeight: number; color: string; emphasis?: string; accent?: string }) {
+export function Lines({ fitted, face, tracking = 0, lineHeight, color, emphasis, accent }: { fitted: Fitted; face: Face; tracking?: number; lineHeight: number; color: string; emphasis?: string; accent?: string }) {
   const { size, lines } = fitted;
   const spacing = tracking * size;
   const space = textWidth(metricsFor(face), " ", size, spacing);
@@ -216,9 +217,9 @@ function HeadlineCentre({ spec, ink, paper }: { spec: CoverSpec; ink: string; pa
   const kickerHeight = kicker ? KICKER_GAP + kicker.lines.length * kicker.size * 1.35 : 0;
   const height = centreHeight(spec);
   const artMin = spec.art ? ART_MIN[spec.art.choice.style] + ART_GAP : 0;
-  const headline = spec.art
-    ? fit(spec.headline, SIZES.headline[0], ART_HEADLINE_MAX, { ...BOX.headline, maxHeight: height - kickerHeight - artMin, lineHeight: 1.05 })
-    : fitOrThrow("headline", spec.headline, { maxHeight: height - kickerHeight, lineHeight: 1.05 });
+  const artBox = { ...BOX.headline, maxHeight: height - kickerHeight - artMin, lineHeight: 1.05 };
+  const artFit = spec.art ? fit(spec.headline, SIZES.headline[0], ART_HEADLINE_MAX, artBox) : null;
+  const headline = spec.art ? artFit && balance(artFit, artBox) : fitOrThrow("headline", spec.headline, { maxHeight: height - kickerHeight, lineHeight: 1.05 });
   if (!headline) throw new CoverFitError(`The headline does not fit beside the illustration: "${spec.headline.slice(0, 80)}"`);
   if (spec.art && headline.size < ART_MIN_HEADLINE) throw new CoverFitError(`With the illustration the headline would be set at ${headline.size}px; drawn without it.`);
   const textHeight = headline.lines.length * headline.size * 1.05 + kickerHeight;

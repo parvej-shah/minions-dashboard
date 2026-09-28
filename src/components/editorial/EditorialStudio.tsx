@@ -14,6 +14,7 @@ import { normalizeDomain } from "@/constants/config";
 import QueueRibbon, { type QueueFilter } from "./QueueRibbon";
 import DraftHeader from "./DraftHeader";
 import CoverImageCard from "./CoverImageCard";
+import CarouselCard from "./CarouselCard";
 import ArticleEditor, { type EditorMode } from "./ArticleEditor";
 import SocialVariantTabs, { type SocialTab } from "./social/SocialVariantTabs";
 import ReviewDock from "./ReviewDock";
@@ -224,6 +225,7 @@ export default function EditorialStudio({
         <div className="lg:col-span-8 space-y-6">
           {/* Shown for every channel: LinkedIn posts carry the cover too. */}
           <CoverImageCard activeAsset={activeAsset} isRendering={draft.isRenderingCover} onRerender={draft.rerenderCover} onMessage={toast.show} />
+          {enabledSocialTabs.LINKEDIN && <CarouselCard key={activeAsset.id} activeAsset={activeAsset} onMessage={toast.show} />}
 
           <ArticleEditor
             activeAsset={activeAsset}

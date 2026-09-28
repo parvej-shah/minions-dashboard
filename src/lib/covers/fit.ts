@@ -54,3 +54,25 @@ export function fit(text: string, min: number, max: number, box: TextBox): Fitte
   }
   return null;
 }
+
+/**
+ * The lines evened out so the last one is not a lone word ("...your calendar
+ * never / sees"): first at the same size with the width narrowed a step at a
+ * time, then up to three sizes smaller (about 10%) at full width. Unchanged
+ * when neither helps.
+ */
+export function balance(f: Fitted, box: TextBox): Fitted {
+  const lonely = (lines: string[]) => lines.length > 1 && !lines[lines.length - 1].includes(" ");
+  if (!lonely(f.lines)) return f;
+  const text = f.lines.join(" ");
+  for (let w = box.maxWidth - 16; w >= box.maxWidth * 0.6; w -= 16) {
+    const lines = wrap(text, f.size, { ...box, maxWidth: w });
+    if (lines.length !== f.lines.length) break;
+    if (!lonely(lines)) return { size: f.size, lines };
+  }
+  for (let size = f.size - 2; size >= f.size - 6; size -= 2) {
+    const smaller = fit(text, size, size, box);
+    if (smaller && !lonely(smaller.lines)) return smaller;
+  }
+  return f;
+}
