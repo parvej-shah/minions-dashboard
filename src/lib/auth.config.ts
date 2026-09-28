@@ -36,6 +36,12 @@ export const authConfig: NextAuthConfig = {
         // -- which is why the progress HUD spun indefinitely and the Idea Stream
         // never refreshed on its own. The route verifies the webhook secret.
         "/api/pipeline/runs",
+        // Sets the pending-signup cookie right before Google sign-in, so its
+        // caller has no session by definition. While this was gated the POST
+        // was answered 307, the cookie was never set, and the signIn callback
+        // refused every brand-new account ("Sign-in failed"). It only sets a
+        // short-lived cookie; the other /api/onboarding routes stay gated.
+        "/api/onboarding/begin",
         "/login"
       ];
       if (publicPaths.some(p => url.pathname.startsWith(p))) {

@@ -60,4 +60,11 @@ describe("session gate public paths", () => {
     expect(authorized("/api/pipeline/draft", false)).toBe(false);
     expect(authorized("/api/pipeline/harvest", false)).toBe(false);
   });
+
+  it("lets a signed-out visitor mark a pending signup, and nothing else in onboarding", () => {
+    expect(authorized("/api/onboarding/begin", false)).toBe(true);
+    for (const route of ["/api/onboarding/setup", "/api/onboarding/client", "/api/onboarding/complete"]) {
+      expect(authorized(route, false), `${route} must require a session`).toBe(false);
+    }
+  });
 });
