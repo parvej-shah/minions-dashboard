@@ -26,6 +26,7 @@ export interface CoverCard {
   /** The illustration the strategist named from each collection; used when the name is real. */
   shape_motif?: string;
   doodle_motif?: string;
+  icon_motif?: string;
 }
 
 export interface CoverCopyInput {

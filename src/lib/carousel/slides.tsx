@@ -10,8 +10,9 @@
  * fits in one style fits in all of them.
  *
  * STAKES, POINT and STEP pages may carry one line icon (icons.ts), picked by
- * the plan, drawn faint below the words. The words always win: when they do
- * not fit beside the icon, the page is drawn without it.
+ * the plan, drawn faint below the words. The words always win: the icon is
+ * dropped when the headline would not fit beside it, or would shrink below
+ * ICON_KEEP of its size without the icon, or below ICON_FLOOR.
  *
  * Same rules as the covers: every letter is drawn in code, fit.ts sets every
  * size and line break, and copy that cannot fit is rejected, never cut. Body
@@ -22,7 +23,7 @@ import { faceStyle, metricsFor } from "@/lib/covers/fonts";
 import { balance, fit, type Fitted, type TextBox } from "@/lib/covers/fit";
 import { contrast } from "@/lib/covers/brand";
 import { textWidth } from "@/lib/covers/metrics";
-import { ICONS, type IconName } from "./icons";
+import { ICONS, type IconName } from "@/lib/covers/icons";
 import { COVER_SIZE, CoverFitError, INNER, Lines, PAD, coverElement, initials, rgba, type CoverAuthor, type CoverBrand, type CoverSpec } from "@/lib/covers/layouts";
 
 export const SLIDE_SIZE = COVER_SIZE;
@@ -82,6 +83,10 @@ const NAME_ROW = 32;
 export const ICON_LAYOUTS: SlideLayout[] = ["STAKES", "POINT", "STEP"];
 const ICON = 300;
 const ICON_GAP = 48;
+/** The headline keeps at least this share of the size it has without the icon: the icon never costs the words their weight. */
+const ICON_KEEP = 0.85;
+/** And never goes below these sizes beside an icon (px at 1080 wide, about a third of that on a phone). */
+const ICON_FLOOR: Partial<Record<SlideLayout, number>> = { STAKES: 84, POINT: 76, STEP: 76 };
 
 const CENTRE = SLIDE_SIZE.height - PAD * 2 - TOP_ROW - TOP_GAP - BOTTOM_GAP - TRACK - TRACK_GAP - NAME_ROW;
 
@@ -148,6 +153,10 @@ interface Page {
   style: SlideStyle;
   /** The height the words may use: the centre, less the icon's space when there is one. */
   room: number;
+  /** The smallest the headline may be set on this page; smaller fails the fit. */
+  mainMin?: number;
+  /** Told the headline's fitted size. */
+  onMain?: (size: number) => void;
   ink: string;
   paper: string;
   accent: string;
@@ -248,11 +257,18 @@ function Frame({ deck, page, icon, children }: { deck: Deck; page: Page; icon?: 
   );
 }
 
+/** The headline's fit, held to the page's minimum size. */
+function mainFit(page: Page, f: Fitted): Fitted {
+  page.onMain?.(f.size);
+  if (page.mainMin && f.size < page.mainMin) throw new CoverFitError(`The headline would be set at ${f.size}px, below ${page.mainMin}px.`);
+  return f;
+}
+
 /** A title (serif) with an optional body line under it, sharing the height left by `reserved`. */
 function TitleBody({ title, body, emphasis, page, reserved }: { title: string; body?: string; emphasis?: string; page: Page; reserved: number }) {
   const bodyFit = body ? fitOrThrow("body", body) : null;
   const bodyHeight = bodyFit ? 48 + height(bodyFit, LH.body) : 0;
-  const titleFit = fitOrThrow("title", title, page.room - reserved - bodyHeight, LH.title);
+  const titleFit = mainFit(page, fitOrThrow("title", title, page.room - reserved - bodyHeight, LH.title));
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Lines fitted={titleFit} face="serif" tracking={-0.015} lineHeight={LH.title} color={page.ink} emphasis={emphasis} accent={page.accent} />
@@ -294,7 +310,7 @@ function StepCentre({ slide, page, n, of }: { slide: Extract<Slide, { layout: "S
 function StakesCentre({ slide, page }: { slide: Extract<Slide, { layout: "STAKES" }>; page: Page }) {
   const bodyFit = slide.body ? fitOrThrow("body", slide.body) : null;
   const bodyHeight = bodyFit ? 56 + height(bodyFit, LH.body) : 0;
-  const statement = fitOrThrow("statement", slide.statement, page.room - bodyHeight - 62, LH.statement);
+  const statement = mainFit(page, fitOrThrow("statement", slide.statement, page.room - bodyHeight - 62, LH.statement));
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <div style={{ width: 120, height: 6, background: page.accent, marginBottom: 56 }} />
@@ -482,15 +498,18 @@ export function slideElement(deck: Deck, i: number) {
     : slide.layout === "QUOTE" ? QuoteCentre({ slide, page })
     : CloseCentre({ slide, page, deck });
   const icon = "icon" in slide && slide.icon && slide.icon in ICONS ? slide.icon : undefined;
+  // Without the icon first: the words must fit at all, and their size there sets how much the icon may take.
+  let full = 0;
+  const plain: Page = { ...base, room: CENTRE, onMain: (size) => (full = size) };
+  const words = draw(plain);
   if (icon) {
-    const page: Page = { ...base, room: CENTRE - ICON - ICON_GAP };
+    const page: Page = { ...base, room: CENTRE - ICON - ICON_GAP, mainMin: Math.max(ICON_FLOOR[slide.layout] ?? 0, Math.ceil(full * ICON_KEEP)) };
     try {
       return Frame({ deck, page, icon, children: draw(page) });
     } catch (e) {
-      // The words win: without the icon they get the whole centre.
+      // The words win: without the icon they get the whole centre at full size.
       if (!(e instanceof CoverFitError)) throw e;
     }
   }
-  const page: Page = { ...base, room: CENTRE };
-  return Frame({ deck, page, children: draw(page) });
+  return Frame({ deck, page: plain, children: words });
 }

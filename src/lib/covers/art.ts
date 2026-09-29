@@ -6,6 +6,8 @@
  *  - SHAPES: abstract motifs in the brand's colours (a waveform for a voice
  *    post, connected steps for a workflow post...). The default.
  *  - DOODLES: hand-drawn Open Doodles figures (CC0), in ink and accent.
+ *  - ICONS: one thin line drawing of an object (Phosphor Icons, MIT; icons.ts),
+ *    the same set carousel pages use.
  *  - NONE: type only, the phase 5 cover.
  *
  * The motif is chosen by keywords in the post, in code; when none match it
@@ -13,6 +15,7 @@
  * covers still varies.
  */
 import { DOODLES, type DoodleName } from "./doodles";
+import { ICON_MEANING, ICONS, type IconName } from "./icons";
 import type { CoverArtStyle } from "./artStyles";
 
 export { COVER_ART_STYLES, DEFAULT_COVER_ART_STYLE, COVER_ART_STYLE_META, parseArtStyle, type CoverArtStyle } from "./artStyles";
@@ -24,7 +27,7 @@ export const MOTIFS = [
 export type Motif = (typeof MOTIFS)[number];
 
 /** by_keyword: the post's words chose the motif (false: rotation by post id). */
-export type ArtChoice = ({ style: "SHAPES"; motif: Motif } | { style: "DOODLES"; motif: DoodleName }) & { by_keyword?: boolean };
+export type ArtChoice = ({ style: "SHAPES"; motif: Motif } | { style: "DOODLES"; motif: DoodleName } | { style: "ICONS"; motif: IconName }) & { by_keyword?: boolean };
 
 /**
  * Words that point at a motif: whole words, case-insensitive. On a tie the
@@ -127,6 +130,16 @@ const DOODLE_WORDS: Partial<Record<DoodleName, RegExp>> = {
   COFFEE: /\b(morning|daily|routine|week|weekly|habit)\b/g,
 };
 
+const ICON_STOP = new Set(["what", "when", "with", "that", "their", "someone", "someone's", "from", "into", "they", "only", "being", "your", "left", "real", "right", "adding", "down", "things"]);
+
+/** Words that point at an icon, from its name and its meaning: the fallback when the strategist names none. */
+const ICON_WORDS = Object.fromEntries(
+  (Object.entries(ICON_MEANING) as [IconName, string][]).map(([name, meaning]) => {
+    const words = [...new Set([...name.toLowerCase().split("_"), ...meaning.toLowerCase().split(/[^a-z']+/)])].filter((w) => w.length >= 4 && !ICON_STOP.has(w));
+    return [name, new RegExp(`\\b(${words.join("|")})s?\\b`, "g")];
+  }),
+) as Partial<Record<IconName, RegExp>>;
+
 /** 32-bit FNV-1a: a stable number from a string. */
 export function hashSeed(s: string): number {
   let h = 0x811c9dc5;
@@ -192,6 +205,10 @@ export function chooseArt(style: CoverArtStyle, text: string, seed: string, rece
   if (style === "DOODLES") {
     const all = Object.keys(DOODLES) as DoodleName[];
     return { style, ...pick(both(DOODLE_WORDS, all), all) };
+  }
+  if (style === "ICONS") {
+    const all = Object.keys(ICONS) as IconName[];
+    return { style, ...pick(both(ICON_WORDS, all), all) };
   }
   return { style, ...pick(both(MOTIF_WORDS, MOTIFS), MOTIFS) };
 }
@@ -477,6 +494,11 @@ export function artSvg(choice: ArtChoice, seed: string, c: ArtColours): { svg: s
     const [, , w, h] = d.viewBox.split(" ").map(Number);
     const body = d.body.replaceAll("__INK__", c.ink).replaceAll("__ACCENT__", c.highlight);
     return { svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${d.viewBox}" width="${w}" height="${h}">${body}</svg>`, aspect: w / h };
+  }
+  if (choice.style === "ICONS") {
+    const { viewBox, body } = ICONS[choice.motif];
+    const [, , w, h] = viewBox.split(" ").map(Number);
+    return { svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="${w * 2}" height="${h * 2}"><g fill="${c.main}">${body}</g></svg>`, aspect: w / h };
   }
   const rnd = random(hashSeed(`${seed}:${choice.motif}`));
   return { svg: svg(W, H, DRAW[choice.motif](rnd, c)), aspect: W / H };

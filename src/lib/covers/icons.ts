@@ -1,5 +1,5 @@
 /**
- * Line icons for carousel pages: Phosphor Icons (https://phosphoricons.com),
+ * Line icons for covers and carousel pages: Phosphor Icons (https://phosphoricons.com),
  * "thin" weight, MIT licence, Copyright (c) 2023 Phosphor Icons. Reduced to
  * objects that suit a work post. Each body is the SVG's inner markup; the
  * paths are filled outlines, so the line weight scales with the drawn size.

@@ -1,6 +1,6 @@
 import type { ChatPayload } from "./types";
 import { DATA_CLOSE, DATA_OPEN, fenceSafe } from "./harvest";
-import { ICON_MEANING } from "@/lib/carousel/icons";
+import { ICON_MEANING } from "@/lib/covers/icons";
 import { CAPTION_WORDS, COVER_HEADLINE_WORDS, INNER_SLIDES, WORD_CAPS } from "@/lib/carousel/plan";
 
 /**

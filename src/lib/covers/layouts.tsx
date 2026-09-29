@@ -183,7 +183,7 @@ const KICKER_GAP = 48;
  * so a short headline gets a large picture and a long one a smaller picture,
  * never a gap. A doodle is a figure and needs more height to read at feed size.
  */
-const ART_MIN = { SHAPES: 220, DOODLES: 260 } as const;
+const ART_MIN = { SHAPES: 220, DOODLES: 260, ICONS: 220 } as const;
 /** With art the headline is capped below its usual 150px, so the picture gets room and neither shouts over the other. */
 const ART_HEADLINE_MAX = 128;
 const ART_MAX = 440;

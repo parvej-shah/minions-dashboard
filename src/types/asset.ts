@@ -43,7 +43,7 @@ export interface CoverSpecDTO {
   headline_source: string;
   /** Who the cover is signed by, so the feed preview can show the real author. */
   author: { name: string; role: string | null } | null;
-  /** SHAPES, DOODLES or NONE; null on covers drawn before illustrations existed. */
+  /** SHAPES, DOODLES, ICONS or NONE; null on covers drawn before illustrations existed. */
   art_style: string | null;
   /** Whether the illustration is on this cover (QUOTE and NUMBER have no room, a long headline may need it). */
   art_drawn: boolean;

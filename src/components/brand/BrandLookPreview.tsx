@@ -15,7 +15,7 @@ interface BrandLookPreviewProps {
   brandName?: string;
   byline?: string;
   logoUrl?: string;
-  /** SHAPES, DOODLES or NONE. */
+  /** SHAPES, DOODLES, ICONS or NONE. */
   art?: string;
 }
 

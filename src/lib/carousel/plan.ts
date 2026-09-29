@@ -8,7 +8,7 @@
 import { bannedHits } from "@/lib/drafts/banned";
 import { numbersIn, unsupportedNumbers } from "@/lib/harvest/text";
 import { CoverFitError, coverElement, type CoverSpec } from "@/lib/covers/layouts";
-import { ICONS, type IconName } from "./icons";
+import { ICONS, type IconName } from "@/lib/covers/icons";
 import { DEFAULT_SLIDE_STYLE, SLIDE_LAYOUTS, SLIDE_STYLES, slideElement, type Deck, type Slide, type SlideLayout, type SlideStyle } from "./slides";
 
 export const CAROUSEL_STRUCTURES = ["CHECKLIST", "STEPS", "DECISION", "CONTRAST", "TEARDOWN"] as const;

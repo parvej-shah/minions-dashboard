@@ -68,7 +68,7 @@ export interface BrandSettings {
   primary_logo_url: string;
   /** The author line under the name on every cover; empty uses the positioning's first sentence. */
   cover_byline: string;
-  /** The illustration above a cover's headline: SHAPES, DOODLES or NONE. */
+  /** The illustration above a cover's headline: SHAPES, DOODLES, ICONS or NONE. */
   cover_art: string;
   primary_ink: string;
   brand_teal: string;

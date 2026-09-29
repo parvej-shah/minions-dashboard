@@ -4,7 +4,7 @@ import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 import { COVER_LAYOUTS, type CoverLayout } from "@/lib/covers/layouts";
 import { renderAssetCover, type CoverEdit } from "@/services/cover";
-import { parseArtStyle } from "@/lib/covers/art";
+import { COVER_ART_STYLES, parseArtStyle } from "@/lib/covers/art";
 
 export const maxDuration = 60;
 
@@ -28,7 +28,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const layout = typeof body.layout === "string" && COVER_LAYOUTS.includes(body.layout as CoverLayout) ? (body.layout as CoverLayout) : undefined;
     if (body.layout !== undefined && !layout) return apiFailure(`layout must be one of ${COVER_LAYOUTS.join(", ")}`, 400);
     const art = body.art === undefined ? undefined : parseArtStyle(body.art);
-    if (art === null) return apiFailure("art must be SHAPES, DOODLES or NONE", 400);
+    if (art === null) return apiFailure(`art must be one of ${COVER_ART_STYLES.join(", ")}`, 400);
     const edit: CoverEdit = { layout, headline: text(body.headline, 160), kicker: text(body.kicker, 160), emphasis: text(body.emphasis, 40), art, art_reroll: body.art_reroll === true };
 
     const result = await renderAssetCover(owned.id, { edit });

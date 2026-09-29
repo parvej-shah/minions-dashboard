@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { artSvg, chooseArt, DOODLE_MEANING, MOTIF_MEANING, MOTIFS, parseArtStyle, type ArtChoice } from "./art";
 import { DOODLES, type DoodleName } from "./doodles";
+import { ICON_MEANING, ICONS, type IconName } from "./icons";
 import { DEFAULT_COVER_BRAND } from "./brand";
 import { coverElement, CoverFitError, type CoverSpec } from "./layouts";
 import { renderCoverPng } from "./render";
@@ -13,6 +14,8 @@ describe("the illustration is chosen in code", () => {
     expect(chooseArt("SHAPES", VOICE, "a")).toMatchObject({ motif: "WAVEFORM", by_keyword: true });
     expect(chooseArt("SHAPES", "Automate the confirmation call first, not the whole dispatch flow", "a")?.motif).toBe("FLOW");
     expect(chooseArt("DOODLES", "We shipped the launch a week early", "a")?.motif).toBe("UNBOXING");
+    expect(chooseArt("ICONS", "Your roadmap slips when a senior engineer resigns", "a")?.style).toBe("ICONS");
+    expect(chooseArt("ICONS", "Fix the buried call to action before a redesign", "a", [], undefined, "", "cursor_click")?.motif).toBe("CURSOR_CLICK");
   });
 
   it("is the same for the same post, and none for NONE", () => {
@@ -49,9 +52,11 @@ describe("the illustration is chosen in code", () => {
   it("has a meaning for every shape and figure, for the strategist to choose from", () => {
     expect(Object.keys(MOTIF_MEANING).sort()).toEqual([...MOTIFS].sort());
     expect(Object.keys(DOODLE_MEANING).sort()).toEqual(Object.keys(DOODLES).sort());
+    expect(Object.keys(ICON_MEANING).sort()).toEqual(Object.keys(ICONS).sort());
   });
 
-  it("accepts only the three styles", () => {
+  it("accepts only the listed styles", () => {
+    expect(parseArtStyle("ICONS")).toBe("ICONS");
     expect(parseArtStyle("DOODLES")).toBe("DOODLES");
     expect(parseArtStyle("CLIPART")).toBeNull();
     expect(parseArtStyle(undefined)).toBeNull();
@@ -62,6 +67,7 @@ describe("every illustration draws in the brand's colours", () => {
   const all: ArtChoice[] = [
     ...MOTIFS.map((motif) => ({ style: "SHAPES" as const, motif })),
     ...(Object.keys(DOODLES) as DoodleName[]).map((motif) => ({ style: "DOODLES" as const, motif })),
+    ...(Object.keys(ICONS) as IconName[]).map((motif) => ({ style: "ICONS" as const, motif })),
   ];
 
   it.each(all.map((c) => [c.motif, c] as const))("%s", (_, choice) => {
@@ -73,7 +79,8 @@ describe("every illustration draws in the brand's colours", () => {
       const names = [...tag.matchAll(/\s([a-z-]+)="/g)].map((m) => m[1]);
       expect(new Set(names).size, tag.slice(0, 80)).toBe(names.length);
     }
-    expect(svg).toContain(colours.highlight);
+    // Line icons are one colour, the line colour; shapes and figures carry the accent too.
+    expect(svg).toContain(choice.style === "ICONS" ? colours.main : colours.highlight);
     expect(aspect).toBeGreaterThan(0.5);
     expect(artSvg(choice, "seed", colours).svg).toBe(svg);
   });

@@ -58,6 +58,10 @@ describe("slide layouts", () => {
     const long = "Write down every architecture decision, every edge case and the one integration only they understood, before they leave";
     const body = "The context that was never written down leaves with them, and the roadmap slips.";
     expect(images(deck([{ layout: "POINT", title: long, body, icon: "NOTEBOOK" }]))).toBe(plain);
+    // Fits beside the icon, but only by shrinking the headline well below its size without it.
+    const statement = "A full redesign is usually the most expensive way to avoid fixing your homepage messaging.";
+    const stakes = (icon?: "WARNING") => deck([{ layout: "STAKES", statement, body: "Founders ask for a rebuild when the real problem is where visitors drop off.", icon }]);
+    expect(images(stakes("WARNING"))).toBe(images(stakes()));
   });
 
   it("rejects copy that cannot fit rather than cutting it", () => {

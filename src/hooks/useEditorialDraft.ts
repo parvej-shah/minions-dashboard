@@ -66,7 +66,7 @@ export interface CoverEditInput {
   headline?: string;
   kicker?: string;
   emphasis?: string;
-  art?: "SHAPES" | "DOODLES" | "NONE";
+  art?: "SHAPES" | "DOODLES" | "ICONS" | "NONE";
   art_reroll?: boolean;
 }
 

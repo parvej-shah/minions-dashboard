@@ -29,6 +29,20 @@ and link to it here.
 
 ---
 
+## 2026-09-29 — Line icons are a cover illustration style, and icons need premium-size words
+
+**Decision:** "Line icons" joins Shapes, Doodles and None as a cover
+illustration a workspace (Brand page) or a single cover (Studio) can use. The
+strategist names one icon per post from the same 97-icon set carousel pages
+use; code checks the name and falls back to the post's words. On carousel
+pages, an icon is kept only while the headline stays at least 85% of its size
+without the icon and never below 84px (statements) or 76px (titles) at 1080
+wide; otherwise the page is drawn without it.
+**Why:** one visual family across a post's cover and its carousel, and an
+icon must never cost the reader legibility. Premium means the words carry the
+page; decoration yields.
+**Status:** active
+
 ## 2026-09-29 — Carousel pages can carry a line icon, when the model thinks it helps
 
 **Decision:** STAKES, POINT and STEP pages may show one faint line icon

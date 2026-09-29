@@ -1215,6 +1215,11 @@ Slices 2–4 (built 2026-09-27, not yet deployed):
   @phosphor-icons/core). The plan's per-slide `icon` is the model's call; an
   unknown or repeated name is dropped, never a failed plan, and a page whose
   words need the room is drawn without its icon.
+- 2026-09-29: icons are held to a headline size floor (ICON_KEEP 85% of the
+  size without the icon, ICON_FLOOR 84px statements / 76px titles), and
+  ICONS is a cover art style too (`src/lib/covers/icons.ts` now shared;
+  strategist `thumbnail_card.icon_motif`; `prisma/sql/2026-09-29-cover-art-icons.sql`
+  widens `brand_profile.cover_art`). Previews in ~/Desktop/minions-illustrations.
 - Later (agreed 2026-09-29, not started): per-brand looks, so two tenants'
   carousels stop sharing one design system. In order of cost: (1) a heading
   font and a body font chosen per workspace from a bundled set (each needs
