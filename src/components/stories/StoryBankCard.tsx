@@ -9,12 +9,15 @@ import type { StoryBankDTO } from "@/services/storyBank";
 import StorySession, { type SessionResult } from "./StorySession";
 import { chunky } from "./chunky";
 
-const DISMISS_KEY = "minions-story-bank-dismissed";
-const today = () => new Date().toISOString().slice(0, 10);
+const DISMISS_KEY = "minions-story-bank-hidden-until";
+/** The X hides the card for a week: a reminder, never a nag. */
+const HIDE_MS = 7 * 86_400_000;
 
 /**
  * The home card that appears when the story bank runs low: how many unused
- * stories are left, the weekly streak, and a button into the session.
+ * stories are left, the weekly streak, and a button into the session. At most
+ * once a week: it stays away in any week the author already added a story,
+ * and the X hides it for seven days.
  */
 export default function StoryBankCard() {
   const [bank, setBank] = useState<StoryBankDTO | null>(null);
@@ -29,7 +32,7 @@ export default function StoryBankCard() {
       .then((b) => {
         if (cancelled) return;
         try {
-          setDismissed(localStorage.getItem(DISMISS_KEY) === today());
+          setDismissed(Date.now() < Number(localStorage.getItem(DISMISS_KEY) || 0));
         } catch {
           // Storage blocked: show the card.
         }
@@ -46,7 +49,7 @@ export default function StoryBankCard() {
   const dismiss = () => {
     setDismissed(true);
     try {
-      localStorage.setItem(DISMISS_KEY, today());
+      localStorage.setItem(DISMISS_KEY, String(Date.now() + HIDE_MS));
     } catch {
       // Hidden for this visit only.
     }
@@ -72,13 +75,14 @@ export default function StoryBankCard() {
     );
   }
 
-  if (!bank || !bank.low || dismissed || !bank.prompts.length) return null;
+  // Quiet by default: only when the bank is low and the author has added nothing this week.
+  if (!bank || !bank.low || bank.added_this_week || dismissed || !bank.prompts.length) return null;
 
   const left = bank.unused;
   return (
     <>
       <section className="relative overflow-hidden rounded-2xl border-2 border-[#1F2D3D] bg-[#0F1419] p-5">
-        <button type="button" onClick={dismiss} aria-label="Hide until tomorrow" className="absolute right-3 top-3 rounded-lg p-1 text-[#64748B] hover:text-[#F1F5F9] cursor-pointer">
+        <button type="button" onClick={dismiss} aria-label="Hide for a week" className="absolute right-3 top-3 rounded-lg p-1 text-[#64748B] hover:text-[#F1F5F9] cursor-pointer">
           <X className="h-4 w-4" />
         </button>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
