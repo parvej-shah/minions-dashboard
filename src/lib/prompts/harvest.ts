@@ -151,7 +151,7 @@ ${plan.map((s) => slotLine(s, memory)).join("\n\n")}
 RULES:
 1. author_advantage: what this author knows about the problem that a competitor could not write, taken from the items you list in memory_refs (M1.. for experience, P1.. for proof). Copy 5 to 15 words exactly from the cited item into evidence_quote. The idea itself (raw_idea and angle) must carry that specific detail (the event, the finding, the mechanism), not just the topic: a reader should be able to tell which experience it came from.
 2. If no experience or proof really fits, set memory_refs to [], and evidence_quote and author_advantage to "". An honest empty field is better than a stretched one.
-3. Use an experience item only for what it states. Never add events, failures, results, clients or numbers to it: "we are building X" is not "our first version of X failed".
+3. Use an experience item only for what it states. Never add events, failures, results, clients or numbers to it: "we are building X" is not "our first version of X failed". One story stays one case: "a founder asked" is never "clients ask" or "hundreds of sites".
 4. Items marked GENERALIZE: use the lesson only. Never write the names of people, companies or places from them, or their figures.
 5. Never invent a number, result, customer story, product capability or quotation. Use only figures that appear in the experience, proof or signals, and only for what they literally say.
 6. Every idea must be a new argument. RECENTLY COVERED lists what is already in the pipeline; do not restate any of it in other words.

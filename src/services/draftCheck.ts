@@ -30,6 +30,7 @@ export async function runDraftCheck(body: Record<string, unknown>): Promise<{ er
     trustBasis: trust?.trustBasis ?? [],
     memory: inputs.memory,
     sources: signals.map((s) => ({ title: s.title, text: s.snippet, url: s.url })),
+    authorFacts: [inputs.positioning, ...inputs.unsourcedProof],
     knownText: [
       str(body.evidence_block),
       str(body.brand_context),

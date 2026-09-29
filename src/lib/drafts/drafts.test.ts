@@ -134,6 +134,78 @@ describe("the draft check", () => {
   });
 });
 
+describe("the draft check keeps a retold experience to what the item says", () => {
+  // From a real draft (2026-09-29): one story, retold with details and an outcome it never stated.
+  const story = "Redesigned the website for Carolyn Greiner, a Learning & Development leader. The goals: a cleaner user experience, better content hierarchy, and showing her expertise with more clarity and credibility.";
+  const founder = "A founder asked for a complete website redesign because the site 'looked outdated'. We reviewed their analytics and user recordings: the visuals were fine, but the main CTA was buried in jargon.";
+  const base: DraftCheckInput = {
+    hook: "Raising prices exposes a weak content hierarchy.",
+    body: "In Carolyn Greiner's redesign we rebuilt the content hierarchy so her expertise landed with clarity and credibility.\n\nLook at your hero section right now.",
+    claims: [],
+    approvedProofs: [],
+    allowCustomerResult: false,
+    trustBasis: ["LIVED_EXPERIENCE"],
+    memory: [{ content: story, disclosure: "PUBLIC", generalizedContent: null }],
+    knownText: [],
+    authorFacts: ["Brand and web strategist for coaches.", "Designed more than 400 brands"],
+  };
+
+  it("passes a faithful retelling", () => {
+    const claims = [{ claim_text: "The goals were a cleaner user experience, better content hierarchy, and showing her expertise with more clarity and credibility.", claim_type: "CUSTOMER_RESULT" }];
+    expect(checkDraft({ ...base, claims })).toMatchObject({ claims_ok: "Y", reasons: [] });
+  });
+
+  it("flags a detail the item never stated", () => {
+    const claims = [{ claim_text: "In Carolyn's case, the goal was better content hierarchy and her expertise with more clarity and credibility. No new logo. No palette shift.", claim_type: "CUSTOMER_RESULT" }];
+    const r = checkDraft({ ...base, claims });
+    expect(r.claims_ok).toBe("N");
+    expect(r.reasons.join(" ")).toMatch(/does not state: "No new logo\. No palette shift\."/);
+  });
+
+  it("flags an outcome the item never stated", () => {
+    const r = checkDraft({ ...base, body: base.body + "\n\nThe result? A clearer user experience, stronger trust, and more discovery calls." });
+    expect(r.claims_ok).toBe("N");
+    expect(r.reasons.join(" ")).toMatch(/outcome/);
+  });
+
+  it("passes an outcome the item does state", () => {
+    const r = checkDraft({ ...base, body: base.body + "\n\nThe result: a cleaner user experience and better content hierarchy." });
+    expect(r.claims_ok).toBe("Y");
+  });
+
+  it("leaves advice about outcomes alone", () => {
+    const r = checkDraft({ ...base, body: base.body + "\n\nA small shift in clarity can drive more discovery calls than a full redesign." });
+    expect(r.claims_ok).toBe("Y");
+  });
+
+  it("flags one story told as many", () => {
+    const r = checkDraft({ ...base, memory: [{ content: founder, disclosure: "PUBLIC", generalizedContent: null }], body: "In over 400 brand projects, I've stopped clients from wasting months of budget." });
+    expect(r.claims_ok).toBe("N");
+    expect(r.reasons.join(" ")).toMatch(/one experience as many \("I've stopped clients"\)/);
+  });
+
+  it("allows many when the author's own facts say so", () => {
+    const r = checkDraft({ ...base, body: "I've designed brands for coaches, and the pattern repeats." });
+    expect(r.claims_ok).toBe("Y");
+  });
+
+  it("leaves consequences and general counts alone", () => {
+    const r = checkDraft({ ...base, body: base.body + "\n\nThe result: sales teams chase stale leads.\n\nMost CRMs hold hundreds of records nobody reads." });
+    expect(r.claims_ok).toBe("Y");
+  });
+
+  it("does not look for outcomes in a draft with no experience behind it", () => {
+    const r = checkDraft({ ...base, trustBasis: ["MARKET_SIGNAL"], memory: [], body: "Most sites bury the offer.\n\nThe result? More bounces and fewer calls." });
+    expect(r.reasons.join(" ")).not.toMatch(/outcome/);
+  });
+
+  it("flags a count said in words that no item gives", () => {
+    const r = checkDraft({ ...base, body: "After diagnosing hundreds of sites, I know the leak is the hero." });
+    expect(r.claims_ok).toBe("N");
+    expect(r.reasons.join(" ")).toMatch(/hundreds of sites/);
+  });
+});
+
 describe("readability", () => {
   it("measures what a phone reader feels", () => {
     const long = Array.from({ length: 35 }, () => "word").join(" ") + ".";

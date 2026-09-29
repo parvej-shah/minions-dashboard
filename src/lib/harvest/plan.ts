@@ -12,6 +12,12 @@ import type { IcpContext, MemoryContext } from "@/services/authorContext";
  * the tenant's recent ideas plus the slots already planned, so the mix holds
  * over time even though one run has only three slots. Deterministic: the same
  * inputs always give the same plan.
+ *
+ * A memory item one of the last RESEED_GAP ideas was built on is left to rest
+ * while anything else can fill the slot: the ICP profile for a question slot,
+ * otherwise the next bucket behind its share. A bucket holding one item would
+ * otherwise seed the same story every run, and the ideas come out as
+ * near-copies. Only when nothing rested is left does an item repeat.
  */
 
 /** How the prompt refers to memory item i and proof claim i. */
@@ -20,6 +26,9 @@ export const proofRef = (i: number) => `P${i + 1}`;
 
 /** Recent ideas counted against the mix. */
 export const MIX_WINDOW = 30;
+
+/** Recent ideas whose memory items rest for this run: about two runs' worth. */
+export const RESEED_GAP = 6;
 
 export type HarvestSeed =
   | { kind: "MEMORY"; ref: string; memory_id: string }
@@ -72,6 +81,7 @@ export function planHarvest(input: HarvestPlanInput): HarvestSlot[] {
     .map((m, i) => ({ m, i, use: recentUse.get(m.id) ?? 0 }))
     .sort((a, b) => a.use - b.use || a.i - b.i);
   const memoryIn = (b: SourceBucket) => ranked.filter(({ m }) => MEMORY_KIND_SOURCE[m.kind]?.bucket === b);
+  const resting = new Set(input.recentMemoryIds.slice(0, RESEED_GAP).flat());
 
   // Phase 6: an item from a recent weekly answer that no recent idea has used
   // seeds the first slot, whatever the mix says. The author just told us what
@@ -82,10 +92,15 @@ export function planHarvest(input: HarvestPlanInput): HarvestSlot[] {
   const taken = new Set<string>();
   let icpUsed = 0;
 
+  const unrested = (b: SourceBucket) => memoryIn(b).find(({ m }) => !taken.has(m.id) && !resting.has(m.id));
+  const icpLeft = (b: SourceBucket) => b === "ICP_QUESTION" && icpUsed < icpPrompts.length;
+  // Something new to build on, without reusing a resting item.
+  const fresh = (b: SourceBucket): boolean => (b === "MARKET" ? input.hasMarketSources : Boolean(unrested(b)) || icpLeft(b));
+  // Anything at all, resting items included.
   const available = (b: SourceBucket): boolean => {
     if (b === "MARKET") return input.hasMarketSources;
     if (memoryIn(b).some(({ m }) => !taken.has(m.id))) return true;
-    return b === "ICP_QUESTION" && icpUsed < icpPrompts.length;
+    return icpLeft(b);
   };
 
   return angles.map((angle, idx) => {
@@ -103,16 +118,20 @@ export function planHarvest(input: HarvestPlanInput): HarvestSlot[] {
         seed: { kind: "MEMORY", ref: memoryRef(freshPick.i), memory_id: freshPick.m.id },
       };
     }
-    let best: SourceBucket | null = null;
-    let bestScore = -Infinity;
-    for (const b of SOURCE_BUCKETS) {
-      if (!(mix[b] > 0) || !available(b)) continue;
-      const deficit = (mix[b] / total) * (counted + 1) - counts[b];
-      if (deficit > bestScore) {
-        best = b;
-        bestScore = deficit;
+    const furthestBehind = (usable: (b: SourceBucket) => boolean): SourceBucket | null => {
+      let best: SourceBucket | null = null;
+      let bestScore = -Infinity;
+      for (const b of SOURCE_BUCKETS) {
+        if (!(mix[b] > 0) || !usable(b)) continue;
+        const deficit = (mix[b] / total) * (counted + 1) - counts[b];
+        if (deficit > bestScore) {
+          best = b;
+          bestScore = deficit;
+        }
       }
-    }
+      return best;
+    };
+    const best = furthestBehind(fresh) ?? furthestBehind(available);
     const base = { slot: idx + 1, pillar: angle.pillar, pillar_brief: angle.brief };
     if (!best) return { ...base, bucket: "OPEN", source_type: null, seed: { kind: "OPEN" } };
 
@@ -120,7 +139,8 @@ export function planHarvest(input: HarvestPlanInput): HarvestSlot[] {
     counted++;
     if (best === "MARKET") return { ...base, bucket: best, source_type: "MARKET_SIGNAL", seed: { kind: "MARKET" } };
 
-    const pick = memoryIn(best).find(({ m }) => !taken.has(m.id));
+    // A resting item only when the ICP profile has nothing left for this slot either.
+    const pick = unrested(best) ?? (icpLeft(best) ? undefined : memoryIn(best).find(({ m }) => !taken.has(m.id)));
     if (pick) {
       taken.add(pick.m.id);
       return {

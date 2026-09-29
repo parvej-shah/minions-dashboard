@@ -16,6 +16,14 @@ export function constantTimeEqual(a: string, b: string): boolean {
 }
 
 /**
+ * Calls a minute the webhook secret may make. Every n8n workflow shares the one
+ * secret, and a scheduled harvest makes about nine calls per workspace, all in
+ * the same minute: at 60, ten workspaces got 429s (2026-09-29, 04:00). A wrong
+ * secret is refused before this count, so the cap only bounds a leaked one.
+ */
+export const WEBHOOK_CALLS_PER_MINUTE = 600;
+
+/**
  * Validates incoming webhook requests against MINIONS_WEBHOOK_SECRET.
  *
  * Deliberately NOT BLOG_API_SECRET any more: that variable held a value that
@@ -59,7 +67,7 @@ export async function verifyWebhookSecret(
 
   // Bucket by a hash of the secret, never the raw value, so it never lands in logs/DB.
   const bucketKey = `webhook:${crypto.createHash("sha256").update(provided).digest("hex")}`;
-  const { allowed } = await checkRateLimit(bucketKey, 60, 60);
+  const { allowed } = await checkRateLimit(bucketKey, WEBHOOK_CALLS_PER_MINUTE, 60);
   if (!allowed) {
     return {
       isValid: false,

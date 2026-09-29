@@ -56,6 +56,7 @@ Platform Attitudes:
 
 Universal Rules:
 - NEVER state statistics not in the body.
+- Describe the author's work exactly as the Final Body does: never add an outcome ("The result? More calls"), a detail of what was or was not changed, or turn one case into many.
 - NEVER use em dashes ('—' or '--').
 - NO RAW MARKDOWN (*, **, ###, \`). Write clean, natural text.
 - Never include links in main text.

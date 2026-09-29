@@ -44,8 +44,10 @@ describe("planHarvest keeps the source mix in code", () => {
     expect(planHarvest(input()).map((s) => s.bucket)).toEqual(["CURRENT_WORK", "EXPERIENCE", "ICP_QUESTION"]);
   });
 
-  it("converges on the 35/25/20/15/5 mix over many runs", () => {
-    const types = simulate(40);
+  it("converges on the 35/25/20/15/5 mix over many runs, given enough to rotate", () => {
+    // Enough items per bucket that none is needed again while it rests.
+    const many = (kind: MemoryContext["kind"], n: number) => Array.from({ length: n }, (_, i) => mem(`${kind}-${i}`, kind));
+    const types = simulate(40, { memory: [...many("CURRENT_WORK", 4), ...many("STORY", 3), ...many("OPINION", 2), mem("q1", "ICP_QUESTION"), mem("ex1", "EXPERIMENT")] });
     const share = (pred: (t: string | null) => boolean) => types.filter(pred).length / types.length;
     expect(share((t) => t === "CURRENT_WORK" || t === "BUILD_IN_PUBLIC")).toBeCloseTo(0.35, 1);
     expect(share((t) => t === "PAST_EXPERIENCE" || t === "PROFESSIONAL_OPINION")).toBeCloseTo(0.25, 1);
@@ -63,6 +65,35 @@ describe("planHarvest keeps the source mix in code", () => {
   it("reaches for the least-used memory item first", () => {
     const plan = planHarvest(input({ recentMemoryIds: [["cw1"], ["cw1"]] }));
     expect(plan[0].seed).toMatchObject({ kind: "MEMORY", memory_id: "cw2" });
+  });
+
+  it("rests an item a recent idea used, rather than seeding it again", () => {
+    // A bucket with one item: before, every run rebuilt the same story.
+    const only = [mem("cw1", "CURRENT_WORK"), mem("st1", "STORY"), mem("st2", "STORY"), mem("op1", "OPINION")];
+    const plan = planHarvest(input({ memory: only, hasMarketSources: false, recentMemoryIds: [["cw1"]] }));
+    expect(plan.some((s) => s.seed.kind === "MEMORY" && s.seed.memory_id === "cw1")).toBe(false);
+    expect(plan.map((s) => s.bucket)).not.toContain("CURRENT_WORK");
+  });
+
+  it("answers a question slot from the ICP profile while the saved question rests", () => {
+    const plan = planHarvest(input({ recentMemoryIds: [["q1"]] }));
+    const icpSlot = plan.find((s) => s.bucket === "ICP_QUESTION")!;
+    expect(icpSlot.seed).toEqual({ kind: "ICP", text: "Will callers hang up?" });
+  });
+
+  it("uses a resting item again once it is older than the gap", () => {
+    const only = [mem("cw1", "CURRENT_WORK"), mem("st1", "STORY")];
+    const old = [["st1"], [], [], [], [], [], ["cw1"]];
+    const plan = planHarvest(input({ memory: only, hasMarketSources: false, recentMemoryIds: old }));
+    expect(plan[0].seed).toMatchObject({ kind: "MEMORY", memory_id: "cw1" });
+  });
+
+  it("repeats a resting item only when nothing else is left", () => {
+    const only = [mem("cw1", "CURRENT_WORK")];
+    const noIcp = { ...ICP, pains: [], questions: [] };
+    const plan = planHarvest(input({ memory: only, icp: noIcp, hasMarketSources: false, recentMemoryIds: [["cw1"]] }));
+    expect(plan[0].seed).toMatchObject({ kind: "MEMORY", memory_id: "cw1" });
+    expect(plan.slice(1).every((s) => s.bucket === "OPEN")).toBe(true);
   });
 
   it("skips a bucket with nothing to build on", () => {
