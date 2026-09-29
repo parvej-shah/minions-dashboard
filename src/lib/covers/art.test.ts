@@ -79,8 +79,7 @@ describe("every illustration draws in the brand's colours", () => {
       const names = [...tag.matchAll(/\s([a-z-]+)="/g)].map((m) => m[1]);
       expect(new Set(names).size, tag.slice(0, 80)).toBe(names.length);
     }
-    // Line icons are one colour, the line colour; shapes and figures carry the accent too.
-    expect(svg).toContain(choice.style === "ICONS" ? colours.main : colours.highlight);
+    expect(svg).toContain(colours.highlight);
     expect(aspect).toBeGreaterThan(0.5);
     expect(artSvg(choice, "seed", colours).svg).toBe(svg);
   });

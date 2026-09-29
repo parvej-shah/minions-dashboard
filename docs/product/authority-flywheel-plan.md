@@ -489,6 +489,22 @@ closes the loop, and depends on LinkedIn.
 | Weekly pulse extraction plus transcription | about $0.01 per user per week |
 | Metrics sync | no LLM cost; API calls only |
 
+Measured 2026-09-29 (n8n runs 27128/27450/27480, Model Studio list prices,
+1 USD ≈ 122 BDT): a draft ≈ 2.2 BDT (strategist 1.42, writer 0.74, editor
+0.02, variants 0.05), a carousel attempt ≈ 1.4 BDT (2.8 with the retry), a
+harvest run ≈ 1.6 BDT. All currently on free quota.
+
+**Later, only if cost matters: prompt caching.** Qwen's implicit cache is
+always on but reuses only an identical prompt prefix of 1,024+ tokens, and
+every prompt opens with the brand or author name, so every call shows
+`cached_tokens: 0`. Fix: put each prompt's fixed text (rules, output format,
+icon/shape/doodle lists) first and the tenant- and post-specific parts last;
+the cache is per account, so all tenants share it. Estimated saving ~25–30%
+of a draft (strategist ~2.5k, carousel ~2k, harvest ~1.2k cacheable tokens;
+qwen3.8-max's cached-token rate is console-only). Explicit `cache_control`
+(125% to create, 10% on hit, 5-minute life) only pays for bursts such as
+many harvests at once. Measure with `usage.prompt_tokens_details.cached_tokens`.
+
 ## 7. Risks
 
 | Risk | Mitigation |

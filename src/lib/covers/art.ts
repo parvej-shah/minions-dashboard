@@ -6,7 +6,7 @@
  *  - SHAPES: abstract motifs in the brand's colours (a waveform for a voice
  *    post, connected steps for a workflow post...). The default.
  *  - DOODLES: hand-drawn Open Doodles figures (CC0), in ink and accent.
- *  - ICONS: one thin line drawing of an object (Phosphor Icons, MIT; icons.ts),
+ *  - ICONS: one thin line drawing of an object in the accent (Phosphor Icons, MIT; icons.ts),
  *    the same set carousel pages use.
  *  - NONE: type only, the phase 5 cover.
  *
@@ -498,7 +498,7 @@ export function artSvg(choice: ArtChoice, seed: string, c: ArtColours): { svg: s
   if (choice.style === "ICONS") {
     const { viewBox, body } = ICONS[choice.motif];
     const [, , w, h] = viewBox.split(" ").map(Number);
-    return { svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="${w * 2}" height="${h * 2}"><g fill="${c.main}">${body}</g></svg>`, aspect: w / h };
+    return { svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="${w * 2}" height="${h * 2}"><g fill="${c.highlight}">${body}</g></svg>`, aspect: w / h };
   }
   const rnd = random(hashSeed(`${seed}:${choice.motif}`));
   return { svg: svg(W, H, DRAW[choice.motif](rnd, c)), aspect: W / H };

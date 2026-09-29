@@ -10,7 +10,7 @@ export const DEFAULT_COVER_ART_STYLE: CoverArtStyle = "SHAPES";
 export const COVER_ART_STYLE_META: Record<CoverArtStyle, { label: string; description: string }> = {
   SHAPES: { label: "Shapes", description: "An abstract shape that fits the topic, in your colours" },
   DOODLES: { label: "Doodles", description: "A hand-drawn figure in your ink and accent" },
-  ICONS: { label: "Line icons", description: "A thin line drawing of one object that fits the topic" },
+  ICONS: { label: "Line icons", description: "A thin line drawing of one object that fits the topic, in your accent" },
   NONE: { label: "None", description: "Type only" },
 };
 
