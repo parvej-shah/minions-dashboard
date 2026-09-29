@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-09-30 — Make Mission Control action-first
+
+**Decision:** The home page leads with the next useful action, uses plain-language progress labels, and omits the mobile header post quota, menu button, and blog shortcut. The quota and navigation remain available in the bottom-bar menu.
+**Why:** Users should immediately see what needs attention without decoding internal automation terminology or losing scarce mobile header space.
+**Status:** active
+
 ## 2026-09-30 — Save a rhythm before changing automatic drafting
 
 **Decision:** Schedule setup asks for cadence and review first, shows whether the rhythm is a preview or saved, and requires those changes to be saved before the immediate automatic drafting switch can be changed. Optional content plan controls still save as they are changed.

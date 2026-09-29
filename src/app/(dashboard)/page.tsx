@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   ChevronRight,
   Globe,
-  Radio,
   Inbox,
   PenLine,
   ClipboardCheck,
@@ -56,15 +55,11 @@ export default function MissionControlPage() {
       {/* HERO / WELCOME HEADER */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-6">
         <div>
-          <div className="flex flex-wrap items-center gap-2 text-xs font-mono tracking-widest text-[#00C9A7] uppercase mb-1">
-            <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse shrink-0" />
-            <span className="break-words">Autonomous Marketing & Operations Cockpit</span>
-          </div>
           <h1 className="text-3xl font-bold tracking-tight text-[#F1F5F9] break-words">
-            Mission Control
+            Your workspace
           </h1>
           <p className="text-sm text-[#94A3B8] mt-1 break-words max-w-xl">
-            Real-time multi-agent orchestration, editorial staging, and omnichannel broadcast telemetry.
+            {isLoading ? "Checking what needs your attention…" : pendingReviewAssets.length > 0 ? `${pendingReviewAssets.length} draft${pendingReviewAssets.length === 1 ? "" : "s"} ready for your review.` : "You're all caught up. Explore ideas or check what's published."}
           </p>
         </div>
 
@@ -91,6 +86,28 @@ export default function MissionControlPage() {
         </div>
       </div>
 
+      <section className="rounded-2xl border border-[#00C9A7]/35 bg-[#0F1C1D] p-5 sm:p-6" aria-labelledby="next-step-title">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#00C9A7]/15 text-[#00C9A7]">
+              {pendingReviewAssets.length > 0 ? <ClipboardCheck className="h-5 w-5" aria-hidden="true" /> : <Sparkles className="h-5 w-5" aria-hidden="true" />}
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#00C9A7]">Next step</p>
+              <h2 id="next-step-title" className="mt-1 text-lg font-bold text-[#F1F5F9]">
+                {isLoading ? "Loading your workspace" : pendingReviewAssets.length > 0 ? "Review your drafts" : "Find your next idea"}
+              </h2>
+              <p className="mt-1 text-sm text-[#94A3B8]">
+                {isLoading ? "This usually takes a moment." : pendingReviewAssets.length > 0 ? "Check the copy and decide what goes live." : "See the ideas your team has found for you."}
+              </p>
+            </div>
+          </div>
+          {!isLoading && <Link href={pendingReviewAssets.length > 0 ? "/editorial" : "/ideas"} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#00C9A7] px-5 py-2.5 text-sm font-bold text-[#070B0F] transition-colors hover:bg-[#00A88A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00C9A7]">
+            {pendingReviewAssets.length > 0 ? "Review drafts" : "Explore ideas"}<ChevronRight className="h-4 w-4" aria-hidden="true" />
+          </Link>}
+        </div>
+      </section>
+
       {/* THE WEEKLY QUESTION (phase 6): shown only on the weeks it is open */}
       <WeeklyPulseCard />
 
@@ -99,7 +116,7 @@ export default function MissionControlPage() {
         {/* KPI 1 */}
         <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-2 shadow-sm">
           <div className="flex items-center justify-between text-xs font-mono text-[#94A3B8]">
-            <span>HARVESTED IDEAS</span>
+            <span>IDEAS FOUND</span>
             <Sparkles className="w-4 h-4 text-[#00C9A7]" />
           </div>
           <div className="text-2xl font-bold text-[#F1F5F9] flex items-baseline gap-2">
@@ -107,7 +124,7 @@ export default function MissionControlPage() {
             <span className="text-xs font-normal text-[#00C9A7] font-mono">+{ideasToday.length} today</span>
           </div>
           <div className="text-[11px] text-[#64748B]">
-            Google Trends & Trade Forum Signals
+            Topics you can turn into posts
           </div>
         </div>
 
@@ -125,7 +142,7 @@ export default function MissionControlPage() {
             )}
           </div>
           <div className="text-[11px] text-[#94A3B8]">
-            Staged & verified by Critic agent
+            Drafts waiting for your decision
           </div>
         </div>
 
@@ -148,16 +165,14 @@ export default function MissionControlPage() {
       <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-3">
         <div className="flex items-center justify-between text-xs font-mono text-[#94A3B8]">
           <span className="flex items-center gap-2">
-            <Radio className="w-3.5 h-3.5 text-[#00C9A7]" />
-            PIPELINE FLOW STATUS
+            <span className="text-sm font-semibold text-[#F1F5F9]">How your content is moving</span>
           </span>
-          <span>Automated Logic Loop</span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
           <Link href="/ideas" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] transition-all group">
             <div className="text-xs font-bold text-[#F1F5F9] group-hover:text-[#00C9A7] flex items-center justify-center gap-1.5">
-              <><Inbox className="h-3.5 w-3.5" aria-hidden="true" /><span>Ingested</span></>
+              <><Inbox className="h-3.5 w-3.5" aria-hidden="true" /><span>Ideas</span></>
             </div>
             <div className="text-lg font-bold text-[#00C9A7] font-mono mt-1">{ideas.length}</div>
           </Link>
@@ -193,9 +208,9 @@ export default function MissionControlPage() {
             <div>
               <h2 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2 break-words">
                 <FileText className="w-4 h-4 text-[#ff6b4a] shrink-0" />
-                Pending Editorial Review Queue
+                Drafts to review
               </h2>
-              <p className="text-xs text-[#94A3B8] break-words">Review claims, adjust social variants, and broadcast to live channels.</p>
+              <p className="text-xs text-[#94A3B8] break-words">Read each draft and make it yours before publishing.</p>
             </div>
             <span className="text-xs font-mono text-[#ff6b4a] font-bold bg-[#ff6b4a]/10 px-2 py-0.5 rounded border border-[#ff6b4a]/20 shrink-0 self-start sm:self-auto">
               {pendingReviewAssets.length} Draft{pendingReviewAssets.length === 1 ? "" : "s"} Waiting
@@ -206,7 +221,7 @@ export default function MissionControlPage() {
             <div className="p-8 text-center rounded-xl bg-[#161D26] border border-dashed border-[#1F2D3D] text-[#00C9A7]">
               <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-[#00C9A7]" />
               <p className="text-sm font-bold">All clear — no drafts waiting for review</p>
-              <p className="text-xs text-[#94A3B8] mt-1">Autonomous harvester is gathering fresh topics.</p>
+              <p className="text-xs text-[#94A3B8] mt-1">When a draft is ready, you’ll find it here.</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -240,7 +255,7 @@ export default function MissionControlPage() {
                     <div className="space-y-1 flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#ff6b4a]/10 text-[#ff6b4a] border border-[#ff6b4a]/20 shrink-0">
-                          PENDING REVIEW
+                          READY TO REVIEW
                         </span>
                         <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold shrink-0 ${
                           asset.audience === "ICP" ? "bg-blue-500/10 text-blue-400" : "bg-purple-500/10 text-purple-400"
@@ -278,15 +293,15 @@ export default function MissionControlPage() {
             <div>
               <h2 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2 break-words">
                 <Globe className="w-4 h-4 text-[#00C9A7] shrink-0" />
-                Live Omnichannel Broadcasts
+                Published articles
               </h2>
-              <p className="text-xs text-[#94A3B8] break-words">Live blog permalinks. Per-channel actions live in Published Posts.</p>
+              <p className="text-xs text-[#94A3B8] break-words">Your recent posts, all in one place.</p>
             </div>
             <Link
               href="/published"
               className="text-xs font-mono text-[#00C9A7] hover:underline flex items-center gap-1"
             >
-              <span>View All Broadcasts →</span>
+              <span>View all posts →</span>
             </Link>
           </div>
 

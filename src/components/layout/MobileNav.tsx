@@ -228,34 +228,15 @@ export function MobileDrawer({
 
 export function MobileTopBar({
   onOpenPalette,
-  setMobileMenuOpen,
-  navCounts,
   isHarvesting = false,
   onHarvest,
-  blogEnabled = true,
-}: Pick<MobileNavProps, "onOpenPalette" | "setMobileMenuOpen" | "navCounts" | "blogEnabled"> & {
+}: Pick<MobileNavProps, "onOpenPalette"> & {
   isHarvesting?: boolean;
   onHarvest?: () => void;
 }) {
-  const { brandSettings } = useBrandSettings();
-  const liveBlogUrl = brandSettings?.company_domain
-    ? (brandSettings.company_domain.startsWith("http") ? brandSettings.company_domain : `https://${brandSettings.company_domain}`)
-    : BLOG_BASE_URL;
-  // A signed-in workspace without its own domain has no public blog; the
-  // fallback would send it to the Minions blog, where its posts do not exist.
-  const hasOwnBlog = !brandSettings || Boolean(brandSettings.company_domain);
-
   return (
   <header className="h-14 border-b border-[#1f2b37] bg-[#0f1419]/95 backdrop-blur-md px-3.5 sm:px-4 flex items-center justify-between sticky top-0 z-30 md:hidden">
     <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
-      <button
-        onClick={() => setMobileMenuOpen(true)}
-        className="p-2 rounded-xl bg-[#161d24] text-[#94A3B8] hover:text-white border border-[#1f2b37] shrink-0"
-        aria-label="Open menu"
-      >
-        <Menu className="w-4 h-4" />
-      </button>
-
       <Link href="/" className="flex items-baseline shrink-0">
         <span className="font-extrabold text-base tracking-tight text-white">Minions</span>
         <span className="text-[#ff6b4a] font-bold text-base ml-0.5">.AI</span>
@@ -263,8 +244,6 @@ export function MobileTopBar({
     </div>
 
     <div className="flex items-center gap-1.5 sm:gap-2">
-      {navCounts && <QuotaMeter quota={navCounts.quota} compact />}
-
       {onHarvest && (
         <button
           onClick={onHarvest}
@@ -286,17 +265,6 @@ export function MobileTopBar({
         <Search className="w-4 h-4 text-[#00C9A7]" />
       </button>
 
-      {blogEnabled && hasOwnBlog && (
-        <a
-          href={liveBlogUrl === BLOG_BASE_URL ? `${liveBlogUrl}/blog` : liveBlogUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1 text-xs font-bold text-white bg-[#ff6b4a] px-2.5 py-1.5 rounded-lg shadow-sm"
-        >
-          <span>Blog</span>
-          <ArrowUpRight className="w-3 h-3" />
-        </a>
-      )}
     </div>
   </header>
   );

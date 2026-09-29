@@ -184,8 +184,6 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         <ImpersonationBanner />
         <MobileTopBar
           onOpenPalette={() => setShowPalette(true)}
-          setMobileMenuOpen={setMobileMenuOpen}
-          navCounts={navCounts}
           isHarvesting={isHarvesting}
           onHarvest={triggerHarvest}
         />
