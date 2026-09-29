@@ -1206,6 +1206,15 @@ Slices 2–4 (built 2026-09-27, not yet deployed):
   with Make carousel in the review screen (passed on the retry), published
   with Approve & Publish; 03 posted it as a 7-page LinkedIn document
   (urn:li:ugcPost:7510360993894678529).
+- 2026-09-29: three page designs (EDITORIAL, BOLD, MINIMAL in
+  `SLIDE_STYLES`). The plan's `style` field is picked by the model per post.
+  They change colour and chrome, never geometry, and plans stored without a
+  style draw as EDITORIAL.
+- Later (agreed 2026-09-29, not started): per-brand looks, so two tenants'
+  carousels stop sharing one design system. In order of cost: (1) a heading
+  font and a body font chosen per workspace from a bundled set (each needs
+  metrics for `fit.ts`); (2) frame styles owned by the brand rather than
+  picked per post; (3) letting the reviewer switch the design in the Studio.
 
 ### Security fixes found along the way (2026-09-23)
 

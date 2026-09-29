@@ -8,7 +8,7 @@
 import { bannedHits } from "@/lib/drafts/banned";
 import { numbersIn, unsupportedNumbers } from "@/lib/harvest/text";
 import { CoverFitError, coverElement, type CoverSpec } from "@/lib/covers/layouts";
-import { SLIDE_LAYOUTS, slideElement, type Deck, type Slide, type SlideLayout } from "./slides";
+import { DEFAULT_SLIDE_STYLE, SLIDE_LAYOUTS, SLIDE_STYLES, slideElement, type Deck, type Slide, type SlideLayout, type SlideStyle } from "./slides";
 
 export const CAROUSEL_STRUCTURES = ["CHECKLIST", "STEPS", "DECISION", "CONTRAST", "TEARDOWN"] as const;
 export type CarouselStructure = (typeof CAROUSEL_STRUCTURES)[number];
@@ -32,6 +32,8 @@ export const WORD_CAPS: Record<SlideLayout, Record<string, number>> = {
 
 export interface CarouselPlan {
   structure: CarouselStructure;
+  /** The frame's design, picked to suit the post. */
+  style: SlideStyle;
   /** The small label on every inner slide, 2 to 4 words. */
   label: string;
   cover: { headline: string; emphasis?: string; kicker?: string };
@@ -100,6 +102,9 @@ export function parsePlan(raw: string): { plan: CarouselPlan | null; errors: str
   const errors: string[] = [];
   const structure = s(json.structure).toUpperCase() as CarouselStructure;
   if (!CAROUSEL_STRUCTURES.includes(structure)) errors.push(`structure must be one of ${CAROUSEL_STRUCTURES.join(", ")}.`);
+  // Plans stored before styles have none: they keep the design they were drawn in.
+  const style = (s(json.style).toUpperCase() || DEFAULT_SLIDE_STYLE) as SlideStyle;
+  if (!SLIDE_STYLES.includes(style)) errors.push(`style must be one of ${SLIDE_STYLES.join(", ")}.`);
   const cover = (json.cover ?? {}) as Record<string, unknown>;
   const slides: Slide[] = [];
   for (const [i, raw] of (Array.isArray(json.slides) ? json.slides : []).entries()) {
@@ -122,6 +127,7 @@ export function parsePlan(raw: string): { plan: CarouselPlan | null; errors: str
   }
   const plan: CarouselPlan = {
     structure,
+    style,
     label: s(json.label),
     cover: { headline: s(cover.headline), emphasis: opt(cover.emphasis), kicker: opt(cover.kicker) },
     slides,
@@ -235,7 +241,7 @@ export function checkPlan(plan: CarouselPlan, sources: PlanSources): string[] {
 /** Builds the deck, and checks that every page fits. */
 export function toDeck(plan: CarouselPlan, base: { author: CoverSpec["author"]; brand: CoverSpec["brand"]; art?: CoverSpec["art"] }): { deck: Deck; errors: string[] } {
   const cover: CoverSpec = { layout: "HEADLINE", headline: plan.cover.headline, emphasis: plan.cover.emphasis, kicker: plan.cover.kicker, author: base.author, brand: base.brand, art: base.art };
-  const deck: Deck = { cover, slides: plan.slides, label: plan.label, author: base.author, brand: base.brand };
+  const deck: Deck = { cover, slides: plan.slides, label: plan.label, author: base.author, brand: base.brand, style: plan.style };
   const errors: string[] = [];
   try {
     coverElement(cover);

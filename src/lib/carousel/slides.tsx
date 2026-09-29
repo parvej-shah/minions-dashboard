@@ -5,6 +5,10 @@
  * track and the author's name at the bottom -- so the deck reads as one
  * designed piece, and the layouts vary only the centre.
  *
+ * The frame comes in a few styles (SLIDE_STYLES) the plan picks per post.
+ * Styles change colour and chrome only, never the geometry, so a plan that
+ * fits in one style fits in all of them.
+ *
  * Same rules as the covers: every letter is drawn in code, fit.ts sets every
  * size and line break, and copy that cannot fit is rejected, never cut. Body
  * copy never goes below 40px on the 1080-wide page, so it reads on a phone.
@@ -20,6 +24,17 @@ export const SLIDE_SIZE = COVER_SIZE;
 
 export const SLIDE_LAYOUTS = ["STAKES", "POINT", "STEP", "CONTRAST", "CHECKLIST", "NUMBER", "QUOTE", "CLOSE"] as const;
 export type SlideLayout = (typeof SLIDE_LAYOUTS)[number];
+
+/**
+ * Page colours are the brand's ink and paper, swapped on "dark" pages, so a
+ * brand with light ink gets light "dark" pages.
+ * EDITORIAL: paper pages, ink opening and closing pages, a thin progress track.
+ * BOLD: every page ink, an accent edge, the label on an accent chip, one progress segment per page.
+ * MINIMAL: every page paper, a hairline track, the accent kept to the words.
+ */
+export const SLIDE_STYLES = ["EDITORIAL", "BOLD", "MINIMAL"] as const;
+export type SlideStyle = (typeof SLIDE_STYLES)[number];
+export const DEFAULT_SLIDE_STYLE: SlideStyle = "EDITORIAL";
 
 export type Slide =
   /** Why this matters now: one statement, set large on the dark page. */
@@ -47,6 +62,8 @@ export interface Deck {
   label: string;
   author: CoverAuthor;
   brand: CoverBrand;
+  /** The frame's style. Missing on decks stored before styles: EDITORIAL. */
+  style?: SlideStyle;
 }
 
 // Chrome: label row, gaps, progress track, name row.
@@ -118,6 +135,7 @@ const arrow = (colour: string) =>
   svg(`<svg xmlns="http://www.w3.org/2000/svg" width="40" height="24" viewBox="0 0 40 24"><path d="M2 12 H36 M26 3 L37 12 L26 21" fill="none" stroke="${colour}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`);
 
 interface Page {
+  style: SlideStyle;
   ink: string;
   paper: string;
   accent: string;
@@ -126,34 +144,75 @@ interface Page {
   total: number;
 }
 
+/** The label at the top left: a short accent bar before it, an accent chip behind it, or the label alone. */
+function LabelMark({ label, page }: { label: Fitted; page: Page }) {
+  const { style, ink, paper, accent } = page;
+  if (style === "BOLD") {
+    const on = contrast(ink, accent) > contrast(paper, accent) ? ink : paper;
+    return (
+      <div style={{ display: "flex", alignItems: "center", height: TOP_ROW, paddingLeft: 16, paddingRight: 16, borderRadius: 6, background: accent }}>
+        <Lines fitted={label} face="sansSemi" tracking={0.12} lineHeight={1} color={on} />
+      </div>
+    );
+  }
+  return (
+    <div style={{ display: "flex", alignItems: "center" }}>
+      {style === "EDITORIAL" ? <div style={{ width: 44, height: 6, background: accent, marginRight: 20 }} /> : null}
+      <Lines fitted={label} face="sansSemi" tracking={0.12} lineHeight={1} color={rgba(ink, style === "MINIMAL" ? 0.55 : 0.7)} />
+    </div>
+  );
+}
+
+const SEGMENT_GAP = 8;
+
+/** How far through the deck this page is: a track, one segment per page, or a hairline. */
+function Progress({ page }: { page: Page }) {
+  const { style, ink, accent, index, total } = page;
+  if (style === "BOLD") {
+    const w = (INNER - SEGMENT_GAP * (total - 1)) / total;
+    return (
+      <div style={{ display: "flex", height: TRACK, marginBottom: TRACK_GAP }}>
+        {Array.from({ length: total }, (_, i) => (
+          <div key={i} style={{ width: w, height: TRACK, marginRight: i + 1 < total ? SEGMENT_GAP : 0, background: i <= index ? accent : rgba(ink, 0.16) }} />
+        ))}
+      </div>
+    );
+  }
+  const line = style === "MINIMAL" ? 2 : TRACK;
+  return (
+    <div style={{ display: "flex", alignItems: "flex-end", height: TRACK, marginBottom: TRACK_GAP }}>
+      <div style={{ display: "flex", width: INNER, height: line, background: rgba(ink, 0.12) }}>
+        <div style={{ width: Math.round((INNER * (index + 1)) / total), height: line, background: style === "MINIMAL" ? rgba(ink, 0.6) : accent }} />
+      </div>
+    </div>
+  );
+}
+
 function Frame({ deck, page, children }: { deck: Deck; page: Page; children: ReactNode }) {
-  const { ink, paper, accent, index, total } = page;
+  const { style, ink, paper, accent, index, total } = page;
   const label = fitOrThrow("chrome", deck.label.toUpperCase());
   const marker = `${String(index + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
   const markerWidth = textWidth(metricsFor("sansSemi"), marker, 26, 0.12 * 26);
   const name = fitOrThrow("chrome", deck.author.name);
   const last = index === total - 1;
   return (
-    <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: paper, padding: PAD }}>
+    <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: paper, padding: PAD, position: "relative" }}>
+      {/* BOLD's accent edge sits in the margin, outside the text. */}
+      {style === "BOLD" ? <div style={{ position: "absolute", left: 0, top: 0, width: 14, height: SLIDE_SIZE.height, background: accent }} /> : null}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: TOP_ROW, marginBottom: TOP_GAP }}>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <div style={{ width: 44, height: 6, background: accent, marginRight: 20 }} />
-          <Lines fitted={label} face="sansSemi" tracking={0.12} lineHeight={1} color={rgba(ink, 0.7)} />
-        </div>
+        <LabelMark label={label} page={page} />
         <div style={{ display: "flex", width: markerWidth + 4, ...faceStyle("sansSemi"), fontSize: 26, letterSpacing: 0.12 * 26, color: rgba(ink, 0.5) }}>{marker}</div>
       </div>
 
       <div style={{ height: CENTRE, display: "flex", flexDirection: "column", justifyContent: "center", marginBottom: BOTTOM_GAP }}>{children}</div>
 
-      <div style={{ display: "flex", height: TRACK, background: rgba(ink, 0.12), marginBottom: TRACK_GAP }}>
-        <div style={{ width: Math.round((INNER * (index + 1)) / total), height: TRACK, background: accent }} />
-      </div>
+      <Progress page={page} />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: NAME_ROW }}>
         {/* The close slide carries the author card, so the name is not repeated under it. */}
         {last ? <div style={{ display: "flex" }} /> : <Lines fitted={name} face="sansSemi" tracking={0.12} lineHeight={1} color={rgba(ink, 0.6)} />}
         {last ? null : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={arrow(accent)} width={40} height={24} alt="" />
+          <img src={arrow(style === "MINIMAL" ? rgba(ink, 0.6) : accent)} width={40} height={24} alt="" />
         )}
       </div>
     </div>
@@ -355,8 +414,14 @@ function CloseCentre({ slide, page, deck }: { slide: Extract<Slide, { layout: "C
   );
 }
 
-/** STAKES and CLOSE sit on the dark page: they bracket the argument, and give the deck rhythm. */
+/** EDITORIAL puts STAKES and CLOSE on the dark page: they bracket the argument, and give the deck rhythm. */
 const DARK: SlideLayout[] = ["STAKES", "CLOSE"];
+
+function isDark(style: SlideStyle, layout: SlideLayout): boolean {
+  if (style === "BOLD") return true;
+  if (style === "MINIMAL") return false;
+  return DARK.includes(layout);
+}
 
 /** Slide i of the deck (0 is the cover) as a Satori element. Throws CoverFitError when any text cannot fit. */
 export function slideElement(deck: Deck, i: number) {
@@ -364,8 +429,10 @@ export function slideElement(deck: Deck, i: number) {
   const slide = deck.slides[i - 1];
   if (!slide) throw new RangeError(`The deck has no slide ${i + 1}.`);
   const { brand } = deck;
-  const dark = DARK.includes(slide.layout);
+  const style = deck.style ?? DEFAULT_SLIDE_STYLE;
+  const dark = isDark(style, slide.layout);
   const page: Page = {
+    style,
     ink: dark ? brand.paper : brand.ink,
     paper: dark ? brand.ink : brand.paper,
     accent: dark ? brand.accentOnInk : brand.accent,
@@ -382,7 +449,7 @@ export function slideElement(deck: Deck, i: number) {
     : slide.layout === "STEP" ? StepCentre({ slide, page, n, of: same.length })
     : slide.layout === "CONTRAST" ? ContrastCentre({ slide, page })
     : slide.layout === "CHECKLIST" ? ChecklistCentre({ slide, page })
-    : slide.layout === "NUMBER" ? NumberCentre({ slide, page, secondary: brand.secondary })
+    : slide.layout === "NUMBER" ? NumberCentre({ slide, page, secondary: dark ? page.accent : brand.secondary })
     : slide.layout === "QUOTE" ? QuoteCentre({ slide, page })
     : CloseCentre({ slide, page, deck });
   return Frame({ deck, page, children: centre });

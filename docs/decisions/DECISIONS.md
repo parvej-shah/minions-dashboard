@@ -29,6 +29,23 @@ and link to it here.
 
 ---
 
+## 2026-09-29 — Carousels come in three designs; the model picks one per post
+
+**Decision:** The pages after a carousel's cover come in three designs:
+EDITORIAL (the original), BOLD and MINIMAL. The model picks one to suit each
+post's tone, alongside the structure it already picks. Every design keeps the
+same page grid and fonts, and uses the workspace's brand colours. Carousels
+made before this keep EDITORIAL. Reviewers can't change the design yet.
+**Why:** every carousel from every tenant had the same frame, so decks looked
+interchangeable across posts and brands. Varying colour and chrome only (never
+geometry) means a plan that fits one design fits all of them, so no new fit
+failures.
+**Alternatives considered:** fonts and frame styles chosen per brand. That is
+the planned next step (see phase 11 "Later" in
+[authority-flywheel-plan.md](../product/authority-flywheel-plan.md)), deferred
+for now.
+**Status:** active
+
 ## 2026-09-25 — Covers lock at publish; a redraw deletes the cover it replaces
 
 **Decision:** A drawn cover can be redrawn only until the draft goes out

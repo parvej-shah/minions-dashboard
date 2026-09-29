@@ -34,6 +34,12 @@ describe("carousel plan gates", () => {
     expect(toDeck(p, { author, brand: DEFAULT_COVER_BRAND }).errors).toEqual([]);
   });
 
+  it("keeps the model's design, and gives a plan stored without one the original design", () => {
+    expect(plan({ style: "bold" }).style).toBe("BOLD");
+    expect(plan().style).toBe("EDITORIAL");
+    expect(parsePlan(JSON.stringify({ ...good, style: "NEON" })).errors).toContain("style must be one of EDITORIAL, BOLD, MINIMAL.");
+  });
+
   it("reads a stored plan sent back by the review screen", () => {
     const stored = plan();
     expect(parsePlan(JSON.stringify(stored)).plan).toEqual(stored);

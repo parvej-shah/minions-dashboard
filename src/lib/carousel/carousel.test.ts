@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { PDFDocument } from "pdf-lib";
 import { DEFAULT_COVER_BRAND } from "@/lib/covers/brand";
 import { CoverFitError, type CoverAuthor } from "@/lib/covers/layouts";
-import { slideElement, smartQuotes, type Deck, type Slide } from "./slides";
+import { SLIDE_STYLES, slideElement, smartQuotes, type Deck, type Slide } from "./slides";
 import { renderCarouselPdf } from "./render";
 
 const author: CoverAuthor = { name: "Parvej Shah", role: "Builds AI voice agents" };
@@ -42,6 +42,13 @@ describe("slide layouts", () => {
     const d = deck(EVERY_LAYOUT);
     for (let i = 0; i <= d.slides.length; i++) expect(() => slideElement(d, i)).not.toThrow();
     expect(() => slideElement(d, d.slides.length + 1)).toThrow(RangeError);
+  });
+
+  it("fits every layout in every style", () => {
+    for (const style of SLIDE_STYLES) {
+      const d = { ...deck(EVERY_LAYOUT), style };
+      for (let i = 1; i <= d.slides.length; i++) expect(() => slideElement(d, i), `${style} slide ${i + 1}`).not.toThrow();
+    }
   });
 
   it("rejects copy that cannot fit rather than cutting it", () => {

@@ -38,6 +38,11 @@ A carousel is kept and sent on when it gives the reader a structure worth keepin
 - CONTRAST: STAKES, 2-3 CONTRAST slides, one POINT, CLOSE.
 - TEARDOWN: STAKES, 3-4 POINT slides (what broke and why), CLOSE.
 
+Pick ONE design for the pages after the cover, to suit the post's tone:
+- EDITORIAL: the opening and closing pages set apart in the brand's strong colour. Considered and calm: arguments, teardowns, contrasts.
+- BOLD: every page in the brand's strong colour, with an accent edge. Energetic and direct: steps, checklists, a clear call to change something.
+- MINIMAL: every page plain and quiet, the accent only in the words. Reflective and personal: lessons, stories, the author's own experience.
+
 Layouts and their word limits (hard limits, counted in code):
 - STAKES: "statement" (max ${cap("STAKES", "statement")} words), optional "body" (max ${cap("STAKES", "body")}), optional "emphasis" (one word of the statement). Why this matters to the reader now.
 - POINT: "title" (max ${cap("POINT", "title")}), optional "body" (max ${cap("POINT", "body")}), optional "emphasis". One point. Numbered automatically.
@@ -64,6 +69,7 @@ ${input.banned.length ? `- Never use these phrases: ${input.banned.join("; ")}.\
 Return ONLY this JSON:
 {
   "structure": "CHECKLIST | STEPS | DECISION | CONTRAST | TEARDOWN",
+  "style": "EDITORIAL | BOLD | MINIMAL",
   "label": "2-4 words",
   "cover": { "headline": "...", "emphasis": "one word of the headline", "kicker": "..." },
   "slides": [ { "layout": "STAKES", "statement": "...", "body": "...", "emphasis": "..." } ],
