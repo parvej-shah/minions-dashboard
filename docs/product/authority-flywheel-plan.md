@@ -1241,6 +1241,13 @@ Slices 2–4 (built 2026-09-27, not yet deployed):
   font and a body font chosen per workspace from a bundled set (each needs
   metrics for `fit.ts`); (2) frame styles owned by the brand rather than
   picked per post; (3) letting the reviewer switch the design in the Studio.
+- 2026-09-29: R2 keeps only `carousel.pdf` per render (no page PNGs); the
+  review card draws the pages from that PDF with pdf.js, through
+  `/api/assets/[id]/carousel/pdf` (the bucket has no CORS). Older carousels
+  keep their PNGs and still show them.
+- Later (user, 2026-09-29, not started): once the model's carousels have
+  earned trust, turn off the reviewer's redraw (edit the words / remake) in
+  the Studio.
 
 ### Security fixes found along the way (2026-09-23)
 

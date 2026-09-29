@@ -7,6 +7,7 @@ import type { StoredCarousel } from "@/services/carousel";
 import type { CarouselPlan } from "@/lib/carousel/plan";
 import type { Slide } from "@/lib/carousel/slides";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import CarouselPdfPages from "./CarouselPdfPages";
 
 interface State {
   carousel: StoredCarousel | null;
@@ -31,6 +32,7 @@ const LAYOUT_NAMES: Record<Slide["layout"], string> = {
 };
 
 const input = "w-full bg-[#161D26] border border-[#1F2D3D] rounded-lg px-3 py-1.5 text-sm text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7] resize-none";
+const pageClass = "snap-start shrink-0 w-[70%] sm:w-[220px] aspect-[4/5] rounded-lg border border-[#1F2D3D] object-cover";
 const ghostButton = "px-2.5 py-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-xs font-medium text-[#00C9A7] border border-[#00C9A7]/30 hover:border-[#00C9A7] transition-all inline-flex items-center gap-1.5 disabled:opacity-50";
 
 /**
@@ -87,6 +89,9 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
 
   if (!state) return null;
   const { carousel, suggested, locked } = state;
+  const pages = carousel?.pages;
+  // The cover, then one page per slide.
+  const pageCount = carousel ? carousel.plan.slides.length + 1 : 0;
 
   const setSlide = (i: number, key: string, value: string) =>
     setDraft((d) => {
@@ -109,7 +114,7 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
           <span className="text-xs font-bold text-[#F1F5F9] font-mono uppercase tracking-wider">LinkedIn carousel</span>
         </div>
         <span className="text-[10px] font-mono text-[#64748B]">
-          {busy === "make" ? "Writing the slides…" : carousel ? (carousel.active ? `On · ${carousel.pages.length} pages` : `Off · ${carousel.pages.length} pages`) : suggested.yes ? "Suggested" : "Optional"}
+          {busy === "make" ? "Writing the slides…" : carousel ? `${carousel.active ? "On" : "Off"} · ${pageCount} pages` : suggested.yes ? "Suggested" : "Optional"}
         </span>
       </div>
 
@@ -132,15 +137,16 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
         <>
           {/* Swipe through the pages as LinkedIn shows them. */}
           <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1">
-            {carousel.pages.map((page, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={page}
-                src={page}
-                alt={`Page ${i + 1} of ${carousel.pages.length}`}
-                className={`snap-start shrink-0 w-[70%] sm:w-[220px] aspect-[4/5] rounded-lg border border-[#1F2D3D] object-cover ${busy ? "opacity-40" : ""}`}
-              />
-            ))}
+            {pages?.length ? (
+              // Carousels drawn before the PDF became the only file keep their page images.
+              pages.map((page, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={page} src={page} alt={`Page ${i + 1} of ${pages.length}`} className={`${pageClass} ${busy ? "opacity-40" : ""}`} />
+              ))
+            ) : (
+              // The render time in the URL, so a redraw never shows the cached PDF.
+              <CarouselPdfPages src={`${url}/pdf?v=${encodeURIComponent(carousel.rendered_at)}`} pageClassName={`${pageClass} ${busy ? "opacity-40" : ""}`} />
+            )}
           </div>
 
           {locked ? (

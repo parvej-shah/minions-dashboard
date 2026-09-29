@@ -24,9 +24,10 @@ export interface StoredCarousel {
   /** LinkedIn gets the carousel instead of the cover. */
   active: boolean;
   plan: CarouselPlan;
-  /** Every page as a PNG, cover first: the review preview. */
-  pages: string[];
+  /** The only file stored: LinkedIn's document, and the review preview. */
   pdf_url: string;
+  /** Each page as a PNG, cover first. Only carousels drawn before 2026-09-29 have them. */
+  pages?: string[];
   /** Copied from the plan for 03, which reads the row as it is. */
   caption: string;
   document_title: string;
@@ -133,21 +134,17 @@ function gate(ctx: Context, plan: CarouselPlan): { deck: Deck | null; errors: st
   return built.errors.length ? { deck: null, errors: built.errors } : { deck: built.deck, errors: [] };
 }
 
-/** Draws every page and the PDF, uploads them under a fresh folder, and saves the row. */
+/** Draws every page into the PDF, uploads it under a fresh folder, and saves the row. */
 async function renderAndStore(ctx: Context, plan: CarouselPlan, deck: Deck, meta: { active: boolean; model: string | null; attempts: number }): Promise<StoredCarousel> {
   const pngs: Buffer[] = [];
   for (let i = 0; i <= deck.slides.length; i++) pngs.push(await renderSlidePng(deck, i));
   const pdf = await renderCarouselPdf(deck, pngs);
-  // A new folder per render, so no CDN or browser serves an old page.
+  // A new folder per render, so no CDN or browser serves an old PDF.
   const folder = `carousels/${ctx.clientId}/${ctx.assetId}-${Date.now()}`;
-  const [pdfUpload, ...pageUploads] = await Promise.all([
-    uploadToR2(`${folder}/carousel.pdf`, pdf, "application/pdf"),
-    ...pngs.map((png, i) => uploadToR2(`${folder}/${String(i + 1).padStart(2, "0")}.png`, png, "image/png")),
-  ]);
+  const pdfUpload = await uploadToR2(`${folder}/carousel.pdf`, pdf, "application/pdf");
   const carousel: StoredCarousel = {
     active: meta.active,
     plan,
-    pages: pageUploads.map((u) => u.url),
     pdf_url: pdfUpload.url,
     caption: plan.caption,
     document_title: plan.documentTitle,

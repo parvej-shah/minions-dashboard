@@ -54,16 +54,17 @@ beforeEach(() => {
 });
 
 describe("making a carousel", () => {
-  it("draws a passing plan, uploads every page and the PDF, and switches it on", async () => {
+  it("draws a passing plan, uploads only the PDF, and switches it on", async () => {
     const chat = vi.fn().mockResolvedValue(reply(plan));
     const result = await generateCarousel("a1", { chat });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(chat).toHaveBeenCalledTimes(1);
     expect(result.carousel.active).toBe(true);
-    expect(result.carousel.pages).toHaveLength(6);
+    expect(result.carousel.pages).toBeUndefined();
     expect(result.carousel.pdf_url).toMatch(/carousel\.pdf$/);
-    expect(uploads.every((k) => k.startsWith("carousels/c1/a1-"))).toBe(true);
+    expect(uploads).toHaveLength(1);
+    expect(uploads[0]).toMatch(/^carousels\/c1\/a1-\d+\/carousel\.pdf$/);
     expect(db.asset.update).toHaveBeenCalledTimes(1);
   }, 60_000);
 
