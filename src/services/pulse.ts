@@ -6,6 +6,7 @@ import { MAX_MEMORY_ITEMS } from "@/constants/contentLanes";
 import { renderPulseExtract } from "@/lib/prompts/pulse";
 import {
   checkCandidates,
+  MAX_PULSE_ITEMS,
   parseItems,
   PULSE_ANSWER_MAX_CHARS,
   PULSE_ANSWER_MIN_CHARS,
@@ -101,12 +102,12 @@ function cleanFollowups(v: unknown): PulseFollowups {
 }
 
 /** One model call; items it proposes are checked in code. Never throws for a model failure. */
-export async function extractItems(answer: string, followups: PulseFollowups, icp?: string): Promise<ExtractResult> {
+export async function extractItems(answer: string, followups: PulseFollowups, icp?: string, question?: string): Promise<ExtractResult> {
   const apiKey = process.env.DASHSCOPE_API_KEY;
   let content: string | null = null;
   if (apiKey) {
     try {
-      const res = await chatWithFallback(renderPulseExtract({ answer, followups, icp }) as unknown as Record<string, unknown>, apiKey);
+      const res = await chatWithFallback(renderPulseExtract({ answer, followups, icp, question }) as unknown as Record<string, unknown>, apiKey);
       if (res.status < 300) content = JSON.parse(res.body)?.choices?.[0]?.message?.content ?? null;
       else console.warn(`[pulse] extraction answered ${res.status}: ${res.body.slice(0, 200)}`);
     } catch (e) {
@@ -146,19 +147,21 @@ export async function answerPulse(clientId: string, body: { answer?: unknown; fo
   return getPulse(clientId, now);
 }
 
-export interface ConfirmResult {
-  pulse: PulseDTO;
-  saved: number;
-  harvest: { started: boolean; message: string } | null;
+export interface ConfirmedItem {
+  kind: string;
+  content: string;
+  disclosure: string;
 }
 
-export async function confirmPulse(clientId: string, body: { items?: unknown }, now = new Date()): Promise<ConfirmResult> {
-  const loaded = await load(clientId, now);
-  if (loaded.row?.status !== "EXTRACTED") throw new PulseError("Answer this week's question first.", 409);
-
-  const raw = Array.isArray(body.items) ? body.items.slice(0, 3) : [];
-  const items: { kind: string; content: string; disclosure: string }[] = [];
-  for (const r of raw) {
+/**
+ * The items an author chose to save, checked again on the server: kind,
+ * privacy setting, length, the blocking privacy floor, and room under the
+ * workspace's item limit. Shared by the weekly question and story sessions.
+ */
+export async function parseConfirmedItems(clientId: string, raw: unknown): Promise<ConfirmedItem[]> {
+  const list = Array.isArray(raw) ? raw.slice(0, MAX_PULSE_ITEMS) : [];
+  const items: ConfirmedItem[] = [];
+  for (const r of list) {
     const item = (r && typeof r === "object" ? r : {}) as Record<string, unknown>;
     const kind = parseMemoryKind(item.kind);
     const disclosure = parseDisclosure(item.disclosure);
@@ -175,6 +178,20 @@ export async function confirmPulse(clientId: string, body: { items?: unknown }, 
   if (count + items.length > MAX_MEMORY_ITEMS) {
     throw new PulseError(`You have ${count} experience items; the limit is ${MAX_MEMORY_ITEMS}. Remove old ones on the Brand page first.`);
   }
+  return items;
+}
+
+export interface ConfirmResult {
+  pulse: PulseDTO;
+  saved: number;
+  harvest: { started: boolean; message: string } | null;
+}
+
+export async function confirmPulse(clientId: string, body: { items?: unknown }, now = new Date()): Promise<ConfirmResult> {
+  const loaded = await load(clientId, now);
+  if (loaded.row?.status !== "EXTRACTED") throw new PulseError("Answer this week's question first.", 409);
+
+  const items = await parseConfirmedItems(clientId, body.items);
 
   const created = await prisma.$transaction(async (tx) => {
     const rows = [];

@@ -14,6 +14,7 @@ import {
   type MemoryKind,
 } from "@/constants/contentLanes";
 import type { CheckedCandidate, ConfirmResult, PulseDTO } from "@/services/pulse";
+import StoryBankCard from "@/components/stories/StoryBankCard";
 
 const inputClass =
   "w-full rounded-lg border border-[#1F2D3D] bg-[#0B1016] px-3 py-2 text-sm text-[#F1F5F9] placeholder:text-[#475569] focus:border-[#00C9A7] focus:outline-none";
@@ -150,7 +151,15 @@ export default function WeeklyPulseCard() {
   }
 
   const open = pulse.state === "DUE" || pulse.state === "CONFIRM";
-  if (!open) return tzBanner || null;
+  // One ask at a time: the story bank card only on weeks the question is not open.
+  if (!open) {
+    return (
+      <div className="space-y-3 empty:hidden">
+        {tzBanner}
+        <StoryBankCard />
+      </div>
+    );
+  }
 
   const confirming = pulse.state === "CONFIRM" && !editing;
   const kept = drafts.filter((d) => d.keep);

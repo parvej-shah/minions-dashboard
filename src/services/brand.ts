@@ -201,9 +201,10 @@ export interface HarvestContext {
   author: AuthorContext;
   /** Target share per idea source; the harvest plan keeps to it (phase 3). */
   sourceMix: Record<SourceBucket, number>;
-  /** source_type and memory_ids of the same recent ideas, newest first: what the mix and memory rotation count. */
+  /** source_type, memory_ids and angle of the same recent ideas, newest first: what the mix and memory rotation count. */
   recentSourceTypes: (string | null)[];
   recentMemoryIds: string[][];
+  recentAngles: (string | null)[];
 }
 
 /**
@@ -295,5 +296,6 @@ export async function getHarvestContext(clientId: string): Promise<HarvestContex
     sourceMix: resolveSourceMix(profile?.harvestSourceMix),
     recentSourceTypes: recentIdeas.map((i) => i.sourceType),
     recentMemoryIds: recentIdeas.map((i) => i.memoryIds),
+    recentAngles: recentIdeas.map((i) => i.angle),
   };
 }

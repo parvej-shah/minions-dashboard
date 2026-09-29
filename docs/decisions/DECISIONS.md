@@ -210,3 +210,20 @@ believing that was what goes out. The article is never published for him.
 made from, so a blog-off user can no longer edit that source directly; the
 post and carousel pages stay editable.
 **Status:** active
+
+## 2026-09-30 — Story sessions refill an author's experience
+
+**Decision:** When fewer than 3 of an author's experience items are unused by
+their recent ideas, the home page shows a "story bank low" card that opens a
+lesson-app style session: 3 short questions, one at a time, aimed at the kinds
+of experience the author has least of. Each answer becomes notes the author
+confirms, saved as they go, and the session ends with one harvest. The card
+shows only on weeks the weekly question is not open, and can be hidden for a
+day. Reused items now take a different part of the story each time (the point,
+the lesson, the myth, the cost, the reader's check).
+**Why:** An author with 12 items and no weekly answers runs out in about four
+harvests, after which ideas retell the same stories. The weekly question only
+reaches people who open the app on the right week.
+**Alternatives considered:** Emailing the weekly question (reverses D16; left
+for a separate call).
+**Status:** active

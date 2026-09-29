@@ -86,6 +86,7 @@ export function buildBrandContextResponse(
       mix: harvest.sourceMix,
       recentSourceTypes: harvest.recentSourceTypes,
       recentMemoryIds: harvest.recentMemoryIds,
+      recentAngles: harvest.recentAngles,
       hasMarketSources: harvest.sources.length > 0,
       runIndex: harvest.runIndex,
     }),

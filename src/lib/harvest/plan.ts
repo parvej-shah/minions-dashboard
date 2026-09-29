@@ -30,8 +30,35 @@ export const MIX_WINDOW = 30;
 /** Recent ideas whose memory items rest for this run: about two runs' worth. */
 export const RESEED_GAP = 6;
 
+/**
+ * Which part of a memory item an idea is about. One story can carry several
+ * posts that make different points, so each reuse of an item takes the next
+ * part: its first idea tells the point itself, later ones the lesson, the
+ * belief it contradicts, the cost, the check for the reader. None of them
+ * needs a fact the item does not state.
+ */
+export const STORY_PARTS = [
+  { id: "CORE", brief: "its main point, told plainly" },
+  { id: "LESSON", brief: "the rule the author takes from it" },
+  { id: "MYTH", brief: "the common belief it contradicts" },
+  { id: "COST", brief: "what ignoring it costs the ICP" },
+  { id: "CHECK", brief: "what the ICP should check in their own work, with this as the one example" },
+] as const;
+export type StoryPart = (typeof STORY_PARTS)[number]["id"];
+
+/** Angles of earlier ideas from the same item, shown so a reuse makes a new point. */
+export const WRITTEN_SHOWN = 3;
+
 export type HarvestSeed =
-  | { kind: "MEMORY"; ref: string; memory_id: string }
+  | {
+      kind: "MEMORY";
+      ref: string;
+      memory_id: string;
+      /** The part of the item this idea is about; set by planHarvest. */
+      part?: StoryPart;
+      /** Angles of recent ideas already built on this item, newest first. */
+      written?: string[];
+    }
   | { kind: "ICP"; text: string }
   | { kind: "MARKET" }
   | { kind: "OPEN" };
@@ -56,6 +83,8 @@ export interface HarvestPlanInput {
   recentSourceTypes: (string | null)[];
   /** memory_ids of the same recent ideas. */
   recentMemoryIds: string[][];
+  /** angle of the same recent ideas; optional for older callers. */
+  recentAngles?: (string | null)[];
   hasMarketSources: boolean;
   runIndex: number;
 }
@@ -82,6 +111,22 @@ export function planHarvest(input: HarvestPlanInput): HarvestSlot[] {
     .sort((a, b) => a.use - b.use || a.i - b.i);
   const memoryIn = (b: SourceBucket) => ranked.filter(({ m }) => MEMORY_KIND_SOURCE[m.kind]?.bucket === b);
   const resting = new Set(input.recentMemoryIds.slice(0, RESEED_GAP).flat());
+
+  // The nth idea from an item takes its nth part, so reuse moves to a new point.
+  const memorySeed = (pick: { m: MemoryContext; i: number; use: number }): HarvestSeed => {
+    const written: string[] = [];
+    input.recentMemoryIds.forEach((ids, n) => {
+      const angle = input.recentAngles?.[n]?.trim();
+      if (angle && ids.includes(pick.m.id) && written.length < WRITTEN_SHOWN) written.push(angle);
+    });
+    return {
+      kind: "MEMORY",
+      ref: memoryRef(pick.i),
+      memory_id: pick.m.id,
+      part: STORY_PARTS[pick.use % STORY_PARTS.length].id,
+      ...(written.length ? { written } : {}),
+    };
+  };
 
   // Phase 6: an item from a recent weekly answer that no recent idea has used
   // seeds the first slot, whatever the mix says. The author just told us what
@@ -115,7 +160,7 @@ export function planHarvest(input: HarvestPlanInput): HarvestSlot[] {
         pillar_brief: angle.brief,
         bucket,
         source_type: sourceType,
-        seed: { kind: "MEMORY", ref: memoryRef(freshPick.i), memory_id: freshPick.m.id },
+        seed: memorySeed(freshPick),
       };
     }
     const furthestBehind = (usable: (b: SourceBucket) => boolean): SourceBucket | null => {
@@ -147,7 +192,7 @@ export function planHarvest(input: HarvestPlanInput): HarvestSlot[] {
         ...base,
         bucket: best,
         source_type: MEMORY_KIND_SOURCE[pick.m.kind].sourceType,
-        seed: { kind: "MEMORY", ref: memoryRef(pick.i), memory_id: pick.m.id },
+        seed: memorySeed(pick),
       };
     }
     // ICP_QUESTION with no question saved as memory: rotate through the ICP profile.

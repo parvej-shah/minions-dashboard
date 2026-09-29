@@ -95,6 +95,7 @@ export const harvestContext: HarvestContext = {
   sourceMix: { ...DEFAULT_SOURCE_MIX },
   recentSourceTypes: [],
   recentMemoryIds: [],
+  recentAngles: [],
 };
 
 /** Exactly what GET /api/brand/context returns for the fixtures above. */

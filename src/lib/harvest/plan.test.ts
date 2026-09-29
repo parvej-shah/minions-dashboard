@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_SOURCE_MIX, resolveSourceMix } from "@/constants/sourceMix";
 import type { MemoryContext } from "@/services/authorContext";
-import { planHarvest, type HarvestPlanInput } from "./plan";
+import { planHarvest, RESEED_GAP as RESEED, STORY_PARTS, WRITTEN_SHOWN, type HarvestPlanInput } from "./plan";
 
 const mem = (id: string, kind: MemoryContext["kind"]): MemoryContext => ({ id, kind, content: `${kind} item ${id}`, disclosure: "PUBLIC", used_count: 0 });
 const MEMORY = [
@@ -96,6 +96,37 @@ describe("planHarvest keeps the source mix in code", () => {
     expect(plan.slice(1).every((s) => s.bucket === "OPEN")).toBe(true);
   });
 
+  it("builds a new item's first idea on its main point", () => {
+    const plan = planHarvest(input());
+    const seeds = plan.map((s) => s.seed).filter((seed) => seed.kind === "MEMORY");
+    expect(seeds.length).toBeGreaterThan(0);
+    for (const seed of seeds) {
+      expect(seed).toMatchObject({ part: "CORE" });
+      expect(seed).not.toHaveProperty("written");
+    }
+  });
+
+  it("takes the next part of an item each time it is reused, and shows what was already written", () => {
+    const only = [mem("cw1", "CURRENT_WORK")];
+    const noIcp = { ...ICP, pains: [], questions: [] };
+    const ids = [[], [], [], [], [], [], ["cw1"], ["cw1"]];
+    const angles = [null, null, null, null, null, null, "  Second point  ", "First point"];
+    const plan = planHarvest(input({ memory: only, icp: noIcp, hasMarketSources: false, recentMemoryIds: ids, recentAngles: angles }));
+    expect(plan[0].seed).toMatchObject({ memory_id: "cw1", part: STORY_PARTS[2].id, written: ["Second point", "First point"] });
+  });
+
+  it("cycles back to the first part after the last one, and caps what it shows", () => {
+    const only = [mem("cw1", "CURRENT_WORK")];
+    const noIcp = { ...ICP, pains: [], questions: [] };
+    const n = STORY_PARTS.length;
+    const ids = [...Array(RESEED).fill([]), ...Array(n).fill(["cw1"])];
+    const angles = ids.map((_, i) => `angle ${i}`);
+    const plan = planHarvest(input({ memory: only, icp: noIcp, hasMarketSources: false, recentMemoryIds: ids, recentAngles: angles }));
+    const seed = plan[0].seed;
+    expect(seed).toMatchObject({ memory_id: "cw1", part: "CORE" });
+    expect(seed.kind === "MEMORY" && seed.written?.length).toBe(WRITTEN_SHOWN);
+  });
+
   it("skips a bucket with nothing to build on", () => {
     const plan = planHarvest(input({ memory: [], hasMarketSources: true }));
     expect(plan.map((s) => s.bucket)).toEqual(["ICP_QUESTION", "MARKET", "ICP_QUESTION"]);
@@ -130,7 +161,7 @@ describe("a weekly answer seeds the next harvest (phase 6)", () => {
 
   it("puts an unused fresh item in slot 1, whatever the mix says", () => {
     const plan = planHarvest(input({ memory: [...MEMORY, fresh] }));
-    expect(plan[0].seed).toEqual({ kind: "MEMORY", ref: `M${MEMORY.length + 1}`, memory_id: "wk" });
+    expect(plan[0].seed).toEqual({ kind: "MEMORY", ref: `M${MEMORY.length + 1}`, memory_id: "wk", part: "CORE" });
     expect(plan[0].bucket).toBe("EXPERIENCE");
     // The other slots still follow the mix, and never reuse it.
     expect(plan.slice(1).some((s) => s.seed.kind === "MEMORY" && s.seed.memory_id === "wk")).toBe(false);

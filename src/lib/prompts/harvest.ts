@@ -1,6 +1,6 @@
 import type { ChatPayload } from "./types";
 import { MEMORY_KIND_META, type MemoryKind } from "@/constants/contentLanes";
-import { memoryRef, proofRef, type HarvestSlot } from "@/lib/harvest/plan";
+import { memoryRef, proofRef, STORY_PARTS, type HarvestSlot } from "@/lib/harvest/plan";
 import type { IcpContext, LaneContext, MemoryContext } from "@/services/authorContext";
 
 /** The slice of GET /api/brand/context the harvest prompt reads. */
@@ -74,6 +74,11 @@ function slotLine(slot: HarvestSlot, memory: MemoryContext[]): string {
     const m = memory.find((x) => x.id === seed.memory_id);
     const label = m ? MEMORY_KIND_META[m.kind as MemoryKind]?.label.toLowerCase() : "experience";
     task = `Build on ${seed.ref} (the author's ${label}). Find the ICP problem it speaks to.`;
+    const part = STORY_PARTS.find((p) => p.id === seed.part);
+    if (part) task += ` Make the idea about ${part.brief}, using only what ${seed.ref} states.`;
+    if (seed.written?.length) {
+      task += ` Ideas already built on ${seed.ref}, so make a different point: ${seed.written.map((a) => `"${fenceSafe(a)}"`).join("; ")}.`;
+    }
   } else if (seed.kind === "ICP") {
     task = `Answer this, which the ICP keeps running into: "${fenceSafe(seed.text)}". Use the author's experience for the answer.`;
   } else if (seed.kind === "MARKET") {

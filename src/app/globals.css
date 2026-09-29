@@ -147,3 +147,36 @@
 .animate-pulse-glow {
   animation: pulse-glow 8s ease-in-out infinite;
 }
+
+/* Story session (src/components/stories): one question at a time, lesson-app style. */
+@keyframes story-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes story-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+@keyframes story-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+@keyframes story-confetti {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate3d(var(--dx), var(--dy), 0) rotate(var(--rot)); opacity: 0; }
+}
+@keyframes story-step-in {
+  from { transform: translateX(24px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.story-sheet-up { animation: story-sheet-up 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.15) both; }
+.story-pop { animation: story-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.story-shake { animation: story-shake 0.4s ease-in-out; }
+.story-confetti { animation: story-confetti 1.4s cubic-bezier(0.15, 0.7, 0.4, 1) both; }
+.story-step-in { animation: story-step-in 0.3s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .story-sheet-up, .story-pop, .story-shake, .story-confetti, .story-step-in { animation: none; }
+  .story-confetti { display: none; }
+}
