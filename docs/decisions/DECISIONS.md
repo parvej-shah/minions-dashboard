@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-09-29 — Show live blog broadcasts only for configured blogs
+
+**Decision:** Mission Control shows the live blog broadcast section only when Blog publishing is enabled and the workspace has a company domain configured.
+**Why:** links to a blog are misleading when the workspace has no active blog destination.
+**Status:** active
+
 ## 2026-09-29 — Line icons are a cover illustration style, and icons need premium-size words
 
 **Decision:** "Line icons" joins Shapes, Doodles and None as a cover

@@ -120,17 +120,7 @@ export default function Sidebar({
                 <span className="truncate whitespace-nowrap">{item.name}</span>
               </div>
 
-              {item.badge && (
-                <span
-                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full border shrink-0 whitespace-nowrap ${
-                    isActive
-                      ? "bg-[#00C9A7]/20 text-[#00C9A7] border-[#00C9A7]/40"
-                      : item.badgeColor || "bg-[#161d24] text-[#94A3B8] border-[#1f2b37]"
-                  }`}
-                >
-                  {item.badge}
-                </span>
-              )}
+
             </Link>
           );
         })}

@@ -25,7 +25,6 @@ import ConfirmModal from "@/components/ui/ConfirmModal";
 import EmptyState, { LoadingState } from "@/components/ui/EmptyState";
 import { useApiResource } from "@/hooks/useApiResource";
 import { toErrorMessage } from "@/lib/api-client";
-import type { SocialChannel } from "@/lib/channels";
 import { useToast } from "@/hooks/useToast";
 import { useChannelSummary } from "@/hooks/useChannelSummary";
 
@@ -386,95 +385,27 @@ export default function PublishedPostsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filteredPosts.map((post) => {
-            const socialCopy = activeTab === "LINKEDIN" ? (post.variants?.linkedin || "")
-              : activeTab === "FACEBOOK" ? (post.variants?.facebook || "")
-              : activeTab === "TWITTER" ? (post.variants?.twitter || "")
-              : "";
-
-            /**
-             * Which channel this card represents, and whether a permalink for
-             * it has ever been recorded. Null channel = the blog tab.
-             */
-            const channel: SocialChannel | null =
-              activeTab === "LINKEDIN"
-                ? "linkedin"
-                : activeTab === "FACEBOOK"
-                  ? "facebook"
-                  : activeTab === "TWITTER"
-                    ? "twitter"
-                    : null;
-            const channelUrl = channel ? post.channel_urls[channel] : null;
-
-
-            return (
+          return (
               <div
                 key={post.id}
                 className="rounded-2xl bg-[#0F1419] border border-[#1F2D3D] hover:border-[#00C9A7]/50 transition-all p-4 flex flex-col justify-between space-y-4 shadow-sm group"
               >
                 <div className="space-y-3.5">
-                  {/* Card Header & Badges */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
-                        activeTab === "BLOG"
-                          ? "bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/30"
-                          : activeTab === "LINKEDIN"
-                            ? "bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/30"
-                            : activeTab === "FACEBOOK"
-                              ? "bg-[#8B5CF6]/10 text-[#8B5CF6] border border-[#8B5CF6]/30"
-                              : "bg-[#0EA5E9]/10 text-[#0EA5E9] border border-[#0EA5E9]/30"
-                      }`}>
-                        {activeTab === "BLOG" && "🌐 Live Blog"}
-                        {activeTab === "LINKEDIN" && "💼 LinkedIn"}
-                        {activeTab === "FACEBOOK" && "👥 Facebook"}
-                        {activeTab === "TWITTER" && "🐦 X / Twitter"}
-                      </span>
-
-                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
-                        post.audience === "ICP" 
-                          ? "bg-blue-500/10 text-blue-400 border border-blue-500/30" 
-                          : post.audience === "BRIDGE"
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                            : "bg-purple-500/10 text-purple-400 border border-purple-500/30"
-                      }`}>
-                        {post.audience}
-                      </span>
-
-                      {/* Posting status. Nothing watches the networks, so this
-                          reflects a recorded permalink and nothing else. */}
-                      {channel && (
-                        channelUrl ? (
-                          <a
-                            href={channelUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="A permalink was recorded for this channel"
-                            className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/30 flex items-center gap-1 hover:bg-[#00C9A7]/20 transition-colors"
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#00C9A7]" />
-                            <span>Posted</span>
-                          </a>
-                        ) : (
-                          <span
-                            title="No permalink recorded yet — posting to this channel is manual"
-                            className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#F59E0B]/10 text-[#FBBF24] border border-[#F59E0B]/30 flex items-center gap-1"
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full border border-[#FBBF24]" />
-                            <span>Needs link</span>
-                          </span>
-                        )
-                      )}
-                    </div>
-
-                    <span
-                      className="text-[10px] font-mono text-[#64748B] bg-[#161D26] px-2 py-0.5 rounded border border-[#1F2D3D]"
-                      title={
-                        post.cost_usd === null
-                          ? "No asset backs this post, so no generation cost was recorded"
-                          : "Recorded generation cost"
-                      }
-                    >
-                      {post.cost_usd === null ? "—" : `$${post.cost_usd.toFixed(3)}`}
+                  {/* Platform pill */}
+                  <div className="flex items-center">
+                    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                      activeTab === "BLOG"
+                        ? "bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/30"
+                        : activeTab === "LINKEDIN"
+                          ? "bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/30"
+                          : activeTab === "FACEBOOK"
+                            ? "bg-[#8B5CF6]/10 text-[#8B5CF6] border border-[#8B5CF6]/30"
+                            : "bg-[#0EA5E9]/10 text-[#0EA5E9] border border-[#0EA5E9]/30"
+                    }`}>
+                      {activeTab === "BLOG" && "🌐 Live Blog"}
+                      {activeTab === "LINKEDIN" && "💼 LinkedIn"}
+                      {activeTab === "FACEBOOK" && "👥 Facebook"}
+                      {activeTab === "TWITTER" && "🐦 X / Twitter"}
                     </span>
                   </div>
 
@@ -495,29 +426,10 @@ export default function PublishedPostsPage() {
                     </div>
                   )}
 
-                  {/* Main Content Area */}
-                  {activeTab === "BLOG" ? (
-                    <div className="space-y-1.5">
-                      <h3 className="text-sm font-bold text-[#F1F5F9] leading-snug line-clamp-2 group-hover:text-[#00C9A7] transition-colors">
-                        {post.title}
-                      </h3>
-                      <p className="text-xs text-[#94A3B8] leading-relaxed line-clamp-3">
-                        {post.excerpt}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-[11px] font-mono text-[#94A3B8]">
-                        <span className="truncate text-[#F1F5F9] font-bold">{post.title}</span>
-
-                      </div>
-                      <div className="bg-[#070B0F] border border-[#1F2D3D] p-3 rounded-xl max-h-36 overflow-y-auto">
-                        <p className="text-xs font-sans text-[#CBD5E1] leading-relaxed whitespace-pre-wrap">
-                          {socialCopy || "No social variant generated for this post."}
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                  {/* Post title */}
+                  <h3 className="text-sm font-bold text-[#F1F5F9] leading-snug line-clamp-2 group-hover:text-[#00C9A7] transition-colors">
+                    {post.title}
+                  </h3>
                 </div>
 
                 {/* Card Footer Actions */}
@@ -530,11 +442,11 @@ export default function PublishedPostsPage() {
                     {post.asset_id ? (
                       <Link
                         href={`/editorial?id=${post.asset_id}`}
-                        className="text-[#94A3B8] hover:text-[#00C9A7] flex items-center gap-1 transition-colors text-[11px]"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-[#00C9A7]/30 bg-[#00C9A7]/10 px-3 py-2 text-xs font-semibold text-[#00C9A7] transition-colors hover:bg-[#00C9A7] hover:text-[#070B0F]"
                         title="Edit in Editorial Studio"
                       >
                         <Edit3 className="w-3 h-3" />
-                        <span>Studio</span>
+                        <span>Open Studio</span>
                       </Link>
                     ) : (
                       <span

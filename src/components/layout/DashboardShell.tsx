@@ -56,7 +56,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const navCounts = useNavCounts();
-  const navItems = buildNavItems(navCounts);
+  const navItems = buildNavItems();
   const channels = useChannelSummary();
   const { brandSettings, isLoading: brandLoading } = useBrandSettings();
   const blogEnabled = channels?.blog ?? true;

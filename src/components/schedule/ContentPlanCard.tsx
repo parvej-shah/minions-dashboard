@@ -112,7 +112,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
   if (!plan.exists) {
     return (
       <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] text-xs text-[#94A3B8]">
-        Save a schedule above first. The content plan fills its slots.
+        Save your rhythm to build your first week plan.
       </div>
     );
   }

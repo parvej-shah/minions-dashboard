@@ -145,15 +145,7 @@ export function MobileDrawer({
                     <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-[#00C9A7]" : "text-[#64748B]"}`} />
                     <span className="truncate whitespace-nowrap">{item.name}</span>
                   </div>
-                  {item.badge && (
-                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap ${
-                      isActive
-                        ? "bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/40"
-                        : item.badgeColor || "bg-[#161d24] text-[#94A3B8] border border-[#1f2b37]"
-                    }`}>
-                      {item.badge}
-                    </span>
-                  )}
+
                 </Link>
               );
             })}

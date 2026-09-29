@@ -82,7 +82,7 @@ export default function AutomaticDrafting({ onChanged, onMessage }: { onChanged:
   return (
     <div className={`p-5 rounded-2xl bg-[#0F1419] border ${style.box} flex items-start justify-between gap-4 shadow-sm`}>
       <div className="min-w-0">
-        <div className="flex items-center gap-2 text-sm font-bold text-[#F1F5F9]">
+        <div className="flex flex-wrap items-center gap-2 text-sm font-bold text-[#F1F5F9]">
           <Bot className="w-4 h-4 text-[#00C9A7]" />
           Automatic drafting
           <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${style.text}`}>
@@ -91,6 +91,7 @@ export default function AutomaticDrafting({ onChanged, onMessage }: { onChanged:
           </span>
         </div>
         <p className="text-xs text-[#94A3B8] mt-1.5 leading-relaxed">{detail}</p>
+        <p className="mt-2 text-[11px] font-medium text-[#64748B]">Drafting and publishing are separate. Your review setting below controls what goes live.</p>
       </div>
       <button
         type="button"

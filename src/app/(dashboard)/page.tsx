@@ -10,14 +10,23 @@ import {
   ChevronRight,
   Globe,
   Radio,
+  Inbox,
+  PenLine,
+  ClipboardCheck,
+  BadgeCheck,
 } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import EmptyState, { LoadingState } from "@/components/ui/EmptyState";
 import WeeklyPulseCard from "@/components/pulse/WeeklyPulseCard";
 import { formatDate } from "@/utils/date";
 import { AssetItem, IdeaItem, PublishedPostRecord } from "@/types";
+import { useBrandSettings } from "@/hooks/useBrandSettings";
+import { useChannelSummary } from "@/hooks/useChannelSummary";
 
 export default function MissionControlPage() {
+  const { brandSettings } = useBrandSettings();
+  const channels = useChannelSummary();
+  const showLiveBlog = channels?.blog === true && Boolean(brandSettings?.company_domain?.trim());
   const ideasResource = useApiResource<IdeaItem[]>("/api/ideas", [], {
     errorMessage: "Could not load ideas",
   });
@@ -130,7 +139,7 @@ export default function MissionControlPage() {
             <span>{published.length}</span>
           </div>
           <div className="text-[11px] text-[#64748B]">
-            Live on the blog
+            Published articles
           </div>
         </div>
       </div>
@@ -148,28 +157,28 @@ export default function MissionControlPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
           <Link href="/ideas" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] transition-all group">
             <div className="text-xs font-bold text-[#F1F5F9] group-hover:text-[#00C9A7] flex items-center justify-center gap-1.5">
-              <span>✨ Ingested</span>
+              <><Inbox className="h-3.5 w-3.5" aria-hidden="true" /><span>Ingested</span></>
             </div>
             <div className="text-lg font-bold text-[#00C9A7] font-mono mt-1">{ideas.length}</div>
           </Link>
 
           <Link href="/ideas" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] transition-all group">
             <div className="text-xs font-bold text-[#F1F5F9] group-hover:text-[#00C9A7] flex items-center justify-center gap-1.5">
-              <span>✍️ Drafting</span>
+              <><PenLine className="h-3.5 w-3.5" aria-hidden="true" /><span>Drafting</span></>
             </div>
             <div className="text-lg font-bold text-[#64748B] font-mono mt-1">{draftingIdeas.length}</div>
           </Link>
 
           <Link href="/editorial" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#ff6b4a]/40 transition-all group shadow-sm">
             <div className="text-xs font-bold text-[#ff6b4a] flex items-center justify-center gap-1.5">
-              <span>🔍 Review</span>
+              <><ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" /><span>Review</span></>
             </div>
             <div className="text-lg font-bold text-[#ff6b4a] font-mono mt-1">{pendingReviewAssets.length}</div>
           </Link>
 
           <Link href="/published" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#00C9A7]/40 transition-all group shadow-sm">
             <div className="text-xs font-bold text-[#00C9A7] flex items-center justify-center gap-1.5">
-              <span>✅ Published</span>
+              <><BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" /><span>Published</span></>
             </div>
             <div className="text-lg font-bold text-[#00C9A7] font-mono mt-1">{published.length}</div>
           </Link>
@@ -264,7 +273,7 @@ export default function MissionControlPage() {
         </div>
 
         {/* LIVE OMNICHANNEL BROADCASTS */}
-        <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
+        {showLiveBlog && <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1F2D3D] pb-3 gap-3">
             <div>
               <h2 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2 break-words">
@@ -327,7 +336,7 @@ export default function MissionControlPage() {
               </div>
             ))}
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   );

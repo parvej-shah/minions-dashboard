@@ -1,17 +1,15 @@
 import {
   BarChart3,
-  Bot,
-  CalendarClock,
   CreditCard,
+  SlidersHorizontal,
+  CalendarClock,
   FileText,
   Globe,
   LayoutDashboard,
   Palette,
   Sparkles,
-  Users,
   type LucideIcon,
 } from "lucide-react";
-import type { NavCounts } from "@/types";
 
 export interface NavItem {
   name: string;
@@ -21,46 +19,33 @@ export interface NavItem {
   badgeColor?: string;
 }
 
-/** Sidebar destinations, with live counts folded into their badges. */
-export function buildNavItems(counts: NavCounts | null): NavItem[] {
+/** Sidebar destinations. */
+export function buildNavItems(): NavItem[] {
   return [
     {
       name: "Mission Control",
       href: "/",
       icon: LayoutDashboard,
-      // The weekly question waiting on the home page outranks "Live".
-      badge: counts?.pulseDue ? "1 question" : "Live",
-      badgeColor: counts?.pulseDue
-        ? "bg-[#ff6b4a]/10 text-[#ff6b4a] border-[#ff6b4a]/30"
-        : "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
     },
     {
       name: "Idea Stream",
       href: "/ideas",
       icon: Sparkles,
-      badge: counts ? `${counts.ideasReady} Ready` : undefined,
-      badgeColor: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
     },
     {
       name: "Editorial Studio",
       href: "/editorial",
       icon: FileText,
-      badge: counts ? `${counts.pendingReview} Review` : undefined,
-      badgeColor: "bg-[#ff6b4a]/10 text-[#ff6b4a] border-[#ff6b4a]/30",
     },
     {
       name: "Published Posts",
       href: "/published",
       icon: Globe,
-      badge: counts ? `${counts.publishedLive} Live` : undefined,
-      badgeColor: "bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/30",
     },
     {
       name: "Brand & Directives",
       href: "/brand",
       icon: Palette,
-      badge: counts ? `${counts.directivesCount} Directives` : undefined,
-      badgeColor: "bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/30",
     },
     {
       name: "Content Performance",
@@ -68,19 +53,14 @@ export function buildNavItems(counts: NavCounts | null): NavItem[] {
       icon: BarChart3,
     },
     {
-      name: "Publishing",
+      name: "Channels",
       href: "/fleet",
-      icon: Bot,
+      icon: SlidersHorizontal,
     },
     {
       name: "Schedule",
       href: "/settings/schedule",
       icon: CalendarClock,
-    },
-    {
-      name: "Team",
-      href: "/settings/team",
-      icon: Users,
     },
     {
       name: "Billing",
