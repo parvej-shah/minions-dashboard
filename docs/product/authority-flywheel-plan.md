@@ -1245,6 +1245,13 @@ Slices 2–4 (built 2026-09-27, not yet deployed):
   review card draws the pages from that PDF with pdf.js, through
   `/api/assets/[id]/carousel/pdf` (the bucket has no CORS). Older carousels
   keep their PNGs and still show them.
+- 2026-09-29: 16 people and role icons added (person, team of four, persona,
+  operator, handover, verified hire, ID badge, teacher, student, lectern,
+  headset, wave, applause, walk, run, arms spread), 113 in all. They sit at the
+  end of the table so keyword ties still go to the older icons; checked on 192
+  real titles and phrases, 176 of 177 keyword picks unchanged. Hand-drawn
+  people illustrations (Open Peeps, CC0) are the next step if covers need the
+  doodled, human look; not started.
 - Later (user, 2026-09-29, not started): once the model's carousels have
   earned trust, turn off the reviewer's redraw (edit the words / remake) in
   the Studio.

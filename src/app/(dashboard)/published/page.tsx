@@ -16,8 +16,6 @@ import {
   Search,
   ArrowUpRight,
   EyeOff,
-  Copy,
-  Check,
   RotateCcw,
   Edit3,
   type LucideIcon,
@@ -26,9 +24,8 @@ import { PublishedPostRecord } from "@/types";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import EmptyState, { LoadingState } from "@/components/ui/EmptyState";
 import { useApiResource } from "@/hooks/useApiResource";
-import { apiClient, toErrorMessage } from "@/lib/api-client";
-import { channelOf, type SocialChannel } from "@/lib/channels";
-import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
+import { toErrorMessage } from "@/lib/api-client";
+import type { SocialChannel } from "@/lib/channels";
 import { useToast } from "@/hooks/useToast";
 import { useChannelSummary } from "@/hooks/useChannelSummary";
 
@@ -82,7 +79,6 @@ export default function PublishedPostsPage() {
     setDateFilter(value);
   }, []);
   const [searchQuery, setSearchQuery] = useState("");
-  const { copiedKey, copy: handleCopy } = useCopyToClipboard(2500);
   const { message: toastMessage, show: showToast } = useToast(4000);
 
   // Unpublish Modal State
@@ -106,52 +102,6 @@ export default function PublishedPostsPage() {
     } finally {
       setIsUnpublishing(false);
       setUnpublishTarget(null);
-    }
-  };
-
-  /**
-   * Recording that a social post went out.
-   *
-   * Nothing observes LinkedIn/Facebook/X on our behalf — the cockpit hands over
-   * copy and a share link, and the operator posts by hand. So "posted" is only
-   * true once someone pastes the permalink back, which is what this writes into
-   * `assets.published_urls`.
-   */
-  const [markTarget, setMarkTarget] = useState<string | null>(null);
-  const [markUrl, setMarkUrl] = useState("");
-  const [isMarking, setIsMarking] = useState(false);
-
-  const openMarkPosted = (postId: string) => {
-    setMarkTarget(postId);
-    setMarkUrl("");
-  };
-
-  const handleMarkPosted = async (post: PublishedPostRecord, channel: SocialChannel) => {
-    const url = markUrl.trim();
-    if (!post.asset_id || !url) return;
-    if (channelOf(url) !== channel) {
-      showToast(`That does not look like a ${channel} URL — nothing was saved.`);
-      return;
-    }
-
-    setIsMarking(true);
-    try {
-      const existing = Object.values(post.channel_urls).filter(Boolean) as string[];
-      const merged = [...existing.filter((u) => channelOf(u) !== channel), url];
-      await apiClient.patch(`/api/assets/${post.asset_id}`, { published_urls: merged });
-
-      setFeed((prev) =>
-        prev.map((p) =>
-          p.id === post.id ? { ...p, channel_urls: { ...p.channel_urls, [channel]: url } } : p
-        )
-      );
-      showToast("Recorded — the post is now marked as live on that channel.");
-      setMarkTarget(null);
-      setMarkUrl("");
-    } catch (e) {
-      showToast(toErrorMessage(e, "Could not record the post URL"));
-    } finally {
-      setIsMarking(false);
     }
   };
 
@@ -239,7 +189,7 @@ export default function PublishedPostsPage() {
   const tabs = allTabs.filter((tab) => tabEnabled[tab.id]);
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-16">
+    <div className="space-y-6 max-w-[1440px] mx-auto pb-16">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-24 right-6 z-50 bg-[#00C9A7] text-[#070B0F] px-4 py-3 rounded-xl shadow-2xl font-bold text-xs flex items-center gap-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
@@ -253,13 +203,13 @@ export default function PublishedPostsPage() {
         <div>
           <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#00C9A7] uppercase mb-1">
             <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
-            Live Omnichannel Hub
+            Published library
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#F1F5F9]">
-            Published Broadcasts & Channels
+            Your published content
           </h1>
           <p className="text-xs sm:text-sm text-[#94A3B8] mt-1">
-            Switch between channels to view live articles, copy ready-to-post social copy, and track production costs.
+            Live articles, ready-to-share channel copy, and the links you have recorded.
           </p>
         </div>
 
@@ -280,7 +230,7 @@ export default function PublishedPostsPage() {
       </div>
 
       {/* Channel Switcher Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-[#1F2D3D] pb-3">
+      <div className="flex flex-wrap items-center gap-1.5 border-b border-[#1F2D3D] pb-3">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;
@@ -288,7 +238,7 @@ export default function PublishedPostsPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer ${
                 isActive
                   ? "bg-[#1E2733] text-[#F1F5F9] border border-[#1F2D3D] shadow-sm ring-1 ring-[#00C9A7]/40"
                   : "bg-transparent text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26]"
@@ -307,7 +257,7 @@ export default function PublishedPostsPage() {
       </div>
 
       {/* Summary Stat Pills */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] flex items-center justify-between shadow-sm">
           <div>
             <div className="text-[11px] font-mono text-[#94A3B8]">POSTS LIVE</div>
@@ -351,7 +301,7 @@ export default function PublishedPostsPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-3">
+      <div className="p-3 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-3">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           <div className="relative w-full lg:w-80">
             <Search className="w-4 h-4 text-[#64748B] absolute left-3 top-1/2 -translate-y-1/2" />
@@ -434,7 +384,7 @@ export default function PublishedPostsPage() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filteredPosts.map((post) => {
             const socialCopy = activeTab === "LINKEDIN" ? (post.variants?.linkedin || "")
               : activeTab === "FACEBOOK" ? (post.variants?.facebook || "")
@@ -455,18 +405,11 @@ export default function PublishedPostsPage() {
                     : null;
             const channelUrl = channel ? post.channel_urls[channel] : null;
 
-            const shareUrl = activeTab === "TWITTER" 
-              ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(socialCopy || post.title + " " + post.published_url)}`
-              : activeTab === "LINKEDIN"
-                ? `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(post.published_url)}`
-                : activeTab === "FACEBOOK"
-                  ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(post.published_url)}`
-                  : post.published_url;
 
             return (
               <div
                 key={post.id}
-                className="rounded-2xl bg-[#0F1419] border border-[#1F2D3D] hover:border-[#00C9A7]/50 transition-all p-5 flex flex-col justify-between space-y-4 shadow-sm group"
+                className="rounded-2xl bg-[#0F1419] border border-[#1F2D3D] hover:border-[#00C9A7]/50 transition-all p-4 flex flex-col justify-between space-y-4 shadow-sm group"
               >
                 <div className="space-y-3.5">
                   {/* Card Header & Badges */}
@@ -513,11 +456,11 @@ export default function PublishedPostsPage() {
                           </a>
                         ) : (
                           <span
-                            title="No permalink recorded — posting to this channel is manual, so the cockpit cannot confirm it went out"
-                            className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#64748B]/10 text-[#94A3B8] border border-[#64748B]/30 flex items-center gap-1"
+                            title="No permalink recorded yet — posting to this channel is manual"
+                            className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#F59E0B]/10 text-[#FBBF24] border border-[#F59E0B]/30 flex items-center gap-1"
                           >
-                            <span className="w-1.5 h-1.5 rounded-full border border-[#94A3B8]" />
-                            <span>Not posted</span>
+                            <span className="w-1.5 h-1.5 rounded-full border border-[#FBBF24]" />
+                            <span>Needs link</span>
                           </span>
                         )
                       )}
@@ -537,7 +480,7 @@ export default function PublishedPostsPage() {
 
                   {/* 16:9 Thumbnail Image */}
                   {post.hero_image_url && (
-                    <div className="relative rounded-xl overflow-hidden aspect-[16/9] bg-black border border-[#1F2D3D]/60 shadow-inner">
+                    <div className="relative rounded-xl overflow-hidden aspect-[4/5] bg-black border border-[#1F2D3D]/60 shadow-inner">
                       <Image
                         src={post.hero_image_url}
                         alt={post.title}
@@ -566,24 +509,7 @@ export default function PublishedPostsPage() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-[11px] font-mono text-[#94A3B8]">
                         <span className="truncate text-[#F1F5F9] font-bold">{post.title}</span>
-                        {socialCopy && (
-                          <button
-                            onClick={() => handleCopy(socialCopy, `${activeTab}-${post.id}`)}
-                            className="text-[#00C9A7] hover:text-[#00E5BD] flex items-center gap-1 font-bold shrink-0 ml-2"
-                          >
-                            {copiedKey === `${activeTab}-${post.id}` ? (
-                              <>
-                                <Check className="w-3 h-3" />
-                                <span>Copied!</span>
-                              </>
-                            ) : (
-                              <>
-                                <Copy className="w-3 h-3" />
-                                <span>Copy Post</span>
-                              </>
-                            )}
-                          </button>
-                        )}
+
                       </div>
                       <div className="bg-[#070B0F] border border-[#1F2D3D] p-3 rounded-xl max-h-36 overflow-y-auto">
                         <p className="text-xs font-sans text-[#CBD5E1] leading-relaxed whitespace-pre-wrap">
@@ -621,126 +547,23 @@ export default function PublishedPostsPage() {
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between gap-2 pt-1">
-                    {activeTab === "BLOG" ? (
-                      <>
-                        <button
-                          onClick={() =>
-                            post.asset_id &&
-                            setUnpublishTarget({ id: post.asset_id, title: post.title })
-                          }
-                          disabled={!post.asset_id}
-                          title={
-                            post.asset_id
-                              ? "Take down post from live blog and return to review queue"
-                              : "No matching asset — this post cannot be unpublished from the cockpit"
-                          }
-                          className="flex items-center gap-1 bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#EF4444] border border-[#EF4444]/30 text-xs font-semibold px-2.5 py-1.5 rounded-xl transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                        >
-                          <EyeOff className="w-3 h-3" />
-                          <span>Unpublish</span>
-                        </button>
-
-                        {post.published_url && (
-                          <a
-                            href={post.published_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 bg-[#00C9A7]/10 hover:bg-[#00C9A7] text-[#00C9A7] hover:text-[#070B0F] border border-[#00C9A7]/30 text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs cursor-pointer"
-                          >
-                            <span>View Live Article</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => handleCopy(socialCopy, `bottom-${activeTab}-${post.id}`)}
-                          className="flex items-center gap-1 bg-[#161D26] hover:bg-[#1E2733] text-[#F1F5F9] border border-[#1F2D3D] text-xs font-semibold px-2.5 py-1.5 rounded-xl transition-all cursor-pointer"
-                        >
-                          {copiedKey === `bottom-${activeTab}-${post.id}` ? (
-                            <>
-                              <Check className="w-3 h-3 text-[#00C9A7]" />
-                              <span className="text-[#00C9A7]">Copied</span>
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="w-3 h-3" />
-                              <span>Copy Text</span>
-                            </>
-                          )}
-                        </button>
-
-                        <div className="flex items-center gap-2">
-                          {channel && channelUrl ? (
-                            <a
-                              href={channelUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1.5 bg-[#00C9A7]/10 hover:bg-[#00C9A7] text-[#00C9A7] hover:text-[#070B0F] border border-[#00C9A7]/30 text-xs font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer"
-                            >
-                              <span>View Post</span>
-                              <ExternalLink className="w-3 h-3" />
-                            </a>
-                          ) : (
-                            channel &&
-                            post.asset_id && (
-                              <button
-                                onClick={() => openMarkPosted(post.id)}
-                                title="Paste the permalink after posting, so the cockpit knows it went out"
-                                className="flex items-center gap-1 bg-[#161D26] hover:bg-[#1E2733] text-[#94A3B8] hover:text-[#F1F5F9] border border-[#1F2D3D] text-xs font-semibold px-2.5 py-1.5 rounded-xl transition-all cursor-pointer"
-                              >
-                                <Check className="w-3 h-3" />
-                                <span>Mark posted</span>
-                              </button>
-                            )
-                          )}
-
-                          {/* A share link needs a post URL; X can share the copy alone. */}
-                          {(post.published_url || activeTab === "TWITTER") && (
-                          <a
-                            href={shareUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 bg-[#3B82F6]/10 hover:bg-[#3B82F6] text-[#3B82F6] hover:text-white border border-[#3B82F6]/30 text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs cursor-pointer"
-                          >
-                            <span>{activeTab === "TWITTER" ? "Post on X" : activeTab === "LINKEDIN" ? "Share on LinkedIn" : "Share on Facebook"}</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Permalink capture, revealed by "Mark posted" */}
-                  {channel && markTarget === post.id && (
-                    <div className="pt-2 space-y-1.5">
-                      <label className="text-[10px] font-mono text-[#64748B] block">
-                        Paste the {activeTab === "TWITTER" ? "X" : activeTab.toLowerCase()} permalink
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          value={markUrl}
-                          onChange={(e) => setMarkUrl(e.target.value)}
-                          placeholder="https://…"
-                          className="flex-1 min-w-0 bg-[#070B0F] border border-[#1F2D3D] rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]/60"
-                        />
-                        <button
-                          onClick={() => handleMarkPosted(post, channel)}
-                          disabled={isMarking || markUrl.trim().length === 0}
-                          className="shrink-0 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                        >
-                          {isMarking ? "Saving…" : "Save"}
-                        </button>
-                        <button
-                          onClick={() => setMarkTarget(null)}
-                          className="shrink-0 text-[11px] text-[#64748B] hover:text-[#F1F5F9] px-2 py-1.5 transition-colors cursor-pointer"
-                        >
-                          Cancel
-                        </button>
-                      </div>
+                  {activeTab === "BLOG" && (
+                    <div className="flex items-center justify-between gap-2 pt-1">
+                      <button
+                        onClick={() => post.asset_id && setUnpublishTarget({ id: post.asset_id, title: post.title })}
+                        disabled={!post.asset_id}
+                        title={post.asset_id ? "Take down post from live blog and return to review queue" : "No matching asset — this post cannot be unpublished from the cockpit"}
+                        className="flex items-center gap-1 bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#EF4444] border border-[#EF4444]/30 text-xs font-semibold px-2.5 py-1.5 rounded-xl transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <EyeOff className="w-3 h-3" />
+                        <span>Unpublish</span>
+                      </button>
+                      {post.published_url && (
+                        <a href={post.published_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 bg-[#00C9A7]/10 hover:bg-[#00C9A7] text-[#00C9A7] hover:text-[#070B0F] border border-[#00C9A7]/30 text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs cursor-pointer">
+                          <span>View Live Article</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
                     </div>
                   )}
                 </div>

@@ -130,7 +130,7 @@ const DOODLE_WORDS: Partial<Record<DoodleName, RegExp>> = {
   COFFEE: /\b(morning|daily|routine|week|weekly|habit)\b/g,
 };
 
-const ICON_STOP = new Set(["what", "when", "with", "that", "their", "someone", "someone's", "from", "into", "they", "only", "being", "your", "left", "real", "right", "adding", "down", "things"]);
+const ICON_STOP = new Set(["what", "when", "with", "that", "their", "someone", "someone's", "from", "into", "they", "only", "being", "your", "left", "real", "right", "adding", "down", "things", "four", "title"]);
 
 /** Words that point at an icon, from its name and its meaning: the fallback when the strategist names none. */
 const ICON_WORDS = Object.fromEntries(
