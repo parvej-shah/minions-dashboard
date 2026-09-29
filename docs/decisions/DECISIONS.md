@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-09-30 — Save a rhythm before changing automatic drafting
+
+**Decision:** Schedule setup asks for cadence and review first, shows whether the rhythm is a preview or saved, and requires those changes to be saved before the immediate automatic drafting switch can be changed. Optional content plan controls still save as they are changed.
+**Why:** Users need to know which settings are active before they start or stop automatic drafting; an unsaved preview must not look like the current schedule.
+**Status:** active
+
 ## 2026-09-29 — Show live blog broadcasts only for configured blogs
 
 **Decision:** Mission Control shows the live blog broadcast section only when Blog publishing is enabled and the workspace has a company domain configured.

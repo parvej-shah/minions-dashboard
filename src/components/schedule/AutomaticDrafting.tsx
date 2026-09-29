@@ -19,7 +19,7 @@ interface DraftingStatus {
 type Tone = "off" | "on" | "warn";
 
 function describe(s: DraftingStatus): { tone: Tone; title: string; detail: string } {
-  if (!s.exists) return { tone: "off", title: "Off", detail: "Save a schedule below first. Nothing is drafted on its own." };
+  if (!s.exists) return { tone: "off", title: "Off", detail: "Save your rhythm above first. Nothing is drafted on its own yet." };
   if (!s.drafting_on) {
     return { tone: "off", title: "Off", detail: "Nothing is drafted on its own. Drafts are only made when you start one, and only go out when you publish or schedule them." };
   }
@@ -48,11 +48,33 @@ const TONE_STYLE: Record<Tone, { box: string; dot: string; text: string }> = {
  * the setting. Replaces the separate "Schedule active" and "Fill slots
  * automatically" switches.
  */
-export default function AutomaticDrafting({ onChanged, onMessage }: { onChanged: () => void; onMessage: (m: string) => void }) {
-  const { data, isLoading, reload } = useApiResource<DraftingStatus | null>("/api/plan/status", null, {
+export default function AutomaticDrafting({ onChanged, onMessage, blockedByUnsavedChanges }: { onChanged: () => void; onMessage: (m: string) => void; blockedByUnsavedChanges: boolean }) {
+  const { data, isLoading, error, reload } = useApiResource<DraftingStatus | null>("/api/plan/status", null, {
     errorMessage: "Could not load the drafting status",
   });
   const [saving, setSaving] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+
+  const retry = async () => {
+    setRetrying(true);
+    try {
+      await reload();
+    } finally {
+      setRetrying(false);
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#F59E0B]/40 bg-[#0F1419] p-5 text-sm text-[#FCD34D]">
+        <span>{error}</span>
+        <button type="button" onClick={() => void retry()} disabled={retrying} aria-busy={retrying} className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-lg border border-[#F59E0B]/40 px-3 font-semibold hover:bg-[#F59E0B]/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F59E0B] disabled:cursor-not-allowed disabled:opacity-50">
+          {retrying && <RefreshCw className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
+          {retrying ? "Trying again…" : "Try again"}
+        </button>
+      </div>
+    );
+  }
 
   if (isLoading || !data) {
     return (
@@ -91,16 +113,25 @@ export default function AutomaticDrafting({ onChanged, onMessage }: { onChanged:
           </span>
         </div>
         <p className="text-xs text-[#94A3B8] mt-1.5 leading-relaxed">{detail}</p>
-        <p className="mt-2 text-[11px] font-medium text-[#64748B]">Drafting and publishing are separate. Your review setting below controls what goes live.</p>
+        {saving && (
+          <p role="status" aria-live="polite" className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-medium text-[#00C9A7]">
+            <RefreshCw className="h-3 w-3 animate-spin" />
+            {data.drafting_on ? "Turning automatic drafting off…" : "Turning automatic drafting on…"}
+          </p>
+        )}
+        {blockedByUnsavedChanges && data.exists && <p className="mt-2 text-sm font-medium text-[#FBBF24]">Save your rhythm above before changing this switch.</p>}
+        <p className="mt-2 text-[11px] font-medium text-[#64748B]">Drafting and publishing are separate. Your review choice above controls what goes live.</p>
       </div>
       <button
         type="button"
         role="switch"
         aria-checked={data.drafting_on}
         aria-label="Automatic drafting"
-        disabled={saving || !data.exists}
+        aria-busy={saving}
+        title={!data.exists || blockedByUnsavedChanges ? "Save your rhythm above first" : data.drafting_on ? "Turn automatic drafting off" : "Turn automatic drafting on"}
+        disabled={saving || !data.exists || blockedByUnsavedChanges}
         onClick={() => void toggle()}
-        className={`w-11 h-6 rounded-full transition-colors p-0.5 flex items-center shrink-0 disabled:opacity-60 ${data.drafting_on ? "bg-[#00C9A7]" : "bg-[#1F2D3D]"}`}
+        className={`w-11 h-6 rounded-full transition-colors p-0.5 flex items-center shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0F1419] disabled:cursor-not-allowed disabled:opacity-60 ${data.drafting_on ? "bg-[#00C9A7]" : "bg-[#1F2D3D]"}`}
       >
         <div className={`w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${data.drafting_on ? "translate-x-5" : "translate-x-0"}`} />
       </button>

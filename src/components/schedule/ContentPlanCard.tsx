@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, CalendarRange, Lightbulb, Pin, RefreshCw, Sparkles } from "lucide-react";
+import { AlertTriangle, CalendarRange, ChevronDown, Lightbulb, Pin, RefreshCw, Sparkles } from "lucide-react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { useApiResource } from "@/hooks/useApiResource";
 import { localParts } from "@/lib/pulse/week";
@@ -71,7 +71,7 @@ function statusLine(s: WeekSlot): string | null {
  * The content plan (phase 7): what the plan is for, when it runs, which lane
  * each weekly slot serves, and the coming week slot by slot with the idea each
  * one will draft and how that idea was chosen. While automatic drafting is off
- * (its switch is AutomaticDrafting, at the top of the page),
+ * (its switch is AutomaticDrafting, above this plan),
  * the week is a preview: nothing is reserved, harvested or drafted.
  */
 export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) => void }) {
@@ -79,6 +79,16 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
     errorMessage: "Could not load the content plan",
   });
   const [saving, setSaving] = useState<string | null>(null);
+  const [retrying, setRetrying] = useState(false);
+
+  const retry = async () => {
+    setRetrying(true);
+    try {
+      await reload();
+    } finally {
+      setRetrying(false);
+    }
+  };
 
   const save = async (what: string, body: Record<string, unknown>, done?: string) => {
     setSaving(what);
@@ -96,8 +106,15 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
     return (
       <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] text-xs text-[#F59E0B] flex items-center justify-between gap-3">
         <span>{error}</span>
-        <button type="button" onClick={() => void reload()} className="text-[#00C9A7] hover:underline">
-          Try again
+        <button
+          type="button"
+          onClick={() => void retry()}
+          disabled={retrying}
+          aria-busy={retrying}
+          className="inline-flex shrink-0 items-center gap-1.5 text-[#00C9A7] transition-colors cursor-pointer hover:text-[#5EEAD4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {retrying && <RefreshCw className="h-3 w-3 animate-spin" />}
+          {retrying ? "Trying again…" : "Try again"}
         </button>
       </div>
     );
@@ -126,7 +143,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
     byDay.set(day, [...(byDay.get(day) ?? []), s]);
   }
   const selectClass =
-    "rounded-lg bg-[#070B0F] border border-[#1F2D3D] px-2.5 py-1.5 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7] [color-scheme:dark] disabled:opacity-60";
+    "rounded-lg bg-[#070B0F] border border-[#1F2D3D] px-2.5 py-1.5 text-xs text-[#F1F5F9] transition-colors focus:outline-none focus:border-[#00C9A7] [color-scheme:dark] cursor-pointer disabled:cursor-not-allowed disabled:opacity-60";
 
   const pinFor = (s: WeekSlot) => slotKey(localParts(new Date(s.slot_at), tz).weekday, utcToZoned(new Date(s.slot_at), tz).time);
   const setPin = (s: WeekSlot, laneId: string) => {
@@ -138,85 +155,27 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
   };
 
   return (
-    <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-5 shadow-sm">
+    <div aria-busy={saving !== null} className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-5 shadow-sm">
       <div>
         <h2 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
           <CalendarRange className="w-4 h-4 text-[#00C9A7]" />
-          Content plan
+          Your next 7 days
         </h2>
         <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
           {plan.filler_enabled
             ? "Automatic drafting is on: an idea is kept for each slot in the next 7 days and drafted at the slot's time. A lane with no strong idea gets a harvest of its own ahead of time."
-            : "Automatic drafting is off (switch at the top of this page), so the week below is a preview of what would be drafted."}
+            : "Automatic drafting is off. This week shows what your rhythm would prepare once you turn it on."}
         </p>
+        {saving && (
+          <p role="status" aria-live="polite" className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-medium text-[#00C9A7]">
+            <RefreshCw className="h-3 w-3 animate-spin" /> Saving plan changes…
+          </p>
+        )}
       </div>
-
-      <div className="grid sm:grid-cols-2 gap-3">
-        <label className="block">
-          <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Main objective</span>
-          <select
-            value={plan.primary_objective}
-            disabled={saving !== null}
-            onChange={(e) =>
-              void save("objective", {
-                primary_objective: e.target.value,
-                ...(plan.secondary_objective === e.target.value ? { secondary_objective: null } : {}),
-              }, "Objective saved")
-            }
-            className={`${selectClass} w-full`}
-          >
-            {OBJECTIVES.map((o) => (
-              <option key={o} value={o}>
-                {OBJECTIVE_LABEL[o]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Second objective (optional)</span>
-          <select
-            value={plan.secondary_objective ?? ""}
-            disabled={saving !== null}
-            onChange={(e) => void save("objective", { secondary_objective: e.target.value || null }, "Objective saved")}
-            className={`${selectClass} w-full`}
-          >
-            <option value="">None</option>
-            {OBJECTIVES.filter((o) => o !== plan.primary_objective).map((o) => (
-              <option key={o} value={o}>
-                {OBJECTIVE_LABEL[o]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Starts (optional)</span>
-          <input
-            type="date"
-            value={plan.plan_starts_on ?? ""}
-            disabled={saving !== null}
-            onChange={(e) => void save("dates", { plan_starts_on: e.target.value || null }, "Plan dates saved")}
-            className={`${selectClass} w-full`}
-          />
-        </label>
-        <label className="block">
-          <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Ends (optional)</span>
-          <input
-            type="date"
-            value={plan.plan_ends_on ?? ""}
-            min={plan.plan_starts_on ?? undefined}
-            disabled={saving !== null}
-            onChange={(e) => void save("dates", { plan_ends_on: e.target.value || null }, "Plan dates saved")}
-            className={`${selectClass} w-full`}
-          />
-        </label>
-      </div>
-      <p className="text-[11px] text-[#64748B] leading-relaxed -mt-2">
-        The objectives lean the lane mix toward lanes with that purpose; each lane&apos;s weight is set on Brand › Audience &amp; Experience.
-      </p>
 
       <div className="pt-4 border-t border-[#1F2D3D]/60 space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-xs font-bold text-[#F1F5F9] uppercase tracking-wider font-mono">The next 7 days</h3>
+          <h3 className="text-xs font-bold text-[#F1F5F9] uppercase tracking-wider font-mono">Upcoming slots</h3>
           {!plan.filler_enabled && <span className="text-[10px] font-mono text-[#64748B]">Preview</span>}
         </div>
 
@@ -250,7 +209,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
                         <span className="ml-auto flex items-center gap-1.5">
                           {plan.slot_lanes[key] && <Pin className="w-3 h-3 text-[#00C9A7]" aria-label="Pinned lane" />}
                           <select
-                            aria-label="Lane for this weekly slot"
+                            aria-label={`Lane for ${formatPostTime(s.slot_at, tz)}`}
                             value={plan.slot_lanes[key] ?? ""}
                             disabled={saving !== null || !editable}
                             onChange={(e) => setPin(s, e.target.value)}
@@ -276,7 +235,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
                       )}
                       {line && <p className="text-[11px] text-[#64748B]">{line}</p>}
                       {s.status === "DRAFTED" && s.asset_id && (
-                        <Link href={`/editorial?id=${s.asset_id}`} className="text-[11px] text-[#00C9A7] hover:underline">
+                        <Link href={`/editorial?id=${s.asset_id}`} className="text-[11px] text-[#00C9A7] transition-colors cursor-pointer hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7]">
                           Open the draft
                         </Link>
                       )}
@@ -293,12 +252,80 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
         </p>
       </div>
 
+      <details className="group border-t border-[#1F2D3D] pt-4">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-lg text-sm font-semibold text-[#CBD5E1] transition-colors hover:text-[#F1F5F9] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00C9A7] [&::-webkit-details-marker]:hidden">
+          Fine-tune your content plan
+          <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+        </summary>
+        <p className="mt-1 text-xs text-[#94A3B8]">Optional objectives and active dates · changes save automatically</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <label className="block">
+            <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Main objective</span>
+            <select
+              value={plan.primary_objective}
+              disabled={saving !== null}
+              onChange={(e) =>
+                void save("objective", {
+                  primary_objective: e.target.value,
+                  ...(plan.secondary_objective === e.target.value ? { secondary_objective: null } : {}),
+                }, "Objective saved")
+              }
+              className={`${selectClass} w-full`}
+            >
+              {OBJECTIVES.map((o) => (
+                <option key={o} value={o}>
+                  {OBJECTIVE_LABEL[o]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Second objective (optional)</span>
+            <select
+              value={plan.secondary_objective ?? ""}
+              disabled={saving !== null}
+              onChange={(e) => void save("objective", { secondary_objective: e.target.value || null }, "Objective saved")}
+              className={`${selectClass} w-full`}
+            >
+              <option value="">None</option>
+              {OBJECTIVES.filter((o) => o !== plan.primary_objective).map((o) => (
+                <option key={o} value={o}>
+                  {OBJECTIVE_LABEL[o]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Starts (optional)</span>
+            <input
+              type="date"
+              value={plan.plan_starts_on ?? ""}
+              disabled={saving !== null}
+              onChange={(e) => void save("dates", { plan_starts_on: e.target.value || null }, "Plan dates saved")}
+              className={`${selectClass} w-full`}
+            />
+          </label>
+          <label className="block">
+            <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Ends (optional)</span>
+            <input
+              type="date"
+              value={plan.plan_ends_on ?? ""}
+              min={plan.plan_starts_on ?? undefined}
+              disabled={saving !== null}
+              onChange={(e) => void save("dates", { plan_ends_on: e.target.value || null }, "Plan dates saved")}
+              className={`${selectClass} w-full`}
+            />
+          </label>
+        </div>
+        <p className="mt-3 text-xs leading-relaxed text-[#94A3B8]">Set lane weights on Brand › Audience &amp; Experience.</p>
+      </details>
+
       {needsNudge && (
         <div className="rounded-xl border border-[#F59E0B]/30 bg-[#F59E0B]/10 p-3 text-xs text-[#FCD34D] flex items-start gap-2">
           <Lightbulb className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
             Some slots have no strong idea yet. A recent piece of work, a lesson or a client question gives the harvester something only you could say.{" "}
-            <Link href="/brand?tab=experience" className="text-[#00C9A7] hover:underline font-semibold">
+            <Link href="/brand?tab=experience" className="text-[#00C9A7] transition-colors cursor-pointer hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] font-semibold">
               Add an update
             </Link>
           </span>
