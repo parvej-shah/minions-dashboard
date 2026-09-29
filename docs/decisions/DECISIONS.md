@@ -29,6 +29,21 @@ and link to it here.
 
 ---
 
+## 2026-09-29 — Carousel pages can carry a line icon, when the model thinks it helps
+
+**Decision:** STAKES, POINT and STEP pages may show one faint line icon
+under the words, from a fixed set of 97 work objects (Phosphor Icons "thin",
+MIT). The model decides page by page whether an icon helps; a deck may have
+icons on several pages, one, or none. No icon repeats in a deck, and when the
+words don't fit beside the icon, the page is drawn without it.
+**Why:** decks like Brain Station 23's use a small line drawing per page to
+make each point easier to see at a glance. Code-drawn icons keep D19's "no AI
+images" rule and cost nothing per carousel.
+**Alternatives considered:** AI-drawn images per page (breaks D19, inconsistent
+across pages); an icon on every page (reads as filler); commissioned custom
+scenes (better, but a later step).
+**Status:** active
+
 ## 2026-09-29 — Carousels come in three designs; the model picks one per post
 
 **Decision:** The pages after a carousel's cover come in three designs:

@@ -1,5 +1,6 @@
 import type { ChatPayload } from "./types";
 import { DATA_CLOSE, DATA_OPEN, fenceSafe } from "./harvest";
+import { ICON_MEANING } from "@/lib/carousel/icons";
 import { CAPTION_WORDS, COVER_HEADLINE_WORDS, INNER_SLIDES, WORD_CAPS } from "@/lib/carousel/plan";
 
 /**
@@ -53,6 +54,9 @@ Layouts and their word limits (hard limits, counted in code):
 - QUOTE: "quote" (max ${cap("QUOTE", "quote")}), optional "attribution". ONLY the author's own words, copied from THE AUTHOR'S EXPERIENCE. Otherwise never use it.
 - CLOSE: "takeaway" (max ${cap("CLOSE", "takeaway")}: the one line to remember), "save_line" (max ${cap("CLOSE", "saveLine")}: starts "Save this for", naming the reader's real next moment, e.g. "Save this for your next vendor demo."). Always the last slide, exactly once.
 
+Icons: a STAKES, POINT or STEP slide may carry one optional "icon", a small line drawing shown faint under the words. You decide, slide by slide, whether one helps: use it only where a concrete object makes the slide's point easier to see at a glance. Some decks want an icon on several slides, some on one, many on none; none is always acceptable. Never use an icon just to fill space, and never the same icon twice. Choose only from this list (name: what it can stand for):
+${Object.entries(ICON_MEANING).map(([name, meaning]) => `${name}: ${meaning}`).join("\n")}
+
 Rules:
 - ${INNER_SLIDES.min} to ${INNER_SLIDES.max} slides after the cover. Fewer, sharper slides beat more.
 - One idea per slide, readable in three seconds on a phone. Plain words the reader uses. No slide repeats another's point.
@@ -72,7 +76,7 @@ Return ONLY this JSON:
   "style": "EDITORIAL | BOLD | MINIMAL",
   "label": "2-4 words",
   "cover": { "headline": "...", "emphasis": "one word of the headline", "kicker": "..." },
-  "slides": [ { "layout": "STAKES", "statement": "...", "body": "...", "emphasis": "..." } ],
+  "slides": [ { "layout": "STAKES", "statement": "...", "body": "...", "emphasis": "...", "icon": "OPTIONAL_ICON_NAME" } ],
   "caption": "...",
   "document_title": "..."
 }

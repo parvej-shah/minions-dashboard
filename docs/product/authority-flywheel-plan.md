@@ -1210,6 +1210,11 @@ Slices 2–4 (built 2026-09-27, not yet deployed):
   `SLIDE_STYLES`). The plan's `style` field is picked by the model per post.
   They change colour and chrome, never geometry, and plans stored without a
   style draw as EDITORIAL.
+- 2026-09-29: optional line icons on STAKES, POINT and STEP pages
+  (`src/lib/carousel/icons.ts`, 97 Phosphor "thin" icons, MIT, generated from
+  @phosphor-icons/core). The plan's per-slide `icon` is the model's call; an
+  unknown or repeated name is dropped, never a failed plan, and a page whose
+  words need the room is drawn without its icon.
 - Later (agreed 2026-09-29, not started): per-brand looks, so two tenants'
   carousels stop sharing one design system. In order of cost: (1) a heading
   font and a body font chosen per workspace from a bundled set (each needs

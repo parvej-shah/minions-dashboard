@@ -51,6 +51,15 @@ describe("slide layouts", () => {
     }
   });
 
+  it("draws an icon under short words, and drops it rather than fail when the words need the room", () => {
+    const images = (d: Deck) => JSON.stringify(slideElement(d, 1)).split("data:image/svg+xml").length - 1;
+    const plain = images(deck([{ layout: "POINT", title: "Write the context down" }]));
+    expect(images(deck([{ layout: "POINT", title: "Write the context down", icon: "NOTEBOOK" }]))).toBe(plain + 1);
+    const long = "Write down every architecture decision, every edge case and the one integration only they understood, before they leave";
+    const body = "The context that was never written down leaves with them, and the roadmap slips.";
+    expect(images(deck([{ layout: "POINT", title: long, body, icon: "NOTEBOOK" }]))).toBe(plain);
+  });
+
   it("rejects copy that cannot fit rather than cutting it", () => {
     const long = Array(80).fill("booking").join(" ");
     expect(() => slideElement(deck([{ layout: "POINT", title: long }]), 1)).toThrow(CoverFitError);

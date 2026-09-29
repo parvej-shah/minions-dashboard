@@ -40,6 +40,19 @@ describe("carousel plan gates", () => {
     expect(parsePlan(JSON.stringify({ ...good, style: "NEON" })).errors).toContain("style must be one of EDITORIAL, BOLD, MINIMAL.");
   });
 
+  it("keeps known icons, and drops unknown, repeated or misplaced ones without failing the plan", () => {
+    const slides = [
+      { layout: "STAKES", statement: "A demo runs in a quiet room.", icon: "phone-call" },
+      { layout: "POINT", title: "Demos hide the delays", icon: "unicorn" },
+      { layout: "POINT", title: "Silence reads as a dropped line", icon: "PHONE_CALL" },
+      { layout: "STEP", title: "Time the first reply", icon: "Clock" },
+      { layout: "CLOSE", takeaway: "Judge it on live calls.", icon: "CLOCK" },
+    ];
+    const { plan: p, errors } = parsePlan(JSON.stringify({ ...good, slides }));
+    expect(errors).toEqual([]);
+    expect(p!.slides.map((x) => ("icon" in x ? x.icon : undefined))).toEqual(["PHONE_CALL", undefined, undefined, "CLOCK", undefined]);
+  });
+
   it("reads a stored plan sent back by the review screen", () => {
     const stored = plan();
     expect(parsePlan(JSON.stringify(stored)).plan).toEqual(stored);

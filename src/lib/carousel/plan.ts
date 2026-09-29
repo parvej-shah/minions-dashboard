@@ -8,6 +8,7 @@
 import { bannedHits } from "@/lib/drafts/banned";
 import { numbersIn, unsupportedNumbers } from "@/lib/harvest/text";
 import { CoverFitError, coverElement, type CoverSpec } from "@/lib/covers/layouts";
+import { ICONS, type IconName } from "./icons";
 import { DEFAULT_SLIDE_STYLE, SLIDE_LAYOUTS, SLIDE_STYLES, slideElement, type Deck, type Slide, type SlideLayout, type SlideStyle } from "./slides";
 
 export const CAROUSEL_STRUCTURES = ["CHECKLIST", "STEPS", "DECISION", "CONTRAST", "TEARDOWN"] as const;
@@ -89,6 +90,11 @@ export function restatedUnverified(line: string, unverified: string[]): string |
 const words = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
 const s = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 const opt = (v: unknown) => s(v) || undefined;
+/** An icon is decoration: a name that is not in the set means no icon, not a failed plan. */
+const iconOf = (v: unknown): IconName | undefined => {
+  const name = s(v).toUpperCase().replace(/[-\s]/g, "_");
+  return name in ICONS ? (name as IconName) : undefined;
+};
 const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((w) => w.length > 2);
 
 /** Reads the model's JSON (or a stored plan sent back by the review screen) into a plan. Unknown layouts are errors, not dropped slides. */
@@ -115,15 +121,22 @@ export function parsePlan(raw: string): { plan: CarouselPlan | null; errors: str
       continue;
     }
     switch (layout) {
-      case "STAKES": slides.push({ layout, statement: s(r.statement), body: opt(r.body), emphasis: opt(r.emphasis) }); break;
+      case "STAKES": slides.push({ layout, statement: s(r.statement), body: opt(r.body), emphasis: opt(r.emphasis), icon: iconOf(r.icon) }); break;
       case "POINT":
-      case "STEP": slides.push({ layout, title: s(r.title), body: opt(r.body), emphasis: opt(r.emphasis) }); break;
+      case "STEP": slides.push({ layout, title: s(r.title), body: opt(r.body), emphasis: opt(r.emphasis), icon: iconOf(r.icon) }); break;
       case "CONTRAST": slides.push({ layout, before: s(r.before), after: s(r.after), beforeLabel: opt(r.before_label ?? r.beforeLabel), afterLabel: opt(r.after_label ?? r.afterLabel) }); break;
       case "CHECKLIST": slides.push({ layout, title: s(r.title), items: (Array.isArray(r.items) ? r.items : []).map(s).filter(Boolean) }); break;
       case "NUMBER": slides.push({ layout, value: s(r.value), unit: opt(r.unit), caption: s(r.caption) }); break;
       case "QUOTE": slides.push({ layout, quote: s(r.quote), attribution: opt(r.attribution) }); break;
       case "CLOSE": slides.push({ layout, takeaway: s(r.takeaway), saveLine: opt(r.save_line ?? r.saveLine) }); break;
     }
+  }
+  // The same drawing twice reads as filler: a repeat is dropped, the first kept.
+  const used = new Set<IconName>();
+  for (const slide of slides) {
+    if (!("icon" in slide) || !slide.icon) continue;
+    if (used.has(slide.icon)) slide.icon = undefined;
+    else used.add(slide.icon);
   }
   const plan: CarouselPlan = {
     structure,
@@ -143,7 +156,7 @@ function fieldsOf(slide: Slide): [string, string][] {
   void layout;
   const out: [string, string][] = [];
   for (const [k, v] of Object.entries(rest)) {
-    if (k === "emphasis" || k === "unit" || k === "value") continue;
+    if (k === "emphasis" || k === "unit" || k === "value" || k === "icon") continue;
     if (Array.isArray(v)) v.forEach((x) => out.push(["item", String(x)]));
     else if (typeof v === "string" && v) out.push([k, v]);
   }

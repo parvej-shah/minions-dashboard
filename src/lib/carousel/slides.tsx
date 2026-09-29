@@ -9,6 +9,10 @@
  * Styles change colour and chrome only, never the geometry, so a plan that
  * fits in one style fits in all of them.
  *
+ * STAKES, POINT and STEP pages may carry one line icon (icons.ts), picked by
+ * the plan, drawn faint below the words. The words always win: when they do
+ * not fit beside the icon, the page is drawn without it.
+ *
  * Same rules as the covers: every letter is drawn in code, fit.ts sets every
  * size and line break, and copy that cannot fit is rejected, never cut. Body
  * copy never goes below 40px on the 1080-wide page, so it reads on a phone.
@@ -18,6 +22,7 @@ import { faceStyle, metricsFor } from "@/lib/covers/fonts";
 import { balance, fit, type Fitted, type TextBox } from "@/lib/covers/fit";
 import { contrast } from "@/lib/covers/brand";
 import { textWidth } from "@/lib/covers/metrics";
+import { ICONS, type IconName } from "./icons";
 import { COVER_SIZE, CoverFitError, INNER, Lines, PAD, coverElement, initials, rgba, type CoverAuthor, type CoverBrand, type CoverSpec } from "@/lib/covers/layouts";
 
 export const SLIDE_SIZE = COVER_SIZE;
@@ -38,11 +43,11 @@ export const DEFAULT_SLIDE_STYLE: SlideStyle = "EDITORIAL";
 
 export type Slide =
   /** Why this matters now: one statement, set large on the dark page. */
-  | { layout: "STAKES"; statement: string; body?: string; emphasis?: string }
+  | { layout: "STAKES"; statement: string; body?: string; emphasis?: string; icon?: IconName }
   /** One point of the argument, numbered in order among the POINT slides. */
-  | { layout: "POINT"; title: string; body?: string; emphasis?: string }
+  | { layout: "POINT"; title: string; body?: string; emphasis?: string; icon?: IconName }
   /** One step of a sequence, with its place in the sequence drawn. */
-  | { layout: "STEP"; title: string; body?: string; emphasis?: string }
+  | { layout: "STEP"; title: string; body?: string; emphasis?: string; icon?: IconName }
   /** Common assumption against what happens in practice. */
   | { layout: "CONTRAST"; before: string; after: string; beforeLabel?: string; afterLabel?: string }
   | { layout: "CHECKLIST"; title: string; items: string[] }
@@ -73,6 +78,11 @@ const BOTTOM_GAP = 56;
 const TRACK = 4;
 const TRACK_GAP = 28;
 const NAME_ROW = 32;
+/** The layouts that may carry an icon: the ones with room under a short statement or title. */
+export const ICON_LAYOUTS: SlideLayout[] = ["STAKES", "POINT", "STEP"];
+const ICON = 300;
+const ICON_GAP = 48;
+
 const CENTRE = SLIDE_SIZE.height - PAD * 2 - TOP_ROW - TOP_GAP - BOTTOM_GAP - TRACK - TRACK_GAP - NAME_ROW;
 
 const BOX = {
@@ -136,6 +146,8 @@ const arrow = (colour: string) =>
 
 interface Page {
   style: SlideStyle;
+  /** The height the words may use: the centre, less the icon's space when there is one. */
+  room: number;
   ink: string;
   paper: string;
   accent: string;
@@ -188,7 +200,14 @@ function Progress({ page }: { page: Page }) {
   );
 }
 
-function Frame({ deck, page, children }: { deck: Deck; page: Page; children: ReactNode }) {
+/** The icon, faint and bottom right: it supports the words, never competes with them. */
+function iconSrc(name: IconName, page: Page): string {
+  const { viewBox, body } = ICONS[name];
+  const [colour, opacity] = page.style === "MINIMAL" ? [page.ink, 0.3] : [page.accent, 0.45];
+  return svg(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="${ICON}" height="${ICON}"><g fill="${colour}" fill-opacity="${opacity}">${body}</g></svg>`);
+}
+
+function Frame({ deck, page, icon, children }: { deck: Deck; page: Page; icon?: IconName; children: ReactNode }) {
   const { style, ink, paper, accent, index, total } = page;
   const label = fitOrThrow("chrome", deck.label.toUpperCase());
   const marker = `${String(index + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
@@ -204,7 +223,17 @@ function Frame({ deck, page, children }: { deck: Deck; page: Page; children: Rea
         <div style={{ display: "flex", width: markerWidth + 4, ...faceStyle("sansSemi"), fontSize: 26, letterSpacing: 0.12 * 26, color: rgba(ink, 0.5) }}>{marker}</div>
       </div>
 
-      <div style={{ height: CENTRE, display: "flex", flexDirection: "column", justifyContent: "center", marginBottom: BOTTOM_GAP }}>{children}</div>
+      {icon ? (
+        <div style={{ height: CENTRE, display: "flex", flexDirection: "column", marginBottom: BOTTOM_GAP }}>
+          <div style={{ height: page.room, display: "flex", flexDirection: "column", justifyContent: "center" }}>{children}</div>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: ICON_GAP }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={iconSrc(icon, page)} width={ICON} height={ICON} alt="" />
+          </div>
+        </div>
+      ) : (
+        <div style={{ height: CENTRE, display: "flex", flexDirection: "column", justifyContent: "center", marginBottom: BOTTOM_GAP }}>{children}</div>
+      )}
 
       <Progress page={page} />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: NAME_ROW }}>
@@ -223,7 +252,7 @@ function Frame({ deck, page, children }: { deck: Deck; page: Page; children: Rea
 function TitleBody({ title, body, emphasis, page, reserved }: { title: string; body?: string; emphasis?: string; page: Page; reserved: number }) {
   const bodyFit = body ? fitOrThrow("body", body) : null;
   const bodyHeight = bodyFit ? 48 + height(bodyFit, LH.body) : 0;
-  const titleFit = fitOrThrow("title", title, CENTRE - reserved - bodyHeight, LH.title);
+  const titleFit = fitOrThrow("title", title, page.room - reserved - bodyHeight, LH.title);
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Lines fitted={titleFit} face="serif" tracking={-0.015} lineHeight={LH.title} color={page.ink} emphasis={emphasis} accent={page.accent} />
@@ -265,7 +294,7 @@ function StepCentre({ slide, page, n, of }: { slide: Extract<Slide, { layout: "S
 function StakesCentre({ slide, page }: { slide: Extract<Slide, { layout: "STAKES" }>; page: Page }) {
   const bodyFit = slide.body ? fitOrThrow("body", slide.body) : null;
   const bodyHeight = bodyFit ? 56 + height(bodyFit, LH.body) : 0;
-  const statement = fitOrThrow("statement", slide.statement, CENTRE - bodyHeight - 62, LH.statement);
+  const statement = fitOrThrow("statement", slide.statement, page.room - bodyHeight - 62, LH.statement);
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <div style={{ width: 120, height: 6, background: page.accent, marginBottom: 56 }} />
@@ -431,7 +460,7 @@ export function slideElement(deck: Deck, i: number) {
   const { brand } = deck;
   const style = deck.style ?? DEFAULT_SLIDE_STYLE;
   const dark = isDark(style, slide.layout);
-  const page: Page = {
+  const base = {
     style,
     ink: dark ? brand.paper : brand.ink,
     paper: dark ? brand.ink : brand.paper,
@@ -443,7 +472,7 @@ export function slideElement(deck: Deck, i: number) {
   const same = deck.slides.filter((s) => s.layout === slide.layout);
   const n = deck.slides.slice(0, i).filter((s) => s.layout === slide.layout).length;
   // Called as functions, not rendered as components, so every fit runs now.
-  const centre =
+  const draw = (page: Page) =>
     slide.layout === "STAKES" ? StakesCentre({ slide, page })
     : slide.layout === "POINT" ? PointCentre({ slide, page, n })
     : slide.layout === "STEP" ? StepCentre({ slide, page, n, of: same.length })
@@ -452,5 +481,16 @@ export function slideElement(deck: Deck, i: number) {
     : slide.layout === "NUMBER" ? NumberCentre({ slide, page, secondary: dark ? page.accent : brand.secondary })
     : slide.layout === "QUOTE" ? QuoteCentre({ slide, page })
     : CloseCentre({ slide, page, deck });
-  return Frame({ deck, page, children: centre });
+  const icon = "icon" in slide && slide.icon && slide.icon in ICONS ? slide.icon : undefined;
+  if (icon) {
+    const page: Page = { ...base, room: CENTRE - ICON - ICON_GAP };
+    try {
+      return Frame({ deck, page, icon, children: draw(page) });
+    } catch (e) {
+      // The words win: without the icon they get the whole centre.
+      if (!(e instanceof CoverFitError)) throw e;
+    }
+  }
+  const page: Page = { ...base, room: CENTRE };
+  return Frame({ deck, page, children: draw(page) });
 }
