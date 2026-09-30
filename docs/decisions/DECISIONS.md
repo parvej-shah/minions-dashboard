@@ -41,11 +41,23 @@ and link to it here.
 **Why:** The onboarding form used to flash while a background check ran, and returning users were asked where to go when the answer is always the dashboard. The product's UX bar is a lesson app like Duolingo: one obvious next step, nothing flashing while it loads.
 **Status:** active
 
+## 2026-09-30 — Rotate the home thought on refresh
+
+**Decision:** Daily Spark has no manual shuffle control. A page refresh selects a new thought, avoiding the previous one when browser session storage is available; the quote remains the focal point of the card.
+**Why:** The extra button made a passive thought feel like another task. Refresh-based variety keeps the card calm while still feeling fresh.
+**Status:** active
+
+## 2026-09-30 — Lead with a useful thought, not a duplicate action
+
+**Decision:** Mission Control gives an original posting thought strong visual hierarchy in place of the next-step card. It rotates daily and offers an optional Another control. Review status and actions remain in the header and review queue; plain-language progress labels and the simplified mobile header remain.
+**Why:** The next-step card repeated actions already on the page, while the thought can reinforce steady, useful publishing as the page's focal moment without removing actual work.
+**Status:** superseded by [Rotate the home thought on refresh](#2026-09-30--rotate-the-home-thought-on-refresh)
+
 ## 2026-09-30 — Make Mission Control action-first
 
 **Decision:** The home page leads with the next useful action, uses plain-language progress labels, and omits the mobile header post quota, menu button, and blog shortcut. The quota and navigation remain available in the bottom-bar menu.
 **Why:** Users should immediately see what needs attention without decoding internal automation terminology or losing scarce mobile header space.
-**Status:** active
+**Status:** superseded by [Lead with a useful thought, not a duplicate action](#2026-09-30--lead-with-a-useful-thought-not-a-duplicate-action)
 
 ## 2026-09-30 — Save a rhythm before changing automatic drafting
 
