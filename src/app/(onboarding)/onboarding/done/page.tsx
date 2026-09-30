@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { PageSkeleton } from "@/components/ui/Skeleton";
 import { apiClient } from "@/lib/api-client";
 
 export default function OnboardingDone() {
@@ -27,9 +27,8 @@ export default function OnboardingDone() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-[#070B0F] text-[#F1F5F9] flex flex-col items-center justify-center p-6 space-y-3">
-      <Loader2 className="w-8 h-8 text-[#00C9A7] animate-spin" />
-      <p className="text-xs text-[#94A3B8] font-mono">Redirecting to your executive dashboard…</p>
+    <div className="min-h-screen bg-canvas p-3.5 sm:p-6 md:p-8">
+      <PageSkeleton label="Opening your dashboard" />
     </div>
   );
 }

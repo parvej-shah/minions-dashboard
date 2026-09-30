@@ -109,21 +109,21 @@ export function InstallPrompt() {
       aria-label="Install Minions"
       className="fixed bottom-[max(6rem,calc(env(safe-area-inset-bottom)+5rem))] left-3 right-3 z-50 mx-auto max-w-md animate-in fade-in slide-in-from-bottom-3 duration-300 md:bottom-6 md:left-auto md:right-6"
     >
-      <div className="relative flex flex-col gap-3 rounded-2xl border border-[#1F2D3D] bg-[#0D1520]/95 p-4 shadow-2xl shadow-black/70 backdrop-blur-xl">
+      <div className="relative flex flex-col gap-3 rounded-2xl border border-line bg-[#0D1520]/95 p-4 shadow-2xl shadow-black/70 backdrop-blur-xl">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#1F2D3D] bg-[#12242a]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-[#12242a]">
               <Image src="/icons/icon-192x192.png" alt="" width={28} height={28} className="h-7 w-7 rounded-lg" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-[#F1F5F9]">Add Minions to your home screen</h3>
-              <p className="text-xs text-[#94A3B8]">A focused, app-like way to open your workspace.</p>
+              <h3 className="text-sm font-semibold text-ink">Add Minions to your home screen</h3>
+              <p className="text-xs text-muted">A focused, app-like way to open your workspace.</p>
             </div>
           </div>
           <button
             type="button"
             onClick={dismiss}
-            className="grid min-h-11 min-w-11 shrink-0 place-items-center rounded-lg text-[#94A3B8] hover:bg-white/5"
+            className="grid min-h-11 min-w-11 shrink-0 place-items-center rounded-lg text-muted hover:bg-white/5"
             aria-label="Dismiss installation suggestion"
           >
             <X className="h-4 w-4" aria-hidden="true" />
@@ -131,18 +131,18 @@ export function InstallPrompt() {
         </div>
 
         {showIOSGuide ? (
-          <div className="space-y-2 rounded-xl border border-[#1F2D3D] bg-[#070B0F]/90 p-3 text-xs text-[#94A3B8]">
-            <p className="flex items-center gap-1.5 font-medium text-[#F1F5F9]">
-              <Smartphone className="h-4 w-4 text-[#00C9A7]" aria-hidden="true" />
+          <div className="space-y-2 rounded-xl border border-line bg-canvas/90 p-3 text-xs text-muted">
+            <p className="flex items-center gap-1.5 font-medium text-ink">
+              <Smartphone className="h-4 w-4 text-brand" aria-hidden="true" />
               Install on iPhone or iPad
             </p>
             <p>If you’re not in Safari, open this page there first. Then tap Share and choose “Add to Home Screen.”</p>
-            <div className="flex items-center gap-2 text-[#00C9A7]">
+            <div className="flex items-center gap-2 text-brand">
               <Share className="h-4 w-4" aria-hidden="true" />
               <PlusSquare className="h-4 w-4" aria-hidden="true" />
-              <span className="text-[#94A3B8]">Share → Add to Home Screen</span>
+              <span className="text-muted">Share → Add to Home Screen</span>
             </div>
-            <button type="button" onClick={() => setShowIOSGuide(false)} className="min-h-11 text-sm font-semibold text-[#00C9A7]">
+            <button type="button" onClick={() => setShowIOSGuide(false)} className="min-h-11 text-sm font-semibold text-brand">
               Got it
             </button>
           </div>
@@ -151,7 +151,7 @@ export function InstallPrompt() {
             <button
               type="button"
               onClick={handleInstallClick}
-              className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00C9A7] to-[#00A389] px-4 text-sm font-semibold text-[#070B0F] shadow-lg shadow-[#00C9A7]/15"
+              className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand to-[#00A389] px-4 text-sm font-semibold text-canvas shadow-lg shadow-brand/15"
             >
               <Download className="h-4 w-4 shrink-0" aria-hidden="true" />
               {isIOS ? "How to install" : "Install app"}
@@ -159,7 +159,7 @@ export function InstallPrompt() {
             <button
               type="button"
               onClick={dismiss}
-              className="min-h-11 rounded-xl border border-[#1F2D3D] bg-[#121B26] px-4 text-sm font-medium text-[#94A3B8]"
+              className="min-h-11 rounded-xl border border-line bg-[#121B26] px-4 text-sm font-medium text-muted"
             >
               Not now
             </button>

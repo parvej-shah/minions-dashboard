@@ -9,6 +9,7 @@ import type { Slide } from "@/lib/carousel/slides";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import CarouselPdfPages from "./CarouselPdfPages";
 
+import { buttonStyles } from "@/components/ui/Button";
 interface State {
   carousel: StoredCarousel | null;
   suggested: { yes: boolean; reason: string };
@@ -31,9 +32,9 @@ const LAYOUT_NAMES: Record<Slide["layout"], string> = {
   STAKES: "Why it matters", POINT: "Point", STEP: "Step", CONTRAST: "Assumption vs practice", CHECKLIST: "Checklist", NUMBER: "Figure", QUOTE: "Quote", CLOSE: "Close",
 };
 
-const input = "w-full bg-[#161D26] border border-[#1F2D3D] rounded-lg px-3 py-1.5 text-sm text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7] resize-none";
-const pageClass = "snap-start shrink-0 w-[70%] sm:w-[220px] aspect-[4/5] rounded-lg border border-[#1F2D3D] object-cover";
-const ghostButton = "px-2.5 py-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-xs font-medium text-[#00C9A7] border border-[#00C9A7]/30 hover:border-[#00C9A7] transition-all inline-flex items-center gap-1.5 disabled:opacity-50";
+const input = "w-full bg-surface-2 border border-line rounded-lg px-3 py-1.5 text-sm text-ink focus:outline-none focus:border-brand resize-none";
+const pageClass = "snap-start shrink-0 w-[70%] sm:w-[220px] aspect-[4/5] rounded-lg border border-line object-cover";
+const ghostButton = "px-2.5 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 text-xs font-medium text-brand border border-brand/30 hover:border-brand transition-all inline-flex items-center gap-1.5 disabled:opacity-50";
 
 /**
  * The draft's LinkedIn carousel (phase 11, D19). Suggested, never automatic:
@@ -107,25 +108,25 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
   };
 
   return (
-    <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-4 sm:p-5 space-y-3 shadow-xl">
-      <div className="flex items-center justify-between gap-2 pb-2 border-b border-[#1F2D3D]/60">
+    <div className="bg-surface rounded-2xl border border-line p-4 sm:p-5 space-y-3 shadow-xl">
+      <div className="flex items-center justify-between gap-2 pb-2 border-b border-line/60">
         <div className="flex items-center gap-2">
-          <GalleryHorizontal className="w-4 h-4 text-[#00C9A7]" />
-          <span className="text-xs font-bold text-[#F1F5F9] font-mono uppercase tracking-wider">LinkedIn carousel</span>
+          <GalleryHorizontal className="w-4 h-4 text-brand" />
+          <span className="text-xs font-bold text-ink font-mono uppercase tracking-wider">LinkedIn carousel</span>
         </div>
-        <span className="text-[10px] font-mono text-[#64748B]">
+        <span className="text-[10px] font-mono text-subtle">
           {busy === "make" ? "Writing the slides…" : carousel ? `${carousel.active ? "On" : "Off"} · ${pageCount} pages` : suggested.yes ? "Suggested" : "Optional"}
         </span>
       </div>
 
       {!carousel ? (
         <div className="space-y-2">
-          <p className="text-xs leading-relaxed text-[#94A3B8]">
-            {suggested.yes ? <Sparkles className="inline w-3 h-3 mr-1 text-[#00C9A7]" /> : null}
+          <p className="text-xs leading-relaxed text-muted">
+            {suggested.yes ? <Sparkles className="inline w-3 h-3 mr-1 text-brand" /> : null}
             {suggested.reason} A carousel is a swipeable PDF on LinkedIn, drawn in your brand. It says only what this draft says.
           </p>
           {locked ? (
-            <p className="text-xs text-[#64748B]">This draft is published without a carousel.</p>
+            <p className="text-xs text-subtle">This draft is published without a carousel.</p>
           ) : (
             <button type="button" disabled={busy !== null} onClick={() => void send("POST", null, "make")} className={ghostButton}>
               {busy === "make" ? <Loader2 className="w-3 h-3 animate-spin" /> : <GalleryHorizontal className="w-3 h-3" />}
@@ -150,21 +151,21 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
           </div>
 
           {locked ? (
-            <p className="text-xs leading-relaxed text-[#94A3B8]">
+            <p className="text-xs leading-relaxed text-muted">
               This draft is published, so its carousel stays exactly as it went out{carousel.active ? "" : " (LinkedIn got the cover image)"}.
             </p>
           ) : (
             <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
-                className="mt-0.5 accent-[#00C9A7] w-4 h-4"
+                className="mt-0.5 accent-brand w-4 h-4"
                 checked={carousel.active}
                 disabled={busy !== null}
                 onChange={(e) => void send("PATCH", { active: e.target.checked }, "toggle")}
               />
-              <span className="text-xs leading-relaxed text-[#F1F5F9]">
+              <span className="text-xs leading-relaxed text-ink">
                 Post to LinkedIn as this carousel
-                <span className="block text-[#64748B]">Off: LinkedIn gets the cover image and the LinkedIn text below, as usual.</span>
+                <span className="block text-subtle">Off: LinkedIn gets the cover image and the LinkedIn text below, as usual.</span>
               </span>
             </label>
           )}
@@ -172,16 +173,16 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
           {draft ? (
             <div className="space-y-3">
               <label className="block">
-                <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Cover headline</span>
+                <span className="text-[11px] font-medium text-muted block mb-1">Cover headline</span>
                 <input className={input} value={draft.cover.headline} onChange={(e) => setDraft({ ...draft, cover: { ...draft.cover, headline: e.target.value } })} />
               </label>
               <label className="block">
-                <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Cover subtitle</span>
+                <span className="text-[11px] font-medium text-muted block mb-1">Cover subtitle</span>
                 <input className={input} value={draft.cover.kicker ?? ""} onChange={(e) => setDraft({ ...draft, cover: { ...draft.cover, kicker: e.target.value } })} />
               </label>
               {draft.slides.map((slide, i) => (
-                <fieldset key={i} className="border border-[#1F2D3D] rounded-lg p-2.5 space-y-2">
-                  <legend className="px-1 text-[10px] font-mono uppercase tracking-wider text-[#64748B]">
+                <fieldset key={i} className="border border-line rounded-lg p-2.5 space-y-2">
+                  <legend className="px-1 text-[10px] font-mono uppercase tracking-wider text-subtle">
                     Page {i + 2} · {LAYOUT_NAMES[slide.layout]}
                   </legend>
                   {FIELDS[slide.layout].map((f) => {
@@ -189,7 +190,7 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
                     const value = Array.isArray(raw) ? raw.join("\n") : typeof raw === "string" ? raw : "";
                     return (
                       <label key={f.key} className="block">
-                        <span className="text-[11px] text-[#94A3B8] block mb-1">{f.label}</span>
+                        <span className="text-[11px] text-muted block mb-1">{f.label}</span>
                         {f.long ? (
                           <textarea rows={f.key === "items" ? 4 : 2} className={input} value={value} onChange={(e) => setSlide(i, f.key, e.target.value)} />
                         ) : (
@@ -201,29 +202,29 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
                 </fieldset>
               ))}
               <label className="block">
-                <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Post text above the carousel</span>
+                <span className="text-[11px] font-medium text-muted block mb-1">Post text above the carousel</span>
                 <textarea rows={6} className={input} value={draft.caption} onChange={(e) => setDraft({ ...draft, caption: e.target.value })} />
               </label>
               <label className="block">
-                <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Document title (shown on LinkedIn)</span>
+                <span className="text-[11px] font-medium text-muted block mb-1">Document title (shown on LinkedIn)</span>
                 <input className={input} value={draft.documentTitle} onChange={(e) => setDraft({ ...draft, documentTitle: e.target.value })} />
               </label>
               <div className="flex flex-wrap gap-2">
-                <button type="button" disabled={busy !== null} onClick={saveEdit} className="px-3 py-1.5 rounded-lg bg-[#00C9A7] text-[#070B0F] text-xs font-semibold disabled:opacity-50 inline-flex items-center gap-1.5">
+                <button type="button" disabled={busy !== null} onClick={saveEdit} className={buttonStyles({ size: "sm" })}>
                   {busy === "save" && <Loader2 className="w-3 h-3 animate-spin" />}
                   Redraw carousel
                 </button>
-                <button type="button" onClick={() => { setDraft(null); setErrors([]); }} className="px-3 py-1.5 rounded-lg bg-[#161D26] border border-[#1F2D3D] text-xs text-[#F1F5F9]">
+                <button type="button" onClick={() => { setDraft(null); setErrors([]); }} className="px-3 py-1.5 rounded-lg bg-surface-2 border border-line text-xs text-ink">
                   Cancel
                 </button>
               </div>
-              <p className="text-[11px] leading-relaxed text-[#64748B]">Edits pass the same checks: word limits, every page fits, and no figure the draft does not state.</p>
+              <p className="text-[11px] leading-relaxed text-subtle">Edits pass the same checks: word limits, every page fits, and no figure the draft does not state.</p>
             </div>
           ) : (
             <div className="space-y-2">
-              <div className="rounded-lg bg-[#161D26] border border-[#1F2D3D] p-2.5">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[#64748B] block mb-1">Post text with the carousel</span>
-                <p className="text-xs leading-relaxed text-[#F1F5F9] whitespace-pre-line">{carousel.caption}</p>
+              <div className="rounded-lg bg-surface-2 border border-line p-2.5">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-subtle block mb-1">Post text with the carousel</span>
+                <p className="text-xs leading-relaxed text-ink whitespace-pre-line">{carousel.caption}</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {!locked && (
@@ -237,7 +238,7 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
                     </button>
                   </>
                 )}
-                <a href={carousel.pdf_url} target="_blank" rel="noopener noreferrer" className="px-2.5 py-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-xs font-medium text-[#94A3B8] border border-[#1F2D3D] hover:border-[#00C9A7] transition-all inline-flex items-center gap-1.5">
+                <a href={carousel.pdf_url} target="_blank" rel="noopener noreferrer" className="px-2.5 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 text-xs font-medium text-muted border border-line hover:border-brand transition-all inline-flex items-center gap-1.5">
                   Open PDF <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
@@ -247,11 +248,11 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
       )}
 
       {errors.length > 0 && (
-        <div className="rounded-lg border border-[#F59E0B]/40 bg-[#F59E0B]/10 p-2.5 space-y-1">
-          <span className="text-xs font-semibold text-[#F59E0B] inline-flex items-center gap-1.5">
+        <div className="rounded-lg border border-gold/40 bg-gold/10 p-2.5 space-y-1">
+          <span className="text-xs font-semibold text-gold inline-flex items-center gap-1.5">
             <AlertTriangle className="w-3 h-3" /> Not saved. Fix these:
           </span>
-          <ul className="list-disc pl-4 space-y-0.5 text-[11px] leading-relaxed text-[#F1F5F9]">
+          <ul className="list-disc pl-4 space-y-0.5 text-[11px] leading-relaxed text-ink">
             {errors.map((e, i) => (
               <li key={i}>{e}</li>
             ))}

@@ -23,7 +23,7 @@ export default function Toast({
   const tone =
     variant === "error"
       ? "bg-red-500/10 border-red-500/40 text-red-300"
-      : "bg-[#00C9A7]/10 border-[#00C9A7]/40 text-[#00C9A7]";
+      : "bg-brand/10 border-brand/40 text-brand";
 
   return (
     <div

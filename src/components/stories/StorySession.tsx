@@ -204,20 +204,20 @@ export default function StorySession({
   const newStreak = saved > 0 && !addedThisWeek ? streak + 1 : streak;
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Story session" className="fixed inset-0 z-[80] flex flex-col bg-[#0B1016] text-[#F1F5F9]">
+    <div role="dialog" aria-modal="true" aria-label="Story session" className="fixed inset-0 z-[80] flex flex-col bg-[#0B1016] text-ink">
       {/* Top bar: close, progress, streak */}
       <header className="mx-auto flex w-full max-w-2xl items-center gap-4 px-4 pt-5 pb-3 sm:px-6">
-        <button type="button" onClick={askToLeave} aria-label="Close the session" className="rounded-lg p-1 text-[#64748B] transition-colors hover:text-[#F1F5F9] cursor-pointer">
+        <button type="button" onClick={askToLeave} aria-label="Close the session" className="rounded-lg p-1 text-subtle transition-colors hover:text-ink cursor-pointer">
           <X className="h-6 w-6" strokeWidth={2.5} />
         </button>
         <div
-          className="relative h-4 flex-1 overflow-hidden rounded-full bg-[#1F2D3D]"
+          className="relative h-4 flex-1 overflow-hidden rounded-full bg-line"
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={prompts.length}
           aria-valuenow={finished ? prompts.length : step}
         >
-          <div className="h-full rounded-full bg-[#00C9A7] transition-[width] duration-500 ease-out" style={{ width: `${Math.max(progress, 0.04) * 100}%` }}>
+          <div className="h-full rounded-full bg-brand transition-[width] duration-500 ease-out" style={{ width: `${Math.max(progress, 0.04) * 100}%` }}>
             <div className="mx-2 mt-[3px] h-[4px] rounded-full bg-white/30" />
           </div>
         </div>
@@ -236,16 +236,16 @@ export default function StorySession({
           {/* The question */}
           <main className="flex-1 overflow-y-auto">
             <div key={step} className="story-step-in mx-auto w-full max-w-2xl px-4 pt-6 pb-40 sm:px-6 sm:pt-10">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-[#00C9A7]/10 px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-[#00C9A7]">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-brand">
                 <Icon className="h-3.5 w-3.5" strokeWidth={2.5} />
                 {MEMORY_KIND_META[prompt.kind].label}
-                <span className="text-[#00C9A7]/60">
+                <span className="text-brand/60">
                   · {step + 1} of {prompts.length}
                 </span>
               </div>
               <h2 className="mt-4 text-2xl font-extrabold leading-tight text-balance sm:text-3xl">{prompt.question}</h2>
-              <p className="mt-2 flex items-start gap-1.5 text-sm text-[#94A3B8]">
-                <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-[#F59E0B]" />
+              <p className="mt-2 flex items-start gap-1.5 text-sm text-muted">
+                <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
                 {prompt.hint}
               </p>
 
@@ -259,7 +259,7 @@ export default function StorySession({
                   rows={5}
                   placeholder={prompt.placeholder}
                   aria-label="Your answer"
-                  className="mt-6 w-full resize-none rounded-2xl border-2 border-[#1F2D3D] bg-[#0F1419] px-4 py-3.5 text-base leading-relaxed text-[#F1F5F9] placeholder:text-[#3B4A5E] focus:border-[#00C9A7] focus:outline-none disabled:opacity-70 sm:text-lg"
+                  className="mt-6 w-full resize-none rounded-2xl border-2 border-line bg-surface px-4 py-3.5 text-base leading-relaxed text-ink placeholder:text-[#3B4A5E] focus:border-brand focus:outline-none disabled:opacity-70 sm:text-lg"
                 />
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -269,9 +269,9 @@ export default function StorySession({
                   </button>
                 ))}
               </div>
-              <p className="mt-3 text-xs text-[#64748B]">
+              <p className="mt-3 text-xs text-subtle">
                 {ready ? (
-                  <span className="inline-flex items-center gap-1 text-[#00C9A7]">
+                  <span className="inline-flex items-center gap-1 text-brand">
                     <Check className="h-3.5 w-3.5" strokeWidth={3} /> Enough to work with. More detail makes a better post.
                   </span>
                 ) : (
@@ -284,7 +284,7 @@ export default function StorySession({
 
           {/* Footer: skip and check */}
           {(phase === "answer" || phase === "checking" || (phase === "saving" && !notes.length)) && (
-            <footer className="border-t-2 border-[#1F2D3D] bg-[#0B1016]">
+            <footer className="border-t-2 border-line bg-[#0B1016]">
               <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5">
                 <button type="button" disabled={phase !== "answer"} onClick={() => void next(saved)} className={chunky.ghost}>
                   Skip
@@ -317,14 +317,14 @@ export default function StorySession({
             />
           )}
           {phase === "empty" && (
-            <section className="story-sheet-up fixed inset-x-0 bottom-0 z-10 border-t-2 border-[#F59E0B]/30 bg-[#221A0B]">
+            <section className="story-sheet-up fixed inset-x-0 bottom-0 z-10 border-t-2 border-gold/30 bg-[#221A0B]">
               <div className="mx-auto w-full max-w-2xl px-4 py-5 sm:px-6">
                 <div className="flex items-start gap-3">
-                  <span className="story-pop flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F59E0B] text-[#1F1300]">
+                  <span className="story-pop flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold text-[#1F1300]">
                     <Lightbulb className="h-5 w-5" strokeWidth={2.5} />
                   </span>
                   <div>
-                    <h3 className="text-lg font-extrabold text-[#F59E0B]">Add a little more detail</h3>
+                    <h3 className="text-lg font-extrabold text-gold">Add a little more detail</h3>
                     <p className="text-sm text-[#E5D3B3]">Say what happened, who it was for, or what changed. One specific moment beats a general summary.</p>
                   </div>
                 </div>
@@ -339,10 +339,10 @@ export default function StorySession({
 
       {quitting && (
         <div className="fixed inset-0 z-20 flex items-end bg-black/60" onClick={() => setQuitting(false)}>
-          <section className="story-sheet-up w-full border-t-2 border-[#1F2D3D] bg-[#0F1419]" onClick={(e) => e.stopPropagation()}>
+          <section className="story-sheet-up w-full border-t-2 border-line bg-surface" onClick={(e) => e.stopPropagation()}>
             <div className="mx-auto w-full max-w-2xl px-4 py-6 text-center sm:px-6">
               <h3 className="text-xl font-extrabold">Leave the session?</h3>
-              <p className="mt-1 text-sm text-[#94A3B8]">
+              <p className="mt-1 text-sm text-muted">
                 {saved > 0
                   ? `Your ${saved} saved stor${saved === 1 ? "y is" : "ies are"} kept, and ideas from ${saved === 1 ? "it" : "them"} start now.`
                   : "Nothing is saved yet. The answer you are writing will be lost."}
@@ -387,14 +387,14 @@ function ResultSheet({
   const kept = notes.filter((n) => n.keep).length;
   const set = (i: number, next: Note) => onChange(notes.map((n, j) => (j === i ? next : n)));
   return (
-    <section className="story-sheet-up fixed inset-x-0 bottom-0 z-10 max-h-[85vh] overflow-y-auto border-t-2 border-[#00C9A7]/30 bg-[#0C2420]">
+    <section className="story-sheet-up fixed inset-x-0 bottom-0 z-10 max-h-[85vh] overflow-y-auto border-t-2 border-brand/30 bg-[#0C2420]">
       <div className="mx-auto w-full max-w-2xl px-4 py-5 sm:px-6">
         <div className="flex items-center gap-3">
-          <span className="story-pop flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#00C9A7] text-[#04201A]">
+          <span className="story-pop flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-brand-ink">
             <Check className="h-6 w-6" strokeWidth={3.5} />
           </span>
           <div className="min-w-0">
-            <h3 className="text-lg font-extrabold text-[#00C9A7]">{praise}</h3>
+            <h3 className="text-lg font-extrabold text-brand">{praise}</h3>
             <p className="text-sm text-[#A7D8CE]">
               {notes.length === 1 ? "Here is the note Minions made." : `Minions made ${notes.length} notes.`} Fix anything that is not quite right.
             </p>
@@ -427,17 +427,17 @@ function NoteCard({ note, solo, onChange }: { note: Note; solo: boolean; onChang
   const issues = note.check?.issues ?? [];
   const setPrivacy = (disclosure: MemoryDisclosure) => onChange({ ...note, disclosure });
   return (
-    <div className={`rounded-2xl border-2 bg-[#0B1016] p-3 transition-opacity ${note.keep ? "border-[#00C9A7]/40" : "border-[#1F2D3D] opacity-50"}`}>
+    <div className={`rounded-2xl border-2 bg-[#0B1016] p-3 transition-opacity ${note.keep ? "border-brand/40" : "border-line opacity-50"}`}>
       <textarea
         value={note.content}
         maxLength={MEMORY_MAX_CHARS}
         rows={3}
         onChange={(e) => onChange({ ...note, content: e.target.value, check: note.check && { ...note.check, confidential: false } })}
         aria-label="Note"
-        className="w-full resize-y bg-transparent text-sm leading-relaxed text-[#F1F5F9] focus:outline-none"
+        className="w-full resize-y bg-transparent text-sm leading-relaxed text-ink focus:outline-none"
       />
       {issues.length > 0 && (
-        <ul className="mt-1 space-y-1 text-xs text-[#F59E0B]">
+        <ul className="mt-1 space-y-1 text-xs text-gold">
           {issues.map((iss, j) => (
             <li key={j}>
               <b>{iss.text}</b>: {iss.reason}
@@ -448,7 +448,7 @@ function NoteCard({ note, solo, onChange }: { note: Note; solo: boolean; onChang
               <button
                 type="button"
                 onClick={() => onChange({ ...note, content: note.check!.generalized!, disclosure: "GENERALIZE", check: { ...note.check!, issues: [], confidential: false } })}
-                className="font-bold text-[#00C9A7] hover:underline cursor-pointer"
+                className="font-bold text-brand hover:underline cursor-pointer"
               >
                 Use a version without these details
               </button>
@@ -457,7 +457,7 @@ function NoteCard({ note, solo, onChange }: { note: Note; solo: boolean; onChang
         </ul>
       )}
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        <div className="inline-flex rounded-xl border-2 border-[#1F2D3D] p-0.5 text-xs font-bold">
+        <div className="inline-flex rounded-xl border-2 border-line p-0.5 text-xs font-bold">
           {(
             [
               ["PUBLIC", "Names OK"],
@@ -469,7 +469,7 @@ function NoteCard({ note, solo, onChange }: { note: Note; solo: boolean; onChang
               type="button"
               aria-pressed={note.disclosure === v}
               onClick={() => setPrivacy(v)}
-              className={`rounded-lg px-2.5 py-1 cursor-pointer ${note.disclosure === v ? "bg-[#00C9A7]/15 text-[#00C9A7]" : "text-[#64748B] hover:text-[#CBD5E1]"}`}
+              className={`rounded-lg px-2.5 py-1 cursor-pointer ${note.disclosure === v ? "bg-brand/15 text-brand" : "text-subtle hover:text-[#CBD5E1]"}`}
             >
               {label}
             </button>
@@ -480,7 +480,7 @@ function NoteCard({ note, solo, onChange }: { note: Note; solo: boolean; onChang
             type="button"
             aria-pressed={note.keep}
             onClick={() => onChange({ ...note, keep: !note.keep })}
-            className="ml-auto text-xs font-extrabold uppercase tracking-wider text-[#94A3B8] hover:text-white cursor-pointer"
+            className="ml-auto text-xs font-extrabold uppercase tracking-wider text-muted hover:text-white cursor-pointer"
           >
             {note.keep ? "Drop" : "Keep"}
           </button>
@@ -530,12 +530,12 @@ function Celebration({
                 style={{ background: c.color, animationDelay: c.delay, ["--dx" as string]: c.dx, ["--dy" as string]: c.dy, ["--rot" as string]: c.rot }}
               />
             ))}
-          <span className="story-pop relative flex h-24 w-24 items-center justify-center rounded-full border-b-8 border-[#00917A] bg-[#00C9A7] text-[#04201A]">
+          <span className="story-pop relative flex h-24 w-24 items-center justify-center rounded-full border-b-8 border-brand-edge bg-brand text-brand-ink">
             <Sparkles className="h-12 w-12" strokeWidth={2.25} />
           </span>
         </div>
-        <h2 className="mt-8 text-3xl font-extrabold text-[#00C9A7]">{saved > 0 ? "Session complete!" : "No stories this time"}</h2>
-        <p className="mt-2 max-w-sm text-sm text-[#94A3B8]">
+        <h2 className="mt-8 text-3xl font-extrabold text-brand">{saved > 0 ? "Session complete!" : "No stories this time"}</h2>
+        <p className="mt-2 max-w-sm text-sm text-muted">
           {saved > 0 ? "Every post Minions writes now has something new that only you could say." : "That is fine. Come back when something happens worth telling."}
         </p>
 
@@ -544,9 +544,9 @@ function Celebration({
           <StatTile label="Streak" tone="#FF9F43" value={`${streak} wk`} pop={grew} />
           <StatTile label="Ideas" tone="#60A5FA" value={saved === 0 ? "—" : harvest?.started ? "2 min" : "Tonight"} />
         </div>
-        {saved > 0 && harvest && !harvest.started && <p className="mt-4 max-w-sm text-xs text-[#64748B]">{harvest.message}</p>}
+        {saved > 0 && harvest && !harvest.started && <p className="mt-4 max-w-sm text-xs text-subtle">{harvest.message}</p>}
       </main>
-      <footer className="border-t-2 border-[#1F2D3D] bg-[#0B1016]">
+      <footer className="border-t-2 border-line bg-[#0B1016]">
         <div className="mx-auto w-full max-w-2xl px-4 py-4 sm:px-6 sm:py-5">
           <button type="button" autoFocus onClick={onDone} className={`${chunky.primary} w-full`}>
             Continue

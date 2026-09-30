@@ -44,10 +44,10 @@ const OBJECTIVE_LABEL: Record<string, string> = {
 };
 
 const METHOD_STYLE: Record<FillMethod, string> = {
-  LANE: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
+  LANE: "bg-brand/10 text-brand border-brand/30",
   OTHER_LANE: "bg-[#3B82F6]/10 text-[#93C5FD] border-[#3B82F6]/30",
   TARGETED_HARVEST: "bg-[#A78BFA]/10 text-[#C4B5FD] border-[#A78BFA]/30",
-  BELOW_BAR: "bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/30",
+  BELOW_BAR: "bg-gold/10 text-gold border-gold/30",
 };
 
 function statusLine(s: WeekSlot): string | null {
@@ -104,14 +104,14 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
 
   if (error) {
     return (
-      <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] text-xs text-[#F59E0B] flex items-center justify-between gap-3">
+      <div className="p-6 rounded-2xl bg-surface border border-line text-xs text-gold flex items-center justify-between gap-3">
         <span>{error}</span>
         <button
           type="button"
           onClick={() => void retry()}
           disabled={retrying}
           aria-busy={retrying}
-          className="inline-flex shrink-0 items-center gap-1.5 text-[#00C9A7] transition-colors cursor-pointer hover:text-[#5EEAD4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex shrink-0 items-center gap-1.5 text-brand transition-colors cursor-pointer hover:text-[#5EEAD4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:cursor-not-allowed disabled:opacity-60"
         >
           {retrying && <RefreshCw className="h-3 w-3 animate-spin" />}
           {retrying ? "Trying again…" : "Try again"}
@@ -121,14 +121,14 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
   }
   if (!plan) {
     return (
-      <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] text-xs text-[#64748B] flex items-center gap-2">
+      <div className="p-6 rounded-2xl bg-surface border border-line text-xs text-subtle flex items-center gap-2">
         <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Loading the content plan…
       </div>
     );
   }
   if (!plan.exists) {
     return (
-      <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] text-xs text-[#94A3B8]">
+      <div className="p-6 rounded-2xl bg-surface border border-line text-xs text-muted">
         Save your rhythm to build your first week plan.
       </div>
     );
@@ -143,7 +143,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
     byDay.set(day, [...(byDay.get(day) ?? []), s]);
   }
   const selectClass =
-    "rounded-lg bg-[#070B0F] border border-[#1F2D3D] px-2.5 py-1.5 text-xs text-[#F1F5F9] transition-colors focus:outline-none focus:border-[#00C9A7] [color-scheme:dark] cursor-pointer disabled:cursor-not-allowed disabled:opacity-60";
+    "rounded-lg bg-canvas border border-line px-2.5 py-1.5 text-xs text-ink transition-colors focus:outline-none focus:border-brand [color-scheme:dark] cursor-pointer disabled:cursor-not-allowed disabled:opacity-60";
 
   const pinFor = (s: WeekSlot) => slotKey(localParts(new Date(s.slot_at), tz).weekday, utcToZoned(new Date(s.slot_at), tz).time);
   const setPin = (s: WeekSlot, laneId: string) => {
@@ -155,37 +155,37 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
   };
 
   return (
-    <div aria-busy={saving !== null} className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-5 shadow-sm">
+    <div aria-busy={saving !== null} className="p-6 rounded-2xl bg-surface border border-line space-y-5 shadow-sm">
       <div>
-        <h2 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
-          <CalendarRange className="w-4 h-4 text-[#00C9A7]" />
+        <h2 className="text-sm font-bold text-ink flex items-center gap-2">
+          <CalendarRange className="w-4 h-4 text-brand" />
           Your next 7 days
         </h2>
-        <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
+        <p className="text-xs text-muted mt-1 leading-relaxed">
           {plan.filler_enabled
             ? "Automatic drafting is on: an idea is kept for each slot in the next 7 days and drafted at the slot's time. A lane with no strong idea gets a harvest of its own ahead of time."
             : "Automatic drafting is off. This week shows what your rhythm would prepare once you turn it on."}
         </p>
         {saving && (
-          <p role="status" aria-live="polite" className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-medium text-[#00C9A7]">
+          <p role="status" aria-live="polite" className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-medium text-brand">
             <RefreshCw className="h-3 w-3 animate-spin" /> Saving plan changes…
           </p>
         )}
       </div>
 
-      <div className="pt-4 border-t border-[#1F2D3D]/60 space-y-3">
+      <div className="pt-4 border-t border-line/60 space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-xs font-bold text-[#F1F5F9] uppercase tracking-wider font-mono">Upcoming slots</h3>
-          {!plan.filler_enabled && <span className="text-[10px] font-mono text-[#64748B]">Preview</span>}
+          <h3 className="text-xs font-bold text-ink uppercase tracking-wider font-mono">Upcoming slots</h3>
+          {!plan.filler_enabled && <span className="text-[10px] font-mono text-subtle">Preview</span>}
         </div>
 
         {plan.week.slots.length === 0 ? (
-          <p className="text-xs text-[#64748B]">No slots in the next 7 days. Check the cadence above and the plan dates.</p>
+          <p className="text-xs text-subtle">No slots in the next 7 days. Check the cadence above and the plan dates.</p>
         ) : (
           <div className="space-y-4">
             {[...byDay.entries()].map(([day, slots]) => (
               <div key={day} className="space-y-2">
-                <div className="text-[11px] font-semibold text-[#94A3B8]">
+                <div className="text-[11px] font-semibold text-muted">
                   {new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "long", month: "short", day: "numeric" }).format(new Date(slots[0].slot_at))}
                 </div>
                 {slots.map((s) => {
@@ -193,9 +193,9 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
                   const key = pinFor(s);
                   const editable = s.status === "PLANNED" || s.status === "HARVESTING" || s.status === "NEEDS_IDEAS";
                   return (
-                    <div key={s.slot_at} className="rounded-xl border border-[#1F2D3D] bg-[#070B0F] p-3 space-y-2">
+                    <div key={s.slot_at} className="rounded-xl border border-line bg-canvas p-3 space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-xs font-mono font-bold text-[#F1F5F9]">
+                        <span className="text-xs font-mono font-bold text-ink">
                           {formatPostTime(s.slot_at, tz).split(", ").slice(-1)[0]}
                         </span>
                         {s.fill_method && (
@@ -207,7 +207,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
                           </span>
                         )}
                         <span className="ml-auto flex items-center gap-1.5">
-                          {plan.slot_lanes[key] && <Pin className="w-3 h-3 text-[#00C9A7]" aria-label="Pinned lane" />}
+                          {plan.slot_lanes[key] && <Pin className="w-3 h-3 text-brand" aria-label="Pinned lane" />}
                           <select
                             aria-label={`Lane for ${formatPostTime(s.slot_at, tz)}`}
                             value={plan.slot_lanes[key] ?? ""}
@@ -228,14 +228,14 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
                         <p className="text-xs text-[#CBD5E1] leading-snug line-clamp-2">{s.idea_title}</p>
                       ) : null}
                       {s.fill_method === "BELOW_BAR" && s.gate_reasons.length > 0 && (
-                        <p className="text-[11px] text-[#F59E0B] flex items-start gap-1.5">
+                        <p className="text-[11px] text-gold flex items-start gap-1.5">
                           <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" />
                           Below the usual bar: {s.gate_reasons.join("; ")}. Its draft always waits for your review.
                         </p>
                       )}
-                      {line && <p className="text-[11px] text-[#64748B]">{line}</p>}
+                      {line && <p className="text-[11px] text-subtle">{line}</p>}
                       {s.status === "DRAFTED" && s.asset_id && (
-                        <Link href={`/editorial?id=${s.asset_id}`} className="text-[11px] text-[#00C9A7] transition-colors cursor-pointer hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7]">
+                        <Link href={`/editorial?id=${s.asset_id}`} className="text-[11px] text-brand transition-colors cursor-pointer hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">
                           Open the draft
                         </Link>
                       )}
@@ -246,21 +246,21 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
             ))}
           </div>
         )}
-        <p className="text-[11px] text-[#64748B] leading-relaxed">
-          <Sparkles className="inline w-3 h-3 mr-1 text-[#00C9A7]" />
+        <p className="text-[11px] text-subtle leading-relaxed">
+          <Sparkles className="inline w-3 h-3 mr-1 text-brand" />
           Pinning a lane applies to that weekday and time every week. Times are {tz.split("/").pop()!.replace(/_/g, " ")} time.
         </p>
       </div>
 
-      <details className="group border-t border-[#1F2D3D] pt-4">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-lg text-sm font-semibold text-[#CBD5E1] transition-colors hover:text-[#F1F5F9] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00C9A7] [&::-webkit-details-marker]:hidden">
+      <details className="group border-t border-line pt-4">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-lg text-sm font-semibold text-[#CBD5E1] transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand [&::-webkit-details-marker]:hidden">
           Fine-tune your content plan
           <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
         </summary>
-        <p className="mt-1 text-xs text-[#94A3B8]">Optional objectives and active dates · changes save automatically</p>
+        <p className="mt-1 text-xs text-muted">Optional objectives and active dates · changes save automatically</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <label className="block">
-            <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Main objective</span>
+            <span className="text-[11px] font-medium text-muted block mb-1">Main objective</span>
             <select
               value={plan.primary_objective}
               disabled={saving !== null}
@@ -280,7 +280,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
             </select>
           </label>
           <label className="block">
-            <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Second objective (optional)</span>
+            <span className="text-[11px] font-medium text-muted block mb-1">Second objective (optional)</span>
             <select
               value={plan.secondary_objective ?? ""}
               disabled={saving !== null}
@@ -296,7 +296,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
             </select>
           </label>
           <label className="block">
-            <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Starts (optional)</span>
+            <span className="text-[11px] font-medium text-muted block mb-1">Starts (optional)</span>
             <input
               type="date"
               value={plan.plan_starts_on ?? ""}
@@ -306,7 +306,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
             />
           </label>
           <label className="block">
-            <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Ends (optional)</span>
+            <span className="text-[11px] font-medium text-muted block mb-1">Ends (optional)</span>
             <input
               type="date"
               value={plan.plan_ends_on ?? ""}
@@ -317,15 +317,15 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
             />
           </label>
         </div>
-        <p className="mt-3 text-xs leading-relaxed text-[#94A3B8]">Set lane weights on Brand › Audience &amp; Experience.</p>
+        <p className="mt-3 text-xs leading-relaxed text-muted">Set lane weights on Brand › Audience &amp; Experience.</p>
       </details>
 
       {needsNudge && (
-        <div className="rounded-xl border border-[#F59E0B]/30 bg-[#F59E0B]/10 p-3 text-xs text-[#FCD34D] flex items-start gap-2">
+        <div className="rounded-xl border border-gold/30 bg-gold/10 p-3 text-xs text-[#FCD34D] flex items-start gap-2">
           <Lightbulb className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
             Some slots have no strong idea yet. A recent piece of work, a lesson or a client question gives the harvester something only you could say.{" "}
-            <Link href="/brand?tab=experience" className="text-[#00C9A7] transition-colors cursor-pointer hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] font-semibold">
+            <Link href="/brand?tab=experience" className="text-brand transition-colors cursor-pointer hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand font-semibold">
               Add an update
             </Link>
           </span>

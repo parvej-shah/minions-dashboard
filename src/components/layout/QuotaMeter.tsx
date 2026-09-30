@@ -18,8 +18,8 @@ export default function QuotaMeter({ quota, compact = false }: QuotaMeterProps) 
   const pct = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0;
   const isOver = used >= limit;
   const isNear = !isOver && pct >= 80;
-  const barColor = isOver ? "bg-[#EF4444]" : isNear ? "bg-[#F59E0B]" : "bg-[#00C9A7]";
-  const textColor = isOver ? "text-[#EF4444]" : isNear ? "text-[#F59E0B]" : "text-[#94A3B8]";
+  const barColor = isOver ? "bg-danger" : isNear ? "bg-gold" : "bg-brand";
+  const textColor = isOver ? "text-danger" : isNear ? "text-gold" : "text-muted";
 
   if (compact) {
     return (
@@ -30,7 +30,7 @@ export default function QuotaMeter({ quota, compact = false }: QuotaMeterProps) 
         <span className={`font-bold ${textColor}`}>
           {used}/{limit}
         </span>
-        <span className="text-[#64748B]">posts</span>
+        <span className="text-subtle">posts</span>
       </div>
     );
   }
@@ -38,7 +38,7 @@ export default function QuotaMeter({ quota, compact = false }: QuotaMeterProps) 
   return (
     <div className="px-3 py-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] space-y-1.5">
       <div className="flex items-center justify-between text-[10px] font-mono">
-        <span className="text-[#64748B] uppercase tracking-wider">
+        <span className="text-subtle uppercase tracking-wider">
           {quota.planKey} plan
         </span>
         <span className={`font-bold ${textColor}`}>

@@ -17,6 +17,8 @@ import {
   AlertCircle,
 } from "lucide-react";
 
+import { buttonStyles } from "@/components/ui/Button";
+import { segment } from "@/components/ui/segment";
 interface QueueBuilderViewProps {
   ideas: IdeaItem[];
   onUpdateIdeas: (updater: (prev: IdeaItem[]) => IdeaItem[]) => void;
@@ -254,24 +256,24 @@ export default function QueueBuilderView({
   return (
     <div className="space-y-4">
       {/* Queue overview */}
-      <section className="rounded-2xl border border-[#1F2D3D] bg-[#0F1419] p-4 shadow-sm sm:p-5">
+      <section className="rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">
         <div className="flex items-start gap-3">
-          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#00C9A7]/25 bg-[#00C9A7]/10 text-[#00C9A7]">
+          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand/25 bg-brand/10 text-brand">
             <Layers aria-hidden="true" className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <h2 className="text-sm font-bold tracking-tight text-white">Production Queue</h2>
-              <span className="whitespace-nowrap rounded-full border border-[#00C9A7]/20 bg-[#00C9A7]/10 px-2 py-1 text-[10px] font-semibold text-[#00C9A7]">
+              <span className="whitespace-nowrap rounded-full border border-brand/20 bg-brand/10 px-2 py-1 text-[10px] font-semibold text-brand">
                 Drafts twice daily · 09:00 & 15:00 UTC
               </span>
               {isSavingOrder && (
-                <span role="status" className="inline-flex items-center gap-1 text-[10px] text-[#00C9A7]">
+                <span role="status" className="inline-flex items-center gap-1 text-[10px] text-brand">
                   <Loader2 aria-hidden="true" className="h-3 w-3 animate-spin" /> Saving
                 </span>
               )}
             </div>
-            <p className="mt-1.5 text-xs leading-relaxed text-[#94A3B8]">
+            <p className="mt-1.5 text-xs leading-relaxed text-muted">
               Add ideas to the queue. Minions drafts the first one automatically.
             </p>
           </div>
@@ -279,13 +281,13 @@ export default function QueueBuilderView({
       </section>
 
       {/* Mobile Column Switcher */}
-      <div role="tablist" aria-label="Queue and ideas" className="grid grid-cols-2 gap-1 rounded-2xl border border-[#1F2D3D] bg-[#0F1419] p-1.5 shadow-sm lg:hidden">
+      <div role="tablist" aria-label="Queue and ideas" className="grid grid-cols-2 gap-1 rounded-2xl border border-line bg-surface p-1.5 shadow-sm lg:hidden">
         <button
           type="button"
           role="tab"
           aria-selected={mobileTab === "queue"}
           onClick={() => setMobileTab("queue")}
-          className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold transition-colors ${mobileTab === "queue" ? "bg-[#00C9A7] text-[#070B0F] shadow-sm" : "text-[#94A3B8] hover:bg-[#161D26] hover:text-white"}`}
+          className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold transition-colors ${mobileTab === "queue" ? segment.on : segment.off}`}
         >
           <Layers aria-hidden="true" className="h-4 w-4 shrink-0" />
           <span>Queue <span className="tabular-nums">{queuedIdeas.length}</span></span>
@@ -295,7 +297,7 @@ export default function QueueBuilderView({
           role="tab"
           aria-selected={mobileTab === "pool"}
           onClick={() => setMobileTab("pool")}
-          className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold transition-colors ${mobileTab === "pool" ? "bg-[#00C9A7] text-[#070B0F] shadow-sm" : "text-[#94A3B8] hover:bg-[#161D26] hover:text-white"}`}
+          className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold transition-colors ${mobileTab === "pool" ? segment.on : segment.off}`}
         >
           <Sparkles aria-hidden="true" className="h-4 w-4 shrink-0" />
           <span>Ideas <span className="tabular-nums">{poolIdeas.length}</span></span>
@@ -309,18 +311,18 @@ export default function QueueBuilderView({
         <div 
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDropOnPool}
-          className={`lg:col-span-7 bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-4 sm:p-5 space-y-4 shadow-lg flex-col max-h-[85vh] ${
+          className={`lg:col-span-7 bg-surface rounded-2xl border border-line p-4 sm:p-5 space-y-4 shadow-lg flex-col max-h-[85vh] ${
             mobileTab === "pool" ? "flex" : "hidden lg:flex"
           }`}
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1F2D3D] pb-3.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-3.5">
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#64748B]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-subtle" />
               <h3 className="text-sm font-bold text-white tracking-wide">
                 Harvested Ideas Pool ({poolIdeas.length})
               </h3>
             </div>
-            <span className="text-[11px] font-mono text-[#64748B]">
+            <span className="text-[11px] font-mono text-subtle">
               Tap Add to move an idea into production
             </span>
           </div>
@@ -328,13 +330,13 @@ export default function QueueBuilderView({
           {/* Pool Search & Filter Bar */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
             <div className="sm:col-span-6 relative">
-              <Search className="w-3.5 h-3.5 text-[#64748B] absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-subtle absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchPool}
                 onChange={(e) => setSearchPool(e.target.value)}
                 placeholder="Filter pool..."
-                className="w-full bg-[#070B0F] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl pl-8 pr-3 py-1.5 text-xs text-white outline-none transition-colors"
+                className="w-full bg-canvas border border-line focus:border-brand rounded-xl pl-8 pr-3 py-1.5 text-xs text-white outline-none transition-colors"
               />
             </div>
 
@@ -342,7 +344,7 @@ export default function QueueBuilderView({
               <select
                 value={selectedTrade}
                 onChange={(e) => setSelectedTrade(e.target.value)}
-                className="w-full bg-[#070B0F] border border-[#1F2D3D] rounded-xl px-2 py-1.5 text-xs text-[#94A3B8] outline-none cursor-pointer"
+                className="w-full bg-canvas border border-line rounded-xl px-2 py-1.5 text-xs text-muted outline-none cursor-pointer"
               >
                 <option value="ALL">All Trades</option>
                 <option value="HVAC">HVAC</option>
@@ -358,7 +360,7 @@ export default function QueueBuilderView({
           {/* Pool Card Scroll Area */}
           <div className="space-y-2.5 overflow-y-auto pr-1 flex-1 min-h-[240px] lg:min-h-[300px]">
             {poolIdeas.length === 0 ? (
-              <div className="p-8 text-center text-xs text-[#64748B] italic space-y-1">
+              <div className="p-8 text-center text-xs text-subtle italic space-y-1">
                 <AlertCircle className="w-5 h-5 mx-auto text-[#475569]" />
                 <div>No ideas matching this filter in the pool.</div>
               </div>
@@ -368,12 +370,12 @@ export default function QueueBuilderView({
                   key={idea.id}
                   draggable
                   onDragStart={(e) => handleDragStart(e, idea.id)}
-                  className={`p-3.5 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] hover:border-[#00C9A7]/40 transition-all flex items-start sm:items-center justify-between gap-3 group cursor-grab active:cursor-grabbing shadow-xs ${
-                    draggedIdeaId === idea.id ? "opacity-40 border-dashed border-[#00C9A7]" : ""
+                  className={`p-3.5 rounded-xl bg-surface-2 hover:bg-surface-3 border border-line hover:border-brand/40 transition-all flex items-start sm:items-center justify-between gap-3 group cursor-grab active:cursor-grabbing shadow-xs ${
+                    draggedIdeaId === idea.id ? "opacity-40 border-dashed border-brand" : ""
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <div className="p-1 rounded text-[#475569] group-hover:text-[#94A3B8] cursor-grab">
+                    <div className="p-1 rounded text-[#475569] group-hover:text-muted cursor-grab">
                       <GripVertical className="w-4 h-4" />
                     </div>
 
@@ -382,16 +384,16 @@ export default function QueueBuilderView({
                         <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${getAudienceColor(idea.audience)}`}>
                           {idea.audience || "ICP"}
                         </span>
-                        <span className="text-[10px] font-medium bg-[#070B0F] text-[#94A3B8] px-2 py-0.2 rounded border border-[#1F2D3D]">
+                        <span className="text-[10px] font-medium bg-canvas text-muted px-2 py-0.2 rounded border border-line">
                           {idea.target_trade || "—"}
                         </span>
                       </div>
 
-                      <div className="text-xs font-semibold text-white group-hover:text-[#00C9A7] line-clamp-1 transition-colors">
+                      <div className="text-xs font-semibold text-white group-hover:text-brand line-clamp-1 transition-colors">
                         {idea.title || idea.raw_idea}
                       </div>
 
-                      <div className="text-[11px] text-[#94A3B8] line-clamp-1 mt-0.5">
+                      <div className="text-[11px] text-muted line-clamp-1 mt-0.5">
                         {idea.excerpt || idea.angle}
                       </div>
                     </div>
@@ -401,7 +403,7 @@ export default function QueueBuilderView({
                   <button
                     type="button"
                     onClick={() => addToQueue(idea)}
-                    className="px-2.5 py-1.5 rounded-lg bg-[#00C9A7]/10 hover:bg-[#00C9A7] text-[#00C9A7] hover:text-[#070B0F] border border-[#00C9A7]/30 text-xs font-bold transition-all shrink-0 flex items-center gap-1 cursor-pointer active:scale-95"
+                    className={buttonStyles({ variant: "soft", size: "sm", className: "shrink-0" })}
                     title="Add to production queue"
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -418,22 +420,22 @@ export default function QueueBuilderView({
           onDragOver={handleDragOverQueue}
           onDragLeave={handleDragLeaveQueue}
           onDrop={handleDropOnQueue}
-          className={`lg:col-span-5 bg-[#0F1419] rounded-2xl border transition-all p-4 sm:p-5 space-y-4 shadow-xl flex-col max-h-[85vh] ${
+          className={`lg:col-span-5 bg-surface rounded-2xl border transition-all p-4 sm:p-5 space-y-4 shadow-xl flex-col max-h-[85vh] ${
             mobileTab === "queue" ? "flex" : "hidden lg:flex"
           } ${
             isDropTargetQueue
-              ? "border-[#00C9A7] ring-2 ring-[#00C9A7]/20 bg-[#00C9A7]/5"
-              : "border-[#1F2D3D]"
+              ? "border-brand ring-2 ring-brand/20 bg-brand/5"
+              : "border-line"
           }`}
         >
-          <div className="flex items-center justify-between border-b border-[#1F2D3D] pb-3.5">
+          <div className="flex items-center justify-between border-b border-line pb-3.5">
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#00C9A7] animate-pulse" />
+              <div className="w-2.5 h-2.5 rounded-full bg-brand animate-pulse" />
               <h3 className="text-sm font-bold text-white tracking-wide">
                 Production Queue ({queuedIdeas.length})
               </h3>
             </div>
-            <span className="text-[10px] font-mono text-[#00C9A7] bg-[#00C9A7]/10 border border-[#00C9A7]/30 px-2 py-0.5 rounded-full font-bold">
+            <span className="text-[10px] font-mono text-brand bg-brand/10 border border-brand/30 px-2 py-0.5 rounded-full font-bold">
               Auto-Draft Active
             </span>
           </div>
@@ -441,12 +443,12 @@ export default function QueueBuilderView({
           {/* Queue Items List */}
           <div className="space-y-2.5 overflow-y-auto pr-1 flex-1 min-h-[240px] lg:min-h-[300px]">
             {queuedIdeas.length === 0 ? (
-              <div className="h-48 border-2 border-dashed border-[#1F2D3D] rounded-xl flex flex-col items-center justify-center p-6 text-center space-y-2">
+              <div className="h-48 border-2 border-dashed border-line rounded-xl flex flex-col items-center justify-center p-6 text-center space-y-2">
                 <Layers className="w-6 h-6 text-[#475569]" />
-                <div className="text-xs font-semibold text-[#94A3B8]">
+                <div className="text-xs font-semibold text-muted">
                   Your queue is empty
                 </div>
-                <p className="text-[11px] text-[#64748B] max-w-xs">
+                <p className="text-[11px] text-subtle max-w-xs">
                   Choose an idea from the Ideas tab to add it here.
                 </p>
               </div>
@@ -465,23 +467,23 @@ export default function QueueBuilderView({
                     }}
                     className={`p-3.5 rounded-xl border transition-all flex items-start sm:items-center justify-between gap-2.5 group cursor-grab active:cursor-grabbing shadow-sm relative ${
                       isFirst
-                        ? "bg-[#00C9A7]/10 border-[#00C9A7]/50 shadow-lg shadow-[#00C9A7]/5"
-                        : "bg-[#161D26] hover:bg-[#1E2733] border-[#1F2D3D]"
-                    } ${dragOverIndex === index ? "border-t-2 border-t-[#00C9A7]" : ""}`}
+                        ? "bg-brand/10 border-brand/50 shadow-lg shadow-brand/5"
+                        : "bg-surface-2 hover:bg-surface-3 border-line"
+                    } ${dragOverIndex === index ? "border-t-2 border-t-brand" : ""}`}
                   >
                     {/* Rank Badge & Grip */}
                     <div className="flex items-center gap-2 shrink-0">
-                      <div className="p-0.5 rounded text-[#475569] group-hover:text-[#94A3B8]">
+                      <div className="p-0.5 rounded text-[#475569] group-hover:text-muted">
                         <GripVertical className="w-3.5 h-3.5" />
                       </div>
 
                       <div
                         className={`w-6 h-6 rounded-lg text-xs font-mono font-extrabold flex items-center justify-center ${
                           isFirst
-                            ? "bg-[#00C9A7] text-[#070B0F]"
+                            ? "bg-brand text-canvas"
                             : index === 1
                             ? "bg-[#3B82F6] text-white"
-                            : "bg-[#070B0F] text-[#94A3B8] border border-[#1F2D3D]"
+                            : "bg-canvas text-muted border border-line"
                         }`}
                       >
                         #{index + 1}
@@ -492,19 +494,19 @@ export default function QueueBuilderView({
                     <div className="min-w-0 flex-1 cursor-pointer" onClick={() => onSelectIdea(idea)}>
                       <div className="flex items-center gap-1.5 mb-0.5">
                         {isFirst && (
-                          <span className="text-[9px] font-mono font-bold text-[#00C9A7] bg-[#00C9A7]/20 px-1.5 rounded uppercase whitespace-nowrap shrink-0">
+                          <span className="text-[9px] font-mono font-bold text-brand bg-brand/20 px-1.5 rounded uppercase whitespace-nowrap shrink-0">
                             Next Up
                           </span>
                         )}
                         <span className={`text-[9px] font-bold px-1 rounded whitespace-nowrap shrink-0 ${getAudienceColor(idea.audience)}`}>
                           {idea.audience || "ICP"}
                         </span>
-                        <span className="text-[9px] font-mono text-[#64748B] whitespace-nowrap shrink-0">
+                        <span className="text-[9px] font-mono text-subtle whitespace-nowrap shrink-0">
                           {idea.target_trade || "—"}
                         </span>
                       </div>
 
-                      <div className="text-xs font-semibold text-white truncate group-hover:text-[#00C9A7] transition-colors">
+                      <div className="text-xs font-semibold text-white truncate group-hover:text-brand transition-colors">
                         {idea.title || idea.raw_idea}
                       </div>
                     </div>
@@ -515,7 +517,7 @@ export default function QueueBuilderView({
                         type="button"
                         onClick={() => moveQueueItem(index, "up")}
                         disabled={index === 0}
-                        className="p-2.5 sm:p-1.5 rounded text-[#64748B] hover:text-white disabled:opacity-20 transition-colors cursor-pointer"
+                        className="p-2.5 sm:p-1.5 rounded text-subtle hover:text-white disabled:opacity-20 transition-colors cursor-pointer"
                         title="Move up"
                       >
                         <ArrowUp className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
@@ -525,7 +527,7 @@ export default function QueueBuilderView({
                         type="button"
                         onClick={() => moveQueueItem(index, "down")}
                         disabled={index === queuedIdeas.length - 1}
-                        className="p-2.5 sm:p-1.5 rounded text-[#64748B] hover:text-white disabled:opacity-20 transition-colors cursor-pointer"
+                        className="p-2.5 sm:p-1.5 rounded text-subtle hover:text-white disabled:opacity-20 transition-colors cursor-pointer"
                         title="Move down"
                       >
                         <ArrowDown className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
@@ -534,7 +536,7 @@ export default function QueueBuilderView({
                       <button
                         type="button"
                         onClick={() => removeFromQueue(idea.id)}
-                        className="p-2.5 sm:p-1.5 rounded text-[#64748B] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors cursor-pointer ml-1"
+                        className="p-2.5 sm:p-1.5 rounded text-subtle hover:text-danger hover:bg-danger/10 transition-colors cursor-pointer ml-1"
                         title="Remove from queue"
                       >
                         <X className="w-4 h-4 sm:w-3.5 sm:h-3.5" />

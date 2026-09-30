@@ -51,25 +51,25 @@ export default function WorkspaceSwitcher() {
       <button
         onClick={() => setOpen((v) => !v)}
         disabled={switching}
-        className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-[#161d24] border border-[#1f2b37] text-xs text-[#F1F5F9] hover:border-[#00C9A7]/50 transition-all disabled:opacity-60"
+        className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-[#161d24] border border-[#1f2b37] text-xs text-ink hover:border-brand/50 transition-all disabled:opacity-60"
       >
         <div className="flex items-center gap-2 min-w-0">
-          <Building2 className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
+          <Building2 className="w-3.5 h-3.5 text-brand shrink-0" />
           <span className="truncate font-semibold">{active.name}</span>
         </div>
-        <ChevronsUpDown className="w-3.5 h-3.5 text-[#64748B] shrink-0" />
+        <ChevronsUpDown className="w-3.5 h-3.5 text-subtle shrink-0" />
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full mt-1.5 w-full rounded-xl bg-[#0f1419] border border-[#1f2b37] shadow-2xl overflow-hidden">
+        <div className="absolute z-50 top-full mt-1.5 w-full rounded-xl bg-surface border border-[#1f2b37] shadow-2xl overflow-hidden">
           {workspaces.map((w) => (
             <button
               key={w.client_id}
               onClick={() => switchTo(w.client_id)}
               className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-xs text-left hover:bg-[#161d24] transition-colors"
             >
-              <span className="truncate text-[#F1F5F9]">{w.name}</span>
-              {w.client_id === active.client_id && <Check className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />}
+              <span className="truncate text-ink">{w.name}</span>
+              {w.client_id === active.client_id && <Check className="w-3.5 h-3.5 text-brand shrink-0" />}
             </button>
           ))}
         </div>

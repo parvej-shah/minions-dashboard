@@ -16,8 +16,9 @@ import {
 import type { CheckedCandidate, ConfirmResult, PulseDTO } from "@/services/pulse";
 import StoryBankCard from "@/components/stories/StoryBankCard";
 
+import { buttonStyles } from "@/components/ui/Button";
 const inputClass =
-  "w-full rounded-lg border border-[#1F2D3D] bg-[#0B1016] px-3 py-2 text-sm text-[#F1F5F9] placeholder:text-[#475569] focus:border-[#00C9A7] focus:outline-none";
+  "w-full rounded-lg border border-line bg-[#0B1016] px-3 py-2 text-sm text-ink placeholder:text-[#475569] focus:border-brand focus:outline-none";
 const MIN_CHARS = 20;
 
 type Draft = CheckedCandidate & { keep: boolean };
@@ -120,16 +121,16 @@ export default function WeeklyPulseCard() {
   if (!pulse) return null;
 
   const tzBanner = browserTz && (
-    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-[#1F2D3D] bg-[#0B1016] px-4 py-3 text-xs text-[#94A3B8]">
-      <Clock className="h-4 w-4 text-[#00C9A7]" />
+    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-line bg-[#0B1016] px-4 py-3 text-xs text-muted">
+      <Clock className="h-4 w-4 text-brand" />
       <span className="flex-1 min-w-[200px]">
-        This workspace runs on <b className="text-[#F1F5F9]">{pulse.settings.timezone}</b>. Your browser says{" "}
-        <b className="text-[#F1F5F9]">{browserTz}</b>. The weekly question and posting times follow the workspace timezone.
+        This workspace runs on <b className="text-ink">{pulse.settings.timezone}</b>. Your browser says{" "}
+        <b className="text-ink">{browserTz}</b>. The weekly question and posting times follow the workspace timezone.
       </span>
-      <button type="button" disabled={busy === "tz"} onClick={() => void setTimezone(browserTz)} className="rounded-lg bg-[#00C9A7] px-3 py-1.5 font-semibold text-[#070B0F] disabled:opacity-50 cursor-pointer">
+      <button type="button" disabled={busy === "tz"} onClick={() => void setTimezone(browserTz)} className={buttonStyles()}>
         Use {browserTz}
       </button>
-      <button type="button" disabled={busy === "tz"} onClick={() => void setTimezone(null)} className="rounded-lg border border-[#1F2D3D] px-3 py-1.5 text-[#F1F5F9] disabled:opacity-50 cursor-pointer">
+      <button type="button" disabled={busy === "tz"} onClick={() => void setTimezone(null)} className="rounded-lg border border-line px-3 py-1.5 text-ink disabled:opacity-50 cursor-pointer">
         Keep {pulse.settings.timezone}
       </button>
     </div>
@@ -139,10 +140,10 @@ export default function WeeklyPulseCard() {
     return (
       <div className="space-y-3">
         {tzBanner}
-        <div className="flex items-start gap-3 rounded-2xl border border-[#00C9A7]/30 bg-[#00C9A7]/5 p-4 text-sm text-[#F1F5F9]">
-          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#00C9A7]" />
+        <div className="flex items-start gap-3 rounded-2xl border border-brand/30 bg-brand/5 p-4 text-sm text-ink">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
           <span className="flex-1">{done}</span>
-          <Link href="/brand?tab=experience" className="text-xs text-[#00C9A7] hover:underline">
+          <Link href="/brand?tab=experience" className="text-xs text-brand hover:underline">
             See your updates
           </Link>
         </div>
@@ -168,20 +169,20 @@ export default function WeeklyPulseCard() {
   return (
     <div className="space-y-3">
       {tzBanner}
-      <section className="rounded-2xl border border-[#ff6b4a]/30 bg-[#0F1419] p-5 shadow-xl space-y-4">
+      <section className="rounded-2xl border border-coral/30 bg-surface p-5 shadow-xl space-y-4">
         <div className="flex items-start gap-3">
-          <MessageSquareText className="mt-0.5 h-5 w-5 shrink-0 text-[#ff6b4a]" />
+          <MessageSquareText className="mt-0.5 h-5 w-5 shrink-0 text-coral" />
           <div className="flex-1 min-w-0">
-            <div className="text-[11px] font-mono uppercase tracking-wider text-[#ff6b4a]">This week</div>
-            <h2 className="text-base font-semibold text-[#F1F5F9]">{pulse.question}</h2>
-            <p className="mt-0.5 text-xs text-[#94A3B8]">
+            <div className="text-[11px] font-mono uppercase tracking-wider text-coral">This week</div>
+            <h2 className="text-base font-semibold text-ink">{pulse.question}</h2>
+            <p className="mt-0.5 text-xs text-muted">
               {confirming
                 ? "Here is what Minions took from your answer. Edit or drop anything, then save. Nothing is stored until you do."
                 : "A few specific sentences are enough. Minions turns them into notes you confirm, and builds ideas only you could write from them."}
             </p>
           </div>
           {!confirming && (
-            <button type="button" aria-label="Skip this week" disabled={!!busy} onClick={() => void simple("skip")} className="text-[#64748B] hover:text-[#F1F5F9] cursor-pointer">
+            <button type="button" aria-label="Skip this week" disabled={!!busy} onClick={() => void simple("skip")} className="text-subtle hover:text-ink cursor-pointer">
               <X className="h-4 w-4" />
             </button>
           )}
@@ -203,14 +204,14 @@ export default function WeeklyPulseCard() {
                 <input className={inputClass} placeholder="The problem it solves (optional)" value={followups.problem} onChange={(e) => setFollowups({ ...followups, problem: e.target.value })} />
                 <input className={inputClass} placeholder="Who it helps (optional)" value={followups.who} onChange={(e) => setFollowups({ ...followups, who: e.target.value })} />
                 <input className={inputClass} placeholder="Any evidence: a number, a reaction (optional)" value={followups.evidence} onChange={(e) => setFollowups({ ...followups, evidence: e.target.value })} />
-                <div className="flex items-center gap-1.5 text-xs text-[#94A3B8]">
+                <div className="flex items-center gap-1.5 text-xs text-muted">
                   <span className="mr-1">Can the specifics be named?</span>
                   {(["YES", "NO", ""] as const).map((v) => (
                     <button
                       key={v || "unsure"}
                       type="button"
                       onClick={() => setFollowups({ ...followups, named: v })}
-                      className={`rounded-lg border px-2.5 py-1.5 cursor-pointer ${followups.named === v ? "border-[#00C9A7] bg-[#00C9A7]/10 text-[#F1F5F9]" : "border-[#1F2D3D]"}`}
+                      className={`rounded-lg border px-2.5 py-1.5 cursor-pointer ${followups.named === v ? "border-brand bg-brand/10 text-ink" : "border-line"}`}
                     >
                       {v === "YES" ? "Yes" : v === "NO" ? "No" : "Not sure"}
                     </button>
@@ -218,7 +219,7 @@ export default function WeeklyPulseCard() {
                 </div>
               </div>
             ) : (
-              <button type="button" onClick={() => setShowFollowups(true)} className="text-xs text-[#00C9A7] hover:underline cursor-pointer">
+              <button type="button" onClick={() => setShowFollowups(true)} className="text-xs text-brand hover:underline cursor-pointer">
                 + Add detail: the problem, who it helps, can it be named, evidence
               </button>
             )}
@@ -227,32 +228,32 @@ export default function WeeklyPulseCard() {
                 type="button"
                 disabled={!!busy || answer.trim().length < MIN_CHARS}
                 onClick={() => void submit()}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[#00C9A7] px-4 py-2 text-xs font-semibold text-[#070B0F] disabled:opacity-50 cursor-pointer"
+                className={buttonStyles({ size: "sm" })}
               >
                 {busy === "answer" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
                 {busy === "answer" ? "Reading your update…" : "Turn into notes"}
               </button>
               {editing ? (
-                <button type="button" onClick={() => setEditing(false)} className="rounded-lg px-3 py-2 text-xs text-[#94A3B8] hover:text-[#F1F5F9] cursor-pointer">
+                <button type="button" onClick={() => setEditing(false)} className="rounded-lg px-3 py-2 text-xs text-muted hover:text-ink cursor-pointer">
                   Back to the notes
                 </button>
               ) : (
                 <>
-                  <button type="button" disabled={!!busy} onClick={() => void simple("snooze")} className="rounded-lg border border-[#1F2D3D] px-3 py-2 text-xs text-[#F1F5F9] disabled:opacity-50 cursor-pointer">
+                  <button type="button" disabled={!!busy} onClick={() => void simple("snooze")} className="rounded-lg border border-line px-3 py-2 text-xs text-ink disabled:opacity-50 cursor-pointer">
                     Ask me tomorrow
                   </button>
-                  <button type="button" disabled={!!busy} onClick={() => void simple("skip")} className="rounded-lg px-3 py-2 text-xs text-[#94A3B8] hover:text-[#F1F5F9] disabled:opacity-50 cursor-pointer">
+                  <button type="button" disabled={!!busy} onClick={() => void simple("skip")} className="rounded-lg px-3 py-2 text-xs text-muted hover:text-ink disabled:opacity-50 cursor-pointer">
                     Skip this week
                   </button>
                 </>
               )}
-              <span className="ml-auto text-[11px] text-[#64748B]">{answer.trim().length < MIN_CHARS ? `At least ${MIN_CHARS} characters` : ""}</span>
+              <span className="ml-auto text-[11px] text-subtle">{answer.trim().length < MIN_CHARS ? `At least ${MIN_CHARS} characters` : ""}</span>
             </div>
           </div>
         ) : (
           <div className="space-y-3">
             {drafts.length === 0 && (
-              <p className="rounded-lg border border-[#1F2D3D] bg-[#0B1016] p-3 text-sm text-[#94A3B8]">
+              <p className="rounded-lg border border-line bg-[#0B1016] p-3 text-sm text-muted">
                 Nothing specific enough to save. Add what you did, learned or noticed, and Minions will try again.
               </p>
             )}
@@ -265,16 +266,16 @@ export default function WeeklyPulseCard() {
                   type="button"
                   disabled={!!busy || kept.length === 0 || blocked || kept.some((d) => d.content.trim().length < MIN_CHARS)}
                   onClick={() => void confirm(drafts)}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#00C9A7] px-4 py-2 text-xs font-semibold text-[#070B0F] disabled:opacity-50 cursor-pointer"
+                  className={buttonStyles({ size: "sm" })}
                 >
                   {busy === "confirm" && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   Save {kept.length} note{kept.length === 1 ? "" : "s"}
                 </button>
               )}
-              <button type="button" disabled={!!busy} onClick={() => setEditing(true)} className="rounded-lg border border-[#1F2D3D] px-3 py-2 text-xs text-[#F1F5F9] disabled:opacity-50 cursor-pointer">
+              <button type="button" disabled={!!busy} onClick={() => setEditing(true)} className="rounded-lg border border-line px-3 py-2 text-xs text-ink disabled:opacity-50 cursor-pointer">
                 Edit my answer
               </button>
-              <button type="button" disabled={!!busy} onClick={() => void confirm([])} className="rounded-lg px-3 py-2 text-xs text-[#94A3B8] hover:text-[#F1F5F9] disabled:opacity-50 cursor-pointer">
+              <button type="button" disabled={!!busy} onClick={() => void confirm([])} className="rounded-lg px-3 py-2 text-xs text-muted hover:text-ink disabled:opacity-50 cursor-pointer">
                 Save nothing this week
               </button>
               {blocked && <span className="text-[11px] text-red-400">Remove the confidential detail before saving.</span>}
@@ -290,17 +291,17 @@ export default function WeeklyPulseCard() {
 function CandidateEditor({ draft, onChange }: { draft: Draft; onChange: (d: Draft) => void }) {
   const issues = draft.check?.issues ?? [];
   return (
-    <div className={`space-y-2 rounded-xl border p-3 ${draft.keep ? "border-[#1F2D3D] bg-[#0B1016]" : "border-[#1F2D3D]/50 opacity-50"}`}>
+    <div className={`space-y-2 rounded-xl border p-3 ${draft.keep ? "border-line bg-[#0B1016]" : "border-line/50 opacity-50"}`}>
       <div className="flex flex-wrap items-center gap-2">
-        <label className="inline-flex items-center gap-1.5 text-xs text-[#94A3B8] cursor-pointer">
-          <input type="checkbox" checked={draft.keep} onChange={(e) => onChange({ ...draft, keep: e.target.checked })} className="accent-[#00C9A7]" />
+        <label className="inline-flex items-center gap-1.5 text-xs text-muted cursor-pointer">
+          <input type="checkbox" checked={draft.keep} onChange={(e) => onChange({ ...draft, keep: e.target.checked })} className="accent-brand" />
           Keep
         </label>
         <select
           value={draft.kind}
           onChange={(e) => onChange({ ...draft, kind: e.target.value as MemoryKind })}
           aria-label="Kind of note"
-          className="rounded-lg border border-[#1F2D3D] bg-[#0B1016] px-2 py-1 text-xs text-[#F1F5F9] cursor-pointer"
+          className="rounded-lg border border-line bg-[#0B1016] px-2 py-1 text-xs text-ink cursor-pointer"
         >
           {MEMORY_KINDS.map((k) => (
             <option key={k} value={k}>
@@ -314,7 +315,7 @@ function CandidateEditor({ draft, onChange }: { draft: Draft; onChange: (d: Draf
             type="button"
             title={MEMORY_DISCLOSURE_META[v].hint}
             onClick={() => onChange({ ...draft, disclosure: v as MemoryDisclosure })}
-            className={`rounded-lg border px-2 py-1 text-xs cursor-pointer ${draft.disclosure === v ? "border-[#00C9A7] bg-[#00C9A7]/10 text-[#F1F5F9]" : "border-[#1F2D3D] text-[#94A3B8]"}`}
+            className={`rounded-lg border px-2 py-1 text-xs cursor-pointer ${draft.disclosure === v ? "border-brand bg-brand/10 text-ink" : "border-line text-muted"}`}
           >
             {MEMORY_DISCLOSURE_META[v].label}
           </button>
@@ -329,7 +330,7 @@ function CandidateEditor({ draft, onChange }: { draft: Draft; onChange: (d: Draf
         className={`${inputClass} resize-y`}
       />
       {issues.length > 0 && (
-        <ul className="space-y-1 text-[11px] text-[#F59E0B]">
+        <ul className="space-y-1 text-[11px] text-gold">
           {issues.map((iss, j) => (
             <li key={j}>
               <b>{iss.text}</b>: {iss.reason}
@@ -337,7 +338,7 @@ function CandidateEditor({ draft, onChange }: { draft: Draft; onChange: (d: Draf
           ))}
           {draft.check?.generalized && (
             <li>
-              <button type="button" onClick={() => onChange({ ...draft, content: draft.check!.generalized!, disclosure: "GENERALIZE", check: { ...draft.check!, issues: [], confidential: false } })} className="text-[#00C9A7] hover:underline cursor-pointer">
+              <button type="button" onClick={() => onChange({ ...draft, content: draft.check!.generalized!, disclosure: "GENERALIZE", check: { ...draft.check!, issues: [], confidential: false } })} className="text-brand hover:underline cursor-pointer">
                 Use a version without these details
               </button>
             </li>

@@ -35,11 +35,11 @@ const VARIANT_STYLES: Record<
     confirmBtn: "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-600/20",
   },
   primary: {
-    iconBg: "bg-[#00C9A7]/10 border-[#00C9A7]/30 text-[#00C9A7]",
+    iconBg: "bg-brand/10 border-brand/30 text-brand",
     icon: <Info className="w-5 h-5" />,
-    glow: "from-[#00C9A7]/10",
+    glow: "from-brand/10",
     confirmBtn:
-      "bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] font-extrabold shadow-lg shadow-[#00C9A7]/20",
+      "bg-brand hover:bg-brand-hover text-canvas font-extrabold shadow-lg shadow-brand/20",
   },
 };
 
@@ -78,14 +78,14 @@ export default function ConfirmModal({
       />
 
       <div className="p-6 pt-5 space-y-5">
-        <p className="text-xs text-[#94A3B8] leading-relaxed pl-0.5">{description}</p>
+        <p className="text-xs text-muted leading-relaxed pl-0.5">{description}</p>
 
-        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#1F2D3D]/60">
+        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-line/60">
           <button
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:text-white hover:bg-[#161D26] border border-[#1F2D3D] transition-all cursor-pointer"
+            className="px-4 py-2 rounded-xl text-xs font-semibold text-muted hover:text-white hover:bg-surface-2 border border-line transition-all cursor-pointer"
           >
             {cancelLabel}
           </button>

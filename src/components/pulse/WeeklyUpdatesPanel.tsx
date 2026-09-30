@@ -7,8 +7,8 @@ import { MEMORY_KIND_META, type MemoryKind } from "@/constants/contentLanes";
 import { PULSE_DAYS } from "@/lib/pulse/week";
 import type { PulseDTO, PulseHistoryItem } from "@/services/pulse";
 
-const cardClass = "p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm";
-const selectClass = "rounded-lg border border-[#1F2D3D] bg-[#0B1016] px-2.5 py-1.5 text-xs text-[#F1F5F9] cursor-pointer";
+const cardClass = "p-6 rounded-2xl bg-surface border border-line space-y-4 shadow-sm";
+const selectClass = "rounded-lg border border-line bg-[#0B1016] px-2.5 py-1.5 text-xs text-ink cursor-pointer";
 
 function timezones(current: string): string[] {
   try {
@@ -58,19 +58,19 @@ export default function WeeklyUpdatesPanel() {
   return (
     <div className={cardClass}>
       <div>
-        <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
-          <CalendarClock className="w-4 h-4 text-[#00C9A7]" />
+        <h3 className="text-base font-bold text-ink flex items-center gap-2">
+          <CalendarClock className="w-4 h-4 text-brand" />
           Weekly updates
         </h3>
-        <p className="text-xs text-[#94A3B8] mt-0.5">
+        <p className="text-xs text-muted mt-0.5">
           Once a week the home page asks what you built, learned, noticed or changed your mind about. The notes you keep
           land here, and the next harvest builds an idea on them first.
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 text-xs text-[#94A3B8]">
+      <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
         <label className="inline-flex items-center gap-1.5 cursor-pointer">
-          <input type="checkbox" checked={s.enabled} onChange={(e) => void save({ enabled: e.target.checked })} className="accent-[#00C9A7]" />
+          <input type="checkbox" checked={s.enabled} onChange={(e) => void save({ enabled: e.target.checked })} className="accent-brand" />
           Ask me every week, from
         </label>
         <select value={s.day} disabled={!s.enabled} onChange={(e) => void save({ day: Number(e.target.value) })} aria-label="Day the question appears" className={selectClass}>
@@ -93,21 +93,21 @@ export default function WeeklyUpdatesPanel() {
       {error && <p className="text-xs text-red-400">{error}</p>}
 
       {history && history.length === 0 && (
-        <p className="rounded-lg border border-dashed border-[#1F2D3D] px-3 py-6 text-center text-xs text-[#64748B]">
+        <p className="rounded-lg border border-dashed border-line px-3 py-6 text-center text-xs text-subtle">
           No weekly answers yet. The first question appears on {PULSE_DAYS[s.day - 1]}.
         </p>
       )}
       <ul className="space-y-3">
         {(history ?? []).map((h) => (
-          <li key={h.week_start} className="rounded-xl border border-[#1F2D3D] bg-[#0B1016] p-3 space-y-2">
-            <div className="flex items-center justify-between text-[11px] font-mono text-[#64748B]">
+          <li key={h.week_start} className="rounded-xl border border-line bg-[#0B1016] p-3 space-y-2">
+            <div className="flex items-center justify-between text-[11px] font-mono text-subtle">
               <span>Week of {h.week_start}</span>
               <span>{h.status === "SKIPPED" ? "Skipped" : `${h.memories.length} note${h.memories.length === 1 ? "" : "s"} kept`}</span>
             </div>
-            {h.answer && <p className="text-xs text-[#94A3B8] whitespace-pre-line">{h.answer}</p>}
+            {h.answer && <p className="text-xs text-muted whitespace-pre-line">{h.answer}</p>}
             {h.memories.map((m) => (
-              <p key={m.id} className={`text-xs text-[#F1F5F9] ${m.is_active ? "" : "line-through opacity-50"}`}>
-                <span className="mr-1.5 rounded bg-[#1F2D3D] px-1.5 py-0.5 font-mono text-[10px] text-[#94A3B8]">
+              <p key={m.id} className={`text-xs text-ink ${m.is_active ? "" : "line-through opacity-50"}`}>
+                <span className="mr-1.5 rounded bg-line px-1.5 py-0.5 font-mono text-[10px] text-muted">
                   {MEMORY_KIND_META[m.kind as MemoryKind]?.label ?? m.kind}
                 </span>
                 {m.content}

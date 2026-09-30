@@ -60,11 +60,11 @@ export default function CarouselPdfPages({ src, pageClassName }: { src: string; 
   return (
     <>
       {status === "loading" && (
-        <div className="flex items-center gap-2 text-xs text-[#94A3B8] py-6">
+        <div className="flex items-center gap-2 text-xs text-muted py-6">
           <Loader2 className="w-3 h-3 animate-spin" /> Drawing the pages
         </div>
       )}
-      {status === "failed" && <p className="text-xs text-[#94A3B8] py-2">The preview could not be drawn. Open the PDF to check the pages.</p>}
+      {status === "failed" && <p className="text-xs text-muted py-2">The preview could not be drawn. Open the PDF to check the pages.</p>}
       <div ref={holder} className="contents" />
     </>
   );

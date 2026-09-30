@@ -19,6 +19,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 
+import { buttonStyles } from "@/components/ui/Button";
 export interface DraftingJob {
   ideaId: string;
   title: string;
@@ -193,7 +194,7 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
       role="complementary"
       aria-label="Multi-agent drafting pipeline status"
       className={`fixed bottom-5 right-5 z-50 w-[420px] max-w-[calc(100vw-2.5rem)] rounded-2xl bg-[#0B0F14]/95 border ${
-        isCompleted ? "border-indigo-500/60 shadow-indigo-500/20" : hasFailed ? "border-[#EF4444]/60 shadow-[#EF4444]/20" : "border-[#1F2D3D] shadow-black/80"
+        isCompleted ? "border-indigo-500/60 shadow-indigo-500/20" : hasFailed ? "border-danger/60 shadow-danger/20" : "border-line shadow-black/80"
       } shadow-2xl backdrop-blur-xl transition-all duration-300 overflow-hidden flex flex-col`}
     >
       {/* Top Ambient Glow Line */}
@@ -202,19 +203,19 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
           isCompleted 
             ? "bg-indigo-500" 
             : hasFailed
-            ? "bg-[#EF4444]"
+            ? "bg-danger"
             : "bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-pulse"
         }`} 
       />
 
       {/* Header */}
-      <div className="p-4 flex items-center justify-between gap-3 border-b border-[#1F2D3D]/60 bg-[#070B0F]/50">
+      <div className="p-4 flex items-center justify-between gap-3 border-b border-line/60 bg-canvas/50">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
             isCompleted 
               ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/40" 
               : hasFailed
-              ? "bg-[#EF4444]/20 text-[#EF4444] border border-[#EF4444]/40"
+              ? "bg-danger/20 text-danger border border-danger/40"
               : "bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 animate-pulse"
           }`}>
             {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : hasFailed ? <X className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
@@ -225,11 +226,11 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
               <span className="text-xs font-bold text-white tracking-wide font-mono uppercase">
                 {isCompleted ? "Draft Complete" : hasFailed ? "Draft Failed" : "Drafting Active"}
               </span>
-              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded border ${hasFailed ? "text-[#EF4444] bg-[#EF4444]/10 border-[#EF4444]/20" : "text-indigo-400 bg-indigo-500/10 border-indigo-500/20"}`}>
+              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded border ${hasFailed ? "text-danger bg-danger/10 border-danger/20" : "text-indigo-400 bg-indigo-500/10 border-indigo-500/20"}`}>
                 {formatTime(elapsedSeconds)}
               </span>
             </div>
-            <p className="text-[11px] text-[#94A3B8] truncate max-w-[220px]">
+            <p className="text-[11px] text-muted truncate max-w-[220px]">
               {isCompleted
                 ? job.title || "Draft staged in Editorial Studio"
                 : hasFailed
@@ -245,14 +246,14 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
         <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={() => setIsMinimized(!isMinimized)}
-            className="p-1 rounded text-[#64748B] hover:text-white hover:bg-[#161D26] transition-colors cursor-pointer"
+            className="p-1 rounded text-subtle hover:text-white hover:bg-surface-2 transition-colors cursor-pointer"
             title={isMinimized ? "Expand" : "Minimize"}
           >
             {isMinimized ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
           <button
             onClick={onDismiss}
-            className="p-1 rounded text-[#64748B] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors cursor-pointer"
+            className="p-1 rounded text-subtle hover:text-danger hover:bg-danger/10 transition-colors cursor-pointer"
             title="Dismiss HUD"
           >
             <X className="w-4 h-4" />
@@ -267,20 +268,20 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
           {/* Progress Bar & Status Line */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[11px] font-mono">
-              <span className="text-[#94A3B8]">
+              <span className="text-muted">
                 {isCompleted
                   ? "Pipeline completed"
                   : hasFailed
                     ? "Pipeline stopped"
                     : `Step ${Math.min(activeStage + 1, AGENT_STAGES.length)} of ${AGENT_STAGES.length}`}
               </span>
-              <span className={`font-bold ${hasFailed ? "text-[#EF4444]" : "text-indigo-400"}`}>
+              <span className={`font-bold ${hasFailed ? "text-danger" : "text-indigo-400"}`}>
                 {isCompleted ? "Done" : hasFailed ? "Error" : formatTime(elapsedSeconds)}
               </span>
             </div>
-            <div className="w-full h-1.5 bg-[#161D26] rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-surface-2 rounded-full overflow-hidden">
               {hasFailed ? (
-                <div className="h-full w-full bg-[#EF4444] rounded-full" />
+                <div className="h-full w-full bg-danger rounded-full" />
               ) : (
                 <div
                   className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-[width] duration-1000 ease-linear"
@@ -307,22 +308,22 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
                   aria-current={isStageActive ? "step" : undefined}
                   className={`p-2.5 rounded-xl border transition-all flex items-center justify-between gap-3 ${
                     isStageActive
-                      ? "bg-[#161D26] border-indigo-500/50"
+                      ? "bg-surface-2 border-indigo-500/50"
                       : isStagePending
-                        ? "bg-[#0F1419]/40 border-[#1F2D3D]/60"
-                        : "bg-[#0F1419]/60 border-[#1F2D3D]"
+                        ? "bg-surface/40 border-line/60"
+                        : "bg-surface/60 border-line"
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div
                       className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
                         isStageFailed
-                          ? "bg-[#EF4444]/10 text-[#EF4444]"
+                          ? "bg-danger/10 text-danger"
                           : isStageDone
                             ? "bg-indigo-500/10 text-indigo-400"
                             : isStageActive
                               ? "bg-indigo-500/10 text-indigo-400"
-                              : "bg-[#161D26] text-[#64748B]"
+                              : "bg-surface-2 text-subtle"
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5" />
@@ -332,13 +333,13 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
                       <div className="flex items-center gap-1.5">
                         <span
                           className={`text-xs font-semibold truncate ${
-                            isStagePending ? "text-[#64748B]" : "text-white"
+                            isStagePending ? "text-subtle" : "text-white"
                           }`}
                         >
                           {stage.name}
                         </span>
                       </div>
-                      <p className="text-[10px] text-[#94A3B8] truncate">
+                      <p className="text-[10px] text-muted truncate">
                         {isStagePending
                           ? `Typically ${Math.round(stage.typicalMs / 1000)}s`
                           : stage.description}
@@ -349,13 +350,13 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
                   {/* Stage Indicator Badge */}
                   <div className="shrink-0">
                     {isStageFailed ? (
-                      <X className="w-3.5 h-3.5 text-[#EF4444]" />
+                      <X className="w-3.5 h-3.5 text-danger" />
                     ) : isStageDone ? (
                       <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
                     ) : isStageActive ? (
                       <Loader2 className="w-3.5 h-3.5 text-indigo-400 animate-spin" />
                     ) : (
-                      <span className="block w-1.5 h-1.5 rounded-full bg-[#1F2D3D]" />
+                      <span className="block w-1.5 h-1.5 rounded-full bg-line" />
                     )}
                   </div>
                 </div>
@@ -365,8 +366,8 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
 
           {/* Bottom Action Area on Completion */}
           {isCompleted ? (
-            <div className="pt-2 border-t border-[#1F2D3D] flex items-center justify-between gap-3">
-              <span className="text-[11px] text-[#00C9A7] font-medium flex items-center gap-1">
+            <div className="pt-2 border-t border-line flex items-center justify-between gap-3">
+              <span className="text-[11px] text-brand font-medium flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5 fill-current" />
                 Staged in Editorial Studio
               </span>
@@ -374,14 +375,14 @@ export default function DraftingProgressHUD({ job, onDismiss }: DraftingProgress
               <Link
                 href={completedAssetId ? `/drafts/${completedAssetId}` : "/editorial"}
                 onClick={onDismiss}
-                className="inline-flex items-center gap-1.5 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-extrabold px-3.5 py-1.5 rounded-xl shadow-lg shadow-[#00C9A7]/20 transition-all cursor-pointer"
+                className={buttonStyles({ size: "sm" })}
               >
                 <span>Open in Editorial Studio</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           ) : (
-            <div className="text-[10px] text-[#64748B] text-center italic pt-1 space-y-0.5">
+            <div className="text-[10px] text-subtle text-center italic pt-1 space-y-0.5">
               <p>You can navigate freely while the agents draft in the background.</p>
               <p>System reports no per-stage progress — the draft appears here when it lands.</p>
             </div>

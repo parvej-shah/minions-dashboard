@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight, Image as ImageIcon, Layers } from "lucide-react";
 import type { AssetItem } from "@/types";
 
+import { segment } from "@/components/ui/segment";
 export type QueueFilter = "ALL" | "PENDING_REVIEW" | "SCHEDULED" | "PUBLISHED" | "UNPUBLISHED" | "DRAFT";
 
 export interface QueueRibbonProps {
@@ -47,25 +48,25 @@ export default function QueueRibbon({
       : assets.filter((a) => a.status === listFilter);
 
   return (
-  <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-4 space-y-3 shadow-xl">
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1F2D3D]/60 pb-3">
+  <div className="bg-surface rounded-2xl border border-line p-4 space-y-3 shadow-xl">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line/60 pb-3">
       
       {/* Left: Queue Title & Status Pills */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-[#00C9A7]" />
-          <span className="text-xs font-bold text-[#F1F5F9] uppercase tracking-wider font-mono">
+          <Layers className="w-4 h-4 text-brand" />
+          <span className="text-xs font-bold text-ink uppercase tracking-wider font-mono">
             Editorial Review Queue
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D] flex-wrap">
+        <div className="flex items-center gap-1.5 bg-canvas p-1 rounded-xl border border-line flex-wrap">
           <button
             onClick={() => setListFilter("PENDING_REVIEW")}
             className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
               listFilter === "PENDING_REVIEW"
-                ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
-                : "text-[#94A3B8] hover:text-[#F1F5F9]"
+                ? segment.on
+                : segment.off
             }`}
           >
             Needs Review ({pendingCount})
@@ -74,8 +75,8 @@ export default function QueueRibbon({
             onClick={() => setListFilter("ALL")}
             className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
               listFilter === "ALL"
-                ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
-                : "text-[#94A3B8] hover:text-[#F1F5F9]"
+                ? segment.on
+                : segment.off
             }`}
           >
             All Drafts ({assets.length})
@@ -85,8 +86,8 @@ export default function QueueRibbon({
               onClick={() => setListFilter("SCHEDULED")}
               className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
                 listFilter === "SCHEDULED"
-                  ? "bg-[#3B82F6] text-[#070B0F] font-bold shadow-sm"
-                  : "text-[#93C5FD] hover:bg-[#161D26]"
+                  ? "bg-[#3B82F6] text-canvas font-bold shadow-sm"
+                  : "text-[#93C5FD] hover:bg-surface-2"
               }`}
             >
               Scheduled ({scheduledCount})
@@ -96,15 +97,15 @@ export default function QueueRibbon({
             onClick={() => setListFilter("PUBLISHED")}
             className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
               listFilter === "PUBLISHED"
-                ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
-                : "text-[#94A3B8] hover:text-[#F1F5F9]"
+                ? segment.on
+                : segment.off
             }`}
           >
             Published ({assets.filter(a => a.status === "PUBLISHED").length})
           </button>
           {liveButUnreviewedCount > 0 && (
             <span
-              className="px-2.5 py-0.5 text-xs font-medium rounded-lg text-[#F59E0B] bg-[#F59E0B]/10 border border-[#F59E0B]/30 cursor-default"
+              className="px-2.5 py-0.5 text-xs font-medium rounded-lg text-gold bg-gold/10 border border-gold/30 cursor-default"
               title="Already on the blog but still marked PENDING_REVIEW — publishing again duplicates the broadcast"
             >
               Live · Unreviewed ({liveButUnreviewedCount})
@@ -115,8 +116,8 @@ export default function QueueRibbon({
               onClick={() => setListFilter("UNPUBLISHED")}
               className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
                 listFilter === "UNPUBLISHED"
-                  ? "bg-[#F59E0B] text-[#070B0F] font-bold shadow-sm"
-                  : "text-[#F59E0B] hover:bg-[#161D26]"
+                  ? "bg-gold text-canvas font-bold shadow-sm"
+                  : "text-gold hover:bg-surface-2"
               }`}
             >
               Offline ({unpublishedCount})
@@ -127,24 +128,24 @@ export default function QueueRibbon({
 
       {/* Right: Quick Sequential Navigation */}
       <div className="flex items-center gap-2 self-end sm:self-auto">
-        <div className="flex items-center gap-1 bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D]">
+        <div className="flex items-center gap-1 bg-canvas p-1 rounded-xl border border-line">
           <button
             onClick={onPrev}
             title="Previous Draft (Key: [ )"
-            className="px-3 py-2 sm:px-2 sm:py-1 rounded-lg text-xs font-bold text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] transition-all flex items-center gap-1 cursor-pointer"
+            className="px-3 py-2 sm:px-2 sm:py-1 rounded-lg text-xs font-bold text-muted hover:text-ink hover:bg-surface-2 transition-all flex items-center gap-1 cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
             <span className="hidden sm:inline">Prev</span>
           </button>
 
-          <span className="px-2 text-[11px] font-mono font-bold text-[#00C9A7] select-none">
+          <span className="px-2 text-[11px] font-mono font-bold text-brand select-none">
             {currentAssetIndex + 1} / {assets.length}
           </span>
 
           <button
             onClick={onNext}
             title="Next Draft (Key: ] )"
-            className="px-3 py-2 sm:px-2 sm:py-1 rounded-lg text-xs font-bold text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] transition-all flex items-center gap-1 cursor-pointer"
+            className="px-3 py-2 sm:px-2 sm:py-1 rounded-lg text-xs font-bold text-muted hover:text-ink hover:bg-surface-2 transition-all flex items-center gap-1 cursor-pointer"
           >
             <span className="hidden sm:inline">Next</span>
             <ChevronRight className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
@@ -166,13 +167,13 @@ export default function QueueRibbon({
             onClick={() => onSelect(asset.id)}
             className={`flex items-center gap-3 p-2.5 px-3 rounded-xl border text-left shrink-0 transition-all duration-200 cursor-pointer min-w-[250px] max-w-[290px] relative ${
               isCurrent
-                ? "bg-[#161D26] border-[#00C9A7] shadow-lg shadow-[#00C9A7]/20 ring-2 ring-[#00C9A7] scale-[1.02] z-10 opacity-100"
-                : "bg-[#070B0F] border-[#1F2D3D] hover:border-[#2A3D52] hover:bg-[#161D26]/70 opacity-65 hover:opacity-100"
+                ? "bg-surface-2 border-brand shadow-lg shadow-brand/20 ring-2 ring-brand scale-[1.02] z-10 opacity-100"
+                : "bg-canvas border-line hover:border-[#2A3D52] hover:bg-surface-2/70 opacity-65 hover:opacity-100"
             }`}
           >
             {/* Micro Thumbnail */}
-            <div className={`w-9 h-9 rounded-lg overflow-hidden bg-[#161D26] border shrink-0 flex items-center justify-center transition-all ${
-              isCurrent ? "border-[#00C9A7] ring-1 ring-[#00C9A7]/50" : "border-[#1F2D3D]"
+            <div className={`w-9 h-9 rounded-lg overflow-hidden bg-surface-2 border shrink-0 flex items-center justify-center transition-all ${
+              isCurrent ? "border-brand ring-1 ring-brand/50" : "border-line"
             }`}>
               {asset.hero_image_url ? (
                 <Image
@@ -184,29 +185,29 @@ export default function QueueRibbon({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <ImageIcon className="w-4 h-4 text-[#64748B]" />
+                <ImageIcon className="w-4 h-4 text-subtle" />
               )}
             </div>
 
             {/* Info block */}
             <div className="min-w-0 flex-1 space-y-0.5">
               <div className="flex items-center justify-between gap-1">
-                <span className={`text-[10px] font-mono font-bold ${isCurrent ? "text-[#00C9A7]" : "text-[#94A3B8]"}`}>
+                <span className={`text-[10px] font-mono font-bold ${isCurrent ? "text-brand" : "text-muted"}`}>
                   Draft #{idx + 1}
                 </span>
                 <span
                   className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded shrink-0 whitespace-nowrap ${
                     isCurrent
-                      ? "bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/40"
+                      ? "bg-brand/20 text-brand border border-brand/40"
                       : asset.status === "PUBLISHED"
-                        ? "bg-[#00C9A7]/20 text-[#00C9A7]"
+                        ? "bg-brand/20 text-brand"
                         : alreadyLive
-                        ? "bg-[#F59E0B]/25 text-[#F59E0B] border border-[#F59E0B]/40"
+                        ? "bg-gold/25 text-gold border border-gold/40"
                         : asset.status === "PENDING_REVIEW"
-                          ? "bg-[#F59E0B]/20 text-[#F59E0B]"
+                          ? "bg-gold/20 text-gold"
                           : asset.status === "SCHEDULED"
                             ? "bg-[#3B82F6]/20 text-[#93C5FD]"
-                            : "bg-[#64748B]/20 text-[#94A3B8]"
+                            : "bg-subtle/20 text-muted"
                   }`}
                 >
                   {isCurrent
@@ -221,11 +222,11 @@ export default function QueueRibbon({
                 </span>
               </div>
 
-              <div className={`text-xs font-semibold line-clamp-2 break-words ${isCurrent ? "text-[#F1F5F9] font-bold" : "text-[#CBD5E1]"}`}>
+              <div className={`text-xs font-semibold line-clamp-2 break-words ${isCurrent ? "text-ink font-bold" : "text-[#CBD5E1]"}`}>
                 {asset.title}
               </div>
 
-              <div className="flex items-center gap-2 text-[10px] text-[#64748B] font-mono">
+              <div className="flex items-center gap-2 text-[10px] text-subtle font-mono">
                 <span>{asset.audience}</span>
                 <span>•</span>
                 <span>{asset.claims.length > 0 ? `${asset.claims.filter((c) => c.verified === 'Y').length}/${asset.claims.length} Claims` : 'Draft'}</span>

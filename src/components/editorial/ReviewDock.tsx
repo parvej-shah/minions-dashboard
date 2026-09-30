@@ -25,6 +25,7 @@ import { normalizeDomain } from "@/constants/config";
 import type { PublishState } from "@/hooks/useEditorialDraft";
 import type { AssetItem } from "@/types";
 
+import { buttonStyles } from "@/components/ui/Button";
 export interface ReviewDockProps {
   activeAsset: AssetItem;
   currentAssetIndex: number;
@@ -102,18 +103,18 @@ export default function ReviewDock({
   const alreadyLive = blogEnabled && Boolean(activeAsset.live_blog_url) && activeAsset.status !== "PUBLISHED";
 
   return (
-        <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-4 sm:p-5 space-y-4 shadow-xl">
-          <div className="flex items-center justify-between pb-2 border-b border-[#1F2D3D]/60">
-            <span className="text-xs font-bold font-mono text-[#F1F5F9] uppercase tracking-wider flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#00C9A7]" />
+        <div className="bg-surface rounded-2xl border border-line p-4 sm:p-5 space-y-4 shadow-xl">
+          <div className="flex items-center justify-between pb-2 border-b border-line/60">
+            <span className="text-xs font-bold font-mono text-ink uppercase tracking-wider flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-brand" />
               Review & Decision
             </span>
             {isDirty ? (
-              <span className="text-[10px] font-mono text-[#F59E0B] font-bold bg-[#F59E0B]/10 px-2 py-0.5 rounded border border-[#F59E0B]/30 animate-pulse">
+              <span className="text-[10px] font-mono text-gold font-bold bg-gold/10 px-2 py-0.5 rounded border border-gold/30 animate-pulse">
                 ● Unsaved Edits
               </span>
             ) : (
-              <span className="text-[10px] font-mono text-[#00C9A7] bg-[#00C9A7]/10 px-2 py-0.5 rounded border border-[#00C9A7]/30">
+              <span className="text-[10px] font-mono text-brand bg-brand/10 px-2 py-0.5 rounded border border-brand/30">
                 {activeAsset.status}
               </span>
             )}
@@ -123,24 +124,24 @@ export default function ReviewDock({
           <div className="flex items-center justify-between gap-2 text-xs">
             <button
               onClick={onPrev}
-              className="flex-1 py-1.5 px-2 rounded-lg bg-[#070B0F] hover:bg-[#161D26] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] text-[11px] font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer"
+              className="flex-1 py-1.5 px-2 rounded-lg bg-canvas hover:bg-surface-2 border border-line text-muted hover:text-ink text-[11px] font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer"
               title="Previous Draft ( [ )"
             >
-              <ChevronLeft className="w-3 h-3 text-[#00C9A7]" />
+              <ChevronLeft className="w-3 h-3 text-brand" />
               <span>Prev Draft</span>
             </button>
 
-            <span className="text-[10px] font-mono text-[#64748B] shrink-0 font-bold px-1">
+            <span className="text-[10px] font-mono text-subtle shrink-0 font-bold px-1">
               {currentAssetIndex + 1} / {totalDrafts}
             </span>
 
             <button
               onClick={onNext}
-              className="flex-1 py-1.5 px-2 rounded-lg bg-[#070B0F] hover:bg-[#161D26] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] text-[11px] font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer"
+              className="flex-1 py-1.5 px-2 rounded-lg bg-canvas hover:bg-surface-2 border border-line text-muted hover:text-ink text-[11px] font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer"
               title="Next Draft ( ] )"
             >
               <span>Next Draft</span>
-              <ChevronRight className="w-3 h-3 text-[#00C9A7]" />
+              <ChevronRight className="w-3 h-3 text-brand" />
             </button>
           </div>
 
@@ -148,11 +149,7 @@ export default function ReviewDock({
           <button
             onClick={onSave}
             disabled={isSaving}
-            className={`w-full py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-              isDirty
-                ? "bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] shadow-md shadow-[#00C9A7]/20"
-                : "bg-[#161D26] hover:bg-[#1E2733] text-[#F1F5F9] border border-[#1F2D3D]"
-            }`}
+            className={buttonStyles({ variant: isDirty ? "primary" : "secondary", size: "sm", block: true })}
           >
             {isSaving ? (
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -168,14 +165,14 @@ export default function ReviewDock({
           {/* Main Publish Decision & Live Visibility Hub */}
           {activeAsset.status === "PUBLISHED" ? (
             <div className="space-y-2 pt-1">
-              <div className="w-full bg-[#00C9A7]/15 border border-[#00C9A7] text-[#00C9A7] p-2.5 rounded-xl font-bold text-xs flex items-center justify-between gap-2">
+              <div className="w-full bg-brand/15 border border-brand text-brand p-2.5 rounded-xl font-bold text-xs flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5">
                   <CheckCheck className="w-4 h-4" />
                   <span>
                     {blogEnabled && blogHost ? `Live on ${blogHost}` : "Approved & Published"}
                   </span>
                 </div>
-                <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-brand animate-pulse" />
               </div>
 
               {blogEnabled && (
@@ -183,9 +180,9 @@ export default function ReviewDock({
                   href={activeAsset.doc_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#F1F5F9] text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  className="w-full bg-surface-2 hover:bg-surface-3 border border-line text-ink text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
-                  <Globe className="w-3.5 h-3.5 text-[#00C9A7]" />
+                  <Globe className="w-3.5 h-3.5 text-brand" />
                   <span>View Live Blog Post</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
@@ -194,7 +191,7 @@ export default function ReviewDock({
               {/* 1-Click Reversible Unpublish Toggle */}
               <button
                 onClick={() => setToggleLiveConfirmOpen(true)}
-                className="w-full bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 border border-[#F59E0B]/30 text-[#F59E0B] text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full bg-gold/10 hover:bg-gold/20 border border-gold/30 text-gold text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
                 title="Hide from public site without deleting content"
               >
                 <EyeOff className="w-3.5 h-3.5" />
@@ -203,7 +200,7 @@ export default function ReviewDock({
 
               <button
                 onClick={() => setDeleteConfirmOpen(true)}
-                className="w-full bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/30 text-[#EF4444] text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full bg-danger/10 hover:bg-danger/20 border border-danger/30 text-danger text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
                 title="Permanently delete post and claim verifications"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -246,15 +243,15 @@ export default function ReviewDock({
                   <button
                     onClick={() => setPicking(true)}
                     disabled={publishState === "pending"}
-                    className="bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#F1F5F9] text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-60"
+                    className="bg-surface-2 hover:bg-surface-3 border border-line text-ink text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-60"
                   >
-                    <CalendarClock className="w-3.5 h-3.5 text-[#00C9A7]" />
+                    <CalendarClock className="w-3.5 h-3.5 text-brand" />
                     Change time
                   </button>
                   <button
                     onClick={onPublish}
                     disabled={publishState === "pending"}
-                    className="bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-60"
+                    className={buttonStyles({ size: "sm" })}
                   >
                     {publishState === "pending" ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                     Publish now
@@ -265,7 +262,7 @@ export default function ReviewDock({
               <button
                 onClick={onUnschedule}
                 disabled={publishState === "pending"}
-                className="w-full bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 border border-[#F59E0B]/30 text-[#F59E0B] text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
+                className="w-full bg-gold/10 hover:bg-gold/20 border border-gold/30 text-gold text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
                 title="Back to review; it goes nowhere until you approve it again"
               >
                 <Undo2 className="w-3.5 h-3.5" />
@@ -274,7 +271,7 @@ export default function ReviewDock({
             </div>
           ) : activeAsset.status === "UNPUBLISHED" ? (
             <div className="space-y-2.5 pt-1">
-              <div className="w-full bg-[#F59E0B]/15 border border-[#F59E0B]/40 text-[#F59E0B] p-2.5 rounded-xl font-bold text-xs flex items-center justify-between gap-2">
+              <div className="w-full bg-gold/15 border border-gold/40 text-gold p-2.5 rounded-xl font-bold text-xs flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5">
                   <EyeOff className="w-4 h-4" />
                   <span>Unpublished (Offline)</span>
@@ -285,7 +282,7 @@ export default function ReviewDock({
               {/* 1-Click Restore to Live */}
               <button
                 onClick={() => setToggleLiveConfirmOpen(true)}
-                className="w-full bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#00C9A7]/20 cursor-pointer"
+                className={buttonStyles({ size: "sm", className: "w-full" })}
               >
                 <Globe className="w-3.5 h-3.5" />
                 <span>{blogEnabled ? "Republish (Put Live on Blog)" : "Republish"}</span>
@@ -293,7 +290,7 @@ export default function ReviewDock({
 
               <button
                 onClick={() => setDeleteConfirmOpen(true)}
-                className="w-full bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/30 text-[#EF4444] text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full bg-danger/10 hover:bg-danger/20 border border-danger/30 text-danger text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
                 title="Permanently delete post and claim verifications"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -307,12 +304,12 @@ export default function ReviewDock({
                   not always flip the asset back. Say so, or the operator
                   publishes the same post twice. */}
               {alreadyLive && (
-                <div className="w-full bg-[#F59E0B]/10 border border-[#F59E0B]/40 text-[#F59E0B] p-2.5 rounded-xl text-[11px] space-y-1.5">
+                <div className="w-full bg-gold/10 border border-gold/40 text-gold p-2.5 rounded-xl text-[11px] space-y-1.5">
                   <div className="flex items-center gap-1.5 font-bold">
                     <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                     <span>This post is already live on the blog</span>
                   </div>
-                  <p className="text-[10px] leading-relaxed text-[#F59E0B]/80">
+                  <p className="text-[10px] leading-relaxed text-gold/80">
                     Publishing again re-runs the broadcast and can duplicate the social posts.
                   </p>
                   <a
@@ -338,11 +335,11 @@ export default function ReviewDock({
               <button
                 onClick={onPublish}
                 disabled={publishState === "pending"}
-                className="w-full bg-[#00C9A7] hover:bg-[#00A88A] active:scale-[0.98] text-[#070B0F] font-bold text-xs py-3 px-4 rounded-xl shadow-lg shadow-[#00C9A7]/20 flex items-center justify-center gap-2 transition-all disabled:opacity-75 cursor-pointer"
+                className={buttonStyles({ size: "sm", className: "w-full" })}
               >
                 {publishState === "pending" ? (
                   <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#070B0F]" />
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-canvas" />
                     <span>Publishing…</span>
                   </>
                 ) : (
@@ -372,16 +369,16 @@ export default function ReviewDock({
                   <button
                     onClick={() => setPicking(true)}
                     disabled={publishState === "pending"}
-                    className="w-full bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#F1F5F9] text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
+                    className="w-full bg-surface-2 hover:bg-surface-3 border border-line text-ink text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
                   >
-                    <CalendarClock className="w-3.5 h-3.5 text-[#00C9A7]" />
+                    <CalendarClock className="w-3.5 h-3.5 text-brand" />
                     <span>Approve & schedule for later</span>
                   </button>
                 ))}
 
               <button
                 onClick={() => setDeleteConfirmOpen(true)}
-                className="w-full bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/30 text-[#EF4444] text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full bg-danger/10 hover:bg-danger/20 border border-danger/30 text-danger text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
                 title="Permanently delete this draft and its claim verifications"
               >
                 <Trash2 className="w-3.5 h-3.5" />

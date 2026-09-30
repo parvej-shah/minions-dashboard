@@ -61,15 +61,15 @@ export default function AdminAuthModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-[#0f1419] text-[#FFFFFF] w-full max-w-lg rounded-2xl border border-[#1f2b37] shadow-2xl overflow-hidden space-y-0">
+      <div className="bg-surface text-[#FFFFFF] w-full max-w-lg rounded-2xl border border-[#1f2b37] shadow-2xl overflow-hidden space-y-0">
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-[#1f2b37] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
               className={`w-10 h-10 rounded-xl border flex items-center justify-center ${
                 currentUser
-                  ? "bg-[#00C9A7]/10 border-[#00C9A7]/30 text-[#00C9A7]"
-                  : "bg-[#ff6b4a]/10 border-[#ff6b4a]/30 text-[#ff6b4a]"
+                  ? "bg-brand/10 border-brand/30 text-brand"
+                  : "bg-coral/10 border-coral/30 text-coral"
               }`}
             >
               {currentUser ? (
@@ -83,12 +83,12 @@ export default function AdminAuthModal({
                 <span className="font-bold tracking-tight text-white text-base">
                   Minions
                 </span>
-                <span className="text-[#ff6b4a] font-bold text-base">.AI</span>
-                <span className="text-[10px] font-mono bg-[#161d24] text-[#00C9A7] px-2 py-0.5 rounded border border-[#00C9A7]/30">
+                <span className="text-coral font-bold text-base">.AI</span>
+                <span className="text-[10px] font-mono bg-[#161d24] text-brand px-2 py-0.5 rounded border border-brand/30">
                   {currentUser ? "ACCOUNT" : "SECURITY GATE"}
                 </span>
               </div>
-              <p className="text-xs text-[#94A3B8] mt-0.5">
+              <p className="text-xs text-muted mt-0.5">
                 {currentUser
                   ? "Authenticated Session & Access Profile"
                   : "Google OAuth 2.0 Access Control"}
@@ -98,7 +98,7 @@ export default function AdminAuthModal({
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-[#161d24] text-[#94A3B8] hover:text-white transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg hover:bg-[#161d24] text-muted hover:text-white transition-colors cursor-pointer"
             aria-label="Close"
           >
             <X className="w-4 h-4" />
@@ -113,14 +113,14 @@ export default function AdminAuthModal({
               <div className="p-4 rounded-xl bg-[#161d24] border border-[#1f2b37] space-y-3.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#00C9A7]/20 text-[#00C9A7] font-bold flex items-center justify-center text-sm border border-[#00C9A7]/30">
+                    <div className="w-10 h-10 rounded-full bg-brand/20 text-brand font-bold flex items-center justify-center text-sm border border-brand/30">
                       {currentUser.name ? currentUser.name[0].toUpperCase() : "U"}
                     </div>
                     <div>
                       <div className="text-sm font-bold text-white">
                         {currentUser.name || "Authenticated User"}
                       </div>
-                      <div className="text-xs text-[#94A3B8] font-mono">
+                      <div className="text-xs text-muted font-mono">
                         {currentUser.email}
                       </div>
                     </div>
@@ -133,15 +133,15 @@ export default function AdminAuthModal({
 
                 <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[#1f2b37] text-xs">
                   <div className="p-2.5 rounded-lg bg-[#0b0f14] border border-[#1f2b37]">
-                    <div className="text-[10px] font-mono text-[#64748B] uppercase">
+                    <div className="text-[10px] font-mono text-subtle uppercase">
                       Access Role
                     </div>
-                    <div className="font-semibold text-[#00C9A7] mt-0.5">
+                    <div className="font-semibold text-brand mt-0.5">
                       {currentUser.role || "MEMBER"}
                     </div>
                   </div>
                   <div className="p-2.5 rounded-lg bg-[#0b0f14] border border-[#1f2b37]">
-                    <div className="text-[10px] font-mono text-[#64748B] uppercase">
+                    <div className="text-[10px] font-mono text-subtle uppercase">
                       Auth Method
                     </div>
                     <div className="font-semibold text-white mt-0.5 flex items-center gap-1">
@@ -164,7 +164,7 @@ export default function AdminAuthModal({
 
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 rounded-xl bg-[#161d24] hover:bg-[#1f2b37] border border-[#1f2b37] text-xs text-[#94A3B8] hover:text-white font-medium cursor-pointer transition-colors"
+                  className="px-4 py-2 rounded-xl bg-[#161d24] hover:bg-[#1f2b37] border border-[#1f2b37] text-xs text-muted hover:text-white font-medium cursor-pointer transition-colors"
                 >
                   Close
                 </button>
@@ -173,7 +173,7 @@ export default function AdminAuthModal({
           ) : (
             /* Logged-Out Sign-In View */
             <div className="space-y-4">
-              <p className="text-xs text-[#94A3B8] leading-relaxed">
+              <p className="text-xs text-muted leading-relaxed">
                 Sign in with your authorized Google account to access the Minions.AI Cockpit, agent fleet telemetry, and editorial controls.
               </p>
 
@@ -205,13 +205,13 @@ export default function AdminAuthModal({
                 </span>
               </button>
 
-              <div className="p-3.5 rounded-xl bg-[#161d24] border border-[#1f2b37] space-y-2 text-xs text-[#94A3B8]">
+              <div className="p-3.5 rounded-xl bg-[#161d24] border border-[#1f2b37] space-y-2 text-xs text-muted">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-brand shrink-0" />
                   <span>Secure OAuth 2.0 authentication</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-brand shrink-0" />
                   <span>Role-based workspace access protection</span>
                 </div>
               </div>

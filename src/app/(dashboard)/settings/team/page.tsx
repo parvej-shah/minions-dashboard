@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/useToast";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import type { TeamMember } from "@/types";
 
+import { buttonStyles } from "@/components/ui/Button";
 const ROLE_LABELS: Record<TeamMember["role"], string> = {
   OWNER: "Owner",
   MARKETING_DIRECTOR: "Marketing Director",
@@ -90,25 +91,25 @@ export default function TeamPage() {
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-16">
-      <div className="border-b border-[#1F2D3D] pb-6">
-        <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#00C9A7] uppercase mb-1">
+      <div className="border-b border-line pb-6">
+        <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-brand uppercase mb-1">
           <Users className="w-3.5 h-3.5" />
           Workspace Team
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-[#F1F5F9]">Team &amp; Access Control</h1>
-        <p className="text-sm text-[#94A3B8] mt-1">
+        <h1 className="text-3xl font-bold tracking-tight text-ink">Team &amp; Access Control</h1>
+        <p className="text-sm text-muted mt-1">
           Manage authorized workspace operators, invite colleagues, and configure role-based permissions.
         </p>
       </div>
 
       {canManage && (
-        <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
+        <div className="p-6 rounded-2xl bg-surface border border-line space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
-              <UserPlus className="w-4 h-4 text-[#00C9A7]" />
+            <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+              <UserPlus className="w-4 h-4 text-brand" />
               Invite Teammate
             </h3>
-            <span className="text-[11px] font-mono text-[#64748B]">
+            <span className="text-[11px] font-mono text-subtle">
               Google SSO Compatible
             </span>
           </div>
@@ -121,13 +122,13 @@ export default function TeamPage() {
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
                 placeholder="colleague@company.com"
-                className="w-full rounded-xl bg-[#070B0F] border border-[#1F2D3D] pl-10 pr-4 py-2.5 text-sm text-[#F1F5F9] placeholder:text-[#475569] focus:outline-none focus:border-[#00C9A7]"
+                className="w-full rounded-xl bg-canvas border border-line pl-10 pr-4 py-2.5 text-sm text-ink placeholder:text-[#475569] focus:outline-none focus:border-brand"
               />
             </div>
             <select
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value as TeamMember["role"])}
-              className="rounded-xl bg-[#070B0F] border border-[#1F2D3D] px-3.5 py-2.5 text-sm text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]"
+              className="rounded-xl bg-canvas border border-line px-3.5 py-2.5 text-sm text-ink focus:outline-none focus:border-brand"
             >
               {INVITABLE_ROLES.map((r) => (
                 <option key={r} value={r}>
@@ -138,28 +139,28 @@ export default function TeamPage() {
             <button
               onClick={handleInvite}
               disabled={isInviting || !inviteEmail.trim()}
-              className="inline-flex items-center justify-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-sm font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer disabled:opacity-50"
+              className={buttonStyles()}
             >
               {isInviting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
               <span>Send Invite</span>
             </button>
           </div>
-          <p className="text-[11px] text-[#64748B]">
+          <p className="text-[11px] text-subtle">
             Invited members can sign in with their Google account to immediately access this workspace.
           </p>
         </div>
       )}
 
       {/* Members List */}
-      <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
+      <div className="p-6 rounded-2xl bg-surface border border-line space-y-4 shadow-sm">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
+          <h3 className="text-sm font-bold text-ink flex items-center gap-2">
             <Shield className="w-4 h-4 text-[#3B82F6]" />
             Active Workspace Members &amp; Invites ({members.length})
           </h3>
           <button
             onClick={() => reload()}
-            className="text-xs text-[#64748B] hover:text-[#94A3B8] flex items-center gap-1 cursor-pointer"
+            className="text-xs text-subtle hover:text-muted flex items-center gap-1 cursor-pointer"
           >
             <RefreshCw className="w-3 h-3" /> Refresh
           </button>
@@ -168,11 +169,11 @@ export default function TeamPage() {
         {isLoading ? (
           <LoadingState label="Loading team members…" />
         ) : members.length === 0 ? (
-          <div className="py-8 text-center text-[#64748B] text-xs">
+          <div className="py-8 text-center text-subtle text-xs">
             No team members found for this workspace.
           </div>
         ) : (
-          <div className="divide-y divide-[#1F2D3D]/60">
+          <div className="divide-y divide-line/60">
             {members.map((m) => {
               const isCurrentUser = m.email.toLowerCase() === currentUserEmail?.toLowerCase();
               const isUpdating = updatingRoleId === m.id;
@@ -180,21 +181,21 @@ export default function TeamPage() {
               return (
                 <div key={m.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-full bg-[#161D26] border border-[#1F2D3D] flex items-center justify-center font-bold text-xs text-[#00C9A7] shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-surface-2 border border-line flex items-center justify-center font-bold text-xs text-brand shrink-0">
                       {m.name ? m.name[0].toUpperCase() : m.email[0].toUpperCase()}
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-[#F1F5F9] truncate">
+                        <span className="text-sm font-semibold text-ink truncate">
                           {m.name || m.email}
                         </span>
                         {isCurrentUser && (
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/30">
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-brand/10 text-brand border border-brand/30">
                             You
                           </span>
                         )}
                         {m.status === "PENDING" ? (
-                          <span className="flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30">
+                          <span className="flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-gold/10 text-gold border border-gold/30">
                             <Clock className="w-2.5 h-2.5" />
                             Pending Invite
                           </span>
@@ -205,7 +206,7 @@ export default function TeamPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-[#64748B] truncate font-mono mt-0.5">{m.email}</p>
+                      <p className="text-xs text-subtle truncate font-mono mt-0.5">{m.email}</p>
                     </div>
                   </div>
 
@@ -215,7 +216,7 @@ export default function TeamPage() {
                         value={m.role}
                         disabled={isUpdating}
                         onChange={(e) => handleRoleChange(m, e.target.value as TeamMember["role"])}
-                        className="rounded-lg bg-[#070B0F] border border-[#1F2D3D] px-2.5 py-1 text-xs text-[#94A3B8] focus:text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7] cursor-pointer disabled:opacity-50"
+                        className="rounded-lg bg-canvas border border-line px-2.5 py-1 text-xs text-muted focus:text-ink focus:outline-none focus:border-brand cursor-pointer disabled:opacity-50"
                       >
                         {INVITABLE_ROLES.map((r) => (
                           <option key={r} value={r}>
@@ -224,7 +225,7 @@ export default function TeamPage() {
                         ))}
                       </select>
                     ) : (
-                      <span className="text-[11px] font-mono px-2.5 py-1 rounded bg-[#161D26] text-[#94A3B8] border border-[#1F2D3D]">
+                      <span className="text-[11px] font-mono px-2.5 py-1 rounded bg-surface-2 text-muted border border-line">
                         {ROLE_LABELS[m.role] || m.role}
                       </span>
                     )}
@@ -233,7 +234,7 @@ export default function TeamPage() {
                       <button
                         onClick={() => setRemoveTarget(m)}
                         title={m.status === "PENDING" ? "Cancel invite" : "Remove from team"}
-                        className="p-1.5 rounded-lg text-[#64748B] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg text-subtle hover:text-danger hover:bg-danger/10 transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -247,7 +248,7 @@ export default function TeamPage() {
       </div>
 
       {toast.message && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#161D26] border border-[#1F2D3D] text-[#F1F5F9] px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold animate-in fade-in">
+        <div className="fixed bottom-6 right-6 z-50 bg-surface-2 border border-line text-ink px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold animate-in fade-in">
           {toast.message}
         </div>
       )}

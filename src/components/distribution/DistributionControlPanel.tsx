@@ -66,22 +66,22 @@ export function DistributionControlPanel({
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
       case "BLOG":
-        return <Globe className="w-4 h-4 text-[#00C9A7]" />;
+        return <Globe className="w-4 h-4 text-brand" />;
       case "FACEBOOK":
         return <span className="text-sm font-black text-[#1877F2]">f</span>;
       case "LINKEDIN":
         return <span className="text-xs font-black text-[#0A66C2]">in</span>;
       case "TWITTER":
-        return <span className="text-xs font-black text-[#F1F5F9]">𝕏</span>;
+        return <span className="text-xs font-black text-ink">𝕏</span>;
       default:
-        return <Share2 className="w-4 h-4 text-[#94A3B8]" />;
+        return <Share2 className="w-4 h-4 text-muted" />;
     }
   };
 
   if (isLoading) {
     return (
-      <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] flex items-center justify-center gap-3 text-xs font-mono text-[#94A3B8]">
-        <RefreshCw className="w-4 h-4 animate-spin text-[#00C9A7]" />
+      <div className="p-6 rounded-2xl bg-surface border border-line flex items-center justify-center gap-3 text-xs font-mono text-muted">
+        <RefreshCw className="w-4 h-4 animate-spin text-brand" />
         <span>Loading distribution channel controls...</span>
       </div>
     );
@@ -91,8 +91,8 @@ export function DistributionControlPanel({
     return (
       <div className="space-y-2">
         {notification && (
-          <div className="text-[11px] font-mono px-3 py-1.5 rounded-lg bg-[#00C9A7]/15 border border-[#00C9A7]/30 text-[#00C9A7] flex items-center gap-2 animate-in fade-in">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00C9A7] animate-pulse" />
+          <div className="text-[11px] font-mono px-3 py-1.5 rounded-lg bg-brand/15 border border-brand/30 text-brand flex items-center gap-2 animate-in fade-in">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
             <span>{notification}</span>
           </div>
         )}
@@ -108,21 +108,21 @@ export function DistributionControlPanel({
                 disabled={isBusy}
                 className={`p-2.5 rounded-xl border text-left transition-all relative flex flex-col justify-between gap-1.5 cursor-pointer ${
                   isActive
-                    ? "bg-[#161D26] border-[#00C9A7]/40 shadow-sm shadow-[#00C9A7]/5"
-                    : "bg-[#0A0E14] border-[#1F2D3D] opacity-60 hover:opacity-100"
+                    ? "bg-surface-2 border-brand/40 shadow-sm shadow-brand/5"
+                    : "bg-[#0A0E14] border-line opacity-60 hover:opacity-100"
                 }`}
               >
                 <div className="flex items-center justify-between gap-1">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <div className="w-5 h-5 rounded-md bg-[#070B0F] border border-[#1F2D3D] flex items-center justify-center shrink-0">
+                    <div className="w-5 h-5 rounded-md bg-canvas border border-line flex items-center justify-center shrink-0">
                       {getPlatformIcon(ch.platform)}
                     </div>
-                    <span className="text-xs font-bold text-[#F1F5F9] truncate">{ch.name.split(" ")[0]}</span>
+                    <span className="text-xs font-bold text-ink truncate">{ch.name.split(" ")[0]}</span>
                   </div>
                   {/* Micro toggle indicator */}
                   <div
                     className={`w-6 h-3.5 rounded-full transition-colors flex items-center px-0.5 shrink-0 ${
-                      isActive ? "bg-[#00C9A7] justify-end" : "bg-[#1F2D3D] justify-start"
+                      isActive ? "bg-brand justify-end" : "bg-line justify-start"
                     }`}
                   >
                     <div className="w-2.5 h-2.5 rounded-full bg-white shadow-xs" />
@@ -131,10 +131,10 @@ export function DistributionControlPanel({
                 <div className="flex items-center gap-1 text-[10px] font-mono">
                   <span
                     className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                      isActive ? "bg-[#00C9A7]" : "bg-[#64748B]"
+                      isActive ? "bg-brand" : "bg-subtle"
                     }`}
                   />
-                  <span className={isActive ? "text-[#00C9A7] font-semibold" : "text-[#A0ACBA]"}>
+                  <span className={isActive ? "text-brand font-semibold" : "text-[#A0ACBA]"}>
                     {isActive ? "Auto Post" : "Paused"}
                   </span>
                 </div>
@@ -147,28 +147,28 @@ export function DistributionControlPanel({
   }
 
   return (
-    <div className="p-4 sm:p-6 rounded-2xl bg-[#0F1419]/70 border border-[#1F2D3D]/80 space-y-4 sm:space-y-5">
+    <div className="p-4 sm:p-6 rounded-2xl bg-surface/70 border border-line/80 space-y-4 sm:space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#1F2D3D]/60 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-line/60 pb-4">
         <div className="min-w-0">
-          <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-[#F1F5F9]">Publishing channels</h2>
-          <p className="text-sm text-[#94A3B8] mt-1 max-w-2xl leading-relaxed">Choose which connected channels receive posts when you publish.</p>
+          <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-ink">Publishing channels</h2>
+          <p className="text-sm text-muted mt-1 max-w-2xl leading-relaxed">Choose which connected channels receive posts when you publish.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="min-h-10 px-3 rounded-lg bg-[#111820] border border-[#1F2D3D] text-[#CBD5E1] inline-flex items-center text-xs font-medium tabular-nums">
+          <span className="min-h-10 px-3 rounded-lg bg-[#111820] border border-line text-[#CBD5E1] inline-flex items-center text-xs font-medium tabular-nums">
             {channels.filter((c) => c.is_active).length} of {channels.length} active
           </span>
         </div>
       </div>
 
       {notification && (
-        <div className="text-xs font-mono px-4 py-2 rounded-xl bg-[#00C9A7]/15 border border-[#00C9A7]/30 text-[#00C9A7] flex items-center justify-between animate-in fade-in duration-150">
+        <div className="text-xs font-mono px-4 py-2 rounded-xl bg-brand/15 border border-brand/30 text-brand flex items-center justify-between animate-in fade-in duration-150">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-[#00C9A7] shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-brand shrink-0" />
             <span>{notification}</span>
           </div>
-          <span className="text-[10px] text-[#00C9A7]/70 font-mono">Changes saved</span>
+          <span className="text-[10px] text-brand/70 font-mono">Changes saved</span>
         </div>
       )}
 
@@ -183,7 +183,7 @@ export function DistributionControlPanel({
               key={ch.id}
               className={`p-4 sm:p-5 rounded-xl border transition-colors flex flex-col justify-between gap-4 relative ${
                 isActive
-                  ? "bg-[#111A20] border-[#00C9A7]/35"
+                  ? "bg-[#111A20] border-brand/35"
                   : "bg-[#0C1117] border-[#273342]"
               }`}
             >
@@ -194,9 +194,9 @@ export function DistributionControlPanel({
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-bold text-[#F1F5F9] truncate">{ch.name}</span>
+                      <span className="text-sm font-bold text-ink truncate">{ch.name}</span>
                       {ch.badge && (
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#070B0F] text-[#94A3B8] border border-[#1F2D3D]">
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-canvas text-muted border border-line">
                           {ch.badge}
                         </span>
                       )}
@@ -215,8 +215,8 @@ export function DistributionControlPanel({
                   role="switch"
                   aria-checked={isActive}
                   aria-label={`Toggle ${ch.name}`}
-                  className={`w-12 h-7 rounded-full transition-colors p-1 flex items-center cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0F1419] ${
-                    isActive ? "bg-[#00C9A7]" : "bg-[#1F2D3D]"
+                  className={`w-12 h-7 rounded-full transition-colors p-1 flex items-center cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface ${
+                    isActive ? "bg-brand" : "bg-line"
                   } ${isBusy ? "opacity-50 cursor-wait" : ""}`}
                 >
                   <div
@@ -237,10 +237,10 @@ export function DistributionControlPanel({
                 <div className="flex items-center gap-1.5">
                   <span
                     className={`w-2 h-2 rounded-full shrink-0 ${
-                      isActive ? "bg-[#00C9A7] animate-pulse" : "bg-[#64748B]"
+                      isActive ? "bg-brand animate-pulse" : "bg-subtle"
                     }`}
                   />
-                  <span className={isActive ? "text-[#00C9A7] font-semibold" : "text-[#64748B]"}>
+                  <span className={isActive ? "text-brand font-semibold" : "text-subtle"}>
                     {isActive ? "Broadcasting Active" : "Broadcast Paused"}
                   </span>
                 </div>
@@ -255,7 +255,7 @@ export function DistributionControlPanel({
               <div className="pt-3 border-t border-[#263443]/70">
                 <div className="flex items-center justify-between mb-2">
                   <span
-                    className={`text-xs ${ch.has_credential ? "text-[#00C9A7]" : "text-[#A0ACBA]"}`}
+                    className={`text-xs ${ch.has_credential ? "text-brand" : "text-[#A0ACBA]"}`}
                   >
                     {ch.has_credential
                       ? ch.key === "blog"

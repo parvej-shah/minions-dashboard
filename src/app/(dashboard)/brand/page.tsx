@@ -94,14 +94,14 @@ function BrandStudio() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
       {/* Top Header */}
-      <div className="space-y-5 border-b border-[#1F2D3D] pb-6">
+      <div className="space-y-5 border-b border-line pb-6">
         <div>
-          <div className="mb-2 flex items-center gap-2 text-[11px] font-mono tracking-[0.16em] text-[#00C9A7] uppercase">
-            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#00C9A7]" />
+          <div className="mb-2 flex items-center gap-2 text-[11px] font-mono tracking-[0.16em] text-brand uppercase">
+            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-brand" />
             Brand profile
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-[#F1F5F9]">Brand</h1>
-          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#94A3B8]">
+          <h1 className="text-3xl font-bold tracking-tight text-ink">Brand</h1>
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">
             Tell the AI who you are, what you post about, and how you sound.
           </p>
         </div>
@@ -109,13 +109,13 @@ function BrandStudio() {
         <div
           role="group"
           aria-label="Brand sections"
-          className="flex w-full max-w-full flex-nowrap items-center gap-1 overflow-x-auto overscroll-x-contain rounded-xl border border-[#1F2D3D] bg-[#0F1419] p-1"
+          className="flex w-full max-w-full flex-nowrap items-center gap-1 overflow-x-auto overscroll-x-contain rounded-xl border border-line bg-surface p-1"
         >
           <button
             type="button"
             aria-pressed={activeTab === "voice-proof"}
             onClick={() => setActiveTab("voice-proof")}
-            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] sm:px-4 sm:text-sm " + (activeTab === "voice-proof" ? "bg-[#00C9A7] text-[#070B0F]" : "text-[#94A3B8] hover:text-[#F1F5F9]")}
+            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "voice-proof" ? "bg-brand text-canvas" : "text-muted hover:text-ink")}
           >
             <Mic2 className="h-4 w-4" aria-hidden="true" />
             Voice &amp; Proof
@@ -124,7 +124,7 @@ function BrandStudio() {
             type="button"
             aria-pressed={activeTab === "overview"}
             onClick={() => setActiveTab("overview")}
-            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] sm:px-4 sm:text-sm " + (activeTab === "overview" ? "bg-[#00C9A7] text-[#070B0F]" : "text-[#94A3B8] hover:text-[#F1F5F9]")}
+            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "overview" ? "bg-brand text-canvas" : "text-muted hover:text-ink")}
           >
             <Sparkles className="h-4 w-4" aria-hidden="true" />
             Overview
@@ -133,7 +133,7 @@ function BrandStudio() {
             type="button"
             aria-pressed={activeTab === "experience"}
             onClick={() => setActiveTab("experience")}
-            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] sm:px-4 sm:text-sm " + (activeTab === "experience" ? "bg-[#00C9A7] text-[#070B0F]" : "text-[#94A3B8] hover:text-[#F1F5F9]")}
+            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "experience" ? "bg-brand text-canvas" : "text-muted hover:text-ink")}
           >
             <BookOpen className="h-4 w-4" aria-hidden="true" />
             Audience &amp; Experience
@@ -142,7 +142,7 @@ function BrandStudio() {
             type="button"
             aria-pressed={activeTab === "sources"}
             onClick={() => setActiveTab("sources")}
-            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] sm:px-4 sm:text-sm " + (activeTab === "sources" ? "bg-[#00C9A7] text-[#070B0F]" : "text-[#94A3B8] hover:text-[#F1F5F9]")}
+            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "sources" ? "bg-brand text-canvas" : "text-muted hover:text-ink")}
           >
             <Rss className="h-4 w-4" aria-hidden="true" />
             Idea Sources
@@ -151,7 +151,7 @@ function BrandStudio() {
             type="button"
             aria-pressed={activeTab === "lexicon"}
             onClick={() => setActiveTab("lexicon")}
-            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C9A7] sm:px-4 sm:text-sm " + (activeTab === "lexicon" ? "bg-[#00C9A7] text-[#070B0F]" : "text-[#94A3B8] hover:text-[#F1F5F9]")}
+            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "lexicon" ? "bg-brand text-canvas" : "text-muted hover:text-ink")}
           >
             <AlertTriangle className="h-4 w-4" aria-hidden="true" />
             Banned Words ({forbiddenDirectives.length})

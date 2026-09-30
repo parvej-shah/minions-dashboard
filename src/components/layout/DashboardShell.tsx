@@ -17,6 +17,7 @@ import { buildNavItems } from "@/constants/nav";
 import type { PipelineTriggerResult } from "@/types";
 import HarvestingProgressHUD, { HarvestingJob } from "@/components/common/HarvestingProgressHUD";
 import ImpersonationBanner from "./ImpersonationBanner";
+import { PageSkeleton } from "@/components/ui/Skeleton";
 
 export interface DashboardShellProps {
   children: React.ReactNode;
@@ -42,11 +43,11 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   // session is read fresh from the database (see the jwt callback), so this
   // never bounces someone whose workspace was just created. Staff are exempt:
   // they work through platform-admin and view-as-tenant.
+  const needsWorkspace =
+    status === "authenticated" && !!session?.user && !session.user.clientId && session.user.role !== "SYSTEM_ADMIN";
   React.useEffect(() => {
-    if (status === "authenticated" && session?.user && !session.user.clientId && session.user.role !== "SYSTEM_ADMIN") {
-      router.replace("/onboarding/setup");
-    }
-  }, [status, session, router]);
+    if (needsWorkspace) router.replace("/onboarding/setup");
+  }, [needsWorkspace, router]);
 
   const [isHarvesting, setIsHarvesting] = useState(false);
   const [activeHarvestJob, setActiveHarvestJob] = useState<HarvestingJob | null>(null);
@@ -106,9 +107,14 @@ export default function DashboardShell({ children }: DashboardShellProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // A workspace whose brand brief was never finished belongs in the wizard.
+  const needsBrief = !brandLoading && !!brandSettings && !brandSettings.positioning && pathname === "/";
+  // While either redirect is pending, show a skeleton rather than a flash of an empty dashboard.
+  const redirecting = needsWorkspace || needsBrief;
+
   // Handle onboarding success toast and un-onboarded tenant routing
   React.useEffect(() => {
-    if (!brandLoading && brandSettings && !brandSettings.positioning && pathname === "/") {
+    if (needsBrief) {
       router.replace("/onboarding/setup");
       return;
     }
@@ -126,13 +132,13 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         );
       }
     }
-  }, [brandLoading, brandSettings, pathname, router, notify]);
+  }, [needsBrief, router, notify]);
 
   const handleSignIn = useCallback(async () => {
     // Mark a pending signup first, as the login page does, or a new Google
     // account is refused by the signIn callback (AccessDenied).
     await fetch("/api/onboarding/begin", { method: "POST" });
-    await signIn("google", { callbackUrl: "/onboarding/setup" });
+    await signIn("google", { callbackUrl: "/onboarding" });
   }, []);
   const handleSignOut = useCallback(() => signOut({ callbackUrl: "/login" }), []);
 
@@ -153,7 +159,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   };
 
   return (
-    <div className="dashboard-readable flex min-h-screen bg-[#0a0d12] text-[#F1F5F9]">
+    <div className="dashboard-readable flex min-h-screen bg-[#0a0d12] text-ink">
       <CommandPalette
         isOpen={showPalette}
         onClose={() => setShowPalette(false)}
@@ -189,7 +195,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         />
 
         {notification && (
-          <div className="bg-[#00C9A7]/20 border-b border-[#00C9A7]/40 px-4 sm:px-6 py-2 text-xs font-medium text-[#00C9A7] flex items-center justify-between animate-in slide-in-from-top-2">
+          <div className="bg-brand/20 border-b border-brand/40 px-4 sm:px-6 py-2 text-xs font-medium text-brand flex items-center justify-between animate-in slide-in-from-top-2">
             <span>{notification}</span>
             <button onClick={clearNotification} className="hover:opacity-75 cursor-pointer">
               <X className="w-3.5 h-3.5" />
@@ -198,7 +204,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         )}
 
         <main className="p-3.5 pb-28 sm:p-6 md:p-8 md:pb-8 flex-1 max-w-7xl w-full mx-auto">
-          {children}
+          {redirecting ? <PageSkeleton label="Opening your workspace" /> : children}
         </main>
       </div>
 

@@ -23,11 +23,11 @@ interface TenantRow {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  ACTIVE: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30",
+  ACTIVE: "bg-brand/10 text-brand border-brand/30",
   TRIAL: "bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/30",
-  PAST_DUE: "bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/30",
-  SUSPENDED: "bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/30",
-  CANCELED: "bg-[#64748B]/10 text-[#64748B] border-[#64748B]/30",
+  PAST_DUE: "bg-gold/10 text-gold border-gold/30",
+  SUSPENDED: "bg-danger/10 text-danger border-danger/30",
+  CANCELED: "bg-subtle/10 text-subtle border-subtle/30",
 };
 
 export default function PlatformAdminPage() {
@@ -62,38 +62,38 @@ export default function PlatformAdminPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Tenants</h1>
-        <p className="text-sm text-[#94A3B8] mt-1">Cross-tenant status, usage, and support access.</p>
+        <p className="text-sm text-muted mt-1">Cross-tenant status, usage, and support access.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-surface border border-line flex items-center justify-between">
           <div>
-            <div className="text-[11px] font-mono text-[#94A3B8]">TOTAL TENANTS</div>
-            <div className="text-xl font-bold text-[#F1F5F9] mt-0.5">{tenants.length}</div>
+            <div className="text-[11px] font-mono text-muted">TOTAL TENANTS</div>
+            <div className="text-xl font-bold text-ink mt-0.5">{tenants.length}</div>
           </div>
-          <Building2 className="w-5 h-5 text-[#00C9A7]" />
+          <Building2 className="w-5 h-5 text-brand" />
         </div>
-        <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-surface border border-line flex items-center justify-between">
           <div>
-            <div className="text-[11px] font-mono text-[#94A3B8]">ACTIVE</div>
-            <div className="text-xl font-bold text-[#F1F5F9] mt-0.5">{activeTenants}</div>
+            <div className="text-[11px] font-mono text-muted">ACTIVE</div>
+            <div className="text-xl font-bold text-ink mt-0.5">{activeTenants}</div>
           </div>
           <Users className="w-5 h-5 text-[#3B82F6]" />
         </div>
-        <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-surface border border-line flex items-center justify-between">
           <div>
-            <div className="text-[11px] font-mono text-[#94A3B8]">TOTAL RECORDED SPEND</div>
-            <div className="text-xl font-bold text-[#F1F5F9] mt-0.5">${totalSpend.toFixed(2)}</div>
+            <div className="text-[11px] font-mono text-muted">TOTAL RECORDED SPEND</div>
+            <div className="text-xl font-bold text-ink mt-0.5">${totalSpend.toFixed(2)}</div>
           </div>
-          <DollarSign className="w-5 h-5 text-[#ff6b4a]" />
+          <DollarSign className="w-5 h-5 text-coral" />
         </div>
       </div>
 
-      <div className="rounded-2xl bg-[#0F1419] border border-[#1F2D3D] overflow-hidden">
+      <div className="rounded-2xl bg-surface border border-line overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs min-w-[720px]">
             <thead>
-              <tr className="border-b border-[#1F2D3D] text-[#94A3B8] font-mono text-[11px]">
+              <tr className="border-b border-line text-muted font-mono text-[11px]">
                 <th className="p-3 font-semibold">TENANT</th>
                 <th className="p-3 font-semibold">STATUS</th>
                 <th className="p-3 font-semibold">PLAN</th>
@@ -103,18 +103,18 @@ export default function PlatformAdminPage() {
                 <th className="p-3 font-semibold text-right">SUPPORT</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1F2D3D]/60">
+            <tbody className="divide-y divide-line/60">
               {tenants.map((t) => (
-                <tr key={t.id} className="hover:bg-[#161D26]/70 transition-colors">
+                <tr key={t.id} className="hover:bg-surface-2/70 transition-colors">
                   <td className="p-3">
                     <Link
                       href={`/platform-admin/tenants/${t.id}`}
-                      className="font-semibold text-[#F1F5F9] hover:text-[#00C9A7] transition-colors inline-flex items-center gap-1.5"
+                      className="font-semibold text-ink hover:text-brand transition-colors inline-flex items-center gap-1.5"
                     >
                       {t.name}
                       <ExternalLink className="w-3 h-3 opacity-50" />
                     </Link>
-                    <div className="text-[10px] text-[#64748B] font-mono">{t.slug}</div>
+                    <div className="text-[10px] text-subtle font-mono">{t.slug}</div>
                   </td>
                   <td className="p-3">
                     <span
@@ -125,15 +125,15 @@ export default function PlatformAdminPage() {
                       {t.status}
                     </span>
                   </td>
-                  <td className="p-3 font-mono text-[#94A3B8]">{t.plan_key}</td>
+                  <td className="p-3 font-mono text-muted">{t.plan_key}</td>
                   <td className="p-3 text-right font-mono">{t.member_count}</td>
                   <td className="p-3 text-right font-mono">{t.asset_count}</td>
-                  <td className="p-3 text-right font-mono text-[#00C9A7]">${t.total_cost_usd.toFixed(3)}</td>
+                  <td className="p-3 text-right font-mono text-brand">${t.total_cost_usd.toFixed(3)}</td>
                   <td className="p-3 text-right">
                     <button
                       onClick={() => viewAsTenant(t.id)}
                       disabled={viewingAs === t.id}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] text-[11px] font-semibold transition-all disabled:opacity-60"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line text-muted hover:text-ink text-[11px] font-semibold transition-all disabled:opacity-60"
                     >
                       {viewingAs === t.id ? (
                         <RefreshCw className="w-3 h-3 animate-spin" />
@@ -151,7 +151,7 @@ export default function PlatformAdminPage() {
       </div>
 
       {toast.message && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#EF4444]/90 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold">
+        <div className="fixed bottom-6 right-6 z-50 bg-danger/90 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold">
           {toast.message}
         </div>
       )}

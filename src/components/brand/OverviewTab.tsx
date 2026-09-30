@@ -9,6 +9,7 @@ import { LoadingState } from "@/components/ui/EmptyState";
 import BrandLookPreview from "@/components/brand/BrandLookPreview";
 import { COVER_ART_STYLES, COVER_ART_STYLE_META } from "@/lib/covers/artStyles";
 
+import { buttonStyles } from "@/components/ui/Button";
 const PER_CATEGORY_LIMIT = 6;
 
 const TONE_LABELS: Record<string, string> = {
@@ -259,15 +260,15 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0F1419] p-4 rounded-2xl border border-[#1F2D3D]">
-        <p className="text-sm leading-relaxed text-[#94A3B8] max-w-xl">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-surface p-4 rounded-2xl border border-line">
+        <p className="text-sm leading-relaxed text-muted max-w-xl">
           This is what the AI knows about your brand. Edit anything below, or let AI refresh it for you.
         </p>
         <button
           type="button"
           onClick={regenerateWithAI}
           disabled={regenerating || !profile}
-          className="flex items-center gap-1.5 bg-[#161D26] hover:bg-[#1E293B] border border-[#00C9A7]/40 text-[#00C9A7] text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm transition-all disabled:opacity-50"
+          className="flex items-center gap-1.5 bg-surface-2 hover:bg-[#1E293B] border border-brand/40 text-brand text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm transition-all disabled:opacity-50"
         >
           {regenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
           Regenerate with AI
@@ -280,14 +281,14 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Positioning */}
-        <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-3 shadow-sm">
+        <div className="p-5 rounded-2xl bg-surface border border-line space-y-3 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <User className="w-4 h-4 text-[#00C9A7]" />
-              <h3 className="text-sm font-bold text-[#F1F5F9]">Positioning</h3>
+              <User className="w-4 h-4 text-brand" />
+              <h3 className="text-sm font-bold text-ink">Positioning</h3>
             </div>
             {!editingPositioning && (
-              <button onClick={openPositioningEdit} className="text-[#94A3B8] hover:text-[#00C9A7] p-1" title="Edit">
+              <button onClick={openPositioningEdit} className="text-muted hover:text-brand p-1" title="Edit">
                 <Pencil className="w-3.5 h-3.5" />
               </button>
             )}
@@ -296,7 +297,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
           {editingPositioning ? (
             <div className="space-y-2">
               <div>
-                <label className="mb-1 block text-[11px] font-semibold text-[#94A3B8]">
+                <label className="mb-1 block text-[11px] font-semibold text-muted">
                   Business name
                 </label>
                 <input
@@ -304,9 +305,9 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
                   value={brandNameDraft}
                   onChange={(e) => setBrandNameDraft(e.target.value)}
                   placeholder="e.g. Acme HVAC"
-                  className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]"
+                  className="w-full bg-surface-2 border border-line rounded-xl px-3 py-2 text-xs text-ink focus:outline-none focus:border-brand"
                 />
-                <p className="mt-1 text-[10px] text-[#64748B]">
+                <p className="mt-1 text-[10px] text-subtle">
                   Shown on generated cover images and used throughout your content.
                 </p>
               </div>
@@ -314,19 +315,19 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
                 rows={3}
                 value={positioningDraft}
                 onChange={(e) => setPositioningDraft(e.target.value)}
-                className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-xl p-3 text-xs text-[#F1F5F9] resize-none focus:outline-none focus:border-[#00C9A7]"
+                className="w-full bg-surface-2 border border-line rounded-xl p-3 text-xs text-ink resize-none focus:outline-none focus:border-brand"
               />
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setEditingPositioning(false)}
-                  className="px-3 py-1.5 rounded-lg text-xs text-[#94A3B8] hover:bg-[#161D26]"
+                  className="px-3 py-1.5 rounded-lg text-xs text-muted hover:bg-surface-2"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={savePositioning}
                   disabled={savingPositioning}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] font-bold rounded-lg text-xs disabled:opacity-50"
+                  className={buttonStyles({ size: "sm" })}
                 >
                   {savingPositioning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                   Save
@@ -335,10 +336,10 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
             </div>
           ) : (
           <div className="space-y-1">
-              <p className="text-sm font-semibold text-[#F1F5F9]">
+              <p className="text-sm font-semibold text-ink">
                 {profile?.brand_name || "Unnamed brand"}
               </p>
-              <p className="text-sm text-[#F1F5F9] leading-relaxed">
+              <p className="text-sm text-ink leading-relaxed">
                 {profile?.positioning || "Not set yet — tap edit to describe who you are."}
               </p>
             </div>
@@ -354,12 +355,12 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
         </div>
 
         {/* Topics */}
-        <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-3 shadow-sm">
+        <div className="p-5 rounded-2xl bg-surface border border-line space-y-3 shadow-sm">
           <div className="flex items-center gap-2">
-            <Hash className="w-4 h-4 text-[#00C9A7]" />
-            <h3 className="text-sm font-bold text-[#F1F5F9]">Topics</h3>
+            <Hash className="w-4 h-4 text-brand" />
+            <h3 className="text-sm font-bold text-ink">Topics</h3>
           </div>
-          <p className="text-sm text-[#94A3B8]">What you post about.</p>
+          <p className="text-sm text-muted">What you post about.</p>
           <TagList
             category="TOPICS"
             items={activeByCategory("TOPICS")}
@@ -370,41 +371,41 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
         </div>
 
         {/* Audience */}
-        <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-3 shadow-sm">
+        <div className="p-5 rounded-2xl bg-surface border border-line space-y-3 shadow-sm">
           <div className="flex items-center gap-2">
-            <Users2 className="w-4 h-4 text-[#00C9A7]" />
-            <h3 className="text-sm font-bold text-[#F1F5F9]">Audience</h3>
+            <Users2 className="w-4 h-4 text-brand" />
+            <h3 className="text-sm font-bold text-ink">Audience</h3>
           </div>
-          <p className="text-sm text-[#94A3B8]">The one customer every idea is written for.</p>
+          <p className="text-sm text-muted">The one customer every idea is written for.</p>
           {/* The ICP profile is the source of truth; the AUDIENCE directive
               the prompts read is derived from it on save. */}
           {icp?.who ? (
             <div className="space-y-1.5">
-              <p className="text-sm text-[#F1F5F9] line-clamp-3">{icp.who}</p>
+              <p className="text-sm text-ink line-clamp-3">{icp.who}</p>
               {icp.pains.length > 0 && (
-                <p className="text-xs text-[#94A3B8] line-clamp-2">Biggest problem: {icp.pains[0]}</p>
+                <p className="text-xs text-muted line-clamp-2">Biggest problem: {icp.pains[0]}</p>
               )}
             </div>
           ) : (
-            <p className="text-xs text-[#64748B]">Not described yet.</p>
+            <p className="text-xs text-subtle">Not described yet.</p>
           )}
           <button
             type="button"
             onClick={onEditAudience}
-            className="text-xs font-semibold text-[#00C9A7] hover:underline cursor-pointer"
+            className="text-xs font-semibold text-brand hover:underline cursor-pointer"
           >
             {icp?.who ? "Edit ideal customer" : "Describe your ideal customer"}
           </button>
         </div>
 
         {/* Voice */}
-        <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-3 shadow-sm">
+        <div className="p-5 rounded-2xl bg-surface border border-line space-y-3 shadow-sm">
           <div className="flex items-center gap-2">
-            <Mic className="w-4 h-4 text-[#00C9A7]" />
-            <h3 className="text-sm font-bold text-[#F1F5F9]">Voice</h3>
+            <Mic className="w-4 h-4 text-brand" />
+            <h3 className="text-sm font-bold text-ink">Voice</h3>
           </div>
           {profile && (
-            <span className="inline-flex text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-[#00C9A7]">
+            <span className="inline-flex text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-brand/10 border border-brand/30 text-brand">
               {TONE_LABELS[profile.tone_guidelines.formality] || profile.tone_guidelines.formality}
             </span>
           )}
@@ -418,35 +419,35 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
         </div>
 
         {/* Brand Look: logo + colors, used for thumbnail/cover generation only */}
-        <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-3 shadow-sm md:col-span-2">
+        <div className="p-5 rounded-2xl bg-surface border border-line space-y-3 shadow-sm md:col-span-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Palette className="w-4 h-4 text-[#00C9A7]" />
-              <h3 className="text-sm font-bold text-[#F1F5F9]">Brand look</h3>
+              <Palette className="w-4 h-4 text-brand" />
+              <h3 className="text-sm font-bold text-ink">Brand look</h3>
             </div>
             {!editingLook && (
-              <button onClick={openLookEdit} className="text-[#94A3B8] hover:text-[#00C9A7] p-1" title="Edit">
+              <button onClick={openLookEdit} className="text-muted hover:text-brand p-1" title="Edit">
                 <Pencil className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
-          <p className="text-sm text-[#94A3B8]">
+          <p className="text-sm text-muted">
             Every post&apos;s cover is drawn in this look: the same type, colours, photo and byline each time, so readers learn to recognise your posts.
           </p>
 
           {editingLook && lookDraft ? (
             <div className="space-y-3">
               <div>
-                <label className="text-[11px] font-medium text-[#94A3B8] block mb-1">Photo or logo on covers (a headshot builds personal authority)</label>
+                <label className="text-[11px] font-medium text-muted block mb-1">Photo or logo on covers (a headshot builds personal authority)</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={lookDraft.primary_logo_url}
                     onChange={(e) => setLookDraft({ ...lookDraft, primary_logo_url: e.target.value })}
                     placeholder="https://… (PNG or JPEG)"
-                    className="flex-1 min-w-0 bg-[#161D26] border border-[#1F2D3D] rounded-lg px-3 py-1.5 text-xs text-[#F1F5F9] font-mono focus:outline-none focus:border-[#00C9A7]"
+                    className="flex-1 min-w-0 bg-surface-2 border border-line rounded-lg px-3 py-1.5 text-xs text-ink font-mono focus:outline-none focus:border-brand"
                   />
-                  <label className={`shrink-0 px-3 py-1.5 rounded-lg bg-[#161D26] border border-[#1F2D3D] text-xs text-[#00C9A7] hover:border-[#00C9A7] cursor-pointer inline-flex items-center gap-1.5 ${uploadingPhoto ? "opacity-50 pointer-events-none" : ""}`}>
+                  <label className={`shrink-0 px-3 py-1.5 rounded-lg bg-surface-2 border border-line text-xs text-brand hover:border-brand cursor-pointer inline-flex items-center gap-1.5 ${uploadingPhoto ? "opacity-50 pointer-events-none" : ""}`}>
                     {uploadingPhoto ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
                     Upload
                     <input type="file" accept="image/png,image/jpeg" className="hidden" onChange={(e) => void uploadPhoto(e.target.files?.[0])} />
@@ -455,18 +456,18 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
                 {photoError && <p className="text-[11px] text-[#F87171] mt-1">{photoError}</p>}
               </div>
               <div>
-                <label className="text-[11px] font-medium text-[#94A3B8] block mb-1">Byline under your name (empty: the first sentence of your positioning)</label>
+                <label className="text-[11px] font-medium text-muted block mb-1">Byline under your name (empty: the first sentence of your positioning)</label>
                 <input
                   type="text"
                   value={lookDraft.cover_byline}
                   maxLength={90}
                   onChange={(e) => setLookDraft({ ...lookDraft, cover_byline: e.target.value })}
                   placeholder="e.g. Builds AI voice agents for real estate teams"
-                  className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-lg px-3 py-1.5 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]"
+                  className="w-full bg-surface-2 border border-line rounded-lg px-3 py-1.5 text-xs text-ink focus:outline-none focus:border-brand"
                 />
               </div>
               <div>
-                <label className="text-[11px] font-medium text-[#94A3B8] block mb-1">Illustration above the headline</label>
+                <label className="text-[11px] font-medium text-muted block mb-1">Illustration above the headline</label>
                 <div className="flex flex-wrap gap-1.5">
                   {COVER_ART_STYLES.map((s) => (
                     <button
@@ -475,21 +476,21 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
                       aria-pressed={lookDraft.cover_art === s}
                       onClick={() => setLookDraft({ ...lookDraft, cover_art: s })}
                       className={`px-2.5 py-1.5 rounded-lg text-xs border transition-all text-left ${
-                        lookDraft.cover_art === s ? "bg-[#00C9A7]/15 border-[#00C9A7] text-[#00C9A7]" : "bg-[#161D26] border-[#1F2D3D] text-[#F1F5F9] hover:border-[#00C9A7]/60"
+                        lookDraft.cover_art === s ? "bg-brand/15 border-brand text-brand" : "bg-surface-2 border-line text-ink hover:border-brand/60"
                       }`}
                     >
                       <span className="font-medium">{COVER_ART_STYLE_META[s].label}</span>
-                      <span className="block text-[10px] text-[#64748B]">{COVER_ART_STYLE_META[s].description}</span>
+                      <span className="block text-[10px] text-subtle">{COVER_ART_STYLE_META[s].description}</span>
                     </button>
                   ))}
                 </div>
-                <p className="text-[10px] text-[#64748B] mt-1">Used on new covers. To change a draft&apos;s cover, use its cover card in Editorial.</p>
+                <p className="text-[10px] text-subtle mt-1">Used on new covers. To change a draft&apos;s cover, use its cover card in Editorial.</p>
               </div>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                 {LOOK_COLOR_FIELDS.map(({ key, label }) => (
                   <div key={key} className="space-y-1">
                     <label
-                      className="h-10 rounded-lg border border-[#1F2D3D] block cursor-pointer relative overflow-hidden"
+                      className="h-10 rounded-lg border border-line block cursor-pointer relative overflow-hidden"
                       style={{ backgroundColor: lookDraft[key] }}
                     >
                       <input
@@ -499,7 +500,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       />
                     </label>
-                    <div className="text-[10px] text-[#64748B] text-center">{label}</div>
+                    <div className="text-[10px] text-subtle text-center">{label}</div>
                   </div>
                 ))}
               </div>
@@ -507,14 +508,14 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setEditingLook(false)}
-                  className="px-3 py-1.5 rounded-lg text-xs text-[#94A3B8] hover:bg-[#161D26]"
+                  className="px-3 py-1.5 rounded-lg text-xs text-muted hover:bg-surface-2"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={saveLook}
                   disabled={savingLook}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] font-bold rounded-lg text-xs disabled:opacity-50"
+                  className={buttonStyles({ size: "sm" })}
                 >
                   {savingLook ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                   Save
@@ -529,18 +530,18 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
                 LOOK_COLOR_FIELDS.map(({ key, label }) => (
                   <span
                     key={key}
-                    className="w-8 h-8 rounded-lg border border-[#1F2D3D]"
+                    className="w-8 h-8 rounded-lg border border-line"
                     style={{ backgroundColor: profile[key] }}
                     title={`${label}: ${profile[key]}`}
                   />
                 ))}
               {profile?.primary_logo_url && (
-                <span className="text-[11px] text-[#94A3B8] font-mono ml-2 truncate max-w-[240px]">
+                <span className="text-[11px] text-muted font-mono ml-2 truncate max-w-[240px]">
                   {profile.primary_logo_url}
                 </span>
               )}
               {profile && !profile.primary_logo_url && (
-                <span className="text-[11px] text-[#64748B] ml-2">No photo or logo yet: covers show your initials.</span>
+                <span className="text-[11px] text-subtle ml-2">No photo or logo yet: covers show your initials.</span>
               )}
             </div>
             </div>
@@ -589,10 +590,10 @@ function TagList({
         {items.map((item) => (
           <span
             key={item.id}
-            className="inline-flex items-center gap-1.5 bg-[#161D26] border border-[#1F2D3D] text-[#F1F5F9] text-[11px] px-3 py-1.5 rounded-lg leading-relaxed"
+            className="inline-flex items-center gap-1.5 bg-surface-2 border border-line text-ink text-[11px] px-3 py-1.5 rounded-lg leading-relaxed"
           >
             {item.content}
-            <button onClick={() => onRemove(item.id)} className="text-[#64748B] hover:text-red-400">
+            <button onClick={() => onRemove(item.id)} className="text-subtle hover:text-red-400">
               <X className="w-3 h-3" />
             </button>
           </span>
@@ -609,12 +610,12 @@ function TagList({
           onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), submit())}
           disabled={isFull}
           placeholder={isFull ? `Limit reached (${PER_CATEGORY_LIMIT})` : placeholder}
-          className="flex-1 bg-[#161D26] border border-[#1F2D3D] rounded-lg px-3 py-2 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7] disabled:opacity-50"
+          className="flex-1 bg-surface-2 border border-line rounded-lg px-3 py-2 text-xs text-ink focus:outline-none focus:border-brand disabled:opacity-50"
         />
         <button
           onClick={submit}
           disabled={submitting || isFull || !draft.trim()}
-          className="flex items-center gap-1 bg-[#161D26] hover:bg-[#1F2D3D] border border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9] text-xs font-semibold px-3 py-2 rounded-lg transition-all disabled:opacity-50"
+          className="flex items-center gap-1 bg-surface-2 hover:bg-line border border-line text-muted hover:text-ink text-xs font-semibold px-3 py-2 rounded-lg transition-all disabled:opacity-50"
         >
           {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
         </button>

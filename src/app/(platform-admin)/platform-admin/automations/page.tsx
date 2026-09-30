@@ -29,8 +29,8 @@ interface Payload {
 }
 
 const STATE: Record<Job["state"], { label: string; cls: string }> = {
-  RUNNING: { label: "Running", cls: "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30" },
-  STOPPED: { label: "Not running", cls: "bg-[#64748B]/10 text-[#94A3B8] border-[#64748B]/30" },
+  RUNNING: { label: "Running", cls: "bg-brand/10 text-brand border-brand/30" },
+  STOPPED: { label: "Not running", cls: "bg-subtle/10 text-muted border-subtle/30" },
   ON_DEMAND: { label: "When called", cls: "bg-[#3B82F6]/10 text-[#93C5FD] border-[#3B82F6]/30" },
 };
 
@@ -65,28 +65,28 @@ export default function AutomationsPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Automations</h1>
-          <p className="text-sm text-[#94A3B8] mt-1">
+          <p className="text-sm text-muted mt-1">
             What actually ran, from each job&apos;s last check-in. A timed job counts as not running after it misses three runs.
           </p>
         </div>
         <button
           type="button"
           onClick={() => void reload()}
-          className="inline-flex items-center gap-1.5 text-xs text-[#94A3B8] hover:text-[#F1F5F9] border border-[#1F2D3D] rounded-lg px-3 py-1.5"
+          className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-ink border border-line rounded-lg px-3 py-1.5"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Refresh
         </button>
       </div>
 
-      <div className="p-4 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] text-sm text-[#F1F5F9]">
+      <div className="p-4 rounded-2xl bg-surface border border-line text-sm text-ink">
         {drafting?.state === "RUNNING"
           ? `Automatic drafting is running. ${onCount} workspace${onCount === 1 ? " has" : "s have"} it switched on.`
           : `Automatic drafting is not running, so no workspace drafts on its own${onCount ? ` (even though ${onCount} ha${onCount === 1 ? "s" : "ve"} the switch on)` : ""}.`}
       </div>
 
-      <div className="rounded-2xl border border-[#1F2D3D] overflow-x-auto">
+      <div className="rounded-2xl border border-line overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-[#0F1419] text-[11px] font-mono text-[#94A3B8] uppercase">
+          <thead className="bg-surface text-[11px] font-mono text-muted uppercase">
             <tr>
               <th className="text-left px-4 py-3">Job</th>
               <th className="text-left px-4 py-3">State</th>
@@ -96,19 +96,19 @@ export default function AutomationsPage() {
           </thead>
           <tbody>
             {data.jobs.map((j) => (
-              <tr key={j.key} className="border-t border-[#1F2D3D]">
+              <tr key={j.key} className="border-t border-line">
                 <td className="px-4 py-3 align-top">
-                  <div className="font-semibold text-[#F1F5F9]">{j.name}</div>
-                  <div className="text-xs text-[#94A3B8] mt-0.5">{j.does}</div>
-                  <div className="text-[10px] font-mono text-[#64748B] mt-1">{j.key}</div>
+                  <div className="font-semibold text-ink">{j.name}</div>
+                  <div className="text-xs text-muted mt-0.5">{j.does}</div>
+                  <div className="text-[10px] font-mono text-subtle mt-1">{j.key}</div>
                 </td>
                 <td className="px-4 py-3 align-top">
                   <span className={`inline-block text-[11px] font-semibold border rounded-full px-2 py-0.5 whitespace-nowrap ${STATE[j.state].cls}`}>{STATE[j.state].label}</span>
                 </td>
-                <td className="px-4 py-3 align-top text-xs text-[#94A3B8] whitespace-nowrap" title={j.last_run_at ?? undefined}>
+                <td className="px-4 py-3 align-top text-xs text-muted whitespace-nowrap" title={j.last_run_at ?? undefined}>
                   {ago(j.last_run_at)}
                 </td>
-                <td className="px-4 py-3 align-top text-xs text-[#94A3B8]">{j.when}</td>
+                <td className="px-4 py-3 align-top text-xs text-muted">{j.when}</td>
               </tr>
             ))}
           </tbody>
@@ -117,9 +117,9 @@ export default function AutomationsPage() {
 
       <div className="space-y-3">
         <h2 className="text-sm font-bold">Workspaces</h2>
-        <div className="rounded-2xl border border-[#1F2D3D] overflow-x-auto">
+        <div className="rounded-2xl border border-line overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-[#0F1419] text-[11px] font-mono text-[#94A3B8] uppercase">
+            <thead className="bg-surface text-[11px] font-mono text-muted uppercase">
               <tr>
                 <th className="text-left px-4 py-3">Workspace</th>
                 <th className="text-left px-4 py-3">Automatic drafting</th>
@@ -128,15 +128,15 @@ export default function AutomationsPage() {
             </thead>
             <tbody>
               {data.workspaces.map((w) => (
-                <tr key={w.client_id} className="border-t border-[#1F2D3D]">
+                <tr key={w.client_id} className="border-t border-line">
                   <td className="px-4 py-3">
-                    <div className="font-semibold text-[#F1F5F9]">{w.name}</div>
-                    <div className="text-[10px] font-mono text-[#64748B]">
+                    <div className="font-semibold text-ink">{w.name}</div>
+                    <div className="text-[10px] font-mono text-subtle">
                       {w.slug} · {w.status}
                     </div>
                   </td>
-                  <td className={`px-4 py-3 text-xs font-semibold ${w.drafting_on ? "text-[#00C9A7]" : "text-[#64748B]"}`}>{w.drafting_on ? "On" : "Off"}</td>
-                  <td className="px-4 py-3 text-xs text-[#94A3B8]">{w.require_review ? "Required" : "Off: passing slot drafts post on their own"}</td>
+                  <td className={`px-4 py-3 text-xs font-semibold ${w.drafting_on ? "text-brand" : "text-subtle"}`}>{w.drafting_on ? "On" : "Off"}</td>
+                  <td className="px-4 py-3 text-xs text-muted">{w.require_review ? "Required" : "Off: passing slot drafts post on their own"}</td>
                 </tr>
               ))}
             </tbody>

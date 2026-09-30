@@ -63,7 +63,7 @@ function MarkdownBlockView({
 }) {
   const paragraphClass = compact
     ? "break-words [overflow-wrap:anywhere] leading-relaxed text-[#CBD5E1] text-xs"
-    : "text-[15px] sm:text-[16px] text-[#E2E8F0] leading-[1.8] font-normal tracking-normal font-sans selection:bg-[#00C9A7]/20 break-words [overflow-wrap:anywhere]";
+    : "text-[15px] sm:text-[16px] text-[#E2E8F0] leading-[1.8] font-normal tracking-normal font-sans selection:bg-brand/20 break-words [overflow-wrap:anywhere]";
 
   switch (block.kind) {
     case "image": {
@@ -75,8 +75,8 @@ function MarkdownBlockView({
           <div
             className={`relative overflow-hidden ${
               compact
-                ? "rounded-xl border border-[#1F2D3D] bg-[#0F1419]"
-                : "rounded-2xl border border-[#1F2D3D] bg-[#070B0F] shadow-lg group"
+                ? "rounded-xl border border-line bg-surface"
+                : "rounded-2xl border border-line bg-canvas shadow-lg group"
             } ${portrait ? "aspect-[4/5] w-full max-w-[420px] mx-auto" : "aspect-[16/9] w-full max-w-full"}`}
           >
             <Image
@@ -95,7 +95,7 @@ function MarkdownBlockView({
           </div>
           {block.alt.trim() && (
             <figcaption
-              className={`text-center font-mono text-[#94A3B8] italic truncate ${
+              className={`text-center font-mono text-muted italic truncate ${
                 compact ? "text-[10px]" : "text-xs px-2"
               }`}
             >
@@ -109,12 +109,12 @@ function MarkdownBlockView({
     case "rule":
       return (
         <div
-          className={`rounded-2xl border border-[#00C9A7]/30 bg-[#00C9A7]/5 border-l-4 border-l-[#00C9A7] ${
+          className={`rounded-2xl border border-brand/30 bg-brand/5 border-l-4 border-l-brand ${
             compact ? "my-3 p-3 rounded-xl" : "my-6 p-5 sm:p-6 shadow-sm"
           }`}
         >
           <span
-            className={`rounded-full font-mono font-bold uppercase tracking-wide bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/40 ${
+            className={`rounded-full font-mono font-bold uppercase tracking-wide bg-brand/20 text-brand border border-brand/40 ${
               compact
                 ? "px-2 py-0.5 text-[10px] block w-fit mb-1.5"
                 : "px-2.5 py-0.5 text-xs inline-block mb-2"
@@ -126,7 +126,7 @@ function MarkdownBlockView({
             className={
               compact
                 ? "text-xs text-[#CBD5E1] break-words [overflow-wrap:anywhere] leading-relaxed font-medium"
-                : "text-base sm:text-lg leading-relaxed text-[#F1F5F9] font-medium"
+                : "text-base sm:text-lg leading-relaxed text-ink font-medium"
             }
           >
             {block.body}
@@ -139,22 +139,22 @@ function MarkdownBlockView({
         <div className={compact ? "space-y-1.5 pt-2" : "space-y-3 pt-4"}>
           {block.level === 3 ? (
             compact ? (
-              <h4 className="font-bold text-[#00C9A7] text-xs font-sans break-words [overflow-wrap:anywhere]">
+              <h4 className="font-bold text-brand text-xs font-sans break-words [overflow-wrap:anywhere]">
                 {block.title}
               </h4>
             ) : (
-              <h3 className="text-base sm:text-lg font-bold text-[#00C9A7] pt-2 flex items-center gap-2 break-words [overflow-wrap:anywhere] font-sans">
-                <CornerDownRight className="w-4 h-4 text-[#00C9A7] shrink-0" />
+              <h3 className="text-base sm:text-lg font-bold text-brand pt-2 flex items-center gap-2 break-words [overflow-wrap:anywhere] font-sans">
+                <CornerDownRight className="w-4 h-4 text-brand shrink-0" />
                 <span>{block.title}</span>
               </h3>
             )
           ) : compact ? (
-            <h3 className="font-bold text-sm text-[#00C9A7] font-sans break-words [overflow-wrap:anywhere]">
+            <h3 className="font-bold text-sm text-brand font-sans break-words [overflow-wrap:anywhere]">
               {block.title}
             </h3>
           ) : (
-            <h2 className="text-lg sm:text-2xl font-extrabold text-[#F1F5F9] pb-2 border-b border-[#1F2D3D]/60 flex items-center gap-2.5 break-words [overflow-wrap:anywhere] font-sans tracking-tight">
-              <span className="text-[#00C9A7] font-mono text-base font-bold shrink-0">#</span>
+            <h2 className="text-lg sm:text-2xl font-extrabold text-ink pb-2 border-b border-line/60 flex items-center gap-2.5 break-words [overflow-wrap:anywhere] font-sans tracking-tight">
+              <span className="text-brand font-mono text-base font-bold shrink-0">#</span>
               <span>{block.title}</span>
             </h2>
           )}
@@ -164,17 +164,17 @@ function MarkdownBlockView({
 
     case "code":
       return (
-        <div className="bg-[#070B0F] border border-[#1F2D3D] rounded-xl overflow-hidden my-4 shadow-inner max-w-full">
-          <div className="flex items-center justify-between px-3 py-1.5 bg-[#161D26] border-b border-[#1F2D3D] text-[10px] font-mono text-[#94A3B8]">
-            <span className="text-[#00C9A7] font-bold">{block.lang} wire format</span>
+        <div className="bg-canvas border border-line rounded-xl overflow-hidden my-4 shadow-inner max-w-full">
+          <div className="flex items-center justify-between px-3 py-1.5 bg-surface-2 border-b border-line text-[10px] font-mono text-muted">
+            <span className="text-brand font-bold">{block.lang} wire format</span>
             {onCopyCode && (
               <button
                 type="button"
                 onClick={() => onCopyCode(block.code, `code-${index}`)}
-                className="hover:text-[#F1F5F9] flex items-center gap-1 cursor-pointer"
+                className="hover:text-ink flex items-center gap-1 cursor-pointer"
               >
                 {copiedKey === `code-${index}` ? (
-                  <Check className="w-3 h-3 text-[#00C9A7]" />
+                  <Check className="w-3 h-3 text-brand" />
                 ) : (
                   <Copy className="w-3 h-3" />
                 )}
@@ -182,7 +182,7 @@ function MarkdownBlockView({
               </button>
             )}
           </div>
-          <pre className="p-3 sm:p-4 text-xs font-mono text-[#00C9A7] overflow-x-auto leading-relaxed max-w-full">
+          <pre className="p-3 sm:p-4 text-xs font-mono text-brand overflow-x-auto leading-relaxed max-w-full">
             {block.code}
           </pre>
         </div>
@@ -195,10 +195,10 @@ function MarkdownBlockView({
             <li
               key={itemIndex}
               className={`font-sans leading-relaxed flex items-start gap-2.5 break-words [overflow-wrap:anywhere] ${
-                compact ? "text-xs text-[#CBD5E1]" : "text-[15px] sm:text-[16px] text-[#F1F5F9]/90"
+                compact ? "text-xs text-[#CBD5E1]" : "text-[15px] sm:text-[16px] text-ink/90"
               }`}
             >
-              <span className="text-[#00C9A7] font-mono font-bold text-xs mt-1 shrink-0">▸</span>
+              <span className="text-brand font-mono font-bold text-xs mt-1 shrink-0">▸</span>
               <span>{item}</span>
             </li>
           ))}
@@ -210,8 +210,8 @@ function MarkdownBlockView({
         <blockquote
           className={
             compact
-              ? "border-l-2 border-[#ff6b4a] pl-2 italic text-[#94A3B8] break-words [overflow-wrap:anywhere] text-xs"
-              : "border-l-2 border-[#ff6b4a] bg-[#ff6b4a]/5 p-3.5 rounded-r-xl text-sm sm:text-[15px] font-sans italic text-[#F1F5F9]/90 my-3 break-words [overflow-wrap:anywhere]"
+              ? "border-l-2 border-coral pl-2 italic text-muted break-words [overflow-wrap:anywhere] text-xs"
+              : "border-l-2 border-coral bg-coral/5 p-3.5 rounded-r-xl text-sm sm:text-[15px] font-sans italic text-ink/90 my-3 break-words [overflow-wrap:anywhere]"
           }
         >
           {block.text}

@@ -5,6 +5,7 @@ import { KeyRound } from "lucide-react";
 import { DistributionChannelConfig } from "@/types";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 
+import { buttonStyles } from "@/components/ui/Button";
 /**
  * Inline token-paste form for one channel.
  *
@@ -91,7 +92,7 @@ export function ChannelCredentialForm({
               type="button"
               onClick={handleDisconnect}
               disabled={disconnecting}
-              className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap px-3 text-xs text-[#ff8b75] hover:text-[#ff6b4a] hover:underline disabled:opacity-50"
+              className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap px-3 text-xs text-[#ff8b75] hover:text-coral hover:underline disabled:opacity-50"
             >
               {disconnecting ? "Disconnecting…" : "Disconnect"}
             </button>
@@ -105,7 +106,7 @@ export function ChannelCredentialForm({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap px-3 text-xs leading-none text-[#A0ACBA] hover:text-[#00C9A7] transition-colors"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap px-3 text-xs leading-none text-[#A0ACBA] hover:text-brand transition-colors"
         >
           <KeyRound className="w-3 h-3" />
           {channel.has_credential ? "Rotate credential" : "Connect credential"}
@@ -115,7 +116,7 @@ export function ChannelCredentialForm({
             type="button"
             onClick={handleDisconnect}
             disabled={disconnecting}
-            className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap px-2 text-xs font-medium leading-none text-[#ff6b4a] hover:underline disabled:opacity-50"
+            className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap px-2 text-xs font-medium leading-none text-coral hover:underline disabled:opacity-50"
           >
             {disconnecting ? "Disconnecting…" : "Disconnect"}
           </button>
@@ -131,7 +132,7 @@ export function ChannelCredentialForm({
           value={externalId}
           onChange={(e) => setExternalId(e.target.value)}
           placeholder="Page / org ID (e.g. Facebook Page ID)"
-          className="w-full rounded-lg bg-[#070B0F] border border-[#1F2D3D] px-3 py-1.5 text-[11px] font-mono text-[#F1F5F9] placeholder:text-[#475569] focus:outline-none focus:border-[#00C9A7]"
+          className="w-full rounded-lg bg-canvas border border-line px-3 py-1.5 text-[11px] font-mono text-ink placeholder:text-[#475569] focus:outline-none focus:border-brand"
         />
       )}
       <input
@@ -139,15 +140,15 @@ export function ChannelCredentialForm({
         value={token}
         onChange={(e) => setToken(e.target.value)}
         placeholder={isBlog ? "https://yoursite.com/webhook/..." : "Access token"}
-        className="w-full rounded-lg bg-[#070B0F] border border-[#1F2D3D] px-3 py-1.5 text-[11px] font-mono text-[#F1F5F9] placeholder:text-[#475569] focus:outline-none focus:border-[#00C9A7]"
+        className="w-full rounded-lg bg-canvas border border-line px-3 py-1.5 text-[11px] font-mono text-ink placeholder:text-[#475569] focus:outline-none focus:border-brand"
       />
-      {error && <p className="text-[11px] text-[#ff6b4a]">{error}</p>}
+      {error && <p className="text-[11px] text-coral">{error}</p>}
       <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="min-h-11 w-full sm:w-auto px-4 rounded-lg bg-[#00C9A7] text-[#070B0F] text-sm font-semibold disabled:opacity-50"
+          className={buttonStyles({ className: "w-full sm:w-auto" })}
         >
           {saving ? "Saving…" : "Save"}
         </button>
@@ -157,7 +158,7 @@ export function ChannelCredentialForm({
             setOpen(false);
             setError(null);
           }}
-          className="min-h-11 w-full sm:w-auto px-4 rounded-lg border border-[#273342] text-sm text-[#A0ACBA] hover:text-[#F1F5F9]"
+          className="min-h-11 w-full sm:w-auto px-4 rounded-lg border border-[#273342] text-sm text-[#A0ACBA] hover:text-ink"
         >
           Cancel
         </button>

@@ -13,6 +13,8 @@ import {
 import MarkdownArticle from "./MarkdownArticle";
 import type { AssetItem } from "@/types";
 
+import { segment } from "@/components/ui/segment";
+import { buttonStyles } from "@/components/ui/Button";
 export type EditorMode = "preview" | "edit" | "split";
 
 export interface ArticleEditorProps {
@@ -57,11 +59,11 @@ export default function ArticleEditor({
   readingTimeMinutes,
 }: ArticleEditorProps) {
   return (
-          <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-5 sm:p-6 space-y-5 shadow-xl">
+          <div className="bg-surface rounded-2xl border border-line p-5 sm:p-6 space-y-5 shadow-xl">
             {/* Header Toolbar */}
-            <div className="flex flex-col gap-3 border-b border-[#1F2D3D] pb-3 2xl:flex-row 2xl:items-center 2xl:justify-between">
+            <div className="flex flex-col gap-3 border-b border-line pb-3 2xl:flex-row 2xl:items-center 2xl:justify-between">
               <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-                <div className="flex w-full items-center bg-[#070B0F] p-1 rounded-xl border border-[#1F2D3D] text-xs sm:w-auto">
+                <div className="flex w-full items-center bg-canvas p-1 rounded-xl border border-line text-xs sm:w-auto">
                   <button
                     type="button"
                     aria-label="Reading View"
@@ -69,8 +71,8 @@ export default function ArticleEditor({
                     onClick={() => setEditorMode("preview")}
                     className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-2.5 py-2 sm:flex-none sm:px-3 sm:py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                       editorMode === "preview"
-                        ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
-                        : "text-[#94A3B8] hover:text-[#F1F5F9]"
+                        ? segment.on
+                        : segment.off
                     }`}
                   >
                     <Eye className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
@@ -84,8 +86,8 @@ export default function ArticleEditor({
                     onClick={() => setEditorMode("edit")}
                     className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-2.5 py-2 sm:flex-none sm:px-3 sm:py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                       editorMode === "edit"
-                        ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
-                        : "text-[#94A3B8] hover:text-[#F1F5F9]"
+                        ? segment.on
+                        : segment.off
                     }`}
                   >
                     <Edit3 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
@@ -99,8 +101,8 @@ export default function ArticleEditor({
                     onClick={() => setEditorMode("split")}
                     className={`hidden 2xl:flex items-center gap-1.5 whitespace-nowrap px-2.5 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                       editorMode === "split"
-                        ? "bg-[#00C9A7] text-[#070B0F] font-bold shadow-sm"
-                        : "text-[#94A3B8] hover:text-[#F1F5F9]"
+                        ? segment.on
+                        : segment.off
                     }`}
                   >
                     <Layers className="w-3.5 h-3.5" />
@@ -111,17 +113,17 @@ export default function ArticleEditor({
                 {/* Live Save Status */}
                 <div className="flex min-w-0 items-center gap-2 sm:max-w-[190px]">
                   {isSaving ? (
-                    <span className="flex min-w-0 items-center gap-1.5 truncate text-[11px] font-mono text-[#00C9A7]">
+                    <span className="flex min-w-0 items-center gap-1.5 truncate text-[11px] font-mono text-brand">
                       <RefreshCw className="w-3 h-3 animate-spin" />
                       Saving changes…
                     </span>
                   ) : isDirty ? (
-                    <span className="flex items-center gap-1.5 whitespace-nowrap text-[11px] font-mono text-[#F59E0B] font-semibold bg-[#F59E0B]/10 px-2 py-1 rounded-lg border border-[#F59E0B]/20">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] animate-pulse" />
+                    <span className="flex items-center gap-1.5 whitespace-nowrap text-[11px] font-mono text-gold font-semibold bg-gold/10 px-2 py-1 rounded-lg border border-gold/20">
+                      <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
                       Unsaved changes
                     </span>
                   ) : (
-                    <span className="flex min-w-0 items-center gap-1.5 whitespace-nowrap text-[11px] font-mono text-[#00C9A7] bg-[#00C9A7]/10 px-2 py-1 rounded-lg border border-[#00C9A7]/20">
+                    <span className="flex min-w-0 items-center gap-1.5 whitespace-nowrap text-[11px] font-mono text-brand bg-brand/10 px-2 py-1 rounded-lg border border-brand/20">
                       <Check className="w-3 h-3" />
                       <span className="truncate">{statusLabel || "All changes saved"}</span>
                     </span>
@@ -135,11 +137,7 @@ export default function ArticleEditor({
                   type="button"
                   onClick={onSave}
                   disabled={isSaving}
-                  className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-4 py-2 text-xs font-bold transition-all shadow-sm cursor-pointer sm:flex-none ${
-                    isDirty
-                      ? "bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] shadow-[#00C9A7]/20"
-                      : "bg-[#161D26] hover:bg-[#1E2733] text-[#F1F5F9] border border-[#1F2D3D]"
-                  }`}
+                  className={buttonStyles({ variant: isDirty ? "primary" : "secondary", size: "sm", className: "flex-1 whitespace-nowrap sm:flex-none" })}
                   title="Save Draft (⌘S)"
                 >
                   {isSaving ? (
@@ -157,11 +155,11 @@ export default function ArticleEditor({
                   type="button"
                   aria-label="Copy Markdown source"
                   onClick={() => onCopy(edited.body, "raw-markdown")}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#070B0F] text-[#94A3B8] border border-[#1F2D3D] transition-all hover:bg-[#161D26] hover:text-[#F1F5F9]"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-canvas text-muted border border-line transition-all hover:bg-surface-2 hover:text-ink"
                   title="Copy Markdown Source"
                 >
                   {copiedKey === "raw-markdown" ? (
-                    <Check className="w-4 h-4 text-[#00C9A7]" />
+                    <Check className="w-4 h-4 text-brand" />
                   ) : (
                     <Copy className="w-4 h-4" />
                   )}
@@ -173,32 +171,32 @@ export default function ArticleEditor({
             {editorMode === "edit" && (
               <div className="space-y-4 animate-in fade-in duration-150">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#94A3B8] flex items-center justify-between">
+                  <label className="text-xs font-semibold text-muted flex items-center justify-between">
                     <span>Article Headline & Title</span>
-                    <span className="text-[10px] font-mono text-[#64748B]">{edited.title.length} chars</span>
+                    <span className="text-[10px] font-mono text-subtle">{edited.title.length} chars</span>
                   </label>
                   <input
                     type="text"
                     value={edited.title}
                     onChange={(e) => setEditedTitle(e.target.value)}
                     placeholder="Enter article headline..."
-                    className="w-full bg-[#070B0F] border border-[#1F2D3D] rounded-xl px-4 py-2.5 text-sm font-bold text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]"
+                    className="w-full bg-canvas border border-line rounded-xl px-4 py-2.5 text-sm font-bold text-ink focus:outline-none focus:border-brand"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#94A3B8]">Executive Hook / Subtitle</label>
+                  <label className="text-xs font-semibold text-muted">Executive Hook / Subtitle</label>
                   <input
                     type="text"
                     value={edited.hook}
                     onChange={(e) => setEditedHook(e.target.value)}
                     placeholder="One-sentence hook or thesis..."
-                    className="w-full bg-[#070B0F] border border-[#1F2D3D] rounded-xl px-4 py-2 text-xs text-[#94A3B8] italic focus:outline-none focus:border-[#00C9A7]"
+                    className="w-full bg-canvas border border-line rounded-xl px-4 py-2 text-xs text-muted italic focus:outline-none focus:border-brand"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <div className="flex items-center justify-between text-xs text-[#94A3B8] pb-1">
+                  <div className="flex items-center justify-between text-xs text-muted pb-1">
                     <span className="font-semibold">Markdown Content Body</span>
                     <div className="flex items-center gap-3 font-mono text-[11px]">
                       <span>{wordCount} words</span>
@@ -211,7 +209,7 @@ export default function ArticleEditor({
                     onChange={(e) => setEditedBody(e.target.value)}
                     rows={20}
                     placeholder="Write or edit article markdown..."
-                    className="w-full bg-[#070B0F] border border-[#1F2D3D] rounded-xl p-4 text-xs font-mono text-[#F1F5F9] leading-relaxed focus:outline-none focus:border-[#00C9A7] resize-y"
+                    className="w-full bg-canvas border border-line rounded-xl p-4 text-xs font-mono text-ink leading-relaxed focus:outline-none focus:border-brand resize-y"
                   />
                 </div>
               </div>
@@ -223,32 +221,32 @@ export default function ArticleEditor({
                 {/* Editor Column */}
                 <div className="space-y-3">
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[#94A3B8]">Headline</label>
+                    <label className="text-xs font-semibold text-muted">Headline</label>
                     <input
                       type="text"
                       value={edited.title}
                       onChange={(e) => setEditedTitle(e.target.value)}
-                      className="w-full bg-[#070B0F] border border-[#1F2D3D] rounded-xl px-3 py-2 text-xs font-bold text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]"
+                      className="w-full bg-canvas border border-line rounded-xl px-3 py-2 text-xs font-bold text-ink focus:outline-none focus:border-brand"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[#94A3B8]">Markdown Source</label>
+                    <label className="text-xs font-semibold text-muted">Markdown Source</label>
                     <textarea
                       value={edited.body}
                       onChange={(e) => setEditedBody(e.target.value)}
                       rows={22}
-                      className="w-full bg-[#070B0F] border border-[#1F2D3D] rounded-xl p-3 text-xs font-mono text-[#F1F5F9] leading-relaxed focus:outline-none focus:border-[#00C9A7] resize-y"
+                      className="w-full bg-canvas border border-line rounded-xl p-3 text-xs font-mono text-ink leading-relaxed focus:outline-none focus:border-brand resize-y"
                     />
                   </div>
                 </div>
 
 
                 {/* Live Formatted Column */}
-                <div className="bg-[#070B0F] border border-[#1F2D3D] rounded-xl p-4 overflow-y-auto max-h-[560px] space-y-4 max-w-full">
-                  <div className="border-b border-[#1F2D3D] pb-3">
-                    <h2 className="text-lg font-bold text-[#F1F5F9] leading-tight break-words [overflow-wrap:anywhere]">{edited.title}</h2>
-                    {edited.hook && <p className="text-xs text-[#94A3B8] italic mt-1 break-words [overflow-wrap:anywhere]">{edited.hook}</p>}
+                <div className="bg-canvas border border-line rounded-xl p-4 overflow-y-auto max-h-[560px] space-y-4 max-w-full">
+                  <div className="border-b border-line pb-3">
+                    <h2 className="text-lg font-bold text-ink leading-tight break-words [overflow-wrap:anywhere]">{edited.title}</h2>
+                    {edited.hook && <p className="text-xs text-muted italic mt-1 break-words [overflow-wrap:anywhere]">{edited.hook}</p>}
                   </div>
                   <div className="space-y-3 text-xs text-[#E2E8F0] font-sans leading-relaxed max-w-full">
                     <MarkdownArticle
@@ -266,19 +264,19 @@ export default function ArticleEditor({
             {editorMode === "preview" && (
               <div className="space-y-6 animate-in fade-in duration-150 max-w-full">
                 {/* Article Header */}
-                <div className="space-y-2 border-b border-[#1F2D3D]/60 pb-4">
-                  <div className="flex items-center gap-2 text-xs font-mono text-[#00C9A7] flex-wrap">
+                <div className="space-y-2 border-b border-line/60 pb-4">
+                  <div className="flex items-center gap-2 text-xs font-mono text-brand flex-wrap">
                     <span>{activeAsset.pillar || "—"}</span>
                     <span>•</span>
                     <span>{readingTimeMinutes} min read</span>
                     <span>•</span>
-                    <span className="text-[#94A3B8]">{wordCount} words</span>
+                    <span className="text-muted">{wordCount} words</span>
                   </div>
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-[#F1F5F9] leading-tight break-words [overflow-wrap:anywhere] font-sans">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-ink leading-tight break-words [overflow-wrap:anywhere] font-sans">
                     {edited.title}
                   </h1>
                   {(edited.hook || activeAsset.hook) && (
-                    <p className="text-xs sm:text-sm font-medium text-[#94A3B8] italic border-l-2 border-[#00C9A7] pl-3 py-0.5 break-words [overflow-wrap:anywhere] font-sans">
+                    <p className="text-xs sm:text-sm font-medium text-muted italic border-l-2 border-brand pl-3 py-0.5 break-words [overflow-wrap:anywhere] font-sans">
                       {edited.hook || activeAsset.hook}
                     </p>
                   )}

@@ -18,6 +18,7 @@ import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { PLANS, type PlanKey } from "@/constants/plans";
 import type { BillingPayload } from "@/types";
 
+import { buttonStyles } from "@/components/ui/Button";
 const EMPTY_PAYLOAD: BillingPayload = {
   clientStatus: "TRIAL",
   subscription: null,
@@ -79,24 +80,24 @@ export default function BillingPage() {
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-16">
-      <div className="border-b border-[#1F2D3D] pb-6">
-        <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#00C9A7] uppercase mb-1">
+      <div className="border-b border-line pb-6">
+        <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-brand uppercase mb-1">
           <CreditCard className="w-3.5 h-3.5" />
           Billing &amp; Usage
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-[#F1F5F9]">Subscription</h1>
-        <p className="text-sm text-[#94A3B8] mt-1">
+        <h1 className="text-3xl font-bold tracking-tight text-ink">Subscription</h1>
+        <p className="text-sm text-muted mt-1">
           Your current plan, this month&apos;s usage, and account status.
         </p>
       </div>
 
       {/* FREE TRIAL BANNER — every tenant gets Starter free for 2 months until billing is live */}
       {trialEndsAt && (
-        <div className="p-4 rounded-2xl bg-[#00C9A7]/10 border border-[#00C9A7]/30 flex items-center gap-3">
-          <Gift className="w-5 h-5 text-[#00C9A7] shrink-0" />
+        <div className="p-4 rounded-2xl bg-brand/10 border border-brand/30 flex items-center gap-3">
+          <Gift className="w-5 h-5 text-brand shrink-0" />
           <div className="text-xs">
-            <span className="font-bold text-[#F1F5F9]">You&apos;re on a free Starter trial.</span>{" "}
-            <span className="text-[#94A3B8]">
+            <span className="font-bold text-ink">You&apos;re on a free Starter trial.</span>{" "}
+            <span className="text-muted">
               {trialDaysLeft !== null && trialDaysLeft > 0
                 ? `${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} left`
                 : "Trial period has ended"}{" "}
@@ -107,25 +108,25 @@ export default function BillingPage() {
       )}
 
       {/* CURRENT PLAN */}
-      <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-5 shadow-sm">
+      <div className="p-6 rounded-2xl bg-surface border border-line space-y-5 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-[#F1F5F9]">{plan.name} Plan</h2>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#00C9A7]/10 text-[#00C9A7] border border-[#00C9A7]/30 uppercase">
+              <h2 className="text-lg font-bold text-ink">{plan.name} Plan</h2>
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-brand/10 text-brand border border-brand/30 uppercase">
                 {subscription ? subscription.status : trialEndsAt ? "FREE TRIAL" : clientStatus}
               </span>
             </div>
-            <p className="text-xs text-[#94A3B8] mt-1 max-w-md">{plan.description}</p>
+            <p className="text-xs text-muted mt-1 max-w-md">{plan.description}</p>
           </div>
 
           <div className="text-right shrink-0">
-            <div className="text-[11px] font-mono text-[#64748B]">
+            <div className="text-[11px] font-mono text-subtle">
               {plan.limits.ideasPerWeek} ideas/wk · {plan.limits.assetsPerMonth} posts/mo ·{" "}
               {plan.limits.channels} channel{plan.limits.channels > 1 ? "s" : ""}
             </div>
             {subscription?.currentPeriodEnd && (
-              <div className="text-[11px] font-mono text-[#64748B] mt-0.5">
+              <div className="text-[11px] font-mono text-subtle mt-0.5">
                 {subscription.cancelAtPeriodEnd ? "Cancels" : "Renews"} {formatDate(subscription.currentPeriodEnd)}
               </div>
             )}
@@ -133,21 +134,21 @@ export default function BillingPage() {
         </div>
 
         {/* USAGE METER */}
-        <div className="space-y-1.5 pt-4 border-t border-[#1F2D3D]/60">
+        <div className="space-y-1.5 pt-4 border-t border-line/60">
           <div className="flex items-center justify-between text-xs font-mono">
-            <span className="text-[#94A3B8]">Posts used this month</span>
-            <span className="font-bold text-[#F1F5F9]">
+            <span className="text-muted">Posts used this month</span>
+            <span className="font-bold text-ink">
               {quota.used} / {quota.limit}
             </span>
           </div>
-          <div className="h-2 rounded-full bg-[#070B0F] overflow-hidden">
+          <div className="h-2 rounded-full bg-canvas overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${
                 quota.used >= quota.limit
-                  ? "bg-[#EF4444]"
+                  ? "bg-danger"
                   : pct >= 80
-                    ? "bg-[#F59E0B]"
-                    : "bg-[#00C9A7]"
+                    ? "bg-gold"
+                    : "bg-brand"
               }`}
               style={{ width: `${pct}%` }}
             />
@@ -155,12 +156,12 @@ export default function BillingPage() {
         </div>
 
         {/* MANAGE SUBSCRIPTION — live once Stripe is configured, placeholder until then */}
-        <div className="pt-4 border-t border-[#1F2D3D]/60">
+        <div className="pt-4 border-t border-line/60">
           {stripeConnected ? (
             <button
               onClick={openPortal}
               disabled={pendingAction === "portal"}
-              className="inline-flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-4 py-2.5 rounded-xl transition-all disabled:opacity-60"
+              className={buttonStyles({ size: "sm" })}
             >
               {pendingAction === "portal" ? (
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -174,12 +175,12 @@ export default function BillingPage() {
               <button
                 disabled
                 title="Stripe billing isn't connected yet"
-                className="inline-flex items-center gap-2 bg-[#161D26] border border-[#1F2D3D] text-[#64748B] text-xs font-bold px-4 py-2.5 rounded-xl cursor-not-allowed"
+                className="inline-flex items-center gap-2 bg-surface-2 border border-line text-subtle text-xs font-bold px-4 py-2.5 rounded-xl cursor-not-allowed"
               >
                 <Lock className="w-3.5 h-3.5" />
                 <span>Manage Subscription</span>
               </button>
-              <span className="text-[11px] font-mono text-[#64748B]">
+              <span className="text-[11px] font-mono text-subtle">
                 Stripe billing portal — coming soon
               </span>
             </div>
@@ -188,8 +189,8 @@ export default function BillingPage() {
       </div>
 
       {/* PLAN COMPARISON */}
-      <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
-        <h3 className="text-sm font-bold text-[#F1F5F9]">Available Plans</h3>
+      <div className="p-6 rounded-2xl bg-surface border border-line space-y-4 shadow-sm">
+        <h3 className="text-sm font-bold text-ink">Available Plans</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {PLANS.map((p) => {
             const isCurrent = p.key === plan.key;
@@ -197,15 +198,15 @@ export default function BillingPage() {
               <div
                 key={p.key}
                 className={`p-4 rounded-xl border space-y-2 ${
-                  isCurrent ? "border-[#00C9A7] bg-[#00C9A7]/5" : "border-[#1F2D3D] bg-[#161D26]"
+                  isCurrent ? "border-brand bg-brand/5" : "border-line bg-surface-2"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-[#F1F5F9]">{p.name}</span>
-                  {isCurrent && <CheckCircle2 className="w-4 h-4 text-[#00C9A7]" />}
+                  <span className="text-sm font-bold text-ink">{p.name}</span>
+                  {isCurrent && <CheckCircle2 className="w-4 h-4 text-brand" />}
                 </div>
-                <p className="text-[11px] text-[#94A3B8] leading-relaxed">{p.description}</p>
-                <div className="text-[11px] font-mono text-[#64748B]">
+                <p className="text-[11px] text-muted leading-relaxed">{p.description}</p>
+                <div className="text-[11px] font-mono text-subtle">
                   {p.limits.ideasPerWeek} ideas/wk · {p.limits.assetsPerMonth} posts/mo ·{" "}
                   {p.limits.channels} channel{p.limits.channels > 1 ? "s" : ""}
                 </div>
@@ -213,7 +214,7 @@ export default function BillingPage() {
                   <button
                     onClick={() => startCheckout(p.key)}
                     disabled={pendingAction === p.key}
-                    className="w-full mt-1 px-3 py-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] text-[#00C9A7] text-[11px] font-bold transition-all disabled:opacity-60"
+                    className="w-full mt-1 px-3 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-line text-brand text-[11px] font-bold transition-all disabled:opacity-60"
                   >
                     {pendingAction === p.key ? "Redirecting…" : `Switch to ${p.name}`}
                   </button>
@@ -223,7 +224,7 @@ export default function BillingPage() {
           })}
         </div>
         {!stripeConnected && (
-          <p className="text-[11px] text-[#64748B] flex items-center gap-1.5">
+          <p className="text-[11px] text-subtle flex items-center gap-1.5">
             <ArrowUpRight className="w-3 h-3 shrink-0" />
             Plan changes will be available from the Manage Subscription portal once Stripe is connected.
           </p>
@@ -231,13 +232,13 @@ export default function BillingPage() {
       </div>
 
       {/* INVOICE HISTORY — placeholder until Stripe is wired up */}
-      <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
-        <h3 className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
-          <FileText className="w-4 h-4 text-[#00C9A7]" />
+      <div className="p-6 rounded-2xl bg-surface border border-line space-y-4 shadow-sm">
+        <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+          <FileText className="w-4 h-4 text-brand" />
           Invoice History
         </h3>
-        <div className="flex flex-col items-center justify-center text-center py-10 px-6 rounded-xl border border-dashed border-[#1F2D3D] bg-[#070B0F]/40">
-          <p className="text-xs text-[#94A3B8] max-w-sm">
+        <div className="flex flex-col items-center justify-center text-center py-10 px-6 rounded-xl border border-dashed border-line bg-canvas/40">
+          <p className="text-xs text-muted max-w-sm">
             {stripeConnected
               ? "Manage invoices from the Stripe Billing Portal via “Manage Subscription” above."
               : "Invoices will appear here once Stripe billing is connected to this account."}
@@ -246,7 +247,7 @@ export default function BillingPage() {
       </div>
 
       {toast.message && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#EF4444]/90 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold">
+        <div className="fixed bottom-6 right-6 z-50 bg-danger/90 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold">
           {toast.message}
         </div>
       )}

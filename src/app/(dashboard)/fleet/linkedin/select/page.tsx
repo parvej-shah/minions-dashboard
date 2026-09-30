@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, User, Building, AlertCircle } from "lucide-react";
 
+import { LoadingState } from "@/components/ui/EmptyState";
 type LinkedInOption = {
   id: string;
   urn: string;
@@ -60,9 +61,8 @@ function LinkedInSelectContent() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <Loader2 className="w-8 h-8 text-[#00C9A7] animate-spin" />
-        <p className="text-[#94A3B8]">Loading your LinkedIn profiles and pages...</p>
+      <div className="mx-auto max-w-2xl py-8">
+        <LoadingState label="Loading your LinkedIn profiles and pages…" />
       </div>
     );
   }
@@ -76,7 +76,7 @@ function LinkedInSelectContent() {
         <p className="text-red-400 font-medium">{error}</p>
         <button 
           onClick={() => router.push(returnTo.startsWith("/onboarding") ? returnTo : "/fleet")}
-          className="px-4 py-2 text-sm font-medium rounded-lg border border-[#1F2D3D] text-[#F1F5F9] hover:bg-[#1F2D3D]"
+          className="px-4 py-2 text-sm font-medium rounded-lg border border-line text-ink hover:bg-line"
         >
           {returnTo.startsWith("/onboarding") ? "Return to Onboarding" : "Return to Fleet"}
         </button>
@@ -90,8 +90,8 @@ function LinkedInSelectContent() {
         <div className="w-16 h-16 rounded-full bg-[#0077b5] flex items-center justify-center mx-auto mb-4">
           <span className="text-white font-bold text-3xl font-serif">in</span>
         </div>
-        <h1 className="text-2xl font-bold text-[#F1F5F9]">Select Publishing Target</h1>
-        <p className="text-[#94A3B8]">
+        <h1 className="text-2xl font-bold text-ink">Select Publishing Target</h1>
+        <p className="text-muted">
           Choose whether Minions should broadcast articles to your personal profile or a company page you manage.
         </p>
       </div>
@@ -100,21 +100,21 @@ function LinkedInSelectContent() {
         {options.map((opt) => (
           <div
             key={opt.urn}
-            className="flex items-center justify-between p-4 rounded-xl border border-[#1F2D3D] bg-[#070B0F] hover:border-[#00C9A7]/50 transition-colors"
+            className="flex items-center justify-between p-4 rounded-xl border border-line bg-canvas hover:border-brand/50 transition-colors"
           >
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-[#1F2D3D] flex items-center justify-center shrink-0 overflow-hidden">
+              <div className="w-10 h-10 rounded-full bg-line flex items-center justify-center shrink-0 overflow-hidden">
                 {opt.picture ? (
                   <img src={opt.picture} alt={opt.name} className="w-full h-full object-cover" />
                 ) : opt.type === "person" ? (
-                  <User className="w-5 h-5 text-[#94A3B8]" />
+                  <User className="w-5 h-5 text-muted" />
                 ) : (
-                  <Building className="w-5 h-5 text-[#94A3B8]" />
+                  <Building className="w-5 h-5 text-muted" />
                 )}
               </div>
               <div>
-                <div className="font-bold text-[#F1F5F9]">{opt.name}</div>
-                <div className="text-xs text-[#94A3B8] capitalize">{opt.type}</div>
+                <div className="font-bold text-ink">{opt.name}</div>
+                <div className="text-xs text-muted capitalize">{opt.type}</div>
               </div>
             </div>
             <button
@@ -129,7 +129,7 @@ function LinkedInSelectContent() {
         ))}
 
         {options.length === 0 && (
-          <div className="text-center p-8 text-[#94A3B8] border border-[#1F2D3D] rounded-xl border-dashed">
+          <div className="text-center p-8 text-muted border border-line rounded-xl border-dashed">
             No profiles or pages found.
           </div>
         )}
@@ -142,9 +142,8 @@ export default function LinkedInSelectPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-          <Loader2 className="w-8 h-8 text-[#00C9A7] animate-spin" />
-          <p className="text-[#94A3B8]">Loading...</p>
+        <div className="mx-auto max-w-2xl py-8">
+          <LoadingState />
         </div>
       }
     >

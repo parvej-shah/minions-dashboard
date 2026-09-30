@@ -71,16 +71,16 @@ export function MobileDrawer({
     <>
   {mobileMenuOpen && (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md md:hidden flex animate-in fade-in duration-200">
-      <div className="w-4/5 max-w-sm bg-[#0f1419] h-full p-5 flex flex-col justify-between border-r border-[#1f2b37] overflow-y-auto">
+      <div className="w-4/5 max-w-sm bg-surface h-full p-5 flex flex-col justify-between border-r border-[#1f2b37] overflow-y-auto">
         <div className="space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-[#1f2b37]">
             <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-baseline">
               <span className="font-extrabold text-xl tracking-tight text-white">Minions</span>
-              <span className="text-[#ff6b4a] font-bold text-xl ml-0.5">.AI</span>
+              <span className="text-coral font-bold text-xl ml-0.5">.AI</span>
             </Link>
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="p-1.5 rounded-lg text-[#94A3B8] hover:text-white"
+              className="p-1.5 rounded-lg text-muted hover:text-white"
               aria-label="Close menu"
             >
               <X className="w-5 h-5" />
@@ -97,13 +97,13 @@ export function MobileDrawer({
               setMobileMenuOpen(false);
               onOpenPalette();
             }}
-            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] text-xs text-[#64748B]"
+            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] text-xs text-subtle"
           >
             <div className="flex items-center gap-2">
-              <Search className="w-4 h-4 text-[#00C9A7]" />
+              <Search className="w-4 h-4 text-brand" />
               <span>Search ideas, drafts...</span>
             </div>
-            <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-[#0b0f14] border border-[#1f2b37] rounded text-[#94A3B8]">
+            <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-[#0b0f14] border border-[#1f2b37] rounded text-muted">
               ⌘K
             </kbd>
           </button>
@@ -116,7 +116,7 @@ export function MobileDrawer({
                 onHarvest();
               }}
               disabled={isHarvesting}
-              className="w-full flex items-center justify-center gap-2 bg-[#ff6b4a] hover:bg-[#ff522b] text-white text-xs font-bold py-3 px-3 rounded-xl shadow-lg shadow-[#ff6b4a]/20 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 bg-coral hover:bg-[#ff522b] text-white text-xs font-bold py-3 px-3 rounded-xl shadow-lg shadow-coral/20 transition-all cursor-pointer disabled:opacity-50"
             >
               <Zap className={`w-3.5 h-3.5 ${isHarvesting ? "animate-spin" : ""}`} />
               <span>{isHarvesting ? "Harvesting Signals..." : "Trigger Idea Harvester"}</span>
@@ -124,7 +124,7 @@ export function MobileDrawer({
           )}
 
           <div className="space-y-1 pt-1">
-            <div className="text-[10px] font-mono font-bold tracking-wider text-[#64748B] uppercase px-3 mb-2">
+            <div className="text-[10px] font-mono font-bold tracking-wider text-subtle uppercase px-3 mb-2">
               Agent Control
             </div>
             {navItems.map((item) => {
@@ -137,12 +137,12 @@ export function MobileDrawer({
                   onClick={() => setMobileMenuOpen(false)}
                   className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                     isActive
-                      ? "bg-[#161d24] text-[#00C9A7] border-l-2 border-[#00C9A7]"
-                      : "text-[#94A3B8] hover:bg-[#161d24]"
+                      ? "bg-[#161d24] text-brand border-l-2 border-brand"
+                      : "text-muted hover:bg-[#161d24]"
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-[#00C9A7]" : "text-[#64748B]"}`} />
+                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-brand" : "text-subtle"}`} />
                     <span className="truncate whitespace-nowrap">{item.name}</span>
                   </div>
 
@@ -174,7 +174,7 @@ export function MobileDrawer({
               href={liveBlogUrl === BLOG_BASE_URL ? `${liveBlogUrl}/blog` : liveBlogUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#ff6b4a] text-white text-xs font-bold shadow-sm"
+              className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-coral text-white text-xs font-bold shadow-sm"
             >
               <span>View Live Blog</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -191,9 +191,9 @@ export function MobileDrawer({
                 className="flex items-center gap-2 min-w-0 flex-1 text-left"
               >
                 {session.user?.image ? (
-                  <Image src={session.user.image} alt={session.user.name || "User"} width={24} height={24} unoptimized className="w-6 h-6 rounded-full border border-[#00C9A7]/40 shrink-0 object-cover" />
+                  <Image src={session.user.image} alt={session.user.name || "User"} width={24} height={24} unoptimized className="w-6 h-6 rounded-full border border-brand/40 shrink-0 object-cover" />
                 ) : (
-                  <div className="w-6 h-6 rounded-full bg-[#00C9A7]/20 text-[#00C9A7] font-bold text-xs flex items-center justify-center shrink-0">
+                  <div className="w-6 h-6 rounded-full bg-brand/20 text-brand font-bold text-xs flex items-center justify-center shrink-0">
                     {session.user?.name ? session.user.name[0].toUpperCase() : "A"}
                   </div>
                 )}
@@ -202,7 +202,7 @@ export function MobileDrawer({
               <div className="flex items-center gap-1.5 ml-2">
                 <button
                   onClick={() => onSignOut()}
-                  className="p-1 text-[#64748B] hover:text-[#ff6b4a]"
+                  className="p-1 text-subtle hover:text-coral"
                   title="Sign Out"
                 >
                   <LogOut className="w-3.5 h-3.5" />
@@ -212,7 +212,7 @@ export function MobileDrawer({
           ) : (
             <button
               onClick={() => onSignIn()}
-              className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#00C9A7]/10 hover:bg-[#00C9A7]/20 border border-[#00C9A7]/30 text-xs font-bold text-[#00C9A7]"
+              className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-brand/10 hover:bg-brand/20 border border-brand/30 text-xs font-bold text-brand"
             >
               <Lock className="w-3.5 h-3.5" />
               <span>Sign In with Google</span>
@@ -235,11 +235,11 @@ export function MobileTopBar({
   onHarvest?: () => void;
 }) {
   return (
-  <header className="h-14 border-b border-[#1f2b37] bg-[#0f1419]/95 backdrop-blur-md px-3.5 sm:px-4 flex items-center justify-between sticky top-0 z-30 md:hidden">
+  <header className="h-14 border-b border-[#1f2b37] bg-surface/95 backdrop-blur-md px-3.5 sm:px-4 flex items-center justify-between sticky top-0 z-30 md:hidden">
     <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
       <Link href="/" className="flex items-baseline shrink-0">
         <span className="font-extrabold text-base tracking-tight text-white">Minions</span>
-        <span className="text-[#ff6b4a] font-bold text-base ml-0.5">.AI</span>
+        <span className="text-coral font-bold text-base ml-0.5">.AI</span>
       </Link>
     </div>
 
@@ -248,7 +248,7 @@ export function MobileTopBar({
         <button
           onClick={onHarvest}
           disabled={isHarvesting}
-          className="p-2 rounded-xl bg-[#ff6b4a]/10 hover:bg-[#ff6b4a]/20 text-[#ff6b4a] border border-[#ff6b4a]/30 transition-all disabled:opacity-50 shrink-0"
+          className="p-2 rounded-xl bg-coral/10 hover:bg-coral/20 text-coral border border-coral/30 transition-all disabled:opacity-50 shrink-0"
           title="Trigger Idea Harvester"
           aria-label="Trigger Idea Harvester"
         >
@@ -258,11 +258,11 @@ export function MobileTopBar({
 
       <button
         onClick={() => onOpenPalette()}
-        className="p-2 rounded-xl bg-[#161d24] text-[#94A3B8] hover:text-white border border-[#1f2b37] shrink-0"
+        className="p-2 rounded-xl bg-[#161d24] text-muted hover:text-white border border-[#1f2b37] shrink-0"
         title="Search"
         aria-label="Search"
       >
-        <Search className="w-4 h-4 text-[#00C9A7]" />
+        <Search className="w-4 h-4 text-brand" />
       </button>
 
     </div>
@@ -276,13 +276,13 @@ export function MobileBottomNav({
   setMobileMenuOpen,
 }: Pick<MobileNavProps, "pathname" | "navCounts" | "setMobileMenuOpen">) {
   return (
-  <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0f1419]/95 backdrop-blur-xl border-t border-[#1f2b37] px-1 py-1.5 flex items-center justify-between pb-[max(0.65rem,env(safe-area-inset-bottom))] shadow-2xl shadow-black">
+  <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-xl border-t border-[#1f2b37] px-1 py-1.5 flex items-center justify-between pb-[max(0.65rem,env(safe-area-inset-bottom))] shadow-2xl shadow-black">
     <Link
       href="/"
       className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all ${
         pathname === "/"
-          ? "text-[#00C9A7] font-bold"
-          : "text-[#94A3B8] hover:text-white"
+          ? "text-brand font-bold"
+          : "text-muted hover:text-white"
       }`}
     >
       <LayoutDashboard className="w-5 h-5" />
@@ -293,14 +293,14 @@ export function MobileBottomNav({
       href="/ideas"
       className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all relative ${
         pathname.startsWith("/ideas")
-          ? "text-[#00C9A7] font-bold"
-          : "text-[#94A3B8] hover:text-white"
+          ? "text-brand font-bold"
+          : "text-muted hover:text-white"
       }`}
     >
       <Sparkles className="w-5 h-5" />
       <span className="text-[10px] font-medium">Ideas</span>
       {navCounts && navCounts.ideasReady > 0 && (
-        <span className="absolute top-1 right-2.5 w-1.5 h-1.5 rounded-full bg-[#00C9A7]" />
+        <span className="absolute top-1 right-2.5 w-1.5 h-1.5 rounded-full bg-brand" />
       )}
     </Link>
 
@@ -308,14 +308,14 @@ export function MobileBottomNav({
       href="/editorial"
       className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all relative ${
         pathname.startsWith("/editorial") || pathname.startsWith("/drafts")
-          ? "text-[#ff6b4a] font-bold"
-          : "text-[#94A3B8] hover:text-white"
+          ? "text-coral font-bold"
+          : "text-muted hover:text-white"
       }`}
     >
       <FileText className="w-5 h-5" />
       <span className="text-[10px] font-medium">Editorial</span>
       {navCounts && navCounts.pendingReview > 0 && (
-        <span className="absolute top-1 right-2.5 w-1.5 h-1.5 rounded-full bg-[#ff6b4a]" />
+        <span className="absolute top-1 right-2.5 w-1.5 h-1.5 rounded-full bg-coral" />
       )}
     </Link>
 
@@ -324,7 +324,7 @@ export function MobileBottomNav({
       className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all ${
         pathname.startsWith("/published")
           ? "text-[#3B82F6] font-bold"
-          : "text-[#94A3B8] hover:text-white"
+          : "text-muted hover:text-white"
       }`}
     >
       <Globe className="w-5 h-5" />
@@ -333,7 +333,7 @@ export function MobileBottomNav({
 
     <button
       onClick={() => setMobileMenuOpen(true)}
-      className="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-[#94A3B8] hover:text-white transition-all cursor-pointer"
+      className="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-muted hover:text-white transition-all cursor-pointer"
     >
       <Menu className="w-5 h-5" />
       <span className="text-[10px] font-medium">Menu</span>

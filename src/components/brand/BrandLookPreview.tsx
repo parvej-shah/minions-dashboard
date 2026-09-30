@@ -75,23 +75,23 @@ export default function BrandLookPreview({ colors, brandName, byline, logoUrl, a
 
   return (
     <div className="space-y-1.5">
-      <label className="text-[11px] font-medium text-[#94A3B8] block">Cover preview (how every post&apos;s cover is drawn)</label>
-      <div className="relative w-full max-w-[240px] aspect-[4/5] rounded-lg border border-[#1F2D3D] overflow-hidden bg-[#070B0F]">
+      <label className="text-[11px] font-medium text-muted block">Cover preview (how every post&apos;s cover is drawn)</label>
+      <div className="relative w-full max-w-[240px] aspect-[4/5] rounded-lg border border-line overflow-hidden bg-canvas">
         {src && (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={src} alt="Sample cover in this look" className={`w-full h-full object-cover transition-opacity ${loading ? "opacity-50" : ""}`} />
         )}
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 text-[#00C9A7] animate-spin" />
+            <Loader2 className="w-6 h-6 text-brand animate-spin" />
           </div>
         )}
         {failed && !loading && (
-          <div className="absolute inset-0 flex items-center justify-center p-4 text-center text-xs text-[#94A3B8]">The preview could not be drawn.</div>
+          <div className="absolute inset-0 flex items-center justify-center p-4 text-center text-xs text-muted">The preview could not be drawn.</div>
         )}
       </div>
       {notes.length > 0 && (
-        <ul className="text-[11px] text-[#F59E0B] space-y-0.5 max-w-sm">
+        <ul className="text-[11px] text-gold space-y-0.5 max-w-sm">
           {notes.map((n, i) => (
             <li key={i}>{n}</li>
           ))}

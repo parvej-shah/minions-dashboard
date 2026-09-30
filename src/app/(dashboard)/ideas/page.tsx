@@ -45,6 +45,8 @@ import {
 } from "@/constants/ideaStage";
 import { FALLBACK_TOPICS } from "@/constants/topics";
 
+import { buttonStyles } from "@/components/ui/Button";
+import { segment } from "@/components/ui/segment";
 /**
  * Topics are per-tenant now, loaded from /api/ideas/topics. The old hardcoded
  * HVAC / Plumbing / Electrical / Roofing / Pest Control list came from the
@@ -538,36 +540,36 @@ export default function IdeaStreamPage() {
 
   // Audience Badge Styling Helper
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16 selection:bg-[#00C9A7]/30 selection:text-[#00C9A7]">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16 selection:bg-brand/30 selection:text-brand">
       {/* Page Header - Clean, Executive & Compact */}
       {isFirstRun && (
-        <section className="relative overflow-hidden rounded-2xl border border-[#00C9A7]/35 bg-[#00C9A7]/[0.07] px-5 py-4 shadow-lg shadow-[#00C9A7]/5">
-          <div className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[#00C9A7]/10 blur-2xl" />
+        <section className="relative overflow-hidden rounded-2xl border border-brand/35 bg-brand/[0.07] px-5 py-4 shadow-lg shadow-brand/5">
+          <div className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-brand/10 blur-2xl" />
           <div className="relative flex items-start gap-3">
-            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#00C9A7]/30 bg-[#00C9A7]/15">
-              <Sparkles className="h-4 w-4 text-[#00C9A7]" />
+            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand/30 bg-brand/15">
+              <Sparkles className="h-4 w-4 text-brand" />
             </div>
             <div>
-              <p className="text-sm font-bold text-[#F1F5F9]">Your first ideas are being prepared</p>
-              <p className="mt-1 max-w-2xl text-xs leading-relaxed text-[#94A3B8]">
+              <p className="text-sm font-bold text-ink">Your first ideas are being prepared</p>
+              <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted">
                 Minions is using your Brand Brief to find relevant angles. When they arrive, choose the one you want turned into your first draft.
               </p>
             </div>
           </div>
         </section>
       )}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1F2D3D] pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line pb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold tracking-widest text-[#00C9A7] uppercase px-2 py-0.5 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00C9A7] animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold tracking-widest text-brand uppercase px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
               IDEA STREAM
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#F1F5F9] break-words">
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-ink break-words">
             {viewMode === "queue" ? "Production Draft Queue" : viewMode === "calendar" ? "Editorial Calendar" : "Idea Stream"}
           </h1>
-          <p className="text-xs text-[#94A3B8] mt-0.5 max-w-xl break-words">
+          <p className="text-xs text-muted mt-0.5 max-w-xl break-words">
             {viewMode === "queue" 
               ? "Choose which idea Minions should turn into a draft next."
               : viewMode === "calendar"
@@ -578,20 +580,20 @@ export default function IdeaStreamPage() {
 
         <div className="flex items-center gap-2.5 self-start sm:self-auto flex-wrap">
           {/* View Mode Toggle Switch: Queue Builder vs Stream vs Calendar */}
-          <div className="flex items-center p-1 bg-[#161D26] border border-[#1F2D3D] rounded-xl shadow-inner">
+          <div className="flex items-center p-1 bg-surface-2 border border-line rounded-xl shadow-inner">
             <button
               onClick={() => setViewMode("queue")}
               className={`flex min-h-11 items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 viewMode === "queue"
-                  ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
-                  : "text-[#94A3B8] hover:text-white"
+                  ? segment.on
+                  : segment.off
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
               <span>Queue</span>
               {ideas.filter(i => i.status === "QUEUED").length > 0 && (
                 <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full font-bold ${
-                  viewMode === "queue" ? "bg-[#070B0F] text-[#00C9A7]" : "bg-[#00C9A7]/20 text-[#00C9A7]"
+                  viewMode === "queue" ? "bg-canvas text-brand" : "bg-brand/20 text-brand"
                 }`}>
                   {ideas.filter(i => i.status === "QUEUED").length}
                 </span>
@@ -602,8 +604,8 @@ export default function IdeaStreamPage() {
               onClick={() => setViewMode("stream")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 viewMode === "stream"
-                  ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
-                  : "text-[#94A3B8] hover:text-white"
+                  ? segment.on
+                  : segment.off
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
@@ -614,8 +616,8 @@ export default function IdeaStreamPage() {
               onClick={() => setViewMode("calendar")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 viewMode === "calendar"
-                  ? "bg-[#00C9A7] text-[#070B0F] shadow-sm font-bold"
-                  : "text-[#94A3B8] hover:text-white"
+                  ? segment.on
+                  : segment.off
               }`}
             >
               <CalendarDays className="w-3.5 h-3.5" />
@@ -625,7 +627,7 @@ export default function IdeaStreamPage() {
 
           <button
             onClick={() => setIsInjectOpen(true)}
-            className="inline-flex min-h-11 items-center gap-1.5 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-3.5 py-2 rounded-xl shadow-md shadow-[#00C9A7]/15 transition-all active:scale-95 cursor-pointer"
+            className={buttonStyles({ size: "sm" })}
           >
             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>Add idea</span>
@@ -635,23 +637,23 @@ export default function IdeaStreamPage() {
 
       {/* Stream-Only Sticky Filter Bar */}
       {viewMode === "stream" && (
-        <div className="sticky top-14 md:top-0 z-30 bg-[#0a0d12] -mx-4 sm:-mx-6 md:-mx-8 px-4 sm:px-6 md:px-8 pt-3 pb-3.5 space-y-3 border-b border-[#1F2D3D] shadow-xl shadow-black/40">
+        <div className="sticky top-14 md:top-0 z-30 bg-[#0a0d12] -mx-4 sm:-mx-6 md:-mx-8 px-4 sm:px-6 md:px-8 pt-3 pb-3.5 space-y-3 border-b border-line shadow-xl shadow-black/40">
           {/* Row 1: Search & Audience Filters */}
           <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
               {/* Search Input */}
               <div className="relative flex-1 max-w-md">
-                <Search className="w-4 h-4 text-[#64748B] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-subtle absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Search ideas by title, topic, keyword, or ID..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="min-h-11 w-full bg-[#0F1419] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl pl-9 pr-8 py-2 text-xs text-[#F1F5F9] placeholder:text-[#64748B] outline-none transition-all"
+                  className="min-h-11 w-full bg-surface border border-line focus:border-brand rounded-xl pl-9 pr-8 py-2 text-xs text-ink placeholder:text-subtle outline-none transition-all"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-1 top-1/2 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center text-[#64748B] hover:text-[#F1F5F9]"
+                    className="absolute right-1 top-1/2 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center text-subtle hover:text-ink"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -660,24 +662,24 @@ export default function IdeaStreamPage() {
 
             </div>
 
-            <details className="lg:hidden rounded-xl border border-[#1F2D3D] bg-[#0F1419] px-3">
-              <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-semibold text-[#F1F5F9] [&::-webkit-details-marker]:hidden">
-                <SlidersHorizontal className="h-4 w-4 text-[#00C9A7]" />
+            <details className="lg:hidden rounded-xl border border-line bg-surface px-3">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
+                <SlidersHorizontal className="h-4 w-4 text-brand" />
                 <span>Filters</span>
-                {(selectedTrade !== "ALL" || selectedStage !== "ALL") && <span className="rounded-full bg-[#00C9A7]/15 px-2 py-0.5 text-xs text-[#00C9A7]">Active</span>}
-                <span className="ml-auto text-xs text-[#94A3B8]">Tap to adjust</span>
+                {(selectedTrade !== "ALL" || selectedStage !== "ALL") && <span className="rounded-full bg-brand/15 px-2 py-0.5 text-xs text-brand">Active</span>}
+                <span className="ml-auto text-xs text-muted">Tap to adjust</span>
               </summary>
-              <div className="grid grid-cols-1 gap-3 border-t border-[#1F2D3D] py-3 sm:grid-cols-2">
-                <label className="space-y-1 text-xs font-medium text-[#94A3B8]">
+              <div className="grid grid-cols-1 gap-3 border-t border-line py-3 sm:grid-cols-2">
+                <label className="space-y-1 text-xs font-medium text-muted">
                   <span>Topic area</span>
-                  <select value={selectedTrade} onChange={(e) => setSelectedTrade(e.target.value)} className="min-h-11 w-full rounded-xl border border-[#1F2D3D] bg-[#070B0F] px-3 text-sm text-[#F1F5F9]">
+                  <select value={selectedTrade} onChange={(e) => setSelectedTrade(e.target.value)} className="min-h-11 w-full rounded-xl border border-line bg-canvas px-3 text-sm text-ink">
                     <option value="ALL">All topics</option>
                     {availableTopics.map((topic) => <option key={topic} value={topic}>{topic}</option>)}
                   </select>
                 </label>
-                <label className="space-y-1 text-xs font-medium text-[#94A3B8]">
+                <label className="space-y-1 text-xs font-medium text-muted">
                   <span>Stage</span>
-                  <select value={selectedStage} onChange={(e) => setSelectedStage(e.target.value as "ALL" | IdeaStage)} className="min-h-11 w-full rounded-xl border border-[#1F2D3D] bg-[#070B0F] px-3 text-sm text-[#F1F5F9]">
+                  <select value={selectedStage} onChange={(e) => setSelectedStage(e.target.value as "ALL" | IdeaStage)} className="min-h-11 w-full rounded-xl border border-line bg-canvas px-3 text-sm text-ink">
                     {STAGE_FILTERS.map((stage) => <option key={stage} value={stage}>{stage === "ALL" ? "All stages" : IDEA_STAGE_LABELS[stage]}</option>)}
                   </select>
                 </label>
@@ -685,16 +687,16 @@ export default function IdeaStreamPage() {
             </details>
 
             {/* Row 2: Scrolling topic pills */}
-            <div className="hidden lg:flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar border-t border-[#1F2D3D]/40">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-[#64748B] mr-1 shrink-0">
+            <div className="hidden lg:flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar border-t border-line/40">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-subtle mr-1 shrink-0">
                 Topic area:
               </span>
               <button
                 onClick={() => setSelectedTrade("ALL")}
                 className={`px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                   selectedTrade === "ALL"
-                    ? "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/40 font-bold"
-                    : "bg-[#0F1419] text-[#94A3B8] border-[#1F2D3D] hover:text-[#F1F5F9] hover:border-[#2A3D52]"
+                    ? "bg-brand/15 text-brand border-brand/40 font-bold"
+                    : "bg-surface text-muted border-line hover:text-ink hover:border-[#2A3D52]"
                 }`}
               >
                 All topics
@@ -707,8 +709,8 @@ export default function IdeaStreamPage() {
                     onClick={() => setSelectedTrade(topic)}
                     className={`px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                       isActive
-                        ? "bg-[#00C9A7]/15 text-[#00C9A7] border-[#00C9A7]/40 font-bold"
-                        : "bg-[#0F1419] text-[#94A3B8] border-[#1F2D3D] hover:text-[#F1F5F9] hover:border-[#2A3D52]"
+                        ? "bg-brand/15 text-brand border-brand/40 font-bold"
+                        : "bg-surface text-muted border-line hover:text-ink hover:border-[#2A3D52]"
                     }`}
                   >
                     {topic}
@@ -718,8 +720,8 @@ export default function IdeaStreamPage() {
             </div>
 
             {/* Row 3: Stage Filters */}
-            <div className="hidden lg:flex items-center gap-2 overflow-x-auto pb-1 pt-1 border-t border-[#1F2D3D]/40 scrollbar-none">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-[#64748B] mr-1 shrink-0">
+            <div className="hidden lg:flex items-center gap-2 overflow-x-auto pb-1 pt-1 border-t border-line/40 scrollbar-none">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-subtle mr-1 shrink-0">
                 Stage:
               </span>
               {STAGE_FILTERS.map((stage) => {
@@ -737,13 +739,13 @@ export default function IdeaStreamPage() {
                     title={stage === "ALL" ? "Every idea" : IDEA_STAGE_HINTS[stage]}
                     className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
                       isSelected
-                        ? "bg-[#161D26] text-[#F1F5F9] border border-[#00C9A7]/60 shadow-sm"
-                        : "bg-transparent text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#0F1419]"
+                        ? "bg-surface-2 text-ink border border-brand/60 shadow-sm"
+                        : "bg-transparent text-muted hover:text-ink hover:bg-surface"
                     }`}
                   >
                     <span>{label}</span>
                     <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${
-                      isSelected ? "bg-[#00C9A7]/20 text-[#00C9A7]" : "bg-[#161D26] text-[#64748B]"
+                      isSelected ? "bg-brand/20 text-brand" : "bg-surface-2 text-subtle"
                     }`}>
                       {count}
                     </span>
@@ -806,10 +808,10 @@ export default function IdeaStreamPage() {
 
           {/* Filters exclude everything that was loaded */}
           {!ideasLoading && ideas.length > 0 && filteredIdeas.length === 0 && (
-            <div className="bg-[#0F1419] border border-[#1F2D3D] rounded-2xl p-12 text-center space-y-3">
-              <AlertCircle className="w-8 h-8 text-[#64748B] mx-auto" />
-              <h3 className="text-base font-bold text-[#F1F5F9]">No ideas found matching filters</h3>
-              <p className="text-xs text-[#94A3B8] max-w-sm mx-auto">
+            <div className="bg-surface border border-line rounded-2xl p-12 text-center space-y-3">
+              <AlertCircle className="w-8 h-8 text-subtle mx-auto" />
+              <h3 className="text-base font-bold text-ink">No ideas found matching filters</h3>
+              <p className="text-xs text-muted max-w-sm mx-auto">
                 Try adjusting your filters or add a new idea.
               </p>
               <button
@@ -818,7 +820,7 @@ export default function IdeaStreamPage() {
                   setSelectedStage("ALL");
                   setSearchQuery("");
                 }}
-                className="mt-2 text-xs font-semibold text-[#00C9A7] hover:underline cursor-pointer"
+                className="mt-2 text-xs font-semibold text-brand hover:underline cursor-pointer"
               >
                 Clear all filters
               </button>
@@ -856,24 +858,24 @@ export default function IdeaStreamPage() {
           />
 
           {/* Slide-over Drawer */}
-          <div className="relative z-10 flex h-[100dvh] max-h-[100dvh] w-full max-w-lg flex-col overflow-hidden border-l border-[#1F2D3D] bg-[#0F1419] shadow-2xl animate-in slide-in-from-right duration-200">
+          <div className="relative z-10 flex h-[100dvh] max-h-[100dvh] w-full max-w-lg flex-col overflow-hidden border-l border-line bg-surface shadow-2xl animate-in slide-in-from-right duration-200">
             {/* Drawer Header and form scroll as one bounded panel region */}
             <div className="flex min-h-0 flex-1 flex-col">
-              <div className="flex shrink-0 items-center justify-between border-b border-[#1F2D3D] px-5 py-4 sm:px-6 sm:py-5">
+              <div className="flex shrink-0 items-center justify-between border-b border-line px-5 py-4 sm:px-6 sm:py-5">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] font-mono uppercase font-bold text-[#00C9A7] bg-[#00C9A7]/10 px-2 py-0.5 rounded border border-[#00C9A7]/20">
+                    <span className="text-[10px] font-mono uppercase font-bold text-brand bg-brand/10 px-2 py-0.5 rounded border border-brand/20">
                       Add an idea
                     </span>
                   </div>
-                  <h2 className="text-lg font-bold text-[#F1F5F9]">
+                  <h2 className="text-lg font-bold text-ink">
                     Add an Idea
                   </h2>
                 </div>
                 <button
                   onClick={() => setIsInjectOpen(false)}
                   disabled={isSubmitting}
-                  className="text-[#94A3B8] hover:text-[#F1F5F9] p-2 rounded-lg hover:bg-[#161D26] transition-colors cursor-pointer"
+                  className="text-muted hover:text-ink p-2 rounded-lg hover:bg-surface-2 transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -883,8 +885,8 @@ export default function IdeaStreamPage() {
               <form id="inject-topic-form" onSubmit={handleInjectManualTopic} className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6 sm:py-6">
                 {/* Field: Title */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
-                    Idea title <span className="text-[#00C9A7]">*</span>
+                  <label className="block text-xs font-semibold text-ink mb-1.5">
+                    Idea title <span className="text-brand">*</span>
                   </label>
                   <input
                     type="text"
@@ -892,17 +894,17 @@ export default function IdeaStreamPage() {
                     placeholder="e.g. Attic Thermal Saturation: Why 2.5-Hour Callback Redos Drain HVAC Margins"
                     value={formTitle}
                     onChange={(e) => setFormTitle(e.target.value)}
-                    className="w-full bg-[#161D26] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3.5 py-2.5 text-xs text-[#F1F5F9] placeholder:text-[#64748B] outline-none transition-all font-medium"
+                    className="w-full bg-surface-2 border border-line focus:border-brand rounded-xl px-3.5 py-2.5 text-xs text-ink placeholder:text-subtle outline-none transition-all font-medium"
                   />
-                  <p className="text-[11px] text-[#64748B] mt-1">
+                  <p className="text-[11px] text-subtle mt-1">
                     Name the specific problem, question, or decision this idea tackles for your ideal customer.
                   </p>
                 </div>
 
                 {/* Field: Topic area */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
-                    Topic area <span className="text-[#00C9A7]">*</span>
+                  <label className="block text-xs font-semibold text-ink mb-1.5">
+                    Topic area <span className="text-brand">*</span>
                   </label>
                   <select
                     required
@@ -914,18 +916,18 @@ export default function IdeaStreamPage() {
                         setFormTags([...formTags.filter(x => !availableTopics.includes(x)), t]);
                       }
                     }}
-                    className="w-full bg-[#161D26] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3.5 py-2.5 text-xs text-[#F1F5F9] outline-none transition-all cursor-pointer"
+                    className="w-full bg-surface-2 border border-line focus:border-brand rounded-xl px-3.5 py-2.5 text-xs text-ink outline-none transition-all cursor-pointer"
                   >
-                    <option value="" disabled className="bg-[#0F1419]">
+                    <option value="" disabled className="bg-surface">
                       Choose a topic area...
                     </option>
                     {availableTopics.map((t) => (
-                      <option key={t} value={t} className="bg-[#0F1419]">
+                      <option key={t} value={t} className="bg-surface">
                         {t}
                       </option>
                     ))}
                   </select>
-                  <p className="text-[11px] text-[#64748B] mt-1">
+                  <p className="text-[11px] text-subtle mt-1">
                     Choose the topic area this idea fits.
                   </p>
                 </div>
@@ -933,35 +935,35 @@ export default function IdeaStreamPage() {
                 {/* Field: Source & Verification URL */}
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
-                      Source link <span className="text-[#64748B] font-normal">(Optional)</span>
+                    <label className="block text-xs font-semibold text-ink mb-1.5">
+                      Source link <span className="text-subtle font-normal">(Optional)</span>
                     </label>
                     <input
                       type="url"
                       placeholder="https://news.ycombinator.com/... or https://techcrunch.com/..."
                       value={formSourceUrl}
                       onChange={(e) => setFormSourceUrl(e.target.value)}
-                      className="w-full bg-[#161D26] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3.5 py-2.5 text-xs text-[#F1F5F9] placeholder:text-[#64748B] outline-none transition-all font-mono"
+                      className="w-full bg-surface-2 border border-line focus:border-brand rounded-xl px-3.5 py-2.5 text-xs text-ink placeholder:text-subtle outline-none transition-all font-mono"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
-                      Source name <span className="text-[#64748B] font-normal">(Optional)</span>
+                    <label className="block text-xs font-semibold text-ink mb-1.5">
+                      Source name <span className="text-subtle font-normal">(Optional)</span>
                     </label>
                     <input
                       type="text"
                       placeholder="e.g. Hacker News Thread #4128, TechCrunch AI Dispatch"
                       value={formSourceTitle}
                       onChange={(e) => setFormSourceTitle(e.target.value)}
-                      className="w-full bg-[#161D26] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3.5 py-2.5 text-xs text-[#F1F5F9] placeholder:text-[#64748B] outline-none transition-all"
+                      className="w-full bg-surface-2 border border-line focus:border-brand rounded-xl px-3.5 py-2.5 text-xs text-ink placeholder:text-subtle outline-none transition-all"
                     />
                   </div>
                 </div>
 
                 {/* Field: Excerpt / Angle */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
+                  <label className="block text-xs font-semibold text-ink mb-1.5">
                     Angle or notes
                   </label>
                   <textarea
@@ -969,27 +971,27 @@ export default function IdeaStreamPage() {
                     placeholder="What might others be missing, and what experience or evidence gives you a useful perspective? An idea, rough angle, or source is enough; future implications are optional."
                     value={formExcerpt}
                     onChange={(e) => setFormExcerpt(e.target.value)}
-                    className="w-full bg-[#161D26] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl p-3.5 text-xs text-[#F1F5F9] placeholder:text-[#64748B] outline-none transition-all resize-none"
+                    className="w-full bg-surface-2 border border-line focus:border-brand rounded-xl p-3.5 text-xs text-ink placeholder:text-subtle outline-none transition-all resize-none"
                   />
                 </div>
 
                 {/* Field: Tags */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#F1F5F9] mb-1.5">
+                  <label className="block text-xs font-semibold text-ink mb-1.5">
                     Tags
                   </label>
                   <div className="space-y-2">
-                    <div className="flex flex-wrap gap-1.5 p-2 bg-[#161D26] border border-[#1F2D3D] rounded-xl min-h-[42px] items-center">
+                    <div className="flex flex-wrap gap-1.5 p-2 bg-surface-2 border border-line rounded-xl min-h-[42px] items-center">
                       {formTags.map((tag) => (
                         <span
                           key={tag}
-                          className="inline-flex items-center gap-1 text-[11px] bg-[#070B0F] border border-[#1F2D3D] text-[#F1F5F9] px-2 py-0.5 rounded-md"
+                          className="inline-flex items-center gap-1 text-[11px] bg-canvas border border-line text-ink px-2 py-0.5 rounded-md"
                         >
                           #{tag}
                           <button
                             type="button"
                             onClick={() => handleRemoveTag(tag)}
-                            className="text-[#64748B] hover:text-[#EF4444]"
+                            className="text-subtle hover:text-danger"
                           >
                             ×
                           </button>
@@ -1001,10 +1003,10 @@ export default function IdeaStreamPage() {
                         value={formTagsInput}
                         onChange={(e) => setFormTagsInput(e.target.value)}
                         onKeyDown={handleAddTag}
-                        className="bg-transparent text-xs text-[#F1F5F9] placeholder:text-[#64748B] outline-none flex-1 min-w-[120px] px-1 py-0.5"
+                        className="bg-transparent text-xs text-ink placeholder:text-subtle outline-none flex-1 min-w-[120px] px-1 py-0.5"
                       />
                     </div>
-                    <p className="text-[11px] text-[#64748B]">
+                    <p className="text-[11px] text-subtle">
                       Press comma or Enter to add tags.
                     </p>
                   </div>
@@ -1013,12 +1015,12 @@ export default function IdeaStreamPage() {
             </div>
 
             {/* Drawer Footer */}
-            <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-[#1F2D3D] bg-[#070B0F]/90 px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:flex-row sm:items-center sm:justify-end sm:gap-3 sm:px-6 sm:py-4">
+            <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-line bg-canvas/90 px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:flex-row sm:items-center sm:justify-end sm:gap-3 sm:px-6 sm:py-4">
               <button
                 type="button"
                 onClick={() => setIsInjectOpen(false)}
                 disabled={isSubmitting}
-                className="w-full rounded-xl px-4 py-2.5 text-xs font-semibold text-[#94A3B8] transition-colors hover:bg-[#161D26] hover:text-[#F1F5F9] cursor-pointer sm:w-auto"
+                className="w-full rounded-xl px-4 py-2.5 text-xs font-semibold text-muted transition-colors hover:bg-surface-2 hover:text-ink cursor-pointer sm:w-auto"
               >
                 Cancel
               </button>
@@ -1026,7 +1028,7 @@ export default function IdeaStreamPage() {
                 type="submit"
                 form="inject-topic-form"
                 disabled={isSubmitting || !formTitle.trim() || !formTrade}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#00C9A7] px-5 py-3 text-xs font-bold text-[#070B0F] shadow-lg shadow-[#00C9A7]/15 transition-all hover:bg-[#00A88A] disabled:opacity-50 cursor-pointer sm:w-auto sm:py-2.5"
+                className={buttonStyles({ size: "sm", className: "w-full sm:w-auto" })}
               >
                 {isSubmitting ? (
                   <>
@@ -1049,20 +1051,20 @@ export default function IdeaStreamPage() {
       {editingIdea && (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
           <div
-            className="w-full max-w-lg bg-[#0F1419] border-l border-[#1F2D3D] h-[100dvh] flex flex-col shadow-2xl animate-in slide-in-from-right duration-300 overflow-hidden"
+            className="w-full max-w-lg bg-surface border-l border-line h-[100dvh] flex flex-col shadow-2xl animate-in slide-in-from-right duration-300 overflow-hidden"
             role="dialog"
             aria-modal="true"
           >
             {/* Drawer Header */}
             <div className="flex min-h-0 flex-1 flex-col">
-              <div className="shrink-0 p-5 sm:p-6 border-b border-[#1F2D3D] flex items-center justify-between">
+              <div className="shrink-0 p-5 sm:p-6 border-b border-line flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Edit3 className="w-5 h-5 text-[#00C9A7]" />
+                  <Edit3 className="w-5 h-5 text-brand" />
                   <div>
-                    <h2 className="text-base font-bold text-[#F1F5F9]">
+                    <h2 className="text-base font-bold text-ink">
                       Edit Strategy & Signal
                     </h2>
-                    <p className="text-xs text-[#64748B] font-mono">
+                    <p className="text-xs text-subtle font-mono">
                       {editingIdea.id || editingIdea.ideaId}
                     </p>
                   </div>
@@ -1070,7 +1072,7 @@ export default function IdeaStreamPage() {
                 <button
                   onClick={() => setEditingIdea(null)}
                   aria-label="Close edit idea"
-                  className="min-h-11 min-w-11 rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] transition-colors cursor-pointer"
+                  className="min-h-11 min-w-11 rounded-lg text-muted hover:text-ink hover:bg-surface-2 transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1081,44 +1083,44 @@ export default function IdeaStreamPage() {
                 <div className="space-y-5">
                 {/* Title / Signal */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-[#94A3B8] flex items-center gap-1.5">
+                  <label className="text-xs font-semibold text-muted flex items-center gap-1.5">
                     <span>Topic Title / Core Signal</span>
-                    <span className="text-[#00C9A7]">*</span>
+                    <span className="text-brand">*</span>
                   </label>
                   <input
                     type="text"
                     required
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="min-h-11 w-full bg-[#070B0F] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3.5 py-2.5 text-sm text-[#F1F5F9] outline-none transition-colors"
+                    className="min-h-11 w-full bg-canvas border border-line focus:border-brand rounded-xl px-3.5 py-2.5 text-sm text-ink outline-none transition-colors"
                   />
                 </div>
 
                 {/* Excerpt / Angle */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-[#94A3B8]">
+                  <label className="text-xs font-semibold text-muted">
                     Strategic Angle & Key Realities
                   </label>
                   <textarea
                     rows={4}
                     value={editExcerpt}
                     onChange={(e) => setEditExcerpt(e.target.value)}
-                    className="w-full bg-[#070B0F] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3.5 py-2.5 text-xs text-[#F1F5F9] outline-none transition-colors resize-none leading-relaxed"
+                    className="w-full bg-canvas border border-line focus:border-brand rounded-xl px-3.5 py-2.5 text-xs text-ink outline-none transition-colors resize-none leading-relaxed"
                   />
                 </div>
 
                 {/* Topic area */}
                 <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-[#94A3B8]">
+                    <label className="text-xs font-semibold text-muted">
                       Topic area
                     </label>
                     <select
                       value={editTrade}
                       onChange={(e) => setEditTrade(e.target.value)}
-                      className="min-h-11 w-full bg-[#070B0F] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3 py-2.5 text-sm text-[#F1F5F9] outline-none transition-colors cursor-pointer"
+                      className="min-h-11 w-full bg-canvas border border-line focus:border-brand rounded-xl px-3 py-2.5 text-sm text-ink outline-none transition-colors cursor-pointer"
                     >
                       {availableTopics.map((t) => (
-                        <option key={t} value={t} className="bg-[#0F1419] text-[#F1F5F9]">
+                        <option key={t} value={t} className="bg-surface text-ink">
                           {t}
                         </option>
                       ))}
@@ -1129,31 +1131,31 @@ export default function IdeaStreamPage() {
 
                 {/* Status Selector */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-[#94A3B8]">
+                  <label className="text-xs font-semibold text-muted">
                     Status
                   </label>
                   <select
                     value={editStatus}
                     onChange={(e) => setEditStatus(e.target.value as IdeaStatus)}
-                    className="w-full bg-[#070B0F] border border-[#1F2D3D] focus:border-[#00C9A7] rounded-xl px-3 py-2.5 text-xs text-[#F1F5F9] outline-none transition-colors cursor-pointer"
+                    className="w-full bg-canvas border border-line focus:border-brand rounded-xl px-3 py-2.5 text-xs text-ink outline-none transition-colors cursor-pointer"
                   >
-                    <option value="HARVESTED" className="bg-[#0F1419]">HARVESTED (Ready)</option>
-                    <option value="REFINED" className="bg-[#0F1419]">REFINED (Ready for Writer)</option>
-                    <option value="CLAIMED" className="bg-[#0F1419]">CLAIMED (Locked)</option>
-                    <option value="DRAFTED" className="bg-[#0F1419]">DRAFTED (Asset Generated)</option>
-                    <option value="PUBLISHED" className="bg-[#0F1419]">PUBLISHED (Live)</option>
-                    <option value="REJECTED" className="bg-[#0F1419]">REJECTED (Archived)</option>
+                    <option value="HARVESTED" className="bg-surface">HARVESTED (Ready)</option>
+                    <option value="REFINED" className="bg-surface">REFINED (Ready for Writer)</option>
+                    <option value="CLAIMED" className="bg-surface">CLAIMED (Locked)</option>
+                    <option value="DRAFTED" className="bg-surface">DRAFTED (Asset Generated)</option>
+                    <option value="PUBLISHED" className="bg-surface">PUBLISHED (Live)</option>
+                    <option value="REJECTED" className="bg-surface">REJECTED (Archived)</option>
                   </select>
                 </div>
               </form>
             </div>
 
             {/* Edit Drawer Footer */}
-            <div className="shrink-0 p-4 sm:p-6 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-[#1F2D3D] bg-[#070B0F]/90 flex items-center justify-between gap-3">
+            <div className="shrink-0 p-4 sm:p-6 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-line bg-canvas/90 flex items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={() => setDeleteIdeaTarget({ id: editingIdea.id || editingIdea.ideaId || "", title: editTitle })}
-                className="min-h-11 px-3 py-2 text-xs font-semibold text-[#EF4444] hover:bg-[#EF4444]/10 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="min-h-11 px-3 py-2 text-xs font-semibold text-danger hover:bg-danger/10 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete</span>
@@ -1164,7 +1166,7 @@ export default function IdeaStreamPage() {
                   type="button"
                   onClick={() => setEditingIdea(null)}
                   disabled={isUpdating}
-                  className="min-h-11 px-4 py-2 text-xs font-semibold text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161D26] rounded-xl transition-colors cursor-pointer"
+                  className="min-h-11 px-4 py-2 text-xs font-semibold text-muted hover:text-ink hover:bg-surface-2 rounded-xl transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1172,7 +1174,7 @@ export default function IdeaStreamPage() {
                   type="submit"
                   form="edit-idea-form"
                   disabled={isUpdating || !editTitle.trim()}
-                  className="min-h-11 inline-flex items-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] disabled:opacity-50 text-[#070B0F] text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/15 transition-all cursor-pointer"
+                  className={buttonStyles({ size: "sm" })}
                 >
                   {isUpdating ? (
                     <>
@@ -1221,7 +1223,7 @@ export default function IdeaStreamPage() {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-24 right-6 z-50 bg-[#00C9A7] text-[#070B0F] px-4 py-3 rounded-xl shadow-2xl font-bold text-xs flex items-center gap-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
+        <div className="fixed bottom-24 right-6 z-50 bg-brand text-canvas px-4 py-3 rounded-xl shadow-2xl font-bold text-xs flex items-center gap-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
           <CheckCircle2 className="w-4 h-4" />
           <span>{toastMessage}</span>
         </div>

@@ -26,18 +26,18 @@ export default function ClaimsGate({
   onToggleClaim,
 }: ClaimsGateProps) {
   return (
-        <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-4 sm:p-5 space-y-3 shadow-xl">
-          <div className="flex items-center justify-between pb-2 border-b border-[#1F2D3D]/60">
+        <div className="bg-surface rounded-2xl border border-line p-4 sm:p-5 space-y-3 shadow-xl">
+          <div className="flex items-center justify-between pb-2 border-b border-line/60">
             <div className="flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-[#00C9A7]" />
-              <span className="text-xs font-bold text-[#F1F5F9] font-mono uppercase tracking-wider">
+              <ShieldCheck className="w-4 h-4 text-brand" />
+              <span className="text-xs font-bold text-ink font-mono uppercase tracking-wider">
                 Claims Gate
               </span>
             </div>
             <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
               allClaimsVerified
-                ? "bg-[#00C9A7]/20 text-[#00C9A7] border border-[#00C9A7]/40"
-                : "bg-[#F59E0B]/20 text-[#F59E0B] border border-[#F59E0B]/40"
+                ? "bg-brand/20 text-brand border border-brand/40"
+                : "bg-gold/20 text-gold border border-gold/40"
             }`}>
               {verifiedClaimsCount}/{totalClaims} PASSED
             </span>
@@ -45,8 +45,8 @@ export default function ClaimsGate({
 
           {/* What the draft check found (phase 4): read these before the claims. */}
           {activeAsset.review_notes.length > 0 && (
-            <div className="p-2.5 rounded-xl border border-[#F59E0B]/40 bg-[#F59E0B]/5 space-y-1">
-              <div className="flex items-center gap-1.5 text-[10px] font-bold font-mono uppercase tracking-wider text-[#F59E0B]">
+            <div className="p-2.5 rounded-xl border border-gold/40 bg-gold/5 space-y-1">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold font-mono uppercase tracking-wider text-gold">
                 <AlertTriangle className="w-3 h-3" />
                 Draft check
               </div>
@@ -68,18 +68,18 @@ export default function ClaimsGate({
                     key={claim.id}
                     className={`p-2.5 rounded-xl border transition-all space-y-1.5 ${
                       isVerified
-                        ? "bg-[#070B0F] border-[#00C9A7]/30 hover:border-[#00C9A7]/60"
-                        : "bg-[#070B0F] border-[#F59E0B]/40 hover:border-[#F59E0B]/80"
+                        ? "bg-canvas border-brand/30 hover:border-brand/60"
+                        : "bg-canvas border-gold/40 hover:border-gold/80"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-1">
                       <span
                         className={`text-[9px] font-semibold px-1.5 py-0.2 rounded font-mono ${
                           claim.source === "GO_BENCHMARK"
-                            ? "bg-[#00C9A7]/15 text-[#00C9A7]"
+                            ? "bg-brand/15 text-brand"
                             : claim.source === "OPERATOR_DISPATCH_DATA"
                               ? "bg-[#3B82F6]/15 text-[#3B82F6]"
-                              : "bg-[#ff6b4a]/15 text-[#ff6b4a]"
+                              : "bg-coral/15 text-coral"
                         }`}
                       >
                         {claim.source === "GO_BENCHMARK"
@@ -93,8 +93,8 @@ export default function ClaimsGate({
                         onClick={() => onToggleClaim(claim.id)}
                         className={`px-2 py-0.5 rounded text-[10px] font-semibold flex items-center gap-1 transition-all cursor-pointer ${
                           isVerified
-                            ? "bg-[#00C9A7]/20 text-[#00C9A7]"
-                            : "bg-[#F59E0B]/20 text-[#F59E0B]"
+                            ? "bg-brand/20 text-brand"
+                            : "bg-gold/20 text-gold"
                         }`}
                       >
                         {isVerified ? <Check className="w-2.5 h-2.5" /> : <AlertTriangle className="w-2.5 h-2.5" />}
@@ -102,14 +102,14 @@ export default function ClaimsGate({
                       </button>
                     </div>
 
-                    <p className="text-[11px] text-[#F1F5F9] font-medium leading-snug">
+                    <p className="text-[11px] text-ink font-medium leading-snug">
                       &quot;{claim.claim_text}&quot;
                     </p>
                   </div>
                 );
               })
             ) : (
-              <div className="text-center py-4 text-xs text-[#64748B] font-mono">
+              <div className="text-center py-4 text-xs text-subtle font-mono">
                 No claims checks attached to this draft.
               </div>
             )}

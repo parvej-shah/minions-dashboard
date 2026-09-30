@@ -1,5 +1,54 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens (see src/components/ui/README.md).
+ * Each one becomes a Tailwind utility: bg-brand, text-muted, border-line,
+ * border-b-brand-edge... Use these instead of raw hex in new code.
+ */
+@theme {
+  --color-canvas: #070B0F;       /* page background */
+  --color-surface: #0F1419;      /* cards */
+  --color-surface-2: #161D26;    /* raised */
+  --color-surface-3: #1E2733;    /* hover on raised */
+  --color-line: #1F2D3D;         /* borders */
+  --color-line-strong: #2B3D52;
+  --color-ink: #F1F5F9;          /* primary text */
+  --color-muted: #94A3B8;        /* secondary text */
+  --color-subtle: #64748B;       /* tertiary text */
+  --color-brand: #00C9A7;        /* the one action colour */
+  --color-brand-hover: #1AD8B6;
+  --color-brand-edge: #00917A;   /* the 3D bottom edge of brand buttons */
+  --color-brand-ink: #04201A;    /* text on brand */
+  --color-coral: #FF6B4A;        /* needs attention */
+  --color-coral-edge: #C2410C;
+  --color-gold: #F59E0B;         /* streaks, rewards */
+  --color-gold-edge: #B45309;
+  --color-danger: #EF4444;
+  --color-danger-edge: #B91C1C;
+
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+  --animate-pop-in: pop-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  --animate-rise-in: rise-in 0.35s ease-out both;
+
+  @keyframes shimmer {
+    from { background-position: 150% 0; }
+    to { background-position: -50% 0; }
+  }
+  @keyframes pop-in {
+    0% { transform: scale(0.85); opacity: 0; }
+    60% { transform: scale(1.04); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+  @keyframes rise-in {
+    from { transform: translateY(8px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-shimmer, .animate-pop-in, .animate-rise-in { animation: none; }
+}
+
 :root {
   /* Minions.AI Official Brand Palette from getminions.ai */
   --bg: #0a0d12;

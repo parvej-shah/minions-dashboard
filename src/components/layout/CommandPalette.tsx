@@ -46,19 +46,19 @@ export default function CommandPalette({
       closeOnBackdrop
     >
       <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[#1f2b37]">
-        <Search className="w-5 h-5 text-[#00C9A7]" />
+        <Search className="w-5 h-5 text-brand" />
         <input
           type="text"
           placeholder="Search sections…"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           autoFocus
-          className="flex-1 bg-transparent border-0 text-sm text-[#F1F5F9] focus:outline-none placeholder:text-[#64748B]"
+          className="flex-1 bg-transparent border-0 text-sm text-ink focus:outline-none placeholder:text-subtle"
         />
         <button
           type="button"
           onClick={onClose}
-          className="text-[10px] font-mono text-[#94A3B8] hover:text-white px-2 py-1 rounded bg-[#161d24] border border-[#1f2b37] cursor-pointer"
+          className="text-[10px] font-mono text-muted hover:text-white px-2 py-1 rounded bg-[#161d24] border border-[#1f2b37] cursor-pointer"
         >
           ESC
         </button>
@@ -66,7 +66,7 @@ export default function CommandPalette({
 
       <div className="p-3 max-h-[400px] overflow-y-auto space-y-1">
         {results.length === 0 ? (
-          <div className="px-3 py-6 text-center text-xs text-[#64748B] font-mono">
+          <div className="px-3 py-6 text-center text-xs text-subtle font-mono">
             No sections match “{searchQuery}”.
           </div>
         ) : (
@@ -80,11 +80,11 @@ export default function CommandPalette({
                 className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#161d24] flex items-center justify-between text-xs transition-colors group cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <Icon className="w-4 h-4 text-[#00C9A7]" />
-                  <span className="font-semibold text-[#F1F5F9]">{item.name}</span>
+                  <Icon className="w-4 h-4 text-brand" />
+                  <span className="font-semibold text-ink">{item.name}</span>
                 </div>
                 {item.badge && (
-                  <span className="text-[10px] font-mono text-[#64748B] group-hover:text-[#00C9A7]">
+                  <span className="text-[10px] font-mono text-subtle group-hover:text-brand">
                     {item.badge}
                   </span>
                 )}

@@ -30,14 +30,14 @@ export default function LexiconTab({
 }: LexiconTabProps) {
   return (
     <div className="space-y-6">
-      <div className="p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm">
+      <div className="p-6 rounded-2xl bg-surface border border-line space-y-4 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+            <h3 className="text-base font-bold text-ink flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-red-400" />
               Banned Lexicon & AI Cliché Blacklist
             </h3>
-            <p className="text-xs text-[#94A3B8] mt-0.5">
+            <p className="text-xs text-muted mt-0.5">
               The Lead Editorial Reviewer rejects or auto-edits any draft containing these words.
             </p>
           </div>
@@ -50,7 +50,7 @@ export default function LexiconTab({
               onChange={(e) => setNewBannedWord(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !isSubmitting && newBannedWord.trim() && onAddBannedWord()}
               disabled={isSubmitting}
-              className="bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3 py-1.5 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]"
+              className="bg-surface-2 border border-line rounded-xl px-3 py-1.5 text-xs text-ink focus:outline-none focus:border-brand"
             />
             <button
               onClick={onAddBannedWord}

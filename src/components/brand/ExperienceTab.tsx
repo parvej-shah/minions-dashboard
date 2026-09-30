@@ -31,9 +31,10 @@ import {
 } from "@/constants/contentLanes";
 import type { IcpProfileItem, MemoryCheckResult, MemoryItem } from "@/types";
 
+import { buttonStyles } from "@/components/ui/Button";
 const inputClass =
-  "w-full rounded-lg bg-[#070B0F] border border-[#1F2D3D] px-3 py-2 text-sm text-[#F1F5F9] placeholder:text-[#475569] focus:outline-none focus:border-[#00C9A7]";
-const cardClass = "p-6 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-4 shadow-sm";
+  "w-full rounded-lg bg-canvas border border-line px-3 py-2 text-sm text-ink placeholder:text-[#475569] focus:outline-none focus:border-brand";
+const cardClass = "p-6 rounded-2xl bg-surface border border-line space-y-4 shadow-sm";
 
 type IcpListKey = "pains" | "decisions" | "questions" | "buying_triggers" | "vocabulary";
 
@@ -87,20 +88,20 @@ function ListEditor({
   };
   return (
     <div className="space-y-2">
-      <label className="text-xs font-semibold text-[#94A3B8]">{label}</label>
+      <label className="text-xs font-semibold text-muted">{label}</label>
       {items.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {items.map((item) => (
             <span
               key={item}
-              className="inline-flex items-center gap-1 rounded-lg border border-[#1F2D3D] bg-[#070B0F] px-2 py-1 text-xs text-[#F1F5F9]"
+              className="inline-flex items-center gap-1 rounded-lg border border-line bg-canvas px-2 py-1 text-xs text-ink"
             >
               {item}
               <button
                 type="button"
                 aria-label={`Remove ${item}`}
                 onClick={() => onChange(items.filter((i) => i !== item))}
-                className="text-[#64748B] hover:text-red-400 cursor-pointer"
+                className="text-subtle hover:text-red-400 cursor-pointer"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -176,11 +177,11 @@ function IcpEditor({ onChange }: { onChange: () => void }) {
   return (
     <div className={cardClass}>
       <div>
-        <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
-          <Target className="w-4 h-4 text-[#00C9A7]" />
+        <h3 className="text-base font-bold text-ink flex items-center gap-2">
+          <Target className="w-4 h-4 text-brand" />
           Your ideal customer
         </h3>
-        <p className="text-xs text-[#94A3B8] mt-0.5">
+        <p className="text-xs text-muted mt-0.5">
           One reader. Every idea is written for this person, so the more specific, the better.
         </p>
       </div>
@@ -188,7 +189,7 @@ function IcpEditor({ onChange }: { onChange: () => void }) {
       {error && <ErrorLine text={error} />}
 
       <div className="space-y-2">
-        <label className="text-xs font-semibold text-[#94A3B8]" htmlFor="icp-who">
+        <label className="text-xs font-semibold text-muted" htmlFor="icp-who">
           Who they are
         </label>
         <textarea
@@ -202,13 +203,13 @@ function IcpEditor({ onChange }: { onChange: () => void }) {
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-[#94A3B8]" htmlFor="icp-role">
+          <label className="text-xs font-semibold text-muted" htmlFor="icp-role">
             Their role
           </label>
           <input id="icp-role" value={icp.role} onChange={(e) => setIcp({ ...icp, role: e.target.value })} placeholder="e.g. Owner-operator" className={inputClass} />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-[#94A3B8]" htmlFor="icp-company">
+          <label className="text-xs font-semibold text-muted" htmlFor="icp-company">
             Their company
           </label>
           <input
@@ -226,9 +227,9 @@ function IcpEditor({ onChange }: { onChange: () => void }) {
         ))}
       </div>
 
-      <div className="flex items-center justify-end gap-3 border-t border-[#1F2D3D]/60 pt-4">
+      <div className="flex items-center justify-end gap-3 border-t border-line/60 pt-4">
         {justSaved && (
-          <span className="flex items-center gap-1 text-xs text-[#00C9A7]">
+          <span className="flex items-center gap-1 text-xs text-brand">
             <Check className="h-3.5 w-3.5" /> Saved. Your audience rule now matches this profile.
           </span>
         )}
@@ -236,7 +237,7 @@ function IcpEditor({ onChange }: { onChange: () => void }) {
           type="button"
           onClick={save}
           disabled={!dirty || isSaving}
-          className="flex items-center gap-1.5 rounded-lg bg-[#00C9A7] px-3 py-2 text-xs font-bold text-[#070B0F] transition-colors hover:bg-[#00C9A7]/90 disabled:opacity-50 cursor-pointer"
+          className={buttonStyles({ size: "sm" })}
         >
           {isSaving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
           Save ideal customer
@@ -318,12 +319,12 @@ function MemorySection({ onChange }: { onChange: () => void }) {
   return (
     <div className={cardClass}>
       <div>
-        <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-[#00C9A7]" />
+        <h3 className="text-base font-bold text-ink flex items-center gap-2">
+          <BookOpen className="w-4 h-4 text-brand" />
           Experience &amp; activity
-          <span className="rounded bg-[#1F2D3D] px-1.5 py-0.5 font-mono text-[10px] text-[#94A3B8]">{items.length}</span>
+          <span className="rounded bg-line px-1.5 py-0.5 font-mono text-[10px] text-muted">{items.length}</span>
         </h3>
-        <p className="text-xs text-[#94A3B8] mt-0.5">
+        <p className="text-xs text-muted mt-0.5">
           What you have built, learned and seen. Minions only proposes ideas it can back with something here, so
           anything you add makes your posts more yours. Never add anything confidential.
         </p>
@@ -334,30 +335,30 @@ function MemorySection({ onChange }: { onChange: () => void }) {
       <Composer draft={draft} setDraft={setDraft} onSaved={(item) => { upsert(item); setDraft(EMPTY_DRAFT); }} />
 
       {items.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-[#1F2D3D] px-3 py-6 text-center text-xs text-[#64748B]">
+        <p className="rounded-lg border border-dashed border-line px-3 py-6 text-center text-xs text-subtle">
           Nothing yet. Start with one lesson from a project that did not go to plan.
         </p>
       ) : (
-        <div className="space-y-5 border-t border-[#1F2D3D]/60 pt-4">
+        <div className="space-y-5 border-t border-line/60 pt-4">
           {grouped.map(({ kind, rows }) => (
             <div key={kind} className="space-y-2">
-              <h4 className="text-[11px] font-mono uppercase tracking-wider text-[#64748B]">{MEMORY_KIND_META[kind].label}</h4>
+              <h4 className="text-[11px] font-mono uppercase tracking-wider text-subtle">{MEMORY_KIND_META[kind].label}</h4>
               {rows.map((item) => (
                 <div
                   key={item.id}
-                  className={`rounded-lg border border-[#1F2D3D] bg-[#070B0F] px-3 py-2.5 ${item.is_active ? "" : "opacity-50"}`}
+                  className={`rounded-lg border border-line bg-canvas px-3 py-2.5 ${item.is_active ? "" : "opacity-50"}`}
                 >
-                  <p className="whitespace-pre-wrap text-sm text-[#F1F5F9]">{item.content}</p>
+                  <p className="whitespace-pre-wrap text-sm text-ink">{item.content}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
                     <button
                       type="button"
                       onClick={() => patch(item, { disclosure: item.disclosure === "PUBLIC" ? "GENERALIZE" : "PUBLIC" })}
                       title={MEMORY_DISCLOSURE_META[item.disclosure].hint}
-                      className="rounded border border-[#1F2D3D] px-1.5 py-0.5 text-[#94A3B8] hover:text-[#F1F5F9] cursor-pointer"
+                      className="rounded border border-line px-1.5 py-0.5 text-muted hover:text-ink cursor-pointer"
                     >
                       {MEMORY_DISCLOSURE_META[item.disclosure].label}
                     </button>
-                    <span className="text-[#64748B]">
+                    <span className="text-subtle">
                       {item.used_in_ideas === 0 ? "Not used yet" : `Used in ${item.used_in_ideas} idea${item.used_in_ideas === 1 ? "" : "s"}`}
                     </span>
                     <span className="flex-1" />
@@ -366,7 +367,7 @@ function MemorySection({ onChange }: { onChange: () => void }) {
                       onClick={() => patch(item, { is_active: !item.is_active })}
                       aria-label={item.is_active ? "Stop using this" : "Use this again"}
                       title={item.is_active ? "Stop using this" : "Use this again"}
-                      className="rounded p-1 text-[#64748B] hover:text-[#F1F5F9] cursor-pointer"
+                      className="rounded p-1 text-subtle hover:text-ink cursor-pointer"
                     >
                       {item.is_active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                     </button>
@@ -374,7 +375,7 @@ function MemorySection({ onChange }: { onChange: () => void }) {
                       type="button"
                       onClick={() => setDraft({ id: item.id, kind: item.kind, content: item.content, disclosure: item.disclosure })}
                       aria-label="Edit"
-                      className="rounded p-1 text-[#64748B] hover:text-[#F1F5F9] cursor-pointer"
+                      className="rounded p-1 text-subtle hover:text-ink cursor-pointer"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
@@ -382,7 +383,7 @@ function MemorySection({ onChange }: { onChange: () => void }) {
                       type="button"
                       onClick={() => remove(item)}
                       aria-label="Delete"
-                      className="rounded p-1 text-[#64748B] hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
+                      className="rounded p-1 text-subtle hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -462,7 +463,7 @@ function Composer({
   }
 
   return (
-    <div className="space-y-3 rounded-xl border border-[#1F2D3D] bg-[#0B1016] p-4">
+    <div className="space-y-3 rounded-xl border border-line bg-[#0B1016] p-4">
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-[200px_1fr]">
         <select
           value={draft.kind}
@@ -476,7 +477,7 @@ function Composer({
             </option>
           ))}
         </select>
-        <p className="self-center text-[11px] text-[#64748B]">{MEMORY_KIND_META[draft.kind].hint}</p>
+        <p className="self-center text-[11px] text-subtle">{MEMORY_KIND_META[draft.kind].hint}</p>
       </div>
 
       <textarea
@@ -495,15 +496,15 @@ function Composer({
             type="button"
             onClick={() => update({ disclosure: d })}
             className={`rounded-lg border px-2.5 py-1.5 text-left text-xs cursor-pointer ${
-              draft.disclosure === d ? "border-[#00C9A7] bg-[#00C9A7]/10 text-[#F1F5F9]" : "border-[#1F2D3D] text-[#94A3B8] hover:text-[#F1F5F9]"
+              draft.disclosure === d ? "border-brand bg-brand/10 text-ink" : "border-line text-muted hover:text-ink"
             }`}
           >
             <span className="font-semibold">{MEMORY_DISCLOSURE_META[d].label}</span>
-            <span className="ml-1.5 text-[#64748B]">{MEMORY_DISCLOSURE_META[d].hint}</span>
+            <span className="ml-1.5 text-subtle">{MEMORY_DISCLOSURE_META[d].hint}</span>
           </button>
         ))}
         <span className="flex-1" />
-        <span className={`text-[11px] ${length > MEMORY_MAX_CHARS ? "text-red-400" : "text-[#64748B]"}`}>
+        <span className={`text-[11px] ${length > MEMORY_MAX_CHARS ? "text-red-400" : "text-subtle"}`}>
           {length}/{MEMORY_MAX_CHARS}
         </span>
         {draft.id && (
@@ -513,7 +514,7 @@ function Composer({
               setDraft(EMPTY_DRAFT);
               setCheck(null);
             }}
-            className="rounded-lg px-3 py-2 text-xs text-[#94A3B8] hover:text-[#F1F5F9] cursor-pointer"
+            className="rounded-lg px-3 py-2 text-xs text-muted hover:text-ink cursor-pointer"
           >
             Cancel
           </button>
@@ -522,7 +523,7 @@ function Composer({
           type="button"
           onClick={checkThenSave}
           disabled={!valid || busy !== null || check !== null}
-          className="flex items-center gap-1.5 rounded-lg bg-[#00C9A7] px-3 py-2 text-xs font-bold text-[#070B0F] transition-colors hover:bg-[#00C9A7]/90 disabled:opacity-50 cursor-pointer"
+          className={buttonStyles({ size: "sm" })}
         >
           {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : draft.id ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
           {busy === "checking" ? "Checking…" : draft.id ? "Save changes" : "Add"}
@@ -530,13 +531,13 @@ function Composer({
       </div>
 
       {length > 0 && length < MEMORY_MIN_CHARS && (
-        <p className="text-[11px] text-[#64748B]">A little more detail: at least {MEMORY_MIN_CHARS} characters.</p>
+        <p className="text-[11px] text-subtle">A little more detail: at least {MEMORY_MIN_CHARS} characters.</p>
       )}
       {error && <ErrorLine text={error} />}
 
       {check && (
         <div className={`space-y-3 rounded-lg border px-3 py-3 ${check.confidential ? "border-red-500/40 bg-red-500/5" : "border-amber-500/40 bg-amber-500/5"}`}>
-          <p className="flex items-start gap-2 text-xs font-semibold text-[#F1F5F9]">
+          <p className="flex items-start gap-2 text-xs font-semibold text-ink">
             <ShieldAlert className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${check.confidential ? "text-red-400" : "text-amber-400"}`} />
             {check.confidential
               ? "This looks confidential. Minions doesn't keep confidential material, so remove it or use the version below."
@@ -547,26 +548,26 @@ function Composer({
           {check.issues.length > 0 && (
             <ul className="space-y-1">
               {check.issues.map((issue) => (
-                <li key={issue.text} className="text-xs text-[#94A3B8]">
-                  <span className="rounded bg-[#1F2D3D] px-1 py-0.5 font-mono text-[#F1F5F9]">{issue.text}</span> {issue.reason}
+                <li key={issue.text} className="text-xs text-muted">
+                  <span className="rounded bg-line px-1 py-0.5 font-mono text-ink">{issue.text}</span> {issue.reason}
                 </li>
               ))}
             </ul>
           )}
           {!check.model_checked && (
-            <p className="text-[11px] text-[#64748B]">The name check is unavailable right now; only contact details, secrets and figures were checked.</p>
+            <p className="text-[11px] text-subtle">The name check is unavailable right now; only contact details, secrets and figures were checked.</p>
           )}
           {check.generalized && (
-            <div className="rounded-lg border border-[#1F2D3D] bg-[#070B0F] px-3 py-2">
-              <p className="mb-1 text-[11px] font-mono uppercase tracking-wider text-[#64748B]">Without the specifics</p>
-              <p className="text-sm text-[#F1F5F9]">{check.generalized}</p>
+            <div className="rounded-lg border border-line bg-canvas px-3 py-2">
+              <p className="mb-1 text-[11px] font-mono uppercase tracking-wider text-subtle">Without the specifics</p>
+              <p className="text-sm text-ink">{check.generalized}</p>
             </div>
           )}
           <div className="flex flex-wrap justify-end gap-2">
             <button
               type="button"
               onClick={() => setCheck(null)}
-              className="rounded-lg px-3 py-1.5 text-xs text-[#94A3B8] hover:text-[#F1F5F9] cursor-pointer"
+              className="rounded-lg px-3 py-1.5 text-xs text-muted hover:text-ink cursor-pointer"
             >
               Keep editing
             </button>
@@ -575,7 +576,7 @@ function Composer({
                 type="button"
                 onClick={() => persist(draft.content)}
                 disabled={busy !== null}
-                className="rounded-lg border border-[#1F2D3D] px-3 py-1.5 text-xs text-[#F1F5F9] hover:border-[#2A3D52] disabled:opacity-50 cursor-pointer"
+                className="rounded-lg border border-line px-3 py-1.5 text-xs text-ink hover:border-[#2A3D52] disabled:opacity-50 cursor-pointer"
               >
                 Save as written
               </button>
@@ -587,7 +588,7 @@ function Composer({
                   setDraft({ ...draft, content: check.generalized! });
                   setCheck(null);
                 }}
-                className="rounded-lg bg-[#00C9A7] px-3 py-1.5 text-xs font-bold text-[#070B0F] hover:bg-[#00C9A7]/90 cursor-pointer"
+                className={buttonStyles({ size: "sm" })}
               >
                 Use this version
               </button>

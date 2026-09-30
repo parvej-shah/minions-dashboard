@@ -1,118 +1,152 @@
 "use client";
 
-import { useOnboardingWizard, ONBOARDING_STEPS } from "@/hooks/useOnboardingWizard";
-import StepCompanySnapshot from "./StepCompanySnapshot";
-import StepLinkedInVoice from "./StepLinkedInVoice";
-import StepBrandInterview from "./StepBrandInterview";
-import Link from "next/link";
-import { Sparkles, ShieldCheck } from "lucide-react";
+import { useState } from "react";
+import { useOnboardingWizard, type OnboardingWizardState } from "@/hooks/useOnboardingWizard";
+import { Button } from "@/components/ui/Button";
+import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
+import { LessonFooter, LessonHeader, useEnterToContinue } from "./lesson";
+import { AudienceQuestion, BusinessQuestion, EXPERTISE_PRAISE, ExpertiseQuestion, FocusQuestion, MIN_ANSWER } from "./BrandQuestions";
+import { VoiceQuestion } from "./VoiceQuestion";
+import { BriefBuilding, BriefReady } from "./BriefScreens";
 
-function ProgressHeader({ step }: { step: number }) {
-  return (
-    <div className="mb-4 flex items-center gap-1.5 sm:gap-2">
-      {ONBOARDING_STEPS.map((label, i) => {
-        const isDone = i < step;
-        const isActive = i === step;
-        return (
-          <div key={label} className="flex items-center gap-1.5 sm:gap-2 flex-1 last:flex-none">
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-              <div
-                className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[11px] sm:text-xs font-mono font-bold border transition-all ${
-                  isDone
-                    ? "bg-[#00C9A7] border-[#00C9A7] text-[#070B0F] shadow-sm shadow-[#00C9A7]/30"
-                    : isActive
-                      ? "border-[#00C9A7] text-[#00C9A7] ring-2 ring-[#00C9A7]/20 bg-[#00C9A7]/5"
-                      : "border-[#1F2D3D] text-[#64748B] bg-[#070B0F]"
-                }`}
-              >
-                {isDone ? "✓" : i + 1}
-              </div>
-              <span
-                className={`text-sm font-mono hidden md:inline ${
-                  isActive ? "text-[#F1F5F9] font-bold" : isDone ? "text-[#94A3B8]" : "text-[#64748B]"
-                }`}
-              >
-                {label}
-              </span>
-            </div>
-            {i < ONBOARDING_STEPS.length - 1 && (
-              <div
-                className={`h-0.5 flex-1 transition-colors ${isDone ? "bg-[#00C9A7]" : "bg-[#1F2D3D]"}`}
-              />
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-/** Shown instead of the wizard when this workspace has already been onboarded. */
-function AlreadySetUp() {
-  return (
-    <div className="rounded-2xl border border-[#1F2D3D] bg-[#0F1419] p-5 sm:p-6 space-y-3">
-      <div className="flex items-center gap-2 text-[#00C9A7]">
-        <ShieldCheck className="w-5 h-5 shrink-0" />
-        <h2 className="text-base sm:text-lg font-bold text-[#F1F5F9]">This workspace is already set up</h2>
-      </div>
-      <p className="text-sm text-[#94A3B8] leading-relaxed">
-        Running onboarding again would replace its brand, voice examples, directives and posting schedule.
-        Change any of those in Brand settings instead.
-      </p>
-      <div className="flex flex-col sm:flex-row gap-2 pt-1">
-        <Link
-          href="/brand"
-          className="inline-flex justify-center items-center px-4 py-2 rounded-xl bg-[#00C9A7] text-[#070B0F] text-sm font-bold hover:bg-[#00A88A] transition-colors"
-        >
-          Open Brand settings
-        </Link>
-        <Link
-          href="/ideas"
-          className="inline-flex justify-center items-center px-4 py-2 rounded-xl border border-[#1F2D3D] text-sm font-semibold text-[#F1F5F9] hover:bg-[#161D26] transition-colors"
-        >
-          Go to Ideas
-        </Link>
-      </div>
-    </div>
-  );
-}
+/**
+ * The brand brief as a lesson: one question per screen. The hook still owns
+ * three steps (brand, voice, finish) and all the saving; step 0 is split into
+ * four screens here, so screens 0-3 are step 0, screen 4 is step 1 and
+ * screen 5 is step 2.
+ */
+const BRAND_SCREENS = 4;
+const LAST_SCREEN = BRAND_SCREENS + 1;
 
 export default function OnboardingWizard() {
   const wizard = useOnboardingWizard();
+  // Wait for the saved draft so a returning user lands on their own screen
+  // instead of seeing the first question flash first.
+  if (!wizard.draftRestored) return <WizardSkeleton />;
+  return <Lesson wizard={wizard} />;
+}
+
+function firstUnanswered(wizard: OnboardingWizardState) {
+  if (wizard.contentFocus.trim().length < MIN_ANSWER) return 0;
+  if (wizard.audienceDescription.trim().length < MIN_ANSWER) return 1;
+  return 2;
+}
+
+function Lesson({ wizard }: { wizard: OnboardingWizardState }) {
+  const [brandScreen, setBrandScreen] = useState(() => firstUnanswered(wizard));
+  const screen = wizard.step === 0 ? brandScreen : BRAND_SCREENS + wizard.step - 1;
+
+  const focusOk = wizard.contentFocus.trim().length >= MIN_ANSWER;
+  const audienceOk = wizard.audienceDescription.trim().length >= MIN_ANSWER;
+  const voiceOk = Boolean(wizard.selectedVoice) || wizard.customSampleText.trim().length >= 20;
+
+  const back = () => {
+    wizard.setError(null);
+    if (wizard.step === 0) setBrandScreen((s) => Math.max(0, s - 1));
+    else {
+      if (wizard.step === 1) setBrandScreen(BRAND_SCREENS - 1);
+      wizard.goBack();
+    }
+  };
+
+  const building = wizard.isGeneratingDirectives;
+  let body: React.ReactNode;
+  let footer: { label: string; onContinue: () => void; disabled?: boolean; loading?: boolean; praise?: string | null; secondary?: React.ReactNode };
+
+  switch (screen) {
+    case 0:
+      body = <FocusQuestion wizard={wizard} />;
+      footer = { label: "Continue", onContinue: () => setBrandScreen(1), disabled: !focusOk, praise: focusOk ? "Clear territory. Nice!" : null };
+      break;
+    case 1:
+      body = <AudienceQuestion wizard={wizard} />;
+      footer = { label: "Continue", onContinue: () => setBrandScreen(2), disabled: !audienceOk, praise: audienceOk ? "Now we know who's listening." : null };
+      break;
+    case 2:
+      body = <ExpertiseQuestion wizard={wizard} />;
+      footer = { label: "Continue", onContinue: () => setBrandScreen(3), praise: EXPERTISE_PRAISE[wizard.writerExpertise] };
+      break;
+    case 3: {
+      const hasAny = Boolean(wizard.websiteUrl.trim() || wizard.businessName.trim() || wizard.selectedPresetId);
+      body = <BusinessQuestion wizard={wizard} />;
+      footer = {
+        label: "Continue",
+        onContinue: () => void wizard.goToBrandInterview(),
+        disabled: !hasAny,
+        secondary: hasAny ? null : (
+          <Button variant="ghost" size="lg" shout block className="sm:w-auto" onClick={() => void wizard.goToBrandInterview()}>
+            Skip
+          </Button>
+        ),
+        praise: hasAny ? "Got it. Almost there." : null,
+      };
+      break;
+    }
+    case 4:
+      body = <VoiceQuestion wizard={wizard} />;
+      footer = {
+        label: "Build my brief",
+        onContinue: () => void wizard.generateDirectives(),
+        disabled: !voiceOk,
+        loading: building,
+        praise: voiceOk ? "Love it. That's your starting voice." : null,
+      };
+      break;
+    default:
+      body = <BriefReady wizard={wizard} />;
+      footer = {
+        label: wizard.saving ? "Setting up" : "Find my first ideas",
+        onContinue: () => void wizard.finalizeOnboarding(),
+        loading: wizard.saving,
+      };
+  }
+
+  const canContinue = !footer.disabled && !footer.loading && !building;
+  useEnterToContinue(canContinue, footer.onContinue);
 
   return (
-    <div className="min-h-screen bg-[#070B0F] px-3.5 py-4 text-[#F1F5F9] sm:px-6 sm:py-5">
-      <div className="mx-auto max-w-3xl space-y-3 sm:space-y-4">
-        {/* Header */}
-        <div className="text-center sm:text-left space-y-1.5">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-[#00C9A7] text-sm font-semibold">
-            <Sparkles className="w-3.5 h-3.5 shrink-0" />
-            <span>Minions Brand Brief</span>
-          </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-[#F1F5F9] tracking-tight leading-tight">
-            Let&apos;s capture how you want to be known
-          </h1>
-          <p className="text-sm sm:text-base text-[#94A3B8] max-w-2xl leading-relaxed">
-            Give Minions context for relevant ideas, then choose what becomes your first draft.
-          </p>
-        </div>
-
-        {wizard.alreadySetUp ? (
-          <AlreadySetUp />
-        ) : (
-          <>
-            {/* Progress Tracker */}
-            <ProgressHeader step={wizard.step} />
-
-            {/* Step Container */}
-            <div>
-              {wizard.step === 0 && <StepCompanySnapshot wizard={wizard} />}
-              {wizard.step === 1 && <StepBrandInterview wizard={wizard} />}
-              {wizard.step === 2 && <StepLinkedInVoice wizard={wizard} />}
+    <div className="flex min-h-dvh flex-col bg-canvas text-ink">
+      <LessonHeader progress={screen / LAST_SCREEN} onBack={screen > 0 && !building && !wizard.saving ? back : undefined} />
+      {building ? (
+        <BriefBuilding />
+      ) : (
+        <>
+          <main className="flex-1">
+            <div key={screen} className="story-step-in mx-auto w-full max-w-2xl px-4 pt-4 pb-10 sm:px-6 sm:pt-8">
+              {body}
             </div>
-          </>
-        )}
-      </div>
+          </main>
+          <LessonFooter {...footer} error={wizard.error} />
+        </>
+      )}
     </div>
+  );
+}
+
+function WizardSkeleton() {
+  return (
+    <SkeletonGroup label="Loading your brand brief" className="flex min-h-dvh flex-col bg-canvas">
+      <div className="mx-auto flex w-full max-w-2xl items-center gap-4 px-4 pt-4 pb-3 sm:px-6 sm:pt-6">
+        <Skeleton className="h-8 w-8" />
+        <Skeleton className="h-4 flex-1 rounded-full" />
+      </div>
+      <div className="mx-auto w-full max-w-2xl flex-1 px-4 pt-4 sm:px-6 sm:pt-8">
+        <div className="flex items-end gap-3">
+          <Skeleton className="h-14 w-14 rounded-2xl sm:h-16 sm:w-16" />
+          <Skeleton className="h-16 flex-1 rounded-2xl" />
+        </div>
+        <Skeleton className="mt-6 h-14 w-full rounded-2xl" />
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Skeleton className="h-10 w-40" />
+          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-10 w-44" />
+        </div>
+      </div>
+      <div className="border-t-2 border-line">
+        <div className="mx-auto flex w-full max-w-2xl justify-end px-4 py-4 sm:px-6 sm:py-5">
+          <Skeleton className="h-14 w-full rounded-2xl sm:w-48" />
+        </div>
+      </div>
+    </SkeletonGroup>
   );
 }

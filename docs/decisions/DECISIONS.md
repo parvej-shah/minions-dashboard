@@ -29,6 +29,18 @@ and link to it here.
 
 ---
 
+## 2026-09-30 — The brand brief is a lesson, one question per screen
+
+**Decision:** The setup wizard asks one question per screen: what you want to be known for, who it's for, how deep your experience is, where you work (skippable), and your voice. The flow ends on a "your brief is ready" screen where you choose review-first or auto-publish. Every answer can be one tap on an example, and each screen has a single CONTINUE button that confirms a good answer.
+**Why:** The old three-step form put up to eight fields on one screen, which read as paperwork. The UX bar is a lesson app like Duolingo: one obvious next step, instant feedback and a reward at the end. The questions and what they save have not changed.
+**Status:** active
+
+## 2026-09-30 — Sign-in goes straight to the dashboard
+
+**Decision:** After Google sign-in, or on opening /login while signed in, the server sends an established workspace straight to the dashboard and a new one to the brand brief, before anything renders. The "this workspace is already set up — open Brand settings or go to Ideas" chooser is gone; loading screens show skeletons shaped like the page instead of spinners or zeros.
+**Why:** The onboarding form used to flash while a background check ran, and returning users were asked where to go when the answer is always the dashboard. The product's UX bar is a lesson app like Duolingo: one obvious next step, nothing flashing while it loads.
+**Status:** active
+
 ## 2026-09-30 — Make Mission Control action-first
 
 **Decision:** The home page leads with the next useful action, uses plain-language progress labels, and omits the mobile header post quota, menu button, and blog shortcut. The quota and navigation remain available in the bottom-bar menu.

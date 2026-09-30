@@ -5,6 +5,7 @@ import { CalendarClock, RefreshCw } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { MIN_LEAD_MINUTES, RELEASE_GRANULARITY_MINUTES, utcToZoned } from "@/lib/postTime";
 
+import { buttonStyles } from "@/components/ui/Button";
 interface ScheduleSettings {
   timezone: string;
   times_of_day: string[];
@@ -83,11 +84,11 @@ export default function SchedulePicker({ current, busy, confirmLabel, onConfirm,
   }, [current]);
 
   if (loadFailed) {
-    return <p className="text-[11px] text-[#F59E0B]">Could not load the workspace&apos;s timezone. Reload the page and try again.</p>;
+    return <p className="text-[11px] text-gold">Could not load the workspace&apos;s timezone. Reload the page and try again.</p>;
   }
   if (!settings || !value) {
     return (
-      <div className="flex items-center gap-2 text-[11px] text-[#94A3B8]">
+      <div className="flex items-center gap-2 text-[11px] text-muted">
         <RefreshCw className="w-3 h-3 animate-spin" /> Loading…
       </div>
     );
@@ -95,11 +96,11 @@ export default function SchedulePicker({ current, busy, confirmLabel, onConfirm,
 
   const today = utcToZoned(new Date(), settings.timezone).date;
   const inputClass =
-    "w-full bg-[#070B0F] border border-[#1F2D3D] rounded-lg px-2.5 py-1.5 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7] [color-scheme:dark]";
+    "w-full bg-canvas border border-line rounded-lg px-2.5 py-1.5 text-xs text-ink focus:outline-none focus:border-brand [color-scheme:dark]";
 
   return (
     <form
-      className="space-y-2 rounded-xl border border-[#1F2D3D] bg-[#161D26] p-3"
+      className="space-y-2 rounded-xl border border-line bg-surface-2 p-3"
       onSubmit={(e) => {
         e.preventDefault();
         onConfirm(value.date, value.time);
@@ -107,27 +108,27 @@ export default function SchedulePicker({ current, busy, confirmLabel, onConfirm,
     >
       <div className="grid grid-cols-2 gap-2">
         <label className="block">
-          <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Date</span>
+          <span className="text-[11px] font-medium text-muted block mb-1">Date</span>
           <input type="date" required min={today} value={value.date} onChange={(e) => setValue({ ...value, date: e.target.value })} className={inputClass} />
         </label>
         <label className="block">
-          <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Time</span>
+          <span className="text-[11px] font-medium text-muted block mb-1">Time</span>
           <input type="time" required step={300} value={value.time} onChange={(e) => setValue({ ...value, time: e.target.value })} className={inputClass} />
         </label>
       </div>
-      <p className="text-[10px] leading-relaxed text-[#64748B]">
+      <p className="text-[10px] leading-relaxed text-subtle">
         {zoneLabel(settings.timezone)}. It goes out within {RELEASE_GRANULARITY_MINUTES} minutes of this time, at least {MIN_LEAD_MINUTES} minutes from now.
       </p>
       <div className="flex gap-2">
         <button
           type="submit"
           disabled={busy || !value.date || !value.time}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold disabled:opacity-60 cursor-pointer"
+          className={buttonStyles({ size: "sm", className: "flex-1" })}
         >
           {busy ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <CalendarClock className="w-3.5 h-3.5" />}
           {confirmLabel}
         </button>
-        <button type="button" onClick={onCancel} className="px-3 py-2 rounded-lg bg-[#070B0F] border border-[#1F2D3D] text-xs text-[#F1F5F9] cursor-pointer">
+        <button type="button" onClick={onCancel} className="px-3 py-2 rounded-lg bg-canvas border border-line text-xs text-ink cursor-pointer">
           Close
         </button>
       </div>

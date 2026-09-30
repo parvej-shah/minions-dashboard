@@ -8,15 +8,15 @@ export interface StatusStyle {
 
 const NEUTRAL: StatusStyle = {
   label: "Unknown",
-  className: "bg-[#161D26] text-[#94A3B8] border-[#1F2D3D]",
+  className: "bg-surface-2 text-muted border-line",
 };
 
-const TEAL = "bg-[#00C9A7]/10 text-[#00C9A7] border-[#00C9A7]/30";
-const AMBER = "bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/30";
+const TEAL = "bg-brand/10 text-brand border-brand/30";
+const AMBER = "bg-gold/10 text-gold border-gold/30";
 const BLUE = "bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/30";
-const CORAL = "bg-[#ff6b4a]/10 text-[#ff6b4a] border-[#ff6b4a]/30";
-const RED = "bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/30";
-const SLATE = "bg-[#161D26] text-[#94A3B8] border-[#1F2D3D]";
+const CORAL = "bg-coral/10 text-coral border-coral/30";
+const RED = "bg-danger/10 text-danger border-danger/30";
+const SLATE = "bg-surface-2 text-muted border-line";
 
 export const ASSET_STATUS_STYLES: Record<AssetStatus, StatusStyle> = {
   DRAFT: { label: "Draft", className: SLATE },

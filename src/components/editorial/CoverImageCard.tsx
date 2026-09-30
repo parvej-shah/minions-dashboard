@@ -7,6 +7,7 @@ import type { AssetItem, CoverSpecDTO } from "@/types";
 import type { CoverEditInput } from "@/hooks/useEditorialDraft";
 import { COVER_ART_STYLES, COVER_ART_STYLE_META } from "@/lib/covers/artStyles";
 
+import { buttonStyles } from "@/components/ui/Button";
 export interface CoverImageCardProps {
   activeAsset: AssetItem;
   isRendering: boolean;
@@ -63,20 +64,20 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
   };
 
   return (
-    <div className="bg-[#0F1419] rounded-2xl border border-[#1F2D3D] p-4 sm:p-5 space-y-3 shadow-xl">
-      <div className="flex items-center justify-between pb-2 border-b border-[#1F2D3D]/60">
+    <div className="bg-surface rounded-2xl border border-line p-4 sm:p-5 space-y-3 shadow-xl">
+      <div className="flex items-center justify-between pb-2 border-b border-line/60">
         <div className="flex items-center gap-2">
-          <ImageIcon className="w-4 h-4 text-[#00C9A7]" />
-          <span className="text-xs font-bold text-[#F1F5F9] font-mono uppercase tracking-wider">Cover</span>
+          <ImageIcon className="w-4 h-4 text-brand" />
+          <span className="text-xs font-bold text-ink font-mono uppercase tracking-wider">Cover</span>
         </div>
-        <span className="text-[10px] font-mono text-[#64748B]">
+        <span className="text-[10px] font-mono text-subtle">
           {isRendering ? "Drawing…" : isCoverPending ? "Drawing…" : coverNeedsAttention ? "Cover needs attention" : isTemplate ? "Portrait · 1080×1350" : "AI image · 1280×720"}
         </span>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
         <div
-          className={`relative rounded-xl overflow-hidden border border-[#1F2D3D] bg-[#070B0F] shadow-inner shrink-0 ${
+          className={`relative rounded-xl overflow-hidden border border-line bg-canvas shadow-inner shrink-0 ${
             isTemplate || !activeAsset.hero_image_url ? "aspect-[4/5] w-full sm:w-[280px]" : "aspect-[16/9] w-full"
           }`}
         >
@@ -91,21 +92,21 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
             />
           ) : isCoverPending ? (
             <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-2">
-              <Loader2 className="w-8 h-8 text-[#00C9A7] animate-spin" />
-              <span className="text-sm font-semibold text-[#F1F5F9]">Drawing the cover</span>
-              <span className="text-xs leading-relaxed text-[#94A3B8]">It appears here on its own in a few seconds.</span>
+              <Loader2 className="w-8 h-8 text-brand animate-spin" />
+              <span className="text-sm font-semibold text-ink">Drawing the cover</span>
+              <span className="text-xs leading-relaxed text-muted">It appears here on its own in a few seconds.</span>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-2">
-              <AlertTriangle className="w-8 h-8 text-[#F59E0B]" />
-              <span className="text-sm font-semibold text-[#F1F5F9]">Cover needs attention</span>
-              <span className="text-xs leading-relaxed text-[#94A3B8]">{coverMessage}</span>
-              {activeAsset.hero_error_code && <span className="text-[10px] font-mono text-[#64748B]">{activeAsset.hero_error_code}</span>}
+              <AlertTriangle className="w-8 h-8 text-gold" />
+              <span className="text-sm font-semibold text-ink">Cover needs attention</span>
+              <span className="text-xs leading-relaxed text-muted">{coverMessage}</span>
+              {activeAsset.hero_error_code && <span className="text-[10px] font-mono text-subtle">{activeAsset.hero_error_code}</span>}
             </div>
           )}
           {isRendering && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <Loader2 className="w-8 h-8 text-[#00C9A7] animate-spin" />
+              <Loader2 className="w-8 h-8 text-brand animate-spin" />
             </div>
           )}
         </div>
@@ -113,13 +114,13 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
         <div className="flex-1 min-w-0 space-y-3">
           {isLocked ? (
             <div className="space-y-1.5">
-              {cover && <p className="text-sm font-semibold text-[#F1F5F9] leading-snug">{cover.layout === "QUOTE" && cover.quote ? `“${cover.quote}”` : cover.headline}</p>}
-              <p className="text-xs leading-relaxed text-[#94A3B8]">This draft is published, so its cover stays exactly as it went out.</p>
+              {cover && <p className="text-sm font-semibold text-ink leading-snug">{cover.layout === "QUOTE" && cover.quote ? `“${cover.quote}”` : cover.headline}</p>}
+              <p className="text-xs leading-relaxed text-muted">This draft is published, so its cover stays exactly as it went out.</p>
             </div>
           ) : cover ? (
             <>
               <div>
-                <span className="text-[11px] font-medium text-[#94A3B8] block mb-1.5">Layout</span>
+                <span className="text-[11px] font-medium text-muted block mb-1.5">Layout</span>
                 <div className="grid grid-cols-2 gap-1.5">
                   {LAYOUTS.map((l) => {
                     const unavailable = l.id === "NUMBER" && !cover.number;
@@ -133,8 +134,8 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                         onClick={() => void run({ layout: l.id })}
                         className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                           cover.layout === l.id
-                            ? "bg-[#00C9A7]/15 border-[#00C9A7] text-[#00C9A7]"
-                            : "bg-[#161D26] border-[#1F2D3D] text-[#F1F5F9] hover:border-[#00C9A7]/60 disabled:opacity-40 disabled:hover:border-[#1F2D3D]"
+                            ? "bg-brand/15 border-brand text-brand"
+                            : "bg-surface-2 border-line text-ink hover:border-brand/60 disabled:opacity-40 disabled:hover:border-line"
                         }`}
                       >
                         {l.label}
@@ -145,7 +146,7 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
               </div>
 
               <div>
-                <span className="text-[11px] font-medium text-[#94A3B8] block mb-1.5">Illustration</span>
+                <span className="text-[11px] font-medium text-muted block mb-1.5">Illustration</span>
                 <div className="flex flex-wrap gap-1.5">
                   {COVER_ART_STYLES.map((s) => {
                     const current = (cover.art_style ?? "NONE") === s;
@@ -160,8 +161,8 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                         onClick={() => void run({ art: s })}
                         className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                           current
-                            ? "bg-[#00C9A7]/15 border-[#00C9A7] text-[#00C9A7]"
-                            : "bg-[#161D26] border-[#1F2D3D] text-[#F1F5F9] hover:border-[#00C9A7]/60 disabled:opacity-40"
+                            ? "bg-brand/15 border-brand text-brand"
+                            : "bg-surface-2 border-line text-ink hover:border-brand/60 disabled:opacity-40"
                         }`}
                       >
                         {COVER_ART_STYLE_META[s].label}
@@ -173,48 +174,48 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                       type="button"
                       disabled={isRendering}
                       onClick={() => void run({ art_reroll: true })}
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border bg-[#161D26] border-[#1F2D3D] text-[#F1F5F9] hover:border-[#00C9A7]/60 disabled:opacity-40"
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border bg-surface-2 border-line text-ink hover:border-brand/60 disabled:opacity-40"
                     >
                       <Shuffle className="w-3 h-3" /> Try another
                     </button>
                   )}
                 </div>
                 {cover.layout === "QUOTE" || cover.layout === "NUMBER" ? (
-                  <p className="text-[11px] text-[#64748B] mt-1.5">Quote and Number covers have no illustration. Switch to Headline or Statement to add one.</p>
+                  <p className="text-[11px] text-subtle mt-1.5">Quote and Number covers have no illustration. Switch to Headline or Statement to add one.</p>
                 ) : cover.art_style && cover.art_style !== "NONE" && !cover.art_drawn ? (
-                  <p className="text-[11px] text-[#64748B] mt-1.5">Left off on this cover: the headline needed the space. A shorter headline makes room for it.</p>
+                  <p className="text-[11px] text-subtle mt-1.5">Left off on this cover: the headline needed the space. A shorter headline makes room for it.</p>
                 ) : null}
               </div>
 
               {editing ? (
                 <div className="space-y-2">
                   <label className="block">
-                    <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Headline (6–10 words works best)</span>
+                    <span className="text-[11px] font-medium text-muted block mb-1">Headline (6–10 words works best)</span>
                     <textarea
                       value={headline}
                       onChange={(e) => setHeadline(e.target.value)}
                       rows={2}
                       maxLength={160}
-                      className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-lg px-3 py-1.5 text-sm text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7] resize-none"
+                      className="w-full bg-surface-2 border border-line rounded-lg px-3 py-1.5 text-sm text-ink focus:outline-none focus:border-brand resize-none"
                     />
                   </label>
                   <label className="block">
-                    <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Accent word</span>
+                    <span className="text-[11px] font-medium text-muted block mb-1">Accent word</span>
                     <input
                       value={emphasis}
                       onChange={(e) => setEmphasis(e.target.value)}
                       maxLength={40}
-                      className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-lg px-3 py-1.5 text-sm text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7]"
+                      className="w-full bg-surface-2 border border-line rounded-lg px-3 py-1.5 text-sm text-ink focus:outline-none focus:border-brand"
                     />
                   </label>
                   <label className="block">
-                    <span className="text-[11px] font-medium text-[#94A3B8] block mb-1">Subtitle (optional)</span>
+                    <span className="text-[11px] font-medium text-muted block mb-1">Subtitle (optional)</span>
                     <textarea
                       value={kicker}
                       onChange={(e) => setKicker(e.target.value)}
                       rows={2}
                       maxLength={160}
-                      className="w-full bg-[#161D26] border border-[#1F2D3D] rounded-lg px-3 py-1.5 text-sm text-[#F1F5F9] focus:outline-none focus:border-[#00C9A7] resize-none"
+                      className="w-full bg-surface-2 border border-line rounded-lg px-3 py-1.5 text-sm text-ink focus:outline-none focus:border-brand resize-none"
                     />
                   </label>
                   <div className="flex gap-2">
@@ -222,25 +223,25 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                       type="button"
                       disabled={isRendering || !headline.trim()}
                       onClick={() => void saveEdit()}
-                      className="px-3 py-1.5 rounded-lg bg-[#00C9A7] text-[#070B0F] text-xs font-semibold disabled:opacity-50"
+                      className={buttonStyles({ size: "sm" })}
                     >
                       Redraw cover
                     </button>
-                    <button type="button" onClick={() => setEditing(false)} className="px-3 py-1.5 rounded-lg bg-[#161D26] border border-[#1F2D3D] text-xs text-[#F1F5F9]">
+                    <button type="button" onClick={() => setEditing(false)} className="px-3 py-1.5 rounded-lg bg-surface-2 border border-line text-xs text-ink">
                       Cancel
                     </button>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-[#64748B]">A figure the draft does not state is refused, so the cover never claims more than the post.</p>
+                  <p className="text-[11px] leading-relaxed text-subtle">A figure the draft does not state is refused, so the cover never claims more than the post.</p>
                 </div>
               ) : (
                 <div className="space-y-1.5">
-                  <p className="text-sm font-semibold text-[#F1F5F9] leading-snug">{cover.layout === "QUOTE" && cover.quote ? `“${cover.quote}”` : cover.headline}</p>
-                  {cover.kicker && cover.layout !== "QUOTE" && <p className="text-xs text-[#94A3B8] leading-relaxed">{cover.kicker}</p>}
+                  <p className="text-sm font-semibold text-ink leading-snug">{cover.layout === "QUOTE" && cover.quote ? `“${cover.quote}”` : cover.headline}</p>
+                  {cover.kicker && cover.layout !== "QUOTE" && <p className="text-xs text-muted leading-relaxed">{cover.kicker}</p>}
                   <button
                     type="button"
                     disabled={isRendering}
                     onClick={startEditing}
-                    className="mt-1 px-2.5 py-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-xs font-medium text-[#00C9A7] border border-[#00C9A7]/30 hover:border-[#00C9A7] transition-all inline-flex items-center gap-1.5 disabled:opacity-50"
+                    className="mt-1 px-2.5 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 text-xs font-medium text-brand border border-brand/30 hover:border-brand transition-all inline-flex items-center gap-1.5 disabled:opacity-50"
                   >
                     <PenLine className="w-3 h-3" />
                     Edit wording
@@ -249,8 +250,8 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
               )}
 
               {cover.notes.length > 0 && !editing && (
-                <details className="text-[11px] text-[#64748B]">
-                  <summary className="cursor-pointer hover:text-[#94A3B8]">Why this wording ({cover.notes.length})</summary>
+                <details className="text-[11px] text-subtle">
+                  <summary className="cursor-pointer hover:text-muted">Why this wording ({cover.notes.length})</summary>
                   <ul className="mt-1.5 space-y-1 list-disc pl-4">
                     {cover.notes.map((n, i) => (
                       <li key={i}>{n}</li>
@@ -260,7 +261,7 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
               )}
             </>
           ) : (
-            <p className="text-xs leading-relaxed text-[#94A3B8]">
+            <p className="text-xs leading-relaxed text-muted">
               {activeAsset.hero_image_url
                 ? "This cover was made as an AI image. Draw it in code to get the editorial cover you can edit."
                 : "Draw this draft's cover in code: portrait, in the brand's type, free."}
@@ -273,7 +274,7 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                 type="button"
                 disabled={isRendering}
                 onClick={() => void run()}
-                className="px-2.5 py-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-xs font-medium text-[#00C9A7] border border-[#00C9A7]/30 hover:border-[#00C9A7] transition-all inline-flex items-center gap-1.5 disabled:opacity-50"
+                className="px-2.5 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 text-xs font-medium text-brand border border-brand/30 hover:border-brand transition-all inline-flex items-center gap-1.5 disabled:opacity-50"
               >
                 <RefreshCw className="w-3 h-3" />
                 Draw cover
@@ -284,7 +285,7 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                 href={activeAsset.hero_image_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-2.5 py-1.5 rounded-lg bg-[#161D26] hover:bg-[#1E2733] text-xs font-medium text-[#94A3B8] border border-[#1F2D3D] hover:border-[#00C9A7] transition-all inline-flex items-center gap-1.5"
+                className="px-2.5 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 text-xs font-medium text-muted border border-line hover:border-brand transition-all inline-flex items-center gap-1.5"
                 title="Open the full-size cover"
               >
                 Full size

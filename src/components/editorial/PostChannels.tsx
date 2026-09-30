@@ -37,7 +37,7 @@ export default function PostChannels({ override, workspace, disabled, onChange, 
 
   return (
     <div className="space-y-1.5">
-      <span className="text-[11px] font-medium text-[#94A3B8] block">Post to</span>
+      <span className="text-[11px] font-medium text-muted block">Post to</span>
       <div className="flex flex-wrap gap-1.5">
         {offered.map((c) => {
           const active = on.includes(c);
@@ -49,7 +49,7 @@ export default function PostChannels({ override, workspace, disabled, onChange, 
               disabled={disabled}
               onClick={() => toggle(c)}
               className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all disabled:opacity-50 cursor-pointer ${
-                active ? "bg-[#00C9A7]/15 border-[#00C9A7] text-[#00C9A7]" : "bg-[#161D26] border-[#1F2D3D] text-[#64748B] line-through"
+                active ? "bg-brand/15 border-brand text-brand" : "bg-surface-2 border-line text-subtle line-through"
               }`}
             >
               {active && <Check className="w-3 h-3" />}
@@ -58,7 +58,7 @@ export default function PostChannels({ override, workspace, disabled, onChange, 
           );
         })}
       </div>
-      {on.length < offered.length && <p className="text-[10px] text-[#64748B]">Only this post. Other posts still go everywhere that&apos;s switched on.</p>}
+      {on.length < offered.length && <p className="text-[10px] text-subtle">Only this post. Other posts still go everywhere that&apos;s switched on.</p>}
     </div>
   );
 }

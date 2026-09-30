@@ -53,7 +53,7 @@ export default function Sidebar({
   const liveBlogHostname = liveBlogUrl.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
   return (
-  <aside className="w-72 lg:w-76 bg-[#0f1419] border-r border-[#1f2b37] flex flex-col justify-between p-4 shrink-0 hidden md:flex sticky top-0 h-screen overflow-y-auto z-40">
+  <aside className="w-72 lg:w-76 bg-surface border-r border-[#1f2b37] flex flex-col justify-between p-4 shrink-0 hidden md:flex sticky top-0 h-screen overflow-y-auto z-40">
     <div className="space-y-4">
       {/* LOGO (WHITE MINIONS + CORAL .AI) */}
       <div className="flex items-center justify-between pb-3 border-b border-[#1f2b37]">
@@ -61,7 +61,7 @@ export default function Sidebar({
           <span className="font-extrabold text-2xl tracking-tight text-white group-hover:opacity-90 transition-opacity">
             Minions
           </span>
-          <span className="text-[#ff6b4a] font-bold text-2xl ml-0.5">
+          <span className="text-coral font-bold text-2xl ml-0.5">
             .AI
           </span>
         </Link>
@@ -74,13 +74,13 @@ export default function Sidebar({
       {/* SEARCH BAR (INTEGRATED IN SIDEBAR) */}
       <button
         onClick={() => onOpenPalette()}
-        className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] text-xs text-[#64748B] hover:border-[#00C9A7]/50 hover:text-[#94A3B8] transition-all cursor-pointer shadow-xs"
+        className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] text-xs text-subtle hover:border-brand/50 hover:text-muted transition-all cursor-pointer shadow-xs"
       >
         <div className="flex items-center gap-2 min-w-0">
-          <Search className="w-3.5 h-3.5 text-[#00C9A7] shrink-0" />
+          <Search className="w-3.5 h-3.5 text-brand shrink-0" />
           <span className="truncate">Search ideas, drafts...</span>
         </div>
-        <kbd className="inline-block px-1.5 py-0.5 text-[10px] font-mono bg-[#0b0f14] border border-[#1f2b37] rounded text-[#94A3B8] shrink-0">
+        <kbd className="inline-block px-1.5 py-0.5 text-[10px] font-mono bg-[#0b0f14] border border-[#1f2b37] rounded text-muted shrink-0">
           ⌘K
         </kbd>
       </button>
@@ -89,7 +89,7 @@ export default function Sidebar({
       <button
         onClick={onHarvest}
         disabled={isHarvesting}
-        className="w-full flex items-center justify-center gap-2 bg-[#ff6b4a] hover:bg-[#ff522b] text-white text-xs font-bold py-3 px-3 rounded-xl shadow-lg shadow-[#ff6b4a]/20 transition-all cursor-pointer disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-2 bg-coral hover:bg-[#ff522b] text-white text-xs font-bold py-3 px-3 rounded-xl shadow-lg shadow-coral/20 transition-all cursor-pointer disabled:opacity-50"
       >
         <Zap className={`w-3.5 h-3.5 ${isHarvesting ? "animate-spin" : ""}`} />
         <span>{isHarvesting ? "Harvesting Signals..." : "Trigger Idea Harvester"}</span>
@@ -97,7 +97,7 @@ export default function Sidebar({
 
       {/* NAVIGATION LINKS */}
       <div className="space-y-1 pt-1">
-        <div className="text-[10px] font-mono font-bold tracking-wider text-[#64748B] uppercase px-3 mb-2">
+        <div className="text-[10px] font-mono font-bold tracking-wider text-subtle uppercase px-3 mb-2">
           Agent Control
         </div>
 
@@ -111,12 +111,12 @@ export default function Sidebar({
               href={item.href}
               className={`flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-semibold whitespace-nowrap transition-all group ${
                 isActive
-                  ? "bg-[#161d24] text-[#00C9A7] border-l-2 border-[#00C9A7]"
-                  : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#161d24]/60"
+                  ? "bg-[#161d24] text-brand border-l-2 border-brand"
+                  : "text-muted hover:text-ink hover:bg-[#161d24]/60"
               }`}
             >
               <div className="flex items-center gap-3 min-w-0">
-                <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-[#00C9A7]" : "text-[#64748B] group-hover:text-[#94A3B8]"}`} />
+                <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-brand" : "text-subtle group-hover:text-muted"}`} />
                 <span className="truncate whitespace-nowrap">{item.name}</span>
               </div>
 
@@ -151,35 +151,35 @@ export default function Sidebar({
           href={liveBlogUrl === BLOG_BASE_URL ? `${liveBlogUrl}/blog` : liveBlogUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#ff6b4a]/10 hover:bg-[#ff6b4a]/20 border border-[#ff6b4a]/30 hover:border-[#ff6b4a] text-xs font-bold text-[#ff6b4a] transition-all group shadow-xs"
+          className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-coral/10 hover:bg-coral/20 border border-coral/30 hover:border-coral text-xs font-bold text-coral transition-all group shadow-xs"
         >
           <div className="flex items-center gap-2 min-w-0">
-            <ArrowUpRight className="w-4 h-4 text-[#ff6b4a] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <ArrowUpRight className="w-4 h-4 text-coral group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             <span className="truncate">View Live Blog</span>
           </div>
-          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#ff6b4a]/20 text-white">
+          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-coral/20 text-white">
             {liveBlogHostname} ↗
           </span>
         </a>
       )}
 
       {session ? (
-        <div className="w-full flex items-center justify-between text-xs p-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] text-[#94A3B8]">
+        <div className="w-full flex items-center justify-between text-xs p-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] text-muted">
           <button
             onClick={() => onOpenAuthModal()}
             className="flex items-center gap-2.5 min-w-0 flex-1 text-left cursor-pointer hover:opacity-90 transition-opacity"
             title="View Admin Auth Details"
           >
             {session.user?.image ? (
-              <Image src={session.user.image} alt={session.user.name || "User"} width={28} height={28} unoptimized className="w-7 h-7 rounded-full border border-[#00C9A7]/40 shrink-0 object-cover" />
+              <Image src={session.user.image} alt={session.user.name || "User"} width={28} height={28} unoptimized className="w-7 h-7 rounded-full border border-brand/40 shrink-0 object-cover" />
             ) : (
-              <div className="w-7 h-7 rounded-full bg-[#00C9A7]/20 text-[#00C9A7] font-bold text-xs flex items-center justify-center border border-[#00C9A7]/40 shrink-0">
+              <div className="w-7 h-7 rounded-full bg-brand/20 text-brand font-bold text-xs flex items-center justify-center border border-brand/40 shrink-0">
                 {session.user?.name ? session.user.name[0].toUpperCase() : (session.user?.email ? session.user.email[0].toUpperCase() : "A")}
               </div>
             )}
             <div className="text-[11px] leading-tight text-left min-w-0">
-              <div className="font-semibold text-[#F1F5F9] truncate">{session.user?.name || "Admin"}</div>
-              <div className="text-[10px] text-[#64748B] font-mono truncate">{session.user?.email}</div>
+              <div className="font-semibold text-ink truncate">{session.user?.name || "Admin"}</div>
+              <div className="text-[10px] text-subtle font-mono truncate">{session.user?.email}</div>
             </div>
           </button>
 
@@ -187,7 +187,7 @@ export default function Sidebar({
             <button
               onClick={() => onSignOut()}
               title="Sign Out"
-              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#ff6b4a] hover:bg-[#ff6b4a]/10 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-subtle hover:text-coral hover:bg-coral/10 transition-colors cursor-pointer"
               aria-label="Sign Out"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -197,7 +197,7 @@ export default function Sidebar({
       ) : (
         <button
           onClick={() => onSignIn()}
-          className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#00C9A7]/10 hover:bg-[#00C9A7]/20 border border-[#00C9A7]/30 hover:border-[#00C9A7] text-xs font-bold text-[#00C9A7] transition-all cursor-pointer shadow-xs"
+          className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-brand/10 hover:bg-brand/20 border border-brand/30 hover:border-brand text-xs font-bold text-brand transition-all cursor-pointer shadow-xs"
         >
           <Lock className="w-3.5 h-3.5" />
           <span>Sign In with Google</span>

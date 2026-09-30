@@ -61,7 +61,7 @@ export default function Modal({
       <div
         role="dialog"
         aria-modal="true"
-        className={`relative w-full ${maxWidthClass} bg-[#0D1520] border border-[#1F2D3D] rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150`}
+        className={`relative w-full ${maxWidthClass} bg-[#0D1520] border border-line rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150`}
         onClick={(e) => e.stopPropagation()}
       >
         {(title || !hideCloseButton) && (
@@ -72,7 +72,7 @@ export default function Modal({
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="p-1 rounded-lg text-[#64748B] hover:text-white hover:bg-white/5 transition-colors cursor-pointer shrink-0"
+                className="p-1 rounded-lg text-subtle hover:text-white hover:bg-white/5 transition-colors cursor-pointer shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>

@@ -20,6 +20,7 @@ import { formatRelativeTime } from "@/utils/date";
 import { GATE_VERDICT_BADGE, getAudienceBadgeClass, getSourceTag } from "@/constants/ideaBadges";
 import type { AudienceLane, IdeaItem } from "@/types";
 
+import { buttonStyles } from "@/components/ui/Button";
 export interface IdeaCardProps {
   idea: IdeaItem;
   claimingIds: Set<string>;
@@ -76,10 +77,10 @@ export default function IdeaCard({
             <div
               key={idea.id || rawId}
               onClick={() => onOpenDetail(idea)}
-              className="bg-[#0F1419] hover:bg-[#161D26] border border-[#1F2D3D] hover:border-[#00C9A7]/50 rounded-xl p-5 transition-all duration-200 flex flex-col justify-between space-y-4 group shadow-sm relative overflow-hidden cursor-pointer active:scale-[0.99]"
+              className="bg-surface hover:bg-surface-2 border border-line hover:border-brand/50 rounded-xl p-5 transition-all duration-200 flex flex-col justify-between space-y-4 group shadow-sm relative overflow-hidden cursor-pointer active:scale-[0.99]"
             >
               {/* Hover Glow Accent */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C9A7]/5 blur-2xl pointer-events-none group-hover:bg-[#00C9A7]/10 transition-colors" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 blur-2xl pointer-events-none group-hover:bg-brand/10 transition-colors" />
 
               {/* Top Badge Row */}
               <div className="space-y-3">
@@ -107,7 +108,7 @@ export default function IdeaCard({
                     )}
 
                     {/* Trade Tag (Gray Pill) */}
-                    <span className="text-[10px] font-medium bg-[#161D26] text-[#94A3B8] border border-[#1F2D3D] px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-medium bg-surface-2 text-muted border border-line px-2 py-0.5 rounded-full">
                       {ideaTrade}
                     </span>
 
@@ -135,10 +136,10 @@ export default function IdeaCard({
                     {/* Signal Indicator if signals exist */}
                     {idea.signals && idea.signals.length > 0 && (
                       <span
-                        className="inline-flex items-center gap-1 text-[10px] font-mono text-[#94A3B8] bg-[#161D26] border border-[#1F2D3D] px-2 py-0.5 rounded-full"
+                        className="inline-flex items-center gap-1 text-[10px] font-mono text-muted bg-surface-2 border border-line px-2 py-0.5 rounded-full"
                         title={`${idea.signals.length} market signal(s) linked`}
                       >
-                        <Radio className="w-2.5 h-2.5 text-[#00C9A7]" />
+                        <Radio className="w-2.5 h-2.5 text-brand" />
                         <span>{idea.signals.length} {idea.signals.length === 1 ? 'signal' : 'signals'}</span>
                       </span>
                     )}
@@ -146,7 +147,7 @@ export default function IdeaCard({
 
                   {/* Right: Idea ID & Action Buttons */}
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="text-xs font-mono text-[#64748B] font-medium mr-1">
+                    <span className="text-xs font-mono text-subtle font-medium mr-1">
                       {rawId}
                     </span>
 
@@ -157,7 +158,7 @@ export default function IdeaCard({
                         onEdit(idea);
                       }}
                       aria-label="Edit idea details"
-                      className="min-h-11 min-w-11 sm:min-h-8 sm:min-w-8 p-2 sm:p-1 rounded-md text-[#64748B] hover:text-[#00C9A7] hover:bg-[#161D26] border border-transparent hover:border-[#1F2D3D] transition-all cursor-pointer flex items-center justify-center"
+                      className="min-h-11 min-w-11 sm:min-h-8 sm:min-w-8 p-2 sm:p-1 rounded-md text-subtle hover:text-brand hover:bg-surface-2 border border-transparent hover:border-line transition-all cursor-pointer flex items-center justify-center"
                       title="Edit Idea details"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
@@ -171,7 +172,7 @@ export default function IdeaCard({
                           onResetClaim(idea.id || rawId);
                         }}
                         aria-label="Release idea from drafting"
-                        className="min-h-11 min-w-11 sm:min-h-8 sm:min-w-8 p-2 sm:p-1 rounded-md text-[#F59E0B] hover:bg-[#F59E0B]/20 border border-[#F59E0B]/30 transition-all cursor-pointer flex items-center justify-center"
+                        className="min-h-11 min-w-11 sm:min-h-8 sm:min-w-8 p-2 sm:p-1 rounded-md text-gold hover:bg-gold/20 border border-gold/30 transition-all cursor-pointer flex items-center justify-center"
                         title="Release Lock & Unclaim Idea"
                       >
                         <Unlock className="w-3.5 h-3.5" />
@@ -185,7 +186,7 @@ export default function IdeaCard({
                         onRequestDelete({ id: idea.id || rawId, title: ideaTitle });
                       }}
                       aria-label="Delete idea"
-                      className="min-h-11 min-w-11 sm:min-h-8 sm:min-w-8 p-2 sm:p-1 rounded-md text-[#64748B] hover:text-[#EF4444] hover:bg-[#EF4444]/10 border border-transparent hover:border-[#EF4444]/30 transition-all cursor-pointer flex items-center justify-center"
+                      className="min-h-11 min-w-11 sm:min-h-8 sm:min-w-8 p-2 sm:p-1 rounded-md text-subtle hover:text-danger hover:bg-danger/10 border border-transparent hover:border-danger/30 transition-all cursor-pointer flex items-center justify-center"
                       title="Delete Idea"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -194,18 +195,18 @@ export default function IdeaCard({
                 </div>
 
                 {/* Title (Bold 16px, 2-line clamp) */}
-                <h3 className="text-[16px] font-bold leading-snug text-[#F1F5F9] line-clamp-2 break-words group-hover:text-white transition-colors">
+                <h3 className="text-[16px] font-bold leading-snug text-ink line-clamp-2 break-words group-hover:text-white transition-colors">
                   {ideaTitle}
                 </h3>
 
                 {/* Excerpt (Muted 13px, 3-line clamp) */}
-                <p className="text-[13px] text-[#94A3B8] leading-relaxed line-clamp-3 break-words">
+                <p className="text-[13px] text-muted leading-relaxed line-clamp-3 break-words">
                   {ideaExcerpt}
                 </p>
 
                 {/* Why it was dropped, or why it is below the bar */}
                 {idea.authority && idea.authority.verdict !== "PASS" && idea.authority.reasons.length > 0 && (
-                  <p className={`text-[12px] leading-relaxed break-words ${idea.authority.verdict === "REJECT" ? "text-[#94A3B8]" : "text-[#F59E0B]"}`}>
+                  <p className={`text-[12px] leading-relaxed break-words ${idea.authority.verdict === "REJECT" ? "text-muted" : "text-gold"}`}>
                     {idea.authority.verdict === "REJECT" ? "Dropped: " : ""}
                     {idea.authority.reasons.join(" ")}
                   </p>
@@ -217,7 +218,7 @@ export default function IdeaCard({
                     {idea.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="text-[10px] text-[#64748B] bg-[#070B0F] border border-[#1F2D3D] px-2 py-0.2 rounded"
+                        className="text-[10px] text-subtle bg-canvas border border-line px-2 py-0.2 rounded"
                       >
                         #{tag}
                       </span>
@@ -227,7 +228,7 @@ export default function IdeaCard({
 
                 {/* Scheduled For Banner / Badge (if scheduled) */}
                 {idea.scheduled_for && (
-                  <div className="flex items-center gap-2 p-2 rounded-lg bg-[#00C9A7]/10 border border-[#00C9A7]/30 text-xs font-mono text-[#00C9A7]">
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-brand/10 border border-brand/30 text-xs font-mono text-brand">
                     <CalendarDays className="w-3.5 h-3.5 shrink-0" />
                     <span className="truncate">
                       Auto-Draft: {new Date(idea.scheduled_for).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
@@ -237,9 +238,9 @@ export default function IdeaCard({
               </div>
 
               {/* Card Footer: Ingested Date & CTA Button */}
-              <div className="flex flex-col items-stretch gap-3 border-t border-[#1F2D3D] pt-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-                <div className="flex items-center gap-1.5 text-xs font-mono text-[#64748B]">
-                  <Clock className="w-3.5 h-3.5 text-[#64748B]" />
+              <div className="flex flex-col items-stretch gap-3 border-t border-line pt-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+                <div className="flex items-center gap-1.5 text-xs font-mono text-subtle">
+                  <Clock className="w-3.5 h-3.5 text-subtle" />
                   <span>Ingested {formatRelativeTime(idea.created_at)}</span>
                 </div>
 
@@ -248,7 +249,7 @@ export default function IdeaCard({
                   {isPublished ? (
                     <Link
                       href="/published"
-                      className="min-h-11 inline-flex items-center gap-1.5 text-xs font-semibold text-[#00C9A7] bg-[#00C9A7]/10 border border-[#00C9A7]/30 px-3 py-1.5 rounded-lg hover:bg-[#00C9A7]/20 transition-all"
+                      className="min-h-11 inline-flex items-center gap-1.5 text-xs font-semibold text-brand bg-brand/10 border border-brand/30 px-3 py-1.5 rounded-lg hover:bg-brand/20 transition-all"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Published ↗
@@ -262,12 +263,12 @@ export default function IdeaCard({
                       Draft Ready →
                     </Link>
                   ) : isClaimed ? (
-                    <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#F59E0B] bg-[#F59E0B]/10 border border-[#F59E0B]/30 px-3 py-1.5 rounded-lg">
-                      <span className="w-2 h-2 rounded-full bg-[#F59E0B] animate-pulse" />
+                    <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-gold bg-gold/10 border border-gold/30 px-3 py-1.5 rounded-lg">
+                      <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
                       CLAIMED (Drafting...)
                     </div>
                   ) : isRejected ? (
-                    <div className="inline-flex items-center gap-1.5 text-xs font-medium text-[#64748B] bg-[#161D26] border border-[#1F2D3D] px-2.5 py-1.5 rounded-lg">
+                    <div className="inline-flex items-center gap-1.5 text-xs font-medium text-subtle bg-surface-2 border border-line px-2.5 py-1.5 rounded-lg">
                       Rejected
                     </div>
                   ) : (
@@ -275,7 +276,7 @@ export default function IdeaCard({
                       {ideaStatus === "QUEUED" ? (
                         <button
                           onClick={() => onUnqueue(idea)}
-                          className="min-h-11 inline-flex items-center justify-center gap-1 bg-[#00C9A7]/10 hover:bg-[#EF4444]/10 text-[#00C9A7] hover:text-[#EF4444] border border-[#00C9A7]/30 hover:border-[#EF4444]/30 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all cursor-pointer group"
+                          className="min-h-11 inline-flex items-center justify-center gap-1 bg-brand/10 hover:bg-danger/10 text-brand hover:text-danger border border-brand/30 hover:border-danger/30 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all cursor-pointer group"
                           title="Click to remove from queue"
                         >
                           <span className="group-hover:hidden">Queued {idea.queue_order ? `#${idea.queue_order}` : ""}</span>
@@ -284,10 +285,10 @@ export default function IdeaCard({
                       ) : (
                         <button
                           onClick={() => onQueue(idea)}
-                          className="min-h-11 inline-flex items-center justify-center gap-1 bg-[#161D26] hover:bg-[#1F2D3D] text-[#94A3B8] hover:text-white border border-[#1F2D3D] text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all cursor-pointer"
+                          className="min-h-11 inline-flex items-center justify-center gap-1 bg-surface-2 hover:bg-line text-muted hover:text-white border border-line text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all cursor-pointer"
                           title="Add to production queue"
                         >
-                          <Plus className="w-3.5 h-3.5 text-[#00C9A7]" />
+                          <Plus className="w-3.5 h-3.5 text-brand" />
                           <span>Queue</span>
                         </button>
                       )}
@@ -295,7 +296,7 @@ export default function IdeaCard({
                       <button
                         onClick={() => onDraft(idea.id || rawId)}
                         disabled={isClaiming}
-                        className="min-h-11 inline-flex items-center justify-center gap-1.5 bg-[#00C9A7]/10 hover:bg-[#00C9A7] text-[#00C9A7] hover:text-[#070B0F] border border-[#00C9A7]/30 hover:border-[#00C9A7] text-xs font-bold px-3 py-1.5 rounded-lg transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                        className={buttonStyles({ variant: "soft", size: "sm" })}
                       >
                         {isClaiming ? (
                           <>

@@ -20,6 +20,7 @@ import type {
   IdeaItem,
 } from "@/types";
 
+import { buttonStyles } from "@/components/ui/Button";
 export interface IdeaDetailModalProps {
   idea: IdeaItem;
   claimingIds: Set<string>;
@@ -42,15 +43,15 @@ export default function IdeaDetailModal({
 }: IdeaDetailModalProps) {
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-[#0F1419] border border-[#1F2D3D] ring-1 ring-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+      <div className="bg-surface border border-line ring-1 ring-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
         {/* Modal Header */}
-        <div className="p-6 border-b border-[#1F2D3D] flex items-start justify-between gap-4 bg-[#070B0F]/50">
+        <div className="p-6 border-b border-line flex items-start justify-between gap-4 bg-canvas/50">
           <div className="space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
               <span className={`text-[10px] font-bold tracking-wider px-2.5 py-0.5 rounded-full border ${getAudienceBadgeClass(detailIdea.audience || "ICP")}`}>
                 {detailIdea.audience || "ICP"}
               </span>
-              <span className="text-[10px] font-medium bg-[#161D26] text-[#94A3B8] border border-[#1F2D3D] px-2.5 py-0.5 rounded-full">
+              <span className="text-[10px] font-medium bg-surface-2 text-muted border border-line px-2.5 py-0.5 rounded-full">
                 {detailIdea.target_trade || "—"}
               </span>
               {detailIdea.source_url ? (
@@ -69,11 +70,11 @@ export default function IdeaDetailModal({
                   {getSourceTag(detailIdea.source || "MANUAL").label}
                 </span>
               )}
-              <span className="text-xs font-mono text-[#64748B]">
+              <span className="text-xs font-mono text-subtle">
                 {detailIdea.ideaId || detailIdea.id}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-[#64748B] font-mono">
+            <div className="flex items-center gap-2 text-xs text-subtle font-mono">
               <Clock className="w-3.5 h-3.5" />
               <span>Harvested {new Date(detailIdea.created_at).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
             </div>
@@ -81,7 +82,7 @@ export default function IdeaDetailModal({
 
           <button
             onClick={() => onClose()}
-            className="p-1.5 rounded-xl text-[#94A3B8] hover:text-white hover:bg-[#161D26] border border-transparent hover:border-[#1F2D3D] transition-all cursor-pointer"
+            className="p-1.5 rounded-xl text-muted hover:text-white hover:bg-surface-2 border border-transparent hover:border-line transition-all cursor-pointer"
             title="Close"
           >
             <X className="w-5 h-5" />
@@ -89,10 +90,10 @@ export default function IdeaDetailModal({
         </div>
 
         {/* Modal Body: Scrollable Content */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1 text-[#F1F5F9]">
+        <div className="p-6 overflow-y-auto space-y-6 flex-1 text-ink">
           {/* Full Topic Headline */}
           <div className="space-y-2">
-            <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#00C9A7] break-words">
+            <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-brand break-words">
               Topic & Working Headline
             </div>
             <h2 className="text-xl sm:text-2xl font-extrabold leading-snug text-white break-words">
@@ -102,20 +103,20 @@ export default function IdeaDetailModal({
 
           {/* Full Strategic Angle / Rationale */}
           <div className="space-y-2">
-            <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#94A3B8] break-words">
+            <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-muted break-words">
               Strategic Angle & Real-World Thesis
             </div>
-            <div className="p-4 rounded-xl bg-[#070B0F] border border-[#1F2D3D] text-sm text-[#E2E8F0] leading-relaxed whitespace-pre-wrap break-words">
+            <div className="p-4 rounded-xl bg-canvas border border-line text-sm text-[#E2E8F0] leading-relaxed whitespace-pre-wrap break-words">
               {detailIdea.excerpt || detailIdea.angle || "No extended strategic thesis recorded."}
             </div>
           </div>
 
           {/* Source & Signal Verification Section */}
-          <div className="space-y-3 p-4 rounded-xl bg-[#070B0F]/80 border border-[#1F2D3D] ring-1 ring-[#00C9A7]/10">
+          <div className="space-y-3 p-4 rounded-xl bg-canvas/80 border border-line ring-1 ring-brand/10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Radio className="w-4 h-4 text-[#00C9A7]" />
-                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#00C9A7]">
+                <Radio className="w-4 h-4 text-brand" />
+                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-brand">
                   Source & Signal Verification
                 </span>
               </div>
@@ -124,7 +125,7 @@ export default function IdeaDetailModal({
                   href={detailIdea.source_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-[#00C9A7] hover:underline font-semibold"
+                  className="inline-flex items-center gap-1 text-xs text-brand hover:underline font-semibold"
                 >
                   <span>Open Primary Source</span>
                   <ExternalLink className="w-3 h-3" />
@@ -132,26 +133,26 @@ export default function IdeaDetailModal({
               )}
             </div>
 
-            <div className="text-xs text-[#94A3B8] leading-relaxed">
+            <div className="text-xs text-muted leading-relaxed">
               <span className="font-semibold text-white">Origin Source: </span>
               <span>{detailIdea.source_title || getSourceTag(detailIdea.source || "MANUAL").label}</span>
               {detailIdea.source_url && (
-                <span className="ml-1 text-[#64748B] font-mono break-all">({detailIdea.source_url})</span>
+                <span className="ml-1 text-subtle font-mono break-all">({detailIdea.source_url})</span>
               )}
             </div>
 
             {/* If structured signals array is present */}
             {detailIdea.signals && detailIdea.signals.length > 0 ? (
-              <div className="space-y-2 pt-2 border-t border-[#1F2D3D]/60">
-                <div className="text-[10px] font-mono text-[#64748B] uppercase">Market Signals Captured ({detailIdea.signals.length})</div>
+              <div className="space-y-2 pt-2 border-t border-line/60">
+                <div className="text-[10px] font-mono text-subtle uppercase">Market Signals Captured ({detailIdea.signals.length})</div>
                 <div className="space-y-2">
                   {detailIdea.signals.map((sig, idx) => (
                     <div
                       key={idx}
-                      className="p-3 rounded-lg bg-[#161D26]/80 border border-[#1F2D3D] space-y-1.5"
+                      className="p-3 rounded-lg bg-surface-2/80 border border-line space-y-1.5"
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <div className="text-xs font-semibold text-[#F1F5F9] leading-snug">
+                        <div className="text-xs font-semibold text-ink leading-snug">
                           {sig.title || "Untitled Signal"}
                         </div>
                         {sig.url && (
@@ -159,7 +160,7 @@ export default function IdeaDetailModal({
                             href={sig.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[#00C9A7] hover:text-white shrink-0 p-1"
+                            className="text-brand hover:text-white shrink-0 p-1"
                             title="Open Signal URL"
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
@@ -167,13 +168,13 @@ export default function IdeaDetailModal({
                         )}
                       </div>
                       {sig.snippet && (
-                        <p className="text-[11px] text-[#94A3B8] leading-relaxed line-clamp-3">
+                        <p className="text-[11px] text-muted leading-relaxed line-clamp-3">
                           {sig.snippet}
                         </p>
                       )}
-                      <div className="flex items-center gap-2 pt-1 text-[10px] font-mono text-[#64748B]">
+                      <div className="flex items-center gap-2 pt-1 text-[10px] font-mono text-subtle">
                         {sig.source && (
-                          <span className="px-1.5 py-0.5 rounded bg-[#0F1419] border border-[#1F2D3D] text-[#00C9A7]">
+                          <span className="px-1.5 py-0.5 rounded bg-surface border border-line text-brand">
                             {sig.source}
                           </span>
                         )}
@@ -186,8 +187,8 @@ export default function IdeaDetailModal({
                 </div>
               </div>
             ) : detailIdea.why ? (
-              <div className="text-xs text-[#94A3B8] pt-1 border-t border-[#1F2D3D]/40">
-                <span className="text-[#64748B] font-mono uppercase text-[10px] block mb-0.5">Strategist Signal Rationale</span>
+              <div className="text-xs text-muted pt-1 border-t border-line/40">
+                <span className="text-subtle font-mono uppercase text-[10px] block mb-0.5">Strategist Signal Rationale</span>
                 <p className="italic text-[#CBD5E1]">&quot;{detailIdea.why}&quot;</p>
               </div>
             ) : null}
@@ -195,9 +196,9 @@ export default function IdeaDetailModal({
 
           {/* Authority check (phase 3 gate) */}
           {detailIdea.authority && (
-            <div className="p-3.5 rounded-xl bg-[#161D26]/60 border border-[#1F2D3D] space-y-2">
+            <div className="p-3.5 rounded-xl bg-surface-2/60 border border-line space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <div className="text-[10px] font-mono text-[#64748B] uppercase">Authority check</div>
+                <div className="text-[10px] font-mono text-subtle uppercase">Authority check</div>
                 <span
                   className={`text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full border ${GATE_VERDICT_BADGE[detailIdea.authority.verdict].className}`}
                   title={GATE_VERDICT_BADGE[detailIdea.authority.verdict].hint}
@@ -208,23 +209,23 @@ export default function IdeaDetailModal({
               </div>
               {detailIdea.authority.icp_problem && (
                 <div className="text-xs">
-                  <span className="text-[#64748B]">ICP problem: </span>
+                  <span className="text-subtle">ICP problem: </span>
                   <span className="text-[#CBD5E1]">{detailIdea.authority.icp_problem}</span>
                 </div>
               )}
               {detailIdea.authority.author_advantage && (
                 <div className="text-xs">
-                  <span className="text-[#64748B]">Your advantage: </span>
+                  <span className="text-subtle">Your advantage: </span>
                   <span className="text-[#CBD5E1]">{detailIdea.authority.author_advantage}</span>
                 </div>
               )}
               {detailIdea.authority.trust_basis.length > 0 && (
-                <div className="text-[10px] font-mono text-[#64748B]">
+                <div className="text-[10px] font-mono text-subtle">
                   Rests on: {detailIdea.authority.trust_basis.map((t) => t.toLowerCase().replace(/_/g, " ")).join(", ")}
                 </div>
               )}
               {detailIdea.authority.reasons.length > 0 && (
-                <ul className="text-xs text-[#F59E0B] list-disc pl-4 space-y-0.5">
+                <ul className="text-xs text-gold list-disc pl-4 space-y-0.5">
                   {detailIdea.authority.reasons.map((r) => (
                     <li key={r}>{r}</li>
                   ))}
@@ -235,8 +236,8 @@ export default function IdeaDetailModal({
 
           {/* Metadata Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-            <div className="p-3.5 rounded-xl bg-[#161D26]/60 border border-[#1F2D3D] space-y-1">
-              <div className="text-[10px] font-mono text-[#64748B] uppercase">Audience Objective</div>
+            <div className="p-3.5 rounded-xl bg-surface-2/60 border border-line space-y-1">
+              <div className="text-[10px] font-mono text-subtle uppercase">Audience Objective</div>
               <div className="text-xs font-semibold text-white">
                 {detailIdea.audience === "ICP" 
                   ? "Ideal Customer Profile (Core Target)"
@@ -246,10 +247,10 @@ export default function IdeaDetailModal({
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-[#161D26]/60 border border-[#1F2D3D] space-y-1">
-              <div className="text-[10px] font-mono text-[#64748B] uppercase">Status</div>
-              <div className="text-xs font-semibold text-[#00C9A7] flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#00C9A7] animate-pulse" />
+            <div className="p-3.5 rounded-xl bg-surface-2/60 border border-line space-y-1">
+              <div className="text-[10px] font-mono text-subtle uppercase">Status</div>
+              <div className="text-xs font-semibold text-brand flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-brand animate-pulse" />
                 <span>{IDEA_STAGE_LABELS[toIdeaStage(detailIdea.status)]}</span>
               </div>
             </div>
@@ -258,12 +259,12 @@ export default function IdeaDetailModal({
           {/* Tags */}
           {detailIdea.tags && detailIdea.tags.length > 0 && (
             <div className="space-y-1.5">
-              <div className="text-[10px] font-mono text-[#64748B] uppercase">Signal Keywords</div>
+              <div className="text-[10px] font-mono text-subtle uppercase">Signal Keywords</div>
               <div className="flex items-center gap-1.5 flex-wrap">
                 {detailIdea.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="text-xs text-[#94A3B8] bg-[#070B0F] border border-[#1F2D3D] px-2.5 py-1 rounded-lg font-mono"
+                    className="text-xs text-muted bg-canvas border border-line px-2.5 py-1 rounded-lg font-mono"
                   >
                     #{tag}
                   </span>
@@ -274,7 +275,7 @@ export default function IdeaDetailModal({
         </div>
 
         {/* Modal Footer: Action Buttons */}
-        <div className="p-4 sm:p-6 border-t border-[#1F2D3D] bg-[#070B0F]/70 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="p-4 sm:p-6 border-t border-line bg-canvas/70 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -283,7 +284,7 @@ export default function IdeaDetailModal({
                 onClose();
                 onEdit(ideaToEdit);
               }}
-              className="px-3.5 py-2 text-xs font-semibold text-[#94A3B8] hover:text-white bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              className="px-3.5 py-2 text-xs font-semibold text-muted hover:text-white bg-surface-2 hover:bg-surface-3 border border-line rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Edit3 className="w-3.5 h-3.5" />
               <span>Edit</span>
@@ -296,7 +297,7 @@ export default function IdeaDetailModal({
                 onClose();
                 onSchedule(ideaToSchedule);
               }}
-              className="px-3.5 py-2 text-xs font-semibold text-[#00C9A7] hover:text-[#070B0F] bg-[#00C9A7]/10 hover:bg-[#00C9A7] border border-[#00C9A7]/30 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className={buttonStyles({ variant: "soft", size: "sm" })}
             >
               <CalendarDays className="w-3.5 h-3.5" />
               <span>Schedule</span>
@@ -310,7 +311,7 @@ export default function IdeaDetailModal({
                 onClose();
                 onRequestDelete({ id: idToDelete, title: titleToDelete });
               }}
-              className="px-3.5 py-2 text-xs font-semibold text-[#EF4444] hover:bg-[#EF4444]/10 border border-transparent hover:border-[#EF4444]/30 rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              className="px-3.5 py-2 text-xs font-semibold text-danger hover:bg-danger/10 border border-transparent hover:border-danger/30 rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Delete</span>
@@ -322,7 +323,7 @@ export default function IdeaDetailModal({
               <Link
                 href="/published"
                 onClick={() => onClose()}
-                className="inline-flex items-center justify-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] text-[#070B0F] text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/15 transition-all"
+                className={buttonStyles({ size: "sm" })}
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>View in Published Stream ↗</span>
@@ -344,7 +345,7 @@ export default function IdeaDetailModal({
                   onDraft(idToDraft);
                 }}
                 disabled={claimingIds.has(detailIdea.id) || claimingIds.has(detailIdea.ideaId || "")}
-                className="inline-flex items-center justify-center gap-2 bg-[#00C9A7] hover:bg-[#00A88A] disabled:opacity-50 text-[#070B0F] text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-[#00C9A7]/15 transition-all active:scale-95 cursor-pointer"
+                className={buttonStyles({ size: "sm" })}
               >
                 <Sparkles className="w-4 h-4" />
                 <span>Create Draft</span>

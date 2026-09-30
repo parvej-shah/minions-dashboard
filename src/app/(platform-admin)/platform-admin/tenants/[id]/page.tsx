@@ -37,7 +37,7 @@ interface TenantDetail {
 function Section({ title, count, children }: { title: string; count: number; children: React.ReactNode }) {
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-mono font-bold uppercase text-[#94A3B8] tracking-wider">
+      <h2 className="text-sm font-mono font-bold uppercase text-muted tracking-wider">
         {title} ({count})
       </h2>
       {children}
@@ -90,26 +90,26 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
       <div>
         <Link
           href="/platform-admin"
-          className="inline-flex items-center gap-1.5 text-xs text-[#94A3B8] hover:text-[#F1F5F9] transition-colors mb-3"
+          className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-ink transition-colors mb-3"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to tenants
         </Link>
         <h1 className="text-2xl font-bold tracking-tight">{tenant.name}</h1>
-        <p className="text-sm text-[#94A3B8] mt-1 font-mono">
+        <p className="text-sm text-muted mt-1 font-mono">
           {tenant.slug} · {tenant.status} · {tenant.timezone}
         </p>
       </div>
 
       {/* Usage cap override */}
-      <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-3">
-        <h2 className="text-sm font-bold text-[#F1F5F9]">Usage cap</h2>
-        <p className="text-xs text-[#94A3B8]">
+      <div className="p-5 rounded-2xl bg-surface border border-line space-y-3">
+        <h2 className="text-sm font-bold text-ink">Usage cap</h2>
+        <p className="text-xs text-muted">
           Plan default (<span className="font-mono">{tenant.plan_key}</span>): {tenant.plan_assets_per_month}{" "}
           assets/month.{" "}
           {tenant.assets_per_month_override !== null ? (
             <>
-              Override active: <span className="font-mono text-[#00C9A7]">{effectiveCap}</span> assets/month.
+              Override active: <span className="font-mono text-brand">{effectiveCap}</span> assets/month.
             </>
           ) : (
             <>No override set — using the plan default.</>
@@ -122,12 +122,12 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
             placeholder={tenant.assets_per_month_override !== null ? String(tenant.assets_per_month_override) : "no override"}
             value={overrideInput}
             onChange={(e) => setOverrideInput(e.target.value)}
-            className="bg-[#161D26] border border-[#1F2D3D] rounded-xl px-3 py-1.5 text-xs text-[#F1F5F9] w-40 focus:outline-none focus:border-[#00C9A7]"
+            className="bg-surface-2 border border-line rounded-xl px-3 py-1.5 text-xs text-ink w-40 focus:outline-none focus:border-brand"
           />
           <button
             onClick={saveOverride}
             disabled={savingOverride}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#00C9A7]/20 hover:bg-[#00C9A7]/30 text-[#00C9A7] border border-[#00C9A7]/40 text-xs font-bold transition-all disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand/20 hover:bg-brand/30 text-brand border border-brand/40 text-xs font-bold transition-all disabled:opacity-60"
           >
             <Save className="w-3.5 h-3.5" />
             Save
@@ -138,39 +138,39 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                 setOverrideInput("");
                 void saveOverride();
               }}
-              className="text-[10px] text-[#64748B] hover:text-[#F1F5F9] transition-colors"
+              className="text-[10px] text-subtle hover:text-ink transition-colors"
             >
               clear override
             </button>
           )}
         </div>
-        <p className="text-[10px] text-[#64748B]">Leave the field blank and Save to clear an existing override.</p>
+        <p className="text-[10px] text-subtle">Leave the field blank and Save to clear an existing override.</p>
       </div>
 
       <Section title="Pipeline runs" count={tenant.pipeline_runs.length}>
         {tenant.pipeline_runs.length === 0 ? (
           <EmptyState icon={<Inbox className="w-5 h-5" />} title="No pipeline runs yet" />
         ) : (
-          <div className="rounded-2xl bg-[#0F1419] border border-[#1F2D3D] overflow-hidden">
+          <div className="rounded-2xl bg-surface border border-line overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs min-w-[560px]">
                 <thead>
-                  <tr className="border-b border-[#1F2D3D] text-[#94A3B8] font-mono text-[11px]">
+                  <tr className="border-b border-line text-muted font-mono text-[11px]">
                     <th className="p-3 font-semibold">TYPE</th>
                     <th className="p-3 font-semibold">STATUS</th>
                     <th className="p-3 font-semibold text-right">STARTED</th>
                     <th className="p-3 font-semibold text-right">UPDATED</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#1F2D3D]/60">
+                <tbody className="divide-y divide-line/60">
                   {tenant.pipeline_runs.map((r) => (
-                    <tr key={r.id} className="hover:bg-[#161D26]/70 transition-colors">
+                    <tr key={r.id} className="hover:bg-surface-2/70 transition-colors">
                       <td className="p-3 font-mono">{r.type}</td>
-                      <td className="p-3 font-mono text-[#94A3B8]">{r.status}</td>
-                      <td className="p-3 text-right font-mono text-[#64748B]">
+                      <td className="p-3 font-mono text-muted">{r.status}</td>
+                      <td className="p-3 text-right font-mono text-subtle">
                         {new Date(r.created_at).toLocaleString()}
                       </td>
-                      <td className="p-3 text-right font-mono text-[#64748B]">
+                      <td className="p-3 text-right font-mono text-subtle">
                         {new Date(r.updated_at).toLocaleString()}
                       </td>
                     </tr>
@@ -186,11 +186,11 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
         {tenant.assets.length === 0 ? (
           <EmptyState icon={<Inbox className="w-5 h-5" />} title="No assets generated yet" />
         ) : (
-          <div className="rounded-2xl bg-[#0F1419] border border-[#1F2D3D] overflow-hidden">
+          <div className="rounded-2xl bg-surface border border-line overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs min-w-[680px]">
                 <thead>
-                  <tr className="border-b border-[#1F2D3D] text-[#94A3B8] font-mono text-[11px]">
+                  <tr className="border-b border-line text-muted font-mono text-[11px]">
                     <th className="p-3 font-semibold">TITLE</th>
                     <th className="p-3 font-semibold">STATUS</th>
                     <th className="p-3 font-semibold">CLAIMS</th>
@@ -198,14 +198,14 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                     <th className="p-3 font-semibold text-right">CREATED</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#1F2D3D]/60">
+                <tbody className="divide-y divide-line/60">
                   {tenant.assets.map((a) => (
-                    <tr key={a.id} className="hover:bg-[#161D26]/70 transition-colors">
-                      <td className="p-3 text-[#F1F5F9] max-w-xs truncate">{a.title}</td>
-                      <td className="p-3 font-mono text-[#94A3B8]">{a.status}</td>
-                      <td className="p-3 font-mono text-[#94A3B8]">{a.claims_ok}</td>
-                      <td className="p-3 text-right font-mono text-[#00C9A7]">${a.generation_cost.toFixed(3)}</td>
-                      <td className="p-3 text-right font-mono text-[#64748B]">
+                    <tr key={a.id} className="hover:bg-surface-2/70 transition-colors">
+                      <td className="p-3 text-ink max-w-xs truncate">{a.title}</td>
+                      <td className="p-3 font-mono text-muted">{a.status}</td>
+                      <td className="p-3 font-mono text-muted">{a.claims_ok}</td>
+                      <td className="p-3 text-right font-mono text-brand">${a.generation_cost.toFixed(3)}</td>
+                      <td className="p-3 text-right font-mono text-subtle">
                         {new Date(a.created_at).toLocaleDateString()}
                       </td>
                     </tr>
@@ -221,24 +221,24 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
         {tenant.ideas.length === 0 ? (
           <EmptyState icon={<Inbox className="w-5 h-5" />} title="No ideas harvested yet" />
         ) : (
-          <div className="rounded-2xl bg-[#0F1419] border border-[#1F2D3D] overflow-hidden">
+          <div className="rounded-2xl bg-surface border border-line overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs min-w-[680px]">
                 <thead>
-                  <tr className="border-b border-[#1F2D3D] text-[#94A3B8] font-mono text-[11px]">
+                  <tr className="border-b border-line text-muted font-mono text-[11px]">
                     <th className="p-3 font-semibold">IDEA</th>
                     <th className="p-3 font-semibold">PILLAR</th>
                     <th className="p-3 font-semibold">STATUS</th>
                     <th className="p-3 font-semibold text-right">CREATED</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#1F2D3D]/60">
+                <tbody className="divide-y divide-line/60">
                   {tenant.ideas.map((i) => (
-                    <tr key={i.id} className="hover:bg-[#161D26]/70 transition-colors">
-                      <td className="p-3 text-[#F1F5F9] max-w-sm truncate">{i.raw_idea}</td>
-                      <td className="p-3 font-mono text-[#94A3B8]">{i.pillar}</td>
-                      <td className="p-3 font-mono text-[#94A3B8]">{i.status}</td>
-                      <td className="p-3 text-right font-mono text-[#64748B]">
+                    <tr key={i.id} className="hover:bg-surface-2/70 transition-colors">
+                      <td className="p-3 text-ink max-w-sm truncate">{i.raw_idea}</td>
+                      <td className="p-3 font-mono text-muted">{i.pillar}</td>
+                      <td className="p-3 font-mono text-muted">{i.status}</td>
+                      <td className="p-3 text-right font-mono text-subtle">
                         {new Date(i.created_at).toLocaleDateString()}
                       </td>
                     </tr>
@@ -251,7 +251,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
       </Section>
 
       {toast.message && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#1F2D3D] text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold">
+        <div className="fixed bottom-6 right-6 z-50 bg-line text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold">
           {toast.message}
         </div>
       )}

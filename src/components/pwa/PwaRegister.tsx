@@ -57,16 +57,16 @@ export function PwaRegister() {
   return (
     <aside
       aria-label="App update"
-      className="fixed inset-x-3 top-[max(0.75rem,env(safe-area-inset-top))] z-[100] mx-auto flex max-w-lg items-center gap-3 rounded-2xl border border-[#1F2D3D] bg-[#0D1520] p-3 shadow-2xl"
+      className="fixed inset-x-3 top-[max(0.75rem,env(safe-area-inset-top))] z-[100] mx-auto flex max-w-lg items-center gap-3 rounded-2xl border border-line bg-[#0D1520] p-3 shadow-2xl"
     >
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-[#F1F5F9]">An update is ready</p>
-        <p className="text-xs text-[#94A3B8]">Refresh to get the latest improvements.</p>
+        <p className="text-sm font-semibold text-ink">An update is ready</p>
+        <p className="text-xs text-muted">Refresh to get the latest improvements.</p>
       </div>
       <button
         type="button"
         onClick={() => updateWaiting.postMessage({ type: "SKIP_WAITING" })}
-        className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-[#00C9A7] px-3 text-sm font-semibold text-[#07110F]"
+        className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-brand px-3 text-sm font-semibold text-[#07110F]"
       >
         <RefreshCw className="h-4 w-4" aria-hidden="true" />
         Refresh
@@ -75,7 +75,7 @@ export function PwaRegister() {
         type="button"
         aria-label="Dismiss update notice"
         onClick={() => setUpdateWaiting(null)}
-        className="grid min-h-11 min-w-11 shrink-0 place-items-center rounded-xl text-[#94A3B8] hover:bg-white/5"
+        className="grid min-h-11 min-w-11 shrink-0 place-items-center rounded-xl text-muted hover:bg-white/5"
       >
         <X className="h-4 w-4" aria-hidden="true" />
       </button>
