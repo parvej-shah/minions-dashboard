@@ -13,6 +13,7 @@ import {
   PenLine,
   ClipboardCheck,
   BadgeCheck,
+  Lightbulb,
 } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import EmptyState, { LoadingState } from "@/components/ui/EmptyState";
@@ -22,7 +23,55 @@ import { AssetItem, IdeaItem, PublishedPostRecord } from "@/types";
 import { useBrandSettings } from "@/hooks/useBrandSettings";
 import { useChannelSummary } from "@/hooks/useChannelSummary";
 
+const POSTING_THOUGHTS = [
+  "One useful idea today. Another tomorrow.",
+  "Show up often enough to become familiar.",
+  "A clear point of view is easier to remember.",
+  "Say one thing well. Leave room for the next post.",
+  "Small insights can start important conversations.",
+  "Be useful today. Be there again tomorrow.",
+  "Publish, learn, and improve the next post.",
+  "Share what experience taught you, not just what you know.",
+  "A strong perspective gives people something to consider.",
+  "Turn your experience into a lesson someone can use.",
+  "Name the problem others feel but cannot yet explain.",
+  "Specific ideas give people a reason to trust you.",
+  "Expertise sounds stronger as an observation than a claim.",
+] as const;
+
+const THOUGHT_STORAGE_KEY = "minions.previousThought";
+
+function pickThoughtForRefresh(): number {
+  let previous = -1;
+  try {
+    const stored = window.sessionStorage.getItem(THOUGHT_STORAGE_KEY);
+    previous = stored === null ? -1 : Number(stored);
+  } catch {
+    // Private browsing may block storage; the quote can still rotate.
+  }
+
+  const hasPrevious = Number.isInteger(previous) && previous >= 0 && previous < POSTING_THOUGHTS.length;
+  const index = hasPrevious
+    ? (previous + 1 + Math.floor(Math.random() * (POSTING_THOUGHTS.length - 1))) % POSTING_THOUGHTS.length
+    : Math.floor(Math.random() * POSTING_THOUGHTS.length);
+
+  try {
+    window.sessionStorage.setItem(THOUGHT_STORAGE_KEY, String(index));
+  } catch {
+    // Storage is optional.
+  }
+  return index;
+}
+
+// The server and hydration render the same placeholder. The browser chooses
+// once per page load, and refreshes never repeat the immediately prior quote.
+const browserThoughtIndex = typeof window === "undefined" ? null : pickThoughtForRefresh();
+const subscribeToThought = () => () => {};
+const getBrowserThought = () => browserThoughtIndex;
+const getServerThought = () => null;
+
 export default function MissionControlPage() {
+  const thoughtIndex = React.useSyncExternalStore(subscribeToThought, getBrowserThought, getServerThought);
   const { brandSettings } = useBrandSettings();
   const channels = useChannelSummary();
   const showLiveBlog = channels?.blog === true && Boolean(brandSettings?.company_domain?.trim());
@@ -86,27 +135,21 @@ export default function MissionControlPage() {
         </div>
       </div>
 
-      <section className="rounded-2xl border border-[#00C9A7]/35 bg-[#0F1C1D] p-5 sm:p-6" aria-labelledby="next-step-title">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#00C9A7]/15 text-[#00C9A7]">
-              {pendingReviewAssets.length > 0 ? <ClipboardCheck className="h-5 w-5" aria-hidden="true" /> : <Sparkles className="h-5 w-5" aria-hidden="true" />}
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#00C9A7]">Next step</p>
-              <h2 id="next-step-title" className="mt-1 text-lg font-bold text-[#F1F5F9]">
-                {isLoading ? "Loading your workspace" : pendingReviewAssets.length > 0 ? "Review your drafts" : "Find your next idea"}
-              </h2>
-              <p className="mt-1 text-sm text-[#94A3B8]">
-                {isLoading ? "This usually takes a moment." : pendingReviewAssets.length > 0 ? "Check the copy and decide what goes live." : "See the ideas your team has found for you."}
-              </p>
-            </div>
-          </div>
-          {!isLoading && <Link href={pendingReviewAssets.length > 0 ? "/editorial" : "/ideas"} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#00C9A7] px-5 py-2.5 text-sm font-bold text-[#070B0F] transition-colors hover:bg-[#00A88A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00C9A7]">
-            {pendingReviewAssets.length > 0 ? "Review drafts" : "Explore ideas"}<ChevronRight className="h-4 w-4" aria-hidden="true" />
-          </Link>}
-        </div>
-      </section>
+      <aside className="relative isolate min-h-[190px] overflow-hidden rounded-2xl border border-[#00C9A7]/30 bg-[#0F1419] p-6 shadow-[0_16px_40px_-30px_rgba(0,201,167,0.45)] sm:min-h-[220px] sm:p-8" aria-label="Daily spark">
+        <span className="absolute inset-y-0 left-0 w-1.5 bg-[#00C9A7]" aria-hidden="true" />
+        <span className="pointer-events-none absolute -right-12 -top-24 h-52 w-52 rounded-full bg-[#00C9A7]/10 blur-3xl" aria-hidden="true" />
+        <p className="relative flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#00C9A7]">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#00C9A7]/10">
+            <Lightbulb className="h-4 w-4" aria-hidden="true" />
+          </span>
+          Daily spark
+        </p>
+        <blockquote className="relative mt-6 max-w-4xl text-[clamp(1.55rem,4vw,2.75rem)] font-bold leading-[1.18] tracking-tight text-[#F1F5F9]" aria-busy={thoughtIndex === null}>
+          {thoughtIndex === null
+            ? <span className="block h-9 w-3/4 max-w-xl animate-pulse rounded-lg bg-[#161D26]" aria-hidden="true" />
+            : <>“{POSTING_THOUGHTS[thoughtIndex]}”</>}
+        </blockquote>
+      </aside>
 
       {/* THE WEEKLY QUESTION (phase 6): shown only on the weeks it is open */}
       <WeeklyPulseCard />
