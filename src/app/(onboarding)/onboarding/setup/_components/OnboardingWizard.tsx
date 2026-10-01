@@ -19,8 +19,8 @@ const LAST_SCREEN = 2;
 // The first post's screen is the real finish line, so setup fills the bar only partway.
 const SETUP_SHARE = 0.75;
 
-export default function OnboardingWizard() {
-  const wizard = useOnboardingWizard();
+export default function OnboardingWizard({ userId }: { userId: string }) {
+  const wizard = useOnboardingWizard(userId);
   // Wait for the saved draft so a returning user lands on their own screen
   // instead of seeing the first question flash first.
   if (!wizard.draftRestored) return <WizardSkeleton />;

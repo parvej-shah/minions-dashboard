@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-10-01 — The first post is reviewed in Editorial Studio, not posted from setup
+
+**Decision:** The first-post screen shows the post as it will look on LinkedIn, now with its cover, and its one main action is Review my post, which opens it in Editorial Studio. The Post it button on that screen is removed; Discard stays. The screen waits for the cover before revealing the post.
+**Why:** Posting from setup skipped the cover, the carousel and the rest of the review, and a brand-new user's first public post should not go out from a celebration screen. Sending them to Editorial Studio shows everything Minions made and teaches the review step they will use from then on.
+**Status:** active
+
 ## 2026-10-01 — One authoritative channel preview in Editorial Studio
 
 **Decision:** Editorial Studio uses one Channel preview as the authoritative representation of social copy, placed first in the review flow. The duplicate reader preview is removed; plain-language draft checks sit beside the publish decision, while each connected channel can be previewed, edited and saved in place.
@@ -43,7 +49,7 @@ and link to it here.
 
 ## 2026-10-01 — Setup ends with the user's first post
 
-**Decision:** Setup asks three questions: what you want to be known for, who reads you, and one thing from your work (a lesson, an opinion or what you're building). That answer is saved as an experience item, and the first post is drafted from it by the normal pipeline, with its claims check, while a lesson-style screen shows progress. The post is then shown as it will look on LinkedIn, with a plain-language list of what to check and three choices: Post it (scheduled into the next posting slot), Edit (in Editorial Studio) or Discard. LinkedIn is connected at that point, not during setup. Experience level, voice, company and publishing mode start from defaults (Practitioner, "Direct & practical", none, review first) and are changed later in Brand and Schedule. Editorial Studio shows the same LinkedIn reader view and plain-language checks at the top of every draft.
+**Decision:** Setup asks three questions: what you want to be known for, who reads you, and one thing from your work (a lesson, an opinion or what you're building). That answer is saved as an experience item, and the first post is drafted from it by the normal pipeline, with its claims check, while a lesson-style screen shows progress. The post is then shown as it will look on LinkedIn, with a plain-language list of what to check and three choices: Post it (scheduled into the next posting slot), Edit (in Editorial Studio) or Discard (the Post it choice is superseded by [The first post is reviewed in Editorial Studio](#2026-10-01--the-first-post-is-reviewed-in-editorial-studio-not-posted-from-setup)). LinkedIn is connected at that point, not during setup. Experience level, voice, company and publishing mode start from defaults (Practitioner, "Direct & practical", none, review first) and are changed later in Brand and Schedule. Editorial Studio shows the same LinkedIn reader view and plain-language checks at the top of every draft.
 **Why:** Six screens of decisions came before any value, and new users could leave before their workspace existed. Seeing a real post in their own words is what hooks them, and it teaches that their experience is what makes a post strong. Rejected: a faster in-app draft at the end of setup, because it would skip the claims check and the cover; the real draft takes about a minute.
 **Status:** active
 

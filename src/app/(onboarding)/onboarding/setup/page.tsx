@@ -13,5 +13,5 @@ export default async function OnboardingSetup() {
   if (!session?.user) redirect("/login");
   const { clientId } = session.user;
   if (clientId && (await isEstablishedTenant(clientId))) redirect("/");
-  return <OnboardingWizard />;
+  return <OnboardingWizard userId={session.user.id} />;
 }

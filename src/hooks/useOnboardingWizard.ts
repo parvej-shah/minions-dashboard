@@ -89,7 +89,27 @@ export interface OnboardingWizardState {
   goBack: () => void;
 }
 
-const STORAGE_KEY = "minions_onboarding_draft";
+// One draft per account. The old shared key let a new signup on the same
+// browser inherit the previous account's answers and brief, and setup then
+// skipped writing a fresh brief because one was already there.
+const LEGACY_STORAGE_KEY = "minions_onboarding_draft";
+/**
+ * A workspace holds at most 6 active rules per category (FORBIDDEN excepted),
+ * and setup itself writes one AUDIENCE, TOPICS and POSITIONING rule. Rules past
+ * the limit were refused one by one, so keep the brief inside it.
+ */
+const BRIEF_RULES_PER_CATEGORY = 5;
+function withinCategoryLimit(directives: GeneratedDirective[]): GeneratedDirective[] {
+  const seen = new Map<string, number>();
+  return directives.filter((d) => {
+    if (d.category === "FORBIDDEN") return true;
+    const n = (seen.get(d.category) ?? 0) + 1;
+    seen.set(d.category, n);
+    return n <= BRIEF_RULES_PER_CATEGORY;
+  });
+}
+
+const draftKey = (userId: string) => `${LEGACY_STORAGE_KEY}:${userId}`;
 
 /**
  * Setup no longer asks for a voice; this is the starting voice every new
@@ -100,7 +120,8 @@ export const DEFAULT_VOICE = "Short paragraphs, clear tradeoffs, and a useful ne
 /** What the first-post answer is, as a ProfessionalMemory kind. */
 export type StoryKind = "LESSON" | "OPINION" | "CURRENT_WORK";
 
-export function useOnboardingWizard(): OnboardingWizardState {
+export function useOnboardingWizard(userId: string): OnboardingWizardState {
+  const STORAGE_KEY = draftKey(userId);
   const router = useRouter();
   const [step, setStep] = useState(0);
 
@@ -152,6 +173,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
   // Restore draft state from localStorage on mount
   useEffect(() => {
     try {
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -192,7 +214,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
     finally {
       setHasRestoredDraft(true);
     }
-  }, []);
+  }, [STORAGE_KEY]);
 
   // Prefill from the already-saved BrandProfile/directives, for a user who
   // lands here a second time (e.g. redirected back by DashboardShell) with no
@@ -282,7 +304,7 @@ export function useOnboardingWizard(): OnboardingWizardState {
         })
       );
     } catch {}
-  }, [storyText, storyKind, businessName, businessNameFromLinkedIn, websiteUrl, audienceDescription, contentFocus, writerExpertise, industry, selectedPresetId, channels, publishingMode, mythAnswer, differentiatorAnswer, avoidAnswer, selectedVoice, customSampleText, step, linkedInProfile, postSnippet, aiSuggestions, importedVoiceCount, directives, positioningSummary, hasRestoredDraft]);
+  }, [storyText, storyKind, businessName, businessNameFromLinkedIn, websiteUrl, audienceDescription, contentFocus, writerExpertise, industry, selectedPresetId, channels, publishingMode, mythAnswer, differentiatorAnswer, avoidAnswer, selectedVoice, customSampleText, step, linkedInProfile, postSnippet, aiSuggestions, importedVoiceCount, directives, positioningSummary, hasRestoredDraft, STORAGE_KEY]);
 
   function applyPreset(preset: BrandPreset) {
     setSelectedPresetId(preset.id);
@@ -391,17 +413,6 @@ export function useOnboardingWizard(): OnboardingWizardState {
 
   /** Writes the workspace: voice sample, brand, the brief's rules and the default schedule. */
   async function saveWorkspace(brief: { directives: GeneratedDirective[]; positioning: string }, voiceSample: string) {
-    if (voiceSample.length >= 20 && importedVoiceCount === 0) {
-      try {
-        const res = await apiClient.post<{ success: boolean; examples_saved: number }>("/api/onboarding/voice", {
-          examples: [voiceSample],
-        });
-        if (res.success) setImportedVoiceCount(res.examples_saved);
-      } catch (voiceErr) {
-        console.warn("Onboarding voice sample save non-fatal:", voiceErr);
-      }
-    }
-
     await apiClient.post("/api/onboarding/setup", {
       // Without these the tenant kept the "<email-local-part>'s Workspace"
       // placeholder name and an empty domain, which covers and public post
@@ -421,8 +432,21 @@ export function useOnboardingWizard(): OnboardingWizardState {
       hasAiDirectives: brief.directives.length > 0,
     });
 
+    // After setup: the voice route needs the workspace, which setup creates
+    // for a new user. Before it, the sample was refused and silently lost.
+    if (voiceSample.length >= 20 && importedVoiceCount === 0) {
+      try {
+        const res = await apiClient.post<{ success: boolean; examples_saved: number }>("/api/onboarding/voice", {
+          examples: [voiceSample],
+        });
+        if (res.success) setImportedVoiceCount(res.examples_saved);
+      } catch (voiceErr) {
+        console.warn("Onboarding voice sample save non-fatal:", voiceErr);
+      }
+    }
+
     const failures: string[] = [];
-    for (const dir of brief.directives) {
+    for (const dir of withinCategoryLimit(brief.directives)) {
       try {
         await apiClient.post("/api/brand/directives", {
           category: dir.category,

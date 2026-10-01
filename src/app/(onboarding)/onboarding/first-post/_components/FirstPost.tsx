@@ -26,6 +26,8 @@ type Phase = "writing" | "stuck" | "missing" | "ready" | "scheduled";
 /** The drafting pipeline takes about this long; the progress bar paces itself to it. */
 const EXPECTED_SECONDS = 60;
 const POLL_MS = 5000;
+/** The cover lands a few seconds after the post; past this, show the post without it. */
+const COVER_WAIT_SECONDS = 90;
 
 const WRITING_STEPS = [
   { at: 0, label: "Planning the angle" },
@@ -35,7 +37,12 @@ const WRITING_STEPS = [
 ];
 
 function phaseOf(s: FirstPostStatus): Phase {
-  if (s.asset) return s.asset.status === "SCHEDULED" ? "scheduled" : "ready";
+  if (s.asset) {
+    if (s.asset.status === "SCHEDULED") return "scheduled";
+    // The reveal shows the post with its cover, so wait for the cover too.
+    const age = (Date.now() - new Date(s.asset.created_at).getTime()) / 1000;
+    return s.asset.hero_status === "PENDING" && age < COVER_WAIT_SECONDS ? "writing" : "ready";
+  }
   if (!s.idea_id) return "missing";
   // COMPLETED without an asset yet: the sync lands a moment after the callback.
   if (s.run && (s.run.status === "RUNNING" || s.run.status === "COMPLETED")) return "writing";
@@ -50,7 +57,7 @@ export default function FirstPost({ author }: { author: { name: string; image: s
   const router = useRouter();
   const [status, setStatus] = useState<FirstPostStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState<"retry" | "approve" | "discard" | null>(null);
+  const [busy, setBusy] = useState<"retry" | "review" | "discard" | null>(null);
   const [discardOpen, setDiscardOpen] = useState(false);
 
   const load = useCallback(async () => {
@@ -93,19 +100,12 @@ export default function FirstPost({ author }: { author: { name: string; image: s
     }
   };
 
-  const approve = async () => {
+  // Setup ends in Editorial Studio, where the post, cover and carousel are
+  // reviewed and scheduled, rather than posting from this screen.
+  const review = () => {
     if (!status?.asset) return;
-    setBusy("approve");
-    setError(null);
-    try {
-      await apiClient.post("/api/onboarding/first-post/approve", { asset_id: status.asset.id });
-      window.dispatchEvent(new Event("minions-counts-updated"));
-      await load();
-    } catch (err) {
-      setError(toErrorMessage(err, "Couldn't schedule it. Please try again."));
-    } finally {
-      setBusy(null);
-    }
+    setBusy("review");
+    router.push(`/editorial?id=${encodeURIComponent(status.asset.id)}`);
   };
 
   const discard = async () => {
@@ -158,21 +158,15 @@ export default function FirstPost({ author }: { author: { name: string; image: s
         <>
           <Ready asset={status.asset} author={author} story={status.story} />
           <LessonFooter
-            label="Post it"
-            onContinue={() => void approve()}
-            loading={busy === "approve"}
+            label="Review my post"
+            onContinue={review}
+            loading={busy === "review"}
             disabled={busy !== null}
             error={error}
             secondary={
-              <div className="grid grid-cols-2 gap-2 sm:flex">
-                <Button variant="ghost" size="lg" icon={<Trash2 className="h-4 w-4" />} disabled={busy !== null} onClick={() => setDiscardOpen(true)}>
-                  Discard
-                </Button>
-                <Link href={`/editorial?id=${encodeURIComponent(status.asset.id)}`} className={buttonStyles({ variant: "secondary", size: "lg" })}>
-                  <PenLine className="h-4 w-4" />
-                  Edit
-                </Link>
-              </div>
+              <Button variant="ghost" size="lg" icon={<Trash2 className="h-4 w-4" />} disabled={busy !== null} onClick={() => setDiscardOpen(true)}>
+                Discard
+              </Button>
             }
           />
           <ConfirmModal
@@ -271,7 +265,7 @@ function Ready({ asset, author, story }: { asset: AssetItem; author: { name: str
             </span>
           </div>
           <h1 className="mt-5 text-2xl font-extrabold text-gold sm:text-3xl">Your first post is ready!</h1>
-          <p className="mt-1.5 text-sm text-muted">This is how people will see it on LinkedIn.</p>
+          <p className="mt-1.5 text-sm text-muted">This is how people will see it on LinkedIn. Nothing goes out until you approve it.</p>
         </div>
 
         <LinkedInPostPreview author={author} text={postText(asset)} imageUrl={asset.hero_image_url} className="animate-rise-in mt-6" />
