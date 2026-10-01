@@ -84,7 +84,7 @@ export async function startDraftRun(
     },
     {
       failure: "The drafting pipeline did not accept the request. Check that 02_idea_to_asset is active in n8n",
-      success: "Drafting run started. The finished draft appears in the Editorial Studio in about three minutes.",
+      success: "Drafting run started. The finished draft appears in the Editorial Studio in about a minute.",
     }
   );
 

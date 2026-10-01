@@ -24,14 +24,14 @@ interface FirstPostStatus {
 type Phase = "writing" | "stuck" | "missing" | "ready" | "scheduled";
 
 /** The drafting pipeline takes about this long; the progress bar paces itself to it. */
-const EXPECTED_SECONDS = 180;
+const EXPECTED_SECONDS = 60;
 const POLL_MS = 5000;
 
 const WRITING_STEPS = [
   { at: 0, label: "Planning the angle" },
-  { at: 25, label: "Writing the first draft" },
-  { at: 80, label: "Checking every claim" },
-  { at: 120, label: "Designing your cover" },
+  { at: 18, label: "Writing the first draft" },
+  { at: 32, label: "Checking every claim" },
+  { at: 44, label: "Designing your cover" },
 ];
 
 function phaseOf(s: FirstPostStatus): Phase {
@@ -211,7 +211,7 @@ function Writing({ startedAt, story }: { startedAt: string | null; story: string
         <PenLine className="h-11 w-11 animate-pulse" strokeWidth={2.25} />
       </span>
       <h1 className="mt-8 text-2xl font-extrabold sm:text-3xl">Writing your first post…</h1>
-      <p className="mt-2 max-w-sm text-sm text-muted">About three minutes. Every claim gets checked against what you told us.</p>
+      <p className="mt-2 max-w-sm text-sm text-muted">About a minute. Every claim gets checked against what you told us.</p>
 
       <div className="mt-6 h-3 w-full max-w-xs overflow-hidden rounded-full bg-line" aria-hidden="true">
         <div className="h-full rounded-full bg-brand transition-[width] duration-1000 ease-linear" style={{ width: `${share * 100}%` }} />
