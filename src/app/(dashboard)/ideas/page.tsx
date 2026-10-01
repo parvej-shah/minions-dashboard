@@ -18,11 +18,9 @@ import {
   Trash2,
   Check,
   LayoutGrid,
-  CalendarDays,
   SlidersHorizontal,
 } from "lucide-react";
 import { IdeaItem, IdeaStatus } from "@/types";
-import CalendarView from "@/components/ideas/CalendarView";
 import ScheduleModal from "@/components/ideas/ScheduleModal";
 import QueueBuilderView from "@/components/ideas/QueueBuilderView";
 import DraftingProgressHUD, { DraftingJob } from "@/components/common/DraftingProgressHUD";
@@ -45,6 +43,7 @@ import {
 } from "@/constants/ideaStage";
 import { FALLBACK_TOPICS } from "@/constants/topics";
 
+import { formatPostTime } from "@/lib/postTime";
 import { buttonStyles } from "@/components/ui/Button";
 import { segment } from "@/components/ui/segment";
 /**
@@ -67,6 +66,12 @@ import { segment } from "@/components/ui/segment";
  */
 const STAGE_FILTERS: Array<"ALL" | IdeaStage> = ["ALL", ...IDEA_STAGES];
 
+interface DraftingStatus {
+  drafting_on: boolean;
+  timezone: string;
+  next_slot_at: string | null;
+}
+
 export default function IdeaStreamPage() {
   const {
     data: ideas,
@@ -85,8 +90,12 @@ export default function IdeaStreamPage() {
     (topic) => topic.trim().toUpperCase() !== "UNSPECIFIED"
   );
   const availableTopics = topicLabels.length > 0 ? topicLabels : FALLBACK_TOPICS;
+  const { data: draftingStatus } = useApiResource<DraftingStatus | null>(
+    "/api/plan/status",
+    null,
+    { errorMessage: "Could not load drafting status" }
+  );
 
-  const [selectedTrade, setSelectedTrade] = useState<string>("ALL");
   const [selectedStage, setSelectedStage] = useState<"ALL" | IdeaStage>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [isInjectOpen, setIsInjectOpen] = useState(false);
@@ -95,6 +104,7 @@ export default function IdeaStreamPage() {
   const [claimingIds, setClaimingIds] = useState<Set<string>>(new Set());
   const [justClaimedIds, setJustClaimedIds] = useState<Set<string>>(new Set());
   const [draftError, setDraftError] = useState<string | null>(null);
+  const [queueingIds, setQueueingIds] = useState<Set<string>>(new Set());
 
   // Live Drafting Multi-Agent Progress HUD state
   const [activeDraftingJob, setActiveDraftingJob] = useState<DraftingJob | null>(null);
@@ -102,7 +112,7 @@ export default function IdeaStreamPage() {
   const [isFirstRun, setIsFirstRun] = useState(false);
 
   // View mode: Stream cards vs Drag & Drop Queue Builder vs Editorial Calendar
-  const [viewMode, setViewMode] = useState<"stream" | "queue" | "calendar">("queue");
+  const [viewMode, setViewMode] = useState<"stream" | "queue">("queue");
 
   // Scheduling Modal State
   const [schedulingIdea, setSchedulingIdea] = useState<IdeaItem | null>(null);
@@ -202,31 +212,14 @@ export default function IdeaStreamPage() {
   const [formTitle, setFormTitle] = useState("");
   const [formExcerpt, setFormExcerpt] = useState("");
   const [formSourceUrl, setFormSourceUrl] = useState("");
-  const [formSourceTitle, setFormSourceTitle] = useState("");
   const [formTrade, setFormTrade] = useState<string>("");
-  const [formTagsInput, setFormTagsInput] = useState("");
-  const [formTags, setFormTags] = useState<string[]>(["Manual"]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      const clean = formTagsInput.trim().replace(/^,+|,+$/g, "");
-      if (clean && !formTags.includes(clean)) {
-        setFormTags([...formTags, clean]);
-        setFormTagsInput("");
-      }
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setFormTags(formTags.filter(t => t !== tagToRemove));
-  };
 
   /** Adds an idea to the production queue at the next free position. */
   const handleQueueIdea = async (idea: IdeaItem) => {
     const targetId = idea.id || idea.ideaId;
     const nextOrder = ideas.filter((i) => i.status === "QUEUED").length + 1;
+    setQueueingIds((prev) => new Set(prev).add(targetId));
     try {
       await apiClient.patch(`/api/ideas/${targetId}`, {
         status: "QUEUED",
@@ -237,17 +230,24 @@ export default function IdeaStreamPage() {
           i.id === targetId ? { ...i, status: "QUEUED", queue_order: nextOrder } : i
         )
       );
-      setToastMessage(`Added to Production Queue (#${nextOrder})`);
+      setToastMessage(`Added to Up next (#${nextOrder})`);
       setTimeout(() => setToastMessage(null), 3000);
     } catch {
-      setToastMessage("Could not add to queue");
+      setToastMessage("Could not add to Up next");
       setTimeout(() => setToastMessage(null), 3000);
+    } finally {
+      setQueueingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(targetId);
+        return next;
+      });
     }
   };
 
   /** Removes an idea from the production queue, back to HARVESTED. */
   const handleUnqueueIdea = async (idea: IdeaItem) => {
     const targetId = idea.id || idea.ideaId;
+    setQueueingIds((prev) => new Set(prev).add(targetId));
     try {
       await apiClient.patch(`/api/ideas/${targetId}`, {
         status: "HARVESTED",
@@ -258,11 +258,17 @@ export default function IdeaStreamPage() {
           i.id === targetId ? { ...i, status: "HARVESTED", queue_order: null } : i
         )
       );
-      setToastMessage("Removed from Queue");
+      setToastMessage("Removed from Up next");
       setTimeout(() => setToastMessage(null), 3000);
     } catch {
-      setToastMessage("Could not remove from queue");
+      setToastMessage("Could not remove from Up next");
       setTimeout(() => setToastMessage(null), 3000);
+    } finally {
+      setQueueingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(targetId);
+        return next;
+      });
     }
   };
 
@@ -393,10 +399,6 @@ export default function IdeaStreamPage() {
     }
 
     setIsSubmitting(true);
-    const newTags = formTagsInput.trim()
-      ? Array.from(new Set([...formTags, formTagsInput.trim()]))
-      : formTags;
-
     const payload = {
       title: formTitle.trim(),
       raw_idea: formTitle.trim(),
@@ -408,17 +410,17 @@ export default function IdeaStreamPage() {
       audience: "ICP",
       source: formSourceUrl.trim() ? "MANUAL_REFERENCE" : "MANUAL",
       source_url: formSourceUrl.trim() || null,
-      source_title: formSourceTitle.trim() || null,
+      source_title: null,
       signals: formSourceUrl.trim() ? [
         {
-          title: formSourceTitle.trim() || formTitle.trim(),
+          title: formTitle.trim(),
           url: formSourceUrl.trim(),
           source: "Manual Reference",
           snippet: formExcerpt.trim() || formTitle.trim(),
           published_at: new Date().toISOString(),
         }
       ] : [],
-      tags: newTags
+      tags: ["Manual", formTrade]
     };
 
     try {
@@ -435,10 +437,7 @@ export default function IdeaStreamPage() {
         setFormTitle("");
         setFormExcerpt("");
         setFormSourceUrl("");
-        setFormSourceTitle("");
         setFormTrade("");
-        setFormTags(["Manual"]);
-        setFormTagsInput("");
         setToastMessage(`Idea added to your stream.`);
         setTimeout(() => setToastMessage(null), 3000);
       } else {
@@ -513,14 +512,6 @@ export default function IdeaStreamPage() {
   // Filtered Ideas calculation
   const filteredIdeas = useMemo(() => {
     return ideas.filter(idea => {
-      // Audience filter
-
-      // Topic area filter
-      if (selectedTrade !== "ALL") {
-        const t = (idea.target_trade || "").toLowerCase();
-        if (!t.includes(selectedTrade.toLowerCase())) return false;
-      }
-
       // Stage filter -- compare mapped stages, never raw status strings.
       if (selectedStage !== "ALL" && toIdeaStage(idea.status) !== selectedStage) return false;
 
@@ -536,9 +527,13 @@ export default function IdeaStreamPage() {
 
       return true;
     });
-  }, [ideas, selectedTrade, selectedStage, searchQuery]);
+  }, [ideas, selectedStage, searchQuery]);
 
-  // Audience Badge Styling Helper
+  const queuedIdeas = ideas
+    .filter((idea) => idea.status === "QUEUED")
+    .sort((a, b) => (a.queue_order ?? 999) - (b.queue_order ?? 999));
+  const nextQueuedIdea = queuedIdeas[0];
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16 selection:bg-brand/30 selection:text-brand">
       {/* Page Header - Clean, Executive & Compact */}
@@ -558,81 +553,52 @@ export default function IdeaStreamPage() {
           </div>
         </section>
       )}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line pb-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold tracking-widest text-brand uppercase px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
-              IDEA STREAM
+      <section className="relative overflow-hidden rounded-[1.75rem] border-2 border-b-4 border-brand/35 border-b-brand-edge/70 bg-[linear-gradient(135deg,#0F1C1D_0%,#10171D_62%,#0E1419_100%)] p-5 sm:p-7">
+        <span className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full bg-brand/10 blur-3xl" aria-hidden="true" />
+        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-brand">
+              <Sparkles className="h-4 w-4" aria-hidden="true" /> Ideas
+            </p>
+            <h1 className="text-2xl font-extrabold leading-tight tracking-tight text-ink sm:text-3xl">
+              Choose what gets written next
+            </h1>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
+              Add a promising idea to Up next. Minions turns the first one into a draft automatically.
+            </p>
+          </div>
+
+          <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-brand/25 bg-canvas/45 p-3 sm:min-w-[280px]">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/15 text-lg font-black text-brand">
+              {queuedIdeas.length}
             </span>
+            <div className="min-w-0">
+              <p className="text-xs font-extrabold text-ink">{queuedIdeas.length === 1 ? "idea is ready" : "ideas are ready"}</p>
+              <p className="mt-0.5 truncate text-xs text-muted">
+                {nextQueuedIdea ? `Next: ${nextQueuedIdea.title || nextQueuedIdea.raw_idea}` : "Choose an idea below to get started."}
+              </p>
+            </div>
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-ink break-words">
-            {viewMode === "queue" ? "Production Draft Queue" : viewMode === "calendar" ? "Editorial Calendar" : "Idea Stream"}
-          </h1>
-          <p className="text-xs text-muted mt-0.5 max-w-xl break-words">
-            {viewMode === "queue" 
-              ? "Choose which idea Minions should turn into a draft next."
-              : viewMode === "calendar"
-              ? "Visual timeline of scheduled drafts and published playbooks."
-              : "A steady stream of relevant topics for your ideal customers."}
-          </p>
         </div>
+      </section>
 
-        <div className="flex items-center gap-2.5 self-start sm:self-auto flex-wrap">
-          {/* View Mode Toggle Switch: Queue Builder vs Stream vs Calendar */}
-          <div className="flex items-center p-1 bg-surface-2 border border-line rounded-xl shadow-inner">
-            <button
-              onClick={() => setViewMode("queue")}
-              className={`flex min-h-11 items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                viewMode === "queue"
-                  ? segment.on
-                  : segment.off
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Queue</span>
-              {ideas.filter(i => i.status === "QUEUED").length > 0 && (
-                <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full font-bold ${
-                  viewMode === "queue" ? "bg-canvas text-brand" : "bg-brand/20 text-brand"
-                }`}>
-                  {ideas.filter(i => i.status === "QUEUED").length}
-                </span>
-              )}
-            </button>
-
-            <button
-              onClick={() => setViewMode("stream")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                viewMode === "stream"
-                  ? segment.on
-                  : segment.off
-              }`}
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Stream</span>
-            </button>
-
-            <button
-              onClick={() => setViewMode("calendar")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                viewMode === "calendar"
-                  ? segment.on
-                  : segment.off
-              }`}
-            >
-              <CalendarDays className="w-3.5 h-3.5" />
-              <span>Calendar</span>
-            </button>
-          </div>
-
-          <button
-            onClick={() => setIsInjectOpen(true)}
-            className={buttonStyles({ size: "sm" })}
-          >
-            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>Add idea</span>
+      <div className="flex flex-col gap-3 border-b border-line pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <div role="tablist" aria-label="Ideas views" className="grid grid-cols-2 rounded-2xl border border-line bg-surface p-1.5 shadow-inner">
+          <button type="button" role="tab" aria-selected={viewMode === "queue"} onClick={() => setViewMode("queue")} className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold transition-all cursor-pointer ${viewMode === "queue" ? segment.on : segment.off}`}>
+            <Layers className="h-4 w-4" aria-hidden="true" />
+            <span>Up next</span>
+            {queuedIdeas.length > 0 && <span className="rounded-full bg-canvas/60 px-1.5 py-0.5 text-[10px] tabular-nums">{queuedIdeas.length}</span>}
+          </button>
+          <button type="button" role="tab" aria-selected={viewMode === "stream"} onClick={() => setViewMode("stream")} className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold transition-all cursor-pointer ${viewMode === "stream" ? segment.on : segment.off}`}>
+            <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+            <span>All ideas</span>
           </button>
         </div>
+
+        <button type="button" onClick={() => setIsInjectOpen(true)} className={buttonStyles({ variant: "secondary", size: "sm", className: "w-full sm:w-auto" })}>
+          <Plus className="h-4 w-4" aria-hidden="true" />
+          <span>Add your own idea</span>
+        </button>
       </div>
 
       {/* Stream-Only Sticky Filter Bar */}
@@ -645,7 +611,7 @@ export default function IdeaStreamPage() {
                 <Search className="w-4 h-4 text-subtle absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Search ideas by title, topic, keyword, or ID..."
+                  placeholder="Search ideas by title or keyword..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="min-h-11 w-full bg-surface border border-line focus:border-brand rounded-xl pl-9 pr-8 py-2 text-xs text-ink placeholder:text-subtle outline-none transition-all"
@@ -666,17 +632,10 @@ export default function IdeaStreamPage() {
               <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
                 <SlidersHorizontal className="h-4 w-4 text-brand" />
                 <span>Filters</span>
-                {(selectedTrade !== "ALL" || selectedStage !== "ALL") && <span className="rounded-full bg-brand/15 px-2 py-0.5 text-xs text-brand">Active</span>}
+                {selectedStage !== "ALL" && <span className="rounded-full bg-brand/15 px-2 py-0.5 text-xs text-brand">Active</span>}
                 <span className="ml-auto text-xs text-muted">Tap to adjust</span>
               </summary>
               <div className="grid grid-cols-1 gap-3 border-t border-line py-3 sm:grid-cols-2">
-                <label className="space-y-1 text-xs font-medium text-muted">
-                  <span>Topic area</span>
-                  <select value={selectedTrade} onChange={(e) => setSelectedTrade(e.target.value)} className="min-h-11 w-full rounded-xl border border-line bg-canvas px-3 text-sm text-ink">
-                    <option value="ALL">All topics</option>
-                    {availableTopics.map((topic) => <option key={topic} value={topic}>{topic}</option>)}
-                  </select>
-                </label>
                 <label className="space-y-1 text-xs font-medium text-muted">
                   <span>Stage</span>
                   <select value={selectedStage} onChange={(e) => setSelectedStage(e.target.value as "ALL" | IdeaStage)} className="min-h-11 w-full rounded-xl border border-line bg-canvas px-3 text-sm text-ink">
@@ -686,38 +645,6 @@ export default function IdeaStreamPage() {
               </div>
             </details>
 
-            {/* Row 2: Scrolling topic pills */}
-            <div className="hidden lg:flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar border-t border-line/40">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-subtle mr-1 shrink-0">
-                Topic area:
-              </span>
-              <button
-                onClick={() => setSelectedTrade("ALL")}
-                className={`px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                  selectedTrade === "ALL"
-                    ? "bg-brand/15 text-brand border-brand/40 font-bold"
-                    : "bg-surface text-muted border-line hover:text-ink hover:border-[#2A3D52]"
-                }`}
-              >
-                All topics
-              </button>
-              {availableTopics.map((topic) => {
-                const isActive = selectedTrade === topic;
-                return (
-                  <button
-                    key={topic}
-                    onClick={() => setSelectedTrade(topic)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                      isActive
-                        ? "bg-brand/15 text-brand border-brand/40 font-bold"
-                        : "bg-surface text-muted border-line hover:text-ink hover:border-[#2A3D52]"
-                    }`}
-                  >
-                    {topic}
-                  </button>
-                );
-              })}
-            </div>
 
             {/* Row 3: Stage Filters */}
             <div className="hidden lg:flex items-center gap-2 overflow-x-auto pb-1 pt-1 border-t border-line/40 scrollbar-none">
@@ -777,20 +704,18 @@ export default function IdeaStreamPage() {
       {viewMode === "queue" ? (
         <QueueBuilderView
           ideas={ideas}
+          draftingLabel={draftingStatus?.drafting_on
+            ? draftingStatus.next_slot_at
+              ? `Next draft ${formatPostTime(draftingStatus.next_slot_at, draftingStatus.timezone)}`
+              : "Drafting automatically"
+            : draftingStatus ? "Automatic drafting off" : null}
+          draftingOn={draftingStatus?.drafting_on === true}
           onUpdateIdeas={setIdeas}
           onSelectIdea={(idea) => setDetailIdea(idea)}
-          onDraftIdea={handleRefineAndDraft}
-          isDrafting={claimingIds.size > 0}
           onToast={(msg) => {
             setToastMessage(msg);
             setTimeout(() => setToastMessage(null), 4000);
           }}
-        />
-      ) : viewMode === "calendar" ? (
-        <CalendarView
-          ideas={ideas}
-          onSelectIdea={(idea) => setDetailIdea(idea)}
-          onOpenSchedule={(idea) => setSchedulingIdea(idea)}
         />
       ) : (
         <div className="space-y-6">
@@ -816,7 +741,6 @@ export default function IdeaStreamPage() {
               </p>
               <button
                 onClick={() => {
-                  setSelectedTrade("ALL");
                   setSelectedStage("ALL");
                   setSearchQuery("");
                 }}
@@ -834,9 +758,9 @@ export default function IdeaStreamPage() {
               key={idea.id || idea.ideaId}
               idea={idea}
               claimingIds={claimingIds}
+              queueingIds={queueingIds}
               justClaimedIds={justClaimedIds}
               onOpenDetail={setDetailIdea}
-              onDraft={handleRefineAndDraft}
               onResetClaim={handleResetClaim}
               onQueue={handleQueueIdea}
               onUnqueue={handleUnqueueIdea}
@@ -858,7 +782,7 @@ export default function IdeaStreamPage() {
           />
 
           {/* Slide-over Drawer */}
-          <div className="relative z-10 flex h-[100dvh] max-h-[100dvh] w-full max-w-lg flex-col overflow-hidden border-l border-line bg-surface shadow-2xl animate-in slide-in-from-right duration-200">
+          <div className="relative z-10 flex h-[100dvh] max-h-[100dvh] w-full max-w-lg flex-col overflow-hidden border-l border-line bg-surface shadow-2xl animate-in slide-in-from-right duration-200" role="dialog" aria-modal="true" aria-labelledby="add-idea-title">
             {/* Drawer Header and form scroll as one bounded panel region */}
             <div className="flex min-h-0 flex-1 flex-col">
               <div className="flex shrink-0 items-center justify-between border-b border-line px-5 py-4 sm:px-6 sm:py-5">
@@ -868,12 +792,13 @@ export default function IdeaStreamPage() {
                       Add an idea
                     </span>
                   </div>
-                  <h2 className="text-lg font-bold text-ink">
-                    Add an Idea
+                  <h2 id="add-idea-title" className="text-lg font-bold text-ink">
+                    Add your idea
                   </h2>
                 </div>
                 <button
                   onClick={() => setIsInjectOpen(false)}
+                  aria-label="Close add idea"
                   disabled={isSubmitting}
                   className="text-muted hover:text-ink p-2 rounded-lg hover:bg-surface-2 transition-colors cursor-pointer"
                 >
@@ -891,7 +816,7 @@ export default function IdeaStreamPage() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Attic Thermal Saturation: Why 2.5-Hour Callback Redos Drain HVAC Margins"
+                    placeholder="e.g. The customer question our industry keeps answering badly"
                     value={formTitle}
                     onChange={(e) => setFormTitle(e.target.value)}
                     className="w-full bg-surface-2 border border-line focus:border-brand rounded-xl px-3.5 py-2.5 text-xs text-ink placeholder:text-subtle outline-none transition-all font-medium"
@@ -909,13 +834,7 @@ export default function IdeaStreamPage() {
                   <select
                     required
                     value={formTrade}
-                    onChange={(e) => {
-                      const t = e.target.value ;
-                      setFormTrade(t);
-                      if (!formTags.includes(t)) {
-                        setFormTags([...formTags.filter(x => !availableTopics.includes(x)), t]);
-                      }
-                    }}
+                    onChange={(e) => setFormTrade(e.target.value)}
                     className="w-full bg-surface-2 border border-line focus:border-brand rounded-xl px-3.5 py-2.5 text-xs text-ink outline-none transition-all cursor-pointer"
                   >
                     <option value="" disabled className="bg-surface">
@@ -947,18 +866,6 @@ export default function IdeaStreamPage() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-ink mb-1.5">
-                      Source name <span className="text-subtle font-normal">(Optional)</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Hacker News Thread #4128, TechCrunch AI Dispatch"
-                      value={formSourceTitle}
-                      onChange={(e) => setFormSourceTitle(e.target.value)}
-                      className="w-full bg-surface-2 border border-line focus:border-brand rounded-xl px-3.5 py-2.5 text-xs text-ink placeholder:text-subtle outline-none transition-all"
-                    />
-                  </div>
                 </div>
 
                 {/* Field: Excerpt / Angle */}
@@ -975,42 +882,6 @@ export default function IdeaStreamPage() {
                   />
                 </div>
 
-                {/* Field: Tags */}
-                <div>
-                  <label className="block text-xs font-semibold text-ink mb-1.5">
-                    Tags
-                  </label>
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap gap-1.5 p-2 bg-surface-2 border border-line rounded-xl min-h-[42px] items-center">
-                      {formTags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="inline-flex items-center gap-1 text-[11px] bg-canvas border border-line text-ink px-2 py-0.5 rounded-md"
-                        >
-                          #{tag}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveTag(tag)}
-                            className="text-subtle hover:text-danger"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      ))}
-                      <input
-                        type="text"
-                        placeholder="Type tag & press Enter..."
-                        value={formTagsInput}
-                        onChange={(e) => setFormTagsInput(e.target.value)}
-                        onKeyDown={handleAddTag}
-                        className="bg-transparent text-xs text-ink placeholder:text-subtle outline-none flex-1 min-w-[120px] px-1 py-0.5"
-                      />
-                    </div>
-                    <p className="text-[11px] text-subtle">
-                      Press comma or Enter to add tags.
-                    </p>
-                  </div>
-                </div>
               </form>
             </div>
 
@@ -1062,7 +933,7 @@ export default function IdeaStreamPage() {
                   <Edit3 className="w-5 h-5 text-brand" />
                   <div>
                     <h2 className="text-base font-bold text-ink">
-                      Edit Strategy & Signal
+                      Edit idea
                     </h2>
                     <p className="text-xs text-subtle font-mono">
                       {editingIdea.id || editingIdea.ideaId}
@@ -1084,7 +955,7 @@ export default function IdeaStreamPage() {
                 {/* Title / Signal */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-muted flex items-center gap-1.5">
-                    <span>Topic Title / Core Signal</span>
+                    <span>Idea title</span>
                     <span className="text-brand">*</span>
                   </label>
                   <input
@@ -1099,7 +970,7 @@ export default function IdeaStreamPage() {
                 {/* Excerpt / Angle */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-muted">
-                    Strategic Angle & Key Realities
+                    Angle or notes
                   </label>
                   <textarea
                     rows={4}
@@ -1129,24 +1000,6 @@ export default function IdeaStreamPage() {
 
                 </div>
 
-                {/* Status Selector */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted">
-                    Status
-                  </label>
-                  <select
-                    value={editStatus}
-                    onChange={(e) => setEditStatus(e.target.value as IdeaStatus)}
-                    className="w-full bg-canvas border border-line focus:border-brand rounded-xl px-3 py-2.5 text-xs text-ink outline-none transition-colors cursor-pointer"
-                  >
-                    <option value="HARVESTED" className="bg-surface">HARVESTED (Ready)</option>
-                    <option value="REFINED" className="bg-surface">REFINED (Ready for Writer)</option>
-                    <option value="CLAIMED" className="bg-surface">CLAIMED (Locked)</option>
-                    <option value="DRAFTED" className="bg-surface">DRAFTED (Asset Generated)</option>
-                    <option value="PUBLISHED" className="bg-surface">PUBLISHED (Live)</option>
-                    <option value="REJECTED" className="bg-surface">REJECTED (Archived)</option>
-                  </select>
-                </div>
               </form>
             </div>
 
@@ -1216,14 +1069,14 @@ export default function IdeaStreamPage() {
           if (detailIdea?.id === updated.id) {
             setDetailIdea(updated);
           }
-          setToastMessage(`📅 Successfully scheduled: ${updated.title || updated.raw_idea}`);
+          setToastMessage(`Scheduled: ${updated.title || updated.raw_idea}`);
           setTimeout(() => setToastMessage(null), 5000);
         }}
       />
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-24 right-6 z-50 bg-brand text-canvas px-4 py-3 rounded-xl shadow-2xl font-bold text-xs flex items-center gap-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
+        <div role="status" className="fixed bottom-24 right-6 z-50 bg-brand text-canvas px-4 py-3 rounded-xl shadow-2xl font-bold text-xs flex items-center gap-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
           <CheckCircle2 className="w-4 h-4" />
           <span>{toastMessage}</span>
         </div>
@@ -1243,9 +1096,9 @@ export default function IdeaStreamPage() {
       {/* Delete Idea Confirmation Modal */}
       <ConfirmModal
         isOpen={Boolean(deleteIdeaTarget)}
-        title="Delete Harvested Signal"
-        description={`Are you sure you want to delete idea "${deleteIdeaTarget?.title}" (${deleteIdeaTarget?.id})? Any drafted asset will remain safely decoupled.`}
-        confirmLabel="Delete Idea"
+        title="Delete idea?"
+        description={`Delete “${deleteIdeaTarget?.title}”? This cannot be undone. Any draft already created will stay safe.`}
+        confirmLabel="Delete idea"
         cancelLabel="Cancel"
         variant="danger"
         isLoading={isDeletingIdea}

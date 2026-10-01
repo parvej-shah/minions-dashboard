@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-10-01 — Ideas leads with what gets written next
+
+**Decision:** The Ideas page leads with Up next: users choose an idea, place the strongest one first, and Minions drafts that first idea automatically. The full idea library remains a secondary view; Calendar is removed from this page, while scheduling remains available from idea details. Cards hide system metadata and Draft Now moves into idea details.
+**Why:** Users should make one understandable decision without learning pipeline statuses, harvested pools, claim mechanics, or competing queue-versus-draft paths.
+**Status:** active
+
 ## 2026-09-30 — The brand brief is a lesson, one question per screen
 
 **Decision:** The setup wizard asks one question per screen: what you want to be known for, who it's for, how deep your experience is, where you work (skippable), and your voice. The flow ends on a "your brief is ready" screen where you choose review-first or auto-publish. Every answer can be one tap on an example, and each screen has a single CONTINUE button that confirms a good answer.
