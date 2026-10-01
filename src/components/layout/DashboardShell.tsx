@@ -174,6 +174,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         navCounts={navCounts}
         pathname={pathname}
         session={session}
+        sessionLoading={status === "loading"}
         isHarvesting={isHarvesting}
         onHarvest={triggerHarvest}
         onOpenPalette={() => setShowPalette(true)}

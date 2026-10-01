@@ -11,12 +11,14 @@ import type { Session } from "next-auth";
 import QuotaMeter from "./QuotaMeter";
 import { useBrandSettings } from "@/hooks/useBrandSettings";
 import WorkspaceSwitcher from "./WorkspaceSwitcher";
+import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
 
 export interface SidebarProps {
   navItems: NavItem[];
   navCounts: NavCounts | null;
   pathname: string;
   session: Session | null;
+  sessionLoading: boolean;
   isHarvesting: boolean;
   onHarvest: () => void;
   onOpenPalette: () => void;
@@ -35,6 +37,7 @@ export default function Sidebar({
   navCounts,
   pathname,
   session,
+  sessionLoading,
   isHarvesting,
   onHarvest,
   onOpenPalette,
@@ -51,6 +54,21 @@ export default function Sidebar({
   // fallback would send it to the Minions blog, where its posts do not exist.
   const hasOwnBlog = !brandSettings || Boolean(brandSettings.company_domain);
   const liveBlogHostname = liveBlogUrl.replace(/^https?:\/\//, "").replace(/\/$/, "");
+
+  if (sessionLoading) {
+    return (
+      <aside className="w-72 lg:w-76 hidden md:flex sticky top-0 h-screen shrink-0 flex-col justify-between border-r border-[#1f2b37] bg-surface p-4">
+        <SkeletonGroup label="Loading sidebar" className="space-y-5">
+          <Skeleton className="h-8 w-36" />
+          <Skeleton className="h-14 w-full" />
+          <Skeleton className="h-11 w-full" />
+          <Skeleton className="h-12 w-full" />
+          {Array.from({ length: 10 }, (_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+        </SkeletonGroup>
+        <SkeletonGroup label="Loading account"><Skeleton className="h-14 w-full" /></SkeletonGroup>
+      </aside>
+    );
+  }
 
   return (
   <aside className="w-72 lg:w-76 bg-surface border-r border-[#1f2b37] flex flex-col justify-between p-4 shrink-0 hidden md:flex sticky top-0 h-screen overflow-y-auto z-40">
@@ -69,7 +87,11 @@ export default function Sidebar({
 
       {session && <WorkspaceSwitcher />}
 
-      {navCounts && <QuotaMeter quota={navCounts.quota} />}
+      {navCounts ? <QuotaMeter quota={navCounts.quota} /> : session && (
+        <SkeletonGroup label="Loading post usage" className="space-y-2 rounded-xl border border-[#1f2b37] bg-[#161d24] px-3 py-2.5">
+          <Skeleton className="h-3 w-full" /><Skeleton className="h-1.5 w-full" />
+        </SkeletonGroup>
+      )}
 
       {/* SEARCH BAR (INTEGRATED IN SIDEBAR) */}
       <button
