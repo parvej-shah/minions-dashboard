@@ -100,11 +100,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const dbUser = await prisma.user.findUnique({
           where: { email: email.trim().toLowerCase() },
         });
-        if (dbUser) {
-          token.id = dbUser.id;
-          token.clientId = dbUser.clientId;
-          token.role = dbUser.role as UserRole;
-        }
+        // The account was deleted: end the session. Keeping the token left a
+        // signed-in browser whose every API call answered 401, with pages
+        // like setup still rendering as if the user existed.
+        if (!dbUser) return null;
+        token.id = dbUser.id;
+        token.clientId = dbUser.clientId;
+        token.role = dbUser.role as UserRole;
       } catch (err) {
         console.error("[NextAuth] Non-fatal DB lookup error in jwt callback, preserving token state:", err);
       }
