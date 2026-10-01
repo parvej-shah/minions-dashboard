@@ -8,6 +8,7 @@ import { BRAND_PRESETS } from "@/constants/brandPresets";
 import { resolveWriterExpertise } from "@/constants/writerExpertise";
 import { normalizeDomain } from "@/constants/config";
 import { refuseOnboardingOverwrite } from "@/lib/onboardingGuard";
+import { syncIcpDirective } from "@/lib/icpDirective";
 
 /**
  * ICP/industry/tone-formality/channel step of onboarding. Writes:
@@ -16,6 +17,8 @@ import { refuseOnboardingOverwrite } from "@/lib/onboardingGuard";
  * - BrandDirective rows: AUDIENCE, POSITIONING, VOICE, TOPICS, etc.
  * - ClientChannel rows, one per selected platform (blog/facebook/linkedin/x)
  */
+const EMPTY_ICP = { who: "", role: "", company_type: "", pains: [], decisions: [], questions: [], buying_triggers: [], vocabulary: [] };
+
 export async function POST(request: Request) {
   const ctx = await requireTenantAccess(true);
   if ("error" in ctx) return ctx.error;
@@ -146,18 +149,27 @@ export async function POST(request: Request) {
       },
     });
 
-    const directivesToCreate = [
-      {
-        id: `DIR-${crypto.randomUUID()}`,
-        clientId: ctx.clientId,
-        category: "AUDIENCE",
-        ruleKey: "icp_description",
-        instruction: `Industry: ${industry}. Target Audience: ${icpDescription}`,
-        priority: 1,
-        audienceScope: "ALL",
-        isActive: true,
-      },
-    ];
+    // The reader setup asked about becomes the ideal customer, which Brand
+    // shows and edits, and its AUDIENCE directive is derived from it. Written
+    // as a raw "Industry: ... Target Audience: ..." directive instead, Brand
+    // showed that string as "Who they are".
+    await prisma.icpProfile.upsert({
+      where: { clientId: ctx.clientId },
+      create: { id: `ICP-${ctx.clientId}`, clientId: ctx.clientId, who: icpDescription },
+      update: { who: icpDescription },
+    });
+    await syncIcpDirective(ctx.clientId, { ...EMPTY_ICP, who: icpDescription });
+
+    const directivesToCreate: {
+      id: string;
+      clientId: string;
+      category: string;
+      ruleKey: string;
+      instruction: string;
+      priority: number;
+      audienceScope: string;
+      isActive: boolean;
+    }[] = [];
 
     if (contentFocus) {
       directivesToCreate.push({
@@ -172,18 +184,9 @@ export async function POST(request: Request) {
       });
     }
 
-    if (resolvedName) {
-      directivesToCreate.push({
-        id: `DIR-${crypto.randomUUID()}`,
-        clientId: ctx.clientId,
-        category: "POSITIONING",
-        ruleKey: "company_name",
-        instruction: resolvedName,
-        priority: 1,
-        audienceScope: "ALL",
-        isActive: true,
-      });
-    }
+    // No company_name directive: the prompts take the name from brandName,
+    // and the directive copy showed as a Positioning note that kept the
+    // placeholder name after the brand was renamed.
 
     // The preset's stock AUDIENCE lanes are deliberately NOT written.
     //

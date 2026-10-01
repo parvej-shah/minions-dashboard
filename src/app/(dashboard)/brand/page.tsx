@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { AlertTriangle, Mic2, Sparkles, Rss, BookOpen } from "lucide-react";
 import { BrandDirectiveItem, BrandTab } from "@/types";
 import LexiconTab from "@/components/brand/LexiconTab";
+import { isBannedPhrase } from "@/lib/drafts/banned";
 import OverviewTab from "@/components/brand/OverviewTab";
 import VoiceProofTab from "@/components/brand/VoiceProofTab";
 import SourcesTab from "@/components/brand/SourcesTab";
@@ -154,7 +155,7 @@ function BrandStudio() {
             className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "lexicon" ? "bg-brand text-canvas" : "text-muted hover:text-ink")}
           >
             <AlertTriangle className="h-4 w-4" aria-hidden="true" />
-            Banned Words ({forbiddenDirectives.length})
+            Banned Words ({forbiddenDirectives.filter((d) => isBannedPhrase(d.content)).length})
           </button>
         </div>
       </div>

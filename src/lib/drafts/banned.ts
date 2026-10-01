@@ -28,10 +28,13 @@ export function bannedHits(text: string, phrases: string[]): string[] {
  * whole rule ("Never mention, promise, or discuss ..."). Only the first kind
  * can be matched in a draft; the gate would never find a rule verbatim.
  */
+export function isBannedPhrase(instruction: string): boolean {
+  const s = instruction.trim();
+  return Boolean(s) && s.split(/\s+/).length <= 4 && !/[.:!?"]/.test(s);
+}
+
 export function bannedPhrases(instructions: string[]): string[] {
-  return Array.from(
-    new Set(instructions.map((s) => s.trim()).filter((s) => s && s.split(/\s+/).length <= 4 && !/[.:!?"]/.test(s)))
-  );
+  return Array.from(new Set(instructions.map((s) => s.trim()).filter(isBannedPhrase)));
 }
 
 /** Sentences of a text, each exactly as it appears, so it can be replaced in place. */

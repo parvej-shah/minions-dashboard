@@ -421,7 +421,9 @@ export function useOnboardingWizard(userId: string): OnboardingWizardState {
       business_name: businessName.trim(),
       website_url: websiteUrl.trim(),
       industry: industry.trim() || "General Business",
-      icp_description: brief.positioning || `${businessName || "My Brand"} provides ${industry} solutions.`,
+      // The reader the user described in setup. The brief's positioning is
+      // about the writer, not the reader; sent here it replaced their answer.
+      icp_description: audienceDescription.trim() || brief.positioning || `${businessName || "My Brand"} provides ${industry} solutions.`,
       content_focus: contentFocus.trim(),
       writer_expertise: writerExpertise,
       channels,
@@ -497,7 +499,10 @@ export function useOnboardingWizard(userId: string): OnboardingWizardState {
       const brief = directives.length > 0 ? { directives, positioning: positioningSummary } : await requestBrief(voiceSample);
       setDirectives(brief.directives);
       setPositioningSummary(brief.positioning);
-      await saveWorkspace(brief, voiceSample);
+      // Only text the user wrote is a writing sample. The voice description
+      // guides the brief, but saved as a sample it showed in Brand as a post
+      // "you genuinely wrote" and the writer imitated a one-line instruction.
+      await saveWorkspace(brief, customSampleText.trim());
 
       // The workspace exists from here on. A failed start is recoverable on
       // the first-post screen, which offers a retry.
