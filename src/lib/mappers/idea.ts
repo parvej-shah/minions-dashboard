@@ -1,8 +1,19 @@
-import type { Idea } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { DEFAULT_GENERATION_COST, UNSPECIFIED_TRADE } from "@/constants/config";
 import type { AudienceLane, GateVerdict, IdeaAuthority, IdeaItem, IdeaSignal, IdeaStatus } from "@/types";
 
-function toAuthority(idea: Idea): IdeaAuthority | null {
+export const ideaDTOSelect = {
+  id: true, rawIdea: true, angle: true, audience: true, targetTrade: true,
+  pillar: true, source: true, sourceUrl: true, sourceTitle: true, signals: true,
+  why: true, status: true, priority: true, tags: true, scheduledFor: true,
+  queueOrder: true, draftAssetId: true, rejectionReason: true, gateVerdict: true,
+  gateReasons: true, scoreBreakdown: true, icpProblem: true, authorAdvantage: true,
+  sourceType: true, trustBasis: true, memoryIds: true, createdAt: true, updatedAt: true,
+} satisfies Prisma.IdeaSelect;
+
+type IdeaDTORecord = Prisma.IdeaGetPayload<{ select: typeof ideaDTOSelect }>;
+
+function toAuthority(idea: IdeaDTORecord): IdeaAuthority | null {
   if (!idea.gateVerdict) return null;
   const breakdown = idea.scoreBreakdown as { score?: unknown } | null;
   return {
@@ -27,7 +38,7 @@ function toAuthority(idea: Idea): IdeaAuthority | null {
  * Note: the database column is still `draft_asset_id` (see the Prisma `@map`),
  * which is what the n8n workflows read and write. Only the JSON key changed.
  */
-export function toIdeaDTO(idea: Idea): IdeaItem {
+export function toIdeaDTO(idea: IdeaDTORecord): IdeaItem {
   return {
     id: idea.id,
     ideaId: idea.id,

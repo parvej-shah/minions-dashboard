@@ -28,7 +28,7 @@ import HarvestingProgressHUD, { HarvestingJob } from "@/components/common/Harves
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import IdeaCard from "@/components/ideas/IdeaCard";
 import IdeaDetailModal from "@/components/ideas/IdeaDetailModal";
-import EmptyState, { LoadingState } from "@/components/ui/EmptyState";
+import EmptyState from "@/components/ui/EmptyState";
 import { apiClient } from "@/lib/api-client";
 import { useApiResource } from "@/hooks/useApiResource";
 
@@ -45,6 +45,7 @@ import {
 import { formatPostTime } from "@/lib/postTime";
 import { buttonStyles } from "@/components/ui/Button";
 import { segment } from "@/components/ui/segment";
+import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
 /**
  * Topics are per-tenant now, loaded from /api/ideas/topics. The old hardcoded
  * HVAC / Plumbing / Electrical / Roofing / Pest Control list came from the
@@ -64,6 +65,71 @@ import { segment } from "@/components/ui/segment";
  * deleted". `toIdeaStage` maps every status the pipeline writes onto a stage.
  */
 const STAGE_FILTERS: Array<"ALL" | IdeaStage> = ["ALL", ...IDEA_STAGES];
+
+function IdeasPageSkeleton() {
+  return (
+    <SkeletonGroup label="Loading your ideas" className="mx-auto max-w-7xl space-y-6 pb-16">
+      <section className="rounded-[1.75rem] border-2 border-b-4 border-brand/20 bg-surface p-5 sm:p-7">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="w-full max-w-2xl space-y-3">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-9 w-full max-w-md" />
+            <Skeleton className="h-4 w-full max-w-xl" />
+          </div>
+          <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-line bg-canvas/45 p-3 sm:min-w-[280px]">
+            <Skeleton className="h-11 w-11 shrink-0 rounded-xl" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-3 w-full" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="flex flex-col gap-3 border-b border-line pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <Skeleton className="h-14 w-full rounded-2xl sm:w-64" />
+        <Skeleton className="h-11 w-full rounded-xl sm:w-40" />
+      </div>
+
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
+        <section className="space-y-4 rounded-2xl border border-line bg-surface p-5 lg:col-span-7">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-6 w-52" />
+            <Skeleton className="h-3 w-72 max-w-full" />
+          </div>
+          <Skeleton className="h-11 w-full rounded-xl" />
+          {[0, 1, 2].map((item) => (
+            <div key={item} className="space-y-4 rounded-2xl border-2 border-b-4 border-line bg-surface-2 p-4">
+              <Skeleton className="h-5 w-4/5" />
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-2/3" />
+              <div className="flex justify-between border-t border-line pt-3">
+                <Skeleton className="h-10 w-24 rounded-xl" />
+                <Skeleton className="h-10 w-32 rounded-xl" />
+              </div>
+            </div>
+          ))}
+        </section>
+
+        <section className="space-y-4 rounded-2xl border-2 border-b-4 border-line bg-surface p-5 lg:col-span-5">
+          <div className="space-y-2 border-b border-line pb-4">
+            <Skeleton className="h-7 w-24" />
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-7 w-44 rounded-full" />
+          </div>
+          {[0, 1].map((item) => (
+            <div key={item} className="space-y-3 rounded-2xl border border-line bg-surface-2 p-4">
+              <Skeleton className="h-5 w-5/6" />
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-10 w-full rounded-xl" />
+            </div>
+          ))}
+        </section>
+      </div>
+    </SkeletonGroup>
+  );
+}
 
 interface DraftingStatus {
   drafting_on: boolean;
@@ -508,6 +574,8 @@ export default function IdeaStreamPage() {
     .sort((a, b) => (a.queue_order ?? 999) - (b.queue_order ?? 999));
   const nextQueuedIdea = queuedIdeas[0];
 
+  if (ideasLoading) return <IdeasPageSkeleton />;
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16 selection:bg-brand/30 selection:text-brand">
       {/* Page Header - Clean, Executive & Compact */}
@@ -693,9 +761,7 @@ export default function IdeaStreamPage() {
         />
       ) : (
         <div className="space-y-6">
-          {ideasLoading && <LoadingState label="Loading idea stream…" />}
-
-          {!ideasLoading && ideas.length === 0 && (
+          {ideas.length === 0 && (
             <EmptyState
               title={ideasError ? "Could not load ideas" : "No ideas yet"}
               description={
@@ -706,7 +772,7 @@ export default function IdeaStreamPage() {
           )}
 
           {/* Filters exclude everything that was loaded */}
-          {!ideasLoading && ideas.length > 0 && filteredIdeas.length === 0 && (
+          {ideas.length > 0 && filteredIdeas.length === 0 && (
             <div className="bg-surface border border-line rounded-2xl p-12 text-center space-y-3">
               <AlertCircle className="w-8 h-8 text-subtle mx-auto" />
               <h3 className="text-base font-bold text-ink">No ideas found matching filters</h3>

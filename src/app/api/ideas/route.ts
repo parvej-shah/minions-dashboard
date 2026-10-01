@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { toIdeaDTO } from "@/lib/mappers/idea";
+import { ideaDTOSelect, toIdeaDTO } from "@/lib/mappers/idea";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 import { createIdeaWithNextId } from "@/services/ideas";
@@ -13,6 +13,8 @@ export async function GET() {
     const ideas = await prisma.idea.findMany({
       where: { clientId: ctx.clientId },
       orderBy: { createdAt: "desc" },
+      // Avoid transferring long-form craft notes and internal strategy fields.
+      select: ideaDTOSelect,
     });
     return NextResponse.json(ideas.map(toIdeaDTO));
   } catch (error) {
