@@ -10,7 +10,7 @@ import { plainReviewNotes } from "@/lib/drafts/plainNotes";
 import { buttonStyles } from "@/components/ui/Button";
 import LinkedInPostPreview from "@/components/editorial/LinkedInPostPreview";
 import DraftChecks from "@/components/editorial/DraftChecks";
-import { Confetti, LessonFooter, LessonHeader } from "../../setup/_components/lesson";
+import { Confetti, LessonFooter, LessonHeader, lessonInput } from "../../setup/_components/lesson";
 import { WaitingSkeleton } from "./FirstPostSkeleton";
 
 interface FirstPostStatus {
@@ -18,6 +18,13 @@ interface FirstPostStatus {
   story: string | null;
   run: { id: string; status: string; started_at: string } | null;
   asset: AssetItem | null;
+  signoff?: Signoff;
+}
+
+/** The cover's author line: the name and the line under it. */
+interface Signoff {
+  name: string;
+  role: string;
 }
 
 type Phase = "writing" | "stuck" | "missing" | "ready" | "scheduled";
@@ -57,6 +64,8 @@ export default function FirstPost({ author }: { author: { name: string; image: s
   const [status, setStatus] = useState<FirstPostStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<"retry" | "review" | null>(null);
+  // Only what the user typed; the rest shows the cover as drawn.
+  const [signoffEdits, setSignoffEdits] = useState<Partial<Signoff>>({});
 
   const load = useCallback(async () => {
     try {
@@ -100,9 +109,29 @@ export default function FirstPost({ author }: { author: { name: string; image: s
 
   // Setup ends in Editorial Studio, where the post, cover and carousel are
   // reviewed and scheduled, rather than posting from this screen.
-  const review = () => {
+  // The sign-off is the last thing setup asks, once the post has shown what
+  // it's for. A changed one redraws the cover before review opens.
+  const signoff: Signoff = { name: "", role: "", ...status?.signoff, ...signoffEdits };
+  const signoffChanged =
+    Boolean(status?.signoff) && (signoff.name.trim() !== status?.signoff?.name || signoff.role.trim() !== status?.signoff?.role);
+
+  const review = async () => {
     if (!status?.asset) return;
+    if (signoffChanged && !signoff.name.trim()) {
+      setError("Add the name to show on your covers.");
+      return;
+    }
     setBusy("review");
+    setError(null);
+    if (signoffChanged) {
+      try {
+        await apiClient.post("/api/onboarding/first-post/signoff", { name: signoff.name.trim(), role: signoff.role.trim() });
+      } catch (err) {
+        setError(toErrorMessage(err, "Couldn't update your cover. Please try again."));
+        setBusy(null);
+        return;
+      }
+    }
     router.push(`/editorial?id=${encodeURIComponent(status.asset.id)}`);
   };
 
@@ -141,10 +170,18 @@ export default function FirstPost({ author }: { author: { name: string; image: s
 
       {phase === "ready" && status.asset && (
         <>
-          <Ready asset={status.asset} author={author} story={status.story} />
+          <Ready asset={status.asset} author={author} story={status.story}>
+            {status.signoff && (
+              <SignoffCard
+                value={signoff}
+                disabled={busy !== null}
+                onChange={(edit) => setSignoffEdits((prev) => ({ ...prev, ...edit }))}
+              />
+            )}
+          </Ready>
           <LessonFooter
-            label="Review my post"
-            onContinue={review}
+            label={busy === "review" && signoffChanged ? "Updating your cover…" : "Review my post"}
+            onContinue={() => void review()}
             loading={busy === "review"}
             disabled={busy !== null}
             error={error}
@@ -222,7 +259,43 @@ function StoryCard({ story, className = "" }: { story: string; className?: strin
   );
 }
 
-function Ready({ asset, author, story }: { asset: AssetItem; author: { name: string; image: string | null }; story: string | null }) {
+/** Setup's last question: how the cover signs off. */
+function SignoffCard({ value, disabled, onChange }: { value: Signoff; disabled: boolean; onChange: (edit: Partial<Signoff>) => void }) {
+  return (
+    <section className="animate-rise-in mt-6 rounded-2xl border-2 border-line bg-surface p-4 text-left sm:p-5">
+      <h2 className="text-lg font-extrabold">One last thing: how should your covers sign off?</h2>
+      <p className="mt-1 text-sm text-muted">This goes at the bottom of every cover. Change it any time in Brand.</p>
+      <label className="mt-4 block text-xs font-extrabold uppercase tracking-widest text-subtle" htmlFor="signoff-name">
+        Your name
+      </label>
+      <input
+        id="signoff-name"
+        type="text"
+        value={value.name}
+        maxLength={60}
+        disabled={disabled}
+        onChange={(e) => onChange({ name: e.target.value })}
+        placeholder="e.g. Jordan Lee"
+        className={`${lessonInput} mt-2`}
+      />
+      <label className="mt-4 block text-xs font-extrabold uppercase tracking-widest text-subtle" htmlFor="signoff-role">
+        Under your name <span className="font-bold normal-case tracking-normal">(optional)</span>
+      </label>
+      <input
+        id="signoff-role"
+        type="text"
+        value={value.role}
+        maxLength={90}
+        disabled={disabled}
+        onChange={(e) => onChange({ role: e.target.value })}
+        placeholder="e.g. Founder at Acme"
+        className={`${lessonInput} mt-2`}
+      />
+    </section>
+  );
+}
+
+function Ready({ asset, author, story, children }: { asset: AssetItem; author: { name: string; image: string | null }; story: string | null; children?: React.ReactNode }) {
   const notes = useMemo(() => plainReviewNotes(asset), [asset]);
   return (
     <main className="flex-1">
@@ -239,6 +312,7 @@ function Ready({ asset, author, story }: { asset: AssetItem; author: { name: str
         </div>
 
         <LinkedInPostPreview author={author} text={postText(asset)} imageUrl={asset.hero_image_url} className="animate-rise-in mt-6" />
+        {children}
         <DraftChecks notes={notes} className="mt-4" />
         {story && <StoryCard story={story} className="mt-4" />}
       </div>

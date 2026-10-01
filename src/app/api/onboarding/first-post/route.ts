@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { apiError, apiFailure } from "@/lib/api-response";
-import { getCurrentUser, requireClientId } from "@/lib/tenant";
+import { getCurrentUser, isPlaceholderTenantName, requireClientId } from "@/lib/tenant";
+import { auth } from "@/lib/auth";
+import { defaultByline } from "@/services/cover";
 import { parseMemoryContent, parseMemoryKind } from "@/lib/authorInput";
 import { blockingCodeFindings } from "@/lib/ai/memoryCheck";
 import { MEMORY_KIND_SOURCE } from "@/constants/sourceMix";
+import { FIRST_POST_TAG } from "@/constants/firstPost";
 import { sweepStaleRuns } from "@/lib/harvestBudget";
 import { toAssetDTO } from "@/lib/mappers/asset";
 import { getTenantBlogDomain } from "@/lib/tenantDomain";
@@ -19,7 +22,6 @@ import { startDraftRun } from "@/services/drafting";
  * reports where that draft is, for the waiting and reveal screen.
  */
 
-const FIRST_POST_TAG = "First post";
 const TRIGGER_SOURCE = "ONBOARDING_FIRST_POST";
 
 async function findFirstPostIdea(clientId: string) {
@@ -49,17 +51,25 @@ export async function GET() {
     const idea = await findFirstPostIdea(ctx.clientId);
     if (!idea) return NextResponse.json({ idea_id: null, story: null, run: null, asset: null });
 
-    const [run, asset, domain] = await Promise.all([
+    const [run, asset, domain, profile, session] = await Promise.all([
       latestRunFor(ctx.clientId, idea.id),
       prisma.asset.findFirst({ where: { clientId: ctx.clientId, ideaId: idea.id }, include: { claims: true } }),
       getTenantBlogDomain(ctx.clientId),
+      prisma.brandProfile.findUnique({ where: { clientId: ctx.clientId }, select: { brandName: true, coverByline: true, positioning: true } }),
+      auth(),
     ]);
+    // The cover's author line as drawn, for setup's last question.
+    const signoff = {
+      name: (isPlaceholderTenantName(profile?.brandName) ? session?.user?.name?.trim() : profile?.brandName) || profile?.brandName || "",
+      role: profile?.coverByline?.trim() || defaultByline(profile?.positioning ?? "") || "",
+    };
 
     return NextResponse.json({
       idea_id: idea.id,
       story: idea.rawIdea,
       run: run ? { id: run.id, status: run.status, started_at: run.createdAt.toISOString() } : null,
       asset: asset ? toAssetDTO(asset, null, domain) : null,
+      signoff,
     });
   } catch (error) {
     return apiError(error, "Could not check on your first post");

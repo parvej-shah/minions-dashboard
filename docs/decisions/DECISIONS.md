@@ -29,9 +29,21 @@ and link to it here.
 
 ---
 
+## 2026-10-01 — Setup ends by asking how covers sign off
+
+**Decision:** Setup never asks for a business name up front. The name and photo on covers come from the user's Google account. The last question comes on the first-post screen, under the post: "How should your covers sign off?", with their name (editable) and an optional line under it (e.g. "Founder at Acme"). If they change it, the cover is redrawn with the same headline and illustration before Editorial Studio opens. That screen no longer has a Discard button; Review my post is its only action. Sending users to the Brand page for this was rejected.
+**Why:** Asked last, after the post has shown what it's for, the question is easy to answer and the user sees its effect on the cover right away. For a personal LinkedIn post the author line should be the person, not a company, so the company belongs in the line under the name. The Brand page is a long form that would break the moment and pull them away from review. Discard on a celebration screen invited throwing away the first post before seeing it in review.
+**Status:** active
+
+## 2026-10-01 — Published library focuses on content, not production cost
+
+**Decision:** The Published Posts summary shows live articles and available channel copy, without a Total Spend card.
+**Why:** People come here to find and review published content; internal generation cost does not help them complete that task.
+**Status:** active
+
 ## 2026-10-01 — The first post is reviewed in Editorial Studio, not posted from setup
 
-**Decision:** The first-post screen shows the post as it will look on LinkedIn, now with its cover, and its one main action is Review my post, which opens it in Editorial Studio. The Post it button on that screen is removed; Discard stays. The screen waits for the cover before revealing the post.
+**Decision:** The first-post screen shows the post as it will look on LinkedIn, now with its cover, and its one main action is Review my post, which opens it in Editorial Studio. The Post it button on that screen is removed; Discard stays (superseded: Discard was removed, see "Setup ends by asking how covers sign off"). The screen waits for the cover before revealing the post.
 **Why:** Posting from setup skipped the cover, the carousel and the rest of the review, and a brand-new user's first public post should not go out from a celebration screen. Sending them to Editorial Studio shows everything Minions made and teaches the review step they will use from then on.
 **Status:** active
 

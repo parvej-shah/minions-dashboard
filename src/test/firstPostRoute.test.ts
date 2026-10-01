@@ -6,7 +6,8 @@ const m = {
 };
 
 vi.mock("@/lib/prisma", () => ({ prisma: {} }));
-vi.mock("@/lib/tenant", () => ({ getCurrentUser: m.getCurrentUser, requireClientId: m.requireClientId }));
+vi.mock("@/lib/tenant", () => ({ getCurrentUser: m.getCurrentUser, requireClientId: m.requireClientId, isPlaceholderTenantName: () => false }));
+vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 
 const route = await import("@/app/api/onboarding/first-post/route");
 
