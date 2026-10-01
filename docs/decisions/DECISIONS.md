@@ -29,11 +29,17 @@ and link to it here.
 
 ---
 
+## 2026-10-02 — Phone review puts checks before publishing
+
+**Decision:** On phones, Editorial Studio shows writing feedback and claim verification before publishing options. The fixed bar links to those options instead of publishing immediately; raw draft-check notes are not repeated in the claims card, and that card is omitted when there are no claims.
+**Why:** Reviewers should encounter checks before the irreversible action, with one clear place to make the publishing decision.
+**Status:** active
+
 ## 2026-10-01 — Editorial phone review keeps actions separate from context
 
 **Decision:** The phone action bar shows only Save and Approve/Publish. Draft position, title, and claim counts stay in the review content and queue, not repeated beside the primary actions. Queue filters scroll horizontally on phones.
 **Why:** The narrow action area should make the next decision obvious and keep both controls comfortable to tap without truncating context.
-**Status:** active
+**Status:** superseded by [Phone review puts checks before publishing](#2026-10-02--phone-review-puts-checks-before-publishing)
 
 ## 2026-10-01 — The first post's cover is Statement with Shapes; Statement leads after it
 

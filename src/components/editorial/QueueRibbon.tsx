@@ -126,8 +126,7 @@ export default function QueueRibbon({
         </div>
       </div>
 
-      {/* Right: Quick Sequential Navigation */}
-      <div className="flex items-center gap-2 self-end sm:self-auto">
+      <div className="hidden sm:flex items-center gap-2">
         <div className="flex items-center gap-1 bg-canvas p-1 rounded-xl border border-line">
           <button
             onClick={onPrev}
@@ -235,6 +234,32 @@ export default function QueueRibbon({
           </button>
         );
       })}
+    </div>
+
+    <div className="flex items-center justify-end border-t border-line/60 pt-2 sm:hidden">
+        <div className="flex items-center gap-1 bg-canvas p-1 rounded-xl border border-line">
+          <button
+            onClick={onPrev}
+            title="Previous Draft (Key: [ )"
+            className="min-h-10 min-w-10 px-2 py-2 sm:px-2 sm:py-1 rounded-lg text-xs font-bold text-muted hover:text-ink hover:bg-surface-2 transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <ChevronLeft className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+            <span className="hidden sm:inline">Prev</span>
+          </button>
+
+          <span className="px-2 text-[11px] font-mono font-bold text-brand select-none">
+            {currentAssetIndex + 1} / {assets.length}
+          </span>
+
+          <button
+            onClick={onNext}
+            title="Next Draft (Key: ] )"
+            className="min-h-10 min-w-10 px-2 py-2 sm:px-2 sm:py-1 rounded-lg text-xs font-bold text-muted hover:text-ink hover:bg-surface-2 transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <span className="hidden sm:inline">Next</span>
+            <ChevronRight className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+          </button>
+        </div>
     </div>
   </div>
   );

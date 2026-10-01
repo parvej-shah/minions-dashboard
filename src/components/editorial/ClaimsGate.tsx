@@ -43,21 +43,6 @@ export default function ClaimsGate({
             </span>
           </div>
 
-          {/* What the draft check found (phase 4): read these before the claims. */}
-          {activeAsset.review_notes.length > 0 && (
-            <div className="p-2.5 rounded-xl border border-gold/40 bg-gold/5 space-y-1">
-              <div className="flex items-center gap-1.5 text-[10px] font-bold font-mono uppercase tracking-wider text-gold">
-                <AlertTriangle className="w-3 h-3" />
-                Draft check
-              </div>
-              <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-[#CBD5E1] leading-relaxed">
-                {activeAsset.review_notes.map((note) => (
-                  <li key={note}>{note}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
           {/* Scrollable Claims Checklist */}
           <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
             {activeAsset.claims.length > 0 ? (

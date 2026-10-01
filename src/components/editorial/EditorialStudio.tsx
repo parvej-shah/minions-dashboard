@@ -353,31 +353,36 @@ export default function EditorialStudio({
 
         </div>
 
-        <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-6">
-          <DraftChecks notes={reviewNotes} />
-          <ReviewDock
-            activeAsset={activeAsset}
-            isDirty={draft.isDirty}
-            publishState={draft.publishState}
-            onPublish={handlePublish}
-            onSchedule={handleSchedule}
-            onUnschedule={handleUnschedule}
-            workspaceChannels={channels}
-            onSetChannels={(c) => void draft.setPostChannels(c).then((m) => m && toast.show(m))}
-            onMessage={toast.show}
-            setToggleLiveConfirmOpen={setToggleLiveConfirmOpen}
-            setDeleteConfirmOpen={setDeleteConfirmOpen}
-            blogEnabled={blogEnabled}
-            blogHost={(normalizeDomain(studioBrand?.company_domain) ?? "").replace(/^https?:\/\//, "")}
-          />
-
-          <ClaimsGate
-            activeAsset={activeAsset}
-            verifiedClaimsCount={verifiedClaimsCount}
-            totalClaims={totalClaims}
-            allClaimsVerified={allClaimsVerified}
-            onToggleClaim={draft.toggleClaim}
-          />
+        <div className="flex flex-col gap-6 lg:col-span-4 lg:sticky lg:top-6">
+          <div className="order-1"><DraftChecks notes={reviewNotes} /></div>
+          {activeAsset.claims.length > 0 && (
+            <div className="order-2 lg:order-3">
+              <ClaimsGate
+                activeAsset={activeAsset}
+                verifiedClaimsCount={verifiedClaimsCount}
+                totalClaims={totalClaims}
+                allClaimsVerified={allClaimsVerified}
+                onToggleClaim={draft.toggleClaim}
+              />
+            </div>
+          )}
+          <div id="editorial-publishing-options" tabIndex={-1} className="order-3 scroll-mt-6 outline-none lg:order-2">
+            <ReviewDock
+              activeAsset={activeAsset}
+              isDirty={draft.isDirty}
+              publishState={draft.publishState}
+              onPublish={handlePublish}
+              onSchedule={handleSchedule}
+              onUnschedule={handleUnschedule}
+              workspaceChannels={channels}
+              onSetChannels={(c) => void draft.setPostChannels(c).then((m) => m && toast.show(m))}
+              onMessage={toast.show}
+              setToggleLiveConfirmOpen={setToggleLiveConfirmOpen}
+              setDeleteConfirmOpen={setDeleteConfirmOpen}
+              blogEnabled={blogEnabled}
+              blogHost={(normalizeDomain(studioBrand?.company_domain) ?? "").replace(/^https?:\/\//, "")}
+            />
+          </div>
         </div>
       </div>
 
@@ -385,9 +390,12 @@ export default function EditorialStudio({
         activeAsset={activeAsset}
         isDirty={draft.isDirty}
         isSaving={draft.isSaving}
-        publishState={draft.publishState}
         onSave={handleSave}
-        onPublish={handlePublish}
+        onReviewPublish={() => {
+          const target = document.getElementById("editorial-publishing-options");
+          target?.scrollIntoView({ behavior: "smooth", block: "start" });
+          target?.focus({ preventScroll: true });
+        }}
       />
 
       <Toast

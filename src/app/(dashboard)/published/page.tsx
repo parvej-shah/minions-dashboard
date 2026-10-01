@@ -10,7 +10,6 @@ import {
   Share2,
   ExternalLink,
   Clock,
-  DollarSign,
   Layers,
   CheckCircle2,
   Search,
@@ -24,7 +23,6 @@ import { PublishedPostRecord } from "@/types";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import EmptyState, { LoadingState } from "@/components/ui/EmptyState";
 import { useApiResource } from "@/hooks/useApiResource";
-import { toErrorMessage } from "@/lib/api-client";
 import { useToast } from "@/hooks/useToast";
 import { useChannelSummary } from "@/hooks/useChannelSummary";
 
@@ -104,11 +102,6 @@ export default function PublishedPostsPage() {
       setUnpublishTarget(null);
     }
   };
-
-  // Only posts with a recorded cost contribute; the rest are counted as
-  // unknown rather than filled in with an assumed figure.
-  const totalSpend = feed.reduce((acc, p) => acc + (p.cost_usd ?? 0), 0);
-  const postsWithoutCost = feed.filter((p) => p.cost_usd === null).length;
 
   const filteredPosts = feed.filter(post => {
     if (audienceFilter !== "ALL" && post.audience !== audienceFilter) return false;
@@ -257,7 +250,7 @@ export default function PublishedPostsPage() {
       </div>
 
       {/* Summary Stat Pills */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="p-4 rounded-2xl bg-surface border border-line flex items-center justify-between shadow-sm">
           <div>
             <div className="text-[11px] font-mono text-muted">POSTS LIVE</div>
@@ -284,20 +277,6 @@ export default function PublishedPostsPage() {
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-surface border border-line flex items-center justify-between shadow-sm">
-          <div>
-            <div className="text-[11px] font-mono text-muted">TOTAL SPEND</div>
-            <div className="text-xl font-bold text-ink mt-0.5">${totalSpend.toFixed(3)}</div>
-            {postsWithoutCost > 0 && (
-              <div className="text-[10px] text-subtle mt-0.5">
-                {postsWithoutCost} post{postsWithoutCost === 1 ? "" : "s"} with no recorded cost excluded
-              </div>
-            )}
-          </div>
-          <div className="w-9 h-9 rounded-xl bg-coral/10 border border-coral/20 flex items-center justify-center text-coral">
-            <DollarSign className="w-5 h-5" />
-          </div>
-        </div>
       </div>
 
       {/* Filter Bar */}
