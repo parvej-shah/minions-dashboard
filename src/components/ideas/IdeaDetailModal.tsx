@@ -42,17 +42,14 @@ export default function IdeaDetailModal({
   onRequestDelete,
 }: IdeaDetailModalProps) {
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-surface border border-line ring-1 ring-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-md sm:items-center sm:p-4 animate-in fade-in duration-200">
+      <div className="flex h-[100dvh] w-full max-w-2xl flex-col overflow-hidden border-line bg-surface shadow-2xl sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:border sm:ring-1 sm:ring-white/10 animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150">
         {/* Modal Header */}
-        <div className="p-6 border-b border-line flex items-start justify-between gap-4 bg-canvas/50">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-line bg-canvas/50 px-4 py-4 sm:p-6">
+          <div className="min-w-0 space-y-2">
+            <div className="flex items-center gap-2 overflow-hidden">
               <span className={`text-[10px] font-bold tracking-wider px-2.5 py-0.5 rounded-full border ${getAudienceBadgeClass(detailIdea.audience || "ICP")}`}>
                 {detailIdea.audience || "ICP"}
-              </span>
-              <span className="text-[10px] font-medium bg-surface-2 text-muted border border-line px-2.5 py-0.5 rounded-full">
-                {detailIdea.target_trade || "—"}
               </span>
               {detailIdea.source_url ? (
                 <a
@@ -70,11 +67,11 @@ export default function IdeaDetailModal({
                   {getSourceTag(detailIdea.source || "MANUAL").label}
                 </span>
               )}
-              <span className="text-xs font-mono text-subtle">
+              <span className="hidden text-xs font-mono text-subtle sm:inline">
                 {detailIdea.ideaId || detailIdea.id}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-subtle font-mono">
+            <div className="flex items-center gap-2 text-[11px] text-subtle sm:text-xs">
               <Clock className="w-3.5 h-3.5" />
               <span>Harvested {new Date(detailIdea.created_at).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
             </div>
@@ -82,7 +79,7 @@ export default function IdeaDetailModal({
 
           <button
             onClick={() => onClose()}
-            className="p-1.5 rounded-xl text-muted hover:text-white hover:bg-surface-2 border border-transparent hover:border-line transition-all cursor-pointer"
+            className="flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-transparent text-muted transition-all hover:border-line hover:bg-surface-2 hover:text-white"
             title="Close"
           >
             <X className="w-5 h-5" />
@@ -90,11 +87,11 @@ export default function IdeaDetailModal({
         </div>
 
         {/* Modal Body: Scrollable Content */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1 text-ink">
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-4 py-5 text-ink sm:space-y-6 sm:p-6">
           {/* Full Topic Headline */}
           <div className="space-y-2">
             <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-brand break-words">
-              Topic & Working Headline
+              Idea
             </div>
             <h2 className="text-xl sm:text-2xl font-extrabold leading-snug text-white break-words">
               {detailIdea.title || detailIdea.raw_idea}
@@ -275,8 +272,8 @@ export default function IdeaDetailModal({
         </div>
 
         {/* Modal Footer: Action Buttons */}
-        <div className="p-4 sm:p-6 border-t border-line bg-canvas/70 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+        <div className="grid shrink-0 grid-cols-2 gap-2 border-t border-line bg-canvas/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:flex sm:items-center sm:justify-between sm:p-6">
+          <div className="contents sm:flex sm:items-center sm:gap-2">
             <button
               type="button"
               onClick={() => {
@@ -284,7 +281,7 @@ export default function IdeaDetailModal({
                 onClose();
                 onEdit(ideaToEdit);
               }}
-              className="px-3.5 py-2 text-xs font-semibold text-muted hover:text-white bg-surface-2 hover:bg-surface-3 border border-line rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              className="flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-line bg-surface-2 px-3.5 py-2 text-xs font-semibold text-muted transition-colors hover:bg-surface-3 hover:text-white"
             >
               <Edit3 className="w-3.5 h-3.5" />
               <span>Edit</span>
@@ -297,7 +294,7 @@ export default function IdeaDetailModal({
                 onClose();
                 onSchedule(ideaToSchedule);
               }}
-              className={buttonStyles({ variant: "soft", size: "sm" })}
+              className={buttonStyles({ variant: "soft", size: "sm", className: "w-full" })}
             >
               <CalendarDays className="w-3.5 h-3.5" />
               <span>Schedule</span>
@@ -311,19 +308,19 @@ export default function IdeaDetailModal({
                 onClose();
                 onRequestDelete({ id: idToDelete, title: titleToDelete });
               }}
-              className="px-3.5 py-2 text-xs font-semibold text-danger hover:bg-danger/10 border border-transparent hover:border-danger/30 rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              className="flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-transparent px-3.5 py-2 text-xs font-semibold text-danger transition-colors hover:border-danger/30 hover:bg-danger/10"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Delete</span>
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="col-span-2 sm:flex sm:items-center sm:gap-2">
             {detailIdea.status === "PUBLISHED" ? (
               <Link
                 href="/published"
                 onClick={() => onClose()}
-                className={buttonStyles({ size: "sm" })}
+                className={buttonStyles({ size: "sm", className: "w-full" })}
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>View in Published Stream ↗</span>
@@ -345,7 +342,7 @@ export default function IdeaDetailModal({
                   onDraft(idToDraft);
                 }}
                 disabled={claimingIds.has(detailIdea.id) || claimingIds.has(detailIdea.ideaId || "")}
-                className={buttonStyles({ size: "sm" })}
+                className={buttonStyles({ size: "sm", className: "w-full" })}
               >
                 <Sparkles className="w-4 h-4" />
                 <span>Create Draft</span>

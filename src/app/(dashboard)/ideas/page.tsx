@@ -41,7 +41,6 @@ import {
   toIdeaStage,
   type IdeaStage,
 } from "@/constants/ideaStage";
-import { FALLBACK_TOPICS } from "@/constants/topics";
 
 import { formatPostTime } from "@/lib/postTime";
 import { buttonStyles } from "@/components/ui/Button";
@@ -80,16 +79,6 @@ export default function IdeaStreamPage() {
     reload: reloadIdeas,
     setData: setIdeas,
   } = useApiResource<IdeaItem[]>("/api/ideas", [], { errorMessage: "Could not load ideas" });
-  // The tenant's own topic labels, derived from their core_themes directive.
-  const { data: topicData } = useApiResource<{ topics: string[] }>(
-    "/api/ideas/topics",
-    { topics: [] },
-    { errorMessage: "Could not load topics" }
-  );
-  const topicLabels = (topicData.topics.length > 0 ? topicData.topics : FALLBACK_TOPICS).filter(
-    (topic) => topic.trim().toUpperCase() !== "UNSPECIFIED"
-  );
-  const availableTopics = topicLabels.length > 0 ? topicLabels : FALLBACK_TOPICS;
   const { data: draftingStatus } = useApiResource<DraftingStatus | null>(
     "/api/plan/status",
     null,
@@ -124,7 +113,6 @@ export default function IdeaStreamPage() {
   const [editingIdea, setEditingIdea] = useState<IdeaItem | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editExcerpt, setEditExcerpt] = useState("");
-  const [editTrade, setEditTrade] = useState<string>("");
   const [editStatus, setEditStatus] = useState<IdeaStatus>("REFINED");
   const [isUpdating, setIsUpdating] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -212,7 +200,6 @@ export default function IdeaStreamPage() {
   const [formTitle, setFormTitle] = useState("");
   const [formExcerpt, setFormExcerpt] = useState("");
   const [formSourceUrl, setFormSourceUrl] = useState("");
-  const [formTrade, setFormTrade] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   /** Adds an idea to the production queue at the next free position. */
@@ -276,7 +263,6 @@ export default function IdeaStreamPage() {
     setEditingIdea(idea);
     setEditTitle(idea.title || idea.raw_idea || "");
     setEditExcerpt(idea.excerpt || idea.angle || "");
-    setEditTrade(idea.target_trade || "");
     setEditStatus((idea.status as IdeaStatus) || "REFINED");
   };
 
@@ -290,8 +276,6 @@ export default function IdeaStreamPage() {
       raw_idea: editTitle.trim(),
       excerpt: editExcerpt.trim(),
       angle: editExcerpt.trim(),
-      target_trade: editTrade,
-      trade: editTrade,
       status: editStatus,
     };
 
@@ -312,7 +296,6 @@ export default function IdeaStreamPage() {
                   raw_idea: payload.raw_idea,
                   excerpt: payload.excerpt,
                   angle: payload.angle,
-                  target_trade: payload.trade,
                   status: payload.status,
                 }
               : item
@@ -392,20 +375,12 @@ export default function IdeaStreamPage() {
   const handleInjectManualTopic = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitle.trim() || isSubmitting) return;
-    if (!formTrade) {
-      setToastMessage("Choose a topic area before adding this idea.");
-      setTimeout(() => setToastMessage(null), 4000);
-      return;
-    }
-
     setIsSubmitting(true);
     const payload = {
       title: formTitle.trim(),
       raw_idea: formTitle.trim(),
       excerpt: formExcerpt.trim() || "An idea added by your team.",
       angle: formExcerpt.trim() || "An idea added by your team.",
-      trade: formTrade,
-      target_trade: formTrade,
       // One ICP per tenant; PEER/BRIDGE were retired on 2026-09-23.
       audience: "ICP",
       source: formSourceUrl.trim() ? "MANUAL_REFERENCE" : "MANUAL",
@@ -420,7 +395,7 @@ export default function IdeaStreamPage() {
           published_at: new Date().toISOString(),
         }
       ] : [],
-      tags: ["Manual", formTrade]
+      tags: ["Manual"]
     };
 
     try {
@@ -437,7 +412,6 @@ export default function IdeaStreamPage() {
         setFormTitle("");
         setFormExcerpt("");
         setFormSourceUrl("");
-        setFormTrade("");
         setToastMessage(`Idea added to your stream.`);
         setTimeout(() => setToastMessage(null), 3000);
       } else {
@@ -573,9 +547,9 @@ export default function IdeaStreamPage() {
               {queuedIdeas.length}
             </span>
             <div className="min-w-0">
-              <p className="text-xs font-extrabold text-ink">{queuedIdeas.length === 1 ? "idea is ready" : "ideas are ready"}</p>
-              <p className="mt-0.5 truncate text-xs text-muted">
-                {nextQueuedIdea ? `Next: ${nextQueuedIdea.title || nextQueuedIdea.raw_idea}` : "Choose an idea below to get started."}
+              <p className="text-sm font-extrabold text-ink">{queuedIdeas.length === 1 ? "1 idea queued" : queuedIdeas.length + " ideas queued"}</p>
+              <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted">
+                {nextQueuedIdea ? (nextQueuedIdea.title || nextQueuedIdea.raw_idea) : "Choose an idea below to get started."}
               </p>
             </div>
           </div>
@@ -826,31 +800,6 @@ export default function IdeaStreamPage() {
                   </p>
                 </div>
 
-                {/* Field: Topic area */}
-                <div>
-                  <label className="block text-xs font-semibold text-ink mb-1.5">
-                    Topic area <span className="text-brand">*</span>
-                  </label>
-                  <select
-                    required
-                    value={formTrade}
-                    onChange={(e) => setFormTrade(e.target.value)}
-                    className="w-full bg-surface-2 border border-line focus:border-brand rounded-xl px-3.5 py-2.5 text-xs text-ink outline-none transition-all cursor-pointer"
-                  >
-                    <option value="" disabled className="bg-surface">
-                      Choose a topic area...
-                    </option>
-                    {availableTopics.map((t) => (
-                      <option key={t} value={t} className="bg-surface">
-                        {t}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-[11px] text-subtle mt-1">
-                    Choose the topic area this idea fits.
-                  </p>
-                </div>
-
                 {/* Field: Source & Verification URL */}
                 <div className="space-y-3">
                   <div>
@@ -898,7 +847,7 @@ export default function IdeaStreamPage() {
               <button
                 type="submit"
                 form="inject-topic-form"
-                disabled={isSubmitting || !formTitle.trim() || !formTrade}
+                disabled={isSubmitting || !formTitle.trim()}
                 className={buttonStyles({ size: "sm", className: "w-full sm:w-auto" })}
               >
                 {isSubmitting ? (
@@ -980,24 +929,6 @@ export default function IdeaStreamPage() {
                   />
                 </div>
 
-                {/* Topic area */}
-                <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-muted">
-                      Topic area
-                    </label>
-                    <select
-                      value={editTrade}
-                      onChange={(e) => setEditTrade(e.target.value)}
-                      className="min-h-11 w-full bg-canvas border border-line focus:border-brand rounded-xl px-3 py-2.5 text-sm text-ink outline-none transition-colors cursor-pointer"
-                    >
-                      {availableTopics.map((t) => (
-                        <option key={t} value={t} className="bg-surface text-ink">
-                          {t}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
                 </div>
 
               </form>
@@ -1076,7 +1007,7 @@ export default function IdeaStreamPage() {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div role="status" className="fixed bottom-24 right-6 z-50 bg-brand text-canvas px-4 py-3 rounded-xl shadow-2xl font-bold text-xs flex items-center gap-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
+        <div role="status" aria-live="polite" className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-1/2 z-[80] flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-2 rounded-2xl border border-brand/30 bg-surface-2 px-4 py-3 text-sm font-semibold text-ink shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-200 sm:bottom-6">
           <CheckCircle2 className="w-4 h-4" />
           <span>{toastMessage}</span>
         </div>

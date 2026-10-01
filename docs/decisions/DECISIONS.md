@@ -37,7 +37,7 @@ and link to it here.
 
 ## 2026-10-01 — Ideas leads with what gets written next
 
-**Decision:** The Ideas page leads with Up next: users choose an idea, place the strongest one first, and Minions drafts that first idea automatically. The full idea library remains a secondary view; Calendar is removed from this page, while scheduling remains available from idea details. Cards hide system metadata and Draft Now moves into idea details.
+**Decision:** The Ideas page leads with Up next: users choose an idea, place the strongest one first, and Minions drafts that first idea automatically. The full idea library remains a secondary view; Calendar is removed from this page, while scheduling remains available from idea details. Cards hide system metadata, manual ideas no longer require legacy topic classification, and Draft Now moves into idea details.
 **Why:** Users should make one understandable decision without learning pipeline statuses, harvested pools, claim mechanics, or competing queue-versus-draft paths.
 **Status:** active
 

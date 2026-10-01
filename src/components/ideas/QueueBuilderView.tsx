@@ -58,7 +58,7 @@ export default function QueueBuilderView({
     }
     if (!searchPool.trim()) return true;
     const query = searchPool.toLowerCase();
-    return [ideaTitle(idea), idea.excerpt || idea.angle || "", idea.target_trade || ""]
+    return [ideaTitle(idea), idea.excerpt || idea.angle || ""]
       .some((value) => value.toLowerCase().includes(query));
   }), [ideas, searchPool]);
 
@@ -110,7 +110,7 @@ export default function QueueBuilderView({
     const saved = await persistQueueState(updatedQueue);
     if (saved) {
       applyQueueLocally(updatedQueue);
-      onToast(`Added “${ideaTitle(idea)}” to Up next.`);
+      onToast("Added to Up next.");
       setMobileTab("queue");
     }
     setPendingIdeaId(null);
@@ -234,13 +234,14 @@ export default function QueueBuilderView({
           onDrop={handleDropOnQueue}
           className={`${cardStyles("raised", `space-y-4 transition-colors lg:col-span-5 ${isDropTargetQueue ? "border-brand bg-brand/5" : ""}`)} ${mobileTab === "queue" ? "block" : "hidden lg:block"}`}
         >
-          <div className="flex items-center justify-between gap-3">
+          <div className="space-y-3 border-b border-line pb-4">
             <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-brand">Writing order</p>
-              <h3 className="mt-1 text-lg font-extrabold text-ink">Up next</h3>
+              <h3 className="text-xl font-black tracking-tight text-ink">Up next</h3>
+              <p className="mt-1 text-xs leading-relaxed text-muted">The first idea becomes your next draft. Drag to change the order.</p>
             </div>
             {draftingLabel && (
-              <span className={`rounded-full px-3 py-1 text-xs font-bold ${draftingOn ? "bg-brand/10 text-brand" : "bg-surface-2 text-muted"}`}>
+              <span className={"inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold " + (draftingOn ? "border border-brand/25 bg-brand/10 text-brand" : "bg-surface-2 text-muted")}>
+                <span className={"h-1.5 w-1.5 rounded-full " + (draftingOn ? "bg-brand" : "bg-subtle")} aria-hidden="true" />
                 {draftingLabel}
               </span>
             )}
