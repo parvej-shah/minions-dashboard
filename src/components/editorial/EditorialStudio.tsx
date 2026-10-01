@@ -4,7 +4,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FileText } from "lucide-react";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import Toast from "@/components/ui/Toast";
-import EmptyState, { LoadingState } from "@/components/ui/EmptyState";
+import EmptyState from "@/components/ui/EmptyState";
+import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
 import { useEditorialDraft } from "@/hooks/useEditorialDraft";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useToast } from "@/hooks/useToast";
@@ -21,6 +22,63 @@ import ReviewDock from "./ReviewDock";
 import ClaimsGate from "./ClaimsGate";
 import MobileActionBar from "./MobileActionBar";
 import ReaderView from "./ReaderView";
+
+function EditorialStudioSkeleton() {
+  return (
+    <SkeletonGroup label="Loading Editorial Studio" className="mx-auto max-w-[1400px] space-y-6 pb-32 lg:pb-16">
+      <section className="space-y-3 rounded-2xl border border-line bg-surface p-4">
+        <div className="flex flex-col gap-3 border-b border-line pb-3 sm:flex-row sm:items-center sm:justify-between">
+          <Skeleton className="h-5 w-52" />
+          <Skeleton className="h-9 w-36 rounded-xl" />
+        </div>
+        <div className="flex gap-3 overflow-hidden">
+          {[0, 1, 2, 3].map((item) => <Skeleton key={item} className="h-16 min-w-64 rounded-xl" />)}
+        </div>
+      </section>
+
+      <div className="flex flex-col gap-3 border-b border-line pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="w-full max-w-2xl space-y-3">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-4 w-64 max-w-full" />
+        </div>
+        <Skeleton className="h-10 w-32 rounded-xl" />
+      </div>
+
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
+        <div className="space-y-6 lg:col-span-8">
+          <section className="space-y-4 rounded-2xl border border-line bg-surface p-5">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-11 w-11 rounded-full" />
+              <div className="flex-1 space-y-2"><Skeleton className="h-4 w-36" /><Skeleton className="h-3 w-24" /></div>
+            </div>
+            <Skeleton className="h-5 w-5/6" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-11/12" />
+            <Skeleton className="aspect-[1.91/1] w-full rounded-2xl" />
+          </section>
+          <section className="space-y-4 rounded-2xl border border-line bg-surface p-5">
+            <div className="flex justify-between"><Skeleton className="h-6 w-36" /><Skeleton className="h-10 w-44 rounded-xl" /></div>
+            {[0, 1, 2, 3, 4].map((item) => <Skeleton key={item} className={item === 0 ? "h-7 w-4/5" : "h-4 w-full"} />)}
+          </section>
+        </div>
+        <aside className="space-y-6 lg:col-span-4">
+          <section className="space-y-4 rounded-2xl border-2 border-b-4 border-line bg-surface p-5">
+            <Skeleton className="h-5 w-28" />
+            <Skeleton className="h-12 w-full rounded-xl" />
+            <Skeleton className="h-12 w-full rounded-xl" />
+            <Skeleton className="h-12 w-full rounded-xl" />
+          </section>
+          <section className="space-y-3 rounded-2xl border border-line bg-surface p-5">
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-16 w-full rounded-xl" />
+            <Skeleton className="h-16 w-full rounded-xl" />
+          </section>
+        </aside>
+      </div>
+    </SkeletonGroup>
+  );
+}
 
 export interface EditorialStudioProps {
   initialDraftId?: string;
@@ -41,11 +99,15 @@ export default function EditorialStudio({
   isStandaloneRoute = false,
 }: EditorialStudioProps) {
   const channels = useChannelSummary();
-  const draft = useEditorialDraft(initialDraftId, channels?.blog ?? true);
+  const { brandSettings: studioBrand } = useBrandSettings();
+  const draft = useEditorialDraft(
+    initialDraftId,
+    channels?.blog ?? true,
+    studioBrand?.company_domain ?? null
+  );
   const { copiedKey, copy } = useCopyToClipboard(2200);
   const toast = useToast(3000);
   // Confirmation copy names the tenant's own blog, not this company's.
-  const { brandSettings: studioBrand } = useBrandSettings();
   const studioBlogHost =
     (normalizeDomain(studioBrand?.company_domain) ?? "your blog").replace(/^https?:\/\//, "") +
     (studioBrand?.company_domain ? "/blog" : "");
@@ -176,13 +238,7 @@ export default function EditorialStudio({
       ?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
   }, [draft.selectedAssetId]);
 
-  if (draft.isLoading) {
-    return (
-      <div className="max-w-[1400px] mx-auto py-10">
-        <LoadingState label="Loading editorial drafts…" />
-      </div>
-    );
-  }
+  if (draft.isLoading) return <EditorialStudioSkeleton />;
 
   if (!activeAsset) {
     return (
@@ -262,8 +318,7 @@ export default function EditorialStudio({
               editorMode={editorMode}
               setEditorMode={setEditorMode}
               isDirty={draft.isDirty}
-              isSaving={draft.isSaving}
-              statusLabel={statusLabel}
+                statusLabel={statusLabel}
               onSave={handleSave}
               onCopy={copy}
               copiedKey={copiedKey}
@@ -278,14 +333,8 @@ export default function EditorialStudio({
         <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-6">
           <ReviewDock
             activeAsset={activeAsset}
-            currentAssetIndex={currentAssetIndex}
-            totalDrafts={assets.length}
             isDirty={draft.isDirty}
-            isSaving={draft.isSaving}
             publishState={draft.publishState}
-            onPrev={draft.prevDraft}
-            onNext={draft.nextDraft}
-            onSave={handleSave}
             onPublish={handlePublish}
             onSchedule={handleSchedule}
             onUnschedule={handleUnschedule}
@@ -295,6 +344,7 @@ export default function EditorialStudio({
             setToggleLiveConfirmOpen={setToggleLiveConfirmOpen}
             setDeleteConfirmOpen={setDeleteConfirmOpen}
             blogEnabled={blogEnabled}
+            blogHost={(normalizeDomain(studioBrand?.company_domain) ?? "").replace(/^https?:\/\//, "")}
           />
 
           <ClaimsGate

@@ -1,4 +1,4 @@
-import type { Asset, Claim } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import {
   DEFAULT_CLAIM_CONFIDENCE,
   DEFAULT_GENERATION_COST,
@@ -8,7 +8,24 @@ import {
 import type { AssetItem, AssetStatus, ClaimCheckItem, CoverSpecDTO } from "@/types";
 import type { AudienceLane } from "@/types";
 
-type AssetWithClaims = Asset & { claims: Claim[] };
+export const assetDTOSelect = {
+  id: true, title: true, slug: true, hook: true, coreArgument: true, content: true,
+  audience: true, pillar: true, targetTrade: true, status: true, claimsOk: true,
+  reviewNotes: true, coverSpec: true, heroImageUrl: true, heroStatus: true,
+  heroErrorCode: true, heroProvider: true, heroAttempts: true, docUrl: true,
+  linkedinVariant: true, facebookVariant: true, xVariant: true, version: true,
+  generationCost: true, channels: true, scheduledFor: true, publishedAt: true,
+  publishedUrls: true, createdAt: true, updatedAt: true,
+  claims: {
+    select: {
+      id: true, claimText: true, claimType: true, source: true, verified: true,
+      confidenceScore: true, notes: true,
+    },
+  },
+} satisfies Prisma.AssetSelect;
+
+type AssetWithClaims = Prisma.AssetGetPayload<{ select: typeof assetDTOSelect }>;
+type ClaimDTORecord = AssetWithClaims["claims"][number];
 
 /**
  * `published_urls` has been written in two formats: comma-joined (the assets
@@ -39,7 +56,7 @@ export function parsePublishedUrls(raw: string | null): string[] {
   return trimmed.split(",").map((url) => url.trim()).filter(Boolean);
 }
 
-export function toClaimDTO(claim: Claim): ClaimCheckItem {
+export function toClaimDTO(claim: ClaimDTORecord): ClaimCheckItem {
   return {
     id: claim.id,
     claim_text: claim.claimText,

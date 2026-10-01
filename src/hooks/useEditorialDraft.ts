@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { blogUrl, normalizeDomain } from "@/constants/config";
-import { useBrandSettings } from "@/hooks/useBrandSettings";
 import type { AssetItem, AssetStatus, CoverSpecDTO } from "@/types";
 
 export type PublishState = "idle" | "pending" | "success" | "error";
@@ -85,11 +84,13 @@ const EMPTY_EDITS = { title: "", hook: "", body: "", linkedin: "", facebook: "",
  * timers and firing the real request inside the last one, so the UI reported
  * success before — and regardless of whether — the request succeeded.
  */
-export function useEditorialDraft(initialDraftId?: string, blogEnabled = true): EditorialDraftState {
-  // The tenant's own blog host. Without it every optimistic doc_url and the
-  // publish confirmation named getminions.ai, whoever owned the post.
-  const { brandSettings } = useBrandSettings();
-  const tenantDomain = brandSettings?.company_domain || null;
+export function useEditorialDraft(
+  initialDraftId?: string,
+  blogEnabled = true,
+  tenantDomain: string | null = null
+): EditorialDraftState {
+  // The tenant's own blog host. The Studio passes its already-loaded brand
+  // settings so this hook does not issue a duplicate /api/brand request.
   // With the blog channel off nothing goes to the blog, so no message names it.
   const blogHost = blogEnabled ? (normalizeDomain(tenantDomain) ?? "").replace(/^https?:\/\//, "") : "";
   const [assets, setAssets] = useState<AssetItem[]>([]);

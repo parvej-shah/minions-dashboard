@@ -3,11 +3,8 @@
 import React, { useState } from "react";
 import {
   CalendarClock,
-  Check,
   CheckCheck,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
   AlertTriangle,
   ExternalLink,
   EyeOff,
@@ -20,22 +17,14 @@ import SchedulePicker, { useWorkspaceTimezone, zoneLabel } from "./SchedulePicke
 import PostChannels from "./PostChannels";
 import type { DistributionChannelKey } from "@/types";
 import { formatPostTime } from "@/lib/postTime";
-import { useBrandSettings } from "@/hooks/useBrandSettings";
-import { normalizeDomain } from "@/constants/config";
 import type { PublishState } from "@/hooks/useEditorialDraft";
 import type { AssetItem } from "@/types";
 
 import { buttonStyles } from "@/components/ui/Button";
 export interface ReviewDockProps {
   activeAsset: AssetItem;
-  currentAssetIndex: number;
-  totalDrafts: number;
   isDirty: boolean;
-  isSaving: boolean;
   publishState: PublishState;
-  onPrev: () => void;
-  onNext: () => void;
-  onSave: () => void;
   onPublish: () => void;
   /** Approve the draft for a local date and time; resolves true when it was scheduled. */
   onSchedule: (date: string, time: string) => Promise<boolean>;
@@ -50,6 +39,7 @@ export interface ReviewDockProps {
    *  "not loaded yet" — default to true so the panel doesn't flash blog copy
    *  and then swap to generic copy once the real channel summary lands. */
   blogEnabled?: boolean;
+  blogHost?: string;
 }
 
 /**
@@ -65,14 +55,8 @@ export interface ReviewDockProps {
  */
 export default function ReviewDock({
   activeAsset,
-  currentAssetIndex,
-  totalDrafts,
   isDirty,
-  isSaving,
   publishState,
-  onPrev,
-  onNext,
-  onSave,
   onPublish,
   onSchedule,
   onUnschedule,
@@ -82,6 +66,7 @@ export default function ReviewDock({
   setToggleLiveConfirmOpen,
   setDeleteConfirmOpen,
   blogEnabled = true,
+  blogHost = "",
 }: ReviewDockProps) {
   const [picking, setPicking] = useState(false);
   const [pickingFor, setPickingFor] = useState<string | null>(null);
@@ -94,10 +79,6 @@ export default function ReviewDock({
   const confirmSchedule = async (date: string, time: string) => {
     if (await onSchedule(date, time)) setPicking(false);
   };
-  // The tenant's own blog host. This badge previously read "Live on
-  // getminions.ai" for every tenant, naming the wrong company's site.
-  const { brandSettings } = useBrandSettings();
-  const blogHost = (normalizeDomain(brandSettings?.company_domain) ?? "").replace(/^https?:\/\//, "");
 
   /** Live-ness comes from the blog table, not the asset's own status. */
   const alreadyLive = blogEnabled && Boolean(activeAsset.live_blog_url) && activeAsset.status !== "PUBLISHED";
@@ -107,7 +88,7 @@ export default function ReviewDock({
           <div className="flex items-center justify-between pb-2 border-b border-line/60">
             <span className="text-xs font-bold font-mono text-ink uppercase tracking-wider flex items-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5 text-brand" />
-              Review & Decision
+              Ready to publish?
             </span>
             {isDirty ? (
               <span className="text-[10px] font-mono text-gold font-bold bg-gold/10 px-2 py-0.5 rounded border border-gold/30 animate-pulse">
@@ -119,48 +100,7 @@ export default function ReviewDock({
               </span>
             )}
           </div>
-
-          {/* Quick Queue Navigation in Sticky Dock */}
-          <div className="flex items-center justify-between gap-2 text-xs">
-            <button
-              onClick={onPrev}
-              className="flex-1 py-1.5 px-2 rounded-lg bg-canvas hover:bg-surface-2 border border-line text-muted hover:text-ink text-[11px] font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer"
-              title="Previous Draft ( [ )"
-            >
-              <ChevronLeft className="w-3 h-3 text-brand" />
-              <span>Prev Draft</span>
-            </button>
-
-            <span className="text-[10px] font-mono text-subtle shrink-0 font-bold px-1">
-              {currentAssetIndex + 1} / {totalDrafts}
-            </span>
-
-            <button
-              onClick={onNext}
-              className="flex-1 py-1.5 px-2 rounded-lg bg-canvas hover:bg-surface-2 border border-line text-muted hover:text-ink text-[11px] font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer"
-              title="Next Draft ( ] )"
-            >
-              <span>Next Draft</span>
-              <ChevronRight className="w-3 h-3 text-brand" />
-            </button>
-          </div>
-
-          {/* Quick Save Draft Button */}
-          <button
-            onClick={onSave}
-            disabled={isSaving}
-            className={buttonStyles({ variant: isDirty ? "primary" : "secondary", size: "sm", block: true })}
-          >
-            {isSaving ? (
-              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Check className="w-3.5 h-3.5" />
-            )}
-            <span>{isSaving ? "Saving to Database..." : isDirty ? "Save Draft Changes" : "Draft Synced to Database ✓"}</span>
-            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[9px] font-mono rounded bg-black/20 text-current">
-              ⌘S
-            </kbd>
-          </button>
+          <p className="-mt-2 text-xs leading-relaxed text-muted">Check the post, choose where it goes, then publish now or schedule it.</p>
 
           {/* Main Publish Decision & Live Visibility Hub */}
           {activeAsset.status === "PUBLISHED" ? (
@@ -349,7 +289,7 @@ export default function ReviewDock({
                       {alreadyLive
                         ? "Republish (Overwrites the Live Post)"
                         : blogEnabled
-                          ? "Approve & 1-Click Publish Live"
+                          ? "Approve & publish"
                           : "Approve & Publish"}
                     </span>
                   </>

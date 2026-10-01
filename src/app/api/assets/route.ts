@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { toAssetDTO } from "@/lib/mappers/asset";
+import { assetDTOSelect, toAssetDTO } from "@/lib/mappers/asset";
 import { apiError } from "@/lib/api-response";
 import { requireClientId } from "@/lib/tenant";
 import { getTenantBlogDomain } from "@/lib/tenantDomain";
@@ -13,7 +13,8 @@ export async function GET() {
     const [assets, blogs, domain] = await Promise.all([
       prisma.asset.findMany({
         where: { clientId: ctx.clientId },
-        include: { claims: true },
+        // Omit relations, provider IDs, and carousel plans that the Studio DTO never uses.
+        select: assetDTOSelect,
         orderBy: { createdAt: "desc" },
       }),
       prisma.blog.findMany({ where: { clientId: ctx.clientId }, select: { slug: true, assetId: true } }),

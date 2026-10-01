@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-10-01 — Editorial Studio is a guided review flow
+
+**Decision:** Editorial Studio leads from a plain-language draft queue into one selected post and one dominant Approve & publish action. Technical version and audience-lane badges, duplicated navigation, duplicated save controls, and operator terminology are removed from the main decision path; editing, scheduling, claims and destructive actions remain available as supporting controls.
+**Why:** Reviewing a post should feel like completing one focused lesson: know which draft you are reviewing, understand what to check, and see the next action immediately without decoding system metadata or choosing between repeated controls.
+**Status:** active
+
 ## 2026-10-01 — Setup ends with the user's first post
 
 **Decision:** Setup asks three questions: what you want to be known for, who reads you, and one thing from your work (a lesson, an opinion or what you're building). That answer is saved as an experience item, and the first post is drafted from it by the normal pipeline, with its claims check, while a lesson-style screen shows progress. The post is then shown as it will look on LinkedIn, with a plain-language list of what to check and three choices: Post it (scheduled into the next posting slot), Edit (in Editorial Studio) or Discard. LinkedIn is connected at that point, not during setup. Experience level, voice, company and publishing mode start from defaults (Practitioner, "Direct & practical", none, review first) and are changed later in Brand and Schedule. Editorial Studio shows the same LinkedIn reader view and plain-language checks at the top of every draft.

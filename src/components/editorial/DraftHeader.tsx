@@ -37,15 +37,15 @@ export default function DraftHeader({
 
       <div className="min-w-0">
         <div className="flex items-center gap-2 text-xs font-mono flex-wrap">
-          <span className="text-subtle tracking-wider uppercase font-semibold">Active Review Target</span>
-          <span className="text-[#2A3D52]">/</span>
+          <span className="text-subtle tracking-wider uppercase font-semibold">Reviewing</span>
+          <span className="hidden">/</span>
           <span className="text-brand font-bold">Draft {currentAssetIndex + 1} of {totalDrafts}</span>
-          <span className="text-[#2A3D52]">•</span>
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand/10 text-brand border border-brand/30">
+          <span className="hidden">•</span>
+          <span className="hidden px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand/10 text-brand border border-brand/30">
             v{activeAsset.version}.0
           </span>
-          <span className="text-[#2A3D52]">•</span>
-          <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
+          <span className="hidden">•</span>
+          <span className={`hidden px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
             activeAsset.audience === "ICP" 
               ? "bg-[#3B82F6]/15 text-[#3B82F6] border border-[#3B82F6]/30"
               : activeAsset.audience === "PEER"
@@ -56,7 +56,7 @@ export default function DraftHeader({
           </span>
         </div>
 
-        <h1 className="text-xl md:text-2xl font-bold tracking-tight text-ink mt-1 break-words">
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-ink mt-1 break-words">
           {title}
         </h1>
       </div>
@@ -78,7 +78,7 @@ export default function DraftHeader({
       ) : (
         <span className="flex items-center gap-1.5 bg-gold/10 text-gold border border-gold/30 text-xs font-semibold px-3 py-1.5 rounded-xl">
           <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
-          Waiting for Review
+          Ready for review
         </span>
       )}
     </div>

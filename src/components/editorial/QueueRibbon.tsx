@@ -56,7 +56,7 @@ export default function QueueRibbon({
         <div className="flex items-center gap-2">
           <Layers className="w-4 h-4 text-brand" />
           <span className="text-xs font-bold text-ink uppercase tracking-wider font-mono">
-            Editorial Review Queue
+            Drafts to review
           </span>
         </div>
 
@@ -69,7 +69,7 @@ export default function QueueRibbon({
                 : segment.off
             }`}
           >
-            Needs Review ({pendingCount})
+            To review ({pendingCount})
           </button>
           <button
             onClick={() => setListFilter("ALL")}
@@ -79,7 +79,7 @@ export default function QueueRibbon({
                 : segment.off
             }`}
           >
-            All Drafts ({assets.length})
+            All ({assets.length})
           </button>
           {scheduledCount > 0 && (
             <button
@@ -211,7 +211,7 @@ export default function QueueRibbon({
                   }`}
                 >
                   {isCurrent
-                    ? "● Spotlight"
+                    ? "Reviewing"
                     : alreadyLive
                       ? "Live · Unreviewed"
                       : asset.status === "PENDING_REVIEW"
