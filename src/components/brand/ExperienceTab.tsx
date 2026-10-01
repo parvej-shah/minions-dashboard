@@ -39,11 +39,11 @@ const cardClass = "p-6 rounded-2xl bg-surface border border-line space-y-4 shado
 type IcpListKey = "pains" | "decisions" | "questions" | "buying_triggers" | "vocabulary";
 
 const ICP_LISTS: { key: IcpListKey; label: string; placeholder: string }[] = [
-  { key: "pains", label: "Their biggest problems", placeholder: "e.g. Calls go unanswered while they are on a job" },
-  { key: "decisions", label: "Decisions they are making", placeholder: "e.g. Hire a dispatcher or automate call handling" },
-  { key: "questions", label: "Questions they ask you", placeholder: "e.g. Will callers hang up on an AI?" },
-  { key: "buying_triggers", label: "What makes them act", placeholder: "e.g. Losing a big job to a faster competitor" },
-  { key: "vocabulary", label: "Words they use", placeholder: "e.g. callbacks, no-shows, service area" },
+  { key: "pains", label: "Their biggest problems", placeholder: "A problem that costs them time or money" },
+  { key: "decisions", label: "Decisions they are making", placeholder: "A choice they are weighing right now" },
+  { key: "questions", label: "Questions they ask you", placeholder: "A question they ask before buying" },
+  { key: "buying_triggers", label: "What makes them act", placeholder: "What finally pushes them to act" },
+  { key: "vocabulary", label: "Words they use", placeholder: "A word or phrase they use for it" },
 ];
 
 interface ExperienceTabProps {
@@ -197,7 +197,7 @@ function IcpEditor({ onChange }: { onChange: () => void }) {
           rows={2}
           value={icp.who}
           onChange={(e) => setIcp({ ...icp, who: e.target.value })}
-          placeholder="e.g. Owners of residential roofing companies with 5 to 30 staff, who answer the phone themselves."
+          placeholder="One specific reader: what they do, the size of their business, and where they are in it."
           className={`${inputClass} resize-none`}
         />
       </div>
@@ -206,7 +206,7 @@ function IcpEditor({ onChange }: { onChange: () => void }) {
           <label className="text-xs font-semibold text-muted" htmlFor="icp-role">
             Their role
           </label>
-          <input id="icp-role" value={icp.role} onChange={(e) => setIcp({ ...icp, role: e.target.value })} placeholder="e.g. Owner-operator" className={inputClass} />
+          <input id="icp-role" value={icp.role} onChange={(e) => setIcp({ ...icp, role: e.target.value })} placeholder="Their job title or role" className={inputClass} />
         </div>
         <div className="space-y-2">
           <label className="text-xs font-semibold text-muted" htmlFor="icp-company">
@@ -216,7 +216,7 @@ function IcpEditor({ onChange }: { onChange: () => void }) {
             id="icp-company"
             value={icp.company_type}
             onChange={(e) => setIcp({ ...icp, company_type: e.target.value })}
-            placeholder="e.g. Local home-services business"
+            placeholder="The kind and size of company they work in"
             className={inputClass}
           />
         </div>

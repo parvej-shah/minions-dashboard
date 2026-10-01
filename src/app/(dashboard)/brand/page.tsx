@@ -114,21 +114,21 @@ function BrandStudio() {
         >
           <button
             type="button"
-            aria-pressed={activeTab === "voice-proof"}
-            onClick={() => setActiveTab("voice-proof")}
-            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "voice-proof" ? "bg-brand text-canvas" : "text-muted hover:text-ink")}
-          >
-            <Mic2 className="h-4 w-4" aria-hidden="true" />
-            Voice &amp; Proof
-          </button>
-          <button
-            type="button"
             aria-pressed={activeTab === "overview"}
             onClick={() => setActiveTab("overview")}
             className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "overview" ? "bg-brand text-canvas" : "text-muted hover:text-ink")}
           >
             <Sparkles className="h-4 w-4" aria-hidden="true" />
             Overview
+          </button>
+          <button
+            type="button"
+            aria-pressed={activeTab === "voice-proof"}
+            onClick={() => setActiveTab("voice-proof")}
+            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "voice-proof" ? "bg-brand text-canvas" : "text-muted hover:text-ink")}
+          >
+            <Mic2 className="h-4 w-4" aria-hidden="true" />
+            Voice &amp; Proof
           </button>
           <button
             type="button"
