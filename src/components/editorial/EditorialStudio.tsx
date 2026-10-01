@@ -318,6 +318,7 @@ export default function EditorialStudio({
               editorMode={editorMode}
               setEditorMode={setEditorMode}
               isDirty={draft.isDirty}
+              isSaving={draft.isSaving}
                 statusLabel={statusLabel}
               onSave={handleSave}
               onCopy={copy}
