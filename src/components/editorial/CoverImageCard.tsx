@@ -64,7 +64,7 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
   };
 
   return (
-    <div className="bg-surface rounded-2xl border border-line p-4 sm:p-5 space-y-3 shadow-xl">
+    <div id="cover-image" className="scroll-mt-6 bg-surface rounded-2xl border border-line p-4 sm:p-5 space-y-3 shadow-xl">
       <div className="flex items-center justify-between pb-2 border-b border-line/60">
         <div className="flex items-center gap-2">
           <ImageIcon className="w-4 h-4 text-brand" />

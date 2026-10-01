@@ -35,11 +35,17 @@ and link to it here.
 **Why:** Posting from setup skipped the cover, the carousel and the rest of the review, and a brand-new user's first public post should not go out from a celebration screen. Sending them to Editorial Studio shows everything Minions made and teaches the review step they will use from then on.
 **Status:** active
 
+## 2026-10-01 — Review a LinkedIn carousel before channel copy
+
+**Decision:** When a LinkedIn carousel is available, Editorial Studio shows it before Channel preview. The channel section has one title and one subtitle, with a direct link to the cover style controls below.
+**Why:** Reviewers should see the swipeable post first and immediately know where to edit its copy and cover.
+**Status:** active
+
 ## 2026-10-01 — One authoritative channel preview in Editorial Studio
 
 **Decision:** Editorial Studio uses one Channel preview as the authoritative representation of social copy, placed first in the review flow. The duplicate reader preview is removed; plain-language draft checks sit beside the publish decision, while each connected channel can be previewed, edited and saved in place.
 **Why:** Two previews of the same post made users scroll through repeated content and left it unclear where edits belonged. One review surface creates a direct path from reading to editing to publishing.
-**Status:** active
+**Status:** superseded by [Review a LinkedIn carousel before channel copy](#2026-10-01--review-a-linkedin-carousel-before-channel-copy)
 
 ## 2026-10-01 — Editorial Studio is a guided review flow
 

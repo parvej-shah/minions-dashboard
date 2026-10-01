@@ -97,9 +97,8 @@ export default function SocialVariantTabs({
             <Share2 className="h-5 w-5" aria-hidden="true" />
           </span>
           <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-brand">Ready for review</p>
-            <h2 id="channel-preview-title" className="mt-0.5 text-xl font-extrabold text-ink">Channel preview</h2>
-            <p className="mt-1 text-sm leading-relaxed text-muted">See exactly what will publish. Choose a channel, then edit its copy here.</p>
+            <h2 id="channel-preview-title" className="text-xl font-extrabold text-ink">Channel preview</h2>
+            <p className="mt-1 text-sm leading-relaxed text-muted">Choose a channel to preview and edit its copy. <a href="#cover-image" className="font-semibold text-brand underline underline-offset-2 hover:text-ink focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">Choose the thumbnail style below ↓</a></p>
           </div>
         </div>
 
