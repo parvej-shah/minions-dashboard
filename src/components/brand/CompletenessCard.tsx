@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Gauge } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
+import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
 import type { BrandCompleteness, BrandTab, CompletenessPrompt } from "@/types";
 
 /**
@@ -11,6 +12,7 @@ import type { BrandCompleteness, BrandTab, CompletenessPrompt } from "@/types";
  */
 export default function CompletenessCard({ version, onGo }: { version: number; onGo: (tab: BrandTab) => void }) {
   const [data, setData] = useState<BrandCompleteness | null>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -18,13 +20,29 @@ export default function CompletenessCard({ version, onGo }: { version: number; o
       .get<BrandCompleteness>("/api/brand/completeness")
       .then((d) => !cancelled && setData(d))
       // Advisory only: a failed load hides the card rather than blocking the page.
-      .catch(() => !cancelled && setData(null));
+      .catch(() => !cancelled && setFailed(true));
     return () => {
       cancelled = true;
     };
   }, [version]);
 
-  if (!data) return null;
+  if (failed && !data) return null;
+  if (!data) {
+    return (
+      <SkeletonGroup label="Checking your profile" className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5 md:flex-row md:items-center">
+        <div className="space-y-2 md:w-56 shrink-0">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-1.5 w-full rounded-full" />
+          <Skeleton className="h-3 w-48" />
+        </div>
+        <div className="grid flex-1 grid-cols-1 gap-2 lg:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-14" />
+          ))}
+        </div>
+      </SkeletonGroup>
+    );
+  }
 
   return (
     <div className="rounded-2xl border border-line bg-surface p-5 shadow-sm">

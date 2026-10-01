@@ -6,12 +6,13 @@ import {
   Globe,
   Share2,
   CheckCircle2,
-  RefreshCw,
 } from "lucide-react";
 import { DistributionChannelConfig } from "@/types";
 import { useDistributionChannels } from "@/hooks/useDistributionChannels";
 import { useToast } from "@/hooks/useToast";
 import { ChannelCredentialForm } from "./ChannelCredentialForm";
+import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
+import { LoadingState } from "@/components/ui/EmptyState";
 
 interface DistributionControlPanelProps {
   compact?: boolean;
@@ -79,11 +80,14 @@ export function DistributionControlPanel({
   };
 
   if (isLoading) {
-    return (
-      <div className="p-6 rounded-2xl bg-surface border border-line flex items-center justify-center gap-3 text-xs font-mono text-muted">
-        <RefreshCw className="w-4 h-4 animate-spin text-brand" />
-        <span>Loading distribution channel controls...</span>
-      </div>
+    return compact ? (
+      <SkeletonGroup label="Loading channels" className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {[0, 1, 2, 3].map((i) => (
+          <Skeleton key={i} className="h-16" />
+        ))}
+      </SkeletonGroup>
+    ) : (
+      <LoadingState label="Loading channels" rows={3} />
     );
   }
 

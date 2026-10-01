@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import EmptyState, { LoadingState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { NOT_AVAILABLE } from "@/utils/format";
 import {
   TELEMETRY_RANGES,
@@ -104,10 +105,10 @@ export default function TelemetryPage() {
             <Type className="w-4 h-4 text-[#3B82F6]" />
           </div>
           <div className="text-2xl font-bold text-ink">
-            {isLoading ? NOT_AVAILABLE : summaryData.wordsGenerated.toLocaleString()}
+            {isLoading ? <Skeleton className="h-8 w-24" /> : summaryData.wordsGenerated.toLocaleString()}
           </div>
           <div className="text-[11px] text-subtle">
-            Across {summaryData.totalAssetsGenerated} draft{summaryData.totalAssetsGenerated === 1 ? "" : "s"} {rangePhrase}
+            {isLoading ? <Skeleton className="h-3 w-40" /> : `Across ${summaryData.totalAssetsGenerated} draft${summaryData.totalAssetsGenerated === 1 ? "" : "s"} ${rangePhrase}`}
           </div>
         </div>
 
@@ -118,13 +119,13 @@ export default function TelemetryPage() {
           </div>
           <div className="text-2xl font-bold text-ink">
             {isLoading
-              ? NOT_AVAILABLE
+              ? <Skeleton className="h-8 w-20" />
               : summaryData.claimsTotal > 0
                 ? `${summaryData.claimsVerified} / ${summaryData.claimsTotal}`
                 : "—"}
           </div>
           <div className="text-[11px] text-subtle">
-            {summaryData.claimsTotal > 0
+            {isLoading ? <Skeleton className="h-3 w-40" /> : summaryData.claimsTotal > 0
               ? `${Math.round((summaryData.claimsVerified / summaryData.claimsTotal) * 100)}% of factual claims sourced ${rangePhrase}`
               : `No claims recorded ${rangePhrase}`}
           </div>
@@ -136,12 +137,14 @@ export default function TelemetryPage() {
             <Zap className="w-4 h-4 text-gold" />
           </div>
           <div className="text-2xl font-bold text-ink">
-            {isLoading || summaryData.publishingVelocityPerWeek === null
+            {isLoading
+              ? <Skeleton className="h-8 w-16" />
+              : summaryData.publishingVelocityPerWeek === null
               ? NOT_AVAILABLE
               : `${summaryData.publishingVelocityPerWeek}/wk`}
           </div>
           <div className="text-[11px] text-subtle">
-            {summaryData.publishedCount} published {rangePhrase}
+            {isLoading ? <Skeleton className="h-3 w-40" /> : `${summaryData.publishedCount} published ${rangePhrase}`}
           </div>
         </div>
 
@@ -160,7 +163,7 @@ export default function TelemetryPage() {
             </p>
           </div>
           <span className="text-xs font-mono text-subtle self-start sm:self-auto bg-surface-2 px-2.5 py-1 rounded-lg border border-line">
-            {isLoading ? "Loading…" : `${ledgerData.length} Posts`}
+            {isLoading ? "…" : `${ledgerData.length} Posts`}
           </span>
         </div>
 

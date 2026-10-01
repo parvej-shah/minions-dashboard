@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import EmptyState, { LoadingState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import WeeklyPulseCard from "@/components/pulse/WeeklyPulseCard";
 import { formatDate } from "@/utils/date";
 import { AssetItem, IdeaItem, PublishedPostRecord } from "@/types";
@@ -107,9 +108,9 @@ export default function MissionControlPage() {
           <h1 className="text-3xl font-bold tracking-tight text-[#F1F5F9] break-words">
             Your workspace
           </h1>
-          <p className="text-sm text-[#94A3B8] mt-1 break-words max-w-xl">
-            {isLoading ? "Checking what needs your attention…" : pendingReviewAssets.length > 0 ? `${pendingReviewAssets.length} draft${pendingReviewAssets.length === 1 ? "" : "s"} ready for your review.` : "You're all caught up. Explore ideas or check what's published."}
-          </p>
+          <div className="text-sm text-[#94A3B8] mt-1 break-words max-w-xl">
+            {isLoading ? <Skeleton className="mt-1 h-4 w-64 max-w-full" /> : pendingReviewAssets.length > 0 ? `${pendingReviewAssets.length} draft${pendingReviewAssets.length === 1 ? "" : "s"} ready for your review.` : "You're all caught up. Explore ideas or check what's published."}
+          </div>
         </div>
 
         <div className="grid w-full grid-cols-2 gap-2 lg:flex lg:w-auto lg:items-center lg:gap-2.5">
@@ -129,8 +130,8 @@ export default function MissionControlPage() {
             className="flex min-h-12 w-full min-w-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#00C9A7] px-2.5 py-3 text-xs font-bold text-[#070B0F] shadow-lg shadow-[#00C9A7]/20 transition-all hover:bg-[#00A88A] active:scale-[0.98] sm:px-4 lg:w-auto lg:flex-none"
           >
             <FileText aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
-            <span className="lg:hidden">Review ({pendingReviewAssets.length})</span>
-            <span className="hidden lg:inline">Editorial Studio ({pendingReviewAssets.length})</span>
+            <span className="lg:hidden">Review{isLoading ? "" : ` (${pendingReviewAssets.length})`}</span>
+            <span className="hidden lg:inline">Editorial Studio{isLoading ? "" : ` (${pendingReviewAssets.length})`}</span>
           </Link>
         </div>
       </div>
@@ -163,8 +164,10 @@ export default function MissionControlPage() {
             <Sparkles className="w-4 h-4 text-[#00C9A7]" />
           </div>
           <div className="text-2xl font-bold text-[#F1F5F9] flex items-baseline gap-2">
-            <span>{ideas.length}</span>
-            <span className="text-xs font-normal text-[#00C9A7] font-mono">+{ideasToday.length} today</span>
+            {isLoading ? <Skeleton className="h-8 w-20" /> : <>
+              <span>{ideas.length}</span>
+              <span className="text-xs font-normal text-[#00C9A7] font-mono">+{ideasToday.length} today</span>
+            </>}
           </div>
           <div className="text-[11px] text-[#64748B]">
             Topics you can turn into posts
@@ -179,8 +182,8 @@ export default function MissionControlPage() {
             <span className="w-2 h-2 rounded-full bg-[#ff6b4a] animate-ping" />
           </div>
           <div className="text-2xl font-bold text-[#F1F5F9] flex items-baseline gap-2">
-            <span>{pendingReviewAssets.length}</span>
-            {pendingReviewAssets.length > 0 && (
+            {isLoading ? <Skeleton className="h-8 w-12" /> : <span>{pendingReviewAssets.length}</span>}
+            {!isLoading && pendingReviewAssets.length > 0 && (
               <span className="text-xs font-semibold text-[#ff6b4a] bg-[#ff6b4a]/10 px-2 py-0.5 rounded">Action Required</span>
             )}
           </div>
@@ -196,7 +199,7 @@ export default function MissionControlPage() {
             <CheckCircle2 className="w-4 h-4 text-[#00C9A7]" />
           </div>
           <div className="text-2xl font-bold text-[#F1F5F9] flex items-baseline gap-2">
-            <span>{published.length}</span>
+            {isLoading ? <Skeleton className="h-8 w-12" /> : <span>{published.length}</span>}
           </div>
           <div className="text-[11px] text-[#64748B]">
             Published articles
@@ -217,28 +220,28 @@ export default function MissionControlPage() {
             <div className="text-xs font-bold text-[#F1F5F9] group-hover:text-[#00C9A7] flex items-center justify-center gap-1.5">
               <><Inbox className="h-3.5 w-3.5" aria-hidden="true" /><span>Ideas</span></>
             </div>
-            <div className="text-lg font-bold text-[#00C9A7] font-mono mt-1">{ideas.length}</div>
+            <div className="text-lg font-bold text-[#00C9A7] font-mono mt-1">{isLoading ? <Skeleton className="mx-auto mt-1 h-6 w-8" /> : ideas.length}</div>
           </Link>
 
           <Link href="/ideas" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] transition-all group">
             <div className="text-xs font-bold text-[#F1F5F9] group-hover:text-[#00C9A7] flex items-center justify-center gap-1.5">
               <><PenLine className="h-3.5 w-3.5" aria-hidden="true" /><span>Drafting</span></>
             </div>
-            <div className="text-lg font-bold text-[#64748B] font-mono mt-1">{draftingIdeas.length}</div>
+            <div className="text-lg font-bold text-[#64748B] font-mono mt-1">{isLoading ? <Skeleton className="mx-auto mt-1 h-6 w-8" /> : draftingIdeas.length}</div>
           </Link>
 
           <Link href="/editorial" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#ff6b4a]/40 transition-all group shadow-sm">
             <div className="text-xs font-bold text-[#ff6b4a] flex items-center justify-center gap-1.5">
               <><ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" /><span>Review</span></>
             </div>
-            <div className="text-lg font-bold text-[#ff6b4a] font-mono mt-1">{pendingReviewAssets.length}</div>
+            <div className="text-lg font-bold text-[#ff6b4a] font-mono mt-1">{isLoading ? <Skeleton className="mx-auto mt-1 h-6 w-8" /> : pendingReviewAssets.length}</div>
           </Link>
 
           <Link href="/published" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#00C9A7]/40 transition-all group shadow-sm">
             <div className="text-xs font-bold text-[#00C9A7] flex items-center justify-center gap-1.5">
               <><BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" /><span>Published</span></>
             </div>
-            <div className="text-lg font-bold text-[#00C9A7] font-mono mt-1">{published.length}</div>
+            <div className="text-lg font-bold text-[#00C9A7] font-mono mt-1">{isLoading ? <Skeleton className="mx-auto mt-1 h-6 w-8" /> : published.length}</div>
           </Link>
         </div>
       </div>
@@ -256,11 +259,13 @@ export default function MissionControlPage() {
               <p className="text-xs text-[#94A3B8] break-words">Read each draft and make it yours before publishing.</p>
             </div>
             <span className="text-xs font-mono text-[#ff6b4a] font-bold bg-[#ff6b4a]/10 px-2 py-0.5 rounded border border-[#ff6b4a]/20 shrink-0 self-start sm:self-auto">
-              {pendingReviewAssets.length} Draft{pendingReviewAssets.length === 1 ? "" : "s"} Waiting
+              {isLoading ? "Checking" : `${pendingReviewAssets.length} Draft${pendingReviewAssets.length === 1 ? "" : "s"} Waiting`}
             </span>
           </div>
 
-          {pendingReviewAssets.length === 0 ? (
+          {isLoading ? (
+            <LoadingState label="Loading drafts to review…" rows={2} />
+          ) : pendingReviewAssets.length === 0 ? (
             <div className="p-8 text-center rounded-xl bg-[#161D26] border border-dashed border-[#1F2D3D] text-[#00C9A7]">
               <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-[#00C9A7]" />
               <p className="text-sm font-bold">All clear — no drafts waiting for review</p>

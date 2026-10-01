@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CalendarClock } from "lucide-react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
+import { Skeleton, SkeletonGroup, SkeletonText } from "@/components/ui/Skeleton";
 import { MEMORY_KIND_META, type MemoryKind } from "@/constants/contentLanes";
 import { PULSE_DAYS } from "@/lib/pulse/week";
 import type { PulseDTO, PulseHistoryItem } from "@/services/pulse";
@@ -52,7 +53,16 @@ export default function WeeklyUpdatesPanel() {
     }
   };
 
-  if (!pulse) return error ? <p className="text-xs text-red-400">{error}</p> : null;
+  if (!pulse) {
+    if (error) return <p className="text-xs text-red-400">{error}</p>;
+    return (
+      <SkeletonGroup label="Loading weekly updates" className={cardClass}>
+        <Skeleton className="h-5 w-40" />
+        <SkeletonText lines={2} />
+        <Skeleton className="h-10 w-full" />
+      </SkeletonGroup>
+    );
+  }
   const s = pulse.settings;
 
   return (

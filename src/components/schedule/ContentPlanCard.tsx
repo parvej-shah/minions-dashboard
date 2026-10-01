@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AlertTriangle, CalendarRange, ChevronDown, Lightbulb, Pin, RefreshCw, Sparkles } from "lucide-react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { useApiResource } from "@/hooks/useApiResource";
+import { LoadingState } from "@/components/ui/EmptyState";
 import { localParts } from "@/lib/pulse/week";
 import { formatPostTime, utcToZoned } from "@/lib/postTime";
 import { FILL_METHOD_LABEL, OBJECTIVES, slotKey, type FillMethod } from "@/lib/plan/fill";
@@ -120,11 +121,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
     );
   }
   if (!plan) {
-    return (
-      <div className="p-6 rounded-2xl bg-surface border border-line text-xs text-subtle flex items-center gap-2">
-        <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Loading the content plan…
-      </div>
-    );
+    return <LoadingState label="Loading the content plan" rows={1} />;
   }
   if (!plan.exists) {
     return (

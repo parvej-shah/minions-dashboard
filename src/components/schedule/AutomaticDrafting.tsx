@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Bot, RefreshCw } from "lucide-react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { useApiResource } from "@/hooks/useApiResource";
+import { LoadingState } from "@/components/ui/EmptyState";
 import { formatPostTime } from "@/lib/postTime";
 
 interface DraftingStatus {
@@ -77,11 +78,7 @@ export default function AutomaticDrafting({ onChanged, onMessage, blockedByUnsav
   }
 
   if (isLoading || !data) {
-    return (
-      <div className="p-5 rounded-2xl bg-surface border border-line text-xs text-subtle flex items-center gap-2">
-        <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Checking automatic drafting…
-      </div>
-    );
+    return <LoadingState label="Checking automatic drafting" rows={1} />;
   }
 
   const { tone, title, detail } = describe(data);
