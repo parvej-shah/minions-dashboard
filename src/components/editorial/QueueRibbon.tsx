@@ -48,11 +48,11 @@ export default function QueueRibbon({
       : assets.filter((a) => a.status === listFilter);
 
   return (
-  <div className="bg-surface rounded-2xl border border-line p-4 space-y-3 shadow-xl">
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line/60 pb-3">
+  <div className="bg-surface rounded-2xl border border-line p-3 sm:p-4 space-y-3 shadow-xl">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b border-line/60 pb-3">
       
       {/* Left: Queue Title & Status Pills */}
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-wrap">
         <div className="flex items-center gap-2">
           <Layers className="w-4 h-4 text-brand" />
           <span className="text-xs font-bold text-ink uppercase tracking-wider font-mono">
@@ -60,10 +60,10 @@ export default function QueueRibbon({
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-canvas p-1 rounded-xl border border-line flex-wrap">
+        <div className="flex items-center gap-1.5 bg-canvas p-1 rounded-xl border border-line max-w-full overflow-x-auto whitespace-nowrap no-scrollbar">
           <button
             onClick={() => setListFilter("PENDING_REVIEW")}
-            className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
+            className={`px-2.5 py-2 sm:py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
               listFilter === "PENDING_REVIEW"
                 ? segment.on
                 : segment.off
@@ -73,7 +73,7 @@ export default function QueueRibbon({
           </button>
           <button
             onClick={() => setListFilter("ALL")}
-            className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
+            className={`px-2.5 py-2 sm:py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
               listFilter === "ALL"
                 ? segment.on
                 : segment.off
@@ -84,7 +84,7 @@ export default function QueueRibbon({
           {scheduledCount > 0 && (
             <button
               onClick={() => setListFilter("SCHEDULED")}
-              className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
+              className={`px-2.5 py-2 sm:py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
                 listFilter === "SCHEDULED"
                   ? "bg-[#3B82F6] text-canvas font-bold shadow-sm"
                   : "text-[#93C5FD] hover:bg-surface-2"
@@ -95,7 +95,7 @@ export default function QueueRibbon({
           )}
           <button
             onClick={() => setListFilter("PUBLISHED")}
-            className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
+            className={`px-2.5 py-2 sm:py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
               listFilter === "PUBLISHED"
                 ? segment.on
                 : segment.off
@@ -105,7 +105,7 @@ export default function QueueRibbon({
           </button>
           {liveButUnreviewedCount > 0 && (
             <span
-              className="px-2.5 py-0.5 text-xs font-medium rounded-lg text-gold bg-gold/10 border border-gold/30 cursor-default"
+              className="px-2.5 py-2 sm:py-0.5 text-xs font-medium rounded-lg text-gold bg-gold/10 border border-gold/30 cursor-default"
               title="Already on the blog but still marked PENDING_REVIEW — publishing again duplicates the broadcast"
             >
               Live · Unreviewed ({liveButUnreviewedCount})
@@ -114,7 +114,7 @@ export default function QueueRibbon({
           {unpublishedCount > 0 && (
             <button
               onClick={() => setListFilter("UNPUBLISHED")}
-              className={`px-2.5 py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
+              className={`px-2.5 py-2 sm:py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
                 listFilter === "UNPUBLISHED"
                   ? "bg-gold text-canvas font-bold shadow-sm"
                   : "text-gold hover:bg-surface-2"
@@ -165,7 +165,7 @@ export default function QueueRibbon({
             key={asset.id}
             id={`queue-card-${asset.id}`}
             onClick={() => onSelect(asset.id)}
-            className={`flex items-center gap-3 p-2.5 px-3 rounded-xl border text-left shrink-0 transition-all duration-200 cursor-pointer min-w-[250px] max-w-[290px] relative ${
+            className={`flex items-center gap-3 p-2.5 px-3 rounded-xl border text-left shrink-0 transition-all duration-200 cursor-pointer min-w-[220px] max-w-[290px] sm:min-w-[250px] relative ${
               isCurrent
                 ? "bg-surface-2 border-brand shadow-lg shadow-brand/20 ring-2 ring-brand scale-[1.02] z-10 opacity-100"
                 : "bg-canvas border-line hover:border-[#2A3D52] hover:bg-surface-2/70 opacity-65 hover:opacity-100"
@@ -226,7 +226,7 @@ export default function QueueRibbon({
                 {asset.title}
               </div>
 
-              <div className="flex items-center gap-2 text-[10px] text-subtle font-mono">
+              <div className="hidden sm:flex items-center gap-2 text-[10px] text-subtle font-mono">
                 <span>{asset.audience}</span>
                 <span>•</span>
                 <span>{asset.claims.length > 0 ? `${asset.claims.filter((c) => c.verified === 'Y').length}/${asset.claims.length} Claims` : 'Draft'}</span>

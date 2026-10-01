@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-10-01 — Editorial phone review keeps actions separate from context
+
+**Decision:** The phone action bar shows only Save and Approve/Publish. Draft position, title, and claim counts stay in the review content and queue, not repeated beside the primary actions. Queue filters scroll horizontally on phones.
+**Why:** The narrow action area should make the next decision obvious and keep both controls comfortable to tap without truncating context.
+**Status:** active
+
 ## 2026-10-01 — Setup ends by asking how covers sign off
 
 **Decision:** Setup never asks for a business name up front. The name and photo on covers come from the user's Google account. The last question comes on the first-post screen, under the post: "How should your covers sign off?", with their name (editable) and an optional line under it (e.g. "Founder at Acme"). If they change it, the cover is redrawn with the same headline and illustration before Editorial Studio opens. That screen no longer has a Discard button; Review my post is its only action. Sending users to the Brand page for this was rejected.

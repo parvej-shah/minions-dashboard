@@ -383,13 +383,6 @@ export default function EditorialStudio({
 
       <MobileActionBar
         activeAsset={activeAsset}
-        title={edited.title}
-        currentAssetIndex={currentAssetIndex}
-        totalDrafts={assets.length}
-        wordCount={wordCount}
-        verifiedClaimsCount={verifiedClaimsCount}
-        totalClaims={totalClaims}
-        allClaimsVerified={allClaimsVerified}
         isDirty={draft.isDirty}
         isSaving={draft.isSaving}
         publishState={draft.publishState}
