@@ -38,6 +38,8 @@ export interface CoverCopyInput {
   icp: { who: string; role: string; company_type: string };
   /** Layouts of this tenant's recent covers, newest first. */
   recentLayouts: string[];
+  /** Draw this layout, skipping the figure and quote picks (the first post's cover). */
+  layout?: "STATEMENT";
 }
 
 export interface HeadlineScore {
@@ -208,11 +210,12 @@ export function chooseCoverCopy(input: CoverCopyInput): CoverCopy {
     kicker = "";
   }
 
-  const numbered = pickNumber(input.card, input.body, input.claimsOk, notes);
-  const quote = pickQuote(input.body);
-  // Most preferred first: a verified figure stops the scroll best.
-  const available: CoverLayout[] = [...(numbered ? (["NUMBER"] as const) : []), ...(quote ? (["QUOTE"] as const) : []), "HEADLINE", "STATEMENT"];
-  const layout = pickLayout(available, input.recentLayouts);
+  const numbered = input.layout ? undefined : pickNumber(input.card, input.body, input.claimsOk, notes);
+  const quote = input.layout ? undefined : pickQuote(input.body);
+  // Most preferred first: a verified figure stops the scroll best, and
+  // STATEMENT (dark) leads HEADLINE when the post has neither (user decision, 2026-10-01).
+  const available: CoverLayout[] = [...(numbered ? (["NUMBER"] as const) : []), ...(quote ? (["QUOTE"] as const) : []), "STATEMENT", "HEADLINE"];
+  const layout = input.layout ?? pickLayout(available, input.recentLayouts);
 
   const base = { layout, label: audienceLabel(input.icp), headline_source: source, score: score!, notes };
   if (layout === "NUMBER" && numbered) {

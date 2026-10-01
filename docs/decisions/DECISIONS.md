@@ -35,6 +35,12 @@ and link to it here.
 **Why:** The narrow action area should make the next decision obvious and keep both controls comfortable to tap without truncating context.
 **Status:** active
 
+## 2026-10-01 — The first post's cover is Statement with Shapes; Statement leads after it
+
+**Decision:** The cover drawn for the first post (setup) is always the dark Statement layout with the Shapes illustration, never a number or quote cover. For every other draft, a verified figure still gets a Number cover and a strong line a Quote cover; otherwise Statement is now chosen before Headline. The rotation that avoids repeating the previous cover's layout stays. Reviewers can still change any cover in Editorial Studio. Always using Statement for every draft was rejected.
+**Why:** Statement with Shapes is the boldest, cleanest first impression, and a figure or quote picked out of someone's very first post can feel random. Forcing one layout on every draft would make a LinkedIn feed look the same post after post, and Number and Quote covers stop the scroll better when the post really has a figure or a strong line.
+**Status:** active
+
 ## 2026-10-01 — Setup ends by asking how covers sign off
 
 **Decision:** Setup never asks for a business name up front. The name and photo on covers come from the user's Google account. The last question comes on the first-post screen, under the post: "How should your covers sign off?", with their name (editable) and an optional line under it (e.g. "Founder at Acme"). If they change it, the cover is redrawn with the same headline and illustration before Editorial Studio opens. That screen no longer has a Discard button; Review my post is its only action. Sending users to the Brand page for this was rejected.

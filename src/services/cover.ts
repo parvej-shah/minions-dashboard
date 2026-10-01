@@ -6,6 +6,7 @@ import { COVER_LAYOUTS, CoverFitError, type CoverLayout, type CoverSpec } from "
 import { renderCoverPng } from "@/lib/covers/render";
 import { chooseArt, parseArtStyle, DEFAULT_COVER_ART_STYLE, type CoverArtStyle } from "@/lib/covers/art";
 import { numbersIn } from "@/lib/harvest/text";
+import { FIRST_POST_TAG } from "@/constants/firstPost";
 
 /**
  * Draws an asset's cover in code and attaches it (phase 5 of
@@ -161,6 +162,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     select: {
       id: true, clientId: true, title: true, hook: true, content: true, claimsOk: true, coverSpec: true, heroAttempts: true,
       heroImageUrl: true, slug: true, status: true, publishedAt: true, linkedinPublishedAt: true, facebookPublishedAt: true,
+      idea: { select: { tags: true } },
     },
   });
   if (!asset) return { ok: false, error: `Asset ${assetId} not found` };
@@ -185,6 +187,10 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   const card: CoverCard = input.card ?? previous?.card ?? {};
   const body = bodyOf(asset.content ?? "");
   const icpFields = { who: icp?.who ?? "", role: icp?.role ?? "", company_type: icp?.companyType ?? "" };
+  // The first post's cover is the dark STATEMENT with Shapes: the boldest
+  // first impression, with no picked figure or quote (user decision,
+  // 2026-10-01). A reviewer's edit still changes it.
+  const firstPost = !input.edit && Boolean(asset.idea?.tags.includes(FIRST_POST_TAG));
   const copy = chooseCoverCopy({
     card,
     title: asset.title ?? "",
@@ -193,11 +199,12 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     claimsOk: asset.claimsOk ?? "N",
     icp: icpFields,
     recentLayouts: recent.map((r) => (r.coverSpec as { layout?: string } | null)?.layout ?? "").filter(Boolean),
+    ...(firstPost ? { layout: "STATEMENT" as const } : {}),
   });
 
   // The illustration. A re-draw keeps the one the cover has unless the
   // reviewer changes the style or asks for another.
-  const artStyle = input.edit?.art ?? parseArtStyle(previous?.art_style) ?? parseArtStyle(profile.coverArt) ?? DEFAULT_COVER_ART_STYLE;
+  const artStyle = input.edit?.art ?? (firstPost ? "SHAPES" : null) ?? parseArtStyle(previous?.art_style) ?? parseArtStyle(profile.coverArt) ?? DEFAULT_COVER_ART_STYLE;
   const reroll = Boolean(input.edit?.art_reroll);
   let art: CoverSpec["art"];
   if (previous?.art && previous.art_style === artStyle && !reroll) art = previous.art;

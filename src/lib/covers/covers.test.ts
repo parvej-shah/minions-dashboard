@@ -91,6 +91,17 @@ describe("cover copy is chosen and checked in code", () => {
     expect(pickQuote("Not because the model was wrong, but because the write failed.")).toBeUndefined();
   });
 
+  it("prefers the dark STATEMENT over HEADLINE when there is no figure or quote", () => {
+    expect(chooseCoverCopy({ ...input, body: "Not because the model was wrong, but because the write failed.", recentLayouts: [] }).layout).toBe("STATEMENT");
+  });
+
+  it("draws the layout it is told to, skipping the figure and quote (the first post)", () => {
+    const card = { ...input.card, number: { value: "3", unit: "seconds", caption: "of silence and the booking was gone" } };
+    const copy = chooseCoverCopy({ ...input, card, layout: "STATEMENT", recentLayouts: ["STATEMENT"] });
+    expect(copy.layout).toBe("STATEMENT");
+    expect(copy.number).toBeUndefined();
+  });
+
   it("rotates layouts: least recently used, never the last one twice", () => {
     expect(pickLayout(["HEADLINE", "STATEMENT"], ["HEADLINE"])).toBe("STATEMENT");
     expect(pickLayout(["QUOTE", "HEADLINE", "STATEMENT"], ["QUOTE", "STATEMENT", "HEADLINE"])).toBe("HEADLINE");
