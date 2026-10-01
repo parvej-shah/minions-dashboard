@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { apiError, apiFailure } from "@/lib/api-response";
-import { requireClientId } from "@/lib/tenant";
+import { getCurrentUser, requireClientId } from "@/lib/tenant";
 import { parseMemoryContent, parseMemoryKind } from "@/lib/authorInput";
 import { blockingCodeFindings } from "@/lib/ai/memoryCheck";
 import { MEMORY_KIND_SOURCE } from "@/constants/sourceMix";
@@ -67,21 +67,24 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+
+  // Setup checks the answer before it saves the workspace, so a story that
+  // would be refused never leaves a half-finished setup behind. A new user
+  // has no workspace yet here, so this only needs a signed-in user.
+  if (body?.validate === true) {
+    if (!(await getCurrentUser())) return apiFailure("Unauthorized", 401);
+    const content = parseMemoryContent(body.story);
+    if (typeof content !== "string") return apiFailure(content.error, 400);
+    const blocked = blockingCodeFindings(content);
+    if (blocked.length) return apiFailure(`Remove this first: ${blocked[0].reason}`, 400);
+    return NextResponse.json({ ok: true });
+  }
+
   const ctx = await requireClientId();
   if ("error" in ctx) return ctx.error;
 
   try {
-    const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
-
-    // Setup checks the answer before it saves the workspace, so a story that
-    // would be refused never leaves a half-finished setup behind.
-    if (body?.validate === true) {
-      const content = parseMemoryContent(body.story);
-      if (typeof content !== "string") return apiFailure(content.error, 400);
-      const blocked = blockingCodeFindings(content);
-      if (blocked.length) return apiFailure(`Remove this first: ${blocked[0].reason}`, 400);
-      return NextResponse.json({ ok: true });
-    }
 
     let idea = await findFirstPostIdea(ctx.clientId);
 
