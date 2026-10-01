@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-10-01 — One authoritative channel preview in Editorial Studio
+
+**Decision:** Editorial Studio uses one Channel preview as the authoritative representation of social copy, placed first in the review flow. The duplicate reader preview is removed; plain-language draft checks sit beside the publish decision, while each connected channel can be previewed, edited and saved in place.
+**Why:** Two previews of the same post made users scroll through repeated content and left it unclear where edits belonged. One review surface creates a direct path from reading to editing to publishing.
+**Status:** active
+
 ## 2026-10-01 — Editorial Studio is a guided review flow
 
 **Decision:** Editorial Studio leads from a plain-language draft queue into one selected post and one dominant Approve & publish action. Technical version and audience-lane badges, duplicated navigation, duplicated save controls, and operator terminology are removed from the main decision path; editing, scheduling, claims and destructive actions remain available as supporting controls.

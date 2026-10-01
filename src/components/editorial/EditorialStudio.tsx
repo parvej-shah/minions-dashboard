@@ -21,7 +21,8 @@ import SocialVariantTabs, { type SocialTab } from "./social/SocialVariantTabs";
 import ReviewDock from "./ReviewDock";
 import ClaimsGate from "./ClaimsGate";
 import MobileActionBar from "./MobileActionBar";
-import ReaderView from "./ReaderView";
+import DraftChecks from "./DraftChecks";
+import { plainReviewNotes } from "@/lib/drafts/plainNotes";
 
 function EditorialStudioSkeleton() {
   return (
@@ -150,6 +151,10 @@ export default function EditorialStudio({
   const verifiedClaimsCount =
     activeAsset?.claims.filter((c) => c.verified === "Y").length ?? 0;
   const allClaimsVerified = totalClaims > 0 && verifiedClaimsCount === totalClaims;
+  const reviewNotes = useMemo(
+    () => (activeAsset ? plainReviewNotes(activeAsset) : []),
+    [activeAsset]
+  );
 
   const handleSave = async () => {
     const message = await draft.saveDraft();
@@ -300,7 +305,7 @@ export default function EditorialStudio({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-8 space-y-6">
-          {enabledSocialTabs.LINKEDIN && <ReaderView asset={activeAsset} linkedinText={edited.linkedin} />}
+          {socialVariants}
 
           {/* Shown for every channel: LinkedIn posts carry the cover too. */}
           <CoverImageCard activeAsset={activeAsset} isRendering={draft.isRenderingCover} onRerender={draft.rerenderCover} onMessage={toast.show} />
@@ -328,10 +333,10 @@ export default function EditorialStudio({
             />
           )}
 
-          {socialVariants}
         </div>
 
         <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-6">
+          <DraftChecks notes={reviewNotes} />
           <ReviewDock
             activeAsset={activeAsset}
             isDirty={draft.isDirty}

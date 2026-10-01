@@ -14,13 +14,11 @@ import {
   Send,
   Share2,
   ThumbsUp,
-  X,
-  Sparkles,
 } from "lucide-react";
 import Image from "next/image";
 import type { AssetItem } from "@/types";
 
-import { buttonStyles } from "@/components/ui/Button";
+import { Button, buttonStyles } from "@/components/ui/Button";
 export type SocialTab = "LINKEDIN" | "FACEBOOK" | "TWITTER";
 
 export interface SocialVariantTabsProps {
@@ -92,59 +90,72 @@ export default function SocialVariantTabs({
   };
 
   return (
-    <div className="space-y-4 bg-transparent p-0 shadow-none sm:space-y-5 sm:rounded-2xl sm:border sm:border-line sm:bg-surface sm:p-5 sm:shadow-xl">
-      {/* Header & Platform Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-4">
-        <div className="flex items-center gap-2">
-          <Share2 className="w-4 h-4 text-brand" />
-          <span className="text-xs font-bold text-ink font-mono uppercase tracking-wider">
-            Social Media Staging & Previews
+    <section aria-labelledby="channel-preview-title" className="overflow-hidden rounded-3xl border-2 border-b-4 border-line bg-surface shadow-xl">
+      <div className="flex flex-col gap-4 border-b-2 border-line bg-gradient-to-br from-brand/10 via-surface to-surface p-4 sm:p-5">
+        <div className="flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-brand/30 bg-brand/10 text-brand">
+            <Share2 className="h-5 w-5" aria-hidden="true" />
           </span>
+          <div>
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-brand">Ready for review</p>
+            <h2 id="channel-preview-title" className="mt-0.5 text-xl font-extrabold text-ink">Channel preview</h2>
+            <p className="mt-1 text-sm leading-relaxed text-muted">See exactly what will publish. Choose a channel, then edit its copy here.</p>
+          </div>
         </div>
 
         {/* Social Platform Tabs */}
-        <div className="flex items-center flex-wrap gap-1.5 bg-canvas p-1 rounded-xl border border-line">
+        <div role="tablist" aria-label="Publishing channel" className="grid w-full grid-cols-1 gap-2 rounded-2xl border border-line bg-canvas p-1.5 sm:flex sm:w-auto sm:flex-wrap">
           {showLinkedin && (
             <button
+              type="button"
+              role="tab"
+              aria-selected={socialTab === "LINKEDIN"}
               onClick={() => setSocialTab("LINKEDIN")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex min-h-11 items-center justify-center gap-1.5 rounded-xl border-b-4 px-4 py-2 text-sm font-extrabold transition-all cursor-pointer active:translate-y-1 active:border-b-0 ${
                 socialTab === "LINKEDIN"
-                  ? "bg-[#0077B5] text-white shadow-md shadow-[#0077B5]/20 font-bold"
-                  : "text-muted hover:text-ink hover:bg-surface-2"
+                  ? "bg-[#0077B5] border-[#005A88] text-white shadow-md shadow-[#0077B5]/20"
+                  : "text-muted border-line hover:text-ink hover:bg-surface-2"
               }`}
             >
-              <span>LinkedIn Feed</span>
+              <span>LinkedIn</span>
             </button>
           )}
 
           {showFacebook && (
             <button
+              type="button"
+              role="tab"
+              aria-selected={socialTab === "FACEBOOK"}
               onClick={() => setSocialTab("FACEBOOK")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex min-h-11 items-center justify-center gap-1.5 rounded-xl border-b-4 px-4 py-2 text-sm font-extrabold transition-all cursor-pointer active:translate-y-1 active:border-b-0 ${
                 socialTab === "FACEBOOK"
-                  ? "bg-[#1877F2] text-white shadow-md shadow-[#1877F2]/20 font-bold"
-                  : "text-muted hover:text-ink hover:bg-surface-2"
+                  ? "bg-[#1877F2] border-[#0F58B8] text-white shadow-md shadow-[#1877F2]/20"
+                  : "text-muted border-line hover:text-ink hover:bg-surface-2"
               }`}
             >
-              <span>Facebook Post</span>
+              <span>Facebook</span>
             </button>
           )}
 
           {showTwitter && (
             <button
+              type="button"
+              role="tab"
+              aria-selected={socialTab === "TWITTER"}
               onClick={() => setSocialTab("TWITTER")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex min-h-11 items-center justify-center gap-1.5 rounded-xl border-b-4 px-4 py-2 text-sm font-extrabold transition-all cursor-pointer active:translate-y-1 active:border-b-0 ${
                 socialTab === "TWITTER"
-                  ? "bg-[#1DA1F2] text-white shadow-md shadow-[#1DA1F2]/20 font-bold"
-                  : "text-muted hover:text-ink hover:bg-surface-2"
+                  ? "bg-[#1DA1F2] border-[#1378B5] text-white shadow-md shadow-[#1DA1F2]/20"
+                  : "text-muted border-line hover:text-ink hover:bg-surface-2"
               }`}
             >
-              <span>X / Twitter</span>
+              <span>X</span>
             </button>
           )}
         </div>
       </div>
 
+      <div className="p-3 sm:p-5">
       {/* ======================================================== */}
       {/* TAB A: LINKEDIN REALISTIC FEED MOCK & EDITOR */}
       {/* ======================================================== */}
@@ -175,7 +186,7 @@ export default function SocialVariantTabs({
               <button
                 type="button"
                 onClick={() => setIsEditingSocial(!isEditingSocial)}
-                className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-xl text-xs font-semibold transition-all border cursor-pointer sm:flex-none ${
+                className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border-2 border-b-4 px-4 py-2 text-sm font-extrabold transition-all cursor-pointer active:translate-y-1 active:border-b-0 sm:flex-none ${
                   isEditingSocial
                     ? "bg-brand/15 text-brand border-brand/40 shadow-xs"
                     : "bg-surface-2 hover:bg-surface-3 text-muted hover:text-ink border-line"
@@ -183,7 +194,7 @@ export default function SocialVariantTabs({
               >
                 <Edit3 className="w-3.5 h-3.5" />
                 <span className="sm:hidden">{isEditingSocial ? "Preview" : "Edit"}</span>
-                <span className="hidden sm:inline">{isEditingSocial ? "Previewing" : "Edit Copy"}</span>
+                <span className="hidden sm:inline">{isEditingSocial ? "Preview" : "Edit post"}</span>
               </button>
 
               <button
@@ -216,12 +227,12 @@ export default function SocialVariantTabs({
                     }
                   }}
                   placeholder="Draft or polish your LinkedIn post copy here..."
-                  className="w-full bg-[#0B0F14] border border-brand/40 focus:border-brand rounded-xl p-4 text-xs text-ink leading-relaxed resize-none outline-none font-sans shadow-inner transition-all"
+                  className="w-full resize-none rounded-2xl border-2 border-brand/50 bg-canvas p-4 text-[15px] leading-7 text-ink shadow-inner outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/10"
                 />
               </div>
 
               {/* Polished Edit Footer */}
-              <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0B0F14] p-3 rounded-xl border border-line">
+              <div className="sticky bottom-3 z-10 flex flex-col gap-3 rounded-2xl border-2 border-line bg-surface/95 p-3 shadow-2xl backdrop-blur sm:flex-row sm:items-center sm:justify-between">
                 <div className="text-[11px] font-mono text-muted flex items-center gap-2">
                   <span>{getStats(edited.linkedin).chars.toLocaleString()} characters</span>
                   <span>•</span>
@@ -232,19 +243,13 @@ export default function SocialVariantTabs({
                   <button
                     type="button"
                     onClick={() => setIsEditingSocial(false)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink hover:bg-surface-2 transition-all cursor-pointer"
+                    className={buttonStyles({ variant: "ghost", size: "md" })}
                   >
-                    Done Editing
+                    Preview
                   </button>
-                  <button
-                    type="button"
-                    onClick={onSave}
-                    disabled={isSaving}
-                    className={buttonStyles({ size: "sm" })}
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>{isSaving ? "Saving..." : "Save Changes"}</span>
-                  </button>
+                  <Button type="button" onClick={onSave} loading={isSaving} size="md" icon={<Check className="h-4 w-4" />}>
+                    Save changes
+                  </Button>
                 </div>
               </div>
             </div>
@@ -299,20 +304,20 @@ export default function SocialVariantTabs({
           )}
 
           {/* LinkedIn Action Bar (Realistic Mock) */}
-          <div className="flex items-center justify-between pt-3 border-t border-line/60 text-xs text-muted">
-            <div className="flex items-center gap-1.5 hover:text-ink cursor-pointer">
+          <div className="flex items-center justify-between pt-3 border-t border-line/60 text-xs text-muted" aria-hidden="true">
+            <div className="flex items-center gap-1.5">
               <ThumbsUp className="w-3.5 h-3.5" />
               <span>Like</span>
             </div>
-            <div className="flex items-center gap-1.5 hover:text-ink cursor-pointer">
+            <div className="flex items-center gap-1.5">
               <MessageCircle className="w-3.5 h-3.5" />
               <span>Comment</span>
             </div>
-            <div className="flex items-center gap-1.5 hover:text-ink cursor-pointer">
+            <div className="flex items-center gap-1.5">
               <Repeat className="w-3.5 h-3.5" />
               <span>Repost</span>
             </div>
-            <div className="flex items-center gap-1.5 hover:text-ink cursor-pointer">
+            <div className="flex items-center gap-1.5">
               <Send className="w-3.5 h-3.5" />
               <span>Send</span>
             </div>
@@ -350,7 +355,7 @@ export default function SocialVariantTabs({
               <button
                 type="button"
                 onClick={() => setIsEditingSocial(!isEditingSocial)}
-                className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-xl text-xs font-semibold transition-all border cursor-pointer sm:flex-none ${
+                className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border-2 border-b-4 px-4 py-2 text-sm font-extrabold transition-all cursor-pointer active:translate-y-1 active:border-b-0 sm:flex-none ${
                   isEditingSocial
                     ? "bg-brand/15 text-brand border-brand/40 shadow-xs"
                     : "bg-surface-2 hover:bg-surface-3 text-muted hover:text-ink border-line"
@@ -358,7 +363,7 @@ export default function SocialVariantTabs({
               >
                 <Edit3 className="w-3.5 h-3.5" />
                 <span className="sm:hidden">{isEditingSocial ? "Preview" : "Edit"}</span>
-                <span className="hidden sm:inline">{isEditingSocial ? "Previewing" : "Edit Copy"}</span>
+                <span className="hidden sm:inline">{isEditingSocial ? "Preview" : "Edit post"}</span>
               </button>
 
               <button
@@ -390,10 +395,10 @@ export default function SocialVariantTabs({
                   }
                 }}
                 placeholder="Draft or polish your Facebook post copy here..."
-                className="w-full bg-[#0B0F14] border border-brand/40 focus:border-brand rounded-xl p-4 text-xs text-ink leading-relaxed resize-none outline-none font-sans shadow-inner transition-all"
+                className="w-full resize-none rounded-2xl border-2 border-brand/50 bg-canvas p-4 text-[15px] leading-7 text-ink shadow-inner outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/10"
               />
 
-              <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0B0F14] p-3 rounded-xl border border-line">
+              <div className="sticky bottom-3 z-10 flex flex-col gap-3 rounded-2xl border-2 border-line bg-surface/95 p-3 shadow-2xl backdrop-blur sm:flex-row sm:items-center sm:justify-between">
                 <div className="text-[11px] font-mono text-muted flex items-center gap-2">
                   <span>{getStats(edited.facebook).chars.toLocaleString()} characters</span>
                   <span>•</span>
@@ -404,19 +409,13 @@ export default function SocialVariantTabs({
                   <button
                     type="button"
                     onClick={() => setIsEditingSocial(false)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink hover:bg-surface-2 transition-all cursor-pointer"
+                    className={buttonStyles({ variant: "ghost", size: "md" })}
                   >
-                    Done Editing
+                    Preview
                   </button>
-                  <button
-                    type="button"
-                    onClick={onSave}
-                    disabled={isSaving}
-                    className={buttonStyles({ size: "sm" })}
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>{isSaving ? "Saving..." : "Save Changes"}</span>
-                  </button>
+                  <Button type="button" onClick={onSave} loading={isSaving} size="md" icon={<Check className="h-4 w-4" />}>
+                    Save changes
+                  </Button>
                 </div>
               </div>
             </div>
@@ -443,16 +442,16 @@ export default function SocialVariantTabs({
           )}
 
           {/* Facebook Action Bar */}
-          <div className="flex items-center justify-around pt-3 border-t border-line/60 text-xs text-muted">
-            <div className="flex items-center gap-1.5 hover:text-ink cursor-pointer">
+          <div className="flex items-center justify-around pt-3 border-t border-line/60 text-xs text-muted" aria-hidden="true">
+            <div className="flex items-center gap-1.5">
               <ThumbsUp className="w-3.5 h-3.5" />
               <span>Like</span>
             </div>
-            <div className="flex items-center gap-1.5 hover:text-ink cursor-pointer">
+            <div className="flex items-center gap-1.5">
               <MessageCircle className="w-3.5 h-3.5" />
               <span>Comment</span>
             </div>
-            <div className="flex items-center gap-1.5 hover:text-ink cursor-pointer">
+            <div className="flex items-center gap-1.5">
               <Share2 className="w-3.5 h-3.5" />
               <span>Share</span>
             </div>
@@ -486,7 +485,7 @@ export default function SocialVariantTabs({
               <button
                 type="button"
                 onClick={() => setIsEditingSocial(!isEditingSocial)}
-                className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-xl text-xs font-semibold transition-all border cursor-pointer sm:flex-none ${
+                className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border-2 border-b-4 px-4 py-2 text-sm font-extrabold transition-all cursor-pointer active:translate-y-1 active:border-b-0 sm:flex-none ${
                   isEditingSocial
                     ? "bg-brand/15 text-brand border-brand/40 shadow-xs"
                     : "bg-surface-2 hover:bg-surface-3 text-muted hover:text-ink border-line"
@@ -494,7 +493,7 @@ export default function SocialVariantTabs({
               >
                 <Edit3 className="w-3.5 h-3.5" />
                 <span className="sm:hidden">{isEditingSocial ? "Preview" : "Edit"}</span>
-                <span className="hidden sm:inline">{isEditingSocial ? "Previewing" : "Edit Copy"}</span>
+                <span className="hidden sm:inline">{isEditingSocial ? "Preview" : "Edit post"}</span>
               </button>
 
               <button
@@ -526,10 +525,10 @@ export default function SocialVariantTabs({
                   }
                 }}
                 placeholder="Draft or polish your X / Twitter thread or post..."
-                className="w-full bg-[#0B0F14] border border-brand/40 focus:border-brand rounded-xl p-4 text-xs text-ink leading-relaxed resize-none outline-none font-sans shadow-inner transition-all"
+                className="w-full resize-none rounded-2xl border-2 border-brand/50 bg-canvas p-4 text-[15px] leading-7 text-ink shadow-inner outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/10"
               />
 
-              <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0B0F14] p-3 rounded-xl border border-line">
+              <div className="sticky bottom-3 z-10 flex flex-col gap-3 rounded-2xl border-2 border-line bg-surface/95 p-3 shadow-2xl backdrop-blur sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3 text-[11px] font-mono">
                   <span className={`${edited.twitter.length > 280 ? "text-red-400 font-bold" : "text-muted"}`}>
                     {edited.twitter.length}/280 characters
@@ -542,19 +541,13 @@ export default function SocialVariantTabs({
                   <button
                     type="button"
                     onClick={() => setIsEditingSocial(false)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink hover:bg-surface-2 transition-all cursor-pointer"
+                    className={buttonStyles({ variant: "ghost", size: "md" })}
                   >
-                    Done Editing
+                    Preview
                   </button>
-                  <button
-                    type="button"
-                    onClick={onSave}
-                    disabled={isSaving}
-                    className={buttonStyles({ size: "sm" })}
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>{isSaving ? "Saving..." : "Save Changes"}</span>
-                  </button>
+                  <Button type="button" onClick={onSave} loading={isSaving} size="md" icon={<Check className="h-4 w-4" />}>
+                    Save changes
+                  </Button>
                 </div>
               </div>
             </div>
@@ -569,15 +562,16 @@ export default function SocialVariantTabs({
           )}
 
           {/* Twitter Action Bar */}
-          <div className="flex items-center justify-between pt-3 border-t border-line/60 text-xs text-subtle">
-            <MessageCircle className="w-3.5 h-3.5 hover:text-[#1DA1F2] cursor-pointer" />
-            <Repeat className="w-3.5 h-3.5 hover:text-brand cursor-pointer" />
-            <ThumbsUp className="w-3.5 h-3.5 hover:text-red-400 cursor-pointer" />
-            <BarChart2 className="w-3.5 h-3.5 hover:text-white cursor-pointer" />
-            <Bookmark className="w-3.5 h-3.5 hover:text-brand cursor-pointer" />
+          <div className="flex items-center justify-between pt-3 border-t border-line/60 text-xs text-subtle" aria-hidden="true">
+            <MessageCircle className="w-3.5 h-3.5" />
+            <Repeat className="w-3.5 h-3.5" />
+            <ThumbsUp className="w-3.5 h-3.5" />
+            <BarChart2 className="w-3.5 h-3.5" />
+            <Bookmark className="w-3.5 h-3.5" />
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </section>
   );
 }
