@@ -136,20 +136,45 @@ export default function MissionControlPage() {
         </div>
       </div>
 
-      <aside className="relative isolate min-h-[190px] overflow-hidden rounded-2xl border border-[#00C9A7]/30 bg-[#0F1419] p-6 shadow-[0_16px_40px_-30px_rgba(0,201,167,0.45)] sm:min-h-[220px] sm:p-8" aria-label="Daily spark">
-        <span className="absolute inset-y-0 left-0 w-1.5 bg-[#00C9A7]" aria-hidden="true" />
-        <span className="pointer-events-none absolute -right-12 -top-24 h-52 w-52 rounded-full bg-[#00C9A7]/10 blur-3xl" aria-hidden="true" />
-        <p className="relative flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#00C9A7]">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#00C9A7]/10">
-            <Lightbulb className="h-4 w-4" aria-hidden="true" />
-          </span>
-          Daily spark
-        </p>
-        <blockquote className="relative mt-6 max-w-4xl text-[clamp(1.55rem,4vw,2.75rem)] font-bold leading-[1.18] tracking-tight text-[#F1F5F9]" aria-busy={thoughtIndex === null}>
-          {thoughtIndex === null
-            ? <span className="block h-9 w-3/4 max-w-xl animate-pulse rounded-lg bg-[#161D26]" aria-hidden="true" />
-            : <>“{POSTING_THOUGHTS[thoughtIndex]}”</>}
-        </blockquote>
+      <aside
+        className="group relative isolate overflow-hidden rounded-[1.75rem] border border-[#00C9A7]/35 bg-[linear-gradient(135deg,#10201e_0%,#0f1719_48%,#10151b_100%)] p-1 shadow-[0_10px_0_#08100f,0_24px_60px_-36px_rgba(0,201,167,0.75)]"
+        aria-label="Daily spark"
+      >
+        <span className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-[#00C9A7]/12 blur-3xl" aria-hidden="true" />
+        <span className="pointer-events-none absolute bottom-5 right-8 text-[8rem] font-black leading-none text-[#00C9A7]/[0.045] sm:text-[11rem]" aria-hidden="true">
+          “
+        </span>
+
+        <div className="relative min-h-[210px] rounded-[1.5rem] border border-white/[0.035] bg-[#0D1418]/75 px-5 py-6 sm:min-h-[230px] sm:px-8 sm:py-8 lg:px-10">
+          <div className="flex items-center justify-between gap-4">
+            <p className="flex items-center gap-3 text-xs font-extrabold uppercase tracking-[0.18em] text-[#38E8C7]">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#00C9A7]/25 bg-[#00C9A7]/12 shadow-[0_4px_0_rgba(0,0,0,0.28)]">
+                <Lightbulb className="h-5 w-5" strokeWidth={2.4} aria-hidden="true" />
+              </span>
+              <span>
+                <span className="block">Daily spark</span>
+                <span className="mt-0.5 block text-[10px] font-semibold normal-case tracking-normal text-[#8CA5A0]">A thought for today</span>
+              </span>
+            </p>
+            <span className="rounded-full border border-[#00C9A7]/20 bg-[#00C9A7]/10 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#70EBD4]">
+              Today
+            </span>
+          </div>
+
+          <blockquote
+            className="relative mt-7 max-w-5xl text-[clamp(1.7rem,4.2vw,3.25rem)] font-extrabold leading-[1.06] tracking-[-0.035em] text-[#F4F8F7] sm:mt-8"
+            aria-busy={thoughtIndex === null}
+          >
+            {thoughtIndex === null
+              ? (
+                <span className="space-y-3" aria-hidden="true">
+                  <span className="block h-8 w-11/12 animate-pulse rounded-xl bg-white/[0.07] sm:h-11" />
+                  <span className="block h-8 w-2/3 animate-pulse rounded-xl bg-white/[0.05] sm:h-11" />
+                </span>
+              )
+              : <>{POSTING_THOUGHTS[thoughtIndex]}</>}
+          </blockquote>
+        </div>
       </aside>
 
       {/* THE WEEKLY QUESTION (phase 6): shown only on the weeks it is open */}
