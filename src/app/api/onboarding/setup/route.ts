@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { apiError, apiFailure } from "@/lib/api-response";
 import { requireTenantAccess, isPlaceholderTenantName } from "@/lib/tenant";
+import { auth } from "@/lib/auth";
 import { DISTRIBUTION_CHANNELS } from "@/constants/channels";
 import { BRAND_PRESETS } from "@/constants/brandPresets";
 import { resolveWriterExpertise } from "@/constants/writerExpertise";
@@ -29,8 +30,15 @@ export async function POST(request: Request) {
     const icpDescription = (body.icp_description || "").toString().trim();
     const contentFocus = (body.content_focus || "").toString().trim();
     const presetId = (body.preset_id || "").toString().trim();
-    const logoUrl = (body.logo_url || "").toString().trim();
-    const businessName = (body.business_name || "").toString().trim();
+    // Setup no longer asks for a business name or photo, so the Google
+    // account's name and picture stand in. Without them the cover's author
+    // line showed "<email-local-part>'s Workspace" and an initials monogram.
+    const session = await auth();
+    const googleName = session?.user?.name?.trim() || "";
+    const googlePhoto = googlePhotoUrl(session?.user?.image);
+    const importedLogo = (body.logo_url || "").toString().trim();
+    const logoUrl = importedLogo || googlePhoto;
+    const typedName = (body.business_name || "").toString().trim();
     // The tenant's own public site. blogUrl() builds every public post URL on
     // this, so leaving it empty makes those URLs advertise getminions.ai.
     const websiteUrl = normalizeDomain((body.website_url || "").toString()) || "";
@@ -53,10 +61,10 @@ export async function POST(request: Request) {
 
     const matchedPreset = BRAND_PRESETS.find((p) => p.id === presetId);
 
-    const client = await prisma.client.findUnique({
-      where: { id: ctx.clientId },
-      select: { name: true },
-    });
+    const [client, existingProfile] = await Promise.all([
+      prisma.client.findUnique({ where: { id: ctx.clientId }, select: { name: true } }),
+      prisma.brandProfile.findUnique({ where: { clientId: ctx.clientId }, select: { primaryLogoUrl: true } }),
+    ]);
 
     // getOrCreateTenant() names a fresh tenant "<email-local-part>'s
     // Workspace" because it runs before onboarding has asked for anything.
@@ -64,6 +72,8 @@ export async function POST(request: Request) {
     // otherwise the placeholder stuck permanently and surfaced everywhere
     // company_name is shown, including generated cover images.
     const isPlaceholderName = isPlaceholderTenantName(client?.name);
+    // The Google name only replaces a placeholder, never a name someone chose.
+    const businessName = typedName || (isPlaceholderName ? googleName : "");
     const resolvedName = businessName || client?.name || industry;
 
     if (businessName && businessName !== client?.name && isPlaceholderName) {
@@ -96,7 +106,8 @@ export async function POST(request: Request) {
         allowedProofClaims: [],
         writerExpertise,
         // Only set on a fresh LinkedIn import -- never clobber a logo the user already set.
-        ...(logoUrl ? { primaryLogoUrl: logoUrl } : {}),
+        // The Google photo only fills an empty one.
+        ...(importedLogo ? { primaryLogoUrl: importedLogo } : !existingProfile?.primaryLogoUrl && googlePhoto ? { primaryLogoUrl: googlePhoto } : {}),
       },
       create: {
         clientId: ctx.clientId,
@@ -250,4 +261,11 @@ export async function POST(request: Request) {
   } catch (error) {
     return apiError(error, "Failed to save onboarding setup");
   }
+}
+
+/** The Google profile picture at cover size (Google serves 96px by default), or "". */
+function googlePhotoUrl(image: string | null | undefined): string {
+  const url = image?.trim() ?? "";
+  if (!/^https:\/\//.test(url)) return "";
+  return url.replace(/=s\d+(-c)?$/, "=s400-c");
 }
