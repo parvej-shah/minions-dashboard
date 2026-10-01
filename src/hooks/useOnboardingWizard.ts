@@ -68,7 +68,6 @@ export interface OnboardingWizardState {
   avoidAnswer: string;
   setAvoidAnswer: (val: string) => void;
   isGeneratingDirectives: boolean;
-  generateDirectives: () => Promise<void>;
 
   // Step 3: Review Directives & Finalize
   directives: GeneratedDirective[];
@@ -76,13 +75,30 @@ export interface OnboardingWizardState {
   toggleDirective: (index: number) => void;
   positioningSummary: string;
   saving: boolean;
+
+  // The first post: one thing from the author's work, drafted at the end of setup.
+  storyText: string;
+  setStoryText: (val: string) => void;
+  storyKind: StoryKind;
+  setStoryKind: (val: StoryKind) => void;
+  /** Checks the answer, saves the workspace, starts the first draft and opens its screen. */
+  writeFirstPost: () => Promise<void>;
+
   error: string | null;
   setError: (err: string | null) => void;
   goBack: () => void;
-  finalizeOnboarding: () => Promise<void>;
 }
 
 const STORAGE_KEY = "minions_onboarding_draft";
+
+/**
+ * Setup no longer asks for a voice; this is the starting voice every new
+ * workspace gets ("Direct & practical"), changed later in Brand.
+ */
+export const DEFAULT_VOICE = "Short paragraphs, clear tradeoffs, and a useful next step. No hype.";
+
+/** What the first-post answer is, as a ProfessionalMemory kind. */
+export type StoryKind = "LESSON" | "OPINION" | "CURRENT_WORK";
 
 export function useOnboardingWizard(): OnboardingWizardState {
   const router = useRouter();
@@ -121,6 +137,8 @@ export function useOnboardingWizard(): OnboardingWizardState {
   const [customSampleText, setCustomSampleText] = useState("");
 
   const [saving, setSaving] = useState(false);
+  const [storyText, setStoryText] = useState("");
+  const [storyKind, setStoryKind] = useState<StoryKind>("LESSON");
   const [error, setError] = useState<string | null>(null);
   // Do not let the persistence effect overwrite a returned OAuth wizard
   // state with defaults before the restore effect has finished reading it.
@@ -167,6 +185,8 @@ export function useOnboardingWizard(): OnboardingWizardState {
         if (parsed.importedVoiceCount) setImportedVoiceCount(parsed.importedVoiceCount);
         if (Array.isArray(parsed.directives)) setDirectives(parsed.directives);
         if (typeof parsed.positioningSummary === "string") setPositioningSummary(parsed.positioningSummary);
+        if (typeof parsed.storyText === "string") setStoryText(parsed.storyText);
+        if (parsed.storyKind === "LESSON" || parsed.storyKind === "OPINION" || parsed.storyKind === "CURRENT_WORK") setStoryKind(parsed.storyKind);
       }
     } catch {}
     finally {
@@ -257,10 +277,12 @@ export function useOnboardingWizard(): OnboardingWizardState {
           importedVoiceCount,
           directives,
           positioningSummary,
+          storyText,
+          storyKind,
         })
       );
     } catch {}
-  }, [businessName, businessNameFromLinkedIn, websiteUrl, audienceDescription, contentFocus, writerExpertise, industry, selectedPresetId, channels, publishingMode, mythAnswer, differentiatorAnswer, avoidAnswer, selectedVoice, customSampleText, step, linkedInProfile, postSnippet, aiSuggestions, importedVoiceCount, directives, positioningSummary, hasRestoredDraft]);
+  }, [storyText, storyKind, businessName, businessNameFromLinkedIn, websiteUrl, audienceDescription, contentFocus, writerExpertise, industry, selectedPresetId, channels, publishingMode, mythAnswer, differentiatorAnswer, avoidAnswer, selectedVoice, customSampleText, step, linkedInProfile, postSnippet, aiSuggestions, importedVoiceCount, directives, positioningSummary, hasRestoredDraft]);
 
   function applyPreset(preset: BrandPreset) {
     setSelectedPresetId(preset.id);
@@ -345,16 +367,11 @@ export function useOnboardingWizard(): OnboardingWizardState {
     }
   }
 
-  async function generateDirectives() {
-    setError(null);
-    const voiceSample = [selectedVoice, customSampleText.trim()].filter(Boolean).join(" ");
-    if (voiceSample.length < 20) {
-      setError("Choose a writing voice or add a short instruction so Minions can make the first drafts sound like you.");
-      return;
-    }
-    setIsGeneratingDirectives(true);
-    try {
-      const res: any = await apiClient.post("/api/onboarding/brand-copilot", {
+  /** Asks the brand copilot for the brief: positioning plus the rules every draft follows. */
+  async function requestBrief(voiceSample: string) {
+    const res = await apiClient.post<{ directives?: GeneratedDirective[]; positioningSummary?: string }>(
+      "/api/onboarding/brand-copilot",
+      {
         industry,
         businessName: businessName.trim() || "Our Company",
         websiteUrl: websiteUrl.trim(),
@@ -367,16 +384,112 @@ export function useOnboardingWizard(): OnboardingWizardState {
         avoidAnswer,
         selectedPresetId,
         headline: linkedInProfile?.headline || undefined,
-      });
-
-      if (res?.directives) {
-        setDirectives(res.directives);
-        setPositioningSummary(res.positioningSummary || "");
-        setStep(2);
       }
+    );
+    return { directives: res?.directives ?? [], positioning: res?.positioningSummary ?? "" };
+  }
+
+  /** Writes the workspace: voice sample, brand, the brief's rules and the default schedule. */
+  async function saveWorkspace(brief: { directives: GeneratedDirective[]; positioning: string }, voiceSample: string) {
+    if (voiceSample.length >= 20 && importedVoiceCount === 0) {
+      try {
+        const res = await apiClient.post<{ success: boolean; examples_saved: number }>("/api/onboarding/voice", {
+          examples: [voiceSample],
+        });
+        if (res.success) setImportedVoiceCount(res.examples_saved);
+      } catch (voiceErr) {
+        console.warn("Onboarding voice sample save non-fatal:", voiceErr);
+      }
+    }
+
+    await apiClient.post("/api/onboarding/setup", {
+      // Without these the tenant kept the "<email-local-part>'s Workspace"
+      // placeholder name and an empty domain, which covers and public post
+      // URLs then displayed. Setup no longer asks for them, so they are only
+      // sent when a returning draft still has them.
+      business_name: businessName.trim(),
+      website_url: websiteUrl.trim(),
+      industry: industry.trim() || "General Business",
+      icp_description: brief.positioning || `${businessName || "My Brand"} provides ${industry} solutions.`,
+      content_focus: contentFocus.trim(),
+      writer_expertise: writerExpertise,
+      channels,
+      preset_id: selectedPresetId,
+      logo_url: linkedInProfile?.profilePicture || undefined,
+      // Skip the preset's generic template directives: the brief already
+      // produced real ones grounded in these answers, and the two contradict.
+      hasAiDirectives: brief.directives.length > 0,
+    });
+
+    const failures: string[] = [];
+    for (const dir of brief.directives) {
+      try {
+        await apiClient.post("/api/brand/directives", {
+          category: dir.category,
+          key: dir.rule_key,
+          content: dir.instruction,
+          priority: dir.priority,
+          audience_scope: "ALL",
+          from_onboarding: true,
+        });
+      } catch (e) {
+        failures.push(dir.rule_key);
+        console.warn("Directive creation non-fatal:", e);
+      }
+    }
+    if (failures.length > 0) {
+      console.warn(`${failures.length} onboarding directive(s) failed to save: ${failures.join(", ")}`);
+    }
+
+    await apiClient.patch("/api/schedule", {
+      // 3 posts a week (plan decision D5).
+      cadence_type: DEFAULT_CADENCE.cadenceType,
+      interval_days: DEFAULT_CADENCE.intervalDays,
+      days_of_week: DEFAULT_CADENCE.daysOfWeek,
+      posts_per_day: DEFAULT_CADENCE.postsPerDay,
+      times_of_day: DEFAULT_CADENCE.timesOfDay,
+      require_review: publishingMode === "review",
+      is_active: true,
+      from_onboarding: true,
+    });
+  }
+
+  async function writeFirstPost() {
+    setError(null);
+    const story = storyText.trim();
+    setIsGeneratingDirectives(true);
+    try {
+      // Checked first: once the workspace is saved, setup can't be re-run.
+      await apiClient.post("/api/onboarding/first-post", { validate: true, story, kind: storyKind });
     } catch (err) {
-      setError(toErrorMessage(err, "Failed to generate brand directives with Copilot."));
-    } finally {
+      setError(toErrorMessage(err, "Couldn't use that answer. Please try again."));
+      setIsGeneratingDirectives(false);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const voiceSample = [selectedVoice || DEFAULT_VOICE, customSampleText.trim()].filter(Boolean).join(" ");
+      const brief = directives.length > 0 ? { directives, positioning: positioningSummary } : await requestBrief(voiceSample);
+      setDirectives(brief.directives);
+      setPositioningSummary(brief.positioning);
+      await saveWorkspace(brief, voiceSample);
+
+      // The workspace exists from here on. A failed start is recoverable on
+      // the first-post screen, which offers a retry.
+      await apiClient.post("/api/onboarding/first-post", { story, kind: storyKind }).catch((e) => {
+        console.warn("First post start failed; the first-post screen will offer a retry:", e);
+      });
+      // More ideas arrive in the background while the first post is written.
+      apiClient.post("/api/pipeline/harvest", {}).catch((e) => console.warn("Initial harvest trigger non-fatal:", e));
+
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch {}
+      router.replace("/onboarding/first-post");
+    } catch (err) {
+      setError(toErrorMessage(err, "Could not finish setting up. Please try again."));
+      setSaving(false);
       setIsGeneratingDirectives(false);
     }
   }
@@ -388,105 +501,6 @@ export function useOnboardingWizard(): OnboardingWizardState {
   function goBack() {
     setError(null);
     setStep((s) => Math.max(0, s - 1));
-  }
-
-  async function finalizeOnboarding() {
-    setError(null);
-    setSaving(true);
-    try {
-      const sample = [selectedVoice, customSampleText.trim()].filter(Boolean).join(" ");
-      if (sample.length >= 20 && importedVoiceCount === 0) {
-        try {
-          const res = await apiClient.post<{ success: boolean; examples_saved: number }>("/api/onboarding/voice", {
-            examples: [sample],
-          });
-          if (res.success) setImportedVoiceCount(res.examples_saved);
-        } catch (voiceErr) {
-          console.warn("Onboarding voice sample save non-fatal:", voiceErr);
-        }
-      }
-
-      await apiClient.post("/api/onboarding/setup", {
-        // The wizard collected this on step 1 but never sent it, so the tenant
-        // kept the "<email-local-part>'s Workspace" placeholder that
-        // getOrCreateTenant() assigns before onboarding runs -- and that
-        // placeholder is what BrandProfile.brandName, /api/brand/context's
-        // company_name, and therefore every generated cover image displayed.
-        business_name: businessName.trim(),
-        // Collected on step 1 and used to ground the AI suggestions, but never
-        // persisted -- so BrandProfile.companyDomain stayed empty and every
-        // public post URL fell back to this company's domain.
-        website_url: websiteUrl.trim(),
-        industry: industry.trim() || "General Business",
-        icp_description: positioningSummary || `${businessName || "My Brand"} provides ${industry} solutions.`,
-        content_focus: contentFocus.trim(),
-        writer_expertise: writerExpertise,
-        channels,
-        preset_id: selectedPresetId,
-        logo_url: linkedInProfile?.profilePicture || undefined,
-        // Tell the route to skip writing the preset's generic template
-        // directives -- the Brand Interview already produced real ones
-        // grounded in this business, and the two used to contradict each other.
-        hasAiDirectives: directives.length > 0,
-      });
-
-      if (directives.length > 0) {
-        const failures: string[] = [];
-        for (const dir of directives) {
-          try {
-            await apiClient.post("/api/brand/directives", {
-              category: dir.category,
-              key: dir.rule_key,
-              content: dir.instruction,
-              priority: dir.priority,
-              audience_scope: "ALL",
-              from_onboarding: true,
-            });
-          } catch (e) {
-            failures.push(dir.rule_key);
-            console.warn("Directive creation non-fatal:", e);
-          }
-        }
-        if (failures.length > 0) {
-          console.warn(`${failures.length} onboarding directive(s) failed to save: ${failures.join(", ")}`);
-        }
-      }
-
-      await apiClient.patch("/api/schedule", {
-        // 3 posts a week (plan decision D5).
-        cadence_type: DEFAULT_CADENCE.cadenceType,
-        interval_days: DEFAULT_CADENCE.intervalDays,
-        days_of_week: DEFAULT_CADENCE.daysOfWeek,
-        posts_per_day: DEFAULT_CADENCE.postsPerDay,
-        times_of_day: DEFAULT_CADENCE.timesOfDay,
-        require_review: publishingMode === "review",
-        is_active: true,
-        from_onboarding: true,
-      });
-
-      let harvestRunId: string | undefined;
-      try {
-        const harvest = await apiClient.post<{ run_id?: string }>("/api/pipeline/harvest", {});
-        harvestRunId = harvest.run_id;
-      } catch (harvestErr) {
-        console.warn("Initial harvest trigger non-fatal:", harvestErr);
-      }
-
-      try {
-        localStorage.removeItem(STORAGE_KEY);
-      } catch (e) {}
-
-      // The harvest begins here. The Idea Stream is the honest next step: the
-      // user sees real opportunities arrive, then chooses what becomes Draft #1.
-      router.replace(
-        harvestRunId
-          ? `/ideas?onboarding_success=true&onboarding_run=${encodeURIComponent(harvestRunId)}`
-          : "/ideas?onboarding_success=true"
-      );
-    } catch (err) {
-      setError(toErrorMessage(err, "Could not finalize onboarding. Please try again."));
-      setSaving(false);
-    }
   }
 
   return {
@@ -534,7 +548,6 @@ export function useOnboardingWizard(): OnboardingWizardState {
     avoidAnswer,
     setAvoidAnswer,
     isGeneratingDirectives,
-    generateDirectives,
     directives,
     setDirectives,
     toggleDirective,
@@ -543,6 +556,10 @@ export function useOnboardingWizard(): OnboardingWizardState {
     error,
     setError,
     goBack,
-    finalizeOnboarding,
+    storyText,
+    setStoryText,
+    storyKind,
+    setStoryKind,
+    writeFirstPost,
   };
 }

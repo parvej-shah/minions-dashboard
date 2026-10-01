@@ -2,21 +2,22 @@
 
 import { useState } from "react";
 import { useOnboardingWizard, type OnboardingWizardState } from "@/hooks/useOnboardingWizard";
-import { Button } from "@/components/ui/Button";
+import { MEMORY_MIN_CHARS } from "@/constants/contentLanes";
 import { LessonFooter, LessonHeader, useEnterToContinue } from "./lesson";
-import { AudienceQuestion, BusinessQuestion, EXPERTISE_PRAISE, ExpertiseQuestion, FocusQuestion, MIN_ANSWER } from "./BrandQuestions";
-import { VoiceQuestion } from "./VoiceQuestion";
-import { BriefBuilding, BriefReady } from "./BriefScreens";
+import { AudienceQuestion, FocusQuestion, MIN_ANSWER } from "./BrandQuestions";
+import { StoryQuestion, storyPraise } from "./StoryQuestion";
+import { BriefBuilding } from "./BriefBuilding";
 import { WizardSkeleton } from "./WizardSkeleton";
 
 /**
- * The brand brief as a lesson: one question per screen. The hook still owns
- * three steps (brand, voice, finish) and all the saving; step 0 is split into
- * four screens here, so screens 0-3 are step 0, screen 4 is step 1 and
- * screen 5 is step 2.
+ * Setup as a three-question lesson that ends in the user's first post:
+ * what they want to be known for, who reads them, and one thing from their
+ * work. Everything else (experience level, voice, company, publishing mode)
+ * starts from a default and is changed later in Brand and Schedule.
  */
-const BRAND_SCREENS = 4;
-const LAST_SCREEN = BRAND_SCREENS + 1;
+const LAST_SCREEN = 2;
+// The first post's screen is the real finish line, so setup fills the bar only partway.
+const SETUP_SHARE = 0.75;
 
 export default function OnboardingWizard() {
   const wizard = useOnboardingWizard();
@@ -33,80 +34,49 @@ function firstUnanswered(wizard: OnboardingWizardState) {
 }
 
 function Lesson({ wizard }: { wizard: OnboardingWizardState }) {
-  const [brandScreen, setBrandScreen] = useState(() => firstUnanswered(wizard));
-  const screen = wizard.step === 0 ? brandScreen : BRAND_SCREENS + wizard.step - 1;
+  const [screen, setScreen] = useState(() => firstUnanswered(wizard));
 
   const focusOk = wizard.contentFocus.trim().length >= MIN_ANSWER;
   const audienceOk = wizard.audienceDescription.trim().length >= MIN_ANSWER;
-  const voiceOk = Boolean(wizard.selectedVoice) || wizard.customSampleText.trim().length >= 20;
+  const storyLength = wizard.storyText.trim().length;
+  const storyOk = storyLength >= MEMORY_MIN_CHARS;
 
+  const building = wizard.isGeneratingDirectives || wizard.saving;
   const back = () => {
     wizard.setError(null);
-    if (wizard.step === 0) setBrandScreen((s) => Math.max(0, s - 1));
-    else {
-      if (wizard.step === 1) setBrandScreen(BRAND_SCREENS - 1);
-      wizard.goBack();
-    }
+    setScreen((s) => Math.max(0, s - 1));
   };
 
-  const building = wizard.isGeneratingDirectives;
   let body: React.ReactNode;
-  let footer: { label: string; onContinue: () => void; disabled?: boolean; loading?: boolean; praise?: string | null; secondary?: React.ReactNode };
+  let footer: { label: string; onContinue: () => void; disabled?: boolean; praise?: string | null };
 
   switch (screen) {
     case 0:
       body = <FocusQuestion wizard={wizard} />;
-      footer = { label: "Continue", onContinue: () => setBrandScreen(1), disabled: !focusOk, praise: focusOk ? "Clear territory. Nice!" : null };
+      footer = { label: "Continue", onContinue: () => setScreen(1), disabled: !focusOk, praise: focusOk ? "Clear territory. Nice!" : null };
       break;
     case 1:
       body = <AudienceQuestion wizard={wizard} />;
-      footer = { label: "Continue", onContinue: () => setBrandScreen(2), disabled: !audienceOk, praise: audienceOk ? "Now we know who's listening." : null };
-      break;
-    case 2:
-      body = <ExpertiseQuestion wizard={wizard} />;
-      footer = { label: "Continue", onContinue: () => setBrandScreen(3), praise: EXPERTISE_PRAISE[wizard.writerExpertise] };
-      break;
-    case 3: {
-      const hasAny = Boolean(wizard.websiteUrl.trim() || wizard.businessName.trim() || wizard.selectedPresetId);
-      body = <BusinessQuestion wizard={wizard} />;
-      footer = {
-        label: "Continue",
-        onContinue: () => void wizard.goToBrandInterview(),
-        disabled: !hasAny,
-        secondary: hasAny ? null : (
-          <Button variant="ghost" size="lg" shout block className="sm:w-auto" onClick={() => void wizard.goToBrandInterview()}>
-            Skip
-          </Button>
-        ),
-        praise: hasAny ? "Got it. Almost there." : null,
-      };
-      break;
-    }
-    case 4:
-      body = <VoiceQuestion wizard={wizard} />;
-      footer = {
-        label: "Build my brief",
-        onContinue: () => void wizard.generateDirectives(),
-        disabled: !voiceOk,
-        loading: building,
-        praise: voiceOk ? "Love it. That's your starting voice." : null,
-      };
+      footer = { label: "Continue", onContinue: () => setScreen(2), disabled: !audienceOk, praise: audienceOk ? "Now we know who's listening." : null };
       break;
     default:
-      body = <BriefReady wizard={wizard} />;
+      body = <StoryQuestion wizard={wizard} />;
       footer = {
-        label: wizard.saving ? "Setting up" : "Find my first ideas",
-        onContinue: () => void wizard.finalizeOnboarding(),
-        loading: wizard.saving,
+        label: "Write my first post",
+        onContinue: () => void wizard.writeFirstPost(),
+        disabled: !storyOk,
+        praise: storyPraise(storyLength),
       };
   }
 
-  const canContinue = !footer.disabled && !footer.loading && !building;
-  useEnterToContinue(canContinue, footer.onContinue);
+  useEnterToContinue(!footer.disabled && !building && screen < LAST_SCREEN, footer.onContinue);
 
   return (
     <div className="flex min-h-dvh flex-col bg-canvas text-ink">
-      <LessonHeader progress={screen / LAST_SCREEN} onBack={screen > 0 && !building && !wizard.saving ? back : undefined} />
+      <LessonHeader
+        progress={building ? SETUP_SHARE : (screen / (LAST_SCREEN + 1)) * SETUP_SHARE}
+        onBack={screen > 0 && !building ? back : undefined}
+      />
       {building ? (
         <BriefBuilding />
       ) : (

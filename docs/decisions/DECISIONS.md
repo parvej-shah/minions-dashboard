@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-10-01 — Setup ends with the user's first post
+
+**Decision:** Setup asks three questions: what you want to be known for, who reads you, and one thing from your work (a lesson, an opinion or what you're building). That answer is saved as an experience item, and the first post is drafted from it by the normal pipeline, with its claims check, while a lesson-style screen shows progress. The post is then shown as it will look on LinkedIn, with a plain-language list of what to check and three choices: Post it (scheduled into the next posting slot), Edit (in Editorial Studio) or Discard. LinkedIn is connected at that point, not during setup. Experience level, voice, company and publishing mode start from defaults (Practitioner, "Direct & practical", none, review first) and are changed later in Brand and Schedule. Editorial Studio shows the same LinkedIn reader view and plain-language checks at the top of every draft.
+**Why:** Six screens of decisions came before any value, and new users could leave before their workspace existed. Seeing a real post in their own words is what hooks them, and it teaches that their experience is what makes a post strong. Rejected: a faster in-app draft at the end of setup, because it would skip the claims check and the cover; the real draft takes about three minutes.
+**Status:** active
+
 ## 2026-10-01 — Ideas leads with what gets written next
 
 **Decision:** The Ideas page leads with Up next: users choose an idea, place the strongest one first, and Minions drafts that first idea automatically. The full idea library remains a secondary view; Calendar is removed from this page, while scheduling remains available from idea details. Cards hide system metadata and Draft Now moves into idea details.
@@ -39,7 +45,7 @@ and link to it here.
 
 **Decision:** The setup wizard asks one question per screen: what you want to be known for, who it's for, how deep your experience is, where you work (skippable), and your voice. The flow ends on a "your brief is ready" screen where you choose review-first or auto-publish. Every answer can be one tap on an example, and each screen has a single CONTINUE button that confirms a good answer.
 **Why:** The old three-step form put up to eight fields on one screen, which read as paperwork. The UX bar is a lesson app like Duolingo: one obvious next step, instant feedback and a reward at the end. The questions and what they save have not changed.
-**Status:** active
+**Status:** superseded by [Setup ends with the user's first post](#2026-10-01--setup-ends-with-the-users-first-post)
 
 ## 2026-09-30 — Sign-in goes straight to the dashboard
 

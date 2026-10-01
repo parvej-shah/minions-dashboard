@@ -20,6 +20,7 @@ import SocialVariantTabs, { type SocialTab } from "./social/SocialVariantTabs";
 import ReviewDock from "./ReviewDock";
 import ClaimsGate from "./ClaimsGate";
 import MobileActionBar from "./MobileActionBar";
+import ReaderView from "./ReaderView";
 
 export interface EditorialStudioProps {
   initialDraftId?: string;
@@ -243,6 +244,8 @@ export default function EditorialStudio({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-8 space-y-6">
+          {enabledSocialTabs.LINKEDIN && <ReaderView asset={activeAsset} linkedinText={edited.linkedin} />}
+
           {/* Shown for every channel: LinkedIn posts carry the cover too. */}
           <CoverImageCard activeAsset={activeAsset} isRendering={draft.isRenderingCover} onRerender={draft.rerenderCover} onMessage={toast.show} />
           {enabledSocialTabs.LINKEDIN && <CarouselCard key={activeAsset.id} activeAsset={activeAsset} onMessage={toast.show} />}
