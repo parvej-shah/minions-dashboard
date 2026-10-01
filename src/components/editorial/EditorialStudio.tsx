@@ -48,19 +48,37 @@ function EditorialStudioSkeleton() {
 
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
         <div className="space-y-6 lg:col-span-8">
-          <section className="space-y-4 rounded-2xl border border-line bg-surface p-5">
-            <div className="flex items-center gap-3">
-              <Skeleton className="h-11 w-11 rounded-full" />
-              <div className="flex-1 space-y-2"><Skeleton className="h-4 w-36" /><Skeleton className="h-3 w-24" /></div>
+          <section className="space-y-4 rounded-2xl border border-line bg-surface p-4 sm:p-5">
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <Skeleton className="h-4 w-44" />
+              <Skeleton className="h-3 w-16" />
             </div>
-            <Skeleton className="h-5 w-5/6" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-11/12" />
-            <Skeleton className="aspect-[1.91/1] w-full rounded-2xl" />
+            <div className="space-y-3 rounded-2xl border-2 border-line bg-canvas p-4">
+              <Skeleton className="h-5 w-64 max-w-full" />
+              <Skeleton className="h-4 w-72 max-w-full" />
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <Skeleton className="h-20 w-full rounded-xl" />
+                <Skeleton className="h-20 w-full rounded-xl" />
+              </div>
+            </div>
+            <div className="flex gap-2 overflow-hidden">
+              {[0, 1, 2].map((item) => <Skeleton key={item} className="aspect-[4/5] w-[70%] shrink-0 rounded-lg sm:w-[220px]" />)}
+            </div>
+            <Skeleton className="h-28 w-full rounded-xl" />
+          </section>
+          <section className="space-y-4 rounded-3xl border-2 border-line bg-surface p-4 sm:p-5">
+            <Skeleton className="h-6 w-44" />
+            <Skeleton className="h-4 w-80 max-w-full" />
+            <div className="flex flex-wrap gap-2"><Skeleton className="h-11 w-28 rounded-xl" /><Skeleton className="h-11 w-28 rounded-xl" /></div>
+            <div className="space-y-4 rounded-2xl border border-line bg-canvas p-4">
+              <div className="flex items-center gap-3"><Skeleton className="h-10 w-10 rounded-full" /><Skeleton className="h-4 w-36" /></div>
+              <Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-5/6" />
+              <Skeleton className="mx-auto aspect-[4/5] w-full max-w-[420px] rounded-xl" />
+            </div>
           </section>
           <section className="space-y-4 rounded-2xl border border-line bg-surface p-5">
-            <div className="flex justify-between"><Skeleton className="h-6 w-36" /><Skeleton className="h-10 w-44 rounded-xl" /></div>
-            {[0, 1, 2, 3, 4].map((item) => <Skeleton key={item} className={item === 0 ? "h-7 w-4/5" : "h-4 w-full"} />)}
+            <Skeleton className="h-5 w-28" />
+            <div className="flex flex-col gap-4 sm:flex-row"><Skeleton className="aspect-[4/5] w-full rounded-xl sm:w-[280px]" /><Skeleton className="h-36 w-full rounded-xl" /></div>
           </section>
         </div>
         <aside className="space-y-6 lg:col-span-4">

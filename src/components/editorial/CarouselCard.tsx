@@ -8,6 +8,7 @@ import type { CarouselPlan } from "@/lib/carousel/plan";
 import type { Slide } from "@/lib/carousel/slides";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import CarouselPdfPages from "./CarouselPdfPages";
+import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
 
 import { buttonStyles } from "@/components/ui/Button";
 interface State {
@@ -45,6 +46,8 @@ const ghostButton = "px-2.5 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 te
  */
 export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: AssetItem; onMessage: (message: string) => void }) {
   const [state, setState] = useState<State | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [busy, setBusy] = useState<"make" | "save" | "toggle" | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [draft, setDraft] = useState<CarouselPlan | null>(null);
@@ -57,15 +60,17 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
     fetch(url)
       .then((res) => res.json())
       .then((json) => {
-        if (!cancelled && json.success) setState({ carousel: json.carousel, suggested: json.suggested, locked: json.locked });
+        if (cancelled) return;
+        if (json.success) setState({ carousel: json.carousel, suggested: json.suggested, locked: json.locked });
+        else setLoadError(true);
       })
       .catch(() => {
-        // The card stays hidden; the rest of the review works without it.
+        if (!cancelled) setLoadError(true);
       });
     return () => {
       cancelled = true;
     };
-  }, [url]);
+  }, [url, loadAttempt]);
 
   const send = async (method: "POST" | "PATCH", body: unknown, kind: "make" | "save" | "toggle") => {
     setBusy(kind);
@@ -88,7 +93,23 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
     }
   };
 
-  if (!state) return null;
+  if (!state && loadError) return (
+    <div className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
+      <p className="font-semibold text-ink">Could not load the LinkedIn carousel</p>
+      <button type="button" onClick={() => { setLoadError(false); setLoadAttempt((n) => n + 1); }} className="mt-3 inline-flex min-h-11 items-center rounded-xl border border-brand/40 px-4 text-sm font-bold text-brand cursor-pointer hover:bg-brand/10">Try again</button>
+    </div>
+  );
+  if (!state) return (
+    <SkeletonGroup label="Loading LinkedIn carousel" className="space-y-4 rounded-2xl border border-line bg-surface p-4 sm:p-5">
+      <div className="flex items-center justify-between border-b border-line pb-3"><Skeleton className="h-4 w-44" /><Skeleton className="h-3 w-16" /></div>
+      <div className="space-y-3 rounded-2xl border-2 border-line bg-canvas p-4">
+        <Skeleton className="h-5 w-64 max-w-full" /><Skeleton className="h-4 w-72 max-w-full" />
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2"><Skeleton className="h-20 w-full rounded-xl" /><Skeleton className="h-20 w-full rounded-xl" /></div>
+      </div>
+      <div className="flex gap-2 overflow-hidden">{[0, 1, 2].map((item) => <Skeleton key={item} className="aspect-[4/5] w-[70%] shrink-0 rounded-lg sm:w-[220px]" />)}</div>
+      <Skeleton className="h-28 w-full rounded-xl" />
+    </SkeletonGroup>
+  );
   const { carousel, suggested, locked } = state;
   const pages = carousel?.pages;
   // The cover, then one page per slide.
@@ -115,7 +136,7 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
           <span className="text-xs font-bold text-ink font-mono uppercase tracking-wider">LinkedIn carousel</span>
         </div>
         <span className="text-[10px] font-mono text-subtle">
-          {busy === "make" ? "Writing the slides…" : carousel ? `${carousel.active ? "On" : "Off"} · ${pageCount} pages` : suggested.yes ? "Suggested" : "Optional"}
+          {busy === "make" ? "Writing the slides…" : carousel ? `${pageCount} pages` : suggested.yes ? "Suggested" : "Optional"}
         </span>
       </div>
 
@@ -136,6 +157,32 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
         </div>
       ) : (
         <>
+          {!locked && (
+            <div className="rounded-2xl border-2 border-brand/40 bg-brand/5 p-4 sm:p-5">
+              <h3 className="text-base font-extrabold text-ink">What should publish on LinkedIn?</h3>
+              <p className="mt-1 text-sm text-muted">Choose the swipeable carousel or a single cover image.</p>
+              <div role="group" aria-label="LinkedIn image format" className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {[
+                  { active: true, label: "Carousel", detail: `${pageCount} swipeable pages`, Icon: GalleryHorizontal },
+                  { active: false, label: "Cover image", detail: "One image with your post", Icon: Sparkles },
+                ].map(({ active, label, detail, Icon }) => (
+                  <button
+                    key={label}
+                    type="button"
+                    aria-pressed={carousel.active === active}
+                    disabled={busy !== null || carousel.active === active}
+                    onClick={() => void send("PATCH", { active }, "toggle")}
+                    className={`flex min-h-20 items-center gap-3 rounded-xl border-2 border-b-4 px-4 py-3 text-left transition-all cursor-pointer active:translate-y-1 active:border-b-2 disabled:cursor-default ${carousel.active === active ? "border-brand bg-brand/15 text-ink" : "border-line bg-surface text-muted hover:border-brand/50 hover:text-ink"}`}
+                  >
+                    <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+                    <span className="flex-1"><span className="block text-sm font-extrabold">{label}</span><span className="block text-xs">{detail}</span></span>
+                    {busy === "toggle" && carousel.active !== active ? <Loader2 className="h-4 w-4 animate-spin" aria-label="Saving choice" /> : carousel.active === active ? <span className="text-xs font-bold text-brand">Selected</span> : null}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Swipe through the pages as LinkedIn shows them. */}
           <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1">
             {pages?.length ? (
@@ -154,21 +201,7 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
             <p className="text-xs leading-relaxed text-muted">
               This draft is published, so its carousel stays exactly as it went out{carousel.active ? "" : " (LinkedIn got the cover image)"}.
             </p>
-          ) : (
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                className="mt-0.5 accent-brand w-4 h-4"
-                checked={carousel.active}
-                disabled={busy !== null}
-                onChange={(e) => void send("PATCH", { active: e.target.checked }, "toggle")}
-              />
-              <span className="text-xs leading-relaxed text-ink">
-                Post to LinkedIn as this carousel
-                <span className="block text-subtle">Off: LinkedIn gets the cover image and the LinkedIn text below, as usual.</span>
-              </span>
-            </label>
-          )}
+          ) : null}
 
           {draft ? (
             <div className="space-y-3">

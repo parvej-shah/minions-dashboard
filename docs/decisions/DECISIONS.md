@@ -35,6 +35,12 @@ and link to it here.
 **Why:** Posting from setup skipped the cover, the carousel and the rest of the review, and a brand-new user's first public post should not go out from a celebration screen. Sending them to Editorial Studio shows everything Minions made and teaches the review step they will use from then on.
 **Status:** active
 
+## 2026-10-01 — Make the LinkedIn publishing format an explicit choice
+
+**Decision:** When a carousel exists, reviewers choose Carousel or Cover image in a prominent control above the slides. The selected format is visible before they approve publishing.
+**Why:** The prior checkbox beneath the slides hid a consequential publishing decision and made the alternate cover-image outcome easy to miss.
+**Status:** active
+
 ## 2026-10-01 — Review a LinkedIn carousel before channel copy
 
 **Decision:** When a LinkedIn carousel is available, Editorial Studio shows it before Channel preview. The channel section has one title and one subtitle, with a direct link to the cover style controls below.
