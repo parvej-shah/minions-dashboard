@@ -3,12 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CalendarCheck, Check, Loader2, PenLine, Quote, RotateCcw, Sparkles, Trash2 } from "lucide-react";
+import { CalendarCheck, Check, Loader2, PenLine, Quote, RotateCcw, Sparkles } from "lucide-react";
 import type { AssetItem } from "@/types";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { plainReviewNotes } from "@/lib/drafts/plainNotes";
-import { Button, buttonStyles } from "@/components/ui/Button";
-import ConfirmModal from "@/components/ui/ConfirmModal";
+import { buttonStyles } from "@/components/ui/Button";
 import LinkedInPostPreview from "@/components/editorial/LinkedInPostPreview";
 import DraftChecks from "@/components/editorial/DraftChecks";
 import { Confetti, LessonFooter, LessonHeader } from "../../setup/_components/lesson";
@@ -57,8 +56,7 @@ export default function FirstPost({ author }: { author: { name: string; image: s
   const router = useRouter();
   const [status, setStatus] = useState<FirstPostStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState<"retry" | "review" | "discard" | null>(null);
-  const [discardOpen, setDiscardOpen] = useState(false);
+  const [busy, setBusy] = useState<"retry" | "review" | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -108,19 +106,6 @@ export default function FirstPost({ author }: { author: { name: string; image: s
     router.push(`/editorial?id=${encodeURIComponent(status.asset.id)}`);
   };
 
-  const discard = async () => {
-    if (!status?.asset) return;
-    setBusy("discard");
-    try {
-      await apiClient.delete(`/api/assets/${status.asset.id}?mode=permanent`);
-      router.replace("/ideas");
-    } catch (err) {
-      setError(toErrorMessage(err, "Couldn't discard it. Please try again."));
-      setBusy(null);
-      setDiscardOpen(false);
-    }
-  };
-
   if (!status || !phase) {
     return error ? <Stuck title="We couldn't load your post" detail={error} /> : <WaitingSkeleton />;
   }
@@ -163,21 +148,6 @@ export default function FirstPost({ author }: { author: { name: string; image: s
             loading={busy === "review"}
             disabled={busy !== null}
             error={error}
-            secondary={
-              <Button variant="ghost" size="lg" icon={<Trash2 className="h-4 w-4" />} disabled={busy !== null} onClick={() => setDiscardOpen(true)}>
-                Discard
-              </Button>
-            }
-          />
-          <ConfirmModal
-            isOpen={discardOpen}
-            title="Discard this post?"
-            description="It's deleted for good. Your story stays saved in Brand, and new ideas are already on their way."
-            confirmLabel="Discard"
-            variant="danger"
-            isLoading={busy === "discard"}
-            onConfirm={() => void discard()}
-            onClose={() => setDiscardOpen(false)}
           />
         </>
       )}
