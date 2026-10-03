@@ -77,7 +77,7 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
 
       <div className="flex flex-col sm:flex-row gap-4">
         <div
-          className={`relative rounded-xl overflow-hidden border border-line bg-canvas shadow-inner shrink-0 ${
+          className={`relative self-start rounded-xl overflow-hidden border border-line bg-canvas shadow-inner shrink-0 ${
             isTemplate || !activeAsset.hero_image_url ? "aspect-[4/5] w-full sm:w-[280px]" : "aspect-[16/9] w-full"
           }`}
         >
@@ -88,7 +88,7 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
               fill
               unoptimized
               sizes="(max-width: 640px) 100vw, 280px"
-              className={`object-cover transition-opacity ${isRendering ? "opacity-40" : ""}`}
+              className={`object-contain transition-opacity ${isRendering ? "opacity-40" : ""}`}
             />
           ) : isCoverPending ? (
             <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-2">
