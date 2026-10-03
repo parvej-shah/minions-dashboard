@@ -57,6 +57,13 @@ export interface PlanSources {
    * caption may not repeat one with its figure as if it were fact.
    */
   unverified?: string[];
+  /** The names the post's title turns on ("Jev"): the deck must name them too, not swap in "a classifier". */
+  names?: string[];
+}
+
+/** Capitalised words after the first, not acronyms: "Why we replaced our AI-writing classifier with Jev" gives ["Jev"]. */
+export function namesIn(title: string): string[] {
+  return [...new Set(title.split(/\s+/).slice(1).map((w) => w.replace(/[^\p{L}\p{N}.-]+$/u, "")).filter((w) => /^\p{Lu}\p{Ll}/u.test(w)))];
 }
 
 const NUMBER_WORDS: Record<string, string> = {
@@ -242,6 +249,11 @@ export function checkPlan(plan: CarouselPlan, sources: PlanSources): string[] {
     const claim = restatedUnverified(line, sources.unverified ?? []);
     if (claim) errors.push(`"${line}" states an unverified claim with its figure as fact ("${claim.slice(0, 90)}"). Drop the figure, or leave the claim out.`);
   }
+  // The slides themselves, not the cover: the cover title may carry the name while every slide says "a classifier".
+  const inner = plan.slides.flatMap((x) => fieldsOf(x).map(([, t]) => t)).join("\n");
+  for (const name of sources.names ?? []) {
+    if (!new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(inner)) errors.push(`The post is about ${name}, but no slide names it. Call it ${name} wherever the post does, not a generic word.`);
+  }
   const banned = bannedHits(all, sources.banned);
   if (banned.length) errors.push(`Uses banned phrases: ${banned.join(", ")}.`);
   if (/[—–]|--/.test(all)) errors.push("No em or en dashes. Use periods, commas or colons.");
@@ -282,6 +294,14 @@ export function repairPlan(plan: CarouselPlan, sources: PlanSources): CarouselPl
   const close = slides.filter((x) => x.layout === "CLOSE");
   if (close.length) slides = [...slides.filter((x) => x.layout !== "CLOSE"), close[0]];
   if (slides.filter((x) => x.layout === "STEP").length === 1) slides = slides.map((x) => (x.layout === "STEP" ? { ...x, layout: "POINT" } : x));
+
+  // STEPs and POINTs are numbered apart ("Step 1 of 3", "01"), so a deck with both reads as two counts: one kind only.
+  const steps = slides.filter((x) => x.layout === "STEP").length;
+  const points = slides.filter((x) => x.layout === "POINT").length;
+  if (steps >= 2 && points) {
+    const to = steps + points <= 5 ? "STEP" : "POINT";
+    slides = slides.map((x) => (x.layout === "STEP" || x.layout === "POINT" ? { ...x, layout: to } : x));
+  }
 
   const known = numbersIn(sources.texts.join(" "));
   const broken = (slide: Slide, i: number): boolean => {

@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_COVER_BRAND } from "@/lib/covers/brand";
 import { renderCarousel, type CarouselInput } from "@/lib/prompts/carousel";
-import { checkPlan, parsePlan, quantities, repairPlan, suggestCarousel, toDeck, type PlanSources } from "./plan";
+import { checkPlan, namesIn, parsePlan, quantities, repairPlan, suggestCarousel, toDeck, type PlanSources } from "./plan";
 
 const body = "Demos run in controlled environments. On a live call, two seconds of silence and the buyer hangs up. Test latency on live calls before you buy.";
 const sources: PlanSources = { texts: [body], memory: ["We lost a showing because the calendar write failed silently."], banned: ["game changer"] };
@@ -103,6 +103,9 @@ describe("carousel plan gates", () => {
     expect(fixed.slides.map((x) => x.layout)).not.toContain("NUMBER");
     expect(fixed.slides.find((x) => x.layout === "POINT" && x.title.includes("real"))).toMatchObject({ title: "Call it from a real phone" });
     expect(fixed.caption).toContain("Demos, run");
+    // STEPs and POINTs mixed would number twice ("Step 1 of 3", "01"): one kind.
+    const mixed = plan({ slides: [good.slides[0], { layout: "STEP", title: "Call it from a real phone" }, { layout: "POINT", title: "Time the first reply" }, { layout: "STEP", title: "Book a real showing" }, good.slides[4]] });
+    expect(repairPlan(mixed, sources).slides.map((x) => x.layout)).toEqual(["STAKES", "STEP", "STEP", "STEP", "CLOSE"]);
     // A plan with too few slides keeps them all and goes back to the model.
     expect(repairPlan(plan({ slides: good.slides.slice(0, 2) }), sources).slides).toHaveLength(2);
   });
@@ -115,6 +118,15 @@ describe("carousel plan gates", () => {
     const real = { layout: "QUOTE", quote: "We lost a showing because the calendar write failed silently." };
     expect(checkPlan(plan({ slides: [good.slides[0], real, ...good.slides.slice(1)] }), sources)).toEqual([]);
     expect(checkPlan(plan({ caption: good.caption + " It lifts bookings 37%." }), sources).join()).toMatch(/figures the draft does not: 37/);
+  });
+
+  it("keeps the names the post's title turns on", () => {
+    expect(namesIn("Why we replaced our AI-writing classifier with Jev")).toEqual(["Jev"]);
+    expect(namesIn("Test voice AI on live calls")).toEqual([]);
+    const named = { ...sources, names: ["Jev"] };
+    expect(checkPlan(plan({ cover: { ...good.cover, headline: "Why we moved our live call checks to Jev" } }), named).join()).toMatch(/no slide names it/);
+    const withJev = [good.slides[0], { layout: "POINT", title: "Jev judges the tone, not the code" }, ...good.slides.slice(2)];
+    expect(checkPlan(plan({ slides: withJev }), named).join()).not.toMatch(/names it/);
   });
 
   it("blocks banned phrases, dashes, repeats and engagement bait", () => {

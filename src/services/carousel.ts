@@ -5,7 +5,7 @@ import { deleteFromR2, r2KeyFromUrl, uploadToR2 } from "@/lib/r2";
 import { coverBrand } from "@/lib/covers/brand";
 import type { CoverSpec } from "@/lib/covers/layouts";
 import { evidenceRules } from "@/lib/drafts/authorContext";
-import { checkPlan, parsePlan, repairPlan, suggestCarousel, toDeck, type CarouselPlan, type PlanSources } from "@/lib/carousel/plan";
+import { COVER_HEADLINE_WORDS, checkPlan, namesIn, parsePlan, repairPlan, suggestCarousel, toDeck, type CarouselPlan, type PlanSources } from "@/lib/carousel/plan";
 import { renderCarouselPdf, renderSlidePng } from "@/lib/carousel/render";
 import type { Deck } from "@/lib/carousel/slides";
 import { renderCarousel, type CarouselInput } from "@/lib/prompts/carousel";
@@ -45,6 +45,8 @@ const MAX_ATTEMPTS = 3;
 /** The route may run 300s; a retry starts only this soon after the first call, so it can finish. */
 const RETRY_CUTOFF_MS = 120_000;
 
+const words = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
+
 type Chat = (payload: Record<string, unknown>) => Promise<{ status: number; body: string; model: string }>;
 
 const defaultChat: Chat = (payload) => qwenChat(payload);
@@ -57,6 +59,8 @@ interface Context {
   input: CarouselInput;
   sources: PlanSources;
   base: { author: CoverSpec["author"]; brand: CoverSpec["brand"]; art?: CoverSpec["art"] };
+  /** The post's own cover headline: the carousel opens with the same title. */
+  postCover: { headline: string; emphasis?: string } | null;
   body: string;
 }
 
@@ -103,10 +107,10 @@ async function loadContext(assetId: string): Promise<Context | { error: string }
     banned,
     unverified,
   };
-  const sources: PlanSources = { texts: [body, asset.hook ?? "", asset.coreArgument ?? "", asset.title], memory, banned, unverified };
+  const sources: PlanSources = { texts: [body, asset.hook ?? "", asset.coreArgument ?? "", asset.title], memory, banned, unverified, names: namesIn(asset.title).filter((n) => body.includes(n)) };
 
   // The cover page keeps the post's own illustration; the author and colours are the workspace's.
-  const cover = (asset.coverSpec ?? null) as { art?: CoverSpec["art"] } | null;
+  const cover = (asset.coverSpec ?? null) as { art?: CoverSpec["art"]; headline?: string; emphasis?: string } | null;
   const { brand } = coverBrand({ ink: profile.primaryInk, paper: profile.brandCream, accent: profile.brandCoral, secondary: profile.brandTeal });
   const author = { name: profile.brandName, role: profile.coverByline?.trim() || defaultByline(profile.positioning ?? ""), photo: await hostedCoverPhoto(profile) };
 
@@ -118,6 +122,7 @@ async function loadContext(assetId: string): Promise<Context | { error: string }
     input,
     sources,
     base: { author, brand, art: cover?.art },
+    postCover: cover?.headline?.trim() && words(cover.headline) >= COVER_HEADLINE_WORDS.min && words(cover.headline) <= COVER_HEADLINE_WORDS.max ? { headline: cover.headline.trim(), emphasis: cover.emphasis } : null,
     body,
   };
 }
@@ -183,7 +188,9 @@ async function planWithModel(ctx: Context, chat: Chat): Promise<Planned> {
     const parsed = parsePlan(content);
     errors = parsed.errors;
     if (!parsed.plan || errors.length) continue;
-    const plan = repairPlan(parsed.plan, ctx.sources);
+    const repaired = repairPlan(parsed.plan, ctx.sources);
+    // The deck opens with the post's own cover title, so the two never disagree.
+    const plan = ctx.postCover ? { ...repaired, cover: { ...repaired.cover, ...ctx.postCover } } : repaired;
     const gated = gate(ctx, plan);
     errors = gated.errors;
     if (gated.deck) return { ok: true, plan, deck: gated.deck, attempts: attempt, model: res.model };
