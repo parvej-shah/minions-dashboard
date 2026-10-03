@@ -1,6 +1,6 @@
 import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
 
-/** Keeps Brand navigation and its foundation cards in view while the page loads. */
+/** Mirrors the visible, section-based Brand editing workspace while it loads. */
 export default function BrandLoading() {
   return (
     <SkeletonGroup label="Loading your brand" className="mx-auto max-w-7xl space-y-7 pb-16">
@@ -13,22 +13,22 @@ export default function BrandLoading() {
             <Skeleton className="h-4 w-[min(32rem,95%)]" />
           </div>
         </div>
-        <div className="flex gap-2 overflow-hidden rounded-2xl border-2 border-line bg-surface p-1">
-          <Skeleton className="h-11 w-36 shrink-0" />
-          <Skeleton className="h-11 w-32 shrink-0" />
-          <Skeleton className="h-11 w-48 shrink-0" />
+      <div className="flex gap-2 overflow-hidden">
+          {["w-24", "w-32", "w-28", "w-24", "w-28"].map((width, item) => <Skeleton key={item} className={`h-10 shrink-0 rounded-xl ${width}`} />)}
         </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        {[0, 1, 2, 3].map((item) => (
-          <div key={item} className="space-y-4 rounded-2xl border-2 border-line bg-surface p-5">
-            <Skeleton className="h-5 w-40" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-4/5" />
-            <Skeleton className="h-10 w-32" />
-          </div>
-        ))}
+      <div className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5 md:flex-row md:items-center">
+        <div className="space-y-2 md:w-56"><Skeleton className="h-4 w-40" /><Skeleton className="h-1.5 w-full" /><Skeleton className="h-3 w-48" /></div>
+        <div className="grid flex-1 gap-2 lg:grid-cols-3">{[0, 1, 2].map((item) => <Skeleton key={item} className="h-14" />)}</div>
       </div>
+      {[0, 1, 2, 3, 4].map((item) => (
+        <div key={item} className="space-y-4">
+          <Skeleton className="h-8 w-56" />
+          <div className="grid gap-4 md:grid-cols-2">
+            {[0, 1].map((card) => <div key={card} className="space-y-4 rounded-2xl border-2 border-line bg-surface p-5"><Skeleton className="h-5 w-40" /><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-4/5" /><Skeleton className="h-10 w-32" /></div>)}
+          </div>
+        </div>
+      ))}
     </SkeletonGroup>
   );
 }

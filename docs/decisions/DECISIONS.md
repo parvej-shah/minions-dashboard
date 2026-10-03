@@ -40,6 +40,12 @@ and link to it here.
 
 **Decision:** Brand opens on a plain-language overview, with audience and writing voice as the primary areas; idea sources and words to avoid sit under More settings, and visual cover styling is collapsed until needed.
 **Why:** Most authors need to shape what they write and who it helps; feeds, blocklists and cover styling are supporting controls that should stay findable without competing for attention.
+**Status:** superseded by [Brand settings are edited in one visible workspace](#2026-10-03--brand-settings-are-edited-in-one-visible-workspace)
+
+## 2026-10-03 — Brand settings are edited in one visible workspace
+
+**Decision:** Show brand basics, audience and experience, writing voice and proof, idea sources, and words to avoid as consecutive sections in one page, with jump links instead of hiding settings behind tabs or disclosures.
+**Why:** Authors need to understand that these are editable inputs shaping future drafts; hidden destinations make the product’s core controls hard to discover.
 **Status:** active
 
 ## 2026-10-02 — Phone review puts checks before publishing
