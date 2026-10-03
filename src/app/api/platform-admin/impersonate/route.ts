@@ -1,60 +1,36 @@
-import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { prisma } from "@/lib/prisma";
-import { apiError, apiFailure } from "@/server/http/respond";
-import { requirePlatformStaff, IMPERSONATION_COOKIE } from "@/lib/tenant";
+import { IMPERSONATION_COOKIE } from "@/lib/tenant";
+import { findClientSummary as findClient } from "@/services/platformAdmin";
+import { asString, readJson } from "@/server/http/body";
+import { badRequest, notFound } from "@/server/http/errors";
+import { route } from "@/server/http/route";
 
-const MAX_AGE_SECONDS = 2 * 60 * 60; // 2h -- a support session, not a standing grant
+const SESSION_SECONDS = 2 * 60 * 60;
 
-/** Current "view as tenant" status, for a UI indicator to check. */
-export async function GET() {
-  const ctx = await requirePlatformStaff();
-  if ("error" in ctx) return ctx.error;
+export const GET = route({ auth: "staff", failure: "Failed to read the view-as-tenant session" }, async () => {
+  const clientId = (await cookies()).get(IMPERSONATION_COOKIE)?.value;
+  const client = clientId ? await findClient(clientId) : null;
+  return client ? { impersonating: true, client } : { impersonating: false, client: null };
+});
 
-  const store = await cookies();
-  const clientId = store.get(IMPERSONATION_COOKIE)?.value ?? null;
-  if (!clientId) return NextResponse.json({ impersonating: false, client: null });
+// The session lives in a cookie only; see requireTenantAccess.
+export const POST = route({ auth: "staff", failure: "Failed to start impersonation" }, async ({ request }) => {
+  const clientId = asString((await readJson(request)).client_id);
+  if (!clientId) throw badRequest("client_id is required");
+  const client = await findClient(clientId);
+  if (!client) throw notFound("Client not found");
 
-  const client = await prisma.client.findUnique({ where: { id: clientId }, select: { id: true, name: true } });
-  if (!client) return NextResponse.json({ impersonating: false, client: null });
+  (await cookies()).set(IMPERSONATION_COOKIE, clientId, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: SESSION_SECONDS,
+    path: "/",
+  });
+  return { success: true, client };
+});
 
-  return NextResponse.json({ impersonating: true, client });
-}
-
-/** Starts a view-as-tenant session, scoped by cookie only -- see requireClientId(). */
-export async function POST(request: Request) {
-  const ctx = await requirePlatformStaff();
-  if ("error" in ctx) return ctx.error;
-
-  try {
-    const body = await request.json();
-    const clientId = (body.client_id || "").toString().trim();
-    if (!clientId) return apiFailure("client_id is required", 400);
-
-    const client = await prisma.client.findUnique({ where: { id: clientId }, select: { id: true, name: true } });
-    if (!client) return apiFailure("Client not found", 404);
-
-    const store = await cookies();
-    store.set(IMPERSONATION_COOKIE, clientId, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: MAX_AGE_SECONDS,
-      path: "/",
-    });
-
-    return NextResponse.json({ success: true, client });
-  } catch (error) {
-    return apiError(error, "Failed to start impersonation");
-  }
-}
-
-/** Ends the current view-as-tenant session. */
-export async function DELETE() {
-  const ctx = await requirePlatformStaff();
-  if ("error" in ctx) return ctx.error;
-
-  const store = await cookies();
-  store.delete(IMPERSONATION_COOKIE);
-  return NextResponse.json({ success: true });
-}
+export const DELETE = route({ auth: "staff", failure: "Failed to end the view-as-tenant session" }, async () => {
+  (await cookies()).delete(IMPERSONATION_COOKIE);
+  return { success: true };
+});

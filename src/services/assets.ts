@@ -129,3 +129,8 @@ export async function removeAsset(clientId: string, idOrSlug: string, mode: Asse
   });
   return toAssetDTO(reverted, null, await getTenantBlogDomain(clientId));
 }
+
+export async function getCarouselPdfUrl(clientId: string, idOrSlug: string): Promise<string | undefined> {
+  const asset = await prisma.asset.findFirst({ where: ownedAssetWhere(clientId, idOrSlug), select: { carouselSpec: true } });
+  return (asset?.carouselSpec as { pdf_url?: string } | null)?.pdf_url;
+}

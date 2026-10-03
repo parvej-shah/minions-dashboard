@@ -1,13 +1,11 @@
-import { prisma } from "@/lib/prisma";
 import { r2KeyFromUrl } from "@/lib/r2";
-import { ownedAssetWhere } from "@/services/assets";
+import { getCarouselPdfUrl } from "@/services/assets";
 import { HttpError, notFound } from "@/server/http/errors";
 import { route } from "@/server/http/route";
 
 // Served from our origin: the R2 bucket sends no CORS headers, so the browser cannot read it there.
 export const GET = route<"tenant", { id: string }>({ auth: "tenant", failure: "Failed to load the carousel PDF" }, async ({ clientId, params }) => {
-  const asset = await prisma.asset.findFirst({ where: ownedAssetWhere(clientId, params.id), select: { carouselSpec: true } });
-  const pdfUrl = (asset?.carouselSpec as { pdf_url?: string } | null)?.pdf_url;
+  const pdfUrl = await getCarouselPdfUrl(clientId, params.id);
   if (!pdfUrl || !r2KeyFromUrl(pdfUrl)) throw notFound("No carousel PDF");
 
   const upstream = await fetch(pdfUrl);

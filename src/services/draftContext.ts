@@ -22,15 +22,31 @@ async function generalizedFor(m: { id: string; content: string; generalizedConte
   return text;
 }
 
+/** How far back "recently posted" reaches, and how many arguments it lists. */
+const RECENT_DAYS = 21;
+const RECENT_MAX = 8;
+
+/** The arguments of the workspace's recent drafts, newest first, so the next one makes a new point. */
+async function recentArguments(clientId: string, ideaId: string): Promise<string[]> {
+  const rows = await prisma.asset.findMany({
+    where: { clientId, ideaId: { not: ideaId }, createdAt: { gte: new Date(Date.now() - RECENT_DAYS * 86_400_000) } },
+    orderBy: { createdAt: "desc" },
+    take: RECENT_MAX,
+    select: { title: true, coreArgument: true },
+  });
+  return rows.map((r) => (r.coreArgument?.trim() || r.title).replace(/\s+/g, " ")).filter(Boolean);
+}
+
 export async function getDraftAuthorContext(clientId: string, ideaId: string): Promise<DraftAuthorContext> {
-  const [idea, icpRow, profile] = await Promise.all([
+  const [idea, icpRow, profile, recent] = await Promise.all([
     prisma.idea.findFirst({ where: { id: ideaId, clientId }, include: { lane: true } }),
     prisma.icpProfile.findUnique({ where: { clientId } }),
     prisma.brandProfile.findUnique({ where: { clientId }, select: { writerExpertise: true } }),
+    recentArguments(clientId, ideaId).catch(() => []),
   ]);
   const icp = icpRow ? toIcpContext(icpRow) : EMPTY_ICP;
   const standing = writerExpertisePromptGuidance(profile?.writerExpertise);
-  if (!idea || !idea.gateVerdict) return emptyDraftContext(icp, standing, idea?.pillar);
+  if (!idea || !idea.gateVerdict) return { ...emptyDraftContext(icp, standing, idea?.pillar), recent_posts: recent };
 
   // Inactive items stay out: switching one off means "do not use this".
   const rows = idea.memoryIds.length
@@ -45,7 +61,7 @@ export async function getDraftAuthorContext(clientId: string, ideaId: string): P
     memory.push({ kind: m.kind, disclosure: generalize ? "GENERALIZE" : "PUBLIC", text: generalize ? await generalizedFor(m) : m.content });
   }
   const lane = idea.lane ? { name: idea.lane.name, purpose: idea.lane.purpose, brief: idea.lane.brief } : null;
-  return buildDraftAuthorContext(idea, memory, icp, lane, standing);
+  return { ...buildDraftAuthorContext(idea, memory, icp, lane, standing), recent_posts: recent };
 }
 
 /** What the draft check needs beyond the author context: the verified proof and the original memory. */

@@ -49,7 +49,7 @@ describe("02 fetches the author context and runs the dashboard's draft check", (
   it("Parse Claims and Gate takes the verdict, claims, notes and reflowed body from the check", async () => {
     const check = checkDraft({
       hook: "h",
-      body: "One is long enough here. Two is long enough here. Three is long enough here. Flushing could cut failures by 40%.",
+      body: "One is long enough here. Two is long enough here. Three is long enough here. Four is long enough here. Flushing could cut failures by 40%.",
       claims: [{ claim_text: "Flushing could cut failures by 40%", claim_type: "OPINION" }],
       approvedProofs: [],
       allowCustomerResult: false,
