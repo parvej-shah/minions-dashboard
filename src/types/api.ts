@@ -1,6 +1,8 @@
 /** The error body every API route returns on failure. */
 export interface ApiErrorBody {
-  error: string;
+  error?: string;
+  /** Some routes put the reason here, next to a structured result. */
+  message?: string;
 }
 
 /** Badge counts rendered in the dashboard sidebar. */
