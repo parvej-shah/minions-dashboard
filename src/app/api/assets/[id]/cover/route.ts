@@ -1,40 +1,32 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { apiError, apiFailure } from "@/server/http/respond";
-import { requireClientId } from "@/lib/tenant";
 import { COVER_LAYOUTS, type CoverLayout } from "@/lib/covers/layouts";
-import { renderAssetCover, type CoverEdit } from "@/services/cover";
 import { COVER_ART_STYLES, parseArtStyle } from "@/lib/covers/art";
+import { requireOwnedAssetId } from "@/services/assets";
+import { renderAssetCover, type CoverEdit } from "@/services/cover";
+import { asOptionalString, readJsonOrEmpty } from "@/server/http/body";
+import { HttpError, badRequest } from "@/server/http/errors";
+import { route } from "@/server/http/route";
 
 export const maxDuration = 60;
 
-const text = (v: unknown, max: number) => (typeof v === "string" ? v.slice(0, max) : undefined);
+export const POST = route<"tenant", { id: string }>({ auth: "tenant", failure: "Failed to render cover" }, async ({ clientId, params, request }) => {
+  const assetId = await requireOwnedAssetId(clientId, params.id);
+  const body = await readJsonOrEmpty(request);
 
-/**
- * Re-draws an asset's cover, optionally with a reviewer's edit: layout,
- * headline, subtitle, accent word, illustration style, or another illustration. No model call; the edit passes the same
- * honesty checks as generated copy (no figure the draft does not state).
- */
-export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const ctx = await requireClientId();
-  if ("error" in ctx) return ctx.error;
+  const layout = COVER_LAYOUTS.find((candidate) => candidate === body.layout) as CoverLayout | undefined;
+  if (body.layout !== undefined && !layout) throw badRequest(`layout must be one of ${COVER_LAYOUTS.join(", ")}`);
+  const art = body.art === undefined ? undefined : parseArtStyle(body.art);
+  if (art === null) throw badRequest(`art must be one of ${COVER_ART_STYLES.join(", ")}`);
 
-  try {
-    const { id } = await params;
-    const owned = await prisma.asset.findFirst({ where: { OR: [{ id }, { slug: id }], clientId: ctx.clientId }, select: { id: true } });
-    if (!owned) return apiFailure("Asset not found", 404);
+  const edit: CoverEdit = {
+    layout,
+    headline: asOptionalString(body.headline, 160),
+    kicker: asOptionalString(body.kicker, 160),
+    emphasis: asOptionalString(body.emphasis, 40),
+    art,
+    art_reroll: body.art_reroll === true,
+  };
 
-    const body = await request.json().catch(() => ({}));
-    const layout = typeof body.layout === "string" && COVER_LAYOUTS.includes(body.layout as CoverLayout) ? (body.layout as CoverLayout) : undefined;
-    if (body.layout !== undefined && !layout) return apiFailure(`layout must be one of ${COVER_LAYOUTS.join(", ")}`, 400);
-    const art = body.art === undefined ? undefined : parseArtStyle(body.art);
-    if (art === null) return apiFailure(`art must be one of ${COVER_ART_STYLES.join(", ")}`, 400);
-    const edit: CoverEdit = { layout, headline: text(body.headline, 160), kicker: text(body.kicker, 160), emphasis: text(body.emphasis, 40), art, art_reroll: body.art_reroll === true };
-
-    const result = await renderAssetCover(owned.id, { edit });
-    if (!result.ok) return apiFailure(result.error, result.locked ? 409 : 422);
-    return NextResponse.json({ success: true, hero_image_url: result.url, cover: result.spec });
-  } catch (error) {
-    return apiError(error, "Failed to render cover");
-  }
-}
+  const result = await renderAssetCover(assetId, { edit });
+  if (!result.ok) throw new HttpError(result.locked ? 409 : 422, result.error);
+  return { success: true, hero_image_url: result.url, cover: result.spec };
+});

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { ownedAssetWhere } from "@/services/assets";
 import { checkScheduleTime } from "@/lib/postTime";
 import { syncAssetToBlog } from "@/services/publishing";
 import { DEFAULT_TIMEZONE } from "@/constants/config";
@@ -25,7 +26,7 @@ async function liveOnBlog(clientId: string, asset: { id: string; slug: string })
 export async function schedulePost(clientId: string, assetId: string, date: string, time: string, now: Date = new Date()): Promise<ScheduleResult> {
   const [asset, client] = await Promise.all([
     prisma.asset.findFirst({
-      where: { OR: [{ id: assetId }, { slug: assetId }], clientId },
+      where: ownedAssetWhere(clientId, assetId),
       select: { id: true, slug: true, status: true, publishedAt: true, linkedinPublishedAt: true, facebookPublishedAt: true },
     }),
     prisma.client.findUnique({ where: { id: clientId }, select: { timezone: true } }),
@@ -49,7 +50,7 @@ export async function schedulePost(clientId: string, assetId: string, date: stri
 
 /** Take a scheduled post back to review. It goes nowhere until approved again. */
 export async function unschedulePost(clientId: string, assetId: string, now: Date = new Date()): Promise<ScheduleResult> {
-  const asset = await prisma.asset.findFirst({ where: { OR: [{ id: assetId }, { slug: assetId }], clientId }, select: { id: true } });
+  const asset = await prisma.asset.findFirst({ where: ownedAssetWhere(clientId, assetId), select: { id: true } });
   if (!asset) return { ok: false, error: "Draft not found", status: 404 };
   const updated = await prisma.asset.updateMany({
     where: { id: asset.id, status: "SCHEDULED" },

@@ -1,43 +1,23 @@
-import { NextResponse } from "next/server";
-import { apiError, apiFailure } from "@/server/http/respond";
-import { requireClientId } from "@/lib/tenant";
 import { schedulePost, unschedulePost } from "@/services/postSchedule";
+import { asString, readJsonOrEmpty } from "@/server/http/body";
+import { HttpError, badRequest } from "@/server/http/errors";
+import { route } from "@/server/http/route";
 
-/**
- * Approve a reviewed draft to go out at a chosen time (phase 7). The body is a
- * local date and time in the workspace's timezone: `{ date: "2026-09-28",
- * time: "09:00" }`. Calling it again on a scheduled post moves it.
- */
-export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const ctx = await requireClientId();
-  if ("error" in ctx) return ctx.error;
+type Params = { id: string };
 
-  try {
-    const { id } = await params;
-    const body = await request.json().catch(() => ({}));
-    const date = typeof body.date === "string" ? body.date.trim() : "";
-    const time = typeof body.time === "string" ? body.time.trim() : "";
-    if (!date || !time) return apiFailure("date (YYYY-MM-DD) and time (HH:mm) are required", 400);
+export const POST = route<"tenant", Params>({ auth: "tenant", failure: "Failed to schedule the post" }, async ({ clientId, params, request }) => {
+  const body = await readJsonOrEmpty(request);
+  const date = asString(body.date);
+  const time = asString(body.time);
+  if (!date || !time) throw badRequest("date (YYYY-MM-DD) and time (HH:mm) are required");
 
-    const result = await schedulePost(ctx.clientId, id, date, time);
-    if (!result.ok) return apiFailure(result.error, result.status);
-    return NextResponse.json({ success: true, status: result.status, scheduled_for: result.scheduled_for });
-  } catch (error) {
-    return apiError(error, "Failed to schedule the post");
-  }
-}
+  const result = await schedulePost(clientId, params.id, date, time);
+  if (!result.ok) throw new HttpError(result.status, result.error);
+  return { success: true, status: result.status, scheduled_for: result.scheduled_for };
+});
 
-/** Cancel a scheduled post: it goes back to review and goes nowhere until approved again. */
-export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const ctx = await requireClientId();
-  if ("error" in ctx) return ctx.error;
-
-  try {
-    const { id } = await params;
-    const result = await unschedulePost(ctx.clientId, id);
-    if (!result.ok) return apiFailure(result.error, result.status);
-    return NextResponse.json({ success: true, status: result.status, scheduled_for: null });
-  } catch (error) {
-    return apiError(error, "Failed to cancel the schedule");
-  }
-}
+export const DELETE = route<"tenant", Params>({ auth: "tenant", failure: "Failed to cancel the schedule" }, async ({ clientId, params }) => {
+  const result = await unschedulePost(clientId, params.id);
+  if (!result.ok) throw new HttpError(result.status, result.error);
+  return { success: true, status: result.status, scheduled_for: null };
+});
