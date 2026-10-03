@@ -14,7 +14,7 @@
  * n8n reaches this through POST /api/internal/llm/chat/completions.
  */
 
-export const DASHSCOPE_ENDPOINT = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions";
+const DASHSCOPE_ENDPOINT = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions";
 
 /** Models with free quota on the account (QwenCloud › Benefits, 2026-09-24), strongest first. */
 const FREE_LARGE = ["deepseek-v4-pro", "glm-5.2", "deepseek-v3.2"];
@@ -51,8 +51,8 @@ export function isModelUnavailable(status: number, body: string): boolean {
 }
 
 /** Leaves time for the answer after the last attempt starts. */
-export const ATTEMPT_TIMEOUT_MS = 150_000;
-export const TOTAL_BUDGET_MS = 270_000;
+const ATTEMPT_TIMEOUT_MS = 150_000;
+const TOTAL_BUDGET_MS = 270_000;
 
 export interface ChainResult {
   status: number;

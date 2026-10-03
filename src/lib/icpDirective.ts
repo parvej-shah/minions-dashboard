@@ -9,9 +9,9 @@ import type { IcpContext } from "@/services/authorContext";
  * directives. So the ICP profile is the source of truth and this directive is
  * derived from it on every save -- editing one place changes both.
  */
-export const ICP_DIRECTIVE_KEY = "icp_profile";
+const ICP_DIRECTIVE_KEY = "icp_profile";
 
-export function icpDirectiveId(clientId: string): string {
+function icpDirectiveId(clientId: string): string {
   return `DIR-ICP-${clientId}`;
 }
 

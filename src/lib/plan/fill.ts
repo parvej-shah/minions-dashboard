@@ -14,7 +14,7 @@
 export const OBJECTIVES = ["AUTHORITY", "CREDIBILITY", "DEMAND"] as const;
 export type Objective = (typeof OBJECTIVES)[number];
 
-export const FILL_METHODS = ["LANE", "OTHER_LANE", "TARGETED_HARVEST", "BELOW_BAR"] as const;
+const FILL_METHODS = ["LANE", "OTHER_LANE", "TARGETED_HARVEST", "BELOW_BAR"] as const;
 export type FillMethod = (typeof FILL_METHODS)[number];
 
 /** How each method reads in the week view. */
@@ -96,7 +96,7 @@ export function chooseLane(
 }
 
 /** Strongest first: the gate's score, then the newest. */
-export function rankIdeas(ideas: PlanIdea[]): PlanIdea[] {
+function rankIdeas(ideas: PlanIdea[]): PlanIdea[] {
   return [...ideas].sort((a, b) => b.score - a.score || b.createdAt.getTime() - a.createdAt.getTime());
 }
 

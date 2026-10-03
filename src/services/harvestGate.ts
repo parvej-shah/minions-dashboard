@@ -3,8 +3,8 @@ import { restemKey, thesisKey } from "@/lib/thesis";
 import { gateIdeas, gateInputFromContext, type CandidateIdea, type GateContext, type GatedIdea } from "@/lib/harvest/gate";
 
 /** Earlier ideas checked for restatement, beyond the 60 in recent_theses. */
-export const DEDUPE_WINDOW = 500;
-export const MAX_IDEAS_PER_GATE = 50;
+const DEDUPE_WINDOW = 500;
+const MAX_IDEAS_PER_GATE = 50;
 
 type Body = Record<string, unknown>;
 

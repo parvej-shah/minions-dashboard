@@ -1,9 +1,3 @@
-/**
- * Date formatting shared across the dashboard.
- * `formatRelativeTime` previously lived inside the Ideas page only, while four
- * other surfaces each formatted dates their own way.
- */
-
 /** "just now" / "12m ago" / "3h ago" / "Aug 14" */
 export function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString).getTime();
@@ -39,9 +33,4 @@ export function formatTime(dateString: string | null | undefined): string {
   if (Number.isNaN(date.getTime())) return "—";
 
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-}
-
-/** Whole seconds elapsed since a timestamp, for in-flight job HUDs. */
-export function secondsSince(startedAt: number): number {
-  return Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
 }

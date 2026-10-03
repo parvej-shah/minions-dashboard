@@ -141,7 +141,7 @@ const ICON_WORDS = Object.fromEntries(
 ) as Partial<Record<IconName, RegExp>>;
 
 /** 32-bit FNV-1a: a stable number from a string. */
-export function hashSeed(s: string): number {
+function hashSeed(s: string): number {
   let h = 0x811c9dc5;
   for (let i = 0; i < s.length; i++) {
     h ^= s.charCodeAt(i);

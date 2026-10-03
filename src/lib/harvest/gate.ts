@@ -23,26 +23,26 @@ import { properNouns } from "@/lib/drafts/generalize";
  * basis, so problems there only lower it to BELOW_BAR.
  */
 
-export const GATE_VERDICTS = ["PASS", "BELOW_BAR", "REJECT"] as const;
+const GATE_VERDICTS = ["PASS", "BELOW_BAR", "REJECT"] as const;
 export type GateVerdict = (typeof GATE_VERDICTS)[number];
 
-export const TRUST_BASES = ["LIVED_EXPERIENCE", "APPROVED_PROOF", "MARKET_SIGNAL", "USER_NOTE"] as const;
+const TRUST_BASES = ["LIVED_EXPERIENCE", "APPROVED_PROOF", "MARKET_SIGNAL", "USER_NOTE"] as const;
 export type TrustBasis = (typeof TRUST_BASES)[number];
 
-export const RECOMMENDED_FORMATS = ["POST", "ARTICLE"] as const;
+const RECOMMENDED_FORMATS = ["POST", "ARTICLE"] as const;
 export type RecommendedFormat = (typeof RECOMMENDED_FORMATS)[number];
 
 /** Content words the idea must share with an item it cites, to count as using it. */
-export const MIN_USE_WORDS = 3;
+const MIN_USE_WORDS = 3;
 /** The evidence quote: at least this many content words, and this share of them found in the item. */
-export const MIN_QUOTE_WORDS = 3;
-export const QUOTE_COVERAGE = 0.8;
+const MIN_QUOTE_WORDS = 3;
+const QUOTE_COVERAGE = 0.8;
 /** Same threshold as src/lib/thesis.ts isRedundantThesis. */
-export const DUPLICATE_OVERLAP = 0.5;
+const DUPLICATE_OVERLAP = 0.5;
 
 /** Score weights (plan section 2, point 3) with predicted impressions at 0 until there is data. */
-export const SCORE_WEIGHTS = { authority: 40, icp: 15, originality: 10, evidence: 10 } as const;
-export const HIGH_PRIORITY_SCORE = 70;
+const SCORE_WEIGHTS = { authority: 40, icp: 15, originality: 10, evidence: 10 } as const;
+const HIGH_PRIORITY_SCORE = 70;
 
 /** One idea as the harvest or refine model returned it (after Parse … JSON). */
 export interface CandidateIdea {
@@ -129,7 +129,7 @@ const INTERNAL_REF = /\b(?:signal\s*#?\s*\d+|\[\d+\]|[MP]\d{1,3})\b/gi;
 const CITATION_PARENS = /\s*\((?:signal\s*#?\s*\d+|[MP]\d{1,3})(?:\s*(?:,|;|and|&)\s*(?:signal\s*#?\s*\d+|[MP]\d{1,3}))*\)/gi;
 
 /** Removes bracketed citations; labels in running text are left for the gate to reject. */
-export function stripCitations(s: string): string {
+function stripCitations(s: string): string {
   return s.replace(CITATION_PARENS, "").replace(/\s+([.,;:])/g, "$1");
 }
 

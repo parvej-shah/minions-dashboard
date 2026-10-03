@@ -24,7 +24,7 @@ const RULE_PREFIX = /^Rule\s+\d+:/i;
  * Forces blank lines around block-level constructs so a body written as one
  * run-on string still splits into paragraphs.
  */
-export function normalizeMarkdown(body: string): string {
+function normalizeMarkdown(body: string): string {
   return (body || "")
     .replace(/^(\s*#{1,6}\s+[^\n]+)/gm, "\n\n$1\n\n")
     .replace(/!\[([^\]]*)\]\s*\((https?:\/\/[^)\s]+)\)/g, "\n\n![$1]($2)\n\n")
@@ -100,9 +100,4 @@ export function parseMarkdownBlocks(body: string): MarkdownBlock[] {
     .map((chunk) => chunk.trim())
     .filter(Boolean)
     .map(classify);
-}
-
-/** Extracts the first image URL in a body, if any. */
-export function firstImageUrl(body: string): string | null {
-  return body.match(MARKDOWN_IMAGE)?.[2] ?? null;
 }

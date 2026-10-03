@@ -5,11 +5,11 @@
  */
 
 /** LinkedIn cuts a post at about 210 characters behind "see more"; the hook must land before that. */
-export const HOOK_MAX_CHARS = 210;
+const HOOK_MAX_CHARS = 210;
 /** A mobile paragraph: at most this many sentences. */
-export const PARAGRAPH_MAX_SENTENCES = 3;
+const PARAGRAPH_MAX_SENTENCES = 3;
 /** A sentence a phone reader can take in one pass. */
-export const SENTENCE_MAX_WORDS = 30;
+const SENTENCE_MAX_WORDS = 30;
 
 export interface Readability {
   words: number;

@@ -4,7 +4,7 @@ import { apiFailure } from "@/lib/api-response";
 import type { UserRole } from "@/constants/access";
 
 /** An account that signed up but has not finished onboarding, so has no workspace yet. */
-export const NO_WORKSPACE_MESSAGE = "Your workspace is not set up yet. Finish onboarding to start using Minions.";
+const NO_WORKSPACE_MESSAGE = "Your workspace is not set up yet. Finish onboarding to start using Minions.";
 
 export interface CurrentUser {
   id: string;
@@ -243,7 +243,7 @@ export async function requirePlatformStaff(): Promise<
 const IMPERSONATION_COOKIE = "pa_impersonate_client_id";
 
 /** Reads the active "view as tenant" cookie, if any -- see requireClientId(). */
-export async function getImpersonatedClientId(): Promise<string | null> {
+async function getImpersonatedClientId(): Promise<string | null> {
   const { cookies } = await import("next/headers");
   const store = await cookies();
   return store.get(IMPERSONATION_COOKIE)?.value ?? null;

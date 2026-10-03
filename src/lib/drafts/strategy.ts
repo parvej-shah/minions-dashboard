@@ -88,7 +88,7 @@ export function hookFor(input: { sourceType?: string | null; lanePurpose?: strin
   return (angle && BY_ANGLE[angle.id]) || HOOKS.READER_SCENE;
 }
 
-export const CONTENT_MODES = ["INSIGHT", "STORY", "HOW_TO", "CASE_NOTE", "OPINION"] as const;
+const CONTENT_MODES = ["INSIGHT", "STORY", "HOW_TO", "CASE_NOTE", "OPINION"] as const;
 export type ContentMode = (typeof CONTENT_MODES)[number];
 
 /**

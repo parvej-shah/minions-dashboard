@@ -41,7 +41,7 @@ export type CarouselResult =
   | { ok: false; error: string; errors: string[]; locked?: boolean };
 
 export const CAROUSEL_LOCKED = "This draft is published, so its carousel stays as it went out.";
-export const MAX_ATTEMPTS = 2;
+const MAX_ATTEMPTS = 2;
 /** The route may run 300s; a first answer slower than this leaves no room for a second. */
 const RETRY_CUTOFF_MS = 120_000;
 

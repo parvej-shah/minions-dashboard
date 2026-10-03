@@ -33,7 +33,7 @@ function isDisallowedIp(ip: string): boolean {
  * the SSRF hole a bare `fetch(url)` opens (probing the cloud metadata
  * endpoint, internal services, localhost, etc).
  */
-export async function assertPublicHost(hostname: string): Promise<void> {
+async function assertPublicHost(hostname: string): Promise<void> {
   const lower = hostname.toLowerCase();
   if (lower === "localhost" || lower.endsWith(".localhost")) {
     throw new Error(`Refusing to fetch from disallowed host: ${hostname}`);

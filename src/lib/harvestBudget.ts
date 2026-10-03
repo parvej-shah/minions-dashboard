@@ -45,7 +45,6 @@ export interface RunBudget {
 }
 
 /** Back-compat alias: the harvest-slot endpoint shipped with this name. */
-export type HarvestBudget = RunBudget;
 
 function toBudget(type: RunType, used: number): RunBudget {
   const limit = DAILY_LIMITS[type];
@@ -68,7 +67,7 @@ function toBudget(type: RunType, used: number): RunBudget {
  * Read-only: safe for display, but do NOT gate a trigger on this alone -- see
  * `claimRunSlot` for why.
  */
-export async function getRunBudget(
+async function getRunBudget(
   type: RunType,
   now: Date = new Date()
 ): Promise<RunBudget> {
@@ -86,7 +85,7 @@ export const getHarvestBudget = (now?: Date) => getRunBudget("HARVEST", now);
  * draft path takes ~85s and harvest ~25s, so a run still RUNNING well past that
  * has lost its workflow -- the process died, or the callback never fired.
  */
-export const RUN_TIMEOUT_MS = 10 * 60 * 1000;
+const RUN_TIMEOUT_MS = 10 * 60 * 1000;
 
 /**
  * Marks every run stuck in RUNNING past `RUN_TIMEOUT_MS` as FAILED.

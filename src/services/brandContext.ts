@@ -101,4 +101,3 @@ export function buildBrandContextResponse(
   };
 }
 
-export type BrandContextResponse = ReturnType<typeof buildBrandContextResponse>;

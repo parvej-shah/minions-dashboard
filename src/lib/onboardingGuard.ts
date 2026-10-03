@@ -26,7 +26,7 @@ export async function isEstablishedTenant(clientId: string): Promise<boolean> {
   return Boolean(idea || asset || schedule);
 }
 
-export const ESTABLISHED_TENANT_MESSAGE =
+const ESTABLISHED_TENANT_MESSAGE =
   "This workspace is already set up. Running onboarding again would overwrite its brand, so change it in Brand settings instead.";
 
 /** A 409 for an onboarding write against an established tenant, or null to proceed. */

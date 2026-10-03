@@ -11,7 +11,7 @@ import { CoverFitError, coverElement, type CoverSpec } from "@/lib/covers/layout
 import { ICONS, type IconName } from "@/lib/covers/icons";
 import { DEFAULT_SLIDE_STYLE, SLIDE_LAYOUTS, SLIDE_STYLES, slideElement, type Deck, type Slide, type SlideLayout, type SlideStyle } from "./slides";
 
-export const CAROUSEL_STRUCTURES = ["CHECKLIST", "STEPS", "DECISION", "CONTRAST", "TEARDOWN"] as const;
+const CAROUSEL_STRUCTURES = ["CHECKLIST", "STEPS", "DECISION", "CONTRAST", "TEARDOWN"] as const;
 export type CarouselStructure = (typeof CAROUSEL_STRUCTURES)[number];
 
 /** Slides after the cover: with it, a deck is 5 to 10 pages. */
@@ -78,7 +78,7 @@ export function quantities(text: string): string[] {
 }
 
 /** The unverified claim a line restates with its figure: the same figure and unit, or most of the same words and any figure. */
-export function restatedUnverified(line: string, unverified: string[]): string | undefined {
+function restatedUnverified(line: string, unverified: string[]): string | undefined {
   const mine = quantities(line);
   if (!mine.length) return undefined;
   return unverified.find((claim) => {

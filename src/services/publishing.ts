@@ -122,7 +122,7 @@ export interface BlogEditFields {
 }
 
 /** Propagates a content edit to the live blog row, if one exists. */
-export async function syncBlogEdit(
+async function syncBlogEdit(
   assetId: string,
   slug: string,
   clientId: string | null,

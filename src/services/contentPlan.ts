@@ -79,7 +79,7 @@ function pinnedLaneFor(s: PostingSchedule, at: Date, tz: string): string | null 
  * from "now", so they carry now's seconds; stored slots are keyed on the
  * instant, and two passes a few seconds apart must name the same slot.
  */
-export function slotInstant(d: Date): Date {
+function slotInstant(d: Date): Date {
   return new Date(Math.floor(d.getTime() / 60_000) * 60_000);
 }
 

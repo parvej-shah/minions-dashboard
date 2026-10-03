@@ -9,7 +9,7 @@
  */
 
 export const PULSE_QUESTION = "What did you build, learn, notice, or change your mind about this week?";
-export const DEFAULT_PULSE_DAY = 5;
+const DEFAULT_PULSE_DAY = 5;
 export const PULSE_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
 
 export function isValidTimezone(tz: string): boolean {

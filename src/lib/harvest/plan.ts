@@ -25,7 +25,7 @@ export const memoryRef = (i: number) => `M${i + 1}`;
 export const proofRef = (i: number) => `P${i + 1}`;
 
 /** Recent ideas counted against the mix. */
-export const MIX_WINDOW = 30;
+const MIX_WINDOW = 30;
 
 /** Recent ideas whose memory items rest for this run: about two runs' worth. */
 export const RESEED_GAP = 6;

@@ -125,7 +125,7 @@ Aesthetic Style: The exact editorial standard of a modern SaaS/dev-tools blog (S
  * content-safety filter). Deliberately generic and text-free so it is very
  * unlikely to be refused itself; sent with prompt_extend off.
  */
-export const SAFE_COVER_PROMPT = [
+const SAFE_COVER_PROMPT = [
   "Create a premium 16:9 editorial still-life photograph for a business publication.",
   "Use a deep graphite desk, a clean unmarked paper document, a matte metal paperweight, and a red pen.",
   "Use restrained teal and coral accent lighting, crisp softbox shadows, realistic materials, generous negative space, and no text.",

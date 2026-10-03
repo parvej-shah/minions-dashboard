@@ -20,7 +20,7 @@ export function properNouns(s: string): string[] {
 }
 
 /** Specifics of the original that must not survive: names, figures (10 and up, money, %), links. */
-export function specificsOf(original: string): string[] {
+function specificsOf(original: string): string[] {
   return [
     ...properNouns(original),
     ...numbersIn(original).filter((n) => Number(n) >= 10 || new RegExp(`${n.replace(".", "\\.")}\\s*%|[$€£৳]\\s?${n.replace(".", "\\.")}`).test(original)),

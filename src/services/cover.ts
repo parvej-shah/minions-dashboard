@@ -16,7 +16,7 @@ import { FIRST_POST_TAG } from "@/constants/firstPost";
  * second; 04_hero_image's Qwen path is kept, bypassed, for optional artwork.
  */
 
-export const COVER_PROVIDER = "template";
+const COVER_PROVIDER = "template";
 
 /** What a reviewer may change on a cover. Everything else comes from the draft and the brand. */
 export interface CoverEdit {
@@ -307,7 +307,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   return { ok: true, url, spec: stored };
 }
 
-export const PUBLISHED_COVER_LOCKED = "This draft is published, so its cover stays as it went out.";
+const PUBLISHED_COVER_LOCKED = "This draft is published, so its cover stays as it went out.";
 
 /**
  * Once a draft has gone out anywhere, its cover is fixed: the blog page and the

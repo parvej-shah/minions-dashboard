@@ -10,7 +10,7 @@
  */
 
 /** The same match rule as 02's Prepare Asset Row gate: whole words, any case. */
-export function containsPhrase(text: string, phrase: string): boolean {
+function containsPhrase(text: string, phrase: string): boolean {
   if (!text || !phrase) return false;
   if (/[a-zA-Z0-9]/.test(phrase)) {
     const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

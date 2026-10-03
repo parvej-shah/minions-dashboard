@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-export const PENDING_SIGNUP_COOKIE = "minions_pending_signup";
+const PENDING_SIGNUP_COOKIE = "minions_pending_signup";
 
 /**
  * Marks that the next Google sign-in is a deliberate self-serve signup, not

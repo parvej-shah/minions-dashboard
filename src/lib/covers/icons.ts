@@ -123,7 +123,6 @@ export const ICONS = {
 } as const;
 
 export type IconName = keyof typeof ICONS;
-export const ICON_NAMES = Object.keys(ICONS) as IconName[];
 
 /** What each icon can stand for: the model picks from these words. */
 export const ICON_MEANING: Record<IconName, string> = {

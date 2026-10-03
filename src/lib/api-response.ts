@@ -21,8 +21,3 @@ export function apiError(
 export function apiFailure(message: string, status: number): NextResponse {
   return NextResponse.json({ error: message }, { status });
 }
-
-/** A successful JSON response. */
-export function apiOk<T>(data: T, status: number = 200): NextResponse {
-  return NextResponse.json(data, { status });
-}

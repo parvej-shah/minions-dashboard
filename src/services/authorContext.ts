@@ -75,7 +75,7 @@ type IcpRow = {
 type MemoryRow = { id: string; kind: string; content: string; disclosure: string; usedCount: number; source?: string; createdAt?: Date };
 
 /** How long a weekly-answer item counts as new this week (phase 6). */
-export const PULSE_FRESH_DAYS = 14;
+const PULSE_FRESH_DAYS = 14;
 type LaneRow = { id: string; name: string; purpose: string; brief: string; weight: number; profileTarget: string };
 
 export function toIcpContext(row: IcpRow | null): IcpContext {
@@ -104,7 +104,7 @@ export function toMemoryContext(row: MemoryRow, now = Date.now()): MemoryContext
   };
 }
 
-export function toLaneContext(row: LaneRow): LaneContext {
+function toLaneContext(row: LaneRow): LaneContext {
   return {
     id: row.id,
     name: row.name,
