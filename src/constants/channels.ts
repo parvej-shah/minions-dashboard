@@ -1,12 +1,6 @@
 import type { DistributionChannelKey, DistributionPlatform } from "@/types";
 
-/**
- * The one distribution-channel catalogue.
- *
- * This list previously existed twice — once in the API route (with `ruleKey`
- * and `defaultActive`) and once as a client-side fallback — with the same
- * strings copied between them.
- */
+/** The one distribution-channel catalogue, shared by the API and the UI. */
 export interface DistributionChannelDefinition {
   id: string;
   key: DistributionChannelKey;
@@ -25,11 +19,8 @@ export interface DistributionChannelDefinition {
  * connected anything -- /api/channels overrides it per-tenant at request
  * time (their own site once a blog webhook is connected, or "Connected"
  * once a real external_id is on file for a social channel) rather than
- * serving this catalogue's copy verbatim. Keeping these tenant-neutral
- * (no "getminions.ai", no "@getminionsai") matters even as a fallback --
- * every tenant reads this same catalogue, and it used to hardcode this
- * platform's own brand/handles, which read as "your content publishes to
- * OUR accounts" to every other tenant.
+ * serving this catalogue's copy verbatim. Every tenant reads this catalogue,
+ * so the copy stays tenant-neutral (no "getminions.ai", no "@getminionsai").
  */
 export const DISTRIBUTION_CHANNELS: readonly DistributionChannelDefinition[] = [
   {

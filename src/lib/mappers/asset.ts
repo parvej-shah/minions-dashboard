@@ -70,11 +70,7 @@ export function toClaimDTO(claim: ClaimDTORecord): ClaimCheckItem {
 
 /**
  * The single Prisma-row -> wire-shape conversion for an editorial asset.
- *
- * The list and by-id routes previously had byte-identical copies of this that
- * disagreed on one thing: the missing-trade fallback was "HVAC" in one and
- * "UNSPECIFIED" in the other. It is UNSPECIFIED everywhere now — a missing
- * trade is never presented as a real one.
+ * A missing trade is UNSPECIFIED, never presented as a real one.
  */
 function toCoverDTO(raw: unknown): CoverSpecDTO | null {
   if (!raw || typeof raw !== "object") return null;

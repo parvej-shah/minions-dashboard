@@ -2,10 +2,8 @@
  * "Steal like an artist" — learning craft from a source article without
  * copying it.
  *
- * The harvester previously showed the model only a headline and a 300-char
- * RSS snippet, which is not enough to learn anything about how a good piece
- * is built. This fetches the actual article and reduces it to a STRUCTURAL
- * lesson: how it opens, what kind of evidence it leans on, how it sequences
+ * A headline and RSS snippet say nothing about how a piece is built, so this
+ * fetches the actual article and reduces it to a STRUCTURAL lesson: how it opens, what kind of evidence it leans on, how it sequences
  * the argument, how it closes.
  *
  * The distinction that keeps this legitimate (and the one Kleon's book is

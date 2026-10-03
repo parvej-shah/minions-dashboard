@@ -15,24 +15,13 @@ function constantTimeEqual(a: string, b: string): boolean {
   return crypto.timingSafeEqual(hashA, hashB);
 }
 
-/**
- * Calls a minute the webhook secret may make. Every n8n workflow shares the one
- * secret, and a scheduled harvest makes about nine calls per workspace, all in
- * the same minute: at 60, ten workspaces got 429s (2026-09-29, 04:00). A wrong
- * secret is refused before this count, so the cap only bounds a leaked one.
- */
+// Every n8n workflow shares one secret and a scheduled harvest makes about nine calls per workspace in the same minute.
+// A wrong secret is refused before this count, so the cap only bounds a leaked one.
 const WEBHOOK_CALLS_PER_MINUTE = 600;
 
 /**
- * Validates incoming webhook requests against MINIONS_WEBHOOK_SECRET.
- *
- * Deliberately NOT BLOG_API_SECRET any more: that variable held a value that
- * was committed to the public getminions.ai repo, so it authenticated this
- * API for anyone. n8n holds the same secret in its "Minions Cockpit API
- * (webhook secret)" credential; rotate both together.
- * Uses constant-time comparison to protect against side-channel timing attacks, and
- * rate-limits by the hash of the provided secret so a leaked/brute-forced token can't
- * be hammered without limit.
+ * Validates a request against MINIONS_WEBHOOK_SECRET, which n8n holds in its "Minions Cockpit API (webhook secret)" credential;
+ * rotate both together. The comparison is constant-time and the rate limit is keyed by a hash of the secret.
  */
 export async function verifyWebhookSecret(
   request: Request

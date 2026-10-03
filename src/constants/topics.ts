@@ -1,21 +1,6 @@
-/**
- * Per-tenant topic labels, replacing the hardcoded `TargetTrade` union.
- *
- * `TargetTrade` was a fixed set -- HVAC, Plumbing, Electrical, Roofing, Pest
- * Control -- inherited from the original home-services product and baked into
- * the type system, the Idea Stream filter row, the inject form, and four other
- * components. Every tenant saw those five trades regardless of industry, so an
- * AI consultancy was asked to file its ideas under "Roofing".
- *
- * Topics now come from the tenant's own `core_themes` directive, which
- * onboarding already collects and stores. Nothing new is asked of the user.
- */
+/** Per-tenant topic labels, taken from the tenant's own `core_themes` directive. */
 
-/**
- * Kept as a plain string alias so existing rows (and the legacy contractor
- * tenant's "HVAC" values) stay valid. The set is data now, not a type -- a
- * union here is exactly what made this un-tenantable.
- */
+/** A plain string, not a union: the set is each tenant's data, and existing rows' values stay valid. */
 export type TopicLabel = string;
 
 /** Shown when a tenant has no core_themes directive yet. */

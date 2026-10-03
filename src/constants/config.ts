@@ -1,8 +1,7 @@
 /**
  * Application-wide configuration constants.
  *
- * Anything that was previously a string literal repeated across route handlers
- * and components lives here, so a change is one edit rather than a find-and-replace.
+ * Anything repeated across route handlers and components lives here, so a change is one edit.
  */
 
 /**

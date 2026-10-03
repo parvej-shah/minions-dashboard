@@ -2,14 +2,8 @@
  * The angle library the harvester draws from, and the rotation that stops it
  * repeating itself.
  *
- * 01_idea_harvester's prompt used to hardcode three fixed angles -- THE
- * STAKES, THE MYTH, HOW IT ACTUALLY WORKS -- along with a JSON skeleton that
- * repeated those same three pillars. It asked the model to "rotate structures
- * and pillars" while the scaffold around it made rotation impossible, so
- * every run produced the same three shapes. Structural repetition was designed
- * in, and no amount of prompt-level pleading could overcome it.
- *
- * Now the three angles are drawn from this library and rotated per run.
+ * Each run draws three angles from this library and rotates them, so the
+ * harvester's ideas do not repeat the same three shapes.
  */
 export interface ContentAngle {
   id: string;

@@ -8,8 +8,8 @@ import { prisma } from "@/lib/prisma";
  * HARVEST scales with tenant count rather than usage: 00_tenant_dispatcher
  * fires one run per ACTIVE client every night, each spending two Qwen calls
  * plus a per-source fetch, so the ceiling has to leave room for the nightly
- * fan-out plus manual runs and onboarding. Raised from 10 on 2026-09-29, when
- * a new tenant's first harvest was refused after the nightly runs used the day.
+ * fan-out plus manual runs and onboarding, or a new tenant's first harvest is
+ * refused after the nightly runs use the day.
  *
  * DRAFT is capped lower because it is the expensive half of the pipeline: two
  * writer calls, a claims-gate pass, social variants, and a hero image generated
@@ -139,9 +139,7 @@ export type RunSlot =
  * callers. Verified against production: 12 simultaneous claims produced exactly
  * 10 rows and 2 rejections.
  *
- * The row doubles as the audit trail: scheduled harvests previously wrote no
- * `pipeline_runs` row at all, which is why that table showed a last-harvest
- * date days old while nine ran that morning.
+ * The row doubles as the audit trail: every scheduled harvest leaves a `pipeline_runs` row.
  */
 export async function claimRunSlot(
   type: RunType,

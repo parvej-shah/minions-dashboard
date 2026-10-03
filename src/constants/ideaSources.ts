@@ -1,11 +1,8 @@
 /**
  * Tenant-configurable harvest sources.
  *
- * The harvester used to read four RSS URLs hardcoded in n8n -- Hacker News,
- * the n8n blog, TechCrunch AI, and a Google News query pinned to
- * "pest control HVAC plumbing" -- for every tenant regardless of industry.
- * That is a large part of why harvested ideas repeated: the same handful of
- * slow-moving feeds produced near-identical signals run after run.
+ * Each tenant picks its own feeds, so harvested ideas follow its industry
+ * instead of one shared handful of slow-moving sources.
  */
 export type IdeaSourceKind = "RSS" | "GOOGLE_NEWS" | "REDDIT" | "SITEMAP";
 

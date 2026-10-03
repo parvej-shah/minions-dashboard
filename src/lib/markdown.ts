@@ -1,9 +1,6 @@
 /**
- * Markdown normalisation and block classification for editorial article bodies.
- *
- * The regex pipeline and the block-type branch tree were previously duplicated
- * verbatim in two places inside EditorialStudio (the split view and the reading
- * view), so a fix to one silently left the other behind.
+ * Markdown normalisation and block classification for editorial article bodies,
+ * shared by the split and reading views.
  */
 
 export type MarkdownBlock =

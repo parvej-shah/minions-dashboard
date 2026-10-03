@@ -54,12 +54,8 @@ export function buildBrandContextResponse(
     // for specialists stays expressible.
     writer_expertise: harvest.writerExpertise,
     writer_expertise_guidance: writerExpertisePromptGuidance(harvest.writerExpertise),
-    // Per-tenant harvest feeds, replacing the four URLs 01_idea_harvester
-    // used to hardcode for every tenant regardless of industry.
     idea_sources: harvest.sources,
-    // The most RECENT theses, for the harvester's do-not-repeat list. The
-    // old workflow sliced the oldest 40 rows off a descending array, so the
-    // model never saw what it had just generated and reliably repeated it.
+    // The most RECENT theses, so the harvester's do-not-repeat list covers what it just generated.
     recent_theses: harvest.recentTheses,
     // Rotates the pillar set per run so the harvester stops emitting the
     // same Stakes/Myth/How-it-works triplet every single time.

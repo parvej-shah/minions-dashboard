@@ -9,11 +9,7 @@ export const TENANT_ZERO_ID = "tenant-zero-getminions-ai";
 /** Founders the getminions.ai byline is drawn from. */
 const FOUNDER_NAMES = ["Parvej", "Rakib"] as const;
 
-/**
- * The byline stored on a blog row. Only getminions.ai's own posts carry a
- * Minions founder; every other workspace's posts are credited to that brand.
- * Every customer's published post used to be signed "Co-Founder, Minions.AI".
- */
+/** The byline stored on a blog row: a Minions founder for getminions.ai's own posts, the workspace's brand for everyone else's. */
 export async function buildAuthor(clientId: string | null) {
   if (clientId === TENANT_ZERO_ID) {
     return {
@@ -103,9 +99,7 @@ export async function upsertToBlog(asset: Asset): Promise<void> {
       content: asset.content,
       audience: asset.audience,
       pillar: asset.pillar,
-      // The byline is deliberately absent here: it is assigned once on create.
-      // Re-running a publish used to reroll `buildAuthor()`, so a live post
-      // could change its author between one republish and the next.
+      // The byline is assigned once on create so a republish cannot change a live post's author.
       assetId: asset.id,
       publishedAt: asset.publishedAt || new Date(),
       updatedAt: new Date(),

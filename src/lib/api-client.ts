@@ -1,12 +1,8 @@
 import type { ApiErrorBody } from "@/types";
 
 /**
- * The one HTTP client for talking to this app's own API routes.
- *
- * Every component previously hand-rolled `fetch` + `res.ok` + `res.json()` with
- * its own error convention (36 call sites). They all go through here now, so a
- * failed request always surfaces as a thrown ApiRequestError carrying the
- * server's client-safe message.
+ * The one HTTP client for this app's own API routes. A failed request always
+ * surfaces as a thrown ApiRequestError carrying the server's client-safe message.
  */
 export class ApiRequestError extends Error {
   readonly status: number;

@@ -1,7 +1,6 @@
 /**
- * Who a brand directive applies to. One ICP per tenant (decision D14,
- * 2026-09-23): the PEER and BRIDGE lanes were retired, and their directives
- * deactivated by prisma/sql/2026-09-23-authority-foundation.sql.
+ * Who a brand directive applies to. One ICP per tenant (decision D14); the
+ * PEER and BRIDGE lanes are retired.
  */
 export const AUDIENCE_SCOPES = ["ALL", "ICP"] as const;
 export type AudienceScope = (typeof AUDIENCE_SCOPES)[number];
