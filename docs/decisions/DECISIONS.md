@@ -52,6 +52,12 @@ and link to it here.
 
 **Decision:** Show brand basics, audience and experience, writing voice and proof, idea sources, and words to avoid as consecutive sections in one page, with jump links instead of hiding settings behind tabs or disclosures.
 **Why:** Authors need to understand that these are editable inputs shaping future drafts; hidden destinations make the product’s core controls hard to discover.
+**Status:** superseded by [Brand settings use focused, visible tabs](#2026-10-03--brand-settings-use-focused-visible-tabs)
+
+## 2026-10-03 — Brand settings use focused, visible tabs
+
+**Decision:** Brand settings show one editable area at a time in five visible tabs: Brand basics, Audience & experience, Writing voice, Idea sources, and Words to avoid. The overview's profile prompts open the relevant tab, and direct links retain their destination.
+**Why:** The all-sections layout made the page long and hard to scan. Visible tabs keep every setting discoverable while giving each editing task a focused space.
 **Status:** active
 
 ## 2026-10-02 — Phone review puts checks before publishing

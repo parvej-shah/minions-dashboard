@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useEffect, useState, type ReactNode } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useState, type ReactNode } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Mic2, Sparkles, Rss, Users2, Ban } from "lucide-react";
 import { BrandDirectiveItem, BrandTab } from "@/types";
 import LexiconTab from "@/components/brand/LexiconTab";
@@ -12,12 +12,12 @@ import ExperienceTab from "@/components/brand/ExperienceTab";
 import CompletenessCard from "@/components/brand/CompletenessCard";
 import { useApiResource } from "@/hooks/useApiResource";
 
-const BRAND_SECTIONS: { tab: BrandTab; id: string; label: string }[] = [
-  { tab: "overview", id: "brand-basics", label: "Brand basics" },
-  { tab: "experience", id: "audience-experience", label: "Audience & experience" },
-  { tab: "voice-proof", id: "writing-voice", label: "Writing voice" },
-  { tab: "sources", id: "idea-sources", label: "Idea sources" },
-  { tab: "lexicon", id: "words-to-avoid", label: "Words to avoid" },
+const BRAND_SECTIONS: { tab: BrandTab; label: string; icon: typeof Sparkles }[] = [
+  { tab: "overview", label: "Brand basics", icon: Sparkles },
+  { tab: "experience", label: "Audience & experience", icon: Users2 },
+  { tab: "voice-proof", label: "Writing voice", icon: Mic2 },
+  { tab: "sources", label: "Idea sources", icon: Rss },
+  { tab: "lexicon", label: "Words to avoid", icon: Ban },
 ];
 
 // useSearchParams needs a Suspense boundary on a prerendered route.
@@ -31,14 +31,12 @@ export default function BrandStudioPage() {
 
 function BrandStudio() {
   const requested = useSearchParams().get("tab");
-  useEffect(() => {
-    const section = BRAND_SECTIONS.find((item) => item.tab === requested);
-    if (section) requestAnimationFrame(() => document.getElementById(section.id)?.scrollIntoView({ behavior: "smooth", block: "start" }));
-  }, [requested]);
+  const router = useRouter();
+  const activeTab = BRAND_SECTIONS.find((item) => item.tab === requested)?.tab ?? "overview";
 
   const goToSection = (tab: BrandTab) => {
-    const section = BRAND_SECTIONS.find((item) => item.tab === tab);
-    if (section) document.getElementById(section.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    router.replace(`/brand?tab=${tab}`, { scroll: false });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
   // Bumped after any profile edit so the completeness card re-reads.
   const [profileVersion, setProfileVersion] = useState(0);
@@ -59,6 +57,7 @@ function BrandStudio() {
 
   const [newBannedWord, setNewBannedWord] = useState("");
   const [isAddingBannedWord, setIsAddingBannedWord] = useState(false);
+  const [bannedWordError, setBannedWordError] = useState<string | null>(null);
 
   const deleteDirective = async (id: string) => {
     const previous = directives;
@@ -75,6 +74,7 @@ function BrandStudio() {
     const word = newBannedWord.trim();
     if (!word) return;
     setIsAddingBannedWord(true);
+    setBannedWordError(null);
     try {
       const res = await fetch("/api/brand/directives", {
         method: "POST",
@@ -87,15 +87,13 @@ function BrandStudio() {
           audience_scope: "ALL",
         }),
       });
-      if (res.ok) {
-        const created: BrandDirectiveItem = await res.json();
-        setDirectives((prev) => [created, ...prev]);
-      }
-    } catch {
-      // No local fallback: a banned word that only exists client-side would silently
-      // never reach the pipeline's actual brand context query.
-    } finally {
+      if (!res.ok) throw new Error("Could not add that word. Please try again.");
+      const created: BrandDirectiveItem = await res.json();
+      setDirectives((prev) => [created, ...prev]);
       setNewBannedWord("");
+    } catch {
+      setBannedWordError("Could not add that word. Please try again.");
+    } finally {
       setIsAddingBannedWord(false);
     }
   };
@@ -103,8 +101,8 @@ function BrandStudio() {
   const removeBannedWord = (id: string) => deleteDirective(id);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 pb-16">
-      <div className="space-y-5 border-b border-line pb-5">
+    <div className="mx-auto max-w-7xl space-y-6 pb-16">
+      <div className="space-y-5">
         <div className="flex items-start gap-3">
           <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border-2 border-brand/30 bg-brand/10 text-brand">
             <Sparkles className="h-5 w-5" aria-hidden="true" />
@@ -112,50 +110,51 @@ function BrandStudio() {
           <div>
             <div className="mb-1 text-[11px] font-mono tracking-[0.14em] text-brand uppercase">Your voice, your point of view</div>
             <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">Make every post sound like you</h1>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">Edit your brand, audience, writing voice, and idea sources together. Changes here guide future drafts.</p>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">Choose what to shape next. Your changes guide future drafts.</p>
           </div>
         </div>
 
-        <nav aria-label="Brand settings sections" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-          {BRAND_SECTIONS.map(({ id, label }) => (
-            <a key={id} href={`#${id}`} className="inline-flex min-h-10 shrink-0 cursor-pointer items-center rounded-xl border border-line bg-surface px-3.5 text-xs font-semibold text-muted transition-colors hover:border-brand/50 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">{label}</a>
+        <nav aria-label="Brand settings" className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+          {BRAND_SECTIONS.map(({ tab, label, icon: Icon }) => (
+            <button key={tab} type="button" onClick={() => goToSection(tab)} aria-current={activeTab === tab ? "page" : undefined} className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 px-3 text-center text-xs font-semibold transition-colors last:col-span-2 sm:justify-start sm:px-4 sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${activeTab === tab ? "border-brand bg-brand text-canvas" : "border-line bg-surface text-muted hover:border-brand/50 hover:text-ink"}`}><Icon className="h-4 w-4" aria-hidden="true" />{label}</button>
           ))}
         </nav>
       </div>
-      <CompletenessCard version={profileVersion} onGo={goToSection} />
+      {activeTab === "overview" && <CompletenessCard version={profileVersion} onGo={goToSection} />}
 
-      <section id="brand-basics" className="scroll-mt-6 space-y-3">
+      {activeTab === "overview" && <section className="space-y-3">
         <SectionHeading icon={<Sparkles className="h-4 w-4" />} title="Brand basics" description="What you do, what you talk about, and the principles that make your content yours." />
         <OverviewTab directives={directives} setDirectives={setDirectives} onEditAudience={() => goToSection("experience")} />
-      </section>
+      </section>}
 
-      <section id="audience-experience" className="scroll-mt-6 space-y-3">
+      {activeTab === "experience" && <section className="space-y-3">
         <SectionHeading icon={<Users2 className="h-4 w-4" />} title="Audience & experience" description="Help Minions write for the right people and draw on what you have actually learned." />
         <ExperienceTab onChange={bumpProfile} />
-      </section>
+      </section>}
 
-      <section id="writing-voice" className="scroll-mt-6 space-y-3">
+      {activeTab === "voice-proof" && <section className="space-y-3">
         <SectionHeading icon={<Mic2 className="h-4 w-4" />} title="Writing voice & proof" description="Set the sound of your writing and the facts future posts are allowed to use." />
         <VoiceProofTab />
-      </section>
+      </section>}
 
-      <section id="idea-sources" className="scroll-mt-6 space-y-3">
+      {activeTab === "sources" && <section className="space-y-3">
         <SectionHeading icon={<Rss className="h-4 w-4" />} title="Idea sources" description="Choose the feeds Minions watches for useful, less repetitive ideas." />
         <SourcesTab />
-      </section>
+      </section>}
 
-      <section id="words-to-avoid" className="scroll-mt-6 space-y-3">
+      {activeTab === "lexicon" && <section className="space-y-3">
         <SectionHeading icon={<Ban className="h-4 w-4" />} title="Words & rules to avoid" description="Block words and set guardrails every new draft should follow." />
         <LexiconTab
           bannedWords={forbiddenDirectives}
           isLoading={directivesLoading}
           isSubmitting={isAddingBannedWord}
+          error={bannedWordError}
           newBannedWord={newBannedWord}
           setNewBannedWord={setNewBannedWord}
           onAddBannedWord={handleAddBannedWord}
           onRemoveBannedWord={removeBannedWord}
         />
-      </section>
+      </section>}
     </div>
   );
 }

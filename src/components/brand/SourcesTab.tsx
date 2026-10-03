@@ -173,11 +173,11 @@ export default function SourcesTab() {
 
         {sources.length < MAX_SOURCES_PER_TENANT ? (
           <div className="space-y-2 border-t border-line/60 pt-4">
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <label className="space-y-1.5 text-xs font-semibold text-muted">Source type
               <select
                 value={kind}
                 onChange={(e) => setKind(e.target.value as IdeaSourceKind)}
-                aria-label="Source type"
                 className={`${inputClass} cursor-pointer`}
               >
                 {IDEA_SOURCE_KINDS.map((k) => (
@@ -186,6 +186,8 @@ export default function SourcesTab() {
                   </option>
                 ))}
               </select>
+              </label>
+              <label className="space-y-1.5 text-xs font-semibold text-muted">Name
               <input
                 type="text"
                 value={label}
@@ -193,6 +195,8 @@ export default function SourcesTab() {
                 placeholder="Name, e.g. Trade Weekly"
                 className={inputClass}
               />
+              </label>
+              <label className="space-y-1.5 text-xs font-semibold text-muted">{kindDef.usesQuery ? "Search topic" : "Feed URL"}
               <input
                 type="text"
                 value={value}
@@ -200,14 +204,15 @@ export default function SourcesTab() {
                 placeholder={kindDef.usesQuery ? "Topic" : "Feed URL"}
                 className={inputClass}
               />
+              </label>
             </div>
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] text-subtle">{kindDef.hint}</p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs text-muted">{kindDef.hint}</p>
               <button
                 type="button"
                 onClick={handleAdd}
                 disabled={isSaving || !label.trim() || !value.trim()}
-                className={buttonStyles({ size: "sm", className: "shrink-0" })}
+                className={buttonStyles({ size: "md", className: "w-full sm:w-auto" })}
               >
                 {isSaving ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />

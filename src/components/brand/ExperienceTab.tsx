@@ -88,7 +88,7 @@ function ListEditor({
   };
   return (
     <div className="space-y-2">
-      <label className="text-xs font-semibold text-muted">{label}</label>
+      <label htmlFor={`icp-list-${label.replace(/\W+/g, "-").toLowerCase()}`} className="text-xs font-semibold text-muted">{label}</label>
       {items.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {items.map((item) => (
@@ -111,6 +111,7 @@ function ListEditor({
       )}
       {items.length < ICP_LIST_MAX && (
         <input
+          id={`icp-list-${label.replace(/\W+/g, "-").toLowerCase()}`}
           type="text"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}

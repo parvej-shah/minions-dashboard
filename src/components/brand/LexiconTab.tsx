@@ -12,6 +12,7 @@ export interface LexiconTabProps {
   bannedWords: BrandDirectiveItem[];
   isLoading: boolean;
   isSubmitting?: boolean;
+  error?: string | null;
   newBannedWord: string;
   setNewBannedWord: (v: string) => void;
   onAddBannedWord: () => void;
@@ -24,6 +25,7 @@ export default function LexiconTab({
   bannedWords,
   isLoading,
   isSubmitting,
+  error,
   newBannedWord,
   setNewBannedWord,
   onAddBannedWord,
@@ -41,32 +43,39 @@ export default function LexiconTab({
           <div>
             <h3 className="text-base font-bold text-ink flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-red-400" />
-              Banned Lexicon & AI Cliché Blacklist
+              Words to avoid
             </h3>
             <p className="text-xs text-muted mt-0.5">
-              The Lead Editorial Reviewer rejects or auto-edits any draft containing these words.
+              These words are checked in new drafts. Add phrases you never want Minions to use.
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+            <label className="sr-only" htmlFor="new-banned-word">Word or phrase to avoid</label>
             <input
+              id="new-banned-word"
               type="text"
-              placeholder="Add banned buzzword..."
+              placeholder="Word or phrase to avoid"
               value={newBannedWord}
               onChange={(e) => setNewBannedWord(e.target.value)}
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? "banned-word-error" : undefined}
               onKeyDown={(e) => e.key === "Enter" && !isSubmitting && newBannedWord.trim() && onAddBannedWord()}
               disabled={isSubmitting}
-              className="bg-surface-2 border border-line rounded-xl px-3 py-1.5 text-xs text-ink focus:outline-none focus:border-brand"
+              className="min-h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-ink focus:outline-none focus:border-brand sm:w-64"
             />
             <button
+              type="button"
               onClick={onAddBannedWord}
               disabled={isSubmitting || !newBannedWord.trim()}
-              className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/40 text-xs font-bold px-3 py-1.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="min-h-11 w-full cursor-pointer rounded-xl border border-red-500/40 bg-red-500/20 px-4 text-sm font-bold text-red-400 transition-colors hover:bg-red-500/30 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
             >
-              {isSubmitting ? "Saving..." : "+ Ban Word"}
+              {isSubmitting ? "Adding…" : "Add word"}
             </button>
           </div>
         </div>
+
+        {error && <p id="banned-word-error" role="alert" className="text-sm text-red-400">{error}</p>}
 
         {/* Tag Cloud */}
         {isLoading ? (
@@ -81,8 +90,10 @@ export default function LexiconTab({
               >
                 <span>&quot;{directive.content}&quot;</span>
                 <button
+                  type="button"
                   onClick={() => onRemoveBannedWord(directive.id)}
-                  className="text-red-400 hover:text-red-200 transition-colors ml-1"
+                  aria-label={`Remove ${directive.content}`}
+                  className="min-h-8 min-w-8 cursor-pointer text-red-400 hover:text-red-200 transition-colors ml-1"
                   title="Remove from blacklist"
                 >
                   ✕
@@ -107,8 +118,9 @@ export default function LexiconTab({
               >
                 <span>{directive.content}</span>
                 <button
+                  type="button"
                   onClick={() => onRemoveBannedWord(directive.id)}
-                  className="text-muted hover:text-ink transition-colors"
+                  className="min-h-9 min-w-9 cursor-pointer text-muted hover:text-ink transition-colors"
                   title="Remove this rule"
                   aria-label="Remove this rule"
                 >

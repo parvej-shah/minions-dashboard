@@ -44,6 +44,13 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [savedSnapshot, setSavedSnapshot] = useState(() => JSON.stringify({
+    questionnaire: initialData.questionnaire,
+    examples: initialData.examples.map((item) => item.content),
+    proofs: initialData.proofs,
+  }));
+  const currentSnapshot = JSON.stringify({ questionnaire, examples, proofs });
+  const isDirty = currentSnapshot !== savedSnapshot;
 
   const voiceScore = useMemo(() => {
     const usefulSamples = examples.filter((item) => item.trim().length >= 100).length;
@@ -64,6 +71,7 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
     setSaveError(null);
     try {
       await apiClient.put("/api/brand/voice-proof", { questionnaire, examples, proofs });
+      setSavedSnapshot(currentSnapshot);
       setSaved(true);
     } catch (err) {
       setSaveError(toErrorMessage(err, "Could not save voice and proof settings"));
@@ -105,7 +113,7 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
                 <select
                   value={questionnaire[option.key]}
                   onChange={(event) => setQuestionnaire({ ...questionnaire, [option.key]: event.target.value })}
-                  className="w-full rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-xs text-ink outline-none focus:border-brand"
+                  className="min-h-11 w-full cursor-pointer rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none focus:border-brand"
                 >
                   {option.choices.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}
                 </select>
@@ -137,6 +145,7 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
               <div key={index} className="relative">
                 <textarea
                   rows={4}
+                  aria-label={`Writing sample ${index + 1}`}
                   value={example}
                   onChange={(event) => setExamples(examples.map((item, itemIndex) => itemIndex === index ? event.target.value : item))}
                   placeholder="Paste something that sounds unmistakably like you…"
@@ -159,8 +168,9 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
               ))}
             </div>
             <div className="flex gap-2">
-              <input value={signatureDraft} onChange={(event) => setSignatureDraft(event.target.value)} onKeyDown={(event) => event.key === "Enter" && (event.preventDefault(), addSignaturePhrase())} placeholder="e.g. Here’s the practical part" className="min-w-0 flex-1 rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs text-ink outline-none focus:border-brand" />
-              <button type="button" onClick={addSignaturePhrase} className="rounded-lg border border-line bg-surface-2 px-3 text-muted hover:text-ink"><Plus className="h-4 w-4" /></button>
+              <label htmlFor="signature-phrase" className="sr-only">Phrase you naturally use</label>
+              <input id="signature-phrase" value={signatureDraft} onChange={(event) => setSignatureDraft(event.target.value)} onKeyDown={(event) => event.key === "Enter" && (event.preventDefault(), addSignaturePhrase())} placeholder="e.g. Here’s the practical part" className="min-w-0 flex-1 rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs text-ink outline-none focus:border-brand" />
+              <button type="button" onClick={addSignaturePhrase} aria-label="Add phrase" disabled={!signatureDraft.trim() || questionnaire.signature_phrases.length >= 8} className="rounded-lg border border-line bg-surface-2 px-3 text-muted hover:text-ink"><Plus className="h-4 w-4" /></button>
             </div>
           </div>
         </section>
@@ -182,9 +192,12 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
                 <span className="flex items-center gap-1.5 text-[11px] font-semibold text-brand"><FileCheck2 className="h-3.5 w-3.5" /> Proof {index + 1}</span>
                 <button type="button" onClick={() => setProofs(proofs.filter((_, itemIndex) => itemIndex !== index))} className="rounded-lg p-1.5 text-subtle hover:bg-red-500/10 hover:text-red-400" aria-label={`Remove proof ${index + 1}`}><Trash2 className="h-3.5 w-3.5" /></button>
               </div>
-              <textarea rows={3} value={proof.claim} onChange={(event) => setProofs(proofs.map((item, itemIndex) => itemIndex === index ? { ...item, claim: event.target.value } : item))} placeholder="Exact claim this source supports" className="w-full resize-y rounded-lg border border-line bg-surface-2 p-3 text-xs text-ink outline-none placeholder:text-[#475569] focus:border-brand" />
-              <input type="url" value={proof.source_url} onChange={(event) => setProofs(proofs.map((item, itemIndex) => itemIndex === index ? { ...item, source_url: event.target.value } : item))} placeholder="https://source.example/report" className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs text-ink outline-none placeholder:text-[#475569] focus:border-brand" />
-              <input value={proof.source_title} onChange={(event) => setProofs(proofs.map((item, itemIndex) => itemIndex === index ? { ...item, source_title: event.target.value } : item))} placeholder="Source title (optional)" className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs text-ink outline-none placeholder:text-[#475569] focus:border-brand" />
+              <label htmlFor={`proof-claim-${proof.id}`} className="block text-xs font-semibold text-muted">Claim this source supports</label>
+              <textarea id={`proof-claim-${proof.id}`} rows={3} value={proof.claim} onChange={(event) => setProofs(proofs.map((item, itemIndex) => itemIndex === index ? { ...item, claim: event.target.value } : item))} placeholder="Exact claim this source supports" className="w-full resize-y rounded-lg border border-line bg-surface-2 p-3 text-xs text-ink outline-none placeholder:text-[#475569] focus:border-brand" />
+              <label htmlFor={`proof-url-${proof.id}`} className="block text-xs font-semibold text-muted">Source URL</label>
+              <input id={`proof-url-${proof.id}`} type="url" value={proof.source_url} onChange={(event) => setProofs(proofs.map((item, itemIndex) => itemIndex === index ? { ...item, source_url: event.target.value } : item))} placeholder="https://source.example/report" className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs text-ink outline-none placeholder:text-[#475569] focus:border-brand" />
+              <label htmlFor={`proof-title-${proof.id}`} className="block text-xs font-semibold text-muted">Source title (optional)</label>
+              <input id={`proof-title-${proof.id}`} value={proof.source_title} onChange={(event) => setProofs(proofs.map((item, itemIndex) => itemIndex === index ? { ...item, source_title: event.target.value } : item))} placeholder="Source title (optional)" className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs text-ink outline-none placeholder:text-[#475569] focus:border-brand" />
             </div>
           ))}
 
@@ -199,8 +212,8 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
       </div>
 
       <div className="sticky bottom-4 flex items-center justify-end gap-3 rounded-2xl border border-line bg-[#0D1520]/95 p-3 shadow-2xl backdrop-blur">
-        {saved && <span className="inline-flex items-center gap-1 text-xs text-emerald-400"><Check className="h-3.5 w-3.5" /> Saved to future drafts</span>}
-        <button type="button" onClick={save} disabled={saving} className={buttonStyles({ size: "sm" })}>
+        {saved && !isDirty && <span role="status" className="inline-flex items-center gap-1 text-xs text-emerald-400"><Check className="h-3.5 w-3.5" /> Saved to future drafts</span>}
+        <button type="button" onClick={save} disabled={saving || !isDirty} aria-busy={saving} className={buttonStyles({ size: "md" })}>
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
           Save voice & proof
         </button>

@@ -86,6 +86,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
   // stuck showing "<email-local-part>'s Workspace" until they can change it.
   const [brandNameDraft, setBrandNameDraft] = useState("");
   const [savingPositioning, setSavingPositioning] = useState(false);
+  const [positioningError, setPositioningError] = useState<string | null>(null);
 
   const [regenerating, setRegenerating] = useState(false);
   const [regenError, setRegenError] = useState<string | null>(null);
@@ -93,6 +94,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
   const [editingLook, setEditingLook] = useState(false);
   const [lookDraft, setLookDraft] = useState<LookDraft | null>(null);
   const [savingLook, setSavingLook] = useState(false);
+  const [lookError, setLookError] = useState<string | null>(null);
 
   const activeByCategory = (cat: BrandCategory) => directives.filter((d) => d.category === cat && d.is_active);
 
@@ -133,6 +135,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
 
   const openPositioningEdit = () => {
     if (!profile) return;
+    setPositioningError(null);
     setPositioningDraft(profile.positioning);
     setBrandNameDraft(profile.brand_name);
     setEditingPositioning(true);
@@ -141,6 +144,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
   const savePositioning = async () => {
     if (!profile) return;
     setSavingPositioning(true);
+    setPositioningError(null);
     try {
       const updated = await apiClient.post<BrandSettings>("/api/brand", {
         ...toProfileInput(profile),
@@ -149,6 +153,8 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
       });
       setProfile(updated);
       setEditingPositioning(false);
+    } catch (error) {
+      setPositioningError(toErrorMessage(error, "Could not save your brand basics."));
     } finally {
       setSavingPositioning(false);
     }
@@ -156,6 +162,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
 
   const openLookEdit = () => {
     if (!profile) return;
+    setLookError(null);
     setLookDraft({
       primary_logo_url: profile.primary_logo_url,
       cover_byline: profile.cover_byline,
@@ -172,6 +179,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
   const saveLook = async () => {
     if (!profile || !lookDraft) return;
     setSavingLook(true);
+    setLookError(null);
     try {
       const updated = await apiClient.post<BrandSettings>("/api/brand", {
         ...toProfileInput(profile),
@@ -179,6 +187,8 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
       });
       setProfile(updated);
       setEditingLook(false);
+    } catch (error) {
+      setLookError(toErrorMessage(error, "Could not save your cover appearance."));
     } finally {
       setSavingLook(false);
     }
@@ -288,7 +298,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
               <h3 className="text-sm font-bold text-ink">Positioning</h3>
             </div>
             {!editingPositioning && (
-              <button onClick={openPositioningEdit} className="text-muted hover:text-brand p-1" title="Edit">
+              <button type="button" onClick={openPositioningEdit} className="min-h-10 min-w-10 cursor-pointer rounded-lg p-2 text-muted hover:bg-surface-2 hover:text-brand" aria-label="Edit business name and positioning">
                 <Pencil className="w-3.5 h-3.5" />
               </button>
             )}
@@ -297,10 +307,11 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
           {editingPositioning ? (
             <div className="space-y-2">
               <div>
-                <label className="mb-1 block text-[11px] font-semibold text-muted">
+                <label htmlFor="brand-name" className="mb-1 block text-xs font-semibold text-muted">
                   Business name
                 </label>
                 <input
+                  id="brand-name"
                   type="text"
                   value={brandNameDraft}
                   onChange={(e) => setBrandNameDraft(e.target.value)}
@@ -311,12 +322,15 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
                   Shown on generated cover images and used throughout your content.
                 </p>
               </div>
+              <label htmlFor="brand-positioning" className="block text-xs font-semibold text-muted">What you do and for whom</label>
               <textarea
+                id="brand-positioning"
                 rows={3}
                 value={positioningDraft}
                 onChange={(e) => setPositioningDraft(e.target.value)}
                 className="w-full bg-surface-2 border border-line rounded-xl p-3 text-xs text-ink resize-none focus:outline-none focus:border-brand"
               />
+              {positioningError && <p role="alert" className="text-xs text-red-400">{positioningError}</p>}
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setEditingPositioning(false)}
@@ -504,6 +518,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
                 ))}
               </div>
               <BrandLookPreview colors={lookDraft} brandName={profile?.brand_name} byline={lookDraft.cover_byline} logoUrl={lookDraft.primary_logo_url} art={lookDraft.cover_art} />
+              {lookError && <p role="alert" className="text-xs text-red-400">{lookError}</p>}
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setEditingLook(false)}
@@ -593,7 +608,7 @@ function TagList({
             className="inline-flex items-center gap-1.5 bg-surface-2 border border-line text-ink text-[11px] px-3 py-1.5 rounded-lg leading-relaxed"
           >
             {item.content}
-            <button onClick={() => onRemove(item.id)} className="text-subtle hover:text-red-400">
+            <button type="button" onClick={() => onRemove(item.id)} aria-label={`Remove ${item.content}`} className="min-h-7 min-w-7 cursor-pointer text-subtle hover:text-red-400">
               <X className="w-3 h-3" />
             </button>
           </span>
@@ -602,6 +617,7 @@ function TagList({
       <div className="flex gap-2">
         <input
           type="text"
+          aria-label={placeholder}
           value={draft}
           onChange={(e) => {
             setDraft(e.target.value);
@@ -613,7 +629,9 @@ function TagList({
           className="flex-1 bg-surface-2 border border-line rounded-lg px-3 py-2 text-xs text-ink focus:outline-none focus:border-brand disabled:opacity-50"
         />
         <button
+          type="button"
           onClick={submit}
+          aria-label="Add item"
           disabled={submitting || isFull || !draft.trim()}
           className="flex items-center gap-1 bg-surface-2 hover:bg-line border border-line text-muted hover:text-ink text-xs font-semibold px-3 py-2 rounded-lg transition-all disabled:opacity-50"
         >
