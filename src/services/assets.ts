@@ -5,6 +5,7 @@ import { getTenantBlogDomain } from "@/lib/tenantDomain";
 import { parsePostChannels } from "@/constants/postChannels";
 import type { JsonObject } from "@/server/http/body";
 import { badRequest, conflict, notFound } from "@/server/http/errors";
+import { isPublished, refreshCoverIfStale } from "@/services/cover";
 import { releaseIdeaForRedraft, removeFromBlog, syncAssetToBlog, type BlogEditFields } from "@/services/publishing";
 
 export const ownedAssetWhere = (clientId: string, idOrSlug: string): Prisma.AssetWhereInput => ({
@@ -95,11 +96,19 @@ export async function updateAsset(clientId: string, idOrSlug: string, body: Json
   });
   if (!owned) throw notFound("Asset not found");
 
-  const updated = await prisma.asset.update({
+  // The cover must match what goes out: brought in line with the approved
+  // text before a post is released, and after any change to its words.
+  const goingOut = body.status === "PUBLISHED" && owned.status !== "PUBLISHED" && !owned.publishedAt;
+  if (goingOut) await refreshCoverIfStale(owned.id);
+  let updated = await prisma.asset.update({
     where: { id: owned.id },
     data: assetUpdateData(body, parseChannelsChange(body, owned)),
     include: { claims: true },
   });
+  const wordsChanged = body.title !== undefined || (body.content ?? body.body_content) !== undefined;
+  if (wordsChanged && !goingOut && !isPublished(updated) && (await refreshCoverIfStale(owned.id))) {
+    updated = await prisma.asset.findUniqueOrThrow({ where: { id: owned.id }, include: { claims: true } });
+  }
   await syncAssetToBlog(updated, body.status as string | undefined, blogEdits(body));
 
   return toAssetDTO(updated, null, await getTenantBlogDomain(clientId));

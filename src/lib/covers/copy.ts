@@ -6,13 +6,16 @@
  *  - Every figure on a cover must appear in the final draft body, and a NUMBER
  *    cover is never used on a BLOCKED draft (the draft check found an invented
  *    figure). A QUOTE is always a sentence taken word for word from the body.
- *  - A headline is scored for clarity, mobile length and ICP relevance; a
- *    failing one falls back to the article title, never to invented text.
- *  - Layouts rotate per tenant, so a run of posts keeps rhythm while the frame
- *    (type, paper, signature) stays constant.
+ *  - A headline is scored for clarity, mobile length and ICP relevance; it
+ *    must set in three lines at feed size. A failing one falls back to the
+ *    article title, never to invented text.
+ *  - A cover makes one point at a glance. HEADLINE and STATEMENT carry it by
+ *    default and alternate per tenant; a NUMBER or QUOTE is used only when
+ *    the service judged it understandable without the post and clearer than
+ *    the headline (judged), never just because it is its turn.
  */
 import { contentWords, numbersIn, sharedWords } from "@/lib/harvest/text";
-import type { CoverLayout } from "./layouts";
+import { headlineFits, type CoverLayout } from "./layouts";
 
 export interface CoverCard {
   headline?: string;
@@ -40,11 +43,16 @@ export interface CoverCopyInput {
   recentLayouts: string[];
   /** Draw this layout, skipping the figure and quote picks (the first post's cover). */
   layout?: "STATEMENT";
+  /**
+   * Whether the figure or the quote (coverOptions) makes the post's point on
+   * its own and better than the headline. Missing means no: the headline wins.
+   */
+  judged?: { number?: boolean; quote?: boolean };
 }
 
 export interface HeadlineScore {
   words: number;
-  /** 1 for 6-10 words, 0.5 for 4-5 or 11-12, 0 otherwise. */
+  /** 1 for 4-8 words, 0.5 for 3 or 9-10, 0 otherwise. */
   length: number;
   /** Shares at least one content word with the ICP. */
   icp_relevant: boolean;
@@ -68,7 +76,10 @@ export interface CoverCopy {
 
 /** Explainer framing and category pairs: a cover must say what the post is about, not name a category. */
 const VAGUE = /\b(vs\.?|versus|explained|understanding|a look at|an introduction|introduction to|the future of|everything you need|deep dive|all about)\b/i;
-const MAX_WORDS = 14;
+const MAX_WORDS = 11;
+/** A subtitle under a longer headline crowds the cover; the headline carries the post alone. */
+const KICKER_HEADLINE_WORDS = 8;
+const KICKER_CHARS = 90;
 
 const words = (t: string) => t.trim().split(/\s+/).filter(Boolean);
 const clean = (t: string | undefined) => (t ?? "").replace(/\s+/g, " ").replace(/[—–]/g, ", ").trim();
@@ -91,13 +102,14 @@ export function scoreHeadline(headline: string, input: Pick<CoverCopyInput, "bod
   const problems: string[] = [];
   if (n < 3) problems.push(`only ${n} word(s)`);
   if (n > MAX_WORDS) problems.push(`${n} words, over ${MAX_WORDS}`);
+  else if (n >= 3 && !headlineFits(headline)) problems.push("too long to set in three lines at feed size");
   if (VAGUE.test(headline)) problems.push("names a topic instead of making a claim");
   const figures = newFigures(headline, input.body);
   if (figures.length) problems.push(`states ${figures.join(", ")}, which the draft does not`);
   const icpText = `${input.icp.who} ${input.icp.role} ${input.icp.company_type}`;
   return {
     words: n,
-    length: n >= 6 && n <= 10 ? 1 : (n >= 4 && n <= 5) || (n >= 11 && n <= 12) ? 0.5 : 0,
+    length: n >= 4 && n <= 8 ? 1 : n === 3 || (n >= 9 && n <= 10) ? 0.5 : 0,
     icp_relevant: icpText.trim() ? sharedWords(headline, icpText) > 0 : false,
     problems,
   };
@@ -136,8 +148,11 @@ const CONTRAST = /\b(not|never|only|instead|without|until|nothing|rather)\b/i;
  */
 const LEANS_ON_CONTEXT = /^(not|but|and|or|so|because|which|that|this|these|those|it|its|it's|they|them|their|then|also|yet|still|instead|here|there|he|she|such)\b/i;
 
+/** A longer quote does not set in four lines at a size the feed can read. */
+const QUOTE_WORDS = 18;
+
 /**
- * The most quotable sentence of the body, word for word: 7-22 words, no
+ * The most quotable sentence of the body, word for word: 7-18 words, no
  * figures, not a question, no markdown, and able to stand alone. Contrast ("not X. It is Y") and a
  * place in the closing paragraphs make a line quotable. A short run of two
  * sentences is allowed when the second completes the first.
@@ -149,7 +164,7 @@ export function pickQuote(body: string): string | undefined {
     const pair = all[i + 1] && words(s).length <= 12 ? `${s} ${all[i + 1]}` : undefined;
     for (const text of pair ? [s, pair] : [s]) {
       const n = words(text).length;
-      if (n < 7 || n > 22 || /\d/.test(text) || /[?*_`#[\]]/.test(text) || LEANS_ON_CONTEXT.test(text)) continue;
+      if (n < 7 || n > QUOTE_WORDS || /\d/.test(text) || /[?*_`#[\]]/.test(text) || LEANS_ON_CONTEXT.test(text)) continue;
       let score = CONTRAST.test(text) ? 2 : 0;
       if (i >= all.length - 4) score += 1;
       if (n >= 10 && n <= 18) score += 1;
@@ -178,6 +193,15 @@ function pickNumber(card: CoverCard, body: string, claimsOk: string, notes: stri
 }
 
 /**
+ * The figure and the quote this draft could open with, before anyone judges
+ * whether they make the point on their own (the service asks Jev).
+ */
+export function coverOptions(input: Pick<CoverCopyInput, "card" | "body" | "claimsOk">): { number?: { value: string; unit?: string; caption: string }; quote?: string } {
+  const picked = pickNumber(input.card, input.body, input.claimsOk, []);
+  return { number: picked ? { ...picked.number, caption: picked.caption } : undefined, quote: pickQuote(input.body) };
+}
+
+/**
  * Least recently used first, ties broken by the order of `available` (most
  * preferred first); never the tenant's last layout when another is possible.
  */
@@ -192,35 +216,65 @@ export function pickLayout(available: CoverLayout[], recent: string[]): CoverLay
 
 export function chooseCoverCopy(input: CoverCopyInput): CoverCopy {
   const notes: string[] = [];
-  const proposed = sentenceCase(clean(input.card.headline));
-  const proposedScore = proposed ? scoreHeadline(proposed, input) : undefined;
-  let headline = proposed;
-  let score = proposedScore;
-  let source: CoverCopy["headline_source"] = "strategist";
-  if (!proposed || proposedScore!.problems.length) {
-    if (proposed) notes.push(`Strategist headline not used: ${proposedScore!.problems.join("; ")}.`);
-    headline = sentenceCase(clean(input.title));
-    score = scoreHeadline(headline, input);
-    source = "title";
-  }
+  const options = [
+    { text: sentenceCase(clean(input.card.headline)), source: "strategist" as const },
+    { text: sentenceCase(clean(input.title)), source: "title" as const },
+  ]
+    .filter((o) => o.text)
+    .map((o) => ({ ...o, score: scoreHeadline(o.text, input) }));
+  // The first that passes; else the first that states no figure the draft
+  // does not (a long headline is still drawn, smaller); else the title.
+  const chosen = options.find((o) => !o.score.problems.length) ?? options.find((o) => !o.score.problems.some((p) => p.startsWith("states "))) ?? options[options.length - 1];
+  const strategist = options.find((o) => o.source === "strategist");
+  if (strategist && strategist !== chosen) notes.push(`Strategist headline not used: ${strategist.score.problems.join("; ")}.`);
+  const headline = chosen?.text ?? "";
+  const source: CoverCopy["headline_source"] = chosen?.source ?? "title";
+  const score = chosen?.score ?? scoreHeadline(headline, input);
 
   let kicker = clean(input.card.subtitle);
-  if (kicker && (kicker.length > 120 || newFigures(kicker, input.body).length || VAGUE.test(kicker))) {
+  if (kicker && (kicker.length > KICKER_CHARS || newFigures(kicker, input.body).length || VAGUE.test(kicker))) {
     notes.push("Strategist subtitle not used: too long, vague, or states a figure the draft does not.");
+    kicker = "";
+  } else if (kicker && words(headline).length > KICKER_HEADLINE_WORDS) {
+    notes.push("No subtitle: the headline carries the post, and both would be too small to read in the feed.");
     kicker = "";
   }
 
   const numbered = input.layout ? undefined : pickNumber(input.card, input.body, input.claimsOk, notes);
   const quote = input.layout ? undefined : pickQuote(input.body);
-  // Most preferred first: a verified figure stops the scroll best, and
-  // STATEMENT (dark) leads HEADLINE when the post has neither (user decision, 2026-10-01).
-  const available: CoverLayout[] = [...(numbered ? (["NUMBER"] as const) : []), ...(quote ? (["QUOTE"] as const) : []), "STATEMENT", "HEADLINE"];
-  const layout = input.layout ?? pickLayout(available, input.recentLayouts);
+  if (numbered && !input.judged?.number) notes.push(`No NUMBER cover: ${numbered.number.value} ${numbered.caption} needs the post to make sense, or says less than the headline.`);
+  if (quote && !input.judged?.quote) notes.push("No QUOTE cover: the line needs the post to make sense, or says less than the headline.");
+  // A figure or quote that makes the point on its own leads, unless the last
+  // cover used that layout. Otherwise the headline carries the cover, dark
+  // STATEMENT before HEADLINE, alternating (user decisions, 2026-10-01 and 2026-10-03).
+  const strong: CoverLayout[] = [...(numbered && input.judged?.number ? (["NUMBER"] as const) : []), ...(quote && input.judged?.quote ? (["QUOTE"] as const) : [])];
+  const layout = input.layout ?? strong.find((l) => l !== input.recentLayouts[0]) ?? pickLayout(["STATEMENT", "HEADLINE"], input.recentLayouts);
 
-  const base = { layout, label: audienceLabel(input.icp), headline_source: source, score: score!, notes };
+  // The verified figure is kept whatever the layout, so a reviewer can switch to it.
+  const base = { layout, label: audienceLabel(input.icp), headline_source: source, score, notes, ...(numbered ? { number: numbered.number } : {}) };
   if (layout === "NUMBER" && numbered) {
-    return { ...base, headline: numbered.caption, emphasis: pickEmphasis(numbered.caption, undefined), number: numbered.number };
+    return { ...base, headline: numbered.caption, emphasis: pickEmphasis(numbered.caption, undefined) };
   }
   if (layout === "QUOTE" && quote) return { ...base, headline, quote };
   return { ...base, headline, emphasis: pickEmphasis(headline, input.card.emphasis_word), kicker: kicker || undefined };
+}
+
+const squash = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+/**
+ * Why a drawn cover no longer matches its draft, or null when it still does:
+ * its quote left the body, it states a figure the body no longer does, or it
+ * shows a title the draft has since changed. A reviewer's own headline counts
+ * as current while its figures are.
+ */
+export function coverOutOfDate(
+  cover: { layout?: string; headline?: string; kicker?: string; quote?: string; number?: { value: string } | null; headline_source?: string },
+  draft: { title: string; body: string }
+): string | null {
+  if (cover.quote && cover.layout === "QUOTE" && !squash(draft.body).includes(squash(cover.quote))) return "its quote is no longer in the post";
+  const text = [cover.headline, cover.kicker, cover.layout === "NUMBER" ? cover.number?.value : ""].filter(Boolean).join(" ");
+  const figures = newFigures(text, draft.body);
+  if (figures.length) return `it states ${figures.join(", ")}, which the post no longer does`;
+  if (cover.headline_source === "title" && cover.headline && squash(cover.headline) !== squash(draft.title)) return "its headline is the post's old title";
+  return null;
 }

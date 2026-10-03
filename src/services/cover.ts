@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { deleteFromR2, r2KeyFromUrl, uploadToR2 } from "@/lib/r2";
 import { coverBrand } from "@/lib/covers/brand";
-import { chooseCoverCopy, scoreHeadline, pickQuote, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
+import { chooseCoverCopy, coverOptions, coverOutOfDate, scoreHeadline, pickQuote, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
+import { askJev } from "@/lib/ai/jev";
 import { COVER_LAYOUTS, CoverFitError, type CoverLayout, type CoverSpec } from "@/lib/covers/layouts";
 import { renderCoverPng } from "@/lib/covers/render";
 import { chooseArt, parseArtStyle, DEFAULT_COVER_ART_STYLE, type CoverArtStyle } from "@/lib/covers/art";
@@ -152,8 +153,42 @@ function copyAttempts(spec: CoverSpec, title: string): CoverSpec[] {
   const out = [spec];
   if (spec.kicker) out.push({ ...spec, kicker: undefined });
   if (title && title !== spec.headline) out.push({ ...spec, layout: spec.layout === "STATEMENT" ? "STATEMENT" : "HEADLINE", headline: title, emphasis: undefined, kicker: undefined, quote: undefined, number: undefined });
-  out.push({ ...spec, layout: "HEADLINE", headline: title || spec.headline, emphasis: undefined, kicker: undefined, quote: undefined, number: undefined, label: undefined });
+  const plain: CoverSpec = { ...spec, layout: "HEADLINE", headline: title || spec.headline, emphasis: undefined, kicker: undefined, quote: undefined, number: undefined, label: undefined };
+  // Last: one line over the limit, because a draft without a cover is worse than a long headline.
+  out.push(plain, { ...plain, looseHeadline: true });
   return out;
+}
+
+/** A Jev yes above this counts. */
+const JEV_YES = 0.7;
+
+/**
+ * Whether the figure or the quote makes the post's point on its own, for its
+ * reader, better than the headline. Jev judges; without Jev the answer is no,
+ * so the headline carries the cover.
+ */
+async function judgeOptions(options: ReturnType<typeof coverOptions>, headline: string, reader: string): Promise<{ number?: boolean; quote?: boolean }> {
+  if (!options.number && !options.quote) return {};
+  const numberCover = options.number ? `${options.number.value}${options.number.unit ? ` ${options.number.unit}` : ""}: ${options.number.caption}` : undefined;
+  const answers = await askJev(
+    { reader, headline, ...(numberCover ? { number_cover: numberCover } : {}), ...(options.quote ? { quote: options.quote } : {}) },
+    {
+      ...(numberCover
+        ? {
+            number_alone: { type: "noul" as const, instructions: "The reader scrolls past a LinkedIn post whose image shows only number_cover: the big figure and its caption, nothing else. Would they know at once what was measured and why it matters to them?" },
+            number_better: { type: "noul" as const, instructions: "Would number_cover make this reader stop and read more than headline would?" },
+          }
+        : {}),
+      ...(options.quote
+        ? {
+            quote_alone: { type: "noul" as const, instructions: "The reader sees only quote on a LinkedIn image, with no post around it. Does it make a complete point about a problem or result this reader cares about, without needing context?" },
+            quote_better: { type: "noul" as const, instructions: "Would quote make this reader stop and read more than headline would?" },
+          }
+        : {}),
+    }
+  );
+  const yes = (k: string) => (answers?.[k]?.noul ?? 0) >= JEV_YES;
+  return { number: yes("number_alone") && yes("number_better"), quote: yes("quote_alone") && yes("quote_better") };
 }
 
 export async function renderAssetCover(assetId: string, input: { card?: CoverCard; edit?: CoverEdit } = {}): Promise<CoverResult> {
@@ -191,7 +226,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   // first impression, with no picked figure or quote (user decision,
   // 2026-10-01). A reviewer's edit still changes it.
   const firstPost = !input.edit && Boolean(asset.idea?.tags.includes(FIRST_POST_TAG));
-  const copy = chooseCoverCopy({
+  const copyInput = {
     card,
     title: asset.title ?? "",
     hook: asset.hook ?? "",
@@ -200,7 +235,11 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     icp: icpFields,
     recentLayouts: recent.map((r) => (r.coverSpec as { layout?: string } | null)?.layout ?? "").filter(Boolean),
     ...(firstPost ? { layout: "STATEMENT" as const } : {}),
-  });
+  };
+  // Judged only when the layout is being chosen: an edit keeps the drawn one.
+  const headlineCopy = chooseCoverCopy(copyInput);
+  const judged = firstPost || input.edit ? {} : await judgeOptions(coverOptions(copyInput), headlineCopy.headline, [icpFields.who, icpFields.role, icpFields.company_type].filter(Boolean).join("; "));
+  const copy = judged.number || judged.quote ? chooseCoverCopy({ ...copyInput, judged }) : headlineCopy;
 
   // The illustration. A re-draw keeps the one the cover has unless the
   // reviewer changes the style or asks for another.
@@ -305,6 +344,27 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   });
   await dropReplacedCover(asset.id, asset.heroImageUrl, url);
   return { ok: true, url, spec: stored };
+}
+
+/**
+ * Redraws the cover when a change to the draft left it behind (its quote is
+ * gone, it states a figure the post no longer does, or it shows an old
+ * title), so what is approved and posted always matches. A reviewer's own
+ * headline is kept when it is still true. True when it redrew the cover.
+ */
+export async function refreshCoverIfStale(assetId: string): Promise<boolean> {
+  const asset = await prisma.asset.findUnique({ where: { id: assetId }, select: { title: true, content: true, coverSpec: true, heroProvider: true } });
+  const spec = asset?.coverSpec as Partial<StoredCoverSpec> | null | undefined;
+  if (!asset || !spec || asset.heroProvider !== COVER_PROVIDER) return false;
+  const draft = { title: asset.title ?? "", body: bodyOf(asset.content ?? "") };
+  const why = coverOutOfDate(spec, draft);
+  if (!why) return false;
+  const reviewerHeadline = spec.headline_source === "reviewer" && spec.headline && !coverOutOfDate({ headline: spec.headline }, draft);
+  const result = reviewerHeadline
+    ? await renderAssetCover(assetId, { edit: { headline: spec.headline, emphasis: spec.emphasis, kicker: coverOutOfDate({ kicker: spec.kicker }, draft) ? "" : undefined, layout: spec.layout === "QUOTE" || spec.layout === "NUMBER" ? "STATEMENT" : undefined } })
+    : await renderAssetCover(assetId);
+  if (!result.ok) console.warn(`[cover] ${assetId} is out of date (${why}) and could not be redrawn: ${result.error}`);
+  return result.ok;
 }
 
 const PUBLISHED_COVER_LOCKED = "This draft is published, so its cover stays as it went out.";

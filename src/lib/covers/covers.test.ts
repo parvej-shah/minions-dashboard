@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { metricsFor } from "./fonts";
 import { textWidth } from "./metrics";
 import { fit, wrap } from "./fit";
-import { audienceLabel, chooseCoverCopy, pickLayout, pickQuote, scoreHeadline, type CoverCopyInput } from "./copy";
+import { audienceLabel, chooseCoverCopy, coverOutOfDate, pickLayout, pickQuote, scoreHeadline, type CoverCopyInput } from "./copy";
 import { contrast, coverBrand, DEFAULT_COVER_BRAND } from "./brand";
 import { coverElement, CoverFitError, type CoverSpec } from "./layouts";
 import { renderCoverPng } from "./render";
@@ -54,7 +54,9 @@ const input: CoverCopyInput = {
 
 describe("cover copy is chosen and checked in code", () => {
   it("scores a headline for length, clarity and figures", () => {
-    expect(scoreHeadline(input.card.headline!, input)).toMatchObject({ words: 10, length: 1, problems: [] });
+    expect(scoreHeadline(input.card.headline!, input)).toMatchObject({ words: 10, length: 0.5, problems: [] });
+    expect(scoreHeadline("Why we moved from regex to Jev", input)).toMatchObject({ length: 1, problems: [] });
+    expect(scoreHeadline("Unversioned automation workflows silently corrupt attribution across interconnected marketing infrastructure", input).problems.join()).toMatch(/three lines/);
     expect(scoreHeadline("Fluency vs accuracy", input).problems.join()).toMatch(/topic/);
     expect(scoreHeadline("Cut no-shows by 40% this quarter", input).problems.join()).toMatch(/40/);
   });
@@ -77,11 +79,38 @@ describe("cover copy is chosen and checked in code", () => {
 
   it("uses a NUMBER only when the draft states it and the draft is not blocked", () => {
     const card = { ...input.card, number: { value: "3", unit: "seconds", caption: "of silence and the booking was gone" } };
-    expect(chooseCoverCopy({ ...input, card }).layout).toBe("NUMBER");
-    expect(chooseCoverCopy({ ...input, card: { ...card, number: { ...card.number, value: "40" } } }).layout).not.toBe("NUMBER");
-    const blocked = chooseCoverCopy({ ...input, card, claimsOk: "BLOCKED" });
+    const judged = { number: true };
+    expect(chooseCoverCopy({ ...input, card, judged }).layout).toBe("NUMBER");
+    expect(chooseCoverCopy({ ...input, card: { ...card, number: { ...card.number, value: "40" } }, judged }).layout).not.toBe("NUMBER");
+    const blocked = chooseCoverCopy({ ...input, card, claimsOk: "BLOCKED", judged });
     expect(blocked.layout).not.toBe("NUMBER");
     expect(blocked.notes.join()).toMatch(/blocked/);
+  });
+
+  it("leads with the headline unless the figure or quote was judged to make the point alone", () => {
+    const card = { ...input.card, number: { value: "3", unit: "seconds", caption: "of silence and the booking was gone" } };
+    const plain = chooseCoverCopy({ ...input, card, recentLayouts: [] });
+    expect(plain.layout).toBe("STATEMENT");
+    expect(plain.number).toEqual({ value: "3", unit: "seconds" });
+    expect(plain.notes.join()).toMatch(/No NUMBER cover.*No QUOTE cover/);
+    expect(chooseCoverCopy({ ...input, recentLayouts: [], judged: { quote: true } }).layout).toBe("QUOTE");
+    // A judged quote still never runs twice in a row.
+    expect(chooseCoverCopy({ ...input, recentLayouts: ["QUOTE"], judged: { quote: true } }).layout).toBe("STATEMENT");
+  });
+
+  it("drops the subtitle under a long headline", () => {
+    const copy = chooseCoverCopy({ ...input, card: { ...input.card, headline: "Your agent books showings your calendar never sees" }, recentLayouts: [] });
+    expect(copy.kicker).toBe(input.card.subtitle);
+    expect(chooseCoverCopy({ ...input, recentLayouts: [] }).kicker).toBeUndefined();
+  });
+
+  it("finds when a drawn cover no longer matches its draft", () => {
+    const draft = { title: "Silent booking failures", body };
+    expect(coverOutOfDate({ layout: "QUOTE", quote: "A booking only exists when your calendar confirms it, not when the caller hears yes.", headline: "x" }, draft)).toBeNull();
+    expect(coverOutOfDate({ layout: "QUOTE", quote: "A line that was edited out of the post." }, draft)).toMatch(/quote/);
+    expect(coverOutOfDate({ layout: "NUMBER", headline: "of silence", number: { value: "5" } }, draft)).toMatch(/5/);
+    expect(coverOutOfDate({ layout: "HEADLINE", headline: "Old title", headline_source: "title" }, draft)).toMatch(/title/);
+    expect(coverOutOfDate({ layout: "HEADLINE", headline: "My own words", headline_source: "reviewer" }, draft)).toBeNull();
   });
 
   it("quotes a body sentence word for word that stands alone", () => {

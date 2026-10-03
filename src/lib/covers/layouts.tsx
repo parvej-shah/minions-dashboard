@@ -18,12 +18,14 @@ import { drawArt, type ArtChoice } from "./art";
 export const COVER_SIZE = { width: 1080, height: 1350 } as const;
 export const PAD = 88;
 export const INNER = COVER_SIZE.width - PAD * 2;
+/** The author's photo or monogram, in px. */
+const AVATAR = 120;
 /**
  * The height between the top padding and the signature: less the label row
  * and its gap when there is a label, the gap above the divider, the divider
- * (2 + 40) and the signature (108).
+ * (2 + 40) and the signature.
  */
-const centreHeight = (spec: { label?: string }) => COVER_SIZE.height - PAD * 2 - (spec.label ? 40 + 48 : 0) - 48 - 42 - 108;
+const centreHeight = (spec: { label?: string }) => COVER_SIZE.height - PAD * 2 - (spec.label ? 40 + 48 : 0) - 48 - 42 - AVATAR;
 
 export const COVER_LAYOUTS = ["HEADLINE", "STATEMENT", "QUOTE", "NUMBER"] as const;
 export type CoverLayout = (typeof COVER_LAYOUTS)[number];
@@ -62,36 +64,52 @@ export interface CoverSpec {
   brand: CoverBrand;
   /** HEADLINE and STATEMENT: an illustration above the headline (src/lib/covers/art.ts). */
   art?: { choice: ArtChoice; seed: string };
+  /**
+   * The last resort when no honest headline sets in HEADLINE_LINES: one more
+   * line, so the draft still gets a cover. Never set on a first attempt.
+   */
+  looseHeadline?: boolean;
 }
 
 export class CoverFitError extends Error {}
 
-// Every text box on the cover. Sizes are px on the 1080-wide canvas; the
-// smallest (26) is about 9px at phone feed width (360), the floor for a
-// secondary line.
+/**
+ * A cover is read in about a second at feed size, so its main line sets in at
+ * most three lines: past that the eye reads a paragraph, not a headline.
+ */
+export const HEADLINE_LINES = 3;
+
+// Every text box on the cover. Sizes are px on the 1080-wide canvas, which a
+// phone feed shows about 360 wide (a third): the smallest (30) is about 10px
+// there, the floor for a secondary line; a headline is never under 24px.
 const BOX = {
   label: { face: "sansSemi", maxWidth: INNER - 64, maxLines: 1, tracking: 0.12 },
-  headline: { face: "serif", maxWidth: INNER, maxLines: 5, tracking: -0.02 },
-  kicker: { face: "sans", maxWidth: INNER, maxLines: 3 },
-  quote: { face: "serifItalic", maxWidth: INNER, maxLines: 7, tracking: -0.01 },
-  numberHeadline: { face: "serif", maxWidth: INNER, maxLines: 4, tracking: -0.015 },
-  name: { face: "sansSemi", maxWidth: INNER - 136, maxLines: 1 },
-  role: { face: "sans", maxWidth: INNER - 136, maxLines: 2 },
+  headline: { face: "serif", maxWidth: INNER, maxLines: HEADLINE_LINES, tracking: -0.02 },
+  kicker: { face: "sans", maxWidth: INNER, maxLines: 2 },
+  quote: { face: "serifItalic", maxWidth: INNER, maxLines: 4, tracking: -0.01 },
+  numberHeadline: { face: "serif", maxWidth: INNER, maxLines: HEADLINE_LINES, tracking: -0.015 },
+  name: { face: "sansSemi", maxWidth: INNER - AVATAR - 28, maxLines: 1 },
+  role: { face: "sans", maxWidth: INNER - AVATAR - 28, maxLines: 2 },
 } satisfies Record<string, TextBox>;
 
 const SIZES: Record<keyof typeof BOX, readonly [number, number]> = {
-  label: [26, 30],
+  label: [30, 34],
   headline: [72, 150],
-  kicker: [32, 42],
-  quote: [56, 124],
-  numberHeadline: [52, 80],
-  name: [32, 38],
-  role: [26, 30],
+  kicker: [36, 44],
+  quote: [60, 124],
+  numberHeadline: [60, 84],
+  name: [40, 46],
+  role: [30, 34],
 };
 
-function fitOrThrow(what: keyof typeof BOX, text: string, height?: { maxHeight: number; lineHeight: number }): Fitted {
+/** True when the headline sets in HEADLINE_LINES at a size that reads at feed width. */
+export function headlineFits(text: string, minSize = 80): boolean {
+  return fit(text, minSize, SIZES.headline[1], BOX.headline) !== null;
+}
+
+function fitOrThrow(what: keyof typeof BOX, text: string, height?: { maxHeight: number; lineHeight: number }, extraLines = 0): Fitted {
   const [min, max] = SIZES[what];
-  const box = { ...BOX[what], ...height };
+  const box = { ...BOX[what], ...height, maxLines: BOX[what].maxLines + extraLines };
   const f = fit(text, min, max, box);
   if (!f) throw new CoverFitError(`The ${what} is too long for this cover: "${text.slice(0, 80)}"`);
   return balance(f, box);
@@ -142,7 +160,8 @@ function Frame({ spec, paper, ink, children }: { spec: CoverSpec; paper: string;
   const { author, brand } = spec;
   const label = spec.label ? fitOrThrow("label", spec.label.toUpperCase()) : null;
   const name = fitOrThrow("name", author.name);
-  const role = author.role ? fitOrThrow("role", author.role) : null;
+  // A byline too long to read at feed size is left off rather than costing the cover.
+  const role = author.role ? fit(author.role, SIZES.role[0], SIZES.role[1], BOX.role) : null;
   return (
     <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: paper, padding: PAD }}>
       {label ? (
@@ -158,9 +177,9 @@ function Frame({ spec, paper, ink, children }: { spec: CoverSpec; paper: string;
       <div style={{ display: "flex", alignItems: "center" }}>
         {author.photo ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={author.photo} width={108} height={108} style={{ borderRadius: 54, objectFit: "cover" }} alt="" />
+          <img src={author.photo} width={AVATAR} height={AVATAR} style={{ borderRadius: AVATAR / 2, objectFit: "cover" }} alt="" />
         ) : (
-          <div style={{ width: 108, height: 108, borderRadius: 54, background: brand.secondary, color: brand.paper, display: "flex", alignItems: "center", justifyContent: "center", ...faceStyle("sansBold"), fontSize: 40 }}>
+          <div style={{ width: AVATAR, height: AVATAR, borderRadius: AVATAR / 2, background: brand.secondary, color: brand.paper, display: "flex", alignItems: "center", justifyContent: "center", ...faceStyle("sansBold"), fontSize: 44 }}>
             {initials(author.name)}
           </div>
         )}
@@ -188,8 +207,6 @@ const ART_MIN = { SHAPES: 220, DOODLES: 260, ICONS: 220 } as const;
 const ART_HEADLINE_MAX = 128;
 const ART_MAX = 440;
 const ART_GAP = 64;
-/** With art, a headline set smaller than this reads worse than one without art; the caller retries without. */
-const ART_MIN_HEADLINE = 84;
 
 function Art({ spec, ink, paper, maxHeight }: { spec: CoverSpec; ink: string; paper: string; maxHeight: number }) {
   if (!spec.art) return null;
@@ -219,9 +236,10 @@ function HeadlineCentre({ spec, ink, paper }: { spec: CoverSpec; ink: string; pa
   const artMin = spec.art ? ART_MIN[spec.art.choice.style] + ART_GAP : 0;
   const artBox = { ...BOX.headline, maxHeight: height - kickerHeight - artMin, lineHeight: 1.05 };
   const artFit = spec.art ? fit(spec.headline, SIZES.headline[0], ART_HEADLINE_MAX, artBox) : null;
-  const headline = spec.art ? artFit && balance(artFit, artBox) : fitOrThrow("headline", spec.headline, { maxHeight: height - kickerHeight, lineHeight: 1.05 });
+  const headline = spec.art ? artFit && balance(artFit, artBox) : fitOrThrow("headline", spec.headline, { maxHeight: height - kickerHeight, lineHeight: 1.05 }, spec.looseHeadline ? 1 : 0);
   if (!headline) throw new CoverFitError(`The headline does not fit beside the illustration: "${spec.headline.slice(0, 80)}"`);
-  if (spec.art && headline.size < ART_MIN_HEADLINE) throw new CoverFitError(`With the illustration the headline would be set at ${headline.size}px; drawn without it.`);
+  // No size floor beside the art: the headline is held to three lines either
+  // way, so leaving the picture off would only leave the space empty.
   const textHeight = headline.lines.length * headline.size * 1.05 + kickerHeight;
   const text = (
     <div style={{ display: "flex", flexDirection: "column" }}>

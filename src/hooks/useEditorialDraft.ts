@@ -229,9 +229,13 @@ export function useEditorialDraft(
     [assets, activeAssetId]
   );
 
-  /** Writes the editor's text to the draft. Throws on failure. */
-  const persistEdits = useCallback(async (): Promise<void> => {
-    if (!activeAsset) return;
+  /**
+   * Writes the editor's text to the draft. Throws on failure. True when the
+   * server redrew the cover because the edit left it behind (a quote or
+   * figure gone, a new title).
+   */
+  const persistEdits = useCallback(async (): Promise<boolean> => {
+    if (!activeAsset) return false;
     const payload = {
       title: edited.title.trim(),
       hook: edited.hook.trim(),
@@ -243,14 +247,22 @@ export function useEditorialDraft(
       },
     };
 
-    await apiClient.patch(`/api/assets/${activeAsset.id}`, payload);
-    patchActive({
-      title: payload.title,
-      hook: payload.hook,
-      body_content: payload.body_content,
-      variants: payload.variants,
-    });
+    const saved = await apiClient.patch<AssetItem>(`/api/assets/${activeAsset.id}`, payload);
+    const redrawn = Boolean(saved?.hero_image_url && saved.hero_image_url !== activeAsset.hero_image_url);
+    if (redrawn) {
+      // Keep the editor's text, pointed at the new cover, so the next save keeps it.
+      setAssets((prev) => prev.map((a) => (a.id === saved.id ? saved : a)));
+      if (bufferedAssetRef.current === saved.id) setEdited((p) => ({ ...p, body: withCoverUrl(p.body, saved.hero_image_url!) }));
+    } else {
+      patchActive({
+        title: payload.title,
+        hook: payload.hook,
+        body_content: payload.body_content,
+        variants: payload.variants,
+      });
+    }
     setLastSaved(new Date());
+    return redrawn;
   }, [activeAsset, edited, patchActive]);
 
   const saveDraft = useCallback(async (): Promise<string> => {
@@ -258,7 +270,8 @@ export function useEditorialDraft(
     setIsSaving(true);
 
     try {
-      await persistEdits();
+      const redrawn = await persistEdits();
+      if (redrawn) return "Changes saved. The cover was redrawn to match them.";
       return activeAsset.status === "PUBLISHED"
         ? blogHost ? `Live blog updated & synced to ${blogHost}` : "Changes saved"
         : "Changes saved";

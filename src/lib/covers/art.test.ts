@@ -95,13 +95,13 @@ describe("every illustration draws in the brand's colours", () => {
 
 describe("the illustration never costs the headline its size", () => {
   const brand = DEFAULT_COVER_BRAND;
-  const long = "Your voice agent confirms every booking on the call but half of them never reach the calendar because the webhook times out silently";
+  const long = "Your voice agent confirms every booking on the call but the calendar never sees them";
   const art = { choice: { style: "SHAPES" as const, motif: "WAVEFORM" as const }, seed: "x" };
 
-  it("refuses a cover whose headline would be set too small with it, and fits without it", () => {
-    const spec: CoverSpec = { layout: "HEADLINE", headline: long, kicker: "One line under it says what the reader gets.", author: { name: "Test" }, brand };
-    expect(() => coverElement({ ...spec, art })).toThrow(CoverFitError);
-    expect(() => coverElement(spec)).not.toThrow();
+  it("keeps the picture beside a long headline, which stays within three lines", () => {
+    const spec: CoverSpec = { layout: "HEADLINE", headline: long, author: { name: "Test" }, brand };
+    expect(() => coverElement({ ...spec, art })).not.toThrow();
+    expect(() => coverElement({ ...spec, art, headline: `${long} ${long}` })).toThrow(CoverFitError);
   });
 
   it("is ignored by QUOTE and NUMBER covers", () => {

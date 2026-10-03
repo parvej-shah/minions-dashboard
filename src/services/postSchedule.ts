@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { ownedAssetWhere } from "@/services/assets";
 import { checkScheduleTime } from "@/lib/postTime";
 import { syncAssetToBlog } from "@/services/publishing";
+import { refreshCoverIfStale } from "@/services/cover";
 import { DEFAULT_TIMEZONE } from "@/constants/config";
 
 /**
@@ -39,7 +40,9 @@ export async function schedulePost(clientId: string, assetId: string, date: stri
   const check = checkScheduleTime(date, time, client?.timezone ?? DEFAULT_TIMEZONE, now);
   if (!check.ok) return { ok: false, error: check.error, status: 400 };
 
-  // Scheduling is the reviewer's approval, exactly as "Approve & Publish" is.
+  // Scheduling is the reviewer's approval, exactly as "Approve & Publish" is,
+  // so the cover is brought in line with the approved text first.
+  await refreshCoverIfStale(asset.id);
   const updated = await prisma.asset.updateMany({
     where: { id: asset.id, status: { not: "PUBLISHED" } },
     data: { status: "SCHEDULED", scheduledFor: check.at, claimsOk: "Y", updatedAt: now },

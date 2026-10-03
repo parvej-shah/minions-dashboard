@@ -29,6 +29,13 @@ and link to it here.
 
 ---
 
+## 2026-10-03 — A cover makes one point at a glance and always matches its post
+
+**Decision:** The cover's main line sets in at most three lines (the strategist writes 4 to 8 words, at most 55 characters), and the subtitle appears only under a short headline. The author's name and byline are larger so they read at phone feed size. Headline and Statement covers are the default and alternate. A Number or Quote cover is used only when Jev judges that the figure or line makes sense without the post and would make the reader stop more than the headline; it is no longer used just because it is its turn. When an edit leaves a cover behind (its quote was cut, it states a figure the post no longer has, or it shows an old title), the cover is redrawn when the draft is saved, approved or scheduled, keeping a reviewer's own headline when that is still true. Reviewers can still pick any layout.
+**Why:** An outside review of live covers found headlines running to four to eight lines, Number and Quote covers that needed the post to make sense ("85 / AI-written posts versus 179 for the rest"), subtitles and bylines too small to read in the feed, and a cover that could go out quoting a line the post no longer had. Thumbnail guidance (YouTube and LinkedIn alike) is a few large words, one idea, read in about a second. The user asked for two to three lines at most.
+**Alternatives considered:** Blocking approval until a reviewer redraws a stale cover (rejected: the user wants results, not another error to act on). Rejecting illustrations that don't fit the claim (left for later: it's mostly taste, and a rule would cause redraws for little gain).
+**Status:** active
+
 ## 2026-10-03 — The cover headline is the post's title
 
 **Decision:** The headline on the cover image and the carousel's first slide is now the post's title: it names what the post is about (the tool, product or change) and what happened or why, so someone scrolling past knows the subject at once. When the post is the author's own account it is titled as their story ("Why we replaced regex with Jev"). Abstract one-line maxims about the topic ("A regex counter cannot judge if writing sounds human") are no longer used, and category labels ("AI scheduling explained") stay ruled out.
@@ -82,7 +89,7 @@ and link to it here.
 
 **Decision:** The cover drawn for the first post (setup) is always the dark Statement layout with the Shapes illustration, never a number or quote cover. For every other draft, a verified figure still gets a Number cover and a strong line a Quote cover; otherwise Statement is now chosen before Headline. The rotation that avoids repeating the previous cover's layout stays. Reviewers can still change any cover in Editorial Studio. Always using Statement for every draft was rejected.
 **Why:** Statement with Shapes is the boldest, cleanest first impression, and a figure or quote picked out of someone's very first post can feel random. Forcing one layout on every draft would make a LinkedIn feed look the same post after post, and Number and Quote covers stop the scroll better when the post really has a figure or a strong line.
-**Status:** active
+**Status:** partly superseded by "A cover makes one point at a glance and always matches its post" (2026-10-03): Number and Quote covers now need Jev's judgement, not rotation; the first-post rule stands.
 
 ## 2026-10-01 — Setup ends by asking how covers sign off
 
