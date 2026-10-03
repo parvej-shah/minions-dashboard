@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { metricsFor } from "./fonts";
 import { textWidth } from "./metrics";
 import { fit, wrap } from "./fit";
-import { audienceLabel, chooseCoverCopy, coverOutOfDate, pickLayout, pickQuote, scoreHeadline, type CoverCopyInput } from "./copy";
+import { audienceLabel, checkCoverLine, chooseCoverCopy, coverOutOfDate, pickLayout, pickQuote, scoreHeadline, type CoverCopyInput } from "./copy";
 import { contrast, coverBrand, DEFAULT_COVER_BRAND } from "./brand";
 import { coverElement, CoverFitError, type CoverSpec } from "./layouts";
 import { renderCoverPng } from "./render";
@@ -54,11 +54,24 @@ const input: CoverCopyInput = {
 
 describe("cover copy is chosen and checked in code", () => {
   it("scores a headline for length, clarity and figures", () => {
-    expect(scoreHeadline(input.card.headline!, input)).toMatchObject({ words: 10, length: 0.5, problems: [] });
-    expect(scoreHeadline("Why we moved from regex to Jev", input)).toMatchObject({ length: 1, problems: [] });
+    expect(scoreHeadline(input.card.headline!, input)).toMatchObject({ words: 10, length: 0, problems: [] });
+    expect(scoreHeadline("Why we moved from regex to Jev", input)).toMatchObject({ length: 0.5, problems: [] });
+    expect(scoreHeadline("We moved from regex to Jev", input)).toMatchObject({ length: 1, problems: [] });
     expect(scoreHeadline("Unversioned automation workflows silently corrupt attribution across interconnected marketing infrastructure", input).problems.join()).toMatch(/three lines/);
     expect(scoreHeadline("Fluency vs accuracy", input).problems.join()).toMatch(/topic/);
     expect(scoreHeadline("Cut no-shows by 40% this quarter", input).problems.join()).toMatch(/40/);
+  });
+
+  it("prefers a short cover line the draft supports, and checks it in code", () => {
+    const copy = chooseCoverCopy({ ...input, card: { ...input.card, cover_line: "Your agent books into nowhere" }, recentLayouts: [] });
+    expect(copy).toMatchObject({ headline: "Your agent books into nowhere", headline_source: "cover_line" });
+    expect(checkCoverLine("Bookings that never land", body)).toBeNull();
+    expect(checkCoverLine("Silent failures", body)).toMatch(/words/);
+    expect(checkCoverLine("Your voice agent loses bookings every single night", body)).toMatch(/words/);
+    expect(checkCoverLine("We lost 40% of bookings", body)).toMatch(/40/);
+    expect(checkCoverLine("Voice agents explained simply", body)).toMatch(/label/);
+    // A line the draft no longer supports falls back to the strategist's headline.
+    expect(chooseCoverCopy({ ...input, card: { ...input.card, cover_line: "We lost 40% of bookings" }, recentLayouts: [] }).headline_source).toBe("strategist");
   });
 
   it("falls back to the title when the strategist headline fails", () => {

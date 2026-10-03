@@ -1,8 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { deleteFromR2, r2KeyFromUrl, uploadToR2 } from "@/lib/r2";
 import { coverBrand } from "@/lib/covers/brand";
-import { chooseCoverCopy, coverOptions, coverOutOfDate, scoreHeadline, pickQuote, quoteSource, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
+import { checkCoverLine, chooseCoverCopy, coverOptions, coverOutOfDate, scoreHeadline, pickQuote, quoteSource, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
 import { askJev } from "@/lib/ai/jev";
+import { chatWithFallback } from "@/lib/ai/modelChain";
+import { renderCoverLine } from "@/lib/prompts/coverLine";
 import { COVER_LAYOUTS, CoverFitError, type CoverLayout, type CoverSpec } from "@/lib/covers/layouts";
 import { renderCoverPng } from "@/lib/covers/render";
 import { chooseArt, parseArtStyle, DEFAULT_COVER_ART_STYLE, type CoverArtStyle } from "@/lib/covers/art";
@@ -191,6 +193,56 @@ async function judgeOptions(options: ReturnType<typeof coverOptions>, headline: 
   return { number: yes("number_alone") && yes("number_better"), quote: yes("quote_alone") && yes("quote_better") };
 }
 
+/** The cover is drawn inside 02's 60 s cover call; the line is skipped rather than late. */
+const COVER_LINE_BUDGET_MS = 20_000;
+
+function parseLines(raw: string): string[] {
+  try {
+    const content = JSON.parse(raw)?.choices?.[0]?.message?.content ?? "";
+    const json = JSON.parse(String(content).replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, ""));
+    return Array.isArray(json?.lines) ? json.lines.filter((l: unknown): l is string => typeof l === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * A 3-6 word cover line written from the finished post: Qwen proposes five,
+ * code drops any that break checkCoverLine, and Jev rates how plainly each
+ * says what the post is about. A line is used only when Jev rates it clear and
+ * clearer than the headline the cover would otherwise carry: a shorter line
+ * that says less is worse than a longer one that says it. "" when none is,
+ * undefined when Qwen or Jev did not answer (so the next draw tries again).
+ */
+export async function writeCoverLine(draft: { title: string; post: string; body: string }, current: string, notes: string[]): Promise<string | undefined> {
+  const apiKey = process.env.DASHSCOPE_API_KEY;
+  if (!apiKey) return undefined;
+  const call = chatWithFallback(renderCoverLine({ title: draft.title, post: draft.post }), apiKey).then((res) => (res.status < 300 ? parseLines(res.body) : []));
+  const timeout = new Promise<string[]>((resolve) => setTimeout(() => resolve([]), COVER_LINE_BUDGET_MS));
+  const proposed = await Promise.race([call, timeout]).catch(() => [] as string[]);
+  const usable = [...new Set(proposed.map((l) => l.trim().replace(/[.]+$/, "").replace(/^\p{Ll}/u, (c) => c.toUpperCase())))].filter((l) => {
+    const why = checkCoverLine(l, draft.body);
+    if (why) notes.push(`Cover line "${l}" not used: ${why}.`);
+    return !why;
+  });
+  if (!proposed.length) return undefined;
+  if (!usable.length) return "";
+  const lines = [current, ...usable];
+  const answers = await askJev(
+    { title: draft.title, post: draft.post.slice(0, 3000), ...Object.fromEntries(lines.map((l, i) => [`line_${i}`, l])) },
+    Object.fromEntries(lines.map((_, i) => [`clear_${i}`, { type: "noul" as const, instructions: `Someone sees only line_${i} on a LinkedIn image. Does it tell them, in plain words, what the post is about?` }]))
+  );
+  // Without Jev nothing says a line is clearer, so the headline stays for now.
+  if (!answers) return undefined;
+  const p = (i: number) => answers[`clear_${i}`]?.noul ?? 0;
+  const best = usable.map((l, i) => ({ l, p: p(i + 1) })).sort((a, b) => b.p - a.p)[0];
+  if (best.p < JEV_YES || best.p <= p(0)) {
+    notes.push(`No cover line used: "${best.l}" is not clearer than the headline (${best.p.toFixed(2)} vs ${p(0).toFixed(2)}).`);
+    return "";
+  }
+  return best.l;
+}
+
 export async function renderAssetCover(assetId: string, input: { card?: CoverCard; edit?: CoverEdit } = {}): Promise<CoverResult> {
   const asset = await prisma.asset.findUnique({
     where: { id: assetId },
@@ -219,9 +271,11 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   if (!profile) return { ok: false, error: "The workspace has no brand profile" };
 
   const previous = (asset.coverSpec ?? null) as Partial<StoredCoverSpec> | null;
-  const card: CoverCard = input.card ?? previous?.card ?? {};
+  let card: CoverCard = input.card ?? previous?.card ?? {};
   const body = bodyOf(asset.content ?? "");
   const icpFields = { who: icp?.who ?? "", role: icp?.role ?? "", company_type: icp?.companyType ?? "" };
+  const reader = [icpFields.who, icpFields.role, icpFields.company_type].filter(Boolean).join("; ");
+  const lineNotes: string[] = [];
   // The first post's cover is the dark STATEMENT with Shapes: the boldest
   // first impression, with no picked figure or quote (user decision,
   // 2026-10-01). A reviewer's edit still changes it.
@@ -237,9 +291,20 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     recentLayouts: recent.map((r) => (r.coverSpec as { layout?: string } | null)?.layout ?? "").filter(Boolean),
     ...(firstPost ? { layout: "STATEMENT" as const } : {}),
   };
+  // Written once per draft and kept on the card (an empty string records
+  // that none beat the headline); written again only when the draft no longer
+  // supports it. A reviewer's edit never rewrites it.
+  if (!input.edit && (card.cover_line === undefined || (card.cover_line && checkCoverLine(card.cover_line, body)))) {
+    const current = chooseCoverCopy({ ...copyInput, card: { ...card, cover_line: undefined } }).headline;
+    const line = await writeCoverLine({ title: asset.title ?? "", post: quoteSource({ body, post: asset.linkedinVariant }), body }, current, lineNotes);
+    if (line !== undefined) {
+      card = { ...card, cover_line: line };
+      copyInput.card = card;
+    }
+  }
   // Judged only when the layout is being chosen: an edit keeps the drawn one.
   const headlineCopy = chooseCoverCopy(copyInput);
-  const judged = firstPost || input.edit ? {} : await judgeOptions(coverOptions(copyInput), headlineCopy.headline, [icpFields.who, icpFields.role, icpFields.company_type].filter(Boolean).join("; "));
+  const judged = firstPost || input.edit ? {} : await judgeOptions(coverOptions(copyInput), headlineCopy.headline, reader);
   const copy = judged.number || judged.quote ? chooseCoverCopy({ ...copyInput, judged }) : headlineCopy;
 
   // The illustration. A re-draw keeps the one the cover has unless the
@@ -269,7 +334,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   const base = kept ?? copy;
   // No audience label: the illustration and the headline open the cover (user decision, 2026-09-25).
   let spec: CoverSpec = { layout: base.layout!, headline: base.headline!, emphasis: base.emphasis, kicker: base.kicker, quote: base.quote, number: base.number, author, brand, art };
-  const notes = [...copy.notes, ...brandNotes];
+  const notes = [...lineNotes, ...copy.notes, ...brandNotes];
   let headlineSource: StoredCoverSpec["headline_source"] = kept?.headline_source ?? copy.headline_source;
   let score = kept?.score ?? copy.score;
 

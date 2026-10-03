@@ -7,8 +7,10 @@
  *    cover is never used on a BLOCKED draft (the draft check found an invented
  *    figure). A QUOTE is always a sentence taken word for word from the body.
  *  - A headline is scored for clarity, mobile length and ICP relevance; it
- *    must set in three lines at feed size. A failing one falls back to the
- *    article title, never to invented text.
+ *    must set in three lines at feed size. The cover line written from the
+ *    finished post (3-6 words, two large lines) comes first; a failing one
+ *    falls back to the strategist's headline, then the article title, never
+ *    to invented text.
  *  - A cover makes one point at a glance. HEADLINE and STATEMENT carry it by
  *    default and alternate per tenant; a NUMBER or QUOTE is used only when
  *    the service judged it understandable without the post and clearer than
@@ -19,6 +21,8 @@ import { headlineFits, type CoverLayout } from "./layouts";
 
 export interface CoverCard {
   headline?: string;
+  /** A 3-6 word line written from the finished post (checkCoverLine); preferred over the headline. */
+  cover_line?: string;
   subtitle?: string;
   /** One word of the headline to set in the accent colour. */
   emphasis_word?: string;
@@ -58,7 +62,7 @@ export interface CoverCopyInput {
 
 export interface HeadlineScore {
   words: number;
-  /** 1 for 4-8 words, 0.5 for 3 or 9-10, 0 otherwise. */
+  /** 1 for 3-6 words, 0.5 for 7-9, 0 otherwise. */
   length: number;
   /** Shares at least one content word with the ICP. */
   icp_relevant: boolean;
@@ -74,7 +78,7 @@ export interface CoverCopy {
   kicker?: string;
   quote?: string;
   number?: { value: string; unit?: string };
-  headline_source: "strategist" | "title";
+  headline_source: "cover_line" | "strategist" | "title";
   score: HeadlineScore;
   /** Why an option was not used, for the reviewer and the cover eval. */
   notes: string[];
@@ -115,10 +119,33 @@ export function scoreHeadline(headline: string, input: Pick<CoverCopyInput, "bod
   const icpText = `${input.icp.who} ${input.icp.role} ${input.icp.company_type}`;
   return {
     words: n,
-    length: n >= 4 && n <= 8 ? 1 : n === 3 || (n >= 9 && n <= 10) ? 0.5 : 0,
+    length: n >= 3 && n <= 6 ? 1 : n >= 7 && n <= 9 ? 0.5 : 0,
     icp_relevant: icpText.trim() ? sharedWords(headline, icpText) > 0 : false,
     problems,
   };
+}
+
+/** A cover line is read in about a second: a few words, set large in two lines. */
+export const COVER_LINE_WORDS = [3, 6] as const;
+const COVER_LINE_CHARS = 40;
+/** On the 1080 canvas; about 30px in the feed, a quarter larger than the smallest headline. */
+const COVER_LINE_MIN_SIZE = 90;
+
+/**
+ * Why a cover line cannot be used, or null when it can: 3-6 words, at most 40
+ * characters, sets in two lines at 90px or more, claims something, and
+ * states no figure the draft does not.
+ */
+export function checkCoverLine(line: string, body: string): string | null {
+  const text = clean(line).replace(/[.]+$/, "");
+  const n = words(text).length;
+  if (n < COVER_LINE_WORDS[0] || n > COVER_LINE_WORDS[1]) return `${n} words, not ${COVER_LINE_WORDS.join("-")}`;
+  if (text.length > COVER_LINE_CHARS) return `${text.length} characters, over ${COVER_LINE_CHARS}`;
+  if (/[:#]|https?:/.test(text) || VAGUE.test(text)) return "a label, not a claim";
+  const figures = newFigures(text, body);
+  if (figures.length) return `states ${figures.join(", ")}, which the draft does not`;
+  if (!headlineFits(text, COVER_LINE_MIN_SIZE, 2)) return "does not set in two large lines";
+  return null;
 }
 
 /** "For real estate brokerages and teams": who the post is for, from the ICP. */
@@ -225,7 +252,9 @@ export function pickLayout(available: CoverLayout[], recent: string[]): CoverLay
 
 export function chooseCoverCopy(input: CoverCopyInput): CoverCopy {
   const notes: string[] = [];
+  const coverLine = input.card.cover_line && !checkCoverLine(input.card.cover_line, input.body) ? input.card.cover_line : "";
   const options = [
+    { text: sentenceCase(clean(coverLine).replace(/[.]+$/, "")), source: "cover_line" as const },
     { text: sentenceCase(clean(input.card.headline)), source: "strategist" as const },
     { text: sentenceCase(clean(input.title)), source: "title" as const },
   ]
@@ -235,7 +264,7 @@ export function chooseCoverCopy(input: CoverCopyInput): CoverCopy {
   // does not (a long headline is still drawn, smaller); else the title.
   const chosen = options.find((o) => !o.score.problems.length) ?? options.find((o) => !o.score.problems.some((p) => p.startsWith("states "))) ?? options[options.length - 1];
   const strategist = options.find((o) => o.source === "strategist");
-  if (strategist && strategist !== chosen) notes.push(`Strategist headline not used: ${strategist.score.problems.join("; ")}.`);
+  if (strategist && strategist !== chosen && strategist.score.problems.length) notes.push(`Strategist headline not used: ${strategist.score.problems.join("; ")}.`);
   const headline = chosen?.text ?? "";
   const source: CoverCopy["headline_source"] = chosen?.source ?? "title";
   const score = chosen?.score ?? scoreHeadline(headline, input);

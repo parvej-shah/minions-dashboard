@@ -47,6 +47,13 @@ and link to it here.
 **Why:** The visible order should reinforce which idea automatic drafting will choose, and the cards should make the next action clear at a glance.
 **Status:** active
 
+## 2026-10-03 — A cover carries a short cover line when it says more than the headline
+
+**Decision:** When a cover is drawn, a 3 to 6 word cover line is written from the finished LinkedIn post and set large in two lines. It replaces the headline only when Jev rates it as saying more plainly what the post is about than the headline does. Otherwise the headline stays, so no cover gets worse. The line may state no figure the post does not, and it is written once per draft. A new line is written only when an edit leaves the old one unsupported. A reviewer's own headline always wins. The strategist now writes its cover headline as 3 to 6 words too.
+**Why:** The user rated the covers 7/10. The main gap was that a title-length headline (7 to 8 words) is too long for a thumbnail read in about a second, where click-through drops past six words. In a trial on 8 drafts, Jev rated the shorter line clearer for 4 of them. For the other 4 the short line lost the specifics, so they kept their headline.
+**Alternatives considered:** Always using the short line (rejected: in the trial, squeezing to 3 to 5 words often dropped what made the line clear, for example "Onboarding should lead to output" against "Fourteen onboarding steps killed activation until we cut three").
+**Status:** active
+
 ## 2026-10-03 — A cover makes one point at a glance and always matches its post
 
 **Decision:** The cover's main line sets in at most three lines (the strategist writes 4 to 8 words, at most 55 characters), and the subtitle appears only under a short headline. The author's name and byline are larger so they read at phone feed size. Headline and Statement covers are the default and alternate. A Number or Quote cover is used only when Jev judges that the figure or line makes sense without the post and would make the reader stop more than the headline; it is no longer used just because it is its turn. A quote is taken from the LinkedIn post when the draft has one, since that is the text the cover is seen beside. When an edit leaves a cover behind (its quote was cut, it states a figure the post no longer has, or it shows an old title), the cover is redrawn when the draft is saved, approved or scheduled, keeping a reviewer's own headline when that is still true. Reviewers can still pick any layout.

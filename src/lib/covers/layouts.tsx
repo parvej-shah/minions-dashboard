@@ -102,9 +102,9 @@ const SIZES: Record<keyof typeof BOX, readonly [number, number]> = {
   role: [30, 34],
 };
 
-/** True when the headline sets in HEADLINE_LINES at a size that reads at feed width. */
-export function headlineFits(text: string, minSize = 80): boolean {
-  return fit(text, minSize, SIZES.headline[1], BOX.headline) !== null;
+/** True when the headline sets in `lines` (HEADLINE_LINES by default) at a size that reads at feed width. */
+export function headlineFits(text: string, minSize = 80, lines: number = HEADLINE_LINES): boolean {
+  return fit(text, minSize, SIZES.headline[1], { ...BOX.headline, maxLines: lines }) !== null;
 }
 
 function fitOrThrow(what: keyof typeof BOX, text: string, height?: { maxHeight: number; lineHeight: number }, extraLines = 0): Fitted {
