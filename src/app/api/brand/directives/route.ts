@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { toDirectiveDTO } from "@/lib/mappers/directive";
-import { apiError, apiFailure } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/server/http/respond";
 import { requireClientId } from "@/lib/tenant";
 import { refuseOnboardingOverwrite } from "@/lib/onboardingGuard";
 import { resolveAudienceScope, RETIRED_SCOPE_MESSAGE } from "@/constants/audience";

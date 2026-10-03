@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireTenantAccess } from "@/lib/tenant";
-import { apiError, apiFailure } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/server/http/respond";
 import { generateBrandSuggestionsWithLLM } from "@/lib/ai/brandCopilot";
 import { fetchWebsiteContext } from "@/lib/ai/websiteContext";
 

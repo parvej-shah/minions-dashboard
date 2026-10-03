@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getBrandSettings, updateBrandSettings } from "@/services/brand";
-import { apiError, apiFailure } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/server/http/respond";
 import { requireClientId } from "@/lib/tenant";
 import type { BrandProfileInput } from "@/types";
 import { resolveWriterExpertise } from "@/constants/writerExpertise";

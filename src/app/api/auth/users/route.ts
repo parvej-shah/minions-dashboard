@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { listAdminUsers } from "@/services/users";
-import { apiError, apiFailure } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/server/http/respond";
 import { getCurrentUser, isPlatformStaff } from "@/lib/tenant";
 
 export async function GET() {

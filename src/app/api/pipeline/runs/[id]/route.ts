@@ -4,7 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireClientId } from "@/lib/tenant";
 import { verifyWebhookSecret } from "@/lib/security";
-import { apiFailure } from "@/lib/api-response";
+import { apiFailure } from "@/server/http/respond";
 import { sweepStaleRuns } from "@/lib/harvestBudget";
 
 export async function GET(

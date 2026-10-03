@@ -1,7 +1,7 @@
 import { DEFAULT_CADENCE } from "@/lib/scheduling";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { apiFailure } from "@/lib/api-response";
+import { apiFailure } from "@/server/http/respond";
 import { requireClientId } from "@/lib/tenant";
 import { triggerN8nWorkflow } from "@/services/pipeline";
 import { requireOneOfEnv } from "@/lib/env";

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { requireRealTenantUser } from "@/lib/tenant";
-import { apiError, apiFailure } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/server/http/respond";
 import { cookies } from "next/headers";
 
 export async function POST(request: Request) {

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { apiFailure } from "@/lib/api-response";
+import { apiFailure } from "@/server/http/respond";
 
 /**
  * Onboarding rewrites a tenant's brand wholesale: positioning, tone, proof

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { apiError, apiFailure } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/server/http/respond";
 import { requireClientId } from "@/lib/tenant";
 import { refuseOnboardingOverwrite } from "@/lib/onboardingGuard";
 

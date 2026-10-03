@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { apiError, apiFailure } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/server/http/respond";
 import { isPlaceholderTenantName, requireClientId } from "@/lib/tenant";
 import { renderAssetCover } from "@/services/cover";
 import { FIRST_POST_TAG } from "@/constants/firstPost";

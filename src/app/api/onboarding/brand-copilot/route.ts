@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireTenantAccess } from "@/lib/tenant";
-import { apiError, apiFailure } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/server/http/respond";
 import { BRAND_PRESETS, type BrandPreset } from "@/constants/brandPresets";
 import { generateBrandDirectivesWithLLM, type GeneratedDirective } from "@/lib/ai/brandCopilot";
 import { fetchWebsiteContext } from "@/lib/ai/websiteContext";

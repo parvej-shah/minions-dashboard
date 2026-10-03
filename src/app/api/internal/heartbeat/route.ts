@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { apiFailure } from "@/lib/api-response";
+import { apiFailure } from "@/server/http/respond";
 import { verifyWebhookSecret } from "@/lib/security";
 import { recordHeartbeat } from "@/services/jobHeartbeat";
 import { AUTOMATION_JOBS } from "@/constants/automations";

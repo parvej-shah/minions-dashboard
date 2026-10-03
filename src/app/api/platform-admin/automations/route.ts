@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { apiError } from "@/lib/api-response";
+import { apiError } from "@/server/http/respond";
 import { requirePlatformStaff } from "@/lib/tenant";
 import { prisma } from "@/lib/prisma";
 import { readAutomations } from "@/services/jobHeartbeat";

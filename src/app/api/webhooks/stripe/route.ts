@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
-import { apiFailure } from "@/lib/api-response";
+import { apiFailure } from "@/server/http/respond";
 import { getStripeClient, isStripeConfigured } from "@/lib/stripe";
 import { optionalEnv } from "@/lib/env";
 import { PLANS, type PlanKey } from "@/constants/plans";

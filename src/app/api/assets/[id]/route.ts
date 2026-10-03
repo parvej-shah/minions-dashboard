@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { toAssetDTO } from "@/lib/mappers/asset";
-import { apiError, apiFailure } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/server/http/respond";
 import { requireClientId } from "@/lib/tenant";
 import { getTenantBlogDomain } from "@/lib/tenantDomain";
 import { parsePostChannels } from "@/constants/postChannels";

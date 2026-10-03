@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { toDirectiveDTO } from "@/lib/mappers/directive";
-import { apiError, apiFailure } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/server/http/respond";
 import { requireClientId } from "@/lib/tenant";
 import { BRAND_PRESETS } from "@/constants/brandPresets";
 import { PRIMARY_LOGO_URL } from "@/constants/config";

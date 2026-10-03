@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { triggerN8nWorkflow } from "@/services/pipeline";
 import { prisma } from "@/lib/prisma";
-import { apiFailure } from "@/lib/api-response";
+import { apiFailure } from "@/server/http/respond";
 import { requireClientId } from "@/lib/tenant";
 
 /**

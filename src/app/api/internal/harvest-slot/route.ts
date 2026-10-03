@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { apiError, apiFailure } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/server/http/respond";
 import { verifyWebhookSecret } from "@/lib/security";
 import { recordHeartbeat } from "@/services/jobHeartbeat";
 import { claimHarvestSlot, getHarvestBudget } from "@/lib/harvestBudget";

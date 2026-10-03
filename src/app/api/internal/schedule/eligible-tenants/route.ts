@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { apiError } from "@/lib/api-response";
+import { apiError } from "@/server/http/respond";
 import { verifyWebhookSecret } from "@/lib/security";
 import { recordHeartbeat } from "@/services/jobHeartbeat";
 import { findPlan } from "@/constants/plans";

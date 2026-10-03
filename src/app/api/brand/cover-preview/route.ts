@@ -1,4 +1,4 @@
-import { apiError } from "@/lib/api-response";
+import { apiError } from "@/server/http/respond";
 import { requireClientId } from "@/lib/tenant";
 import { renderCoverPreview } from "@/services/cover";
 

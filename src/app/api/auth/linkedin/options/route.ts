@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireClientId } from "@/lib/tenant";
-import { apiError } from "@/lib/api-response";
+import { apiError } from "@/server/http/respond";
 import { cookies } from "next/headers";
 
 export async function GET(request: Request) {

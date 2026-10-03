@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getBrandSettings, getWriterVoiceConfig, getHarvestContext } from "@/services/brand";
-import { apiError, apiFailure } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/server/http/respond";
 import { verifyWebhookSecret } from "@/lib/security";
 import { recordHeartbeat } from "@/services/jobHeartbeat";
 import { buildBrandContextResponse } from "@/services/brandContext";

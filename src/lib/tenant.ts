@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { apiFailure } from "@/lib/api-response";
+import { apiFailure } from "@/server/http/respond";
 import type { UserRole } from "@/constants/access";
 
 /** An account that signed up but has not finished onboarding, so has no workspace yet. */

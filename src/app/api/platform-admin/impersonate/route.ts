@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { apiError, apiFailure } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/server/http/respond";
 import { requirePlatformStaff, IMPERSONATION_COOKIE } from "@/lib/tenant";
 
 const MAX_AGE_SECONDS = 2 * 60 * 60; // 2h -- a support session, not a standing grant

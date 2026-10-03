@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { apiError } from "@/lib/api-response";
+import { apiError } from "@/server/http/respond";
 import { requireClientId } from "@/lib/tenant";
 import { pulseHistory } from "@/services/pulse";
 

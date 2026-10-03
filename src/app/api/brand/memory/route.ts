@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { apiError, apiFailure } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/server/http/respond";
 import { requireClientId } from "@/lib/tenant";
 import { toMemoryDTO } from "@/lib/mappers/author";
 import { parseDisclosure, parseMemoryContent, parseMemoryKind } from "@/lib/authorInput";

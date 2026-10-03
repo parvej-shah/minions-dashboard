@@ -5,7 +5,7 @@ import {
   findChannelById,
   findChannelByKey,
 } from "@/constants/channels";
-import { apiError, apiFailure } from "@/lib/api-response";
+import { apiError, apiFailure } from "@/server/http/respond";
 import { requireClientId } from "@/lib/tenant";
 import type { DistributionChannelConfig, DistributionChannelsPayload } from "@/types";
 import type { ClientChannel } from "@prisma/client";
