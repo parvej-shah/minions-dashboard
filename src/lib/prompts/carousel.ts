@@ -19,6 +19,8 @@ export interface CarouselInput {
   icp: { who: string; role: string };
   /** The author's own experience, the only source of a QUOTE slide. */
   memory: string[];
+  /** The post is the author's own account (their memory, or a note on an idea they added): tell it as their story. */
+  own_account?: boolean;
   evidence_rules: string[];
   banned: string[];
   /** Claims the draft check could not verify: never stated as fact, never with their figure. */
@@ -61,8 +63,10 @@ Rules:
 - ${INNER_SLIDES.min} to ${INNER_SLIDES.max} slides after the cover. Fewer, sharper slides beat more.
 - One idea per slide, readable in three seconds on a phone. Plain words the reader uses. No slide repeats another's point.
 - Say only what the post says. Never add a figure, result, client, tool name or claim the post does not state. Never write first-person experience the post does not contain.
-- Use the names the post uses: a tool, product, company or person the post names keeps its name on the slides, never swapped for a generic word ("Jev", not "a classifier").
-- Cover headline: ${COVER_HEADLINE_WORDS.min}-${COVER_HEADLINE_WORDS.max} words, sentence case, the deck's title: someone scrolling past must know at once what it is about. Name the specific things the post names and what happened or why${input.memory.length ? "; when the post is the author's own account, title it as their story (e.g. \"Why we moved from regex to Jev\")" : ""}. Never an abstract maxim or a bare topic label. "emphasis" is the one headline word it turns on. "kicker": one sentence, max 16 words, what the reader gets by swiping.
+${input.own_account || input.memory.length ? `- This post is the author's own account. Tell it as their story on every slide, in the first person and past tense: what they did, what they found, what they changed ("We counted AI tells with regex", "We moved the decision to Jev"). Never turn it into instructions for the reader ("Start with regex", "Allow one rewrite"): a step the author took is not advice to copy. Prefer TEARDOWN; use STEPS only for a sequence the post tells the reader to follow.
+- The STAKES slide states what the problem cost the author, as the post says it (e.g. posts reaching fewer people), not a general rule.
+` : ""}- Use the names the post uses: a tool, product, company or person the post names keeps its name on the slides, never swapped for a generic word ("Jev", not "a classifier").
+- Cover headline: ${COVER_HEADLINE_WORDS.min}-${COVER_HEADLINE_WORDS.max} words, sentence case, the deck's title: someone scrolling past must know at once what it is about. Name the specific things the post names and what happened or why${input.own_account || input.memory.length ? "; when the post is the author's own account, title it as their story (e.g. \"Why we moved from regex to Jev\")" : ""}. Never an abstract maxim or a bare topic label. "emphasis" is the one headline word it turns on. "kicker": one sentence, max 16 words, what the reader gets by swiping.
 - "label": 2-4 words naming the topic, shown small on every slide.
 - "caption": the post text above the document, ${CAPTION_WORDS.min}-${CAPTION_WORDS.max} words. Open with the post's hook, lightly sharpened, then one or two short lines pointing into the carousel. Short paragraphs separated by a blank line. At most 2 hashtags at the end. No "comment X below", no "follow for more".
 - "document_title": the title LinkedIn shows on the document, max 10 words.

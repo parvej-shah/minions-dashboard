@@ -4,7 +4,7 @@ import { chat as qwenChat } from "@/lib/ai/qwen";
 import { deleteFromR2, r2KeyFromUrl, uploadToR2 } from "@/lib/r2";
 import { coverBrand } from "@/lib/covers/brand";
 import type { CoverSpec } from "@/lib/covers/layouts";
-import { evidenceRules } from "@/lib/drafts/authorContext";
+import { evidenceRules, manualIdeaNote } from "@/lib/drafts/authorContext";
 import { COVER_HEADLINE_WORDS, checkPlan, namesIn, parsePlan, repairPlan, suggestCarousel, toDeck, type CarouselPlan, type PlanSources } from "@/lib/carousel/plan";
 import { renderCarouselPdf, renderSlidePng } from "@/lib/carousel/render";
 import type { Deck } from "@/lib/carousel/slides";
@@ -79,7 +79,7 @@ async function loadContext(assetId: string): Promise<Context | { error: string }
   const [profile, icp, idea, banned, claims, onBlog] = await Promise.all([
     prisma.brandProfile.findUnique({ where: { clientId } }),
     prisma.icpProfile.findUnique({ where: { clientId } }),
-    asset.ideaId ? prisma.idea.findFirst({ where: { id: asset.ideaId, clientId }, select: { memoryIds: true, trustBasis: true } }) : null,
+    asset.ideaId ? prisma.idea.findFirst({ where: { id: asset.ideaId, clientId }, select: { memoryIds: true, trustBasis: true, source: true, gateVerdict: true, rawIdea: true, angle: true, why: true } }) : null,
     tenantBannedPhrases(clientId),
     prisma.claim.findMany({ where: { assetId: asset.id, verified: { not: "Y" } }, select: { claimText: true } }),
     prisma.blog.findFirst({ where: { clientId, OR: [{ assetId: asset.id }, { slug: asset.slug }] }, select: { slug: true } }),
@@ -103,6 +103,7 @@ async function loadContext(assetId: string): Promise<Context | { error: string }
     body,
     icp: { who: icp?.who ?? "", role: icp?.role ?? "" },
     memory,
+    own_account: memory.length > 0 || Boolean(idea && manualIdeaNote(idea)),
     evidence_rules: evidenceRules({ trust_basis: idea?.trustBasis ?? [], memory: memory.map((text) => ({ kind: "", text, disclosure: "PUBLIC" as const })) }),
     banned,
     unverified,

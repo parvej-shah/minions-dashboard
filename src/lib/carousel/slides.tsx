@@ -160,6 +160,8 @@ interface Page {
   ink: string;
   paper: string;
   accent: string;
+  /** The words start at the top, so a run of POINT or STEP pages lines up page to page, icon or not. */
+  top?: boolean;
   /** 0-based index of this slide in the whole deck, cover included. */
   index: number;
   total: number;
@@ -234,14 +236,14 @@ function Frame({ deck, page, icon, children }: { deck: Deck; page: Page; icon?: 
 
       {icon ? (
         <div style={{ height: CENTRE, display: "flex", flexDirection: "column", marginBottom: BOTTOM_GAP }}>
-          <div style={{ height: page.room, display: "flex", flexDirection: "column", justifyContent: "center" }}>{children}</div>
+          <div style={{ height: page.room, display: "flex", flexDirection: "column", justifyContent: page.top ? "flex-start" : "center" }}>{children}</div>
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: ICON_GAP }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={iconSrc(icon, page)} width={ICON} height={ICON} alt="" />
           </div>
         </div>
       ) : (
-        <div style={{ height: CENTRE, display: "flex", flexDirection: "column", justifyContent: "center", marginBottom: BOTTOM_GAP }}>{children}</div>
+        <div style={{ height: CENTRE, display: "flex", flexDirection: "column", justifyContent: page.top ? "flex-start" : "center", marginBottom: BOTTOM_GAP }}>{children}</div>
       )}
 
       <Progress page={page} />
@@ -481,6 +483,7 @@ export function slideElement(deck: Deck, i: number) {
     ink: dark ? brand.paper : brand.ink,
     paper: dark ? brand.ink : brand.paper,
     accent: dark ? brand.accentOnInk : brand.accent,
+    top: slide.layout === "POINT" || slide.layout === "STEP",
     index: i,
     total: deck.slides.length + 1,
   };
