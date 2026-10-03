@@ -29,6 +29,18 @@ and link to it here.
 
 ---
 
+## 2026-10-03 — Remove repeated Mission Control pipeline cards
+
+**Decision:** Remove the Ideas, Drafting, Review and Published mini-card strip below the summary cards.
+**Why:** It repeats the same counts and adds visual clutter.
+**Status:** active
+
+## 2026-10-03 — Hide Content Performance from navigation
+
+**Decision:** Remove Content Performance from the dashboard navigation.
+**Why:** The user asked to hide the tab.
+**Status:** active
+
 ## 2026-10-03 — LinkedIn posts end with 2 to 3 specific hashtags
 
 **Decision:** Every LinkedIn post ends with a line of 2 to 3 hashtags naming its specific topic, industry or audience (like #VoiceAI, #RealEstateTech), never generic tags like #AI or #Leadership. More than 3 fails the variant check; fewer than 2 is flagged for review, not blocked. Facebook and X stay at none unless the brand names one.

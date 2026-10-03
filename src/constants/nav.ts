@@ -1,5 +1,4 @@
 import {
-  BarChart3,
   CreditCard,
   SlidersHorizontal,
   CalendarClock,
@@ -46,11 +45,6 @@ export function buildNavItems(): NavItem[] {
       name: "Brand & Directives",
       href: "/brand",
       icon: Palette,
-    },
-    {
-      name: "Content Performance",
-      href: "/telemetry",
-      icon: BarChart3,
     },
     {
       name: "Channels",

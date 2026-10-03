@@ -9,10 +9,7 @@ import {
   CheckCircle2,
   ChevronRight,
   Globe,
-  Inbox,
-  PenLine,
-  ClipboardCheck,
-  BadgeCheck,
+  CalendarClock,
   Lightbulb,
 } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
@@ -94,7 +91,6 @@ export default function MissionControlPage() {
   const isLoading = ideasResource.isLoading || assetsResource.isLoading || publishedResource.isLoading;
 
   const pendingReviewAssets = assets.filter((a) => a.status === "PENDING_REVIEW");
-  const draftingIdeas = ideas.filter((i) => i.status === "CLAIMED" || i.status === "DRAFTING" || i.status === "PICKED");
 
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
@@ -113,25 +109,32 @@ export default function MissionControlPage() {
           </div>
         </div>
 
-        <div className="grid w-full grid-cols-2 gap-2 lg:flex lg:w-auto lg:items-center lg:gap-2.5">
+        <div className="grid w-full grid-cols-3 gap-2 lg:flex lg:w-auto lg:items-center lg:gap-2.5">
+          <Link
+            href="/settings/schedule"
+            aria-label="Open Schedule"
+            className="flex min-h-12 w-full min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-[#1F2D3D] bg-[#0F1419] px-1.5 py-3 text-[11px] font-semibold text-[#F1F5F9] shadow-sm transition-all hover:border-[#00C9A7]/40 hover:bg-[#161D26] active:scale-[0.98] sm:gap-2 sm:px-4 sm:text-xs lg:w-auto lg:flex-none"
+          >
+            <CalendarClock aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-[#38BDF8]" />
+            <span>Schedule</span>
+          </Link>
+
           <Link
             href="/ideas"
-            aria-label="Discover Ideas"
-            className="flex min-h-12 w-full min-w-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-[#1F2D3D] bg-[#161D26] px-2.5 py-3 text-xs font-semibold text-[#F1F5F9] shadow-sm transition-all hover:bg-[#1E2733] active:scale-[0.98] sm:px-4 lg:w-auto lg:flex-none"
+            aria-label="Open the Idea Directory"
+            className="flex min-h-12 w-full min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-[#00C9A7]/25 bg-[#00C9A7]/[0.07] px-1.5 py-3 text-[11px] font-semibold text-[#B8F5E9] shadow-sm transition-all hover:border-[#00C9A7]/45 hover:bg-[#00C9A7]/[0.12] active:scale-[0.98] sm:gap-2 sm:px-4 sm:text-xs lg:w-auto lg:flex-none"
           >
             <Sparkles aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-[#00C9A7]" />
-            <span className="lg:hidden">Ideas</span>
-            <span className="hidden lg:inline">Discover Ideas</span>
+            <span>Directory</span>
           </Link>
 
           <Link
             href="/editorial"
-            aria-label={`Open Editorial Studio: ${pendingReviewAssets.length} items to review`}
-            className="flex min-h-12 w-full min-w-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#00C9A7] px-2.5 py-3 text-xs font-bold text-[#070B0F] shadow-lg shadow-[#00C9A7]/20 transition-all hover:bg-[#00A88A] active:scale-[0.98] sm:px-4 lg:w-auto lg:flex-none"
+            aria-label={`Open Editor: ${pendingReviewAssets.length} items to review`}
+            className="flex min-h-12 w-full min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-[#00C9A7] px-1.5 py-3 text-[11px] font-bold text-[#070B0F] shadow-lg shadow-[#00C9A7]/20 transition-all hover:bg-[#00A88A] active:scale-[0.98] sm:gap-2 sm:px-4 sm:text-xs lg:w-auto lg:flex-none"
           >
             <FileText aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
-            <span className="lg:hidden">Review{isLoading ? "" : ` (${pendingReviewAssets.length})`}</span>
-            <span className="hidden lg:inline">Editorial Studio{isLoading ? "" : ` (${pendingReviewAssets.length})`}</span>
+            <span>Editor{isLoading ? "" : ` (${pendingReviewAssets.length})`}</span>
           </Link>
         </div>
       </div>
@@ -229,45 +232,6 @@ export default function MissionControlPage() {
           <div className="text-[11px] text-[#64748B]">
             Published articles
           </div>
-        </div>
-      </div>
-
-      {/* HORIZONTAL PIPELINE FLOW BAR (PER PRD SPECIFICATION) */}
-      <div className="p-5 rounded-2xl bg-[#0F1419] border border-[#1F2D3D] space-y-3">
-        <div className="flex items-center justify-between text-xs font-mono text-[#94A3B8]">
-          <span className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-[#F1F5F9]">How your content is moving</span>
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-          <Link href="/ideas" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] transition-all group">
-            <div className="text-xs font-bold text-[#F1F5F9] group-hover:text-[#00C9A7] flex items-center justify-center gap-1.5">
-              <><Inbox className="h-3.5 w-3.5" aria-hidden="true" /><span>Ideas</span></>
-            </div>
-            <div className="text-lg font-bold text-[#00C9A7] font-mono mt-1">{isLoading ? <Skeleton className="mx-auto mt-1 h-6 w-8" /> : ideas.length}</div>
-          </Link>
-
-          <Link href="/ideas" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#1F2D3D] transition-all group">
-            <div className="text-xs font-bold text-[#F1F5F9] group-hover:text-[#00C9A7] flex items-center justify-center gap-1.5">
-              <><PenLine className="h-3.5 w-3.5" aria-hidden="true" /><span>Drafting</span></>
-            </div>
-            <div className="text-lg font-bold text-[#64748B] font-mono mt-1">{isLoading ? <Skeleton className="mx-auto mt-1 h-6 w-8" /> : draftingIdeas.length}</div>
-          </Link>
-
-          <Link href="/editorial" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#ff6b4a]/40 transition-all group shadow-sm">
-            <div className="text-xs font-bold text-[#ff6b4a] flex items-center justify-center gap-1.5">
-              <><ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" /><span>Review</span></>
-            </div>
-            <div className="text-lg font-bold text-[#ff6b4a] font-mono mt-1">{isLoading ? <Skeleton className="mx-auto mt-1 h-6 w-8" /> : pendingReviewAssets.length}</div>
-          </Link>
-
-          <Link href="/published" className="p-3 rounded-xl bg-[#161D26] hover:bg-[#1E2733] border border-[#00C9A7]/40 transition-all group shadow-sm">
-            <div className="text-xs font-bold text-[#00C9A7] flex items-center justify-center gap-1.5">
-              <><BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" /><span>Published</span></>
-            </div>
-            <div className="text-lg font-bold text-[#00C9A7] font-mono mt-1">{isLoading ? <Skeleton className="mx-auto mt-1 h-6 w-8" /> : published.length}</div>
-          </Link>
         </div>
       </div>
 
