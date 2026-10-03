@@ -26,7 +26,7 @@ reduced motion.
 
 ## Components
 
-- **`Button` / `ButtonLink` / `buttonStyles()`**: the tactile button. The
+- **`Button` / `buttonStyles()`**: the tactile button (use `buttonStyles()` on a `<Link>`). The
   variants are `primary`, `soft` (brand-tinted, for real actions that should
   not compete with the primary), `secondary`, `light` (third-party sign-in), `ghost`,
   `gold`, `coral` and `danger`, in sizes `sm`, `md` and `lg`. `block` makes it
@@ -34,7 +34,7 @@ reduced motion.
   CONTINUE. `loading` keeps the button's width, shows a spinner and blocks
   double clicks.
   Put at most one `primary` on each screen.
-- **`Card` / `cardStyles()`**: the tones are `default`, `raised` (it has the
+- **`Card`**: the tones are `default`, `raised` (it has the
   button's bottom edge, for tappable cards), `brand`, `coral` and `gold`.
 - **`Skeleton`, `SkeletonText`, `SkeletonCard`, `SkeletonGroup`,
   `PageSkeleton`**: placeholders shaped like the content that is on its way.
@@ -46,7 +46,12 @@ reduced motion.
   announcement. Use it wherever a list is still fetching.
 - **`ProgressBar`**: a thick, rounded bar for steps and goals. The value runs
   from 0 to 1.
-- **`EmptyState`**, **`Modal`**, **`ConfirmModal`** and **`Toast`** already existed and are still the ones to use.
+- **`Modal`** (variants `center` and `sheet`, the phone-full-screen one),
+  **`Drawer`** (right-hand slide-over for forms), **`ConfirmModal`**,
+  **`Toast`** (positions `top`, `bottom`, `lifted` above the phone tab bar),
+  **`EmptyState`**, **`ErrorLine`** and **`Confetti`**.
+- **`fieldStyles`**: `inputClass`, `sectionClass` and `sectionCardClass` for
+  settings forms.
 
 ## Rules
 
