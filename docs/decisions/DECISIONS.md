@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-10-03 — An idea the author adds themselves is written as their own account
+
+**Decision:** When the author adds their own idea with notes ("Add your own idea"), the draft treats those notes as the author's first-hand account: it may speak in the first person and use the figures and names the notes give, and it opens on the author's view rather than an imagined reader scene. Nothing beyond the notes may be claimed. The hook and the X post now get the same AI-pattern check and one rewrite as the body and the LinkedIn and Facebook posts.
+**Why:** A test idea about our own switch to Jev, with real reach figures in its notes, came back as a story about an invented brokerage, with the figures and the tool's name gone: the notes were handled like a stranger's topic. The hook and X post, never checked, still carried the "it isn't X, it's Y" figure the rest of the draft had lost.
+**Status:** active
+
 ## 2026-10-03 — Drafts are written as the author talking, and checked for AI patterns
 
 **Decision:** Drafts speak as the author (first-person view, mixed sentence length) instead of a brand lecturing the reader, and avoid the figures that mark AI text ("it isn't X, it's Y", three-beat fragments, a closing maxim). Every finished draft is judged by Jev and code; one that still reads as template writing gets exactly one rewrite, kept only if it changes nothing but the wording and reads better. An idea with no author experience behind it is written as the author's take on the source, tied to their goal: never a neutral explainer, never invented experience. The strategist sees the last three weeks of arguments and must make a new point.

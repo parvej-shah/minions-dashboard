@@ -13,11 +13,7 @@ export async function runDraftCheck(body: Record<string, unknown>): Promise<Draf
   if (!clientId || !ideaId) throw badRequest("client_id and idea_id are required");
   if (!str(body.body).trim()) throw badRequest("body is empty");
 
-  const [inputs, trust, icpRow] = await Promise.all([
-    getDraftCheckInputs(clientId, ideaId),
-    prisma.idea.findFirst({ where: { id: ideaId, clientId }, select: { trustBasis: true } }),
-    prisma.icpProfile.findUnique({ where: { clientId } }),
-  ]);
+  const [inputs, icpRow] = await Promise.all([getDraftCheckInputs(clientId, ideaId), prisma.icpProfile.findUnique({ where: { clientId } })]);
   const idea = inputs.idea;
   const signals = Array.isArray(idea?.signals) ? (idea.signals as { title?: string; snippet?: string; url?: string }[]) : [];
   const icp = icpRow ? toIcpContext(icpRow) : null;
@@ -28,7 +24,7 @@ export async function runDraftCheck(body: Record<string, unknown>): Promise<Draf
     claims: Array.isArray(body.claims) ? (body.claims as EditorClaim[]) : [],
     approvedProofs: inputs.approvedProofs,
     allowCustomerResult: inputs.allowCustomerResult,
-    trustBasis: trust?.trustBasis ?? [],
+    trustBasis: inputs.trustBasis,
     memory: inputs.memory,
     sources: signals.map((s) => ({ title: s.title, text: s.snippet, url: s.url })),
     authorFacts: [inputs.positioning, ...inputs.unsourcedProof],

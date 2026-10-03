@@ -79,6 +79,9 @@ export function hookFor(input: { sourceType?: string | null; lanePurpose?: strin
       return HOOKS.POSITION;
     case "EXPERIMENT":
       return HOOKS.EXPERIMENT;
+    // The author's own note: open on their view, not on a scene the note may not contain.
+    case "USER_NOTE":
+      return HOOKS.POSITION;
   }
   // A lane that exists to help the reader choose opens on the choice.
   if (lanePurpose === "DEMAND") return HOOKS.THE_DECISION;

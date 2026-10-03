@@ -36,6 +36,8 @@ export interface SlopReport {
 
 /** "It's not X, it's Y" is fine once in a post; more than that is the tell. */
 const CONTRAST_ALLOWED = 1;
+/** Below this many words a text (a hook, an X post) may not use the contrast figure at all. */
+const SHORT_TEXT_WORDS = 120;
 /** Three "X, Y and Z" lists in one short post read as a formula. */
 const TRIADS_ALLOWED = 3;
 /** Below this many sentences there is too little text to judge rhythm. */
@@ -77,8 +79,10 @@ function contrasts(ss: string[]): string[] {
     // "Speed-to-lead isn't a courtesy. It's the signal."
     const next = ss[i + 1];
     if (next && NEGATION.test(s) && wordsOf(s).length <= 16 && AFFIRMATION_START.test(next.trim())) out.push(`${s} ${next}`);
-    // "Not when the agent says so. Not when ... Only when ..."
-    if (/^not\b/i.test(s) && next && /^(?:only|just)\b/i.test(next.trim())) out.push(`${s} ${next}`);
+    // "Not when the agent says so. Not when ... Only when ..." / "Not because of the words. Because ..."
+    if (/^not\b/i.test(s) && next && /^(?:only|just|because)\b/i.test(next.trim())) out.push(`${s} ${next}`);
+    // "The problem is not the content. The reader hears the machinery."
+    else if (next && /^the (?:real )?(?:problem|issue|point|answer|fix|question|difference|reason|cause|bottleneck) (?:is not|isn't|isn’t|was not|wasn't|wasn’t)\b/i.test(s) && wordsOf(s).length <= 12) out.push(`${s} ${next}`);
   });
   return out;
 }
@@ -161,11 +165,13 @@ export function slopReport(text: string): SlopReport {
   const ss = sentences(prose).filter((s) => !/^(?:[-*]\s|\d+\.\s)/.test(s));
   const problems: SlopProblem[] = [];
 
+  // In a hook or a short post the one allowed contrast is the whole skeleton, so none is allowed there.
+  const contrastAllowed = prose.split(/\s+/).filter(Boolean).length < SHORT_TEXT_WORDS ? 0 : CONTRAST_ALLOWED;
   const c = contrasts(ss);
-  if (c.length > CONTRAST_ALLOWED) {
+  if (c.length > contrastAllowed) {
     problems.push({
       kind: "contrast",
-      fix: `Uses the "it isn't X, it's Y" figure ${c.length} times. Keep at most one; say the other points directly, as a plain statement.`,
+      fix: `Uses the "it isn't X, it's Y" figure ${c.length} times. ${contrastAllowed ? "Keep at most one; say the other points" : "In a text this short, say each point"} directly, as a plain statement.`,
       examples: c.slice(0, 4),
     });
   }
@@ -227,7 +233,7 @@ export function slopReport(text: string): SlopReport {
 
   // What each problem costs, per occurrence over what is allowed.
   const weight: Record<SlopProblem["kind"], number> = { contrast: 2, fragments: 2, anaphora: 1, triads: 1, rhythm: 2, vocabulary: 1, symbols: 1, maxim_close: 1, lecture: 0, generic: 0 };
-  const allowed: Partial<Record<SlopProblem["kind"], number>> = { contrast: CONTRAST_ALLOWED, triads: TRIADS_ALLOWED };
+  const allowed: Partial<Record<SlopProblem["kind"], number>> = { contrast: contrastAllowed, triads: TRIADS_ALLOWED };
   const score = problems.reduce((n, p) => n + weight[p.kind] * Math.max(1, (p.examples.length || 1) - (allowed[p.kind] ?? 0)), 0);
   return { problems, score };
 }

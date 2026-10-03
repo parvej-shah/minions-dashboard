@@ -38,9 +38,28 @@ describe("slopReport", () => {
   });
 
   it("allows one contrast, and ignores headings, hashtags and figures", () => {
-    const one = "Most teams think the voice is the hard part. It isn't, in my experience it's the calendar write.\n\nThat is where I would look first, because a slot can vanish between the question and the booking.\n\n$300\nAED 1,100\n\n#VoiceAI #RealEstate";
+    const one = `Most teams think the voice is the hard part. It isn't, in my experience it's the calendar write.
+
+That is where I would look first, because a slot can vanish between the question and the booking, and nobody notices until the buyer turns up at a house with no agent waiting outside.
+
+I have seen teams spend a month tuning how the agent sounds on the phone while the booking step quietly fails a few times a week. The caller hears a confident confirmation, the calendar never gets the event, and the agent finds out from an annoyed text on Saturday morning.
+
+So before any voice work, I would run twenty test bookings end to end and check each one landed where the agent actually looks.
+
+$300
+AED 1,100
+
+#VoiceAI #RealEstate`;
     expect(slopReport(one).problems.map((p) => p.kind)).not.toContain("contrast");
     expect(slopReport(one).problems.map((p) => p.kind)).not.toContain("fragments");
+  });
+
+  it("allows no contrast in a hook or other short text", () => {
+    const hook = "AI listing posts get half the impressions of hand-written ones. The problem is not the content, it is that the reader hears the machinery.";
+    expect(slopReport(hook).problems.map((p) => p.kind)).toContain("contrast");
+    // Across two sentences, with the second a plain statement.
+    expect(slopReport("Listing posts by AI draw half the reach. The problem is not the content. The reader hears the machinery.").problems.map((p) => p.kind)).toContain("contrast");
+    expect(slopReport("Reach dropped by half. Not because of the words. Because the reader hears the machinery.").problems.map((p) => p.kind)).toContain("contrast");
   });
 
   it("flags stock vocabulary and symbols", () => {

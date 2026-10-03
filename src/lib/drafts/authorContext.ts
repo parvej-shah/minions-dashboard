@@ -78,6 +78,35 @@ export function emptyDraftContext(icp: IcpContext, writerStanding: string, pilla
   };
 }
 
+/**
+ * The note on an idea the author added themselves ("Add your own idea"): what
+ * they wrote is their own account, so the draft may use it in the first
+ * person, figures and names included. Null for any other idea, or one with
+ * only a title. A gated idea carries its note in its trust basis instead.
+ */
+export function manualIdeaNote(idea: { source: string | null; gateVerdict: string | null; rawIdea: string; angle: string | null; why: string | null }): string | null {
+  if (idea.source !== "MANUAL" || idea.gateVerdict) return null;
+  const notes = [idea.angle, idea.why].map((s) => s?.trim()).filter(Boolean);
+  return notes.length ? [idea.rawIdea.trim(), ...notes].join("\n") : null;
+}
+
+/** The context for a manual idea's note: the note is the author's experience item, and the only one. */
+export function noteDraftContext(note: string, icp: IcpContext, writerStanding: string, lane: DraftAuthorContext["lane"]): DraftAuthorContext {
+  const trust = ["USER_NOTE"];
+  return {
+    ...emptyDraftContext(icp, writerStanding),
+    found: true,
+    source_type: "USER_NOTE",
+    trust_basis: trust,
+    author_advantage: "The author's own account in their note below.",
+    recommended_format: "POST",
+    lane,
+    memory: [{ kind: "NOTE", disclosure: "PUBLIC", text: note }],
+    hook: hookFor({ sourceType: "USER_NOTE" }),
+    allowed_modes: allowedContentModes(trust),
+  };
+}
+
 /** The stored idea fields the draft context is built from (camelCase, as Prisma returns them). */
 export interface DraftIdeaFields {
   sourceType: string | null;

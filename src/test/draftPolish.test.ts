@@ -4,7 +4,7 @@ const m = { askJev: vi.fn(), chat: vi.fn() };
 vi.mock("@/lib/ai/jev", () => ({ askJev: m.askJev }));
 vi.mock("@/lib/ai/modelChain", () => ({ chatWithFallback: m.chat }));
 
-const { polishText, MAX_REWRITES } = await import("@/services/draftPolish");
+const { polishText, polishDraft, MAX_REWRITES } = await import("@/services/draftPolish");
 
 const TEMPLATE = "A voicemail doesn't signal unavailability, it signals failure.\n\nSpeed isn't a courtesy. It's the signal.\n\nNo promise. No follow-up. No trace.\n\nThe backend is the truth.";
 const BETTER = "I think a voicemail after hours tells a buyer nobody is coming back tonight, and most of them move on to the next listing before morning.\n\nWhat I'd check first is how fast the call gets answered, because that is the part buyers notice.\n\nHas anyone measured how many of those callers try again?";
@@ -52,5 +52,14 @@ describe("polishText", () => {
     const r = await polishText(TEMPLATE, "post");
     expect(r.text).toBe(TEMPLATE);
     expect(r.rejected).toMatch(/figure/);
+  });
+});
+
+describe("polishDraft", () => {
+  it("checks the hook and the X post too, and passes other fields through", async () => {
+    m.askJev.mockResolvedValue(jev(3.5));
+    const r = await polishDraft({ body: BETTER, hook: "I think after-hours calls decide most listings.", li_variant: BETTER, fb_variant: BETTER, x_variant: BETTER, title: "T" });
+    expect(Object.keys(r.report).sort()).toEqual(["body", "fb_variant", "hook", "li_variant", "x_variant"]);
+    expect(r.texts.title).toBe("T");
   });
 });

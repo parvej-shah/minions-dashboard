@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { checkMemory } from "@/lib/ai/memoryCheck";
 import { generalizedText } from "@/lib/drafts/generalize";
-import { buildDraftAuthorContext, emptyDraftContext, type DraftAuthorContext, type DraftMemory } from "@/lib/drafts/authorContext";
+import { buildDraftAuthorContext, emptyDraftContext, manualIdeaNote, noteDraftContext, type DraftAuthorContext, type DraftMemory } from "@/lib/drafts/authorContext";
 import { writerExpertisePromptGuidance } from "@/constants/writerExpertise";
 import { toIcpContext, EMPTY_ICP } from "@/services/authorContext";
 import { parseBrandProof } from "@/lib/brand-proof";
@@ -46,6 +46,11 @@ export async function getDraftAuthorContext(clientId: string, ideaId: string): P
   ]);
   const icp = icpRow ? toIcpContext(icpRow) : EMPTY_ICP;
   const standing = writerExpertisePromptGuidance(profile?.writerExpertise);
+  const note = idea ? manualIdeaNote(idea) : null;
+  if (idea && note) {
+    const lane = idea.lane ? { name: idea.lane.name, purpose: idea.lane.purpose, brief: idea.lane.brief } : null;
+    return { ...noteDraftContext(note, icp, standing, lane), recent_posts: recent };
+  }
   if (!idea || !idea.gateVerdict) return { ...emptyDraftContext(icp, standing, idea?.pillar), recent_posts: recent };
 
   // Inactive items stay out: switching one off means "do not use this".
@@ -67,16 +72,19 @@ export async function getDraftAuthorContext(clientId: string, ideaId: string): P
 /** What the draft check needs beyond the author context: the verified proof and the original memory. */
 export async function getDraftCheckInputs(clientId: string, ideaId: string) {
   const [idea, profile, proofRows] = await Promise.all([
-    prisma.idea.findFirst({ where: { id: ideaId, clientId }, select: { memoryIds: true, rawIdea: true, angle: true, why: true, icpProblem: true, authorAdvantage: true, signals: true } }),
+    prisma.idea.findFirst({ where: { id: ideaId, clientId }, select: { memoryIds: true, rawIdea: true, angle: true, why: true, icpProblem: true, authorAdvantage: true, signals: true, trustBasis: true, source: true, gateVerdict: true } }),
     prisma.brandProfile.findUnique({ where: { clientId }, select: { allowedProofClaims: true, allowCustomerResultClaims: true, positioning: true } }),
     prisma.brandDirective.findMany({ where: { clientId, isActive: true, category: "PROOF" }, select: { instruction: true } }),
   ]);
   const memory = idea?.memoryIds.length
     ? await prisma.professionalMemory.findMany({ where: { clientId, id: { in: idea.memoryIds } }, select: { content: true, disclosure: true, generalizedContent: true } })
     : [];
+  // A manual idea's note backs the draft the way an experience item does (see getDraftAuthorContext).
+  const note = idea ? manualIdeaNote(idea) : null;
   return {
     idea,
-    memory,
+    trustBasis: note ? ["USER_NOTE"] : idea?.trustBasis ?? [],
+    memory: note ? [...memory, { content: note, disclosure: "PUBLIC", generalizedContent: null }] : memory,
     approvedProofs: proofRows.map((r) => parseBrandProof(r.instruction)).filter((p): p is NonNullable<typeof p> => p !== null),
     unsourcedProof: profile?.allowedProofClaims ?? [],
     allowCustomerResult: profile?.allowCustomerResultClaims ?? false,

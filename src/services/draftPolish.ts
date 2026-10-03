@@ -2,7 +2,7 @@ import { chatWithFallback } from "@/lib/ai/modelChain";
 import { askJev, type JevQuestion } from "@/lib/ai/jev";
 import { slopReport, SLOP_REWRITE_AT, type SlopProblem } from "@/lib/drafts/slop";
 import { rejectPolish } from "@/lib/drafts/polish";
-import { renderHumanize } from "@/lib/prompts/humanize";
+import { renderHumanize, type PolishKind } from "@/lib/prompts/humanize";
 
 /**
  * Makes a finished draft read like its author wrote it (see src/lib/drafts/slop.ts).
@@ -29,7 +29,7 @@ const YES = 0.7;
 const REWRITE_BUDGET_MS = 75_000;
 
 /** The texts of a draft that are prose worth polishing, and how each is shaped. */
-const POLISHED: Record<string, "post" | "article"> = { body: "article", li_variant: "post", fb_variant: "post" };
+const POLISHED: Record<string, PolishKind> = { body: "article", hook: "hook", li_variant: "post", fb_variant: "post", x_variant: "x" };
 
 const QUESTIONS: Record<string, JevQuestion> = {
   human: {
@@ -101,7 +101,7 @@ function parseText(raw: string): string | null {
   }
 }
 
-async function rewrite(text: string, kind: "post" | "article", problems: PolishVerdict["problems"]): Promise<string | null> {
+async function rewrite(text: string, kind: PolishKind, problems: PolishVerdict["problems"]): Promise<string | null> {
   const apiKey = process.env.DASHSCOPE_API_KEY;
   if (!apiKey) return null;
   const payload = renderHumanize({ text, kind, problems });
@@ -119,7 +119,7 @@ export interface PolishResult {
   rejected: string | null;
 }
 
-export async function polishText(text: string, kind: "post" | "article"): Promise<PolishResult> {
+export async function polishText(text: string, kind: PolishKind): Promise<PolishResult> {
   const before = await judge(text);
   let best = { text, verdict: before };
   let rewrites = 0;

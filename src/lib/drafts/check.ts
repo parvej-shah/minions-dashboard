@@ -113,7 +113,8 @@ export function checkDraft(input: DraftCheckInput): DraftCheckResult {
   const body = reflowParagraphs(input.body);
   const text = `${input.hook}\n${body}`;
   const sources = (input.sources ?? []).filter((s) => s.url && `${s.title ?? ""}${s.text ?? ""}`.trim());
-  const lived = input.trustBasis.includes("LIVED_EXPERIENCE");
+  // A note the author wrote is their experience too, when it is among the items.
+  const lived = input.trustBasis.includes("LIVED_EXPERIENCE") || (input.trustBasis.includes("USER_NOTE") && input.memory.length > 0);
   const publicMemory = input.memory.filter((m) => m.disclosure !== "GENERALIZE").map((m) => m.content);
   const blocked: string[] = [];
   const review: string[] = [];

@@ -3,7 +3,7 @@ import { allowedContentModes, hookFor, resolveContentMode } from "./strategy";
 import { generalizedText, leakedSpecifics, redact } from "./generalize";
 import { checkDraft, type DraftCheckInput } from "./check";
 import { measure, readabilityIssues, reflowParagraphs } from "./readability";
-import { buildDraftAuthorContext, evidenceRules } from "./authorContext";
+import { buildDraftAuthorContext, evidenceRules, manualIdeaNote, noteDraftContext } from "./authorContext";
 import { EMPTY_ICP } from "@/services/authorContext";
 
 describe("the hook follows what the idea rests on, not the pillar's name", () => {
@@ -256,6 +256,41 @@ describe("the draft check sources claims to supplied signals", () => {
       sources: [{ title: "Speech model promises faster turn-taking", text: "The release targets phone agents.", url: "https://news.example/s" }],
     });
     expect(r.claims[0]).toMatchObject({ verified: "Y", source_url: "https://news.example/s" });
+    expect(r.claims_ok).toBe("Y");
+  });
+});
+
+describe("an idea the author added themselves", () => {
+  const idea = { source: "MANUAL", gateVerdict: null, rawIdea: "Why we replaced our classifier with Jev", angle: "Minions posts got a median of 85 impressions against 179 for the rest.", why: null };
+
+  it("carries its note as the author's own account", () => {
+    const note = manualIdeaNote(idea)!;
+    expect(note).toContain("85 impressions");
+    const ctx = noteDraftContext(note, EMPTY_ICP, "", null);
+    expect(ctx).toMatchObject({ found: true, trust_basis: ["USER_NOTE"], memory: [{ kind: "NOTE", disclosure: "PUBLIC", text: note }] });
+    expect(ctx.hook.archetype).toBe("POSITION");
+    expect(ctx.allowed_modes).toContain("STORY");
+    expect(evidenceRules(ctx)[0]).toMatch(/author's own note/);
+  });
+
+  it("has no note with only a title, and none once the gate has judged it", () => {
+    expect(manualIdeaNote({ ...idea, angle: " " })).toBeNull();
+    expect(manualIdeaNote({ ...idea, gateVerdict: "PASS" })).toBeNull();
+    expect(manualIdeaNote({ ...idea, source: "HARVEST" })).toBeNull();
+  });
+
+  it("lets the draft use the note's figures and first person", () => {
+    const note = manualIdeaNote(idea)!;
+    const r = checkDraft({
+      hook: "I think the judge should not be the writer.",
+      body: "We saw our posts get a median of 85 impressions against 179 for the rest.",
+      claims: [{ claim_text: "Our posts got a median of 85 impressions against 179 for the rest.", claim_type: "STAT" }],
+      approvedProofs: [],
+      allowCustomerResult: false,
+      trustBasis: ["USER_NOTE"],
+      memory: [{ content: note, disclosure: "PUBLIC", generalizedContent: null }],
+      knownText: [],
+    });
     expect(r.claims_ok).toBe("Y");
   });
 });

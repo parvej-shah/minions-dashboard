@@ -8,17 +8,26 @@ import type { SlopProblem } from "@/lib/drafts/slop";
  */
 export interface HumanizeInput {
   text: string;
-  /** "post" for a LinkedIn/Facebook post, "article" for the blog body (keeps its ## headings). */
-  kind: "post" | "article";
+  /** "post" for a LinkedIn/Facebook post, "article" for the blog body (keeps its ## headings), "hook" for the opening line, "x" for the X post. */
+  kind: PolishKind;
   problems: Pick<SlopProblem, "fix" | "examples">[];
 }
+
+export type PolishKind = "post" | "article" | "hook" | "x";
+
+const KIND_LABEL: Record<PolishKind, string> = {
+  post: "LinkedIn post",
+  article: "article",
+  hook: "post's opening line (one or two sentences)",
+  x: "post for X",
+};
 
 export function renderHumanize(input: HumanizeInput): ChatPayload {
   const problems = input.problems
     .map((p, i) => `${i + 1}. ${p.fix}${p.examples.length ? `\n   Where: ${p.examples.map((e) => `"${e}"`).join(" | ")}` : ""}`)
     .join("\n");
 
-  const system = `You revise a finished ${input.kind === "post" ? "LinkedIn post" : "article"} so it reads like its author wrote it, not like a language model following a template. Fix the problems listed and nothing else.
+  const system = `You revise a finished ${KIND_LABEL[input.kind]} so it reads like its author wrote it, not like a language model following a template. Fix the problems listed and nothing else.
 
 Rules:
 - Keep every fact, number, name, claim, link and hashtag exactly. Add no new fact, number, example, client, result or experience.
