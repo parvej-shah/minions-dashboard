@@ -15,6 +15,7 @@
  */
 
 import { DASHSCOPE_CHAT_URL } from "@/constants/dashscope";
+import { callCostUsd, recordCost } from "@/lib/ai/cost";
 
 /** Models with free quota on the account (QwenCloud › Benefits, 2026-09-24), strongest first. */
 const FREE_LARGE = ["deepseek-v4-pro", "glm-5.2", "deepseek-v3.2"];
@@ -65,6 +66,8 @@ export interface ChainResult {
   model: string;
   /** Models that were unavailable before `model` answered. */
   skipped: { model: string; status: number; error: string }[];
+  /** What the answer cost at list price, in USD (see src/lib/ai/cost.ts). */
+  costUsd: number;
 }
 
 type Fetch = (url: string, init: RequestInit) => Promise<Response>;
@@ -94,7 +97,9 @@ export async function chatWithFallback(
       console.warn(`[llm] ${model} unavailable (${res.status}); falling back to ${chain[i + 1]}`);
       continue;
     }
-    return { status: res.status, body, model, skipped };
+    const costUsd = res.ok ? callCostUsd(model, body) : 0;
+    recordCost(costUsd);
+    return { status: res.status, body, model, skipped, costUsd };
   }
   // Unreachable: the loop always returns on its last model.
   throw new Error("empty model chain");

@@ -25,7 +25,8 @@ const xHashtagCount = (xVariant.match(/#\w+/g) || []).length;
 if (xHashtagCount > 1) errors.push(`X variant has ${xHashtagCount} hashtags; use zero by default and at most one.`);
 
 const liHashtagCount = (liVariant.match(/#\w+/g) || []).length;
-if (liHashtagCount > 2) errors.push(`LinkedIn variant has ${liHashtagCount} hashtags, over the 2 maximum.`);
+if (liHashtagCount > 3) errors.push(`LinkedIn variant has ${liHashtagCount} hashtags, over the 3 maximum.`);
+else if (liHashtagCount < 2) warnings.push(`LinkedIn variant has ${liHashtagCount} hashtags; it should end with 2 to 3.`);
 
 for (const [platform, text] of [['LinkedIn', liVariant], ['Facebook', fbVariant], ['X', xVariant]]) {
   if (fabricatedStoryPattern.test(text)) errors.push(`${platform} variant contains an unverified client-story pattern.`);

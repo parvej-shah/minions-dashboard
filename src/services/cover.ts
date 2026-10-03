@@ -4,6 +4,7 @@ import { coverBrand } from "@/lib/covers/brand";
 import { checkCoverLine, chooseCoverCopy, coverOptions, coverOutOfDate, scoreHeadline, pickQuote, quoteSource, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
 import { askJev } from "@/lib/ai/jev";
 import { chatWithFallback } from "@/lib/ai/modelChain";
+import { withCostMeter } from "@/lib/ai/cost";
 import { renderCoverLine } from "@/lib/prompts/coverLine";
 import { COVER_LAYOUTS, CoverFitError, type CoverLayout, type CoverSpec } from "@/lib/covers/layouts";
 import { renderCoverPng } from "@/lib/covers/render";
@@ -294,9 +295,12 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   // Written once per draft and kept on the card (an empty string records
   // that none beat the headline); written again only when the draft no longer
   // supports it. A reviewer's edit never rewrites it.
+  let lineCostUsd = 0;
   if (!input.edit && (card.cover_line === undefined || (card.cover_line && checkCoverLine(card.cover_line, body)))) {
     const current = chooseCoverCopy({ ...copyInput, card: { ...card, cover_line: undefined } }).headline;
-    const line = await writeCoverLine({ title: asset.title ?? "", post: quoteSource({ body, post: asset.linkedinVariant }), body }, current, lineNotes);
+    const metered = await withCostMeter(() => writeCoverLine({ title: asset.title ?? "", post: quoteSource({ body, post: asset.linkedinVariant }), body }, current, lineNotes));
+    const line = metered.value;
+    lineCostUsd = metered.costUsd;
     if (line !== undefined) {
       card = { ...card, cover_line: line };
       copyInput.card = card;
@@ -405,6 +409,8 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
       heroAttempts: (asset.heroAttempts ?? 0) + 1,
       coverSpec: stored as object,
       content: withCoverLine(asset.content ?? "", asset.title ?? "", url),
+      // The cover line's model call counts toward the post's generation cost.
+      ...(lineCostUsd ? { generationCost: { increment: lineCostUsd } } : {}),
       updatedAt: new Date(),
     },
   });

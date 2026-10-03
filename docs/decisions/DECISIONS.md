@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-10-03 — LinkedIn posts end with 2 to 3 specific hashtags
+
+**Decision:** Every LinkedIn post ends with a line of 2 to 3 hashtags naming its specific topic, industry or audience (like #VoiceAI, #RealEstateTech), never generic tags like #AI or #Leadership. More than 3 fails the variant check; fewer than 2 is flagged for review, not blocked. Facebook and X stay at none unless the brand names one.
+**Why:** The owner asked for them. Once drafts were rewritten to sound like the author (same day), the writer started dropping the optional "max 2" hashtags entirely.
+**Status:** active
+
 ## 2026-10-03 — Jev decides what kind of claim each sentence is
 
 **Decision:** The draft check takes each claim's type (opinion, customer result, statistic, fact, market or product claim) from Jev; the editor model's label is used only when Jev is unavailable. Opinions skip the check, customer results need an experience item or approved proof, the rest need a source.

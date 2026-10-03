@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { chat as qwenChat } from "@/lib/ai/qwen";
+import { withCostMeter } from "@/lib/ai/cost";
 import { deleteFromR2, r2KeyFromUrl, uploadToR2 } from "@/lib/r2";
 import { coverBrand } from "@/lib/covers/brand";
 import type { CoverSpec } from "@/lib/covers/layouts";
@@ -137,7 +138,7 @@ function gate(ctx: Context, plan: CarouselPlan): { deck: Deck | null; errors: st
 }
 
 /** Draws every page into the PDF, uploads it under a fresh folder, and saves the row. */
-async function renderAndStore(ctx: Context, plan: CarouselPlan, deck: Deck, meta: { active: boolean; model: string | null; attempts: number }): Promise<StoredCarousel> {
+async function renderAndStore(ctx: Context, plan: CarouselPlan, deck: Deck, meta: { active: boolean; model: string | null; attempts: number }, costUsd = 0): Promise<StoredCarousel> {
   const pngs: Buffer[] = [];
   for (let i = 0; i <= deck.slides.length; i++) pngs.push(await renderSlidePng(deck, i));
   const pdf = await renderCarouselPdf(deck, pngs);
@@ -154,7 +155,8 @@ async function renderAndStore(ctx: Context, plan: CarouselPlan, deck: Deck, meta
     attempts: meta.attempts,
     rendered_at: new Date().toISOString(),
   };
-  await prisma.asset.update({ where: { id: ctx.assetId }, data: { carouselSpec: carousel as unknown as Prisma.InputJsonValue } });
+  // The model calls that planned it count toward the post's generation cost.
+  await prisma.asset.update({ where: { id: ctx.assetId }, data: { carouselSpec: carousel as unknown as Prisma.InputJsonValue, ...(costUsd ? { generationCost: { increment: costUsd } } : {}) } });
   await dropReplaced(ctx.stored);
   return carousel;
 }
@@ -206,9 +208,9 @@ export async function generateCarousel(assetId: string, { chat = defaultChat }: 
   const ctx = await loadContext(assetId);
   if ("error" in ctx) return { ok: false, error: ctx.error, errors: [] };
   if (ctx.locked) return { ok: false, error: CAROUSEL_LOCKED, errors: [], locked: true };
-  const planned = await planWithModel(ctx, chat);
+  const { value: planned, costUsd } = await withCostMeter(() => planWithModel(ctx, chat));
   if (!planned.ok) return planned;
-  return { ok: true, carousel: await renderAndStore(ctx, planned.plan, planned.deck, { active: true, model: planned.model, attempts: planned.attempts }) };
+  return { ok: true, carousel: await renderAndStore(ctx, planned.plan, planned.deck, { active: true, model: planned.model, attempts: planned.attempts }, costUsd) };
 }
 
 /** A reviewer's edit: the same gates, redrawn with no model call. Keeps whether it is on. */
