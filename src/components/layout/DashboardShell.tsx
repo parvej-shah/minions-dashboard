@@ -2,7 +2,8 @@
 
 import React, { useCallback, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
+import { signInWithGoogle } from "@/lib/googleSignIn";
 import { X } from "lucide-react";
 import AdminAuthModal from "@/components/auth/AdminAuthModal";
 import CommandPalette from "./CommandPalette";
@@ -134,12 +135,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
     }
   }, [needsBrief, router, notify]);
 
-  const handleSignIn = useCallback(async () => {
-    // Mark a pending signup first, as the login page does, or a new Google
-    // account is refused by the signIn callback (AccessDenied).
-    await fetch("/api/onboarding/begin", { method: "POST" });
-    await signIn("google", { callbackUrl: "/onboarding" });
-  }, []);
+  const handleSignIn = useCallback(() => signInWithGoogle("/onboarding"), []);
   const handleSignOut = useCallback(() => signOut({ callbackUrl: "/login" }), []);
 
   const mobileNavProps = {

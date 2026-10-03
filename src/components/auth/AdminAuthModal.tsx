@@ -10,7 +10,7 @@ import {
   KeyRound,
   CheckCircle2,
 } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { signInWithGoogle } from "@/lib/googleSignIn";
 import type { UserRole } from "@/constants/access";
 
 export interface AdminUser {
@@ -46,10 +46,7 @@ export default function AdminAuthModal({
     setIsProcessing(true);
     setAuthError(null);
     try {
-      // Mark a pending signup first, as the login page does, or a new Google
-      // account is refused by the signIn callback (AccessDenied).
-      await fetch("/api/onboarding/begin", { method: "POST" });
-      await signIn("google", { callbackUrl: "/" });
+      await signInWithGoogle("/");
     } catch (err) {
       setAuthError(
         `Google OAuth Error: ${err instanceof Error ? err.message : "Failed to initialize Google OAuth"}`

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { signIn } from "next-auth/react";
+import { signInWithGoogle } from "@/lib/googleSignIn";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -53,13 +53,7 @@ export default function LoginScreen() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      // This page is both sign-in and free-trial signup, so every click marks
-      // a pending signup. Gating it on callbackUrl rejected new accounts that
-      // arrived via the middleware redirect (callbackUrl is then an absolute
-      // URL such as https://host/, e.g. launching the PWA at start_url "/"),
-      // and the signIn callback answered AccessDenied.
-      await fetch("/api/onboarding/begin", { method: "POST" });
-      await signIn("google", { callbackUrl });
+      await signInWithGoogle(callbackUrl);
     } catch (err) {
       console.error("Sign in error:", err);
       setErrorMessage("Couldn't reach Google. Check your connection and try again.");

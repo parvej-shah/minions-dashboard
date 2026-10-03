@@ -5,6 +5,7 @@ import { User, Hash, Users2, Mic, Plus, X, Loader2, Pencil, Sparkles, Check, Pal
 import type { BrandDirectiveItem, BrandCategory, BrandSettings, BrandProfileInput, IcpProfileItem } from "@/types";
 import { useApiResource } from "@/hooks/useApiResource";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
+import { createDirective, deleteDirectiveRequest } from "@/lib/directivesClient";
 import { LoadingState } from "@/components/ui/EmptyState";
 import BrandLookPreview from "@/components/brand/BrandLookPreview";
 import { COVER_ART_STYLES, COVER_ART_STYLE_META } from "@/lib/covers/artStyles";
@@ -109,16 +110,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
         .split(/\s+/)
         .slice(0, 4)
         .join("_") || "directive_rule";
-    const res = await fetch("/api/brand/directives", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ category: cat, key, content, priority: 1, audience_scope: "ALL" }),
-    });
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      throw new Error(body?.error || "Could not add that — please try again.");
-    }
-    const created: BrandDirectiveItem = await res.json();
+    const created = await createDirective({ category: cat, key, content });
     setDirectives((prev) => [created, ...prev]);
   };
 
@@ -126,8 +118,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
     const previous = directives;
     setDirectives(directives.filter((d) => d.id !== id));
     try {
-      const res = await fetch(`/api/brand/directives/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Delete failed");
+      await deleteDirectiveRequest(id);
     } catch {
       setDirectives(previous);
     }
@@ -237,17 +228,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
 
       if (res.directives?.length) {
         for (const dir of res.directives) {
-          const created = await fetch("/api/brand/directives", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              category: dir.category,
-              key: dir.rule_key,
-              content: dir.instruction,
-              priority: dir.priority,
-              audience_scope: "ALL",
-            }),
-          }).then((r) => r.json());
+          const created = await createDirective({ category: dir.category, key: dir.rule_key, content: dir.instruction, priority: dir.priority });
           setDirectives((prev) => [created, ...prev]);
         }
       }

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { IdeaItem } from "@/types";
+import { apiClient, toErrorMessage } from "@/lib/api-client";
 import {
   X,
   Check,
@@ -59,24 +60,15 @@ export default function ScheduleModal({
     setIsSaving(true);
     setError(null);
     try {
-      const res = await fetch(`/api/ideas/${idea.id || idea.ideaId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          scheduled_for: dateTimeToSave ? new Date(dateTimeToSave).toISOString() : null,
-          status: newStatus
-        })
+      const data = await apiClient.patch<{ idea: IdeaItem }>(`/api/ideas/${idea.id || idea.ideaId}`, {
+        scheduled_for: dateTimeToSave ? new Date(dateTimeToSave).toISOString() : null,
+        status: newStatus,
       });
-
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || "Failed to schedule idea");
-      }
 
       onScheduleSuccess(data.idea);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred while scheduling.");
+      setError(toErrorMessage(err, "An error occurred while scheduling."));
       setIsSaving(false);
     }
   };

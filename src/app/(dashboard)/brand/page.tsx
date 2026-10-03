@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState, type ReactNode } from "react";
+import { createDirective, deleteDirectiveRequest } from "@/lib/directivesClient";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mic2, Sparkles, Rss, Users2, Ban } from "lucide-react";
 import { BrandDirectiveItem, BrandTab } from "@/types";
@@ -63,8 +64,7 @@ function BrandStudio() {
     const previous = directives;
     setDirectives(directives.filter((d) => d.id !== id));
     try {
-      const res = await fetch(`/api/brand/directives/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Delete failed");
+      await deleteDirectiveRequest(id);
     } catch {
       setDirectives(previous);
     }
@@ -76,19 +76,7 @@ function BrandStudio() {
     setIsAddingBannedWord(true);
     setBannedWordError(null);
     try {
-      const res = await fetch("/api/brand/directives", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          category: "FORBIDDEN",
-          key: word,
-          content: word,
-          priority: 1,
-          audience_scope: "ALL",
-        }),
-      });
-      if (!res.ok) throw new Error("Could not add that word. Please try again.");
-      const created: BrandDirectiveItem = await res.json();
+      const created = await createDirective({ category: "FORBIDDEN", key: word, content: word });
       setDirectives((prev) => [created, ...prev]);
       setNewBannedWord("");
     } catch {

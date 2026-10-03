@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, User, Building, AlertCircle } from "lucide-react";
 
@@ -24,16 +25,10 @@ function LinkedInSelectContent() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/auth/linkedin/options")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          setError(data.error);
-        } else {
-          setOptions(data.options || []);
-        }
-      })
-      .catch((err) => setError(err.message))
+    apiClient
+      .get<{ options?: LinkedInOption[] }>("/api/auth/linkedin/options")
+      .then((data) => setOptions(data.options ?? []))
+      .catch((err) => setError(toErrorMessage(err, "Could not load your LinkedIn profiles")))
       .finally(() => setLoading(false));
   }, []);
 
@@ -41,20 +36,10 @@ function LinkedInSelectContent() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch("/api/auth/linkedin/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ urn }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        router.push(returnTo);
-      } else {
-        setError(data.error || "Failed to save selection");
-        setSaving(false);
-      }
-    } catch (err: any) {
-      setError(err.message);
+      await apiClient.post("/api/auth/linkedin/save", { urn });
+      router.push(returnTo);
+    } catch (err) {
+      setError(toErrorMessage(err, "Failed to save selection"));
       setSaving(false);
     }
   };

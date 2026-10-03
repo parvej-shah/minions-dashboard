@@ -26,6 +26,7 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { useToast } from "@/hooks/useToast";
 import { useChannelSummary } from "@/hooks/useChannelSummary";
 
+import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { buttonStyles } from "@/components/ui/Button";
 export const dynamic = "force-dynamic";
 
@@ -87,16 +88,12 @@ export default function PublishedPostsPage() {
     if (!unpublishTarget) return;
     setIsUnpublishing(true);
     try {
-      const res = await fetch(`/api/assets/${unpublishTarget.id}?mode=unpublish`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        setFeed(prev => prev.filter(p => p.asset_id !== unpublishTarget.id));
-        showToast(`Post "${unpublishTarget.title}" unpublished and returned to review queue.`);
-        window.dispatchEvent(new Event("minions-counts-updated"));
-      }
+      await apiClient.delete(`/api/assets/${unpublishTarget.id}?mode=unpublish`);
+      setFeed(prev => prev.filter(p => p.asset_id !== unpublishTarget.id));
+      showToast(`Post "${unpublishTarget.title}" unpublished and returned to review queue.`);
+      window.dispatchEvent(new Event("minions-counts-updated"));
     } catch (e) {
-      console.error("Failed to unpublish:", e);
+      showToast(toErrorMessage(e, "Could not unpublish that post."));
     } finally {
       setIsUnpublishing(false);
       setUnpublishTarget(null);
