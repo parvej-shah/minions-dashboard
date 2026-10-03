@@ -320,6 +320,10 @@ model Asset {
   facebookPublishedAt DateTime? @map("facebook_published_at")
   linkedinPostId      String?   @map("linkedin_post_id")
   linkedinPublishedAt DateTime? @map("linkedin_published_at")
+  // A second LinkedIn post of a published draft in the format it did not go
+  // out in: the original's id, and CAROUSEL or COVER. Null on every other draft.
+  followUpOf          String?   @map("follow_up_of")
+  followUpFormat      String?   @map("follow_up_format")
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at")
 
@@ -333,6 +337,8 @@ model Asset {
   // (`POST /rest/v1/assets`), so an application check cannot stop it — a second
   // insert for the same idea has to fail at the database.
   @@unique([ideaId], map: "assets_idea_id_key")
+  // One second post per published draft.
+  @@unique([followUpOf], map: "assets_follow_up_of_key")
   @@index([clientId])
   @@map("assets")
 }

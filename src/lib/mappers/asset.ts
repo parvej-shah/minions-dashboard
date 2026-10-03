@@ -7,6 +7,7 @@ import {
 } from "@/constants/config";
 import type { AssetItem, AssetStatus, ClaimCheckItem, CoverSpecDTO } from "@/types";
 import type { AudienceLane } from "@/types";
+import { linkedinWentAs, type FollowUpFormat } from "@/lib/followUp";
 
 export const assetDTOSelect = {
   id: true, title: true, slug: true, hook: true, coreArgument: true, content: true,
@@ -16,6 +17,7 @@ export const assetDTOSelect = {
   linkedinVariant: true, facebookVariant: true, xVariant: true, version: true,
   generationCost: true, channels: true, scheduledFor: true, publishedAt: true,
   publishedUrls: true, createdAt: true, updatedAt: true,
+  linkedinPublishedAt: true, carouselSpec: true, followUpOf: true, followUpFormat: true,
   claims: {
     select: {
       id: true, claimText: true, claimType: true, source: true, verified: true,
@@ -136,6 +138,9 @@ export function toAssetDTO(
       twitter: asset.xVariant ?? "",
     },
     claims: asset.claims.map(toClaimDTO),
+    linkedin_went_as: linkedinWentAs(asset),
+    follow_up_of: asset.followUpOf,
+    follow_up_format: (asset.followUpFormat as FollowUpFormat | null) ?? null,
     created_at: asset.createdAt.toISOString(),
     updated_at: asset.updatedAt.toISOString(),
   };

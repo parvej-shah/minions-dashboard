@@ -6,6 +6,7 @@ import { parsePostChannels } from "@/constants/postChannels";
 import type { JsonObject } from "@/server/http/body";
 import { badRequest, conflict, notFound } from "@/server/http/errors";
 import { isPublished, refreshCoverIfStale } from "@/services/cover";
+import { followUpNotReady } from "@/lib/followUp";
 import { releaseIdeaForRedraft, removeFromBlog, syncAssetToBlog, type BlogEditFields } from "@/services/publishing";
 
 export const ownedAssetWhere = (clientId: string, idOrSlug: string): Prisma.AssetWhereInput => ({
@@ -40,13 +41,14 @@ export async function getAsset(clientId: string, idOrSlug: string) {
   return toAssetDTO(asset, null, await getTenantBlogDomain(clientId));
 }
 
-function parseChannelsChange(body: JsonObject, owned: { status: string; publishedAt: Date | null }): string[] | undefined {
+function parseChannelsChange(body: JsonObject, owned: { status: string; publishedAt: Date | null; followUpOf: string | null }): string[] | undefined {
   if (body.channels === undefined) return undefined;
   const parsed = body.channels === null ? [] : parsePostChannels(body.channels);
   if (parsed === null || (body.channels !== null && parsed.length === 0)) {
     throw badRequest("channels must name at least one of blog, linkedin, facebook (or be null for the workspace's)");
   }
   if (owned.status === "PUBLISHED" || owned.publishedAt) throw conflict("This post has gone out, so its channels can't change");
+  if (owned.followUpOf) throw conflict("A second post goes to LinkedIn only");
   return parsed;
 }
 
@@ -94,7 +96,7 @@ export async function updateAsset(clientId: string, idOrSlug: string, body: Json
 
   const owned = await prisma.asset.findFirst({
     where: ownedAssetWhere(clientId, idOrSlug),
-    select: { id: true, status: true, publishedAt: true, heroImageUrl: true },
+    select: { id: true, status: true, publishedAt: true, heroImageUrl: true, followUpOf: true, followUpFormat: true, carouselSpec: true },
   });
   if (!owned) throw notFound("Asset not found");
   // An editor open since the cover was redrawn still holds the old cover line,
@@ -111,6 +113,8 @@ export async function updateAsset(clientId: string, idOrSlug: string, body: Json
   // The cover must match what goes out: brought in line with the approved
   // text before a post is released, and after any change to its words.
   const goingOut = body.status === "PUBLISHED" && owned.status !== "PUBLISHED" && !owned.publishedAt;
+  const notReady = goingOut ? followUpNotReady(owned) : null;
+  if (notReady) throw conflict(notReady);
   if (goingOut) await refreshCoverIfStale(owned.id);
   let updated = await prisma.asset.update({
     where: { id: owned.id },

@@ -19,5 +19,6 @@ export function monthlyAssetLimit(plan: PlanDefinition, override: number | null 
 }
 
 export function countAssetsThisMonth(clientId: string, since: Date = startOfMonth()): Promise<number> {
-  return prisma.asset.count({ where: { clientId, createdAt: { gte: since } } });
+  // A second LinkedIn post of a published draft is not a new draft.
+  return prisma.asset.count({ where: { clientId, createdAt: { gte: since }, followUpOf: null } });
 }

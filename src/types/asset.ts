@@ -96,6 +96,11 @@ export interface AssetItem {
   body_content: string;
   variants: SocialVariants;
   claims: ClaimCheckItem[];
+  /** What LinkedIn got with this draft, its carousel or its cover; null until it went to LinkedIn. */
+  linkedin_went_as: "CAROUSEL" | "COVER" | null;
+  /** A second LinkedIn post: the original draft's id, and the format it shares. Null on every other draft. */
+  follow_up_of: string | null;
+  follow_up_format: "CAROUSEL" | "COVER" | null;
   created_at: string;
   updated_at: string;
 }

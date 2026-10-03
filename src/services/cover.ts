@@ -454,11 +454,12 @@ export function isPublished(asset: { status: string; publishedAt: Date | null; l
  * which would leave the old cover in R2 forever. Redraws only happen before
  * publishing, so nothing public points at the old file and it is deleted once the
  * new one is saved. Only our own drawn covers are touched, never an uploaded
- * photo or a paid AI image. A failed delete never fails the redraw.
+ * photo or a paid AI image, and only this draft's own file: a second post
+ * starts out sharing the original's cover. A failed delete never fails the redraw.
  */
 async function dropReplacedCover(assetId: string, oldUrl: string | null, newUrl: string): Promise<void> {
   const key = r2KeyFromUrl(oldUrl);
-  if (!key || !key.startsWith("covers/") || oldUrl === newUrl) return;
+  if (!key || !key.startsWith("covers/") || !key.includes(`/${assetId}-`) || oldUrl === newUrl) return;
   try {
     await deleteFromR2(key);
   } catch (e) {

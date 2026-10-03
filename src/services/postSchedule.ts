@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { followUpNotReady } from "@/lib/followUp";
 import { ownedAssetWhere } from "@/services/assets";
 import { checkScheduleTime } from "@/lib/postTime";
 import { syncAssetToBlog } from "@/services/publishing";
@@ -28,7 +29,7 @@ export async function schedulePost(clientId: string, assetId: string, date: stri
   const [asset, client] = await Promise.all([
     prisma.asset.findFirst({
       where: ownedAssetWhere(clientId, assetId),
-      select: { id: true, slug: true, status: true, publishedAt: true, linkedinPublishedAt: true, facebookPublishedAt: true },
+      select: { id: true, slug: true, status: true, publishedAt: true, linkedinPublishedAt: true, facebookPublishedAt: true, followUpFormat: true, carouselSpec: true },
     }),
     prisma.client.findUnique({ where: { id: clientId }, select: { timezone: true } }),
   ]);
@@ -36,6 +37,8 @@ export async function schedulePost(clientId: string, assetId: string, date: stri
   if (asset.status === "PUBLISHED" || asset.publishedAt || asset.linkedinPublishedAt || asset.facebookPublishedAt || (await liveOnBlog(clientId, asset))) {
     return { ok: false, error: "This post is already out, so it can't be scheduled.", status: 409 };
   }
+  const notReady = followUpNotReady(asset);
+  if (notReady) return { ok: false, error: notReady, status: 409 };
 
   const check = checkScheduleTime(date, time, client?.timezone ?? DEFAULT_TIMEZONE, now);
   if (!check.ok) return { ok: false, error: check.error, status: 400 };

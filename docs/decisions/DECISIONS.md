@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-10-03 — A published draft can go to LinkedIn again in the other format
+
+**Decision:** After a draft goes out on LinkedIn with its cover, the reviewer can post its carousel as a second LinkedIn post, and after a carousel post, its cover. The second post is a new draft: LinkedIn only, new text that does not open like the first post, same review and scheduling as any draft, one per published draft, and it does not count toward the monthly draft limit. The first post is never changed.
+**Why:** LinkedIn cannot swap the media on a live post, and republishing duplicated the whole post. A reworded second post a few days later reaches people the first missed without reading as a repost.
+**Status:** active
+
 ## 2026-10-03 — Remove repeated Mission Control pipeline cards
 
 **Decision:** Remove the Ideas, Drafting, Review and Published mini-card strip below the summary cards.

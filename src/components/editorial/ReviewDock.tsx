@@ -10,6 +10,7 @@ import {
   EyeOff,
   Globe,
   RefreshCw,
+  Repeat2,
   Trash2,
   Undo2,
 } from "lucide-react";
@@ -40,6 +41,9 @@ export interface ReviewDockProps {
    *  and then swap to generic copy once the real channel summary lands. */
   blogEnabled?: boolean;
   blogHost?: string;
+  /** Drafts a second LinkedIn post of this published draft in the format it did not use. */
+  onPostAgain: () => void;
+  isPostingAgain: boolean;
 }
 
 /**
@@ -67,6 +71,8 @@ export default function ReviewDock({
   setDeleteConfirmOpen,
   blogEnabled = true,
   blogHost = "",
+  onPostAgain,
+  isPostingAgain,
 }: ReviewDockProps) {
   const [picking, setPicking] = useState(false);
   const [pickingFor, setPickingFor] = useState<string | null>(null);
@@ -100,7 +106,11 @@ export default function ReviewDock({
               </span>
             )}
           </div>
-          <p className="-mt-2 text-xs leading-relaxed text-muted">Check the post, choose where it goes, then publish now or schedule it.</p>
+          <p className="-mt-2 text-xs leading-relaxed text-muted">
+            {activeAsset.follow_up_of
+              ? `A second LinkedIn post of a published draft, with its ${activeAsset.follow_up_format === "CAROUSEL" ? "carousel" : "cover"}. It goes to LinkedIn only. Schedule it a few days after the first.`
+              : "Check the post, choose where it goes, then publish now or schedule it."}
+          </p>
 
           {/* Main Publish Decision & Live Visibility Hub */}
           {activeAsset.status === "PUBLISHED" ? (
@@ -126,6 +136,29 @@ export default function ReviewDock({
                   <span>View Live Blog Post</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
+              )}
+
+              {/* The format LinkedIn did not get goes out as a second post, never by changing the first. */}
+              {activeAsset.linkedin_went_as && !activeAsset.follow_up_of && (
+                <div className="space-y-1">
+                  <button
+                    onClick={onPostAgain}
+                    disabled={isPostingAgain}
+                    className="w-full bg-surface-2 hover:bg-surface-3 border border-brand/40 hover:border-brand text-ink text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
+                  >
+                    {isPostingAgain ? <RefreshCw className="w-3.5 h-3.5 animate-spin text-brand" /> : <Repeat2 className="w-3.5 h-3.5 text-brand" />}
+                    <span>
+                      {isPostingAgain
+                        ? "Writing the second post…"
+                        : activeAsset.linkedin_went_as === "COVER"
+                          ? "Post the carousel on LinkedIn too"
+                          : "Post the cover on LinkedIn too"}
+                    </span>
+                  </button>
+                  <p className="text-[11px] leading-relaxed text-subtle">
+                    Drafts a second LinkedIn post with new text, for your review. Nothing goes out until you approve it.
+                  </p>
+                </div>
               )}
 
               {/* 1-Click Reversible Unpublish Toggle */}
@@ -162,13 +195,15 @@ export default function ReviewDock({
                 </p>
               </div>
 
-              <PostChannels
-                override={activeAsset.channels}
-                workspace={workspaceChannels}
-                disabled={publishState === "pending"}
-                onChange={onSetChannels}
-                onMessage={onMessage}
-              />
+              {!activeAsset.follow_up_of && (
+                <PostChannels
+                  override={activeAsset.channels}
+                  workspace={workspaceChannels}
+                  disabled={publishState === "pending"}
+                  onChange={onSetChannels}
+                  onMessage={onMessage}
+                />
+              )}
 
               {picking ? (
                 <SchedulePicker
@@ -264,7 +299,7 @@ export default function ReviewDock({
                 </div>
               )}
 
-              {!alreadyLive && (<PostChannels
+              {!alreadyLive && !activeAsset.follow_up_of && (<PostChannels
                 override={activeAsset.channels}
                 workspace={workspaceChannels}
                 disabled={publishState === "pending"}

@@ -58,6 +58,10 @@ export interface EditorialDraftState {
   /** Re-draws the active draft's cover in code, optionally with a reviewer's edit. Returns a toast message. */
   isRenderingCover: boolean;
   rerenderCover: (edit?: CoverEditInput) => Promise<string>;
+
+  /** Drafts a second LinkedIn post of the published draft in the format it did not use, and opens it. */
+  isPostingAgain: boolean;
+  postAgain: () => Promise<string>;
 }
 
 export interface CoverEditInput {
@@ -475,6 +479,25 @@ export function useEditorialDraft(
     [activeAsset, isRenderingCover]
   );
 
+  const [isPostingAgain, setIsPostingAgain] = useState(false);
+  const postAgain = useCallback(async (): Promise<string> => {
+    if (!activeAsset || isPostingAgain) return "";
+    setIsPostingAgain(true);
+    try {
+      const res = await apiClient.post<{ created: boolean; asset: AssetItem }>(`/api/assets/${activeAsset.id}/follow-up`);
+      setAssets((prev) => [res.asset, ...prev.filter((a) => a.id !== res.asset.id)]);
+      setSelectedAssetId(res.asset.id);
+      window.dispatchEvent(new Event("minions-counts-updated"));
+      const what = res.asset.follow_up_format === "CAROUSEL" ? "carousel" : "cover";
+      if (!res.created) return `This draft already has a second post with the ${what}. It is open now.`;
+      return `Second post drafted with the ${what}. Review it, then schedule it a few days out.`;
+    } catch (err) {
+      return toErrorMessage(err, "Could not draft the second post");
+    } finally {
+      setIsPostingAgain(false);
+    }
+  }, [activeAsset, isPostingAgain]);
+
   return {
     assets,
     isLoading,
@@ -515,5 +538,8 @@ export function useEditorialDraft(
 
     isRenderingCover,
     rerenderCover,
+
+    isPostingAgain,
+    postAgain,
   };
 }

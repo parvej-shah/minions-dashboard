@@ -157,7 +157,8 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
         </div>
       ) : (
         <>
-          {!locked && (
+          {/* A second post that exists to share the carousel has no choice to make. */}
+          {!locked && activeAsset.follow_up_format !== "CAROUSEL" && (
             <div className="rounded-2xl border-2 border-brand/40 bg-brand/5 p-4 sm:p-5">
               <h3 className="text-base font-extrabold text-ink">What should publish on LinkedIn?</h3>
               <p className="mt-1 text-sm text-muted">Choose the swipeable carousel or a single cover image.</p>

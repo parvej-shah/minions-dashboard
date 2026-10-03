@@ -25,6 +25,8 @@ export interface CarouselInput {
   banned: string[];
   /** Claims the draft check could not verify: never stated as fact, never with their figure. */
   unverified?: string[];
+  /** A second post of a draft already on LinkedIn: what that first post said, which the caption must not echo. */
+  posted_post?: string;
   /** The previous attempt's gate failures, for the one retry. */
   feedback?: string[];
 }
@@ -68,7 +70,7 @@ ${input.own_account || input.memory.length ? `- This post is the author's own ac
 ` : ""}- Use the names the post uses: a tool, product, company or person the post names keeps its name on the slides, never swapped for a generic word ("Jev", not "a classifier").
 - Cover headline: ${COVER_HEADLINE_WORDS.min}-${COVER_HEADLINE_WORDS.max} words, sentence case, the deck's title: someone scrolling past must know at once what it is about. Name the specific things the post names and what happened or why${input.own_account || input.memory.length ? "; when the post is the author's own account, title it as their story (e.g. \"Why we moved from regex to Jev\")" : ""}. Never an abstract maxim or a bare topic label. "emphasis" is the one headline word it turns on. "kicker": one sentence, max 16 words, what the reader gets by swiping.
 - "label": 2-4 words naming the topic, shown small on every slide.
-- "caption": the post text above the document, ${CAPTION_WORDS.min}-${CAPTION_WORDS.max} words. Open with the post's hook, lightly sharpened, then one or two short lines pointing into the carousel. Short paragraphs separated by a blank line. At most 2 hashtags at the end. No "comment X below", no "follow for more".
+- "caption": the post text above the document, ${CAPTION_WORDS.min}-${CAPTION_WORDS.max} words. ${input.posted_post ? "Open with a new first line, not the post's hook" : "Open with the post's hook, lightly sharpened"}, then one or two short lines pointing into the carousel. Short paragraphs separated by a blank line. At most 2 hashtags at the end. No "comment X below", no "follow for more".${input.posted_post ? " This carousel goes out days after an EARLIER POST of the same draft (below): the caption repeats none of its sentences and never refers to it." : ""}
 - "document_title": the title LinkedIn shows on the document, max 10 words.
 - Never use em dashes or en dashes. No markdown. Never sound like a guru; no hype.
 ${input.banned.length ? `- Never use these phrases: ${input.banned.join("; ")}.\n` : ""}${input.evidence_rules.map((r) => `- ${r}`).join("\n")}
@@ -99,7 +101,7 @@ ${fenceSafe(input.body)}
 UNVERIFIED CLAIMS:
 ${input.unverified?.length ? fenceSafe(input.unverified.map((c) => `- ${c}`).join("\n")) : "(none)"}
 
-THE AUTHOR'S EXPERIENCE:
+${input.posted_post ? `EARLIER POST:\n${fenceSafe(input.posted_post)}\n\n` : ""}THE AUTHOR'S EXPERIENCE:
 ${input.memory.length ? fenceSafe(input.memory.map((m) => `- ${m}`).join("\n")) : "(none: use no QUOTE slide)"}
 ${DATA_CLOSE}${input.feedback?.length ? `
 

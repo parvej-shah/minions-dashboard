@@ -42,6 +42,8 @@ export type CarouselResult =
   | { ok: false; error: string; errors: string[]; locked?: boolean };
 
 export const CAROUSEL_LOCKED = "This draft is published, so its carousel stays as it went out.";
+const COVER_POST_NO_CAROUSEL = "This post shares the cover. The carousel already went out with the first post.";
+const CAROUSEL_POST_STAYS_ON = "This post is the carousel's, so the carousel stays on.";
 const MAX_ATTEMPTS = 3;
 /** The route may run 300s; a retry starts only this soon after the first call, so it can finish. */
 const RETRY_CUTOFF_MS = 120_000;
@@ -55,6 +57,8 @@ const defaultChat: Chat = (payload) => qwenChat(payload);
 interface Context {
   assetId: string;
   clientId: string;
+  /** CAROUSEL: a second post that exists to share the carousel. COVER: one that shares the cover, so it has none. */
+  followUpFormat: string | null;
   locked: boolean;
   stored: StoredCarousel | null;
   input: CarouselInput;
@@ -71,16 +75,21 @@ async function loadContext(assetId: string): Promise<Context | { error: string }
     where: { id: assetId },
     select: {
       id: true, clientId: true, ideaId: true, slug: true, title: true, hook: true, coreArgument: true, content: true, coverSpec: true, carouselSpec: true,
-      status: true, publishedAt: true, linkedinPublishedAt: true, facebookPublishedAt: true,
+      status: true, publishedAt: true, linkedinPublishedAt: true, facebookPublishedAt: true, followUpOf: true, followUpFormat: true,
     },
   });
   if (!asset?.clientId) return { error: `Asset ${assetId} not found` };
   const clientId = asset.clientId;
+  // A second post has no idea of its own: it is its original's, and must not echo what that post said.
+  const original = asset.followUpOf
+    ? await prisma.asset.findFirst({ where: { id: asset.followUpOf, clientId }, select: { ideaId: true, linkedinVariant: true } })
+    : null;
+  const ideaId = asset.ideaId ?? original?.ideaId ?? null;
 
   const [profile, icp, idea, banned, claims, onBlog] = await Promise.all([
     prisma.brandProfile.findUnique({ where: { clientId } }),
     prisma.icpProfile.findUnique({ where: { clientId } }),
-    asset.ideaId ? prisma.idea.findFirst({ where: { id: asset.ideaId, clientId }, select: { memoryIds: true, trustBasis: true, source: true, gateVerdict: true, rawIdea: true, angle: true, why: true } }) : null,
+    ideaId ? prisma.idea.findFirst({ where: { id: ideaId, clientId }, select: { memoryIds: true, trustBasis: true, source: true, gateVerdict: true, rawIdea: true, angle: true, why: true } }) : null,
     tenantBannedPhrases(clientId),
     prisma.claim.findMany({ where: { assetId: asset.id, verified: { not: "Y" } }, select: { claimText: true } }),
     prisma.blog.findFirst({ where: { clientId, OR: [{ assetId: asset.id }, { slug: asset.slug }] }, select: { slug: true } }),
@@ -108,6 +117,7 @@ async function loadContext(assetId: string): Promise<Context | { error: string }
     evidence_rules: evidenceRules({ trust_basis: idea?.trustBasis ?? [], memory: memory.map((text) => ({ kind: "", text, disclosure: "PUBLIC" as const })) }),
     banned,
     unverified,
+    ...(original?.linkedinVariant ? { posted_post: original.linkedinVariant } : {}),
   };
   const sources: PlanSources = { texts: [body, asset.hook ?? "", asset.coreArgument ?? "", asset.title], memory, banned, unverified, names: namesIn(asset.title).filter((n) => body.includes(n)) };
 
@@ -119,6 +129,7 @@ async function loadContext(assetId: string): Promise<Context | { error: string }
   return {
     assetId: asset.id,
     clientId,
+    followUpFormat: asset.followUpFormat,
     locked: Boolean(onBlog) || isPublished(asset),
     stored: (asset.carouselSpec ?? null) as StoredCarousel | null,
     input,
@@ -157,16 +168,20 @@ async function renderAndStore(ctx: Context, plan: CarouselPlan, deck: Deck, meta
   };
   // The model calls that planned it count toward the post's generation cost.
   await prisma.asset.update({ where: { id: ctx.assetId }, data: { carouselSpec: carousel as unknown as Prisma.InputJsonValue, ...(costUsd ? { generationCost: { increment: costUsd } } : {}) } });
-  await dropReplaced(ctx.stored);
+  await dropReplaced(ctx.assetId, ctx.stored);
   return carousel;
 }
 
-/** The files of the carousel just replaced. Only before publishing, so nothing public points at them. A failed delete never fails the save. */
-async function dropReplaced(old: StoredCarousel | null): Promise<void> {
+/**
+ * The files of the carousel just replaced. Only before publishing, so nothing
+ * public points at them, and only this draft's own: a second post starts out
+ * sharing the original's carousel. A failed delete never fails the save.
+ */
+async function dropReplaced(assetId: string, old: StoredCarousel | null): Promise<void> {
   if (!old) return;
   for (const url of [old.pdf_url, ...(old.pages ?? [])]) {
     const key = r2KeyFromUrl(url);
-    if (!key?.startsWith("carousels/")) continue;
+    if (!key?.startsWith("carousels/") || !key.includes(`/${assetId}-`)) continue;
     await deleteFromR2(key).catch((e) => console.warn(`[carousel] could not delete ${key}:`, e));
   }
 }
@@ -208,6 +223,7 @@ export async function generateCarousel(assetId: string, { chat = defaultChat }: 
   const ctx = await loadContext(assetId);
   if ("error" in ctx) return { ok: false, error: ctx.error, errors: [] };
   if (ctx.locked) return { ok: false, error: CAROUSEL_LOCKED, errors: [], locked: true };
+  if (ctx.followUpFormat === "COVER") return { ok: false, error: COVER_POST_NO_CAROUSEL, errors: [], locked: true };
   const { value: planned, costUsd } = await withCostMeter(() => planWithModel(ctx, chat));
   if (!planned.ok) return planned;
   return { ok: true, carousel: await renderAndStore(ctx, planned.plan, planned.deck, { active: true, model: planned.model, attempts: planned.attempts }, costUsd) };
@@ -230,6 +246,7 @@ export async function setCarouselActive(assetId: string, active: boolean): Promi
   if ("error" in ctx) return { ok: false, error: ctx.error, errors: [] };
   if (ctx.locked) return { ok: false, error: CAROUSEL_LOCKED, errors: [], locked: true };
   if (!ctx.stored) return { ok: false, error: "This draft has no carousel yet.", errors: [] };
+  if (ctx.followUpFormat === "CAROUSEL" && !active) return { ok: false, error: CAROUSEL_POST_STAYS_ON, errors: [], locked: true };
   const carousel = { ...ctx.stored, active };
   await prisma.asset.update({ where: { id: ctx.assetId }, data: { carouselSpec: carousel as unknown as Prisma.InputJsonValue } });
   return { ok: true, carousel };

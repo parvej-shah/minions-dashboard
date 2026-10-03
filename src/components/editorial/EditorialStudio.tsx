@@ -323,7 +323,7 @@ export default function EditorialStudio({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-8 space-y-6">
-          {enabledSocialTabs.LINKEDIN && <CarouselCard key={activeAsset.id} activeAsset={activeAsset} onMessage={toast.show} />}
+          {enabledSocialTabs.LINKEDIN && activeAsset.follow_up_format !== "COVER" && <CarouselCard key={activeAsset.id} activeAsset={activeAsset} onMessage={toast.show} />}
           {socialVariants}
 
           {/* Shown for every channel: LinkedIn posts carry the cover too. */}
@@ -381,6 +381,8 @@ export default function EditorialStudio({
               setDeleteConfirmOpen={setDeleteConfirmOpen}
               blogEnabled={blogEnabled}
               blogHost={(normalizeDomain(studioBrand?.company_domain) ?? "").replace(/^https?:\/\//, "")}
+              onPostAgain={() => void draft.postAgain().then((m) => m && toast.show(m))}
+              isPostingAgain={draft.isPostingAgain}
             />
           </div>
         </div>
