@@ -24,6 +24,7 @@ import type { StoryPrompt } from "@/lib/storyBank";
 import type { CheckedCandidate } from "@/services/pulse";
 import type { StoryExtractDTO } from "@/services/storyBank";
 import { chunky } from "./chunky";
+import Confetti from "@/components/ui/Confetti";
 
 const KIND_ICON: Record<MemoryKind, LucideIcon> = {
   STORY: BookOpen,
@@ -490,20 +491,6 @@ function NoteCard({ note, solo, onChange }: { note: Note; solo: boolean; onChang
   );
 }
 
-/** Deterministic confetti: same burst every time, no randomness in render. */
-const CONFETTI = Array.from({ length: 28 }, (_, i) => {
-  const angle = (i / 28) * Math.PI * 2;
-  const dist = 140 + ((i * 37) % 90);
-  return {
-    dx: `${Math.round(Math.cos(angle) * dist)}px`,
-    dy: `${Math.round(Math.sin(angle) * dist * 0.8 + 60)}px`,
-    rot: `${(i * 97) % 360}deg`,
-    color: ["#00C9A7", "#FF9F43", "#F59E0B", "#60A5FA", "#F472B6"][i % 5],
-    delay: `${(i % 6) * 30}ms`,
-    round: i % 3 === 0,
-  };
-});
-
 function Celebration({
   saved,
   streak,
@@ -521,15 +508,7 @@ function Celebration({
     <>
       <main className="flex flex-1 flex-col items-center justify-center overflow-y-auto px-4 pb-32 text-center">
         <div className="relative">
-          {saved > 0 &&
-            CONFETTI.map((c, i) => (
-              <span
-                key={i}
-                aria-hidden="true"
-                className={`story-confetti absolute left-1/2 top-1/2 h-2.5 w-2.5 ${c.round ? "rounded-full" : "rounded-sm"}`}
-                style={{ background: c.color, animationDelay: c.delay, ["--dx" as string]: c.dx, ["--dy" as string]: c.dy, ["--rot" as string]: c.rot }}
-              />
-            ))}
+          {saved > 0 && <Confetti burst="big" />}
           <span className="story-pop relative flex h-24 w-24 items-center justify-center rounded-full border-b-8 border-brand-edge bg-brand text-brand-ink">
             <Sparkles className="h-12 w-12" strokeWidth={2.25} />
           </span>

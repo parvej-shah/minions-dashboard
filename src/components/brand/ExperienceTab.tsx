@@ -32,9 +32,7 @@ import {
 import type { IcpProfileItem, MemoryCheckResult, MemoryItem } from "@/types";
 
 import { buttonStyles } from "@/components/ui/Button";
-const inputClass =
-  "w-full rounded-lg bg-canvas border border-line px-3 py-2 text-sm text-ink placeholder:text-[#475569] focus:outline-none focus:border-brand";
-const cardClass = "p-6 rounded-2xl bg-surface border border-line space-y-4 shadow-sm";
+import { inputClass, sectionClass } from "@/components/ui/fieldStyles";
 
 type IcpListKey = "pains" | "decisions" | "questions" | "buying_triggers" | "vocabulary";
 
@@ -176,7 +174,7 @@ function IcpEditor({ onChange }: { onChange: () => void }) {
   if (!icp) return error ? <ErrorLine text={error} /> : <LoadingState />;
 
   return (
-    <div className={cardClass}>
+    <div className={sectionClass}>
       <div>
         <h3 className="text-base font-bold text-ink flex items-center gap-2">
           <Target className="w-4 h-4 text-brand" />
@@ -318,7 +316,7 @@ function MemorySection({ onChange }: { onChange: () => void }) {
   const grouped = MEMORY_KINDS.map((kind) => ({ kind, rows: items.filter((i) => i.kind === kind) })).filter((g) => g.rows.length);
 
   return (
-    <div className={cardClass}>
+    <div className={sectionClass}>
       <div>
         <h3 className="text-base font-bold text-ink flex items-center gap-2">
           <BookOpen className="w-4 h-4 text-brand" />

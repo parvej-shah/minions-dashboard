@@ -13,8 +13,7 @@ import {
 } from "@/constants/ideaSources";
 
 import { buttonStyles } from "@/components/ui/Button";
-const inputClass =
-  "w-full rounded-lg bg-canvas border border-line px-3 py-2 text-sm text-ink placeholder:text-[#475569] focus:outline-none focus:border-brand";
+import { inputClass } from "@/components/ui/fieldStyles";
 
 /**
  * Where the idea harvester looks for market signals, per tenant.

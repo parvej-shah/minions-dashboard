@@ -246,30 +246,3 @@ export function useEnterToContinue(enabled: boolean, onContinue: () => void) {
     return () => window.removeEventListener("keydown", onKey);
   }, [enabled, onContinue]);
 }
-
-const CONFETTI = [
-  { dx: "-120px", dy: "-90px", rot: "220deg", color: "#00C9A7", delay: "0ms" },
-  { dx: "110px", dy: "-100px", rot: "-180deg", color: "#F59E0B", delay: "40ms", round: true },
-  { dx: "-150px", dy: "10px", rot: "160deg", color: "#FF6B4A", delay: "80ms" },
-  { dx: "140px", dy: "20px", rot: "-240deg", color: "#60A5FA", delay: "20ms", round: true },
-  { dx: "-60px", dy: "-140px", rot: "300deg", color: "#F59E0B", delay: "60ms" },
-  { dx: "70px", dy: "-150px", rot: "-120deg", color: "#00C9A7", delay: "100ms", round: true },
-  { dx: "-100px", dy: "90px", rot: "200deg", color: "#60A5FA", delay: "120ms" },
-  { dx: "100px", dy: "100px", rot: "-200deg", color: "#FF6B4A", delay: "90ms", round: true },
-];
-
-/** A burst of confetti from the centre of its (relative) parent, for a lesson's reward moment. */
-export function Confetti() {
-  return (
-    <>
-      {CONFETTI.map((c, i) => (
-        <span
-          key={i}
-          aria-hidden="true"
-          className={`story-confetti absolute left-1/2 top-1/2 h-2.5 w-2.5 ${c.round ? "rounded-full" : "rounded-sm"}`}
-          style={{ background: c.color, animationDelay: c.delay, ["--dx" as string]: c.dx, ["--dy" as string]: c.dy, ["--rot" as string]: c.rot }}
-        />
-      ))}
-    </>
-  );
-}

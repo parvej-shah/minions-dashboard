@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Users } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { LoadingState } from "@/components/ui/EmptyState";
+import { formatDate } from "@/utils/date";
 
 interface UserRow {
   id: string;
@@ -87,7 +88,7 @@ export default function PlatformAdminUsersPage() {
                     )}
                   </td>
                   <td className="p-3 text-right font-mono text-muted">
-                    {new Date(u.created_at).toLocaleDateString()}
+                    {formatDate(u.created_at)}
                   </td>
                 </tr>
               ))}

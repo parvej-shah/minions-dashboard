@@ -34,3 +34,18 @@ export function formatTime(dateString: string | null | undefined): string {
 
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
+
+/** "Aug 14, 2026, 02:05 PM" */
+export function formatDateTime(dateString: string | null | undefined): string {
+  if (!dateString) return "—";
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}

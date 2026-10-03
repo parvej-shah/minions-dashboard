@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { buttonStyles } from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
 interface ScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -78,9 +79,8 @@ export default function ScheduleModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-surface border border-line ring-1 ring-white/10 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150 text-ink">
-        
+    <Modal isOpen onClose={onClose} maxWidthClass="max-w-lg" hideCloseButton>
+      <div className="text-ink">
         {/* Header */}
         <div className="p-5 border-b border-line flex items-start justify-between gap-4 bg-canvas/60">
           <div className="space-y-1">
@@ -213,6 +213,6 @@ export default function ScheduleModal({
         </div>
 
       </div>
-    </div>
+    </Modal>
   );
 }

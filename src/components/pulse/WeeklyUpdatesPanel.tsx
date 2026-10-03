@@ -7,8 +7,8 @@ import { Skeleton, SkeletonGroup, SkeletonText } from "@/components/ui/Skeleton"
 import { MEMORY_KIND_META, type MemoryKind } from "@/constants/contentLanes";
 import { PULSE_DAYS } from "@/lib/pulse/week";
 import type { PulseDTO, PulseHistoryItem } from "@/services/pulse";
+import { sectionClass } from "@/components/ui/fieldStyles";
 
-const cardClass = "p-6 rounded-2xl bg-surface border border-line space-y-4 shadow-sm";
 const selectClass = "rounded-lg border border-line bg-[#0B1016] px-2.5 py-1.5 text-xs text-ink cursor-pointer";
 
 function timezones(current: string): string[] {
@@ -56,7 +56,7 @@ export default function WeeklyUpdatesPanel() {
   if (!pulse) {
     if (error) return <p className="text-xs text-red-400">{error}</p>;
     return (
-      <SkeletonGroup label="Loading weekly updates" className={cardClass}>
+      <SkeletonGroup label="Loading weekly updates" className={sectionClass}>
         <Skeleton className="h-5 w-40" />
         <SkeletonText lines={2} />
         <Skeleton className="h-10 w-full" />
@@ -66,7 +66,7 @@ export default function WeeklyUpdatesPanel() {
   const s = pulse.settings;
 
   return (
-    <div className={cardClass}>
+    <div className={sectionClass}>
       <div>
         <h3 className="text-base font-bold text-ink flex items-center gap-2">
           <CalendarClock className="w-4 h-4 text-brand" />

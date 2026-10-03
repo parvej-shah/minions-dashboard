@@ -11,6 +11,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { signInWithGoogle } from "@/lib/googleSignIn";
+import Modal from "@/components/ui/Modal";
 import type { UserRole } from "@/constants/access";
 
 export interface AdminUser {
@@ -27,7 +28,6 @@ interface AdminAuthProps {
   isOpen: boolean;
   onClose: () => void;
   currentUser: AdminUser | null;
-  onLogin: (user: AdminUser) => void;
   onLogout: () => void;
 }
 
@@ -56,8 +56,8 @@ export default function AdminAuthModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-surface text-[#FFFFFF] w-full max-w-lg rounded-2xl border border-[#1f2b37] shadow-2xl overflow-hidden space-y-0">
+    <Modal isOpen onClose={onClose} maxWidthClass="max-w-lg" hideCloseButton>
+      <div className="text-white">
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-[#1f2b37] flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -223,6 +223,6 @@ export default function AdminAuthModal({
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

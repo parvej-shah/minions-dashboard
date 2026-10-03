@@ -229,7 +229,6 @@ export default function DashboardShell({ children }: DashboardShellProps) {
               }
             : null
         }
-        onLogin={() => setAuthModalOpen(false)}
         onLogout={() => {
           setAuthModalOpen(false);
           handleSignOut();

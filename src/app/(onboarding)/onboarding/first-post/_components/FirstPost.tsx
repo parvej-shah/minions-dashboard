@@ -10,7 +10,8 @@ import { plainReviewNotes } from "@/lib/drafts/plainNotes";
 import { buttonStyles } from "@/components/ui/Button";
 import LinkedInPostPreview from "@/components/editorial/LinkedInPostPreview";
 import DraftChecks from "@/components/editorial/DraftChecks";
-import { Confetti, LessonFooter, LessonHeader, lessonInput } from "../../setup/_components/lesson";
+import Confetti from "@/components/ui/Confetti";
+import { LessonFooter, LessonHeader, lessonInput } from "../../setup/_components/lesson";
 import { WaitingSkeleton } from "./FirstPostSkeleton";
 
 interface FirstPostStatus {

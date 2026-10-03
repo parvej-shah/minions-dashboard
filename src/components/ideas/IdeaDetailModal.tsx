@@ -21,6 +21,8 @@ import type {
 } from "@/types";
 
 import { buttonStyles } from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
+import { formatDateTime } from "@/utils/date";
 export interface IdeaDetailModalProps {
   idea: IdeaItem;
   claimingIds: Set<string>;
@@ -42,8 +44,7 @@ export default function IdeaDetailModal({
   onRequestDelete,
 }: IdeaDetailModalProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-md sm:items-center sm:p-4 animate-in fade-in duration-200">
-      <div className="flex h-[100dvh] w-full max-w-2xl flex-col overflow-hidden border-line bg-surface shadow-2xl sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:border sm:ring-1 sm:ring-white/10 animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150">
+    <Modal isOpen onClose={onClose} variant="sheet" maxWidthClass="max-w-2xl" hideCloseButton>
         {/* Modal Header */}
         <div className="flex shrink-0 items-start justify-between gap-3 border-b border-line bg-canvas/50 px-4 py-4 sm:p-6">
           <div className="min-w-0 space-y-2">
@@ -73,7 +74,7 @@ export default function IdeaDetailModal({
             </div>
             <div className="flex items-center gap-2 text-[11px] text-subtle sm:text-xs">
               <Clock className="w-3.5 h-3.5" />
-              <span>Harvested {new Date(detailIdea.created_at).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+              <span>Harvested {formatDateTime(detailIdea.created_at)}</span>
             </div>
           </div>
 
@@ -350,7 +351,6 @@ export default function IdeaDetailModal({
             )}
           </div>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

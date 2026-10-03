@@ -8,6 +8,7 @@ import { LoadingState } from "@/components/ui/EmptyState";
 import EmptyState from "@/components/ui/EmptyState";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { useToast } from "@/hooks/useToast";
+import { formatDate, formatDateTime } from "@/utils/date";
 
 interface TenantDetail {
   id: string;
@@ -168,10 +169,10 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                       <td className="p-3 font-mono">{r.type}</td>
                       <td className="p-3 font-mono text-muted">{r.status}</td>
                       <td className="p-3 text-right font-mono text-subtle">
-                        {new Date(r.created_at).toLocaleString()}
+                        {formatDateTime(r.created_at)}
                       </td>
                       <td className="p-3 text-right font-mono text-subtle">
-                        {new Date(r.updated_at).toLocaleString()}
+                        {formatDateTime(r.updated_at)}
                       </td>
                     </tr>
                   ))}
@@ -206,7 +207,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                       <td className="p-3 font-mono text-muted">{a.claims_ok}</td>
                       <td className="p-3 text-right font-mono text-brand">${a.generation_cost.toFixed(3)}</td>
                       <td className="p-3 text-right font-mono text-subtle">
-                        {new Date(a.created_at).toLocaleDateString()}
+                        {formatDate(a.created_at)}
                       </td>
                     </tr>
                   ))}
@@ -239,7 +240,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                       <td className="p-3 font-mono text-muted">{i.pillar}</td>
                       <td className="p-3 font-mono text-muted">{i.status}</td>
                       <td className="p-3 text-right font-mono text-subtle">
-                        {new Date(i.created_at).toLocaleDateString()}
+                        {formatDate(i.created_at)}
                       </td>
                     </tr>
                   ))}

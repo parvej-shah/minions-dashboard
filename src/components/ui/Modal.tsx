@@ -14,15 +14,12 @@ export interface ModalProps {
   hideCloseButton?: boolean;
   /** Set false to keep a click on the backdrop from closing the modal. */
   closeOnBackdrop?: boolean;
+  /** "sheet" fills the screen on phones and floats like "center" from the sm breakpoint up. */
+  variant?: "center" | "sheet";
   children: React.ReactNode;
 }
 
-/**
- * The one modal shell.
- *
- * Five places previously hand-rolled `fixed inset-0` + backdrop + panel, each
- * with its own (or missing) Escape handling and body-scroll locking.
- */
+/** The one modal shell: backdrop, panel, Escape to close and background scroll lock. */
 export default function Modal({
   isOpen,
   onClose,
@@ -30,6 +27,7 @@ export default function Modal({
   maxWidthClass = "max-w-md",
   hideCloseButton = false,
   closeOnBackdrop = true,
+  variant = "center",
   children,
 }: ModalProps) {
   useEffect(() => {
@@ -51,17 +49,24 @@ export default function Modal({
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
+  const isSheet = variant === "sheet";
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150"
+      className={`fixed inset-0 z-50 flex justify-center bg-black/80 backdrop-blur-md animate-in fade-in duration-150 ${
+        isSheet ? "items-end sm:items-center sm:p-4" : "items-center p-4"
+      }`}
       onClick={closeOnBackdrop ? onClose : undefined}
       role="presentation"
     >
       <div
         role="dialog"
         aria-modal="true"
-        className={`relative w-full ${maxWidthClass} bg-[#0D1520] border border-line rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150`}
+        className={`relative w-full ${maxWidthClass} bg-[#0D1520] border-line shadow-2xl overflow-hidden ${
+          isSheet
+            ? "flex h-[100dvh] flex-col sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:border animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150"
+            : "rounded-2xl border animate-in zoom-in-95 duration-150"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {(title || !hideCloseButton) && (

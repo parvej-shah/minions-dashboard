@@ -19,6 +19,7 @@ import { PLANS, type PlanKey } from "@/constants/plans";
 import type { BillingPayload } from "@/types";
 
 import { buttonStyles } from "@/components/ui/Button";
+import { formatDate } from "@/utils/date";
 const EMPTY_PAYLOAD: BillingPayload = {
   clientStatus: "TRIAL",
   subscription: null,
@@ -28,11 +29,6 @@ const EMPTY_PAYLOAD: BillingPayload = {
   trialEndsAt: null,
   trialDaysLeft: null,
 };
-
-function formatDate(iso: string | null): string {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
 
 export default function BillingPage() {
   const { data, isLoading } = useApiResource<BillingPayload>("/api/billing", EMPTY_PAYLOAD, {

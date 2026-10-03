@@ -28,6 +28,7 @@ import { useChannelSummary } from "@/hooks/useChannelSummary";
 
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { buttonStyles } from "@/components/ui/Button";
+import { formatDateTime } from "@/utils/date";
 export const dynamic = "force-dynamic";
 
 type TabPlatform = "BLOG" | "LINKEDIN" | "FACEBOOK" | "TWITTER";
@@ -136,21 +137,6 @@ export default function PublishedPostsPage() {
     setAudienceFilter("ALL");
     setDateFilter("ALL");
     setSearchQuery("");
-  };
-
-  const formatPublishDate = (dateString: string) => {
-    try {
-      const d = new Date(dateString);
-      return d.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch {
-      return dateString;
-    }
   };
 
   /**
@@ -414,7 +400,7 @@ export default function PublishedPostsPage() {
                   <div className="flex items-center justify-between text-[11px] font-mono text-subtle">
                     <span className="flex items-center gap-1 truncate">
                       <Clock className="w-3 h-3 shrink-0" />
-                      <span>{formatPublishDate(post.published_at)}</span>
+                      <span>{formatDateTime(post.published_at)}</span>
                     </span>
                     {post.asset_id ? (
                       <Link
