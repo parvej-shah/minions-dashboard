@@ -44,7 +44,7 @@ export function evidenceRules(ctx: Pick<DraftAuthorContext, "trust_basis" | "mem
   if (t.includes("LIVED_EXPERIENCE") && ctx.memory.length) {
     rules.push("You may write in the first person about the AUTHOR'S EXPERIENCE listed, and only about that. Use its details as stated; never add events, numbers, clients or results it does not state.");
   } else if (t.includes("USER_NOTE")) {
-    rules.push("The idea is the author's own note. You may use what the note says, and nothing more in the first person.");
+    rules.push("The idea is the author's own note. You may use what the note says, and nothing more in the first person. Call things what the note calls them: name the tools, products and people it names instead of a generic stand-in ('a classifier'), and keep each figure's exact sense (a median stays a median).");
   } else {
     // The fallback when the experience bank has nothing for this idea: still the
     // author's own view, never a neutral explainer, and never invented experience.

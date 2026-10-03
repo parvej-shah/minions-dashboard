@@ -60,7 +60,8 @@ Sound like a person, not a model (all variants):
 ${SOUND_HUMAN}
 
 Universal Rules:
-- NEVER state statistics not in the body.
+- NEVER state statistics not in the body, and keep each one's exact sense: a median stays a median, "about" stays "about".
+- Say only what the Final Body says: never add a cause, a reason something worked, a metric, or an item to a list that the body does not give. Keep the names the body uses.
 - Describe the author's work exactly as the Final Body does: never add an outcome ("The result? More calls"), a detail of what was or was not changed, or turn one case into many.
 - NEVER use em dashes ('—' or '--').
 - NO RAW MARKDOWN (*, **, ###, \`). Write clean, natural text.

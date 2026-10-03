@@ -271,6 +271,7 @@ describe("an idea the author added themselves", () => {
     expect(ctx.hook.archetype).toBe("POSITION");
     expect(ctx.allowed_modes).toContain("STORY");
     expect(evidenceRules(ctx)[0]).toMatch(/author's own note/);
+    expect(evidenceRules(ctx)[0]).toMatch(/name the tools/);
   });
 
   it("has no note with only a title, and none once the gate has judged it", () => {

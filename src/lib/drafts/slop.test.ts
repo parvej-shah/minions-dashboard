@@ -62,6 +62,11 @@ AED 1,100
     expect(slopReport("Reach dropped by half. Not because of the words. Because the reader hears the machinery.").problems.map((p) => p.kind)).toContain("contrast");
   });
 
+  it("does not count a quoted example as the text's own contrast", () => {
+    const t = "Our first check looked for stacked 'it isn't X, it's Y' contrasts and \"not this, but that\" lines. It counted them well enough.";
+    expect(slopReport(t).problems.map((p) => p.kind)).not.toContain("contrast");
+  });
+
   it("flags stock vocabulary and symbols", () => {
     const r = slopReport("This is a crucial shift in the landscape. Call → qualify → book.");
     expect(r.problems.map((p) => p.kind)).toEqual(expect.arrayContaining(["vocabulary", "symbols"]));
@@ -69,6 +74,11 @@ AED 1,100
 });
 
 describe("rejectPolish", () => {
+  it("lets a short hook change by a few words", () => {
+    expect(rejectPolish("A regex counts patterns. It cannot hear a voice.", "I think a regex counts patterns well enough, but it cannot hear a voice.")).toBeNull();
+    expect(rejectPolish("A regex counts patterns.", "I think a regex can count patterns all day long, and it still cannot hear whether one person is talking.")).toMatch(/length/);
+  });
+
   const base = "## Why\nI think 2,500 minutes a month is the number to start from.\n\nThat is what I'd check first.\n\n#VoiceAI";
   it("keeps a rewrite that only changes wording", () => {
     expect(rejectPolish(base, "## Why\nI'd start from 2,500 minutes a month, I think.\n\nThat is the first thing I'd check.\n\n#VoiceAI")).toBeNull();

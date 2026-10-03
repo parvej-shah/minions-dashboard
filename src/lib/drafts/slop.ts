@@ -160,8 +160,11 @@ export function rhythmSpread(text: string): number {
 /** At or above this score a draft gets its one rewrite when Jev cannot be asked: two figures past their allowance. */
 export const SLOP_REWRITE_AT = 2;
 
+/** Quoted examples ("the 'it isn't X, it's Y' figure") are talked about, not used. */
+const QUOTED = /(^|[\s(])(?:"[^"\n]{1,80}"|“[^”\n]{1,80}”|'.{1,80}?'|‘.{1,80}?’)(?=[\s.,;:!?)]|$)/g;
+
 export function slopReport(text: string): SlopReport {
-  const prose = bodyLines(text).replace(/(^|\s)#\w+/g, " ");
+  const prose = bodyLines(text).replace(/(^|\s)#\w+/g, " ").replace(QUOTED, "$1that");
   const ss = sentences(prose).filter((s) => !/^(?:[-*]\s|\d+\.\s)/.test(s));
   const problems: SlopProblem[] = [];
 
