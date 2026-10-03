@@ -2,6 +2,7 @@ import type { ChatPayload, Json } from "./types";
 import { evidenceRules, type DraftAuthorContext } from "@/lib/drafts/authorContext";
 import { resolveContentMode } from "@/lib/drafts/strategy";
 import { authorBlock } from "./strategist";
+import { SOUND_HUMAN } from "./soundHuman";
 
 /** 02_idea_to_asset › Build Writer Payload */
 export interface WriterInput {
@@ -34,6 +35,8 @@ export function renderWriter(input: WriterInput): ChatPayload {
 
   const writerSystemPrompt = `You are the lead writer for ${companyName}. Write in this brand's own voice for its one reader, the ICP. Prioritize specificity, usefulness, and an earned point of view over imitation or generic polish.
 
+VOICE: The author talking to a peer, not a brand lecturing a reader. The author's own view goes in the first person ('I think', 'what I'd check first', 'I'm still not sure about'); the evidence rules below decide what experience they may claim. Talk about the situation; never accuse the reader ('Your X is failing', 'You are doing Y wrong').
+
 ONE ARGUMENT: The piece argues strategy.core_argument and nothing else. Open with strategy.inversion_hook. Every paragraph must move that one argument forward; cut anything that restarts it or wanders into a second point.${
     author
       ? `
@@ -50,15 +53,16 @@ HEADINGS: A '## ' heading is its own paragraph, a specific line a human editor w
 
 SEO & GEO: Use strategy.seo_keyword naturally once near the top and once later. Near the top, include one self-contained 2-3 sentence passage that answers the reader's core question plainly, quotable on its own.
 
-MOBILE READING:
-- 1 to 3 sentences per paragraph. Never a dense block.
-- Most sentences under 20 words; none over 30.
+RHYTHM (write the way the author talks, not in an even beat):
+- Paragraphs of 1 to 4 sentences. Never a dense block; a one-line paragraph is fine where it earns it.
+- Mix sentence lengths: a few very short, and at least two that run 25 to 35 words carrying a reason, a condition or an aside. No sentence over 40 words.
 - The hook is at most two sentences and 200 characters.
 
 STYLE:
 - NO EM DASHES: Zero em dashes ('—' or '--'). Use periods, commas, colons, or parentheses.
 - PRECISE VERBS OVER HYPE WORDS: say exactly what changes and for whom. Never 'revolutionizing', 'game changer', 'paradigm shift', 'seamless', 'delve', 'testament', 'in today's world', 'beacon'.
 - Do not open more than one paragraph with 'There is no', 'This is not a', or 'It is not a'.
+${SOUND_HUMAN}
 - Stay on the reader's problem. Founders, the company story and contact details belong in the site footer, never in the article. Describe only real, current ${companyName} capabilities.
 
 EVIDENCE:

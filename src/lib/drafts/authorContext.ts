@@ -33,6 +33,8 @@ export interface DraftAuthorContext {
   writer_standing: string;
   hook: Hook;
   allowed_modes: ContentMode[];
+  /** The arguments of the author's last few posts, so this one does not repeat them. */
+  recent_posts?: string[];
 }
 
 /** Plain-language evidence rules for this draft, from its trust basis. */
@@ -44,7 +46,9 @@ export function evidenceRules(ctx: Pick<DraftAuthorContext, "trust_basis" | "mem
   } else if (t.includes("USER_NOTE")) {
     rules.push("The idea is the author's own note. You may use what the note says, and nothing more in the first person.");
   } else {
-    rules.push("There is no author experience behind this idea: never write first-person experience, clients or results ('we built', 'I saw', 'one of our clients'). Write analysis and opinion.");
+    // The fallback when the experience bank has nothing for this idea: still the
+    // author's own view, never a neutral explainer, and never invented experience.
+    rules.push("There is no author experience behind this idea, so write it as the author's take: first person is welcome for what the author thinks, would check or recommends ('I think', 'what I'd look at first', 'I'm not sure yet'), never for events, clients, builds or results ('we built', 'I saw', 'one of our clients'). Credit what a source says to the source, and tie the point to the author's goal and the ICP's problem.");
   }
   if (t.includes("APPROVED_PROOF")) rules.push("Verified proof may be stated as fact, in its own wording.");
   if (t.includes("MARKET_SIGNAL")) rules.push("Supplied sources may be cited for exactly what their excerpts say.");

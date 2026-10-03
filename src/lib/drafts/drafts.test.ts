@@ -44,7 +44,9 @@ describe("content modes the evidence can carry", () => {
 
   it("forbids first-person experience in the rules when there is none", () => {
     const none = buildDraftAuthorContext({ sourceType: "MARKET_SIGNAL", trustBasis: ["MARKET_SIGNAL"], icpProblem: "x", readerContext: null, authorAdvantage: "old", whiteSpace: null, freshPerspective: null, vision: null, recommendedFormat: null, pillar: null }, [], EMPTY_ICP, null, "");
-    expect(evidenceRules(none)[0]).toMatch(/never write first-person/);
+    expect(evidenceRules(none)[0]).toMatch(/never for events, clients, builds or results/);
+    // The fallback is still the author's own take, not a neutral explainer.
+    expect(evidenceRules(none)[0]).toMatch(/author's take/);
     expect(none.author_advantage).toBe("");
     expect(none.recommended_format).toBe("ARTICLE");
   });
@@ -208,8 +210,8 @@ describe("the draft check keeps a retold experience to what the item says", () =
 
 describe("readability", () => {
   it("measures what a phone reader feels", () => {
-    const long = Array.from({ length: 35 }, () => "word").join(" ") + ".";
-    const r = measure("x".repeat(250), `## Head\nOne. Two. Three. Four.\n\n${long}`);
+    const long = Array.from({ length: 45 }, () => "word").join(" ") + ".";
+    const r = measure("x".repeat(250), `## Head\nOne. Two. Three. Four. Five.\n\n${long}`);
     expect(r).toMatchObject({ headings: 1, paragraphs: 2, long_paragraphs: 1, long_sentences: 1, hook_chars: 250 });
     expect(readabilityIssues(r)).toHaveLength(3);
   });
@@ -218,22 +220,22 @@ describe("readability", () => {
 describe("paragraph reflow", () => {
   const long = (w: string) => `${w} is a sentence long enough to stand alone.`;
   it("splits an over-long paragraph without changing a word", () => {
-    const p = [1, 2, 3, 4].map((i) => long(`S${i}`)).join(" ");
+    const p = [1, 2, 3, 4, 5].map((i) => long(`S${i}`)).join(" ");
     const out = reflowParagraphs(`${p}\n\nA. B.`);
     expect(out.split("\n\n")).toHaveLength(3);
     expect(out.replace(/\s+/g, " ")).toBe(`${p} A. B.`);
-    expect(out.split("\n\n").every((g) => g.split(/(?<=\.)\s/).length <= 3)).toBe(true);
+    expect(out.split("\n\n").every((g) => g.split(/(?<=\.)\s/).length <= 4)).toBe(true);
   });
 
   it("keeps short fragments together", () => {
-    const out = reflowParagraphs(`${long("First")} No alert. No retry. Just a ghost. ${long("Last")}`);
+    const out = reflowParagraphs(`${long("First")} ${long("Second")} No alert. No retry. Just a ghost. ${long("Last")}`);
     expect(out).toContain("No alert. No retry. Just a ghost.");
-    // The run cannot join either long neighbour without passing 3 sentences, so it stands alone.
-    expect(out.split("\n\n")).toHaveLength(3);
+    // Five sentences must split, and never inside the run of fragments.
+    expect(out.split("\n\n").length).toBeGreaterThan(1);
   });
 
   it("keeps a heading on top of its first group, and leaves lists alone", () => {
-    const p = [1, 2, 3, 4].map((i) => long(`S${i}`)).join(" ");
+    const p = [1, 2, 3, 4, 5].map((i) => long(`S${i}`)).join(" ");
     expect(reflowParagraphs(`## Why\n${p}`).startsWith(`## Why\n${long("S1")}`)).toBe(true);
     const list = "- One. Two.\n- Three. Four.\n- Five.";
     expect(reflowParagraphs(list)).toBe(list);

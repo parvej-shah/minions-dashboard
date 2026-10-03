@@ -19,6 +19,10 @@ import { renderHumanize } from "@/lib/prompts/humanize";
 export const MAX_REWRITES = 1;
 /** On Jev's 0-4 "reads as a person" scale, below this a text is rewritten. */
 const HUMAN_SCORE_MIN = 2.5;
+/** Below this Jev score the rewrite recasts the voice, not just the figures. */
+const RECAST_BELOW = 1.5;
+const RECAST_FIX =
+  "Reads as a brand lecturing the reader. Recast it as the author talking to a peer: put their view in the first person ('I think', 'what I'd check first', 'I'm not sure yet'), talk about the situation instead of telling the reader what they must do, and close on what the author would check or still wonders. Keep every fact; claim no experience.";
 /** A Jev yes above this counts. */
 const YES = 0.7;
 /** The rewrite must finish well inside 02's 120 s Scrub Banned Words call. */
@@ -68,12 +72,16 @@ export async function judge(text: string): Promise<PolishVerdict> {
   if (!jev) return { human: null, slop: code.score, problems, needsRewrite: code.score >= SLOP_REWRITE_AT };
 
   const yes = (k: string) => (jev[k]?.noul ?? 0) >= YES;
-  for (const k of Object.keys(JEV_ONLY_FIX)) if (yes(k)) problems.push({ kind: k as SlopProblem["kind"], fix: JEV_ONLY_FIX[k], examples: [] });
+  for (const k of Object.keys(JEV_ONLY_FIX)) if (yes(k)) problems.push({ kind: k as "lecture" | "generic", fix: JEV_ONLY_FIX[k], examples: [] });
   // Jev saw a figure the code's patterns missed: ask for it without examples.
   for (const k of ["contrast", "fragments", "maxim_close"] as const) {
     if (yes(k) && !problems.some((p) => p.kind === k)) problems.push({ kind: k, fix: QUESTIONS[k].instructions.replace(/^Does it /, "It does: ").replace(/\?$/, ". Rewrite those as plain sentences."), examples: [] });
   }
   const human = typeof jev.human?.score === "number" ? jev.human.score : null;
+  // Far below a person: removing figures alone leaves a lecture, so the voice changes too.
+  if (human !== null && human < RECAST_BELOW && !problems.some((p) => p.kind === "generic")) {
+    problems.push({ kind: "generic", fix: RECAST_FIX, examples: [] });
+  }
   const needsRewrite = (human !== null && human < HUMAN_SCORE_MIN) || ["contrast", "fragments", "maxim_close", "lecture", "generic"].some(yes);
   return { human, slop: code.score, problems, needsRewrite: needsRewrite || code.score >= SLOP_REWRITE_AT + 2 };
 }
@@ -86,7 +94,8 @@ function parseText(raw: string): string | null {
   try {
     const content = JSON.parse(raw)?.choices?.[0]?.message?.content ?? "";
     const json = JSON.parse(String(content).replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, ""));
-    return typeof json?.text === "string" ? json.text : null;
+    // Models add em dashes whatever they are told; a comma reads the same.
+    return typeof json?.text === "string" ? json.text.replace(/\s*(?:—|--)\s*/g, ", ") : null;
   } catch {
     return null;
   }

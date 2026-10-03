@@ -19,6 +19,23 @@ export interface StrategistInput {
   author?: DraftAuthorContext;
 }
 
+/** What a lane's purpose asks of a post, in words the model can aim at. */
+const LANE_GOAL: Record<string, string> = {
+  AUTHORITY: "be the person the ICP thinks of on this problem, by showing how the author thinks about it",
+  CREDIBILITY: "show the ICP the author has done this work and knows where it goes wrong",
+  DEMAND: "help the ICP decide, so the ones ready to act see the author as the obvious next step",
+};
+
+/** The author's recent arguments, fenced as data, so the strategist picks a new one. */
+export function recentPostsBlock(author: DraftAuthorContext | undefined): string {
+  const recent = author?.recent_posts ?? [];
+  if (!recent.length) return "";
+  return `${DATA_OPEN}
+RECENTLY POSTED (arguments already made; do not repeat them):
+${fenceSafe(recent.map((r) => `- ${r}`).join("\n"))}
+${DATA_CLOSE}`;
+}
+
 /** The author inputs both the strategist and the writer see, fenced as data. */
 export function authorBlock(author: DraftAuthorContext | undefined): string {
   if (!author?.found) return "";
@@ -31,6 +48,7 @@ export function authorBlock(author: DraftAuthorContext | undefined): string {
     author.fresh_perspective && `The non-obvious point: ${author.fresh_perspective}`,
     author.vision && `Where this is heading (optional close): ${author.vision}`,
     author.lane && `Lane: ${author.lane.name} (${author.lane.brief})`,
+    author.lane && `The author's goal for this post: ${LANE_GOAL[author.lane.purpose] ?? LANE_GOAL.AUTHORITY}`,
     icp.who && `The ICP: ${icp.who.replace(/[.\s]+$/, "")}${icp.role ? ` (${icp.role})` : ""}`,
     icp.vocabulary.length ? `The ICP's own words: ${icp.vocabulary.join(", ")}` : "",
   ].filter(Boolean);
@@ -62,9 +80,11 @@ export function renderStrategist(input: StrategistInput): ChatPayload {
 You decide the intellectual argument and visual metaphor before writing begins.
 
 Reasoning process:
-Step 1 — The Hook: For THIS idea, you MUST use the ${hookArchetype} hook archetype: ${archetypeInstruction} Write 1-2 punchy sentences in exactly that style.
+Step 1 — The Hook: For THIS idea, you MUST use the ${hookArchetype} hook archetype: ${archetypeInstruction} Write 1-2 plain sentences in exactly that style, the way the author would say it to a peer: no slogan, no 'it isn't X, it's Y' formula.
 Step 2 — The Reader: Describe the most specific real person implied by the ICP, the Brand Context and this idea. Never default to a software or engineering persona unless the brand and idea support it.
-Step 2b — The Argument: One central argument, built on the author's advantage when one is given. Every key point must serve it.
+Step 2b — The Argument: One central argument, built on the author's advantage when one is given. Every key point must serve it.${author?.found && !author.memory.length ? `
+  No experience of the author's backs this idea, so make it the author's take on the source: what they think it means for the ICP, what they would check or do about it, and why it matters to their goal. Never a neutral explainer anyone could have written.` : ""}${author?.recent_posts?.length ? `
+  The author posted the arguments under RECENTLY POSTED below in the last few weeks. Do not argue any of them again, even in new words; find the point about this idea that they did not make.` : ""}
 Step 3 — The Visual Art Direction for Cover Art:
   - First decide the visual register from the article's ACTUAL subject matter: PHYSICAL_TRADE or ABSTRACT_DATA.
   - Cover Headline: 6 to 10 words in sentence case. It is the whole cover: a specific, believable claim or promise to the reader, naming the concrete thing that breaks or the outcome, and it must make sense with no other context. Write it for the ICP reader's own situation. Never an abstract category pairing (not 'Fluency Vs Accuracy', 'Speed Versus Quality', or 'AI Scheduling Explained'), never a topic label.
@@ -95,7 +115,7 @@ ${writerStanding}
 Return ONLY this JSON:
 {
   "title": "string, a sharp headline",
-  "inversion_hook": "1-2 punchy sentences using the hook archetype",
+  "inversion_hook": "1-2 plain sentences using the hook archetype",
   "core_argument": "one sentence, sharp and direct",
   "content_mode": "${modes.join(" | ")}",
   "reader": "one sentence, maximally specific",
@@ -129,7 +149,7 @@ Angle: ${target.angle}
 Why: ${target.why}
 
 Brand Context:
-${cappedBrand}${author?.found ? `\n\n${authorBlock(author)}` : ""}`;
+${cappedBrand}${author?.found ? `\n\n${authorBlock(author)}` : ""}${recentPostsBlock(author) ? `\n\n${recentPostsBlock(author)}` : ""}`;
 
   return {
     model: "qwen3.8-max",

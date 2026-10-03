@@ -67,7 +67,7 @@ export interface DraftCheckResult {
   readability: Readability;
 }
 
-const FIRST_PERSON_EXPERIENCE =
+export const FIRST_PERSON_EXPERIENCE =
   /\b(?:we|I)\s+(?:built|tested|saw|found|ran|worked|helped|learned|watched|launched|shipped|audited|fixed|wired|deployed|noticed)\b|\bour (?:clients?|customers?)\b|\bone of our\b|\bwhen we\b/i;
 
 /** A stated outcome: "The result? …", "resulted in", "doubled". */

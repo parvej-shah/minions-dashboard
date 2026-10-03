@@ -29,6 +29,13 @@ and link to it here.
 
 ---
 
+## 2026-10-03 — Drafts are written as the author talking, and checked for AI patterns
+
+**Decision:** Drafts speak as the author (first-person view, mixed sentence length) instead of a brand lecturing the reader, and avoid the figures that mark AI text ("it isn't X, it's Y", three-beat fragments, a closing maxim). Every finished draft is judged by Jev and code; one that still reads as template writing gets exactly one rewrite, kept only if it changes nothing but the wording and reads better. An idea with no author experience behind it is written as the author's take on the source, tied to their goal: never a neutral explainer, never invented experience. The strategist sees the last three weeks of arguments and must make a new point.
+**Why:** On tenant zero's LinkedIn (Sep 2026) Minions posts drew a median 85 impressions against 179 for the profile's other posts; LinkedIn ranks on dwell time and expertise, and generic AI phrasing loses on both.
+**Alternatives considered:** two or more rewrites (drift from the author's argument, 10-20 s more inside 02's two-minute call); prompt bans alone (the figures survived them); the author's own posts as the standard (AI-assisted too; Jev rates most of them as template).
+**Status:** active
+
 ## 2026-10-03 — Brand settings lead with the author’s foundation
 
 **Decision:** Brand opens on a plain-language overview, with audience and writing voice as the primary areas; idea sources and words to avoid sit under More settings, and visual cover styling is collapsed until needed.

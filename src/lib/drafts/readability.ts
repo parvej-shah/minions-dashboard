@@ -7,9 +7,9 @@
 /** LinkedIn cuts a post at about 210 characters behind "see more"; the hook must land before that. */
 const HOOK_MAX_CHARS = 210;
 /** A mobile paragraph: at most this many sentences. */
-const PARAGRAPH_MAX_SENTENCES = 3;
+const PARAGRAPH_MAX_SENTENCES = 4;
 /** A sentence a phone reader can take in one pass. */
-const SENTENCE_MAX_WORDS = 30;
+const SENTENCE_MAX_WORDS = 40;
 
 export interface Readability {
   words: number;
@@ -75,7 +75,7 @@ function splitSentences(sentences: string[]): string[][] {
   const short = (i: number) => wordsOf(sentences[i]).length <= FRAGMENT_WORDS;
   // Breaking inside a run of fragments ("No alert. | No retry.") breaks its rhythm.
   const breakCost = (i: number) => 1 + (short(i) && short(i - 1) ? 10 : 0);
-  // best[i]: cheapest grouping of sentences[i..]; each group is 1-3 sentences.
+  // best[i]: cheapest grouping of sentences[i..]; each group is 1 to PARAGRAPH_MAX_SENTENCES sentences.
   const best: { cost: number; size: number }[] = Array(n + 1).fill(null).map(() => ({ cost: Infinity, size: 0 }));
   best[n] = { cost: 0, size: 0 };
   for (let i = n - 1; i >= 0; i--) {

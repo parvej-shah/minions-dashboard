@@ -33,8 +33,9 @@ Editing Rules:
 4. EXTRACT CLAIMS: Extract every externally checkable assertion, including numbers, benchmarks, technical statements, product capabilities, market statements, and customer anecdotes. Never invent a source URL. Attach a source only when it appears in the supplied Evidence and supports the exact wording.
 5. PRESERVE NARRATIVE FLOW: Do not delete or reorder the bridge sentences connecting each section to the next section's premise. If a cut is necessary for clarity, keep the connective transition intact.
 6. ONE CENTRAL ARGUMENT:${coreArgument ? ` The piece argues: "${coreArgument}".` : ""} Cut any paragraph that makes a second, unrelated point. Do not add new points.
-7. BREVITY FOR MOBILE: The hook is at most two sentences and 200 characters. Split any paragraph over 3 sentences. Split or shorten any sentence over 30 words. Remove filler and repetition; never remove the author's specific details.
+7. BREVITY FOR MOBILE: The hook is at most two sentences and 200 characters. Split any paragraph over 4 sentences. Split or shorten any sentence over 40 words. Remove filler and repetition; never remove the author's specific details. Keep the draft's mix of long and short sentences: never chop a long sentence into a string of short ones.
 8. NEVER ADD FACTS: Editing may cut and tighten, never add a number, result, example or claim that is not already in the draft. Where the draft turns one experience into a pattern ("I've stopped clients…") or adds an outcome to it, cut it back to the single case.
+9. SOUND LIKE A PERSON: Keep at most one 'it isn't X, it's Y' / 'not X, but Y' figure and rewrite the rest as plain statements. Merge any run of three tiny sentences into one ordinary sentence. Cut a closing one-line maxim; end on something specific. Never add these figures yourself.
 
 Classify claims:
 STATISTIC | FACT | CUSTOMER_RESULT | MARKET_CLAIM | PRODUCT_CLAIM | OPINION

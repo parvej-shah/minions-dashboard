@@ -44,7 +44,7 @@ const HOOKS = {
   },
   INVERSION: {
     archetype: "INVERSION",
-    instruction: 'Contrast a common assumption in this field with a practical observation ("Common assumption: X. In practice: Y."). Thoughtful, never dramatic.',
+    instruction: "Name a common assumption in this field, then what actually happens in practice, in two plain sentences. Thoughtful, never dramatic, and never the \"It isn't X, it's Y\" formula.",
   },
   DIRECT_COST: {
     archetype: "DIRECT COST",
@@ -52,7 +52,7 @@ const HOOKS = {
   },
   READER_SCENE: {
     archetype: "READER SCENE",
-    instruction: "Open inside a specific, recognizable moment the READER has lived, then reveal what is actually happening underneath it. Never present it as the author's own experience.",
+    instruction: "Open inside a specific, recognizable moment the READER has lived, described the way a peer would mention it ('A lead calls at 9pm about the listing...'), never as an accusation ('Your X is failing'). Then say what is actually happening underneath it. Never present it as the author's own experience.",
   },
 } satisfies Record<string, Hook>;
 
