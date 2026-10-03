@@ -160,8 +160,8 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
         </h2>
         <p className="text-xs text-muted mt-1 leading-relaxed">
           {plan.filler_enabled
-            ? "Automatic drafting is on: an idea is kept for each slot in the next 7 days and drafted at the slot's time. A lane with no strong idea gets a harvest of its own ahead of time."
-            : "Automatic drafting is off. This week shows what your rhythm would prepare once you turn it on."}
+            ? "Minions prepares a draft at each scheduled time."
+            : "This is a preview. Turn on automatic drafting to use this schedule."}
         </p>
         {saving && (
           <p role="status" aria-live="polite" className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-medium text-brand">
@@ -170,11 +170,13 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
         )}
       </div>
 
-      <div className="pt-4 border-t border-line/60 space-y-3">
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="text-xs font-bold text-ink uppercase tracking-wider font-mono">Upcoming slots</h3>
-          {!plan.filler_enabled && <span className="text-[10px] font-mono text-subtle">Preview</span>}
-        </div>
+      <details className="group border-t border-line/60 pt-4">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-lg text-sm font-semibold text-[#CBD5E1] transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand [&::-webkit-details-marker]:hidden">
+          <span>Preview upcoming drafts <span className="ml-1 text-xs font-normal text-muted">({plan.week.slots.length})</span></span>
+          <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" aria-hidden="true" />
+        </summary>
+        <div className="mt-3 space-y-3">
+          <p className="text-xs leading-relaxed text-muted">Minions picks a lane automatically. Open a slot only if you want to pin a different one.</p>
 
         {plan.week.slots.length === 0 ? (
           <p className="text-xs text-subtle">No slots in the next 7 days. Check the cadence above and the plan dates.</p>
@@ -247,7 +249,20 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
           <Sparkles className="inline w-3 h-3 mr-1 text-brand" />
           Pinning a lane applies to that weekday and time every week. Times are {tz.split("/").pop()!.replace(/_/g, " ")} time.
         </p>
-      </div>
+
+      {needsNudge && (
+        <div className="rounded-xl border border-gold/30 bg-gold/10 p-3 text-xs text-[#FCD34D] flex items-start gap-2">
+          <Lightbulb className="w-4 h-4 shrink-0 mt-0.5" />
+          <span>
+            Some slots have no strong idea yet. A recent piece of work, a lesson or a client question gives the harvester something only you could say.{" "}
+            <Link href="/brand?tab=experience" className="text-brand transition-colors cursor-pointer hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand font-semibold">
+              Add an update
+            </Link>
+          </span>
+        </div>
+      )}
+        </div>
+      </details>
 
       <details className="group border-t border-line pt-4">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-lg text-sm font-semibold text-[#CBD5E1] transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand [&::-webkit-details-marker]:hidden">
@@ -316,18 +331,6 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
         </div>
         <p className="mt-3 text-xs leading-relaxed text-muted">Set lane weights on Brand › Audience &amp; Experience.</p>
       </details>
-
-      {needsNudge && (
-        <div className="rounded-xl border border-gold/30 bg-gold/10 p-3 text-xs text-[#FCD34D] flex items-start gap-2">
-          <Lightbulb className="w-4 h-4 shrink-0 mt-0.5" />
-          <span>
-            Some slots have no strong idea yet. A recent piece of work, a lesson or a client question gives the harvester something only you could say.{" "}
-            <Link href="/brand?tab=experience" className="text-brand transition-colors cursor-pointer hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand font-semibold">
-              Add an update
-            </Link>
-          </span>
-        </div>
-      )}
     </div>
   );
 }

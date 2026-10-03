@@ -77,6 +77,7 @@ export default function SchedulePage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
   const [planKey, setPlanKey] = useState(0);
   const [statusKey, setStatusKey] = useState(0);
   const toast = useToast(4000);
@@ -88,6 +89,7 @@ export default function SchedulePage() {
       setData(next);
       setSavedData(next);
       setAdvancedOpen(next.posts_per_day > 1);
+      setScheduleOpen(!next.exists);
       setLoadError(null);
     } catch (error) {
       setLoadError(toErrorMessage(error, "Could not load your schedule."));
@@ -151,11 +153,44 @@ export default function SchedulePage() {
       const next = { ...data, ...saved };
       setData(next);
       setSavedData(next);
-      toast.show("Rhythm saved. Your upcoming week has been refreshed.");
+      toast.show("Schedule saved. Your upcoming week has been refreshed.");
       setPlanKey((key) => key + 1);
       setStatusKey((key) => key + 1);
     } catch (error) {
       setSaveError(toErrorMessage(error, "Could not save your rhythm. Try again."));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleSaveAndEnable(): Promise<boolean> {
+    if (saving || !canSave) return false;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      if (hasUnsavedChanges) {
+        const saved = await apiClient.patch<SchedulePayload>("/api/schedule", {
+          cadence_type: data.cadence_type,
+          interval_days: data.interval_days,
+          days_of_week: data.days_of_week,
+          posts_per_day: data.posts_per_day,
+          times_of_day: data.times_of_day,
+          require_review: data.require_review,
+        });
+        const next = { ...data, ...saved };
+        setData(next);
+        setSavedData(next);
+        setPlanKey((key) => key + 1);
+      }
+      await apiClient.patch("/api/plan", { filler_enabled: true });
+      toast.show("Schedule saved. Automatic drafting is on.");
+      setPlanKey((key) => key + 1);
+      setScheduleOpen(false);
+      return true;
+    } catch (error) {
+      setSaveError(toErrorMessage(error, "Could not save the schedule and turn on automatic drafting."));
+      setScheduleOpen(true);
+      return false;
     } finally {
       setSaving(false);
     }
@@ -180,24 +215,47 @@ export default function SchedulePage() {
     <div className="mx-auto max-w-3xl space-y-6 pb-16">
       <header className="pb-1">
         <div className="mb-2 flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-brand">
-          <CalendarClock className="h-4 w-4" aria-hidden="true" /> Posting schedule
+          <CalendarClock className="h-4 w-4" aria-hidden="true" /> Draft schedule
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-ink">Make room for your next draft</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-ink">Your drafting schedule</h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          Pick when drafts are written, then choose who approves them. You can change your rhythm whenever you need to.
+          Set your pace once. Minions follows it until you want to make a change.
         </p>
       </header>
 
-      <section aria-labelledby="cadence-heading" className="space-y-5 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">
-        <div className="flex items-start gap-3">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-extrabold text-[#06231E]">1</span>
-          <div>
-            <h2 id="cadence-heading" className="text-lg font-bold text-ink">Choose your pace</h2>
-            <p className="mt-1 text-sm text-muted">How often should Minions prepare a draft?</p>
-          </div>
-        </div>
+      <AutomaticDrafting
+        key={statusKey}
+        scheduleSummary={savedData?.exists
+          ? `${rhythmSummary(savedData)} · ${savedData.timezone} · ${savedData.require_review ? "You review each draft" : "Eligible drafts publish automatically"}`
+          : "Set a schedule before turning this on."}
+        blockedByUnsavedChanges={hasUnsavedChanges || saving}
+        canSaveSchedule={canSave}
+        onChanged={() => setPlanKey((key) => key + 1)}
+        onEnableWithSave={handleSaveAndEnable}
+        onMessage={toast.show}
+      />
 
-        <div className="grid gap-2 sm:grid-cols-3" role="group" aria-label="Drafting cadence">
+      <details
+        open={scheduleOpen}
+        onToggle={(event) => setScheduleOpen(event.currentTarget.open)}
+        className="rounded-2xl border border-line bg-surface shadow-sm"
+      >
+        <summary className="flex min-h-20 cursor-pointer list-none items-center justify-between gap-4 rounded-2xl p-5 transition-colors hover:bg-surface-2/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:px-6 [&::-webkit-details-marker]:hidden">
+          <span className="min-w-0">
+            <span id="cadence-heading" className="block text-base font-bold text-ink">Edit your schedule</span>
+            <span className="mt-1 block text-sm text-muted">
+              {data.exists ? `${rhythmSummary(savedData ?? data)} · ${savedData?.timezone ?? data.timezone}` : "Choose when Minions should prepare drafts."}
+            </span>
+          </span>
+          <ChevronDown className={`h-5 w-5 shrink-0 text-muted transition-transform ${scheduleOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+        </summary>
+        <div className="space-y-5 border-t border-line p-5 sm:p-6">
+          <div className="space-y-1">
+            <h2 className="text-lg font-bold text-ink">How often should Minions prepare a draft?</h2>
+            <p className="text-sm text-muted">Your current rhythm is already selected.</p>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-3" role="group" aria-label="Drafting cadence">
           {CADENCE_OPTIONS.map((option) => {
             const selected = data.cadence_type === option.key;
             return (
@@ -297,15 +355,11 @@ export default function SchedulePage() {
             </div>
           )}
         </div>
-      </section>
 
-      <section aria-labelledby="review-heading" className="space-y-5 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">
-        <div className="flex items-start gap-3">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-extrabold text-[#06231E]">2</span>
-          <div>
-            <h2 id="review-heading" className="text-lg font-bold text-ink">Choose who publishes</h2>
-            <p className="mt-1 text-sm text-muted">Drafting a post and publishing it are separate decisions.</p>
-          </div>
+      <section aria-labelledby="review-heading" className="space-y-5 rounded-2xl border border-line bg-[#0D1319] p-5 sm:p-6">
+        <div>
+          <h2 id="review-heading" className="text-base font-bold text-ink">Who publishes?</h2>
+          <p className="mt-1 text-sm text-muted">You can keep reviewing drafts or let eligible scheduled posts publish automatically.</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2" role="group" aria-label="Publishing approval">
           <button type="button" disabled={saving} aria-pressed={data.require_review} onClick={() => updateData((previous) => ({ ...previous, require_review: true }))} className={`min-h-32 cursor-pointer rounded-xl border-2 p-4 text-left transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50 ${data.require_review ? "border-brand bg-brand/10" : "border-line bg-[#0B1016] hover:border-brand/60"}`}>
@@ -332,21 +386,12 @@ export default function SchedulePage() {
         {saveError && <p role="alert" className="mt-4 rounded-xl border border-gold/40 bg-gold/10 p-3 text-sm text-[#FCD34D]">{saveError}</p>}
         <button type="button" onClick={() => void handleSave()} disabled={saving || !canSave || !hasUnsavedChanges} aria-busy={saving} className="mt-5 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-b-4 border-brand-edge bg-brand px-5 text-sm font-extrabold text-[#06231E] transition-all hover:bg-[#1AD8B6] active:translate-y-0.5 active:border-b-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:border-line disabled:bg-line disabled:text-subtle disabled:translate-y-0 sm:w-auto">
           {saving ? <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" /> : hasUnsavedChanges ? <Save className="h-4 w-4" aria-hidden="true" /> : <Check className="h-4 w-4" aria-hidden="true" />}
-          {saving ? "Saving your rhythm…" : hasUnsavedChanges ? "Save my rhythm" : "Rhythm saved"}
+          {saving ? "Saving schedule…" : hasUnsavedChanges ? "Save schedule" : "Schedule saved"}
         </button>
         {!canSave && <p className="mt-2 text-sm text-[#FBBF24]">{missingDay ? "Choose at least one day above." : missingTime ? "Choose a time for every draft." : duplicateTime ? "Give each draft its own time." : "Choose a valid gap between drafts."}</p>}
       </section>
-
-      <section aria-labelledby="drafting-heading" className="space-y-3">
-        <div className="flex items-start gap-3 px-1">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-extrabold text-[#06231E]">3</span>
-          <div>
-            <h2 id="drafting-heading" className="text-lg font-bold text-ink">Let Minions draft on this rhythm</h2>
-            <p className="mt-1 text-sm text-muted">This switch saves immediately. Your review choice above controls what can go live.</p>
-          </div>
         </div>
-        <AutomaticDrafting key={statusKey} blockedByUnsavedChanges={hasUnsavedChanges || saving} onChanged={() => setPlanKey((key) => key + 1)} onMessage={toast.show} />
-      </section>
+      </details>
 
       <ContentPlanCard key={planKey} onMessage={toast.show} />
 

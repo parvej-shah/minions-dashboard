@@ -20,21 +20,21 @@ interface DraftingStatus {
 type Tone = "off" | "on" | "warn";
 
 function describe(s: DraftingStatus): { tone: Tone; title: string; detail: string } {
-  if (!s.exists) return { tone: "off", title: "Off", detail: "Save your rhythm above first. Nothing is drafted on its own yet." };
+  if (!s.exists) return { tone: "off", title: "Off", detail: "Save your schedule below before turning this on." };
   if (!s.drafting_on) {
-    return { tone: "off", title: "Off", detail: "Nothing is drafted on its own. Drafts are only made when you start one, and only go out when you publish or schedule them." };
+    return { tone: "off", title: "Off", detail: "No drafts are prepared automatically while this is off." };
   }
   if (!s.service_running) {
     return {
       tone: "warn",
       title: "On, but the drafting service isn't running",
-      detail: "Your switch is on, but nothing will be drafted until the service runs again. Posts you've already scheduled still go out.",
+      detail: "The setting is on, but the drafting service is not running. Posts already scheduled are unaffected.",
     };
   }
   const next = s.next_slot_at
     ? `Next draft: ${formatPostTime(s.next_slot_at, s.timezone)}${s.next_lane_name ? ` (${s.next_lane_name})` : ""}.`
     : "No slots in the next 7 days. Check the cadence and the plan dates.";
-  return { tone: "on", title: "On", detail: `A draft is written for each slot at its time. ${next}` };
+  return { tone: "on", title: "On", detail: next };
 }
 
 const TONE_STYLE: Record<Tone, { box: string; dot: string; text: string }> = {
@@ -49,7 +49,7 @@ const TONE_STYLE: Record<Tone, { box: string; dot: string; text: string }> = {
  * the setting. Replaces the separate "Schedule active" and "Fill slots
  * automatically" switches.
  */
-export default function AutomaticDrafting({ onChanged, onMessage, blockedByUnsavedChanges }: { onChanged: () => void; onMessage: (m: string) => void; blockedByUnsavedChanges: boolean }) {
+export default function AutomaticDrafting({ onChanged, onMessage, onEnableWithSave, canSaveSchedule, blockedByUnsavedChanges, scheduleSummary }: { onChanged: () => void; onMessage: (m: string) => void; onEnableWithSave: () => Promise<boolean>; canSaveSchedule: boolean; blockedByUnsavedChanges: boolean; scheduleSummary: string }) {
   const { data, isLoading, error, reload } = useApiResource<DraftingStatus | null>("/api/plan/status", null, {
     errorMessage: "Could not load the drafting status",
   });
@@ -98,8 +98,20 @@ export default function AutomaticDrafting({ onChanged, onMessage, blockedByUnsav
     }
   };
 
+  const saveAndEnable = async () => {
+    setSaving(true);
+    try {
+      await onEnableWithSave();
+      await reload();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const showSaveAndEnable = !data.drafting_on && (!data.exists || blockedByUnsavedChanges);
+
   return (
-    <div className={`p-5 rounded-2xl bg-surface border ${style.box} flex items-start justify-between gap-4 shadow-sm`}>
+    <div className={`flex flex-col gap-4 rounded-2xl border bg-surface p-5 shadow-sm sm:flex-row sm:items-start sm:justify-between ${style.box}`}>
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2 text-sm font-bold text-ink">
           <Bot className="w-4 h-4 text-brand" />
@@ -109,29 +121,42 @@ export default function AutomaticDrafting({ onChanged, onMessage, blockedByUnsav
             {title}
           </span>
         </div>
-        <p className="text-xs text-muted mt-1.5 leading-relaxed">{detail}</p>
-        {saving && (
+        <p className="mt-2 text-sm font-semibold leading-relaxed text-[#CBD5E1]">{scheduleSummary}</p>
+        <p className="mt-1 text-xs leading-relaxed text-muted">{detail}</p>
+        {saving && !showSaveAndEnable && (
           <p role="status" aria-live="polite" className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-medium text-brand">
             <RefreshCw className="h-3 w-3 animate-spin" />
             {data.drafting_on ? "Turning automatic drafting off…" : "Turning automatic drafting on…"}
           </p>
         )}
-        {blockedByUnsavedChanges && data.exists && <p className="mt-2 text-sm font-medium text-[#FBBF24]">Save your rhythm above before changing this switch.</p>}
-        <p className="mt-2 text-[11px] font-medium text-subtle">Drafting and publishing are separate. Your review choice above controls what goes live.</p>
+        {blockedByUnsavedChanges && data.exists && !data.drafting_on && <p className="mt-2 text-xs font-medium text-[#FBBF24]">Save these settings to use the new schedule.</p>}
       </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={data.drafting_on}
-        aria-label="Automatic drafting"
-        aria-busy={saving}
-        title={!data.exists || blockedByUnsavedChanges ? "Save your rhythm above first" : data.drafting_on ? "Turn automatic drafting off" : "Turn automatic drafting on"}
-        disabled={saving || !data.exists || blockedByUnsavedChanges}
-        onClick={() => void toggle()}
-        className={`w-11 h-6 rounded-full transition-colors p-0.5 flex items-center shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-60 ${data.drafting_on ? "bg-brand" : "bg-line"}`}
-      >
-        <div className={`w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${data.drafting_on ? "translate-x-5" : "translate-x-0"}`} />
-      </button>
+      {showSaveAndEnable ? (
+        <button
+          type="button"
+          aria-busy={saving}
+          disabled={saving || !canSaveSchedule}
+          onClick={() => void saveAndEnable()}
+          className="inline-flex min-h-11 w-full shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-xl border-b-4 border-brand-edge bg-brand px-4 text-sm font-extrabold text-[#06231E] transition-colors hover:bg-[#1AD8B6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:border-line disabled:bg-line disabled:text-subtle sm:w-auto"
+        >
+          {saving && <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />}
+          {saving ? "Saving & turning on…" : "Save & turn on"}
+        </button>
+      ) : (
+        <button
+          type="button"
+          role="switch"
+          aria-checked={data.drafting_on}
+          aria-label="Automatic drafting"
+          aria-busy={saving}
+          title={data.drafting_on ? "Turn automatic drafting off" : "Turn automatic drafting on"}
+          disabled={saving || !data.exists}
+          onClick={() => void toggle()}
+          className={`h-11 w-11 self-end rounded-full p-0.5 transition-colors flex items-center shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-60 sm:h-6 sm:w-11 sm:self-auto ${data.drafting_on ? "bg-brand" : "bg-line"}`}
+        >
+          <div className={`h-5 w-5 rounded-full bg-white shadow-md transform transition-transform ${data.drafting_on ? "translate-x-5" : "translate-x-0"}`} />
+        </button>
+      )}
     </div>
   );
 }

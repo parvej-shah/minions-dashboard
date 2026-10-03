@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-10-03 — Schedule setup starts from the saved rhythm
+
+**Decision:** The Schedule page leads with automatic drafting status and the saved cadence, with schedule editing and slot-by-slot lane overrides revealed only when requested. For a new or changed schedule, users can save and turn on drafting in one explicit action; review-first remains the safe default unless the user changes it.
+**Why:** Most people should not have to configure a cadence, publishing policy, and every upcoming slot just to start automatic drafting. Progressive disclosure keeps advanced controls available while the saved rhythm provides a useful default.
+**Status:** active
+
 ## 2026-10-03 — Automatic drafting takes the oldest idea; no idea queue
 
 **Decision:** The Ideas page has no user-managed drafting queue. When automatic drafting is on, Minions drafts the oldest eligible unused idea; users can still start a specific draft directly or set a draft time. Harvesting pauses once 10 unused, gate-passed ideas are available.
