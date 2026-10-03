@@ -8,7 +8,6 @@ import {
   Edit3,
   ExternalLink,
   Loader2,
-  Plus,
   Sparkles,
   Trash2,
   Unlock,
@@ -20,12 +19,10 @@ import { Button, buttonStyles } from "@/components/ui/Button";
 export interface IdeaCardProps {
   idea: IdeaItem;
   claimingIds: Set<string>;
-  queueingIds: Set<string>;
   justClaimedIds: Set<string>;
   onOpenDetail: (idea: IdeaItem) => void;
   onResetClaim: (ideaId: string) => void;
-  onQueue: (idea: IdeaItem) => void;
-  onUnqueue: (idea: IdeaItem) => void;
+  onDraft: (ideaId: string) => void;
   onEdit: (idea: IdeaItem) => void;
   onRequestDelete: (target: { id: string; title: string }) => void;
 }
@@ -33,12 +30,10 @@ export interface IdeaCardProps {
 export default function IdeaCard({
   idea,
   claimingIds,
-  queueingIds,
   justClaimedIds,
   onOpenDetail,
   onResetClaim,
-  onQueue,
-  onUnqueue,
+  onDraft,
   onEdit,
   onRequestDelete,
 }: IdeaCardProps) {
@@ -48,7 +43,6 @@ export default function IdeaCard({
   const status = (idea.status || "HARVESTED").toUpperCase();
   const sourceInfo = getSourceTag(idea.source || "MANUAL");
   const verdict = idea.authority ? GATE_VERDICT_BADGE[idea.authority.verdict] : null;
-  const isQueueing = queueingIds.has(idea.id) || queueingIds.has(id);
   const isClaiming = claimingIds.has(idea.id) || claimingIds.has(id);
   const isClaimed = ["CLAIMED", "PICKED"].includes(status) || justClaimedIds.has(idea.id) || justClaimedIds.has(id);
   const isDrafted = ["DRAFTED", "REVIEW"].includes(status) || Boolean(idea.draftAssetId);
@@ -128,13 +122,9 @@ export default function IdeaCard({
           </span>
         ) : isRejected ? (
           <span className="inline-flex min-h-10 items-center justify-center rounded-xl border border-line bg-surface-2 px-3 text-xs font-bold text-subtle">Set aside</span>
-        ) : status === "QUEUED" ? (
-          <Button variant="secondary" size="sm" loading={isQueueing} onClick={() => onUnqueue(idea)}>
-            Up next {idea.queue_order ? `#${idea.queue_order}` : ""}
-          </Button>
         ) : (
-          <Button variant="soft" size="sm" loading={isQueueing} icon={<Plus className="h-4 w-4" aria-hidden="true" />} onClick={() => onQueue(idea)}>
-            Add to Up next
+          <Button variant="soft" size="sm" loading={isClaiming} onClick={() => onDraft(idea.id || id)}>
+            Draft now
           </Button>
         )}
       </div>

@@ -12,24 +12,20 @@ import {
   CheckCircle2,
   Loader2,
   X,
-  Layers,
   AlertCircle,
   Edit3,
   Trash2,
   Check,
-  LayoutGrid,
   SlidersHorizontal,
 } from "lucide-react";
 import { IdeaItem, IdeaStatus } from "@/types";
 import ScheduleModal from "@/components/ideas/ScheduleModal";
-import QueueBuilderView from "@/components/ideas/QueueBuilderView";
 import DraftingProgressHUD, { DraftingJob } from "@/components/common/DraftingProgressHUD";
 import HarvestingProgressHUD, { HarvestingJob } from "@/components/common/HarvestingProgressHUD";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import IdeaCard from "@/components/ideas/IdeaCard";
 import IdeaDetailModal from "@/components/ideas/IdeaDetailModal";
 import EmptyState from "@/components/ui/EmptyState";
-import { apiClient } from "@/lib/api-client";
 import { useApiResource } from "@/hooks/useApiResource";
 
 import {
@@ -42,9 +38,7 @@ import {
   type IdeaStage,
 } from "@/constants/ideaStage";
 
-import { formatPostTime } from "@/lib/postTime";
 import { buttonStyles } from "@/components/ui/Button";
-import { segment } from "@/components/ui/segment";
 import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
 /**
  * Topics are per-tenant now, loaded from /api/ideas/topics. The old hardcoded
@@ -131,12 +125,6 @@ function IdeasPageSkeleton() {
   );
 }
 
-interface DraftingStatus {
-  drafting_on: boolean;
-  timezone: string;
-  next_slot_at: string | null;
-}
-
 export default function IdeaStreamPage() {
   const {
     data: ideas,
@@ -145,11 +133,6 @@ export default function IdeaStreamPage() {
     reload: reloadIdeas,
     setData: setIdeas,
   } = useApiResource<IdeaItem[]>("/api/ideas", [], { errorMessage: "Could not load ideas" });
-  const { data: draftingStatus } = useApiResource<DraftingStatus | null>(
-    "/api/plan/status",
-    null,
-    { errorMessage: "Could not load drafting status" }
-  );
 
   const [selectedStage, setSelectedStage] = useState<"ALL" | IdeaStage>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
@@ -159,15 +142,12 @@ export default function IdeaStreamPage() {
   const [claimingIds, setClaimingIds] = useState<Set<string>>(new Set());
   const [justClaimedIds, setJustClaimedIds] = useState<Set<string>>(new Set());
   const [draftError, setDraftError] = useState<string | null>(null);
-  const [queueingIds, setQueueingIds] = useState<Set<string>>(new Set());
 
   // Live Drafting Multi-Agent Progress HUD state
   const [activeDraftingJob, setActiveDraftingJob] = useState<DraftingJob | null>(null);
   const [activeHarvestJob, setActiveHarvestJob] = useState<HarvestingJob | null>(null);
   const [isFirstRun, setIsFirstRun] = useState(false);
 
-  // View mode: Stream cards vs Drag & Drop Queue Builder vs Editorial Calendar
-  const [viewMode, setViewMode] = useState<"stream" | "queue">("queue");
 
   // Scheduling Modal State
   const [schedulingIdea, setSchedulingIdea] = useState<IdeaItem | null>(null);
@@ -193,7 +173,6 @@ export default function IdeaStreamPage() {
 
     const startFirstRun = window.setTimeout(() => {
       setIsFirstRun(true);
-      setViewMode("stream");
       setActiveHarvestJob({ runId, startedAt: Date.now() });
     }, 0);
     window.history.replaceState({}, document.title, window.location.pathname);
@@ -267,63 +246,6 @@ export default function IdeaStreamPage() {
   const [formExcerpt, setFormExcerpt] = useState("");
   const [formSourceUrl, setFormSourceUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  /** Adds an idea to the production queue at the next free position. */
-  const handleQueueIdea = async (idea: IdeaItem) => {
-    const targetId = idea.id || idea.ideaId;
-    const nextOrder = ideas.filter((i) => i.status === "QUEUED").length + 1;
-    setQueueingIds((prev) => new Set(prev).add(targetId));
-    try {
-      await apiClient.patch(`/api/ideas/${targetId}`, {
-        status: "QUEUED",
-        queue_order: nextOrder,
-      });
-      setIdeas((prev) =>
-        prev.map((i) =>
-          i.id === targetId ? { ...i, status: "QUEUED", queue_order: nextOrder } : i
-        )
-      );
-      setToastMessage(`Added to Up next (#${nextOrder})`);
-      setTimeout(() => setToastMessage(null), 3000);
-    } catch {
-      setToastMessage("Could not add to Up next");
-      setTimeout(() => setToastMessage(null), 3000);
-    } finally {
-      setQueueingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(targetId);
-        return next;
-      });
-    }
-  };
-
-  /** Removes an idea from the production queue, back to HARVESTED. */
-  const handleUnqueueIdea = async (idea: IdeaItem) => {
-    const targetId = idea.id || idea.ideaId;
-    setQueueingIds((prev) => new Set(prev).add(targetId));
-    try {
-      await apiClient.patch(`/api/ideas/${targetId}`, {
-        status: "HARVESTED",
-        queue_order: null,
-      });
-      setIdeas((prev) =>
-        prev.map((i) =>
-          i.id === targetId ? { ...i, status: "HARVESTED", queue_order: null } : i
-        )
-      );
-      setToastMessage("Removed from Up next");
-      setTimeout(() => setToastMessage(null), 3000);
-    } catch {
-      setToastMessage("Could not remove from Up next");
-      setTimeout(() => setToastMessage(null), 3000);
-    } finally {
-      setQueueingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(targetId);
-        return next;
-      });
-    }
-  };
 
   const openEditModal = (idea: IdeaItem) => {
     setEditingIdea(idea);
@@ -569,10 +491,6 @@ export default function IdeaStreamPage() {
     });
   }, [ideas, selectedStage, searchQuery]);
 
-  const queuedIdeas = ideas
-    .filter((idea) => idea.status === "QUEUED")
-    .sort((a, b) => (a.queue_order ?? 999) - (b.queue_order ?? 999));
-  const nextQueuedIdea = queuedIdeas[0];
 
   if (ideasLoading) return <IdeasPageSkeleton />;
 
@@ -589,7 +507,7 @@ export default function IdeaStreamPage() {
             <div>
               <p className="text-sm font-bold text-ink">Your first ideas are being prepared</p>
               <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted">
-                Minions is using your Brand Brief to find relevant angles. When they arrive, choose the one you want turned into your first draft.
+                Minions is using your Brand Brief to find relevant angles. When they arrive, Minions will use the oldest available idea for your first draft.
               </p>
             </div>
           </div>
@@ -603,49 +521,26 @@ export default function IdeaStreamPage() {
               <Sparkles className="h-4 w-4" aria-hidden="true" /> Ideas
             </p>
             <h1 className="text-2xl font-extrabold leading-tight tracking-tight text-ink sm:text-3xl">
-              Choose what gets written next
+              Your ideas
             </h1>
             <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
-              Add a promising idea to Up next. Minions turns the first one into a draft automatically.
+              When automatic drafting is on, Minions picks the oldest available idea and turns it into a draft.
             </p>
           </div>
 
-          <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-brand/25 bg-canvas/45 p-3 sm:min-w-[280px]">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/15 text-lg font-black text-brand">
-              {queuedIdeas.length}
-            </span>
-            <div className="min-w-0">
-              <p className="text-sm font-extrabold text-ink">{queuedIdeas.length === 1 ? "1 idea queued" : queuedIdeas.length + " ideas queued"}</p>
-              <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted">
-                {nextQueuedIdea ? (nextQueuedIdea.title || nextQueuedIdea.raw_idea) : "Choose an idea below to get started."}
-              </p>
-            </div>
-          </div>
+
         </div>
       </section>
 
-      <div className="flex flex-col gap-3 border-b border-line pb-4 sm:flex-row sm:items-center sm:justify-between">
-        <div role="tablist" aria-label="Ideas views" className="grid grid-cols-2 rounded-2xl border border-line bg-surface p-1.5 shadow-inner">
-          <button type="button" role="tab" aria-selected={viewMode === "queue"} onClick={() => setViewMode("queue")} className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold transition-all cursor-pointer ${viewMode === "queue" ? segment.on : segment.off}`}>
-            <Layers className="h-4 w-4" aria-hidden="true" />
-            <span>Up next</span>
-            {queuedIdeas.length > 0 && <span className="rounded-full bg-canvas/60 px-1.5 py-0.5 text-[10px] tabular-nums">{queuedIdeas.length}</span>}
-          </button>
-          <button type="button" role="tab" aria-selected={viewMode === "stream"} onClick={() => setViewMode("stream")} className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold transition-all cursor-pointer ${viewMode === "stream" ? segment.on : segment.off}`}>
-            <LayoutGrid className="h-4 w-4" aria-hidden="true" />
-            <span>All ideas</span>
-          </button>
-        </div>
-
+      <div className="flex justify-end border-b border-line pb-4">
         <button type="button" onClick={() => setIsInjectOpen(true)} className={buttonStyles({ variant: "secondary", size: "sm", className: "w-full sm:w-auto" })}>
           <Plus className="h-4 w-4" aria-hidden="true" />
           <span>Add your own idea</span>
         </button>
       </div>
 
-      {/* Stream-Only Sticky Filter Bar */}
-      {viewMode === "stream" && (
-        <div className="sticky top-14 md:top-0 z-30 bg-[#0a0d12] -mx-4 sm:-mx-6 md:-mx-8 px-4 sm:px-6 md:px-8 pt-3 pb-3.5 space-y-3 border-b border-line shadow-xl shadow-black/40">
+      {/* Search and stage filters */}
+      <div className="sticky top-14 md:top-0 z-30 bg-[#0a0d12] -mx-4 sm:-mx-6 md:-mx-8 px-4 sm:px-6 md:px-8 pt-3 pb-3.5 space-y-3 border-b border-line shadow-xl shadow-black/40">
           {/* Row 1: Search & Audience Filters */}
           <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
               {/* Search Input */}
@@ -723,7 +618,6 @@ export default function IdeaStreamPage() {
               })}
             </div>
         </div>
-      )}
 
         {/* Drafting Pipeline Error */}
         {draftError && (
@@ -742,25 +636,7 @@ export default function IdeaStreamPage() {
           </div>
         )}
 
-      {/* Conditional Rendering: Queue Builder vs Calendar View vs Stream View */}
-      {viewMode === "queue" ? (
-        <QueueBuilderView
-          ideas={ideas}
-          draftingLabel={draftingStatus?.drafting_on
-            ? draftingStatus.next_slot_at
-              ? `Next draft ${formatPostTime(draftingStatus.next_slot_at, draftingStatus.timezone)}`
-              : "Drafting automatically"
-            : draftingStatus ? "Automatic drafting off" : null}
-          draftingOn={draftingStatus?.drafting_on === true}
-          onUpdateIdeas={setIdeas}
-          onSelectIdea={(idea) => setDetailIdea(idea)}
-          onToast={(msg) => {
-            setToastMessage(msg);
-            setTimeout(() => setToastMessage(null), 4000);
-          }}
-        />
-      ) : (
-        <div className="space-y-6">
+      <div className="space-y-6">
           {ideas.length === 0 && (
             <EmptyState
               title={ideasError ? "Could not load ideas" : "No ideas yet"}
@@ -798,19 +674,16 @@ export default function IdeaStreamPage() {
               key={idea.id || idea.ideaId}
               idea={idea}
               claimingIds={claimingIds}
-              queueingIds={queueingIds}
               justClaimedIds={justClaimedIds}
               onOpenDetail={setDetailIdea}
               onResetClaim={handleResetClaim}
-              onQueue={handleQueueIdea}
-              onUnqueue={handleUnqueueIdea}
+              onDraft={handleRefineAndDraft}
               onEdit={openEditModal}
               onRequestDelete={setDeleteIdeaTarget}
             />
           ))}
         </div>
       </div>
-      )}
 
       {/* Slide-over / Modal for "+ Add an Idea" */}
       {isInjectOpen && (

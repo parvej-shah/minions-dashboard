@@ -12,8 +12,8 @@ const usableBacklog = rawRows.filter(r => {
   return status === 'REFINED' && !claimedAt && verdict === 'PASS';
 });
 
-// Spec §4: if count > 12 -> skip
-const isFull = usableBacklog.length > 12;
+// Stop harvesting once 10 unused, gate-passed ideas are available.
+const isFull = usableBacklog.length >= 10;
 
 return [{
   json: {

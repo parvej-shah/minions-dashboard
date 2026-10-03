@@ -216,10 +216,10 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
       <div class="writes"><div class="w"><span class="arrow">←</span><b>clients</b></div><div class="w"><span class="arrow">→</span>POST /api/internal/harvest-slot</div></div>
     </div>
     <div class="row">
-      <div class="trig"><span class="t">webhook test-harvester</span><span class="t">dashboard “Harvest”</span><span class="t">02 empty queue</span></div>
+      <div class="trig"><span class="t">webhook test-harvester</span><span class="t">dashboard “Harvest”</span><span class="t">02 no eligible idea</span></div>
       <div class="spine"><span class="dot" style="--c:var(--violet)"></span>
         <div class="stage"><h3>Harvest ideas <span class="wf">01_idea_harvester</span></h3>
-          <p>Skips if more than 12 unclaimed REFINED ideas already exist. It refines any human-entered NEW notes, reads the tenant's RSS sources, and generates one idea per pillar in the rotation. It then drops ideas whose thesis duplicates an earlier one and studies each source article's structure ("craft notes").</p>
+          <p>Skips if 10 or more unused, gate-passed REFINED ideas already exist. It refines any human-entered NEW notes, reads the tenant's RSS sources, and generates one idea per pillar in the rotation. It then drops ideas whose thesis duplicates an earlier one and studies each source article's structure ("craft notes").</p>
           <div class="chips"><span class="chip llm">Refine · qwen-flash</span><span class="chip llm">Harvest · qwen3.8-max</span><span class="chip llm">Craft · qwen3.8-max</span></div></div>
       </div>
       <div class="writes"><div class="w"><span class="arrow">→</span><b>ideas</b> status REFINED</div><div class="w"><span class="arrow">←</span>/api/brand/context</div><div class="w"><span class="arrow">→</span>/api/ideas/craft</div><div class="w"><span class="arrow">→</span>/api/internal/source-status</div></div>
@@ -292,7 +292,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
     <div class="life-note">
       <span>PICKED &gt; 30 min, no asset → sweeper → HARVESTED (eligible again)</span>
       <span>Idea with draft_asset_id is never re-drafted (reason ALREADY_DRAFTED) until its asset is deleted</span>
-      <span>02 pick order: explicit idea_id → due QUEUED (scheduled_for, queue_order) → HIGH priority REFINED/HARVESTED by batch_rank, oldest first</span>
+      <span>02 pick order: explicit idea_id → oldest eligible unused idea (future scheduled ideas wait)</span>
     </div>
   </div>
 </section>
@@ -311,9 +311,9 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
   <div class="sec-head"><h2>01 · Idea harvester</h2><p><code>Ykpl0pQTzBdZlDcA</code> · {{NODES:01_idea_harvester}}. Brand context comes from <code>/api/brand/context</code>, which supplies positioning, directives, author standing, tenant RSS sources, the pillar rotation for this run, and fingerprints of the 60 most recent theses, and the author context: the ICP, professional memory, content lanes, and the <code>harvest_plan</code>. The plan (<code>src/lib/harvest/plan.ts</code>) picks what each idea is built on so the tenant's source mix holds: 35% current work, 25% experience, 20% ICP questions, 15% market, 5% experiments. If that context is incomplete (<code>context_complete: false</code>) or has no <code>pillar_rotation</code> or <code>harvest_plan</code>, the run fails instead of falling back to generic sources.</p></div>
   <div class="wfblock">
     <ol class="steps">
-      <li class="io"><b>Resolve Client ID</b>: takes <code>client_id</code> and the run id from the webhook body. It starts only from the webhook (dispatcher, dashboard, or 02 when the queue is empty) or a manual run.</li>
+      <li class="io"><b>Resolve Client ID</b>: takes <code>client_id</code> and the run id from the webhook body. It starts only from the webhook (dispatcher, dashboard, or 02 when no eligible idea is available) or a manual run.</li>
       <li class="io"><b>Read Ideas</b>: loads up to 2,000 of the tenant's ideas.</li>
-      <li class="gate"><b>Backlog Guard</b>: if more than 12 REFINED ideas are unclaimed, the run skips and reports <code>skipped: true</code> in the callback.</li>
+      <li class="gate"><b>Backlog Guard</b>: when 10 unused, gate-passed REFINED ideas are available, the run skips and reports <code>skipped: true</code> in the callback.</li>
       <li class="io"><b>Fetch Brand Context</b>: branches into two parallel paths, A and B.</li>
       <li class="ai"><b>A · Refine</b>: any <code>NEW</code> rows are sent to the refiner (prompt below), gated in <code>refine</code> mode (a person's note is never dropped, only marked below the bar), and saved as <code>REFINED</code> with source <code>MANUAL</code>.</li>
       <li class="io"><b>B · Expand Tenant Sources → RSS</b>: reads one feed per active source. Without sources it falls back to Hacker News, TechCrunch AI and the n8n blog. Feed health goes to <code>/api/internal/source-status</code>.</li>
@@ -418,7 +418,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
     <thead><tr><th>Guard</th><th>Where</th><th>Rule</th><th>Effect</th></tr></thead>
     <tbody>
       <tr><td>Harvest budget</td><td>00 → /api/internal/harvest-slot</td><td>System-wide daily run limit across tenants</td><td>Tenant skipped for the day</td></tr>
-      <tr><td>Backlog guard</td><td>01 Backlog Guard</td><td>More than 12 unclaimed REFINED ideas</td><td>Harvest skipped</td></tr>
+      <tr><td>Backlog guard</td><td>01 Backlog Guard</td><td>10 unused, gate-passed REFINED ideas</td><td>Harvest skipped</td></tr>
       <tr><td>Degraded context</td><td>01 Build Harvest Payload</td><td><code>context_complete=false</code> or empty rotation</td><td>Run throws</td></tr>
       <tr><td>Authority gate</td><td>01 Gate Harvest Ideas → /api/internal/harvest/gate</td><td>No ICP problem; restated thesis (Jaccard ≥ 0.5); cited memory missing, misquoted or unused; unsupported figure; Generalize specifics</td><td>Stored REJECTED with reasons</td></tr>
       <tr><td>Below the bar</td><td>same</td><td>No quoted, used memory item or proof</td><td>Kept, <code>BELOW_BAR</code>, LOW priority</td></tr>

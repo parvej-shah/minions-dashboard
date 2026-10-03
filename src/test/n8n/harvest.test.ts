@@ -209,8 +209,8 @@ describe("the backlog guard", () => {
     expect(out).toMatchObject({ backlog_count: 0, skip_harvest: false });
   });
 
-  it("skips once more than 12 passing ideas are waiting", async () => {
-    expect(await guard(rows(13, { gate_verdict: "PASS" }))).toMatchObject({ backlog_count: 13, skip_harvest: true });
-    expect(await guard(rows(12, { gate_verdict: "PASS" }))).toMatchObject({ skip_harvest: false });
+  it("skips once 10 passing ideas are waiting", async () => {
+    expect(await guard(rows(10, { gate_verdict: "PASS" }))).toMatchObject({ backlog_count: 10, skip_harvest: true });
+    expect(await guard(rows(9, { gate_verdict: "PASS" }))).toMatchObject({ skip_harvest: false });
   });
 });
