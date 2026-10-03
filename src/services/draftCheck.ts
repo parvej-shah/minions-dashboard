@@ -1,3 +1,4 @@
+import { badRequest } from "@/server/http/errors";
 import { checkDraft, type DraftCheckResult, type EditorClaim } from "@/lib/drafts/check";
 import { getDraftCheckInputs } from "@/services/draftContext";
 import { prisma } from "@/lib/prisma";
@@ -6,11 +7,11 @@ import { toIcpContext } from "@/services/authorContext";
 const str = (v: unknown) => (typeof v === "string" ? v : "");
 
 /** POST /api/internal/drafts/check: loads what the draft may rest on, then runs checkDraft. */
-export async function runDraftCheck(body: Record<string, unknown>): Promise<{ error: string } | DraftCheckResult> {
+export async function runDraftCheck(body: Record<string, unknown>): Promise<DraftCheckResult> {
   const clientId = str(body.client_id).trim();
   const ideaId = str(body.idea_id).trim();
-  if (!clientId || !ideaId) return { error: "client_id and idea_id are required" };
-  if (!str(body.body).trim()) return { error: "body is empty" };
+  if (!clientId || !ideaId) throw badRequest("client_id and idea_id are required");
+  if (!str(body.body).trim()) throw badRequest("body is empty");
 
   const [inputs, trust, icpRow] = await Promise.all([
     getDraftCheckInputs(clientId, ideaId),

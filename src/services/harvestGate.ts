@@ -1,3 +1,4 @@
+import { badRequest } from "@/server/http/errors";
 import { prisma } from "@/lib/prisma";
 import { restemKey, thesisKey } from "@/lib/thesis";
 import { gateIdeas, gateInputFromContext, type CandidateIdea, type GateContext, type GatedIdea } from "@/lib/harvest/gate";
@@ -16,16 +17,16 @@ type Body = Record<string, unknown>;
  */
 export async function gateHarvestRequest(
   body: Body
-): Promise<{ error: string } | { ideas: (CandidateIdea & GatedIdea)[]; summary: Record<string, number> }> {
+): Promise<{ ideas: (CandidateIdea & GatedIdea)[]; summary: Record<string, number> }> {
   const clientId = typeof body.client_id === "string" ? body.client_id.trim() : "";
   const mode = body.mode === "refine" ? "refine" : body.mode === "harvest" ? "harvest" : null;
   const ideas = Array.isArray(body.ideas) ? (body.ideas.filter((i) => i && typeof i === "object") as CandidateIdea[]) : null;
   const context = body.context && typeof body.context === "object" ? (body.context as GateContext) : null;
-  if (!clientId) return { error: "client_id is required" };
-  if (!mode) return { error: 'mode must be "harvest" or "refine"' };
-  if (!ideas) return { error: "ideas must be an array" };
-  if (ideas.length > MAX_IDEAS_PER_GATE) return { error: `At most ${MAX_IDEAS_PER_GATE} ideas per call` };
-  if (!context) return { error: "context (the brand context the prompt used) is required" };
+  if (!clientId) throw badRequest("client_id is required");
+  if (!mode) throw badRequest('mode must be "harvest" or "refine"');
+  if (!ideas) throw badRequest("ideas must be an array");
+  if (ideas.length > MAX_IDEAS_PER_GATE) throw badRequest(`At most ${MAX_IDEAS_PER_GATE} ideas per call`);
+  if (!context) throw badRequest("context (the brand context the prompt used) is required");
 
   let knownTheses: string[] = [];
   if (mode === "harvest") {

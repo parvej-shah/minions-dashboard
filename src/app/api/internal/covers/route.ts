@@ -1,47 +1,35 @@
-import { NextResponse } from "next/server";
-import { apiError, apiFailure } from "@/server/http/respond";
-import { verifyWebhookSecret } from "@/lib/security";
 import { markCoverFailed, renderAssetCover } from "@/services/cover";
 import { settleSlotDraft } from "@/services/contentPlan";
+import { readJsonOrEmpty, requireFields } from "@/server/http/body";
+import { HttpError } from "@/server/http/errors";
+import { route } from "@/server/http/route";
 
-/** Rendering is about a second; the R2 upload and photo fetch add a few more. */
 export const maxDuration = 60;
 
-/**
- * Draws a drafted asset's cover in code (phase 5). Called by
- * 02_idea_to_asset right after the asset is saved, with the strategist's
- * cover card. Always leaves the cover READY or FAILED, never PENDING, so a
- * draft never waits on a cover that is not coming.
- */
-export async function POST(request: Request) {
-  const authCheck = await verifyWebhookSecret(request);
-  if (!authCheck.isValid && authCheck.response) return authCheck.response;
-
-  const body = await request.json().catch(() => ({}));
-  const assetId = typeof body.asset_id === "string" ? body.asset_id.trim() : "";
-  if (!assetId) return apiFailure("asset_id is required", 400);
+// Always leaves the cover READY or FAILED, never PENDING, so a draft never waits on a cover that is not coming.
+export const POST = route({ auth: "webhook", failure: "Failed to render cover" }, async ({ request }) => {
+  const body = await readJsonOrEmpty(request);
+  const { asset_id } = requireFields(body, "asset_id");
   const card = body.card && typeof body.card === "object" ? body.card : {};
 
-  try {
-    const result = await renderAssetCover(assetId, { card });
-    if (!result.ok && result.locked) return apiFailure(result.error, 409);
-    if (!result.ok) {
-      await markCoverFailed(assetId, result.error);
-      await settleSlotDraft(assetId);
-      return apiFailure(result.error, 422);
-    }
-    // A content-plan slot's draft is labelled or published once its cover is drawn.
-    const slot = await settleSlotDraft(assetId);
-    return NextResponse.json({
-      success: true,
-      hero_status: "READY",
-      hero_image_url: result.url,
-      layout: result.spec.layout,
-      notes: result.spec.notes,
-      ...(slot && slot !== "NOT_A_SLOT" ? { slot } : {}),
-    });
-  } catch (error) {
-    await markCoverFailed(assetId, error instanceof Error ? error.message : "Cover render failed").catch(() => {});
-    return apiError(error, "Failed to render cover");
+  const result = await renderAssetCover(asset_id, { card }).catch(async (error) => {
+    await markCoverFailed(asset_id, error instanceof Error ? error.message : "Cover render failed").catch(() => {});
+    throw error;
+  });
+  if (!result.ok && result.locked) throw new HttpError(409, result.error);
+  if (!result.ok) {
+    await markCoverFailed(asset_id, result.error);
+    await settleSlotDraft(asset_id);
+    throw new HttpError(422, result.error);
   }
-}
+
+  const slot = await settleSlotDraft(asset_id);
+  return {
+    success: true,
+    hero_status: "READY",
+    hero_image_url: result.url,
+    layout: result.spec.layout,
+    notes: result.spec.notes,
+    ...(slot && slot !== "NOT_A_SLOT" ? { slot } : {}),
+  };
+});

@@ -85,3 +85,10 @@ export async function deleteIdeaSource(clientId: string, id: string) {
   const { count } = await prisma.ideaSource.deleteMany({ where: { id, clientId } });
   if (count === 0) throw notFound("Source not found");
 }
+
+export async function recordSourceFetch(sourceId: string, ok: boolean, error: string) {
+  const updated = await prisma.ideaSource
+    .update({ where: { id: sourceId }, data: { lastFetchedAt: new Date(), lastError: ok ? null : error || "Fetch failed" } })
+    .catch(() => null);
+  if (!updated) throw notFound(`Unknown source_id: ${sourceId}`);
+}

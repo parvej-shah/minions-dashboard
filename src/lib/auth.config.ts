@@ -10,8 +10,8 @@ export const authConfig: NextAuthConfig = {
     authorized({ auth, request }) {
       const url = new URL(request.url);
       // Routes reached by n8n rather than a browser. They are NOT unauthenticated:
-      // each one verifies the webhook secret itself (verifyWebhookSecret, or the
-      // rate-limited check in /api/media/ingest). Listing them here only stops the
+      // each one verifies the webhook secret itself (verifyWebhookSecret). Listing
+      // them here only stops the
       // session gate from bouncing a server-to-server POST to /login.
       //
       // Omitting a route here fails in a way that looks like success: the gate

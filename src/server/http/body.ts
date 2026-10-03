@@ -5,9 +5,9 @@ export type JsonObject = Record<string, unknown>;
 const isObject = (value: unknown): value is JsonObject =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-export async function readJson(request: Request): Promise<JsonObject> {
+export async function readJson(request: Request, invalidMessage = "Body must be a JSON object"): Promise<JsonObject> {
   const body = await request.json().catch(() => null);
-  if (!isObject(body)) throw badRequest("Body must be a JSON object");
+  if (!isObject(body)) throw badRequest(invalidMessage);
   return body;
 }
 

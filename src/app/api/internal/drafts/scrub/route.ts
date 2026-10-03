@@ -1,30 +1,16 @@
-import { NextResponse } from "next/server";
-import { apiError, apiFailure } from "@/server/http/respond";
-import { verifyWebhookSecret } from "@/lib/security";
 import { scrubBannedWords } from "@/services/bannedScrub";
+import { readJsonOrEmpty, requireFields } from "@/server/http/body";
+import { badRequest } from "@/server/http/errors";
+import { route } from "@/server/http/route";
 
 export const maxDuration = 120;
 
-/**
- * 02_idea_to_asset › Scrub Banned Words, just before Prepare Asset Row:
- * rewrites the sentences that use one of the tenant's FORBIDDEN words.
- *
- *   POST { client_id, texts: { body, hook, li_variant, ... } }
- *   -> { texts, rewritten, kept, remaining }
- */
-export async function POST(request: Request) {
-  const authCheck = await verifyWebhookSecret(request);
-  if (!authCheck.isValid && authCheck.response) return authCheck.response;
+export const POST = route({ auth: "webhook", failure: "Failed to scrub banned words" }, async ({ request }) => {
+  const body = await readJsonOrEmpty(request);
+  const { client_id } = requireFields(body, "client_id");
+  const { texts } = body;
+  if (!texts || typeof texts !== "object" || Array.isArray(texts)) throw badRequest("client_id and texts are required");
 
-  const body = (await request.json().catch(() => null)) as { client_id?: unknown; texts?: unknown } | null;
-  const clientId = typeof body?.client_id === "string" ? body.client_id : "";
-  const raw = body?.texts && typeof body.texts === "object" && !Array.isArray(body.texts) ? (body.texts as Record<string, unknown>) : null;
-  if (!clientId || !raw) return apiFailure("client_id and texts are required", 400);
-  const texts = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, typeof v === "string" ? v : ""]));
-
-  try {
-    return NextResponse.json(await scrubBannedWords(clientId, texts));
-  } catch (error) {
-    return apiError(error, "Failed to scrub banned words");
-  }
-}
+  const strings = Object.fromEntries(Object.entries(texts).map(([key, value]) => [key, typeof value === "string" ? value : ""]));
+  return scrubBannedWords(client_id, strings);
+});

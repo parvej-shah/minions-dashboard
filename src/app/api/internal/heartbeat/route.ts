@@ -1,22 +1,13 @@
-import { NextResponse } from "next/server";
-import { apiFailure } from "@/server/http/respond";
-import { verifyWebhookSecret } from "@/lib/security";
 import { recordHeartbeat } from "@/services/jobHeartbeat";
 import { AUTOMATION_JOBS } from "@/constants/automations";
+import { asString, readJsonOrEmpty } from "@/server/http/body";
+import { badRequest } from "@/server/http/errors";
+import { route } from "@/server/http/route";
 
-/**
- * Server-to-server only: a check-in for the n8n jobs that never otherwise call
- * the dashboard (the stuck-idea sweeper and the error alert). Every other job
- * checks in from the route it already calls on each run.
- */
-export async function POST(request: Request) {
-  const check = await verifyWebhookSecret(request);
-  if (!check.isValid) return check.response!;
-
-  const body = await request.json().catch(() => ({}));
-  const job = typeof body.job === "string" ? body.job : "";
-  if (!AUTOMATION_JOBS.some((j) => j.key === job)) return apiFailure("job must be one of the known automation keys", 400);
-
+// Check-in for the n8n jobs that never otherwise call the dashboard (the stuck-idea sweeper and the error alert).
+export const POST = route({ auth: "webhook", failure: "Failed to record the heartbeat" }, async ({ request }) => {
+  const job = asString((await readJsonOrEmpty(request)).job);
+  if (!AUTOMATION_JOBS.some((known) => known.key === job)) throw badRequest("job must be one of the known automation keys");
   await recordHeartbeat(job);
-  return NextResponse.json({ success: true });
-}
+  return { success: true };
+});

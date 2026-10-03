@@ -1,64 +1,12 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getBrandSettings, getWriterVoiceConfig, getHarvestContext } from "@/services/brand";
-import { apiError, apiFailure } from "@/server/http/respond";
-import { verifyWebhookSecret } from "@/lib/security";
+import { loadBrandContext } from "@/services/brandContextLoader";
 import { recordHeartbeat } from "@/services/jobHeartbeat";
-import { buildBrandContextResponse } from "@/services/brandContext";
-import { harvestFocusLane } from "@/services/contentPlan";
+import { badRequest } from "@/server/http/errors";
+import { route } from "@/server/http/route";
 
-/**
- * Structured brand context for the n8n drafting pipeline to ingest.
- * Sourced from the same `getBrandSettings()` the /api/brand and Brand Profile
- * tab use, so this cannot drift from what an operator edits there.
- *
- * The caller here is n8n (a server-to-server webhook call, not a signed-in
- * browser), so tenancy comes from a `clientId` query param rather than a
- * session — n8n's Assemble Brand Context node passes the client_id it
- * already carries from the workflow trigger payload.
- */
-export async function GET(request: Request) {
-  const authCheck = await verifyWebhookSecret(request);
-  if (!authCheck.isValid && authCheck.response) return authCheck.response;
+// Tenancy comes from the clientId query param: the caller is n8n, not a signed-in browser.
+export const GET = route({ auth: "webhook", failure: "Failed to build brand context" }, async ({ request }) => {
   await recordHeartbeat("01_idea_harvester");
-
   const clientId = new URL(request.url).searchParams.get("clientId");
-  if (!clientId) {
-    return apiFailure("clientId query param is required", 400);
-  }
-
-  try {
-    // The webhook secret authenticates the *caller* (n8n), not a tenant, and n8n
-    // legitimately harvests for every tenant -- so this cannot be narrowed to one
-    // clientId. What it can do is refuse ids that name no live tenant, so a typo
-    // or a stale id fails loudly here instead of further downstream, where
-    // getBrandSettings' fallback would hand back a plausible-looking default
-    // profile for a tenant that does not exist.
-    const client = await prisma.client.findUnique({
-      where: { id: clientId },
-      select: { id: true, status: true },
-    });
-    if (!client) {
-      return apiFailure("Unknown clientId", 404);
-    }
-    if (client.status !== "ACTIVE") {
-      return apiFailure(`Tenant ${clientId} is ${client.status}, not ACTIVE`, 409);
-    }
-
-    const [brand, voiceConfig, harvest, focusLane] = await Promise.all([
-      getBrandSettings(clientId),
-      getWriterVoiceConfig(clientId),
-      getHarvestContext(clientId),
-      harvestFocusLane(clientId),
-    ]);
-
-    // A targeted harvest for a content-plan slot (phase 7): the harvester sees
-    // only that slot's lane, so every idea it makes is for that lane.
-    const focused = focusLane ? harvest.author.lanes.filter((l) => l.id === focusLane) : [];
-    if (focused.length) harvest.author = { ...harvest.author, lanes: focused };
-
-    return NextResponse.json(buildBrandContextResponse(brand, voiceConfig, harvest));
-  } catch (error) {
-    return apiError(error, "Failed to build brand context");
-  }
-}
+  if (!clientId) throw badRequest("clientId query param is required");
+  return loadBrandContext(clientId);
+});

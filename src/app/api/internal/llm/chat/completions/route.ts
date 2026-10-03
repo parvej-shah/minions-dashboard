@@ -1,30 +1,19 @@
 import { NextResponse } from "next/server";
-import { apiFailure } from "@/server/http/respond";
-import { verifyWebhookSecret } from "@/lib/security";
 import { chatWithFallback } from "@/lib/ai/modelChain";
-
-/**
- * Every model call n8n makes goes through here: an OpenAI-compatible chat
- * completion, forwarded to DashScope with model fallback
- * (src/lib/ai/modelChain.ts). The body is the `payload` a Render … Prompt
- * node returned, sent unchanged; the reply is DashScope's own, so the n8n
- * parse nodes read it exactly as before. `x-model-used` says which model
- * answered.
- */
+import { readJson } from "@/server/http/body";
+import { HttpError, badRequest } from "@/server/http/errors";
+import { route } from "@/server/http/route";
 
 // A slow primary plus a fallback must fit in one invocation.
 export const maxDuration = 300;
 
-export async function POST(request: Request) {
-  const authCheck = await verifyWebhookSecret(request);
-  if (!authCheck.isValid && authCheck.response) return authCheck.response;
+// n8n sends the `payload` a Render … Prompt node returned, unchanged; the reply is DashScope's own.
+export const POST = route({ auth: "webhook", failure: "The model call failed" }, async ({ request }) => {
+  const payload = await readJson(request, "Body must be a chat payload with a model");
+  if (typeof payload.model !== "string") throw badRequest("Body must be a chat payload with a model");
 
-  const payload = await request.json().catch(() => null);
-  if (!payload || typeof payload !== "object" || Array.isArray(payload) || typeof payload.model !== "string") {
-    return apiFailure("Body must be a chat payload with a model", 400);
-  }
   const apiKey = process.env.DASHSCOPE_API_KEY;
-  if (!apiKey) return apiFailure("DASHSCOPE_API_KEY is not configured", 500);
+  if (!apiKey) throw new HttpError(500, "DASHSCOPE_API_KEY is not configured");
 
   try {
     const result = await chatWithFallback(payload, apiKey);
@@ -33,12 +22,12 @@ export async function POST(request: Request) {
       headers: {
         "Content-Type": "application/json",
         "x-model-used": result.model,
-        ...(result.skipped.length ? { "x-model-skipped": result.skipped.map((s) => s.model).join(",") } : {}),
+        ...(result.skipped.length ? { "x-model-skipped": result.skipped.map((skipped) => skipped.model).join(",") } : {}),
       },
     });
   } catch (error) {
     const timedOut = error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError");
     console.error("[llm] model call failed", error);
-    return apiFailure(timedOut ? "The model call timed out" : "The model call failed", timedOut ? 504 : 502);
+    throw new HttpError(timedOut ? 504 : 502, timedOut ? "The model call timed out" : "The model call failed");
   }
-}
+});
