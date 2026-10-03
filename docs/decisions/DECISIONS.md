@@ -29,6 +29,13 @@ and link to it here.
 
 ---
 
+## 2026-10-03 — Jev decides what kind of claim each sentence is
+
+**Decision:** The draft check takes each claim's type (opinion, customer result, statistic, fact, market or product claim) from Jev; the editor model's label is used only when Jev is unavailable. Opinions skip the check, customer results need an experience item or approved proof, the rest need a source.
+**Why:** On 166 stored claims labelled by hand, the editor model called 28 checkable claims opinions, so they passed unchecked; Jev did that 6 times, at about 0.3s per draft. Jev sends more opinions to review instead (25 vs 10), the safe direction.
+**Alternatives considered:** Keeping the stricter of the two labels: no customer result missed, but it keeps the editor's habit of calling generic figures customer results, which wrongly blocked 15 claims against Jev's 2. Jev's one miss in the sample was labelled a statistic, so it still went to review.
+**Status:** active
+
 ## 2026-10-03 — Schedule setup starts from the saved rhythm
 
 **Decision:** The Schedule page leads with automatic drafting status and the saved cadence, with schedule editing and slot-by-slot lane overrides revealed only when requested. For a new or changed schedule, users can save and turn on drafting in one explicit action; review-first remains the safe default unless the user changes it.

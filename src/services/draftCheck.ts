@@ -3,6 +3,7 @@ import { checkDraft, type DraftCheckResult, type EditorClaim } from "@/lib/draft
 import { getDraftCheckInputs } from "@/services/draftContext";
 import { prisma } from "@/lib/prisma";
 import { toIcpContext } from "@/services/authorContext";
+import { labelClaims } from "@/services/claimLabels";
 
 const str = (v: unknown) => (typeof v === "string" ? v : "");
 
@@ -13,7 +14,12 @@ export async function runDraftCheck(body: Record<string, unknown>): Promise<Draf
   if (!clientId || !ideaId) throw badRequest("client_id and idea_id are required");
   if (!str(body.body).trim()) throw badRequest("body is empty");
 
-  const [inputs, icpRow] = await Promise.all([getDraftCheckInputs(clientId, ideaId), prisma.icpProfile.findUnique({ where: { clientId } })]);
+  const editorClaims = Array.isArray(body.claims) ? (body.claims as EditorClaim[]) : [];
+  const [inputs, icpRow, claims] = await Promise.all([
+    getDraftCheckInputs(clientId, ideaId),
+    prisma.icpProfile.findUnique({ where: { clientId } }),
+    labelClaims({ hook: str(body.hook), body: str(body.body) }, editorClaims),
+  ]);
   const idea = inputs.idea;
   const signals = Array.isArray(idea?.signals) ? (idea.signals as { title?: string; snippet?: string; url?: string }[]) : [];
   const icp = icpRow ? toIcpContext(icpRow) : null;
@@ -21,7 +27,7 @@ export async function runDraftCheck(body: Record<string, unknown>): Promise<Draf
   return checkDraft({
     hook: str(body.hook),
     body: str(body.body),
-    claims: Array.isArray(body.claims) ? (body.claims as EditorClaim[]) : [],
+    claims,
     approvedProofs: inputs.approvedProofs,
     allowCustomerResult: inputs.allowCustomerResult,
     trustBasis: inputs.trustBasis,
