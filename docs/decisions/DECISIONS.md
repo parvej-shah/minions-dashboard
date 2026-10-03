@@ -35,6 +35,12 @@ and link to it here.
 **Why:** Queue ordering added cognitive load without changing the regular drafting flow: automatic drafting can use the oldest available idea, and a bounded stock of 10 keeps the idea pool ready without accumulating excess.
 **Status:** active
 
+## 2026-10-03 — Ideas are shown oldest first with distinct draft states
+
+**Decision:** The Ideas list defaults to oldest-first order. Ideas ready for drafting, drafts ready to open, active drafting and published ideas use distinct status labels and card colors; “Draft now” is the filled primary action and “Open draft” is neutral.
+**Why:** The visible order should reinforce which idea automatic drafting will choose, and the cards should make the next action clear at a glance.
+**Status:** active
+
 ## 2026-10-03 — A cover makes one point at a glance and always matches its post
 
 **Decision:** The cover's main line sets in at most three lines (the strategist writes 4 to 8 words, at most 55 characters), and the subtitle appears only under a short headline. The author's name and byline are larger so they read at phone feed size. Headline and Statement covers are the default and alternate. A Number or Quote cover is used only when Jev judges that the figure or line makes sense without the post and would make the reader stop more than the headline; it is no longer used just because it is its turn. A quote is taken from the LinkedIn post when the draft has one, since that is the text the cover is seen beside. When an edit leaves a cover behind (its quote was cut, it states a figure the post no longer has, or it shows an old title), the cover is redrawn when the draft is saved, approved or scheduled, keeping a reviewer's own headline when that is still true. Reviewers can still pick any layout.

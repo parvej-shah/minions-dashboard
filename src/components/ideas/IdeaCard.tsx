@@ -44,14 +44,31 @@ export default function IdeaCard({
   const sourceInfo = getSourceTag(idea.source || "MANUAL");
   const verdict = idea.authority ? GATE_VERDICT_BADGE[idea.authority.verdict] : null;
   const isClaiming = claimingIds.has(idea.id) || claimingIds.has(id);
-  const isClaimed = ["CLAIMED", "PICKED"].includes(status) || justClaimedIds.has(idea.id) || justClaimedIds.has(id);
+  const isClaimed = ["CLAIMED", "PICKED", "DRAFTING"].includes(status) || justClaimedIds.has(idea.id) || justClaimedIds.has(id);
   const isDrafted = ["DRAFTED", "REVIEW"].includes(status) || Boolean(idea.draftAssetId);
   const isPublished = status === "PUBLISHED";
-  const isRejected = status === "REJECTED";
+  const isRejected = ["REJECTED", "DISCARDED", "FAILED"].includes(status);
+  const stageLabel = isPublished ? "Published" : isDrafted ? "Draft ready" : isClaimed || isClaiming || status === "DRAFTING" ? "Drafting" : isRejected ? "Set aside" : "Ready to draft";
+  const cardTone = isDrafted
+    ? "border-blue-500/35 bg-blue-950/20 hover:border-blue-400/60"
+    : isPublished
+      ? "border-brand/35 bg-brand/[0.04] hover:border-brand/55"
+      : isClaimed || isClaiming || status === "DRAFTING"
+        ? "border-gold/35 bg-gold/[0.035] hover:border-gold/55"
+        : "border-line bg-surface hover:border-brand/40";
+  const stageTone = isDrafted
+    ? "border-blue-500/30 bg-blue-500/10 text-blue-300"
+    : isPublished
+      ? "border-brand/30 bg-brand/10 text-brand"
+      : isClaimed || isClaiming || status === "DRAFTING"
+        ? "border-gold/30 bg-gold/10 text-gold"
+        : isRejected
+          ? "border-line bg-surface-2 text-subtle"
+          : "border-brand/25 bg-brand/[0.07] text-brand";
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-2xl border-2 border-b-4 border-line bg-surface p-5 transition-all hover:-translate-y-0.5 hover:border-brand/40">
-      <span className="pointer-events-none absolute -right-10 -top-12 h-32 w-32 rounded-full bg-brand/5 blur-2xl transition-colors group-hover:bg-brand/10" aria-hidden="true" />
+    <article className={`group relative flex flex-col overflow-hidden rounded-2xl border-2 border-b-4 p-5 transition-all hover:-translate-y-0.5 ${cardTone}`}>
+      <span className={`pointer-events-none absolute -right-10 -top-12 h-32 w-32 rounded-full blur-2xl transition-colors ${isDrafted ? "bg-blue-500/5 group-hover:bg-blue-500/10" : "bg-brand/5 group-hover:bg-brand/10"}`} aria-hidden="true" />
 
       <div className="relative flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -67,6 +84,7 @@ export default function IdeaCard({
           ) : (
             <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${sourceInfo.className}`}>{sourceInfo.label}</span>
           )}
+          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${stageTone}`}>{stageLabel}</span>
         </div>
 
         <div className="flex shrink-0 items-center gap-1">
@@ -113,7 +131,7 @@ export default function IdeaCard({
             <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> Published
           </Link>
         ) : isDrafted ? (
-          <Link href="/editorial" className={buttonStyles({ variant: "soft", size: "sm" })}>
+          <Link href="/editorial" className={buttonStyles({ variant: "secondary", size: "sm" })}>
             <Sparkles className="h-4 w-4" aria-hidden="true" /> Open draft
           </Link>
         ) : isClaimed || isClaiming ? (
@@ -123,7 +141,7 @@ export default function IdeaCard({
         ) : isRejected ? (
           <span className="inline-flex min-h-10 items-center justify-center rounded-xl border border-line bg-surface-2 px-3 text-xs font-bold text-subtle">Set aside</span>
         ) : (
-          <Button variant="soft" size="sm" loading={isClaiming} onClick={() => onDraft(idea.id || id)}>
+          <Button variant="primary" size="sm" loading={isClaiming} onClick={() => onDraft(idea.id || id)}>
             Draft now
           </Button>
         )}

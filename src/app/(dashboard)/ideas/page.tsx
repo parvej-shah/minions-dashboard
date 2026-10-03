@@ -469,6 +469,12 @@ export default function IdeaStreamPage() {
       }
 
       return true;
+    }).sort((a, b) => {
+      const dateA = Date.parse(a.created_at);
+      const dateB = Date.parse(b.created_at);
+      const timeA = Number.isFinite(dateA) ? dateA : 0;
+      const timeB = Number.isFinite(dateB) ? dateB : 0;
+      return timeA - timeB || (a.ideaId || a.id).localeCompare(b.ideaId || b.id);
     });
   }, [ideas, selectedStage, searchQuery]);
 
@@ -543,7 +549,7 @@ export default function IdeaStreamPage() {
                   </button>
                 )}
               </div>
-
+              <span className="hidden shrink-0 text-xs font-medium text-muted sm:block">Oldest first</span>
             </div>
 
             <details className="lg:hidden rounded-xl border border-line bg-surface px-3">
