@@ -18,15 +18,6 @@ export interface IdeaSourceItem {
   last_fetched_at: string | null;
 }
 
-export interface IdeaSourceInput {
-  kind: IdeaSourceKind;
-  label: string;
-  url?: string | null;
-  query?: string | null;
-  max_items?: number;
-  is_active?: boolean;
-}
-
 export const IDEA_SOURCE_KINDS: {
   id: IdeaSourceKind;
   label: string;

@@ -22,7 +22,6 @@ export const AUTOMATION_JOBS: AutomationJob[] = [
   { key: "04_hero_image", name: "Cover image", when: "When started", does: "Makes the image for a draft's cover.", everyMinutes: null },
 ];
 
-export type AutomationKey = (typeof AUTOMATION_JOBS)[number]["key"];
 
 /** A timed job counts as running while its last check-in is within 3 intervals (a missed run or two is not "stopped"). */
 export const MISSED_RUNS_ALLOWED = 3;

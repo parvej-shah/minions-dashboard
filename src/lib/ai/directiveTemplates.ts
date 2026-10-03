@@ -23,7 +23,7 @@ export interface TemplateInput {
   selectedPresetId?: string;
 }
 
-export function pickPreset(industry: string, selectedPresetId?: string): BrandPreset {
+function pickPreset(industry: string, selectedPresetId?: string): BrandPreset {
   return (
     BRAND_PRESETS.find((preset) => preset.id === selectedPresetId) ||
     BRAND_PRESETS.find((preset) => preset.industry.toLowerCase().includes(industry.toLowerCase())) ||

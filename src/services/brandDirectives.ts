@@ -13,7 +13,7 @@ const PER_CATEGORY_LIMIT = 6;
 const FORBIDDEN_CATEGORY = "FORBIDDEN";
 
 export const newDirectiveId = () => `DIR-${randomUUID()}`;
-export const toRuleKey = (key: unknown) => String(key).toLowerCase().replace(/\s+/g, "_");
+const toRuleKey = (key: unknown) => String(key).toLowerCase().replace(/\s+/g, "_");
 
 export async function listDirectives(clientId: string) {
   const rows = await prisma.brandDirective.findMany({ where: { clientId }, orderBy: { createdAt: "asc" } });

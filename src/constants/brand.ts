@@ -1,7 +1,3 @@
-import { DEFAULT_WRITER_EXPERTISE } from "@/constants/writerExpertise";
-import type { BrandSettings } from "@/types";
-import { BRAND_POSITIONING, PRIMARY_LOGO_URL } from "@/constants/config";
-
 /**
  * Forbidden-word list for the drafting pipeline's voice prompt.
  *
@@ -29,45 +25,3 @@ export const DEFAULT_PALETTE = {
   brandCream: "#FFF8F0",
   accentBlue: "#3A6EA5",
 } as const;
-
-/**
- * Brand settings served by /api/brand when no `brand_profile` row is stored yet.
- *
- * Once a row exists in the database, these values are only the seed used to
- * create it — the database is the source of truth from then on.
- */
-export const DEFAULT_BRAND_SETTINGS: Omit<BrandSettings, "directives" | "updated_at"> = {
-  id: "BRAND-MINIONS-01",
-  brand_name: "getminions.ai",
-  company_domain: "getminions.ai",
-  positioning: BRAND_POSITIONING,
-  primary_logo_url: PRIMARY_LOGO_URL,
-  cover_byline: "",
-  cover_art: "SHAPES",
-  primary_ink: DEFAULT_PALETTE.primaryInk,
-  brand_teal: DEFAULT_PALETTE.brandTeal,
-  brand_coral: DEFAULT_PALETTE.brandCoral,
-  brand_cream: DEFAULT_PALETTE.brandCream,
-  accent_blue: DEFAULT_PALETTE.accentBlue,
-  tone_guidelines: {
-    formality: "tactile_operator",
-    cadence:
-      "1–3 sentence paragraphs, zero marketing fluff, Stripe/Linear engineering rigor",
-    banned_lexicon: STATIC_BANNED_LEXICON,
-    allowed_proof_claims: [
-      "Live callable AI voice dispatcher demo",
-      "Deterministic JSON schema validation pipeline",
-      "Sub-1.8s WebSocket voice turnaround latency",
-      "Direct team engineering logs from Dhaka",
-    ],
-  },
-  writer_expertise: DEFAULT_WRITER_EXPERTISE,
-  thumbnail_layout: {
-    visual_style:
-      "Tactile Commercial Studio Flat-Lay (Stitched leather clipboard, metallic mechanical clip, dark slate tabletop, volumetric rim lighting)",
-    show_badge: true,
-    show_logo: true,
-    title_word_count_min: 3,
-    title_word_count_max: 6,
-  },
-};

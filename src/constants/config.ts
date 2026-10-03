@@ -41,9 +41,6 @@ export function blogUrl(slug: string, domain?: string | null): string | null {
   return base ? `${base}/blog/${slug}` : null;
 }
 
-/** Fallback hero image when an asset has none. */
-export const DEFAULT_HERO_IMAGE = "/images/social-covers/twitter/twitter_cover_dark.png";
-
 /** Author avatar used when syncing an asset into the public blog table. */
 export const BLOG_AUTHOR_AVATAR = `${BLOG_BASE_URL}/images/minions_ai_logo_primary_transparent.png`;
 
@@ -69,63 +66,6 @@ export const N8N_WEBHOOKS = {
 /** Primary logo, served from the public R2 bucket. */
 export const PRIMARY_LOGO_URL =
   "https://pub-13629069dfd74891bffc487ab4e135f5.r2.dev/minions_logo_primary.svg";
-
-/** Positioning line handed to the drafting pipeline. */
-export const BRAND_POSITIONING =
-  "AI operations partner for US home-services businesses (1-10 techs)";
-
-/** Public social profiles linked from the dashboard. */
-export const SOCIAL_PROFILES = {
-  linkedin: "https://linkedin.com/company/getminionsai",
-  facebook: "https://facebook.com/getminionsai",
-  twitter: "https://twitter.com/getminionsai",
-} as const;
-
-/**
- * Operator-maintained model rate card, shown on the telemetry page.
- *
- * These are list prices someone has to keep in step with the provider's
- * pricing page — they are NOT measured from any run, and nothing in the app
- * computes a cost from them. The UI labels them as such so they are never
- * mistaken for observed spend; recorded `generation_cost` is the real figure.
- */
-export const MODEL_RATE_CARD = [
-  {
-    model: "AI Core Max",
-    stage: "01 Harvest · 02 Stage 1",
-    rate: "$0.002 / 1k tokens",
-    role: "Signal harvesting and strategist thesis defense",
-    accent: "#00C9A7",
-  },
-  {
-    model: "AI Core Flash",
-    stage: "01 Refine · 02 Stage 4",
-    rate: "$0.0001 / 1k tokens",
-    role: "Idea refinement and omnichannel social variants",
-    accent: "#8B5CF6",
-  },
-  {
-    model: "AI Core Plus",
-    stage: "02 Stage 2",
-    rate: "$0.0004 / 1k tokens",
-    role: "Staff Writer 800–1200w long-form prose",
-    accent: "#F1F5F9",
-  },
-  {
-    model: "AI Core Flash",
-    stage: "02 Stage 3",
-    rate: "$0.0001 / 1k tokens",
-    role: "Lead Editorial Reviewer claims classification",
-    accent: "#3B82F6",
-  },
-  {
-    model: "AI Image Generation",
-    stage: "02 Cover Art",
-    rate: "$0.025 / image",
-    role: "1280×720 commercial studio cover generation",
-    accent: "#F59E0B",
-  },
-] as const;
 
 /**
  * Timezone for a workspace that hasn't set its own (Bangladesh, where the

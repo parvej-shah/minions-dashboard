@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 
 const MAX_SLUG_LENGTH = 60;
 
-export function slugify(name: string): string {
+function slugify(name: string): string {
   return name
     .toLowerCase()
     .trim()

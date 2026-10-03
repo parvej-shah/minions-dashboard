@@ -9,7 +9,7 @@ export function chat(payload: object, options?: ChainOptions): Promise<ChainResu
   return chatWithFallback(payload, requireEnv("DASHSCOPE_API_KEY"), options);
 }
 
-export function completionContent(result: Pick<ChainResult, "status" | "body" | "model">, label: string): string | null {
+function completionContent(result: Pick<ChainResult, "status" | "body" | "model">, label: string): string | null {
   if (result.status >= 300) {
     console.warn(`[${label}] ${result.model} answered ${result.status}: ${result.body.slice(0, 200)}`);
     return null;

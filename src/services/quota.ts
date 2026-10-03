@@ -3,7 +3,7 @@ import { findPlan, type PlanDefinition } from "@/constants/plans";
 
 const DEFAULT_PLAN_KEY = "starter";
 
-export function startOfMonth(): Date {
+function startOfMonth(): Date {
   const start = new Date();
   start.setDate(1);
   start.setHours(0, 0, 0, 0);

@@ -30,11 +30,6 @@ export function asList(value: unknown): unknown[] {
   return value ? [value] : [];
 }
 
-export function asStringList(value: unknown): string[] {
-  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string");
-  return typeof value === "string" && value ? [value] : [];
-}
-
 export function requireFields<K extends string>(body: JsonObject, ...keys: K[]): Record<K, string> {
   const fields = Object.fromEntries(keys.map((key) => [key, asString(body[key])])) as Record<K, string>;
   if (keys.some((key) => !fields[key])) throw badRequest(`${keys.join(" and ")} ${keys.length > 1 ? "are" : "is"} required`);
