@@ -31,7 +31,7 @@ Rules:
 Return ONLY this JSON: {"text": "the full revised ${input.kind}"}`;
 
   return {
-    model: "qwen3-max",
+    model: "glm-5.2",
     enable_thinking: false,
     temperature: 0.6,
     max_tokens: 3000,

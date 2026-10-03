@@ -96,7 +96,7 @@ Brand Context:
 ${brandContext}${toneProfileBlock}${voiceBlock}`;
 
   return {
-    model: "qwen3-max",
+    model: "glm-5.2",
     enable_thinking: false,
     temperature: 0.7,
     max_tokens: 4000,
