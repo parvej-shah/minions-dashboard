@@ -19,7 +19,7 @@ export const DEFAULT_SOURCE_MIX: Record<SourceBucket, number> = {
 };
 
 /** What an idea is built on, stored as ideas.source_type. */
-export const SOURCE_TYPES = [
+const SOURCE_TYPES = [
   "CURRENT_WORK",
   "BUILD_IN_PUBLIC",
   "PAST_EXPERIENCE",

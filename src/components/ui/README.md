@@ -46,8 +46,7 @@ reduced motion.
   announcement. Use it wherever a list is still fetching.
 - **`ProgressBar`**: a thick, rounded bar for steps and goals. The value runs
   from 0 to 1.
-- **`EmptyState`**, **`Modal`**, **`ConfirmModal`**, **`Toast`** and
-  **`StatusBadge`** already existed and are still the ones to use.
+- **`EmptyState`**, **`Modal`**, **`ConfirmModal`** and **`Toast`** already existed and are still the ones to use.
 
 ## Rules
 

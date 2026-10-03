@@ -14,10 +14,8 @@ import {
   ArrowRight,
   ExternalLink,
   Layers,
-  ShieldCheck,
   Sparkles,
   Zap,
-  Globe,
 } from "lucide-react";
 import { buttonStyles } from "@/components/ui/Button";
 
@@ -39,103 +37,6 @@ function DocsContent() {
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   }
-
-  const nextJsWebhookSnippet = `import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
-import crypto from "crypto";
-import { z } from "zod";
-import { db } from "@/lib/db"; // Replace with your Prisma/Drizzle db client
-
-const webhookSchema = z.object({
-  title: z.string().min(1),
-  slug: z.string().min(1),
-  excerpt: z.string().optional().nullable(),
-  hook: z.string().optional().nullable(),
-  content: z.string().min(1),
-  hero_image_url: z.string().url().optional().nullable(),
-  coverImageUrl: z.string().url().optional().nullable(),
-  published_at: z.string().datetime().optional().nullable(),
-});
-
-function verifySecret(authHeader: string | null): boolean {
-  const secret = process.env.MINIONS_WEBHOOK_SECRET;
-  if (!secret) return true; // Open if secret not configured
-  if (!authHeader) return false;
-  const token = authHeader.replace(/^Bearer\\s+/i, "").trim();
-  const tokenBuf = Buffer.from(token, "utf8");
-  const secretBuf = Buffer.from(secret, "utf8");
-  if (tokenBuf.length !== secretBuf.length) return false;
-  return crypto.timingSafeEqual(tokenBuf, secretBuf);
-}
-
-export async function POST(request: NextRequest) {
-  const authHeader = request.headers.get("authorization") || request.headers.get("x-webhook-secret");
-  if (!verifySecret(authHeader)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const body = await request.json();
-  const parsed = webhookSchema.parse(body);
-
-  const post = await db.post.upsert({
-    where: { slug: parsed.slug },
-    update: {
-      title: parsed.title,
-      excerpt: parsed.excerpt || parsed.hook || parsed.title,
-      content: parsed.content,
-      coverUrl: parsed.hero_image_url || parsed.coverImageUrl,
-      publishedAt: parsed.published_at ? new Date(parsed.published_at) : new Date(),
-    },
-    create: {
-      slug: parsed.slug,
-      title: parsed.title,
-      excerpt: parsed.excerpt || parsed.hook || parsed.title,
-      content: parsed.content,
-      coverUrl: parsed.hero_image_url || parsed.coverImageUrl,
-      publishedAt: parsed.published_at ? new Date(parsed.published_at) : new Date(),
-    },
-  });
-
-  revalidatePath("/blog");
-  revalidatePath(\`/blog/\${post.slug}\`);
-
-  return NextResponse.json({ success: true, slug: post.slug });
-}`;
-
-  const pythonFastApiSnippet = `import hmac
-import os
-from datetime import datetime
-from typing import Optional
-from fastapi import FastAPI, Header, HTTPException, status
-from pydantic import BaseModel, HttpUrl
-
-app = FastAPI()
-
-class MinionsWebhookPayload(BaseModel):
-    title: str
-    slug: str
-    excerpt: Optional[str] = None
-    hook: Optional[str] = None
-    content: str
-    hero_image_url: Optional[HttpUrl] = None
-    published_at: Optional[datetime] = None
-
-@app.post("/api/webhooks/minions")
-async def receive_minions_post(
-    payload: MinionsWebhookPayload,
-    authorization: Optional[str] = Header(None),
-    x_webhook_secret: Optional[str] = Header(None),
-):
-    secret = os.getenv("MINIONS_WEBHOOK_SECRET")
-    if secret:
-        token = (authorization or x_webhook_secret or "").replace("Bearer ", "").strip()
-        if not hmac.compare_digest(token, secret):
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid secret")
-
-    # Upsert to your database (SQLAlchemy, Tortoise, etc.)
-    print(f"Publishing article: {payload.title} ({payload.slug})")
-    
-    return {"success": True, "slug": payload.slug}`;
 
   const aiDirectivePrompt = `You are an expert Executive Brand & Editorial Voice Architect for Minions.AI.
 Analyze my company and executive profile below to generate a tailored, comprehensive 40-point Brand Directives configuration.

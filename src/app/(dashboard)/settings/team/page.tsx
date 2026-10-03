@@ -17,12 +17,6 @@ const ROLE_LABELS: Record<TeamMember["role"], string> = {
   MEMBER: "Member",
 };
 
-const ROLE_DESCRIPTIONS: Record<TeamMember["role"], string> = {
-  OWNER: "Full workspace ownership, billing, member and platform controls",
-  MARKETING_DIRECTOR: "Team invites, brand directives, and editorial approval",
-  MEMBER: "Drafting, content review, and telemetry analytics",
-};
-
 const INVITABLE_ROLES: TeamMember["role"][] = ["MARKETING_DIRECTOR", "MEMBER", "OWNER"];
 
 export default function TeamPage() {

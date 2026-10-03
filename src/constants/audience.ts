@@ -2,7 +2,7 @@
  * Who a brand directive applies to. One ICP per tenant (decision D14); the
  * PEER and BRIDGE lanes are retired.
  */
-export const AUDIENCE_SCOPES = ["ALL", "ICP"] as const;
+const AUDIENCE_SCOPES = ["ALL", "ICP"] as const;
 export type AudienceScope = (typeof AUDIENCE_SCOPES)[number];
 
 /** Values old directive rows may still carry. Read-only: never accepted on write. */

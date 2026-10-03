@@ -7,7 +7,7 @@
  * keeps the two identical) and for new tenants on first read of their author
  * context.
  */
-export const LANE_PURPOSES = ["AUTHORITY", "CREDIBILITY", "DEMAND"] as const;
+const LANE_PURPOSES = ["AUTHORITY", "CREDIBILITY", "DEMAND"] as const;
 export type LanePurpose = (typeof LANE_PURPOSES)[number];
 
 export const PROFILE_TARGETS = ["PERSONAL", "COMPANY", "BOTH"] as const;

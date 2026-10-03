@@ -1,5 +1,4 @@
 import React from "react";
-import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 /**
@@ -53,7 +52,7 @@ export interface ButtonStyleOptions {
   className?: string;
 }
 
-/** The class string, for elements that are not a <button> or <Link>. */
+/** The class string, for elements that are not a <button>, such as a <Link>. */
 export function buttonStyles({ variant = "primary", size = "md", block, shout, className = "" }: ButtonStyleOptions = {}) {
   return [base, variants[variant], sizes[size], block && "w-full", shout && "uppercase tracking-wider", className]
     .filter(Boolean)
@@ -78,18 +77,5 @@ export function Button({ variant, size, block, shout, className, loading, icon, 
       {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : icon}
       {children}
     </button>
-  );
-}
-
-export interface ButtonLinkProps extends ButtonStyleOptions, Omit<React.ComponentProps<typeof Link>, "className"> {
-  icon?: React.ReactNode;
-}
-
-export function ButtonLink({ variant, size, block, shout, className, icon, children, ...rest }: ButtonLinkProps) {
-  return (
-    <Link className={buttonStyles({ variant, size, block, shout, className })} {...rest}>
-      {icon}
-      {children}
-    </Link>
   );
 }

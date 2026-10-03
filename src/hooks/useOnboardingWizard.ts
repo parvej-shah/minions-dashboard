@@ -7,8 +7,6 @@ import type { AiSuggestions, GeneratedDirective } from "@/lib/ai/brandCopilot";
 import type { LinkedInProfile } from "@/types";
 import { DEFAULT_WRITER_EXPERTISE, type WriterExpertise } from "@/constants/writerExpertise";
 
-export const ONBOARDING_STEPS = ["Your brand", "Your voice", "Start creating"] as const;
-
 const LEGACY_VOICE_DESCRIPTIONS = new Set([
   "Short paragraphs, clear tradeoffs, and a useful next step. No hype.",
   "Teach the why before the how, with calm and precise language.",
@@ -57,7 +55,6 @@ export interface OnboardingWizardState {
   selectedPresetId: string | null;
   setSelectedPresetId: (id: string | null) => void;
   applyPreset: (preset: BrandPreset) => void;
-  isGeneratingSuggestions: boolean;
   goToBrandInterview: () => Promise<void>;
 
   // Step 2: Brand Interview
@@ -115,7 +112,7 @@ const draftKey = (userId: string) => `${LEGACY_STORAGE_KEY}:${userId}`;
  * Setup no longer asks for a voice; this is the starting voice every new
  * workspace gets ("Direct & practical"), changed later in Brand.
  */
-export const DEFAULT_VOICE = "Short paragraphs, clear tradeoffs, and a useful next step. No hype.";
+const DEFAULT_VOICE = "Short paragraphs, clear tradeoffs, and a useful next step. No hype.";
 
 /** What the first-post answer is, as a ProfessionalMemory kind. */
 export type StoryKind = "LESSON" | "OPINION" | "CURRENT_WORK";
@@ -310,8 +307,6 @@ export function useOnboardingWizard(userId: string): OnboardingWizardState {
     setSelectedPresetId(preset.id);
     setIndustry(preset.industry);
   }
-
-  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
 
   async function goToBrandInterview() {
     setStep(1);
@@ -552,7 +547,6 @@ export function useOnboardingWizard(userId: string): OnboardingWizardState {
     selectedPresetId,
     setSelectedPresetId,
     applyPreset,
-    isGeneratingSuggestions,
     goToBrandInterview,
     linkedInConnected,
     setLinkedInConnected,

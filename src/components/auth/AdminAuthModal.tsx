@@ -7,7 +7,6 @@ import {
   LogOut,
   X,
   ShieldCheck,
-  User,
   KeyRound,
   CheckCircle2,
 } from "lucide-react";

@@ -14,7 +14,7 @@ const tones: Record<CardTone, string> = {
   gold: "border-2 border-b-4 border-gold/35 border-b-gold-edge/70 bg-[#1A150B]",
 };
 
-export function cardStyles(tone: CardTone = "default", className = "") {
+function cardStyles(tone: CardTone = "default", className = "") {
   return `rounded-2xl p-5 sm:p-6 ${tones[tone]} ${className}`;
 }
 
