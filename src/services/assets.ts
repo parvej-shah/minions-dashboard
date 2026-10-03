@@ -87,14 +87,26 @@ function blogEdits(body: JsonObject): BlogEditFields {
   };
 }
 
+const COVER_LINE = /^!\[[^\]]*\]\(([^)]*)\)/;
+
 export async function updateAsset(clientId: string, idOrSlug: string, body: JsonObject) {
   if (body.status === "SCHEDULED") throw badRequest("Use POST /api/assets/{id}/schedule to schedule a post");
 
   const owned = await prisma.asset.findFirst({
     where: ownedAssetWhere(clientId, idOrSlug),
-    select: { id: true, status: true, publishedAt: true },
+    select: { id: true, status: true, publishedAt: true, heroImageUrl: true },
   });
   if (!owned) throw notFound("Asset not found");
+  // An editor open since the cover was redrawn still holds the old cover line,
+  // whose file is deleted; the saved text always points at the current cover.
+  const content = body.content ?? body.body_content;
+  if (typeof content === "string" && owned.heroImageUrl) {
+    const line = content.match(COVER_LINE);
+    if (line && line[1] !== owned.heroImageUrl) {
+      body = { ...body, content: content.replace(COVER_LINE, (m) => m.replace(line[1], owned.heroImageUrl!)) };
+      delete body.body_content;
+    }
+  }
 
   // The cover must match what goes out: brought in line with the approved
   // text before a post is released, and after any change to its words.
