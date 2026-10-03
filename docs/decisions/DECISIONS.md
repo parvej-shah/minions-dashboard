@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-10-03 — Brand settings lead with the author’s foundation
+
+**Decision:** Brand opens on a plain-language overview, with audience and writing voice as the primary areas; idea sources and words to avoid sit under More settings, and visual cover styling is collapsed until needed.
+**Why:** Most authors need to shape what they write and who it helps; feeds, blocklists and cover styling are supporting controls that should stay findable without competing for attention.
+**Status:** active
+
 ## 2026-10-02 — Phone review puts checks before publishing
 
 **Decision:** On phones, Editorial Studio shows writing feedback and claim verification before publishing options. The fixed bar links to those options instead of publishing immediately; raw draft-check notes are not repeated in the claims card, and that card is omitted when there are no claims.

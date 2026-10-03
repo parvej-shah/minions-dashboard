@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { AlertTriangle, Mic2, Sparkles, Rss, BookOpen } from "lucide-react";
+import { AlertTriangle, Mic2, Sparkles, Rss, BookOpen, ChevronDown } from "lucide-react";
 import { BrandDirectiveItem, BrandTab } from "@/types";
 import LexiconTab from "@/components/brand/LexiconTab";
 import { isBannedPhrase } from "@/lib/drafts/banned";
@@ -30,6 +30,7 @@ function BrandStudio() {
   const [activeTab, setActiveTab] = useState<BrandTab>(
     BRAND_TABS.includes(requested as BrandTab) ? (requested as BrandTab) : "overview"
   );
+  const [showMoreSettings, setShowMoreSettings] = useState(requested === "sources" || requested === "lexicon");
   // Bumped after any profile edit so the completeness card re-reads.
   const [profileVersion, setProfileVersion] = useState(0);
   const bumpProfile = () => setProfileVersion((v) => v + 1);
@@ -93,74 +94,41 @@ function BrandStudio() {
   const removeBannedWord = (id: string) => deleteDirective(id);
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-16">
-      {/* Top Header */}
-      <div className="space-y-5 border-b border-line pb-6">
-        <div>
-          <div className="mb-2 flex items-center gap-2 text-[11px] font-mono tracking-[0.16em] text-brand uppercase">
-            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-brand" />
-            Brand profile
+    <div className="mx-auto max-w-7xl space-y-7 pb-16">
+      <div className="space-y-5 border-b border-line pb-5">
+        <div className="flex items-start gap-3">
+          <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border-2 border-brand/30 bg-brand/10 text-brand">
+            <Sparkles className="h-5 w-5" aria-hidden="true" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-ink">Brand</h1>
-          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">
-            Tell the AI who you are, what you post about, and how you sound.
-          </p>
+          <div>
+            <div className="mb-1 text-[11px] font-mono tracking-[0.14em] text-brand uppercase">Your voice, your point of view</div>
+            <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">Make every post sound like you</h1>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">Shape what Minions knows about your work, your readers, and the way you write.</p>
+          </div>
         </div>
 
-        <div
-          role="group"
-          aria-label="Brand sections"
-          className="flex w-full max-w-full flex-nowrap items-center gap-1 overflow-x-auto overscroll-x-contain rounded-xl border border-line bg-surface p-1"
-        >
-          <button
-            type="button"
-            aria-pressed={activeTab === "overview"}
-            onClick={() => setActiveTab("overview")}
-            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "overview" ? "bg-brand text-canvas" : "text-muted hover:text-ink")}
-          >
-            <Sparkles className="h-4 w-4" aria-hidden="true" />
-            Overview
+        <div className="space-y-2">
+          <div role="group" aria-label="Brand foundations" className="flex w-full max-w-full flex-nowrap items-center gap-1 overflow-x-auto overscroll-x-contain rounded-2xl border-2 border-line bg-surface p-1">
+            <button type="button" aria-pressed={activeTab === "overview"} onClick={() => setActiveTab("overview")} className={"inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-xl px-3.5 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "overview" ? "border-b-4 border-brand-edge bg-brand text-brand-ink hover:bg-brand-hover" : "text-muted hover:text-ink")}>
+              <Sparkles className="h-4 w-4" aria-hidden="true" /> Brand overview
+            </button>
+            <button type="button" aria-pressed={activeTab === "voice-proof"} onClick={() => setActiveTab("voice-proof")} className={"inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-xl px-3.5 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "voice-proof" ? "border-b-4 border-brand-edge bg-brand text-brand-ink hover:bg-brand-hover" : "text-muted hover:text-ink")}>
+              <Mic2 className="h-4 w-4" aria-hidden="true" /> Writing voice
+            </button>
+            <button type="button" aria-pressed={activeTab === "experience"} onClick={() => setActiveTab("experience")} className={"inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-xl px-3.5 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "experience" ? "border-b-4 border-brand-edge bg-brand text-brand-ink hover:bg-brand-hover" : "text-muted hover:text-ink")}>
+              <BookOpen className="h-4 w-4" aria-hidden="true" /> Audience &amp; experience
+            </button>
+          </div>
+          <button type="button" aria-expanded={showMoreSettings} onClick={() => setShowMoreSettings((open) => !open)} className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-xl px-3 text-xs font-semibold text-muted transition-colors hover:bg-surface hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">
+            More settings <span className="text-subtle" aria-hidden="true">·</span><span className="hidden text-subtle sm:inline">Idea sources and words to avoid</span><ChevronDown className={"h-4 w-4 transition-transform " + (showMoreSettings ? "rotate-180" : "")} aria-hidden="true" />
           </button>
-          <button
-            type="button"
-            aria-pressed={activeTab === "voice-proof"}
-            onClick={() => setActiveTab("voice-proof")}
-            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "voice-proof" ? "bg-brand text-canvas" : "text-muted hover:text-ink")}
-          >
-            <Mic2 className="h-4 w-4" aria-hidden="true" />
-            Voice &amp; Proof
-          </button>
-          <button
-            type="button"
-            aria-pressed={activeTab === "experience"}
-            onClick={() => setActiveTab("experience")}
-            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "experience" ? "bg-brand text-canvas" : "text-muted hover:text-ink")}
-          >
-            <BookOpen className="h-4 w-4" aria-hidden="true" />
-            Audience &amp; Experience
-          </button>
-          <button
-            type="button"
-            aria-pressed={activeTab === "sources"}
-            onClick={() => setActiveTab("sources")}
-            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "sources" ? "bg-brand text-canvas" : "text-muted hover:text-ink")}
-          >
-            <Rss className="h-4 w-4" aria-hidden="true" />
-            Idea Sources
-          </button>
-          <button
-            type="button"
-            aria-pressed={activeTab === "lexicon"}
-            onClick={() => setActiveTab("lexicon")}
-            className={"inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 sm:text-sm " + (activeTab === "lexicon" ? "bg-brand text-canvas" : "text-muted hover:text-ink")}
-          >
-            <AlertTriangle className="h-4 w-4" aria-hidden="true" />
-            Banned Words ({forbiddenDirectives.filter((d) => isBannedPhrase(d.content)).length})
-          </button>
+          {showMoreSettings && <div role="group" aria-label="More brand settings" className="flex w-full max-w-full flex-nowrap items-center gap-1 overflow-x-auto overscroll-x-contain rounded-2xl border border-line/70 bg-canvas p-1">
+            <button type="button" aria-pressed={activeTab === "sources"} onClick={() => setActiveTab("sources")} className={"inline-flex min-h-10 shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-xl px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 " + (activeTab === "sources" ? "bg-surface-2 text-ink" : "text-muted hover:text-ink")}><Rss className="h-4 w-4" aria-hidden="true" /> Idea sources</button>
+            <button type="button" aria-pressed={activeTab === "lexicon"} onClick={() => setActiveTab("lexicon")} className={"inline-flex min-h-10 shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-xl px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 " + (activeTab === "lexicon" ? "bg-surface-2 text-ink" : "text-muted hover:text-ink")}><AlertTriangle className="h-4 w-4" aria-hidden="true" /> Words to avoid ({forbiddenDirectives.filter((d) => isBannedPhrase(d.content)).length})</button>
+          </div>}
         </div>
       </div>
-
-      <CompletenessCard version={profileVersion} onGo={setActiveTab} />
+      <CompletenessCard version={profileVersion} onGo={(tab) => { setActiveTab(tab); if (tab === "sources" || tab === "lexicon") setShowMoreSettings(true); }} />
 
       {/* ======================================================== */}
       {/* OVERVIEW: plain-language summary, the default landing view */}

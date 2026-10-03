@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User, Hash, Users2, Mic, Plus, X, Loader2, Pencil, Sparkles, Check, Palette, Upload } from "lucide-react";
+import { User, Hash, Users2, Mic, Plus, X, Loader2, Pencil, Sparkles, Check, Palette, Upload, ChevronDown } from "lucide-react";
 import type { BrandDirectiveItem, BrandCategory, BrandSettings, BrandProfileInput, IcpProfileItem } from "@/types";
 import { useApiResource } from "@/hooks/useApiResource";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
@@ -418,24 +418,23 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
           />
         </div>
 
-        {/* Brand Look: logo + colors, used for thumbnail/cover generation only */}
-        <div className="p-5 rounded-2xl bg-surface border border-line space-y-3 shadow-sm md:col-span-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Palette className="w-4 h-4 text-brand" />
-              <h3 className="text-sm font-bold text-ink">Brand look</h3>
-            </div>
+        {/* Visual identity is useful but less frequently changed than the brand brief. */}
+        <details className="group rounded-2xl border border-line bg-surface shadow-sm md:col-span-2">
+          <summary className="flex min-h-16 cursor-pointer list-none items-center gap-3 rounded-2xl px-4 py-3 transition-colors hover:bg-surface-2 sm:px-5 [&::-webkit-details-marker]:hidden">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand/25 bg-brand/10 text-brand"><Palette className="h-4 w-4" aria-hidden="true" /></span>
+            <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-ink">Cover appearance</span><span className="mt-0.5 block text-xs text-muted">Photo, colors, and illustration style</span></span>
+            <ChevronDown className="h-4 w-4 shrink-0 text-muted transition-transform group-open:rotate-180" aria-hidden="true" />
+          </summary>
+          <div className="space-y-3 border-t border-line/70 p-4 sm:p-5">
             {!editingLook && (
-              <button onClick={openLookEdit} className="text-muted hover:text-brand p-1" title="Edit">
-                <Pencil className="w-3.5 h-3.5" />
-              </button>
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs text-muted">Your saved colors, photo, and illustration style.</p>
+                <button type="button" onClick={openLookEdit} className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-xl border-2 border-line bg-surface-2 px-3 text-xs font-semibold text-ink transition-colors hover:border-brand/50 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">
+                  <Pencil className="h-3.5 w-3.5" aria-hidden="true" /> Edit cover appearance
+                </button>
+              </div>
             )}
-          </div>
-          <p className="text-sm text-muted">
-            Every post&apos;s cover is drawn in this look: the same type, colours, photo and byline each time, so readers learn to recognise your posts.
-          </p>
-
-          {editingLook && lookDraft ? (
+            {editingLook && lookDraft ? (
             <div className="space-y-3">
               <div>
                 <label className="text-[11px] font-medium text-muted block mb-1">Photo or logo on covers (a headshot builds personal authority)</label>
@@ -546,7 +545,8 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
             </div>
             </div>
           )}
-        </div>
+          </div>
+        </details>
       </div>
     </div>
   );
