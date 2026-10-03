@@ -68,12 +68,12 @@ describe("making a carousel", () => {
     expect(db.asset.update).toHaveBeenCalledTimes(1);
   }, 60_000);
 
-  it("retries once with the failures, then gives up without storing anything", async () => {
+  it("retries with the failures, then gives up without storing anything or showing the reviewer the checks", async () => {
     const bad = { ...plan, caption: plan.caption + " Systems must answer within two seconds." };
     const chat = vi.fn().mockResolvedValue(reply(bad));
     const result = await generateCarousel("a1", { chat });
-    expect(result.ok).toBe(false);
-    expect(chat).toHaveBeenCalledTimes(2);
+    expect(result).toMatchObject({ ok: false, errors: [] });
+    expect(chat).toHaveBeenCalledTimes(3);
     const retry = chat.mock.calls[1][0] as { messages: { content: string }[] };
     expect(retry.messages[1].content).toContain("unverified claim");
     expect(db.asset.update).not.toHaveBeenCalled();

@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_COVER_BRAND } from "@/lib/covers/brand";
 import { renderCarousel, type CarouselInput } from "@/lib/prompts/carousel";
-import { checkPlan, parsePlan, quantities, suggestCarousel, toDeck, type PlanSources } from "./plan";
+import { checkPlan, parsePlan, quantities, repairPlan, suggestCarousel, toDeck, type PlanSources } from "./plan";
 
 const body = "Demos run in controlled environments. On a live call, two seconds of silence and the buyer hangs up. Test latency on live calls before you buy.";
 const sources: PlanSources = { texts: [body], memory: ["We lost a showing because the calendar write failed silently."], banned: ["game changer"] };
@@ -77,9 +77,34 @@ describe("carousel plan gates", () => {
     expect(checkPlan(plan({ slides: lone }), sources).join()).toMatch(/single STEP/);
   });
 
-  it("counts words per field", () => {
+  it("counts words per field, letting a field run a word or two over", () => {
     const long = { layout: "POINT", title: "This title runs on far past the twelve words a slide title may ever hold" };
-    expect(checkPlan(plan({ slides: [good.slides[0], long, ...good.slides.slice(2)] }), sources).join()).toMatch(/title has 15 words; the most is 12/);
+    expect(checkPlan(plan({ slides: [good.slides[0], long, ...good.slides.slice(2)] }), sources).join()).toMatch(/title has 15 words; the most is 14/);
+    const oneOver = { layout: "STEP", title: "Call it", body: "one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two calls." };
+    const steps = [good.slides[0], oneOver, { layout: "STEP", title: "Time the reply" }, ...good.slides.slice(3)];
+    expect(checkPlan(plan({ slides: steps }), sources).join()).not.toMatch(/words/);
+  });
+
+  it("repairs what the model gets wrong mechanically, and cuts no wording", () => {
+    const messy = plan({
+      caption: good.caption.replace("Demos run", "Demos — run"),
+      slides: [
+        { layout: "CLOSE", takeaway: "Judge the agent on live calls, not demos." },
+        good.slides[0],
+        { layout: "STEP", title: "Call it from a **real** phone" },
+        { layout: "NUMBER", value: "40", unit: "%", caption: "of leads call after hours." },
+        { layout: "POINT", title: "Demos hide the delays that live calls expose" },
+        ...good.slides.slice(1, 4),
+      ],
+    });
+    const fixed = repairPlan(messy, sources);
+    expect(checkPlan(fixed, sources)).toEqual([]);
+    expect(fixed.slides.at(-1)?.layout).toBe("CLOSE");
+    expect(fixed.slides.map((x) => x.layout)).not.toContain("NUMBER");
+    expect(fixed.slides.find((x) => x.layout === "POINT" && x.title.includes("real"))).toMatchObject({ title: "Call it from a real phone" });
+    expect(fixed.caption).toContain("Demos, run");
+    // A plan with too few slides keeps them all and goes back to the model.
+    expect(repairPlan(plan({ slides: good.slides.slice(0, 2) }), sources).slides).toHaveLength(2);
   });
 
   it("allows figures and quotes only from the sources", () => {

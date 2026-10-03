@@ -87,6 +87,13 @@ function restatedUnverified(line: string, unverified: string[]): string | undefi
   });
 }
 
+/**
+ * The prompt asks for WORD_CAPS; a field may run this far over before it
+ * fails, because the real limit is whether the page fits, which toDeck checks.
+ * One word over must not cost the reviewer a carousel.
+ */
+const overCap = (cap: number) => cap + Math.max(2, Math.ceil(cap * 0.1));
+
 const words = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
 const s = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 const opt = (v: unknown) => s(v) || undefined;
@@ -212,7 +219,7 @@ export function checkPlan(plan: CarouselPlan, sources: PlanSources): string[] {
     const at = `Slide ${i + 2} (${slide.layout})`;
     for (const [field, text] of fieldsOf(slide)) {
       const cap = WORD_CAPS[slide.layout][field];
-      if (cap && words(text) > cap) errors.push(`${at}: ${field} has ${words(text)} words; the most is ${cap}.`);
+      if (cap && words(text) > overCap(cap)) errors.push(`${at}: ${field} has ${words(text)} words; the most is ${overCap(cap)}.`);
     }
     if (!mainLine(slide)) errors.push(`${at}: the main text is empty.`);
     if (slide.layout === "CHECKLIST" && (slide.items.length < 2 || slide.items.length > 5)) errors.push(`${at}: 2 to 5 items, not ${slide.items.length}.`);
@@ -249,6 +256,55 @@ export function checkPlan(plan: CarouselPlan, sources: PlanSources): string[] {
     }
   }
   return errors;
+}
+
+/**
+ * Fixes in code what the model gets wrong mechanically, so a plan is not lost
+ * to a dash or a stray slide: dashes and markdown become plain punctuation, a
+ * lone STEP becomes a POINT, a CLOSE moves to the end, and a slide that breaks
+ * a rule (an extra or unsupported NUMBER or QUOTE, a repeated point, one past
+ * the maximum) is dropped while enough slides remain. Wording is never cut:
+ * a field still too long goes back to the model.
+ */
+export function repairPlan(plan: CarouselPlan, sources: PlanSources): CarouselPlan {
+  const clean = (t: string) => t.replace(/\s*(?:[—–]|--)\s*/g, ", ").replace(/(^|\s)#{1,6}\s+/g, "$1").replace(/[*`]/g, "");
+  const cleanSlide = (slide: Slide): Slide => {
+    const out: Record<string, unknown> = { ...slide };
+    for (const [k, v] of Object.entries(slide)) {
+      if (k === "layout" || k === "icon") continue;
+      if (typeof v === "string") out[k] = clean(v);
+      else if (Array.isArray(v)) out[k] = v.map((x) => clean(String(x)));
+    }
+    return out as Slide;
+  };
+  let slides = plan.slides.map(cleanSlide);
+
+  const close = slides.filter((x) => x.layout === "CLOSE");
+  if (close.length) slides = [...slides.filter((x) => x.layout !== "CLOSE"), close[0]];
+  if (slides.filter((x) => x.layout === "STEP").length === 1) slides = slides.map((x) => (x.layout === "STEP" ? { ...x, layout: "POINT" } : x));
+
+  const known = numbersIn(sources.texts.join(" "));
+  const broken = (slide: Slide, i: number): boolean => {
+    if (slide.layout === "NUMBER") {
+      const stated = numbersIn(slide.value);
+      return !stated.length || !stated.every((x) => known.includes(x)) || slides.findIndex((x) => x.layout === "NUMBER") !== i;
+    }
+    if (slide.layout === "QUOTE") return !sources.memory.some((m) => overlap(slide.quote, m) >= 0.8) || slides.findIndex((x) => x.layout === "QUOTE") !== i;
+    return slides.slice(0, i).some((x) => overlap(mainLine(x), mainLine(slide)) >= 0.75);
+  };
+  for (let i = slides.length - 1; i >= 0 && slides.length > INNER_SLIDES.min; i--) {
+    if (slides[i].layout !== "CLOSE" && broken(slides[i], i)) slides.splice(i, 1);
+  }
+  while (slides.length > INNER_SLIDES.max) slides.splice(slides.length - 2, 1);
+
+  return {
+    ...plan,
+    label: clean(plan.label),
+    documentTitle: clean(plan.documentTitle),
+    caption: clean(plan.caption),
+    cover: { ...plan.cover, headline: clean(plan.cover.headline), kicker: plan.cover.kicker ? clean(plan.cover.kicker) : plan.cover.kicker },
+    slides,
+  };
 }
 
 /** Builds the deck, and checks that every page fits. */

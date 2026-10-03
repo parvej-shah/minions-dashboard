@@ -5,7 +5,7 @@ import { deleteFromR2, r2KeyFromUrl, uploadToR2 } from "@/lib/r2";
 import { coverBrand } from "@/lib/covers/brand";
 import type { CoverSpec } from "@/lib/covers/layouts";
 import { evidenceRules } from "@/lib/drafts/authorContext";
-import { checkPlan, parsePlan, suggestCarousel, toDeck, type CarouselPlan, type PlanSources } from "@/lib/carousel/plan";
+import { checkPlan, parsePlan, repairPlan, suggestCarousel, toDeck, type CarouselPlan, type PlanSources } from "@/lib/carousel/plan";
 import { renderCarouselPdf, renderSlidePng } from "@/lib/carousel/render";
 import type { Deck } from "@/lib/carousel/slides";
 import { renderCarousel, type CarouselInput } from "@/lib/prompts/carousel";
@@ -41,8 +41,8 @@ export type CarouselResult =
   | { ok: false; error: string; errors: string[]; locked?: boolean };
 
 export const CAROUSEL_LOCKED = "This draft is published, so its carousel stays as it went out.";
-const MAX_ATTEMPTS = 2;
-/** The route may run 300s; a first answer slower than this leaves no room for a second. */
+const MAX_ATTEMPTS = 3;
+/** The route may run 300s; a retry starts only this soon after the first call, so it can finish. */
 const RETRY_CUTOFF_MS = 120_000;
 
 type Chat = (payload: Record<string, unknown>) => Promise<{ status: number; body: string; model: string }>;
@@ -165,7 +165,7 @@ async function dropReplaced(old: StoredCarousel | null): Promise<void> {
 
 type Planned = { ok: true; plan: CarouselPlan; deck: Deck; attempts: number; model: string } | { ok: false; error: string; errors: string[] };
 
-/** The model's plan through every gate, with one retry told exactly what failed. */
+/** The model's plan, repaired in code, through every gate; each retry is told exactly what failed. */
 async function planWithModel(ctx: Context, chat: Chat): Promise<Planned> {
   let errors: string[] = [];
   const started = Date.now();
@@ -183,11 +183,14 @@ async function planWithModel(ctx: Context, chat: Chat): Promise<Planned> {
     const parsed = parsePlan(content);
     errors = parsed.errors;
     if (!parsed.plan || errors.length) continue;
-    const gated = gate(ctx, parsed.plan);
+    const plan = repairPlan(parsed.plan, ctx.sources);
+    const gated = gate(ctx, plan);
     errors = gated.errors;
-    if (gated.deck) return { ok: true, plan: parsed.plan, deck: gated.deck, attempts: attempt, model: res.model };
+    if (gated.deck) return { ok: true, plan, deck: gated.deck, attempts: attempt, model: res.model };
   }
-  return { ok: false, error: "No carousel passed the checks for this draft. It will post as a normal post.", errors };
+  // The reasons go to the log, not the reviewer: they can only make it again.
+  if (errors.length) console.warn(`[carousel] ${ctx.assetId} failed the checks:`, errors);
+  return { ok: false, error: "The slides did not come out right this time. Make it again, or LinkedIn posts the cover image.", errors: [] };
 }
 
 /** Plans a carousel with the model, draws it and switches it on. */
