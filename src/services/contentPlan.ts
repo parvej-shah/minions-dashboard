@@ -20,6 +20,7 @@ import {
 import { startHarvest } from "@/services/harvestRun";
 import { syncAssetToBlog } from "@/services/publishing";
 import { triggerN8nWorkflow } from "@/services/pipeline";
+import { toScheduleConfig } from "@/services/postingSchedule";
 import { draftingServiceRunning } from "@/services/jobHeartbeat";
 import { DEFAULT_TIMEZONE } from "@/constants/config";
 
@@ -45,19 +46,6 @@ const DRAFT_START_MINUTES = 30;
 
 const asObjective = (v: string | null | undefined): Objective | null =>
   v && (OBJECTIVES as readonly string[]).includes(v) ? (v as Objective) : null;
-
-function scheduleConfig(s: PostingSchedule) {
-  return {
-    cadenceType: s.cadenceType,
-    intervalDays: s.intervalDays,
-    daysOfWeek: s.daysOfWeek,
-    postsPerDay: s.postsPerDay,
-    timesOfDay: s.timesOfDay,
-    isActive: s.isActive,
-    lastRunAt: s.lastRunAt,
-    createdAt: s.createdAt,
-  };
-}
 
 /** Whether an instant falls inside the plan's optional date range, in the workspace's timezone. */
 function inPlanRange(s: PostingSchedule, at: Date, tz: string): boolean {
@@ -88,7 +76,7 @@ function slotInstant(d: Date): Date {
 export function upcomingPlanSlots(s: PostingSchedule, tz: string, now: Date): Date[] {
   const until = now.getTime() + LOOKAHEAD_DAYS * 86_400_000;
   const perDay = Math.max(1, s.timesOfDay.length);
-  return nextUpcomingSlots(scheduleConfig(s), tz, perDay * (LOOKAHEAD_DAYS + 1), now)
+  return nextUpcomingSlots(toScheduleConfig(s), tz, perDay * (LOOKAHEAD_DAYS + 1), now)
     .map(slotInstant)
     .filter((d) => d.getTime() <= until && inPlanRange(s, d, tz));
 }

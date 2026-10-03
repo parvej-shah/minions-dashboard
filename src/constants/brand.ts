@@ -22,6 +22,14 @@ export const STATIC_BANNED_LEXICON = [
   "🚀",
 ];
 
+export const DEFAULT_PALETTE = {
+  primaryInk: "#12242A",
+  brandTeal: "#0E5C63",
+  brandCoral: "#FF6B4A",
+  brandCream: "#FFF8F0",
+  accentBlue: "#3A6EA5",
+} as const;
+
 /**
  * Brand settings served by /api/brand when no `brand_profile` row is stored yet.
  *
@@ -36,11 +44,11 @@ export const DEFAULT_BRAND_SETTINGS: Omit<BrandSettings, "directives" | "updated
   primary_logo_url: PRIMARY_LOGO_URL,
   cover_byline: "",
   cover_art: "SHAPES",
-  primary_ink: "#12242A",
-  brand_teal: "#0E5C63",
-  brand_coral: "#FF6B4A",
-  brand_cream: "#FFF8F0",
-  accent_blue: "#3A6EA5",
+  primary_ink: DEFAULT_PALETTE.primaryInk,
+  brand_teal: DEFAULT_PALETTE.brandTeal,
+  brand_coral: DEFAULT_PALETTE.brandCoral,
+  brand_cream: DEFAULT_PALETTE.brandCream,
+  accent_blue: DEFAULT_PALETTE.accentBlue,
   tone_guidelines: {
     formality: "tactile_operator",
     cadence:

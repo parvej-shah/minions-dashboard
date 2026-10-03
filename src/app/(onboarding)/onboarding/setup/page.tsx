@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { isEstablishedTenant } from "@/lib/onboardingGuard";
+import { isEstablishedTenant } from "@/services/onboardingGuard";
 import OnboardingWizard from "./_components/OnboardingWizard";
 
 /**

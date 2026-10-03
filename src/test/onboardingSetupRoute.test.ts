@@ -28,7 +28,7 @@ vi.mock("@/lib/tenant", () => ({
   isPlaceholderTenantName: (n: string | null | undefined) => !n?.trim() || /'s Workspace$/.test(n.trim()),
 }));
 vi.mock("@/lib/auth", () => ({ auth: m.auth }));
-vi.mock("@/lib/onboardingGuard", () => ({ refuseOnboardingOverwrite: vi.fn().mockResolvedValue(null) }));
+vi.mock("@/services/onboardingGuard", () => ({ assertNotEstablished: vi.fn().mockResolvedValue(undefined) }));
 vi.mock("@/lib/icpDirective", () => ({ syncIcpDirective: m.syncIcpDirective }));
 
 const route = await import("@/app/api/onboarding/setup/route");

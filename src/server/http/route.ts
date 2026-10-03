@@ -71,7 +71,7 @@ export async function authorize<A extends AuthMode>(mode: A, request: Request): 
 
 export function route<A extends AuthMode, P extends Record<string, string> = Record<string, never>>(
   options: RouteOptions<A>,
-  handler: (ctx: RouteContext<A, P>) => Promise<unknown>
+  handler: (ctx: RouteContext<A, P>) => unknown
 ) {
   return async (request: Request, segment?: { params: Promise<P> }): Promise<Response> => {
     try {

@@ -1,36 +1,28 @@
-import { apiError } from "@/server/http/respond";
-import { requireClientId } from "@/lib/tenant";
 import { renderCoverPreview } from "@/services/cover";
+import { asOptionalString, readJsonOrEmpty } from "@/server/http/body";
+import { route } from "@/server/http/route";
 
 export const maxDuration = 30;
 
-const str = (v: unknown) => (typeof v === "string" ? v.slice(0, 500) : undefined);
+const MAX_FIELD_LENGTH = 500;
+const PREVIEW_FIELDS = [
+  "brand_name",
+  "primary_ink",
+  "brand_cream",
+  "brand_coral",
+  "brand_teal",
+  "cover_byline",
+  "primary_logo_url",
+  "positioning",
+  "cover_art",
+] as const;
 
-/**
- * A sample cover in the workspace's look, with the Brand page's unsaved
- * colours, byline and photo. Returns the PNG; notes about replaced colours or
- * an unreadable photo come back in the X-Cover-Notes header.
- */
-export async function POST(request: Request) {
-  const ctx = await requireClientId();
-  if ("error" in ctx) return ctx.error;
-  try {
-    const body = await request.json().catch(() => ({}));
-    const { png, notes } = await renderCoverPreview(ctx.clientId, {
-      brand_name: str(body.brand_name),
-      primary_ink: str(body.primary_ink),
-      brand_cream: str(body.brand_cream),
-      brand_coral: str(body.brand_coral),
-      brand_teal: str(body.brand_teal),
-      cover_byline: str(body.cover_byline),
-      primary_logo_url: str(body.primary_logo_url),
-      positioning: str(body.positioning),
-      cover_art: str(body.cover_art),
-    });
-    return new Response(new Uint8Array(png), {
-      headers: { "Content-Type": "image/png", "Cache-Control": "no-store", "X-Cover-Notes": encodeURIComponent(JSON.stringify(notes)) },
-    });
-  } catch (error) {
-    return apiError(error, "Failed to render the cover preview");
-  }
-}
+// Renders with the Brand page's unsaved values; notes about replaced colours or an unreadable photo travel in X-Cover-Notes.
+export const POST = route({ auth: "tenant", failure: "Failed to render the cover preview" }, async ({ clientId, request }) => {
+  const body = await readJsonOrEmpty(request);
+  const input = Object.fromEntries(PREVIEW_FIELDS.map((field) => [field, asOptionalString(body[field], MAX_FIELD_LENGTH)]));
+  const { png, notes } = await renderCoverPreview(clientId, input);
+  return new Response(new Uint8Array(png), {
+    headers: { "Content-Type": "image/png", "Cache-Control": "no-store", "X-Cover-Notes": encodeURIComponent(JSON.stringify(notes)) },
+  });
+});

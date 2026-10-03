@@ -1,5 +1,5 @@
 import type { Session } from "next-auth";
-import { isEstablishedTenant } from "@/lib/onboardingGuard";
+import { isEstablishedTenant } from "@/services/onboardingGuard";
 
 /**
  * Where a signed-in person belongs when they arrive without a destination:

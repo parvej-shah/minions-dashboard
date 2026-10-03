@@ -17,7 +17,7 @@ vi.mock("@/lib/prisma", () => ({
 }));
 vi.mock("@/lib/tenant", () => ({ requireClientId }));
 
-const { isEstablishedTenant, refuseOnboardingOverwrite } = await import("./onboardingGuard");
+const { isEstablishedTenant, assertNotEstablished } = await import("./onboardingGuard");
 const directivesRoute = await import("@/app/api/brand/directives/route");
 
 function state({ idea = false, asset = false, schedule = false }) {
@@ -35,17 +35,15 @@ describe("isEstablishedTenant", () => {
   it("a workspace mid-way through its first onboarding is not established", async () => {
     state({});
     expect(await isEstablishedTenant("c")).toBe(false);
-    expect(await refuseOnboardingOverwrite("c")).toBeNull();
+    await expect(assertNotEstablished("c")).resolves.toBeUndefined();
   });
 
   it.each([["ideas", { idea: true }], ["assets", { asset: true }], ["a posting schedule", { schedule: true }]])(
-    "a workspace with %s is established, and onboarding writes get a 409",
+    "a workspace with %s is established, and onboarding writes are refused with a 409",
     async (_label, s) => {
       state(s);
       expect(await isEstablishedTenant("c")).toBe(true);
-      const res = await refuseOnboardingOverwrite("c");
-      expect(res?.status).toBe(409);
-      expect((await res!.json()).error).toMatch(/already set up/);
+      await expect(assertNotEstablished("c")).rejects.toMatchObject({ status: 409, message: expect.stringMatching(/already set up/) });
     }
   );
 });

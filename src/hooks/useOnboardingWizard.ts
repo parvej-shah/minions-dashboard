@@ -3,8 +3,8 @@ import { DEFAULT_CADENCE } from "@/lib/scheduling";
 import { useRouter } from "next/navigation";
 import { apiClient, toErrorMessage, ApiRequestError } from "@/lib/api-client";
 import type { BrandPreset } from "@/constants/brandPresets";
-import type { GeneratedDirective } from "@/app/api/onboarding/brand-copilot/route";
-import type { LinkedInProfile, AiSuggestions } from "@/app/api/onboarding/voice-import/route";
+import type { AiSuggestions, GeneratedDirective } from "@/lib/ai/brandCopilot";
+import type { LinkedInProfile } from "@/types";
 import { DEFAULT_WRITER_EXPERTISE, type WriterExpertise } from "@/constants/writerExpertise";
 
 export const ONBOARDING_STEPS = ["Your brand", "Your voice", "Start creating"] as const;

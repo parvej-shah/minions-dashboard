@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Session } from "next-auth";
 
 const isEstablishedTenant = vi.fn();
-vi.mock("@/lib/onboardingGuard", () => ({ isEstablishedTenant }));
+vi.mock("@/services/onboardingGuard", () => ({ isEstablishedTenant }));
 
 const { homeRouteFor } = await import("./homeRoute");
 

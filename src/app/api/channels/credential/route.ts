@@ -1,4 +1,4 @@
-import { resolveChannelCredential } from "@/services/channelCredential";
+import { resolveChannelCredential } from "@/services/channels";
 import { badRequest } from "@/server/http/errors";
 import { route } from "@/server/http/route";
 

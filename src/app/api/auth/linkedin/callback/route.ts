@@ -1,130 +1,64 @@
 import { NextResponse } from "next/server";
-import { requireClientId } from "@/lib/tenant";
-import { prisma } from "@/lib/prisma";
-import { getSupabaseAdmin } from "@/lib/supabase";
+import { exchangeCode, fetchUserInfo, PENDING_TOKEN_COOKIE, personUrn, redirectUriFor } from "@/lib/linkedin";
+import { storeChannelCredential } from "@/services/channels";
+import { route } from "@/server/http/route";
 
-export async function GET(request: Request) {
-  const ctx = await requireClientId();
-  if ("error" in ctx) return ctx.error;
+const PENDING_TOKEN_TTL_SECONDS = 60 * 10;
 
-  const url = new URL(request.url);
-  const code = url.searchParams.get("code");
-  const error = url.searchParams.get("error");
-  const errorDescription = url.searchParams.get("error_description");
-
-  const rawState = url.searchParams.get("state");
-  let returnTo = "/fleet";
-  if (rawState) {
-    try {
-      const parsed = JSON.parse(Buffer.from(rawState, "base64").toString("utf-8"));
-      if (parsed.returnTo) returnTo = parsed.returnTo;
-    } catch (e) {}
-  }
-
-  const fallbackRedirect = returnTo.includes("/onboarding") ? "/onboarding/setup" : "/fleet";
-  const onboardingFailure = (message: string) => {
-    const failureUrl = new URL(fallbackRedirect, request.url);
-    failureUrl.searchParams.set("error", message);
-    return NextResponse.redirect(failureUrl);
-  };
-
-  if (error) {
-    console.error("LinkedIn OAuth Error:", error, errorDescription);
-    return onboardingFailure(errorDescription || error);
-  }
-
-  if (!code) {
-    return onboardingFailure("LinkedIn did not return an authorization code. Please try connecting again.");
-  }
-
-  const redirectUri = process.env.LINKEDIN_REDIRECT_URI?.trim() || `${url.origin}/api/auth/linkedin/callback`;
-
+function returnToFrom(rawState: string | null): string {
   try {
-    // Exchange code for access token
-    const tokenResponse = await fetch("https://www.linkedin.com/oauth/v2/accessToken", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        grant_type: "authorization_code",
-        code,
-        redirect_uri: redirectUri,
-        client_id: process.env.LINKEDIN_CLIENT_ID || "",
-        client_secret: process.env.LINKEDIN_CLIENT_SECRET || "",
-      }),
-    });
-
-    if (!tokenResponse.ok) {
-      const errData = await tokenResponse.text();
-      console.error("Failed to exchange token:", errData);
-      return onboardingFailure("LinkedIn could not complete the authorization exchange. Check the configured redirect URL and try again.");
-    }
-
-    const tokenData = await tokenResponse.json();
-    const accessToken = tokenData.access_token;
-
-    // DIRECT ONBOARDING ROUTE: If connecting from onboarding, automatically save personal profile & return straight to /onboarding/setup!
-    if (returnTo.includes("/onboarding")) {
-      let personUrn = "";
-      try {
-        const profileRes = await fetch("https://api.linkedin.com/v2/userinfo", {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (profileRes.ok) {
-          const profile = await profileRes.json();
-          if (profile.sub) {
-            personUrn = `urn:li:person:${profile.sub}`;
-          }
-        }
-      } catch (e) {
-        console.warn("Direct onboarding UserInfo fetch error:", e);
-      }
-
-      if (personUrn) {
-        // Encrypt token into Supabase Vault
-        const { data: secretId, error: vaultError } = await getSupabaseAdmin().rpc("create_channel_secret", {
-          secret: accessToken,
-          name: `${ctx.clientId}:linkedin:${Date.now()}`,
-        });
-
-        if (!vaultError && secretId) {
-          // Save to database
-          await prisma.clientChannel.upsert({
-            where: { clientId_channelKey: { clientId: ctx.clientId, channelKey: "linkedin" } },
-            update: { isActive: true, credentialRef: secretId, externalId: personUrn },
-            create: { clientId: ctx.clientId, channelKey: "linkedin", isActive: true, credentialRef: secretId, externalId: personUrn },
-          });
-
-          // Redirect directly back to onboarding setup without intermediate page drift!
-          return NextResponse.redirect(new URL("/onboarding/setup?imported=true", request.url));
-        }
-
-        console.error("LinkedIn onboarding credential save failed:", vaultError);
-        return onboardingFailure("LinkedIn connected, but Minions could not save the credential. Please try again.");
-      }
-
-      return onboardingFailure("LinkedIn did not return a usable member profile. Ensure this app has OpenID Connect access, then try again.");
-    }
-
-    // Standard fleet selection flow if connecting from Fleet
-    const selectUrl = new URL("/fleet/linkedin/select", request.url);
-    if (returnTo) {
-      selectUrl.searchParams.set("return_to", returnTo);
-    }
-    const response = NextResponse.redirect(selectUrl);
-
-    response.cookies.set("linkedin_pending_token", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 10,
-      path: "/",
-    });
-
-    return response;
-  } catch (err) {
-    console.error("OAuth Callback Exception:", err);
-    return onboardingFailure("LinkedIn connection encountered an internal error. Please try again.");
+    return JSON.parse(Buffer.from(rawState ?? "", "base64").toString("utf-8")).returnTo || "/fleet";
+  } catch {
+    return "/fleet";
   }
 }
+
+export const GET = route({ auth: "tenant", failure: "LinkedIn connection encountered an internal error. Please try again." }, async ({ clientId, request }) => {
+  const url = new URL(request.url);
+  const returnTo = returnToFrom(url.searchParams.get("state"));
+  const fromOnboarding = returnTo.includes("/onboarding");
+  const fail = (message: string) => {
+    const failure = new URL(fromOnboarding ? "/onboarding/setup" : "/fleet", request.url);
+    failure.searchParams.set("error", message);
+    return NextResponse.redirect(failure);
+  };
+
+  const providerError = url.searchParams.get("error");
+  if (providerError) {
+    console.error("[linkedin] OAuth error:", providerError, url.searchParams.get("error_description"));
+    return fail(url.searchParams.get("error_description") || providerError);
+  }
+  const code = url.searchParams.get("code");
+  if (!code) return fail("LinkedIn did not return an authorization code. Please try connecting again.");
+
+  const accessToken = await exchangeCode(code, redirectUriFor(url.origin));
+  if (!accessToken) {
+    return fail("LinkedIn could not complete the authorization exchange. Check the configured redirect URL and try again.");
+  }
+
+  if (fromOnboarding) {
+    const user = await fetchUserInfo(accessToken).catch(() => null);
+    const sub = user && "profile" in user ? user.profile.sub : null;
+    if (!sub) return fail("LinkedIn did not return a usable member profile. Ensure this app has OpenID Connect access, then try again.");
+
+    try {
+      await storeChannelCredential(clientId, "linkedin", accessToken, personUrn(sub));
+    } catch (error) {
+      console.error("[linkedin] onboarding credential save failed:", error);
+      return fail("LinkedIn connected, but Minions could not save the credential. Please try again.");
+    }
+    return NextResponse.redirect(new URL("/onboarding/setup?imported=true", request.url));
+  }
+
+  const selectUrl = new URL("/fleet/linkedin/select", request.url);
+  selectUrl.searchParams.set("return_to", returnTo);
+  const response = NextResponse.redirect(selectUrl);
+  response.cookies.set(PENDING_TOKEN_COOKIE, accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: PENDING_TOKEN_TTL_SECONDS,
+    path: "/",
+  });
+  return response;
+});

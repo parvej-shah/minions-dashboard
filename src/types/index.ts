@@ -6,6 +6,7 @@ export * from "./billing";
 export * from "./brand";
 export * from "./channel";
 export * from "./idea";
+export * from "./onboarding";
 export * from "./published";
 export * from "./team";
 export * from "./telemetry";

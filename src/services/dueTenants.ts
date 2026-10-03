@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { computeDueSlot } from "@/lib/scheduling";
 import { fillDueSlot, planAhead } from "@/services/contentPlan";
+import { toScheduleConfig } from "@/services/postingSchedule";
 import { countAssetsThisMonth, monthlyAssetLimit, resolvePlan } from "@/services/quota";
 
 export interface DueTenant {
@@ -38,20 +39,7 @@ export async function findDueTenants(now: Date = new Date()) {
     });
     if (planned[client.id] === undefined) delete planned[client.id];
 
-    const slot = computeDueSlot(
-      {
-        cadenceType: schedule.cadenceType,
-        intervalDays: schedule.intervalDays,
-        daysOfWeek: schedule.daysOfWeek,
-        postsPerDay: schedule.postsPerDay,
-        timesOfDay: schedule.timesOfDay,
-        isActive: schedule.isActive,
-        lastRunAt: schedule.lastRunAt,
-        createdAt: schedule.createdAt,
-      },
-      client.timezone,
-      now
-    );
+    const slot = computeDueSlot(toScheduleConfig(schedule), client.timezone, now);
     if (!slot) continue;
 
     const limit = monthlyAssetLimit(resolvePlan(client.subscription?.planKey), client.assetsPerMonthOverride);

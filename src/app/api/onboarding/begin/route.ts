@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
 import { markPendingSignup } from "@/lib/onboarding";
+import { route } from "@/server/http/route";
 
-/** Called right before signIn("google") from the onboarding landing page. */
-export async function POST() {
+// Runs right before Google sign-in, so the caller has no session yet.
+export const POST = route({ auth: "public", failure: "Failed to start sign-up" }, async () => {
   await markPendingSignup();
-  return NextResponse.json({ ok: true });
-}
+  return { ok: true };
+});

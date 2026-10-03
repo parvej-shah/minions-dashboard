@@ -75,7 +75,7 @@ describe("POST /api/brand/memory", () => {
   it("GET counts how many ideas use each item, within the workspace", async () => {
     m.memFindMany.mockResolvedValue([row(), row({ id: "mem-2" })]);
     m.ideaFindMany.mockResolvedValue([{ memoryIds: ["mem-1"] }, { memoryIds: ["mem-1", "mem-2"] }]);
-    const res = await memory.GET();
+    const res = await memory.GET(new Request("http://x"));
     const body = await res.json();
     expect(m.ideaFindMany.mock.calls[0][0].where).toEqual({ clientId: "c1", memoryIds: { hasSome: ["mem-1", "mem-2"] } });
     expect(body.map((i: { used_in_ideas: number }) => i.used_in_ideas)).toEqual([2, 1]);
