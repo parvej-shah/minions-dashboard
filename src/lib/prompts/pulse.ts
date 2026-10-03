@@ -49,7 +49,7 @@ ${input.answer}
 </update>${extra.length ? `\n\nFollow-up answers:\n${extra.join("\n")}` : ""}`;
 
   return {
-    model: "qwen3.8-max",
+    model: "glm-5.2",
     enable_thinking: false,
     temperature: 0.2,
     max_tokens: 1200,

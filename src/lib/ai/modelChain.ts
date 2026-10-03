@@ -26,11 +26,14 @@ const FREE_SMALL = ["deepseek-v4-flash", "glm-5.1"];
  * (a test checks that).
  */
 export const MODEL_FALLBACKS: Record<string, string[]> = {
+  // The large stages (strategist, writer, rewrite, harvest, pulse, craft, carousel). Read most like a
+  // person in a Jev-scored comparison (2026-10-03) and always returned valid JSON. deepseek-v4-pro
+  // comes late: it drafted longest, with the most AI figures, and broke JSON on rewrites.
+  // qwen3.8-max is left out while its free quota is used up; qwen3.7-max is the paid last resort.
+  "glm-5.2": ["qwen3-max", "deepseek-v3.2", "deepseek-v4-pro", "qwen3.7-max"],
+  "qwen3-max": FREE_LARGE,
+  // No prompt names it now (free quota used up); kept for any caller that still sends it.
   "qwen3.8-max": [...FREE_LARGE, "qwen3.7-max"],
-  "qwen3-max": ["qwen3.8-max", ...FREE_LARGE],
-  // Writer and humanize rewrite: read most like a person in a Jev-scored comparison (2026-10-03).
-  // deepseek-v4-pro last: it drafted longest, with the most AI figures, and broke JSON on rewrites.
-  "glm-5.2": ["qwen3-max", "deepseek-v3.2", "deepseek-v4-pro"],
   "qwen3.7-flash": [...FREE_SMALL, "qwen-flash"],
   "qwen-flash": [...FREE_SMALL, "qwen3.7-flash"],
   // Onboarding and the memory check (thinking off). Dated snapshots carry their own free quota, unlike the undated qwen-plus.

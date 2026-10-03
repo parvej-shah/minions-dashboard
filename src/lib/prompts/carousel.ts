@@ -102,7 +102,7 @@ Your previous plan failed these checks. Fix every one and return the whole plan 
 ${input.feedback.map((f) => `- ${f}`).join("\n")}` : ""}`;
 
   return {
-    model: "qwen3.8-max",
+    model: "glm-5.2",
     enable_thinking: false,
     temperature: 0.5,
     max_tokens: 2500,

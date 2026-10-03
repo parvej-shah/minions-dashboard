@@ -79,7 +79,7 @@ describe("model fallback", () => {
     for (const f of fs.readdirSync(dir).filter((f) => f.endsWith(".ts"))) {
       for (const m of fs.readFileSync(path.join(dir, f), "utf8").matchAll(/model: "([^"]+)"/g)) models.add(m[1]);
     }
-    expect(models.size).toBeGreaterThan(3);
+    expect(models.size).toBeGreaterThan(2);
     for (const m of models) expect(MODEL_FALLBACKS[m], m).toBeDefined();
   });
 });
