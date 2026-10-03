@@ -1,10 +1,11 @@
+import { badRequest } from "@/server/http/errors";
 import { prisma } from "@/lib/prisma";
 import { checkMemory } from "@/lib/ai/memoryCheck";
 import { PULSE_ANSWER_MAX_CHARS, PULSE_ANSWER_MIN_CHARS } from "@/lib/pulse/extract";
 import { isValidTimezone, weekStart } from "@/lib/pulse/week";
 import { bankLevel, pickPrompts, promptById, streakWeeks, STREAK_SOURCES, type BankLevel, type StoryPrompt } from "@/lib/storyBank";
 import { DEFAULT_TIMEZONE } from "@/constants/config";
-import { extractItems, parseConfirmedItems, PulseError, type CheckedCandidate } from "@/services/pulse";
+import { extractItems, parseConfirmedItems, type CheckedCandidate } from "@/services/pulse";
 import { startHarvest } from "@/services/harvestRun";
 
 /**
@@ -72,10 +73,10 @@ export interface StoryExtractDTO {
 /** One answer in, up to three checked items out. Nothing is saved. */
 export async function extractStory(clientId: string, body: { prompt_id?: unknown; answer?: unknown }): Promise<StoryExtractDTO> {
   const prompt = promptById(body.prompt_id);
-  if (!prompt) throw new PulseError("Unknown question.");
+  if (!prompt) throw badRequest("Unknown question.");
   const answer = typeof body.answer === "string" ? body.answer.trim() : "";
-  if (answer.length < PULSE_ANSWER_MIN_CHARS) throw new PulseError(`Write at least ${PULSE_ANSWER_MIN_CHARS} characters, so there is something specific to use.`);
-  if (answer.length > PULSE_ANSWER_MAX_CHARS) throw new PulseError(`Keep it under ${PULSE_ANSWER_MAX_CHARS} characters.`);
+  if (answer.length < PULSE_ANSWER_MIN_CHARS) throw badRequest(`Write at least ${PULSE_ANSWER_MIN_CHARS} characters, so there is something specific to use.`);
+  if (answer.length > PULSE_ANSWER_MAX_CHARS) throw badRequest(`Keep it under ${PULSE_ANSWER_MAX_CHARS} characters.`);
 
   const icp = await prisma.icpProfile.findUnique({ where: { clientId }, select: { who: true } });
   const extracted = await extractItems(answer, {}, icp?.who || undefined, prompt.question);

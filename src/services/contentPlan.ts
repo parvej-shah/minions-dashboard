@@ -20,6 +20,7 @@ import {
 import { startHarvest } from "@/services/harvestRun";
 import { syncAssetToBlog } from "@/services/publishing";
 import { triggerN8nWorkflow } from "@/services/pipeline";
+import { draftingServiceRunning } from "@/services/jobHeartbeat";
 import { DEFAULT_TIMEZONE } from "@/constants/config";
 
 /**
@@ -477,4 +478,28 @@ export async function settleSlotDraft(assetId: string): Promise<SlotDraftOutcome
     console.warn(`[plan] could not settle the slot draft ${assetId}:`, e);
     return null;
   }
+}
+
+export async function getPlanStatus(clientId: string) {
+  const [schedule, client, service] = await Promise.all([
+    prisma.postingSchedule.findUnique({ where: { clientId } }),
+    prisma.client.findUnique({ where: { id: clientId }, select: { timezone: true } }),
+    draftingServiceRunning(),
+  ]);
+  const timezone = client?.timezone ?? DEFAULT_TIMEZONE;
+  const nextAt = schedule ? (upcomingPlanSlots(schedule, timezone, new Date())[0] ?? null) : null;
+  const slot = nextAt
+    ? await prisma.scheduleSlot.findUnique({ where: { clientId_slotAt: { clientId, slotAt: nextAt } }, select: { laneId: true } })
+    : null;
+  const lane = slot?.laneId ? await prisma.contentLane.findUnique({ where: { id: slot.laneId }, select: { name: true } }) : null;
+
+  return {
+    exists: Boolean(schedule),
+    drafting_on: schedule?.fillerEnabled ?? false,
+    service_running: service.running,
+    service_last_run_at: service.last_run_at,
+    timezone,
+    next_slot_at: nextAt?.toISOString() ?? null,
+    next_lane_name: lane?.name ?? null,
+  };
 }

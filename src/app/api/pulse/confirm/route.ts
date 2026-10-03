@@ -1,25 +1,7 @@
-import { NextResponse } from "next/server";
-import { apiError, apiFailure } from "@/server/http/respond";
-import { requireClientId } from "@/lib/tenant";
-import { confirmPulse, PulseError } from "@/services/pulse";
+import { confirmPulse } from "@/services/pulse";
+import { readJson } from "@/server/http/body";
+import { route } from "@/server/http/route";
 
-/**
- * Saves the items the author kept from this week's answer, then starts a
- * harvest so ideas from them arrive now.
- *
- *   POST { items: [{ kind, content, disclosure }] }   (an empty list keeps none)
- */
-export async function POST(request: Request) {
-  const ctx = await requireClientId();
-  if ("error" in ctx) return ctx.error;
-
-  const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
-  if (!body) return apiFailure("Expected a JSON object.", 400);
-
-  try {
-    return NextResponse.json(await confirmPulse(ctx.clientId, body));
-  } catch (error) {
-    if (error instanceof PulseError) return apiFailure(error.message, error.status);
-    return apiError(error, "Failed to save these items");
-  }
-}
+export const POST = route({ auth: "tenant", failure: "Failed to save these items" }, async ({ clientId, request }) =>
+  confirmPulse(clientId, await readJson(request, "Expected a JSON object."))
+);

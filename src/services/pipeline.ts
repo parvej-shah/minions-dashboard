@@ -1,13 +1,9 @@
 import { N8N_WEBHOOKS } from "@/constants/config";
-import { requireEnv } from "@/lib/env";
+import { prisma } from "@/lib/prisma";
+import { requireEnv, requireOneOfEnv } from "@/lib/env";
 import type { PipelineTriggerResult } from "@/types";
 
-/**
- * Fires an n8n automation webhook and normalises the outcome.
- *
- * Every n8n call in the app goes through here, server-side. The endpoint URL is
- * deliberately not echoed back to the client: it is internal infrastructure.
- */
+// The n8n endpoint is internal infrastructure and is never echoed back to the client.
 export async function triggerN8nWorkflow(
   webhook: keyof typeof N8N_WEBHOOKS,
   payload: Record<string, unknown>,
@@ -16,10 +12,7 @@ export async function triggerN8nWorkflow(
   const endpoint = N8N_WEBHOOKS[webhook];
 
   try {
-    // The n8n webhooks require this header (Header Auth, same credential n8n
-    // uses to call back). The secret used to travel in the request BODY as
-    // callback_secret, which n8n stores in plain text in every execution log;
-    // callbacks now use n8n's own credential against a fixed URL instead.
+    // The secret travels in a header: n8n stores request bodies in plain text in every execution log.
     const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-Webhook-Secret": requireEnv("MINIONS_WEBHOOK_SECRET") },
@@ -57,4 +50,32 @@ export async function triggerN8nWorkflow(
       status: 502,
     };
   }
+}
+
+const callbackUrl = (runId: string) => `${requireOneOfEnv("NEXT_PUBLIC_APP_URL", "NEXTAUTH_URL")}/api/pipeline/runs/${runId}`;
+
+export async function dispatchRun(
+  webhook: keyof typeof N8N_WEBHOOKS,
+  runId: string,
+  payload: Record<string, unknown>,
+  messages: { failure: string; success: string }
+) {
+  const outcome = await triggerN8nWorkflow(
+    webhook,
+    { ...payload, run_id: runId, callback_url: callbackUrl(runId) },
+    messages
+  );
+  if (!outcome.result.success) await prisma.pipelineRun.update({ where: { id: runId }, data: { status: "FAILED" } });
+  return outcome;
+}
+
+export function dispatchPublish(assetId: string, clientId: string) {
+  return triggerN8nWorkflow(
+    "publish",
+    { asset_id: assetId, client_id: clientId, trigger_source: "MINIONS_COCKPIT_EDITORIAL" },
+    {
+      failure: "The publisher did not accept the request. Check that 03_review_publisher is active in n8n",
+      success: "Publish run started. The post appears on the blog shortly.",
+    }
+  );
 }

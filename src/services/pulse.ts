@@ -1,3 +1,4 @@
+import { badRequest, conflict } from "@/server/http/errors";
 import { prisma } from "@/lib/prisma";
 import { chatWithFallback } from "@/lib/ai/modelChain";
 import { checkMemory, blockingCodeFindings } from "@/lib/ai/memoryCheck";
@@ -36,12 +37,6 @@ export interface PulseDTO {
   answer: string | null;
   candidates: CheckedCandidate[];
   settings: { enabled: boolean; day: number; timezone: string; timezone_confirmed: boolean };
-}
-
-export class PulseError extends Error {
-  constructor(message: string, readonly status = 400) {
-    super(message);
-  }
 }
 
 async function load(clientId: string, now: Date) {
@@ -119,12 +114,12 @@ export async function extractItems(answer: string, followups: PulseFollowups, ic
 
 export async function answerPulse(clientId: string, body: { answer?: unknown; followups?: unknown }, now = new Date()): Promise<PulseDTO> {
   const answer = typeof body.answer === "string" ? body.answer.trim() : "";
-  if (answer.length < PULSE_ANSWER_MIN_CHARS) throw new PulseError(`Write at least ${PULSE_ANSWER_MIN_CHARS} characters, so there is something specific to use.`);
-  if (answer.length > PULSE_ANSWER_MAX_CHARS) throw new PulseError(`Keep it under ${PULSE_ANSWER_MAX_CHARS} characters.`);
+  if (answer.length < PULSE_ANSWER_MIN_CHARS) throw badRequest(`Write at least ${PULSE_ANSWER_MIN_CHARS} characters, so there is something specific to use.`);
+  if (answer.length > PULSE_ANSWER_MAX_CHARS) throw badRequest(`Keep it under ${PULSE_ANSWER_MAX_CHARS} characters.`);
 
   const loaded = await load(clientId, now);
   const state = toDTO(loaded, now).state;
-  if (state === "OFF" || state === "DONE") throw new PulseError("There is no weekly question open right now.", 409);
+  if (state === "OFF" || state === "DONE") throw conflict("There is no weekly question open right now.");
 
   const followups = cleanFollowups(body.followups);
   const icp = await prisma.icpProfile.findUnique({ where: { clientId }, select: { who: true } });
@@ -166,17 +161,17 @@ export async function parseConfirmedItems(clientId: string, raw: unknown): Promi
     const kind = parseMemoryKind(item.kind);
     const disclosure = parseDisclosure(item.disclosure);
     const content = parseMemoryContent(item.content);
-    if (!kind || !disclosure) throw new PulseError("Each item needs a kind and a privacy setting.");
-    if (typeof content !== "string") throw new PulseError(content.error);
+    if (!kind || !disclosure) throw badRequest("Each item needs a kind and a privacy setting.");
+    if (typeof content !== "string") throw badRequest(content.error);
     // The floor that holds even if the page's check was skipped (decision D4).
     const blocked = blockingCodeFindings(content);
-    if (blocked.length) throw new PulseError(`Remove this before saving: ${blocked[0].reason}`);
+    if (blocked.length) throw badRequest(`Remove this before saving: ${blocked[0].reason}`);
     items.push({ kind, content, disclosure });
   }
 
   const count = await prisma.professionalMemory.count({ where: { clientId } });
   if (count + items.length > MAX_MEMORY_ITEMS) {
-    throw new PulseError(`You have ${count} experience items; the limit is ${MAX_MEMORY_ITEMS}. Remove old ones on the Brand page first.`);
+    throw badRequest(`You have ${count} experience items; the limit is ${MAX_MEMORY_ITEMS}. Remove old ones on the Brand page first.`);
   }
   return items;
 }
@@ -189,7 +184,7 @@ export interface ConfirmResult {
 
 export async function confirmPulse(clientId: string, body: { items?: unknown }, now = new Date()): Promise<ConfirmResult> {
   const loaded = await load(clientId, now);
-  if (loaded.row?.status !== "EXTRACTED") throw new PulseError("Answer this week's question first.", 409);
+  if (loaded.row?.status !== "EXTRACTED") throw conflict("Answer this week's question first.");
 
   const items = await parseConfirmedItems(clientId, body.items);
 
@@ -225,12 +220,12 @@ export async function updatePulseSettings(
   if (typeof body.enabled === "boolean") data.pulseEnabled = body.enabled;
   if (body.day !== undefined) {
     const day = Number(body.day);
-    if (!Number.isInteger(day) || day < 1 || day > 7) throw new PulseError("day must be 1 (Monday) to 7 (Sunday).");
+    if (!Number.isInteger(day) || day < 1 || day > 7) throw badRequest("day must be 1 (Monday) to 7 (Sunday).");
     data.pulseDay = day;
   }
   if (body.timezone !== undefined) {
     const tz = typeof body.timezone === "string" ? body.timezone.trim() : "";
-    if (!isValidTimezone(tz)) throw new PulseError("That is not a timezone this browser knows.");
+    if (!isValidTimezone(tz)) throw badRequest("That is not a timezone this browser knows.");
     data.timezone = tz;
     data.timezoneConfirmed = true;
   }

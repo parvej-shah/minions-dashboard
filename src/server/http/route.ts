@@ -57,19 +57,30 @@ function fromTenantResult(result: { error: Response } | object): Authorized {
   return "error" in result ? { refusal: result.error } : { scope: result };
 }
 
+class Refusal extends Error {
+  constructor(readonly response: Response) {
+    super("Request refused");
+  }
+}
+
+export async function authorize<A extends AuthMode>(mode: A, request: Request): Promise<AuthScopes[A]> {
+  const authorized = await authorizers[mode](request);
+  if ("refusal" in authorized) throw new Refusal(authorized.refusal);
+  return authorized.scope as AuthScopes[A];
+}
+
 export function route<A extends AuthMode, P extends Record<string, string> = Record<string, never>>(
   options: RouteOptions<A>,
   handler: (ctx: RouteContext<A, P>) => Promise<unknown>
 ) {
   return async (request: Request, segment?: { params: Promise<P> }): Promise<Response> => {
-    const authorized = await authorizers[options.auth](request);
-    if ("refusal" in authorized) return authorized.refusal;
-
     try {
+      const scope = await authorize(options.auth, request);
       const params = (await segment?.params) ?? ({} as P);
-      const result = await handler({ ...authorized.scope, request, params } as RouteContext<A, P>);
+      const result = await handler({ ...scope, request, params } as RouteContext<A, P>);
       return result instanceof Response ? result : NextResponse.json(result);
     } catch (error) {
+      if (error instanceof Refusal) return error.response;
       if (error instanceof HttpError) {
         return NextResponse.json({ error: error.message, ...error.extra }, { status: error.status });
       }
