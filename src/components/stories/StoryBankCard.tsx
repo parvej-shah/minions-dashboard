@@ -6,7 +6,8 @@ import { CheckCircle2, Flame, X } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { FULL_AT, SESSION_SIZE } from "@/lib/storyBank";
 import type { StoryBankDTO } from "@/services/storyBank";
-import StorySession, { type SessionResult } from "./StorySession";
+import StorySession from "./StorySession";
+import type { SessionResult } from "./types";
 import { chunky } from "./chunky";
 
 const DISMISS_KEY = "minions-story-bank-hidden-until";

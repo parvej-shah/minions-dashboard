@@ -19,12 +19,13 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
-import { MEMORY_KIND_META, MEMORY_MAX_CHARS, MEMORY_MIN_CHARS, type MemoryDisclosure, type MemoryKind } from "@/constants/contentLanes";
+import { MEMORY_KIND_META, MEMORY_MIN_CHARS, type MemoryKind } from "@/constants/contentLanes";
 import type { StoryPrompt } from "@/lib/storyBank";
-import type { CheckedCandidate } from "@/services/pulse";
 import type { StoryExtractDTO } from "@/services/storyBank";
 import { chunky } from "./chunky";
-import Confetti from "@/components/ui/Confetti";
+import Celebration from "./Celebration";
+import ResultSheet from "./ResultSheet";
+import type { Note, SessionResult } from "./types";
 
 const KIND_ICON: Record<MemoryKind, LucideIcon> = {
   STORY: BookOpen,
@@ -39,13 +40,7 @@ const KIND_ICON: Record<MemoryKind, LucideIcon> = {
 
 const PRAISE = ["Nice one!", "That's a keeper!", "Great detail!", "Love it!"];
 
-type Note = CheckedCandidate & { keep: boolean };
 type Phase = "answer" | "checking" | "review" | "empty" | "saving";
-
-export interface SessionResult {
-  saved: number;
-  harvest: { started: boolean; message: string } | null;
-}
 
 /**
  * The story session: a full-screen, one-question-at-a-time flow. Answer,
@@ -360,191 +355,6 @@ export default function StorySession({
           </section>
         </div>
       )}
-    </div>
-  );
-}
-
-function ResultSheet({
-  praise,
-  notes,
-  onChange,
-  busy,
-  blocked,
-  disabled,
-  onEdit,
-  onKeep,
-  error,
-}: {
-  praise: string;
-  notes: Note[];
-  onChange: (n: Note[]) => void;
-  busy: boolean;
-  blocked: boolean;
-  disabled: boolean;
-  onEdit: () => void;
-  onKeep: () => void;
-  error: string | null;
-}) {
-  const kept = notes.filter((n) => n.keep).length;
-  const set = (i: number, next: Note) => onChange(notes.map((n, j) => (j === i ? next : n)));
-  return (
-    <section className="story-sheet-up fixed inset-x-0 bottom-0 z-10 max-h-[85vh] overflow-y-auto border-t-2 border-brand/30 bg-[#0C2420]">
-      <div className="mx-auto w-full max-w-2xl px-4 py-5 sm:px-6">
-        <div className="flex items-center gap-3">
-          <span className="story-pop flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-brand-ink">
-            <Check className="h-6 w-6" strokeWidth={3.5} />
-          </span>
-          <div className="min-w-0">
-            <h3 className="text-lg font-extrabold text-brand">{praise}</h3>
-            <p className="text-sm text-[#A7D8CE]">
-              {notes.length === 1 ? "Here is the note Minions made." : `Minions made ${notes.length} notes.`} Fix anything that is not quite right.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-4 space-y-3">
-          {notes.map((n, i) => (
-            <NoteCard key={i} note={n} solo={notes.length === 1} onChange={(next) => set(i, next)} />
-          ))}
-        </div>
-
-        {blocked && <p className="mt-3 text-sm font-semibold text-red-400">Remove the private detail flagged above, or keep that note general.</p>}
-        {error && <p className="mt-3 text-sm font-semibold text-red-400">{error}</p>}
-
-        <div className="mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-          <button type="button" disabled={busy} onClick={onEdit} className="py-2 text-sm font-extrabold uppercase tracking-wider text-[#A7D8CE] hover:text-white cursor-pointer disabled:opacity-50">
-            Edit my answer
-          </button>
-          <button type="button" disabled={busy || disabled} onClick={onKeep} className={`${chunky.primary} w-full sm:ml-auto sm:w-auto sm:min-w-[11rem]`}>
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : kept > 1 ? `Keep ${kept}` : "Continue"}
-          </button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function NoteCard({ note, solo, onChange }: { note: Note; solo: boolean; onChange: (n: Note) => void }) {
-  const issues = note.check?.issues ?? [];
-  const setPrivacy = (disclosure: MemoryDisclosure) => onChange({ ...note, disclosure });
-  return (
-    <div className={`rounded-2xl border-2 bg-[#0B1016] p-3 transition-opacity ${note.keep ? "border-brand/40" : "border-line opacity-50"}`}>
-      <textarea
-        value={note.content}
-        maxLength={MEMORY_MAX_CHARS}
-        rows={3}
-        onChange={(e) => onChange({ ...note, content: e.target.value, check: note.check && { ...note.check, confidential: false } })}
-        aria-label="Note"
-        className="w-full resize-y bg-transparent text-sm leading-relaxed text-ink focus:outline-none"
-      />
-      {issues.length > 0 && (
-        <ul className="mt-1 space-y-1 text-xs text-gold">
-          {issues.map((iss, j) => (
-            <li key={j}>
-              <b>{iss.text}</b>: {iss.reason}
-            </li>
-          ))}
-          {note.check?.generalized && (
-            <li>
-              <button
-                type="button"
-                onClick={() => onChange({ ...note, content: note.check!.generalized!, disclosure: "GENERALIZE", check: { ...note.check!, issues: [], confidential: false } })}
-                className="font-bold text-brand hover:underline cursor-pointer"
-              >
-                Use a version without these details
-              </button>
-            </li>
-          )}
-        </ul>
-      )}
-      <div className="mt-2 flex flex-wrap items-center gap-2">
-        <div className="inline-flex rounded-xl border-2 border-line p-0.5 text-xs font-bold">
-          {(
-            [
-              ["PUBLIC", "Names OK"],
-              ["GENERALIZE", "Keep it general"],
-            ] as const
-          ).map(([v, label]) => (
-            <button
-              key={v}
-              type="button"
-              aria-pressed={note.disclosure === v}
-              onClick={() => setPrivacy(v)}
-              className={`rounded-lg px-2.5 py-1 cursor-pointer ${note.disclosure === v ? "bg-brand/15 text-brand" : "text-subtle hover:text-[#CBD5E1]"}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        {!solo && (
-          <button
-            type="button"
-            aria-pressed={note.keep}
-            onClick={() => onChange({ ...note, keep: !note.keep })}
-            className="ml-auto text-xs font-extrabold uppercase tracking-wider text-muted hover:text-white cursor-pointer"
-          >
-            {note.keep ? "Drop" : "Keep"}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Celebration({
-  saved,
-  streak,
-  grew,
-  harvest,
-  onDone,
-}: {
-  saved: number;
-  streak: number;
-  grew: boolean;
-  harvest: SessionResult["harvest"];
-  onDone: () => void;
-}) {
-  return (
-    <>
-      <main className="flex flex-1 flex-col items-center justify-center overflow-y-auto px-4 pb-32 text-center">
-        <div className="relative">
-          {saved > 0 && <Confetti burst="big" />}
-          <span className="story-pop relative flex h-24 w-24 items-center justify-center rounded-full border-b-8 border-brand-edge bg-brand text-brand-ink">
-            <Sparkles className="h-12 w-12" strokeWidth={2.25} />
-          </span>
-        </div>
-        <h2 className="mt-8 text-3xl font-extrabold text-brand">{saved > 0 ? "Session complete!" : "No stories this time"}</h2>
-        <p className="mt-2 max-w-sm text-sm text-muted">
-          {saved > 0 ? "Every post Minions writes now has something new that only you could say." : "That is fine. Come back when something happens worth telling."}
-        </p>
-
-        <div className="mt-8 grid w-full max-w-md grid-cols-3 gap-3">
-          <StatTile label="Stories" tone="#00C9A7" value={`+${saved}`} />
-          <StatTile label="Streak" tone="#FF9F43" value={`${streak} wk`} pop={grew} />
-          <StatTile label="Ideas" tone="#60A5FA" value={saved === 0 ? "—" : harvest?.started ? "2 min" : "Tonight"} />
-        </div>
-        {saved > 0 && harvest && !harvest.started && <p className="mt-4 max-w-sm text-xs text-subtle">{harvest.message}</p>}
-      </main>
-      <footer className="border-t-2 border-line bg-[#0B1016]">
-        <div className="mx-auto w-full max-w-2xl px-4 py-4 sm:px-6 sm:py-5">
-          <button type="button" autoFocus onClick={onDone} className={`${chunky.primary} w-full`}>
-            Continue
-          </button>
-        </div>
-      </footer>
-    </>
-  );
-}
-
-function StatTile({ label, tone, value, pop }: { label: string; tone: string; value: string; pop?: boolean }) {
-  return (
-    <div className="overflow-hidden rounded-2xl border-2" style={{ borderColor: tone }}>
-      <div className="py-1 text-[10px] font-extrabold uppercase tracking-widest text-[#0B1016]" style={{ background: tone }}>
-        {label}
-      </div>
-      <div className={`py-3 text-xl font-extrabold ${pop ? "story-pop" : ""}`} style={{ color: tone }}>
-        {value}
-      </div>
     </div>
   );
 }
