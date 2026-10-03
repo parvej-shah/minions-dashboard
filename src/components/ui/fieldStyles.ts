@@ -3,3 +3,6 @@ export const inputClass =
 
 /** A settings section: padded surface with spaced children. */
 export const sectionClass = "p-6 rounded-2xl bg-surface border border-line space-y-4 shadow-sm";
+
+/** A compact brand card: padded surface with spaced children. */
+export const sectionCardClass = "p-5 rounded-2xl bg-surface border border-line space-y-3 shadow-sm";

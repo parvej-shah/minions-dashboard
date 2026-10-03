@@ -1,7 +1,8 @@
 "use client";
 
 import { Suspense, useState, type ReactNode } from "react";
-import { createDirective, deleteDirectiveRequest } from "@/lib/directivesClient";
+import { createDirective } from "@/lib/directivesClient";
+import { useDirectiveActions } from "@/hooks/useDirectiveActions";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mic2, Sparkles, Rss, Users2, Ban } from "lucide-react";
 import { BrandDirectiveItem, BrandTab } from "@/types";
@@ -60,15 +61,7 @@ function BrandStudio() {
   const [isAddingBannedWord, setIsAddingBannedWord] = useState(false);
   const [bannedWordError, setBannedWordError] = useState<string | null>(null);
 
-  const deleteDirective = async (id: string) => {
-    const previous = directives;
-    setDirectives(directives.filter((d) => d.id !== id));
-    try {
-      await deleteDirectiveRequest(id);
-    } catch {
-      setDirectives(previous);
-    }
-  };
+  const directiveActions = useDirectiveActions(directives, setDirectives);
 
   const handleAddBannedWord = async () => {
     const word = newBannedWord.trim();
@@ -86,7 +79,7 @@ function BrandStudio() {
     }
   };
 
-  const removeBannedWord = (id: string) => deleteDirective(id);
+  
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 pb-16">
@@ -140,7 +133,7 @@ function BrandStudio() {
           newBannedWord={newBannedWord}
           setNewBannedWord={setNewBannedWord}
           onAddBannedWord={handleAddBannedWord}
-          onRemoveBannedWord={removeBannedWord}
+          onRemoveBannedWord={directiveActions.remove}
         />
       </section>}
     </div>
