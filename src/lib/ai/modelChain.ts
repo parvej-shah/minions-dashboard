@@ -14,7 +14,7 @@
  * n8n reaches this through POST /api/internal/llm/chat/completions.
  */
 
-const DASHSCOPE_ENDPOINT = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions";
+import { DASHSCOPE_CHAT_URL } from "@/constants/dashscope";
 
 /** Models with free quota on the account (QwenCloud › Benefits, 2026-09-24), strongest first. */
 const FREE_LARGE = ["deepseek-v4-pro", "glm-5.2", "deepseek-v3.2"];
@@ -65,18 +65,18 @@ export interface ChainResult {
 type Fetch = (url: string, init: RequestInit) => Promise<Response>;
 
 export async function chatWithFallback(
-  payload: Record<string, unknown>,
+  payload: object,
   apiKey: string,
   { fetchImpl = fetch as Fetch, now = Date.now } = {}
 ): Promise<ChainResult> {
   const started = now();
-  const chain = modelChain(String(payload.model ?? ""));
+  const chain = modelChain(String((payload as { model?: unknown }).model ?? ""));
   const skipped: ChainResult["skipped"] = [];
 
   for (let i = 0; i < chain.length; i++) {
     const model = chain[i];
     const left = TOTAL_BUDGET_MS - (now() - started);
-    const res = await fetchImpl(DASHSCOPE_ENDPOINT, {
+    const res = await fetchImpl(DASHSCOPE_CHAT_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({ ...payload, model }),

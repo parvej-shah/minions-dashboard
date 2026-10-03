@@ -13,6 +13,8 @@
  * If a node is retuned in n8n, update it here in the same change.
  */
 
+import { DASHSCOPE_CHAT_URL, DASHSCOPE_IMAGE_URL } from "@/constants/dashscope";
+
 /** Which pipeline a stage belongs to, and therefore what its runs are counted in. */
 export type FleetCountBasis = "IDEAS" | "ASSETS";
 
@@ -45,11 +47,6 @@ export interface PipelineAgentDefinition {
   accent: string;
 }
 
-const DASHSCOPE_CHAT =
-  "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions";
-const DASHSCOPE_IMAGE =
-  "https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation";
-
 export const PIPELINE_AGENTS: PipelineAgentDefinition[] = [
   {
     id: "WORKER-001",
@@ -64,7 +61,7 @@ export const PIPELINE_AGENTS: PipelineAgentDefinition[] = [
     workflow: "01_idea_harvester",
     node: "AI Harvest",
     n8nStage: "Market Signal Radar",
-    provider: DASHSCOPE_CHAT,
+    provider: DASHSCOPE_CHAT_URL,
     temperature: 0.75,
     maxTokens: 2500,
     runsUnit: "ideas harvested",
@@ -88,7 +85,7 @@ export const PIPELINE_AGENTS: PipelineAgentDefinition[] = [
     workflow: "01_idea_harvester",
     node: "AI Refine",
     n8nStage: "Workflow 01 · Refine",
-    provider: DASHSCOPE_CHAT,
+    provider: DASHSCOPE_CHAT_URL,
     temperature: 0.6,
     maxTokens: 1500,
     runsUnit: "ideas harvested",
@@ -112,7 +109,7 @@ export const PIPELINE_AGENTS: PipelineAgentDefinition[] = [
     workflow: "02_idea_to_asset",
     node: "Executive Strategist Agent",
     n8nStage: "Workflow 02 · Stage 1",
-    provider: DASHSCOPE_CHAT,
+    provider: DASHSCOPE_CHAT_URL,
     temperature: 0.5,
     maxTokens: 2000,
     runsUnit: "assets drafted",
@@ -136,7 +133,7 @@ export const PIPELINE_AGENTS: PipelineAgentDefinition[] = [
     workflow: "02_idea_to_asset",
     node: "AI Call 2 Writer",
     n8nStage: "Workflow 02 · Stage 2",
-    provider: DASHSCOPE_CHAT,
+    provider: DASHSCOPE_CHAT_URL,
     temperature: 0.7,
     maxTokens: 4000,
     runsUnit: "assets drafted",
@@ -160,7 +157,7 @@ export const PIPELINE_AGENTS: PipelineAgentDefinition[] = [
     workflow: "02_idea_to_asset",
     node: "AI Call 3 Editor",
     n8nStage: "Workflow 02 · Stage 3",
-    provider: DASHSCOPE_CHAT,
+    provider: DASHSCOPE_CHAT_URL,
     temperature: 0.3,
     maxTokens: 4000,
     runsUnit: "assets drafted",
@@ -184,7 +181,7 @@ export const PIPELINE_AGENTS: PipelineAgentDefinition[] = [
     workflow: "02_idea_to_asset",
     node: "AI Call 4 Variants",
     n8nStage: "Workflow 02 · Stage 4",
-    provider: DASHSCOPE_CHAT,
+    provider: DASHSCOPE_CHAT_URL,
     temperature: 0.8,
     maxTokens: 2500,
     runsUnit: "assets drafted",
@@ -208,7 +205,7 @@ export const PIPELINE_AGENTS: PipelineAgentDefinition[] = [
     workflow: "02_idea_to_asset",
     node: "AI Image 3.0 Pro Generation",
     n8nStage: "Workflow 02 · Cover Art",
-    provider: DASHSCOPE_IMAGE,
+    provider: DASHSCOPE_IMAGE_URL,
     runsUnit: "assets drafted",
     countBasis: "ASSETS",
     schedule: "Automated multimodal engine",

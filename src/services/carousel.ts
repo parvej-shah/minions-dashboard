@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { chatWithFallback } from "@/lib/ai/modelChain";
+import { chat as qwenChat } from "@/lib/ai/qwen";
 import { deleteFromR2, r2KeyFromUrl, uploadToR2 } from "@/lib/r2";
 import { coverBrand } from "@/lib/covers/brand";
 import type { CoverSpec } from "@/lib/covers/layouts";
@@ -47,11 +47,7 @@ const RETRY_CUTOFF_MS = 120_000;
 
 type Chat = (payload: Record<string, unknown>) => Promise<{ status: number; body: string; model: string }>;
 
-const defaultChat: Chat = (payload) => {
-  const key = process.env.DASHSCOPE_API_KEY;
-  if (!key) throw new Error("DASHSCOPE_API_KEY is not set");
-  return chatWithFallback(payload, key);
-};
+const defaultChat: Chat = (payload) => qwenChat(payload);
 
 interface Context {
   assetId: string;

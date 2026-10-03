@@ -6,7 +6,7 @@
  * fallbacks always have somewhere safe to land.
  */
 
-import { chatWithFallback } from "./modelChain";
+import { chat, isQwenConfigured } from "./qwen";
 
 // qwen3.7-plus answers these prompts in ~11s with thinking off; the older 12s cap
 // would have cut it off just before the answer.
@@ -45,8 +45,7 @@ export async function callQwen(
   timeoutMs = DEFAULT_TIMEOUT_MS,
   settings: { model: string; temperature: number; max_tokens: number } = ONBOARDING_MODEL
 ): Promise<string | null> {
-  const apiKey = process.env.DASHSCOPE_API_KEY;
-  if (!apiKey) return null;
+  if (!isQwenConfigured()) return null;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -54,7 +53,7 @@ export async function callQwen(
   try {
     // Through the model chain: once a model's free quota runs out, the next
     // one answers, instead of every new signup silently getting the templates.
-    const { status, body, model } = await chatWithFallback(
+    const { status, body, model } = await chat(
       {
         model: settings.model,
         messages: [{ role: "user", content: prompt }],
@@ -64,7 +63,6 @@ export async function callQwen(
         // empty answer; these are short structured calls, so answer directly.
         enable_thinking: false,
       },
-      apiKey,
       { fetchImpl: (url, init) => fetch(url, { ...init, signal: init.signal ? AbortSignal.any([init.signal, controller.signal]) : controller.signal }) }
     );
 

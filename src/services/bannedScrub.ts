@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { chatWithFallback } from "@/lib/ai/modelChain";
+import { chat, isQwenConfigured } from "@/lib/ai/qwen";
 import { acceptRewrite, applyRewrites, bannedHits, bannedPhrases, offendingSentences } from "@/lib/drafts/banned";
 import { renderScrub } from "@/lib/prompts/scrub";
 
@@ -52,13 +52,12 @@ export async function scrubBannedWords(
   const result: ScrubResult = { texts: { ...texts }, rewritten: [], kept: [], remaining: [] };
   if (!offending.length) return result;
 
-  const apiKey = process.env.DASHSCOPE_API_KEY;
   let replies = new Map<number, string>();
-  if (apiKey) {
+  if (isQwenConfigured()) {
     try {
       const hitsBySentence = offending.map((s) => bannedHits(s, banned));
       const payload = renderScrub({ banned: Array.from(new Set(hitsBySentence.flat())), sentences: offending });
-      const res = await chatWithFallback(payload as unknown as Record<string, unknown>, apiKey);
+      const res = await chat(payload);
       if (res.status < 300) replies = parseRewrites(res.body);
       else console.warn(`[scrub] model answered ${res.status}: ${res.body.slice(0, 200)}`);
     } catch (e) {

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { chatWithFallback } from "@/lib/ai/modelChain";
+import { chat, isQwenConfigured } from "@/lib/ai/qwen";
 import { readJson } from "@/server/http/body";
 import { HttpError, badRequest } from "@/server/http/errors";
 import { route } from "@/server/http/route";
@@ -12,11 +12,10 @@ export const POST = route({ auth: "webhook", failure: "The model call failed" },
   const payload = await readJson(request, "Body must be a chat payload with a model");
   if (typeof payload.model !== "string") throw badRequest("Body must be a chat payload with a model");
 
-  const apiKey = process.env.DASHSCOPE_API_KEY;
-  if (!apiKey) throw new HttpError(500, "DASHSCOPE_API_KEY is not configured");
+  if (!isQwenConfigured()) throw new HttpError(500, "DASHSCOPE_API_KEY is not configured");
 
   try {
-    const result = await chatWithFallback(payload, apiKey);
+    const result = await chat(payload);
     return new NextResponse(result.body, {
       status: result.status,
       headers: {

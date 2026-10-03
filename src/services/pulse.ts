@@ -1,6 +1,6 @@
 import { badRequest, conflict } from "@/server/http/errors";
 import { prisma } from "@/lib/prisma";
-import { chatWithFallback } from "@/lib/ai/modelChain";
+import { chatContent } from "@/lib/ai/qwen";
 import { checkMemory, blockingCodeFindings } from "@/lib/ai/memoryCheck";
 import { parseDisclosure, parseMemoryContent, parseMemoryKind } from "@/lib/authorInput";
 import { MAX_MEMORY_ITEMS } from "@/constants/contentLanes";
@@ -98,17 +98,7 @@ function cleanFollowups(v: unknown): PulseFollowups {
 
 /** One model call; items it proposes are checked in code. Never throws for a model failure. */
 export async function extractItems(answer: string, followups: PulseFollowups, icp?: string, question?: string): Promise<ExtractResult> {
-  const apiKey = process.env.DASHSCOPE_API_KEY;
-  let content: string | null = null;
-  if (apiKey) {
-    try {
-      const res = await chatWithFallback(renderPulseExtract({ answer, followups, icp, question }) as unknown as Record<string, unknown>, apiKey);
-      if (res.status < 300) content = JSON.parse(res.body)?.choices?.[0]?.message?.content ?? null;
-      else console.warn(`[pulse] extraction answered ${res.status}: ${res.body.slice(0, 200)}`);
-    } catch (e) {
-      console.warn("[pulse] extraction failed:", e);
-    }
-  }
+  const content = await chatContent(renderPulseExtract({ answer, followups, icp, question }), "pulse");
   return checkCandidates(parseItems(content), answer, followups);
 }
 
