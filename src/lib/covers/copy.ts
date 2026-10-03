@@ -37,6 +37,12 @@ export interface CoverCopyInput {
   title: string;
   hook: string;
   body: string;
+  /**
+   * The LinkedIn post text, when the draft has one. The cover is seen beside
+   * it, so a quote comes from it: a line the reader never sees in the post
+   * would read as invented.
+   */
+  post?: string;
   claimsOk: string;
   icp: { who: string; role: string; company_type: string };
   /** Layouts of this tenant's recent covers, newest first. */
@@ -192,13 +198,16 @@ function pickNumber(card: CoverCard, body: string, claimsOk: string, notes: stri
   return { number: { value, unit: clean(card.number?.unit) || undefined }, caption };
 }
 
+/** Where a cover quote is taken from: the LinkedIn post when there is one, else the body. */
+export const quoteSource = (draft: { body: string; post?: string | null }) => draft.post?.trim() || draft.body;
+
 /**
  * The figure and the quote this draft could open with, before anyone judges
  * whether they make the point on their own (the service asks Jev).
  */
-export function coverOptions(input: Pick<CoverCopyInput, "card" | "body" | "claimsOk">): { number?: { value: string; unit?: string; caption: string }; quote?: string } {
+export function coverOptions(input: Pick<CoverCopyInput, "card" | "body" | "post" | "claimsOk">): { number?: { value: string; unit?: string; caption: string }; quote?: string } {
   const picked = pickNumber(input.card, input.body, input.claimsOk, []);
-  return { number: picked ? { ...picked.number, caption: picked.caption } : undefined, quote: pickQuote(input.body) };
+  return { number: picked ? { ...picked.number, caption: picked.caption } : undefined, quote: pickQuote(quoteSource(input)) };
 }
 
 /**
@@ -241,7 +250,7 @@ export function chooseCoverCopy(input: CoverCopyInput): CoverCopy {
   }
 
   const numbered = input.layout ? undefined : pickNumber(input.card, input.body, input.claimsOk, notes);
-  const quote = input.layout ? undefined : pickQuote(input.body);
+  const quote = input.layout ? undefined : pickQuote(quoteSource(input));
   if (numbered && !input.judged?.number) notes.push(`No NUMBER cover: ${numbered.number.value} ${numbered.caption} needs the post to make sense, or says less than the headline.`);
   if (quote && !input.judged?.quote) notes.push("No QUOTE cover: the line needs the post to make sense, or says less than the headline.");
   // A figure or quote that makes the point on its own leads, unless the last
@@ -269,9 +278,9 @@ const squash = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()
  */
 export function coverOutOfDate(
   cover: { layout?: string; headline?: string; kicker?: string; quote?: string; number?: { value: string } | null; headline_source?: string },
-  draft: { title: string; body: string }
+  draft: { title: string; body: string; post?: string | null }
 ): string | null {
-  if (cover.quote && cover.layout === "QUOTE" && !squash(draft.body).includes(squash(cover.quote))) return "its quote is no longer in the post";
+  if (cover.quote && cover.layout === "QUOTE" && !squash(quoteSource(draft)).includes(squash(cover.quote))) return "its quote is not in the post";
   const text = [cover.headline, cover.kicker, cover.layout === "NUMBER" ? cover.number?.value : ""].filter(Boolean).join(" ");
   const figures = newFigures(text, draft.body);
   if (figures.length) return `it states ${figures.join(", ")}, which the post no longer does`;

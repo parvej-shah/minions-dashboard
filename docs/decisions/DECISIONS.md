@@ -29,9 +29,15 @@ and link to it here.
 
 ---
 
+## 2026-10-03 — Automatic drafting takes the oldest idea; no idea queue
+
+**Decision:** The Ideas page has no user-managed drafting queue. When automatic drafting is on, Minions drafts the oldest eligible unused idea; users can still start a specific draft directly or set a draft time. Harvesting pauses once 10 unused, gate-passed ideas are available.
+**Why:** Queue ordering added cognitive load without changing the regular drafting flow: automatic drafting can use the oldest available idea, and a bounded stock of 10 keeps the idea pool ready without accumulating excess.
+**Status:** active
+
 ## 2026-10-03 — A cover makes one point at a glance and always matches its post
 
-**Decision:** The cover's main line sets in at most three lines (the strategist writes 4 to 8 words, at most 55 characters), and the subtitle appears only under a short headline. The author's name and byline are larger so they read at phone feed size. Headline and Statement covers are the default and alternate. A Number or Quote cover is used only when Jev judges that the figure or line makes sense without the post and would make the reader stop more than the headline; it is no longer used just because it is its turn. When an edit leaves a cover behind (its quote was cut, it states a figure the post no longer has, or it shows an old title), the cover is redrawn when the draft is saved, approved or scheduled, keeping a reviewer's own headline when that is still true. Reviewers can still pick any layout.
+**Decision:** The cover's main line sets in at most three lines (the strategist writes 4 to 8 words, at most 55 characters), and the subtitle appears only under a short headline. The author's name and byline are larger so they read at phone feed size. Headline and Statement covers are the default and alternate. A Number or Quote cover is used only when Jev judges that the figure or line makes sense without the post and would make the reader stop more than the headline; it is no longer used just because it is its turn. A quote is taken from the LinkedIn post when the draft has one, since that is the text the cover is seen beside. When an edit leaves a cover behind (its quote was cut, it states a figure the post no longer has, or it shows an old title), the cover is redrawn when the draft is saved, approved or scheduled, keeping a reviewer's own headline when that is still true. Reviewers can still pick any layout.
 **Why:** An outside review of live covers found headlines running to four to eight lines, Number and Quote covers that needed the post to make sense ("85 / AI-written posts versus 179 for the rest"), subtitles and bylines too small to read in the feed, and a cover that could go out quoting a line the post no longer had. Thumbnail guidance (YouTube and LinkedIn alike) is a few large words, one idea, read in about a second. The user asked for two to three lines at most.
 **Alternatives considered:** Blocking approval until a reviewer redraws a stale cover (rejected: the user wants results, not another error to act on). Rejecting illustrations that don't fit the claim (left for later: it's mostly taste, and a rule would cause redraws for little gain).
 **Status:** active
@@ -143,7 +149,7 @@ and link to it here.
 
 **Decision:** The Ideas page leads with Up next: users choose an idea, place the strongest one first, and Minions drafts that first idea automatically. The full idea library remains a secondary view; Calendar is removed from this page, while scheduling remains available from idea details. Cards hide system metadata, manual ideas no longer require legacy topic classification, and Draft Now moves into idea details.
 **Why:** Users should make one understandable decision without learning pipeline statuses, harvested pools, claim mechanics, or competing queue-versus-draft paths.
-**Status:** active
+**Status:** superseded by [Automatic drafting takes the oldest idea; no idea queue](#2026-10-03--automatic-drafting-takes-the-oldest-idea-no-idea-queue)
 
 ## 2026-09-30 — The brand brief is a lesson, one question per screen
 

@@ -111,6 +111,13 @@ describe("cover copy is chosen and checked in code", () => {
     expect(coverOutOfDate({ layout: "NUMBER", headline: "of silence", number: { value: "5" } }, draft)).toMatch(/5/);
     expect(coverOutOfDate({ layout: "HEADLINE", headline: "Old title", headline_source: "title" }, draft)).toMatch(/title/);
     expect(coverOutOfDate({ layout: "HEADLINE", headline: "My own words", headline_source: "reviewer" }, draft)).toBeNull();
+    // The quote must be in the LinkedIn post the cover is seen beside.
+    expect(coverOutOfDate({ layout: "QUOTE", quote: "A booking only exists when your calendar confirms it, not when the caller hears yes." }, { ...draft, post: "A shorter LinkedIn version." })).toMatch(/quote/);
+  });
+
+  it("quotes the LinkedIn post when the draft has one", () => {
+    const post = "We lost bookings for a month. A booking is real only when your calendar has it, never when the caller hears yes.";
+    expect(chooseCoverCopy({ ...input, post, recentLayouts: [], judged: { quote: true } }).quote).toBe("A booking is real only when your calendar has it, never when the caller hears yes.");
   });
 
   it("quotes a body sentence word for word that stands alone", () => {

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { deleteFromR2, r2KeyFromUrl, uploadToR2 } from "@/lib/r2";
 import { coverBrand } from "@/lib/covers/brand";
-import { chooseCoverCopy, coverOptions, coverOutOfDate, scoreHeadline, pickQuote, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
+import { chooseCoverCopy, coverOptions, coverOutOfDate, scoreHeadline, pickQuote, quoteSource, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
 import { askJev } from "@/lib/ai/jev";
 import { COVER_LAYOUTS, CoverFitError, type CoverLayout, type CoverSpec } from "@/lib/covers/layouts";
 import { renderCoverPng } from "@/lib/covers/render";
@@ -195,7 +195,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   const asset = await prisma.asset.findUnique({
     where: { id: assetId },
     select: {
-      id: true, clientId: true, title: true, hook: true, content: true, claimsOk: true, coverSpec: true, heroAttempts: true,
+      id: true, clientId: true, title: true, hook: true, content: true, linkedinVariant: true, claimsOk: true, coverSpec: true, heroAttempts: true,
       heroImageUrl: true, slug: true, status: true, publishedAt: true, linkedinPublishedAt: true, facebookPublishedAt: true,
       idea: { select: { tags: true } },
     },
@@ -231,6 +231,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     title: asset.title ?? "",
     hook: asset.hook ?? "",
     body,
+    post: asset.linkedinVariant ?? undefined,
     claimsOk: asset.claimsOk ?? "N",
     icp: icpFields,
     recentLayouts: recent.map((r) => (r.coverSpec as { layout?: string } | null)?.layout ?? "").filter(Boolean),
@@ -292,9 +293,9 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     if (edit.layout) {
       if (!COVER_LAYOUTS.includes(edit.layout)) return { ok: false, error: `Unknown layout ${edit.layout}` };
       if (edit.layout === "NUMBER" && !spec.number) return { ok: false, error: "This draft has no verified figure for a NUMBER cover." };
-      if (edit.layout === "QUOTE" && !spec.quote) {
-        const quote = pickQuote(body);
-        if (!quote) return { ok: false, error: "No sentence in the draft works as a pull quote." };
+      if (edit.layout === "QUOTE") {
+        const quote = pickQuote(quoteSource({ body, post: asset.linkedinVariant }));
+        if (!quote) return { ok: false, error: "No sentence in the post works as a pull quote." };
         spec = { ...spec, quote };
       }
       spec = { ...spec, layout: edit.layout };
@@ -353,10 +354,10 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
  * headline is kept when it is still true. True when it redrew the cover.
  */
 export async function refreshCoverIfStale(assetId: string): Promise<boolean> {
-  const asset = await prisma.asset.findUnique({ where: { id: assetId }, select: { title: true, content: true, coverSpec: true, heroProvider: true } });
+  const asset = await prisma.asset.findUnique({ where: { id: assetId }, select: { title: true, content: true, linkedinVariant: true, coverSpec: true, heroProvider: true } });
   const spec = asset?.coverSpec as Partial<StoredCoverSpec> | null | undefined;
   if (!asset || !spec || asset.heroProvider !== COVER_PROVIDER) return false;
-  const draft = { title: asset.title ?? "", body: bodyOf(asset.content ?? "") };
+  const draft = { title: asset.title ?? "", body: bodyOf(asset.content ?? ""), post: asset.linkedinVariant };
   const why = coverOutOfDate(spec, draft);
   if (!why) return false;
   const reviewerHeadline = spec.headline_source === "reviewer" && spec.headline && !coverOutOfDate({ headline: spec.headline }, draft);

@@ -105,7 +105,8 @@ export async function updateAsset(clientId: string, idOrSlug: string, body: Json
     data: assetUpdateData(body, parseChannelsChange(body, owned)),
     include: { claims: true },
   });
-  const wordsChanged = body.title !== undefined || (body.content ?? body.body_content) !== undefined;
+  const variants = (body.variants ?? {}) as Record<string, unknown>;
+  const wordsChanged = body.title !== undefined || (body.content ?? body.body_content) !== undefined || body.linkedin_variant !== undefined || variants.linkedin !== undefined;
   if (wordsChanged && !goingOut && !isPublished(updated) && (await refreshCoverIfStale(owned.id))) {
     updated = await prisma.asset.findUniqueOrThrow({ where: { id: owned.id }, include: { claims: true } });
   }
