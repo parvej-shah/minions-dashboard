@@ -1,7 +1,8 @@
 "use client";
 
 import { Flame, Hammer, Lightbulb } from "lucide-react";
-import type { OnboardingWizardState, StoryKind } from "@/hooks/useOnboardingWizard";
+import type { OnboardingWizardState } from "@/hooks/useOnboardingWizard";
+import type { StoryKind } from "@/lib/onboardingDraft";
 import { MEMORY_MIN_CHARS } from "@/constants/contentLanes";
 import { ExampleChip, Question, lessonInput } from "./lesson";
 

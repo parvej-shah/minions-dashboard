@@ -6,6 +6,7 @@ interface NewDirective {
   key: string;
   content: string;
   priority?: number;
+  from_onboarding?: boolean;
 }
 
 export const createDirective = ({ priority = 1, ...directive }: NewDirective) =>
