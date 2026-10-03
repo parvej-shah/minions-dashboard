@@ -87,8 +87,8 @@ Step 2b — The Argument: One central argument, built on the author's advantage 
   The author posted the arguments under RECENTLY POSTED below in the last few weeks. Do not argue any of them again, even in new words; find the point about this idea that they did not make.` : ""}
 Step 3 — The Visual Art Direction for Cover Art:
   - First decide the visual register from the article's ACTUAL subject matter: PHYSICAL_TRADE or ABSTRACT_DATA.
-  - Cover Headline: 6 to 10 words in sentence case. It is the whole cover: a specific, believable claim or promise to the reader, naming the concrete thing that breaks or the outcome, and it must make sense with no other context. Write it for the ICP reader's own situation. Never an abstract category pairing (not 'Fluency Vs Accuracy', 'Speed Versus Quality', or 'AI Scheduling Explained'), never a topic label.
-  - Emphasis Word: the one word of the cover headline the claim turns on. It is set in the accent colour.
+  - Cover Headline: 5 to 10 words in sentence case. It is the post's title on the thumbnail: someone scrolling past must know at once what the post is about. Name the specific things the post names (the tool, product, process or change) and what happened or why, and make it make sense with no other context.${author?.memory.length ? ` This post is the author's own account, so title it as their story, in their words: what they did and why (e.g. 'Why we moved from regex to Jev', 'How we stopped losing after-hours calls', 'What our first 50 bookings taught us'), never an abstract maxim about the topic.` : ` Title it as a specific question or claim about the reader's situation (e.g. 'Why voice agents lose bookings after hours'), never an abstract maxim.`} Never an abstract category pairing (not 'Fluency Vs Accuracy', 'Speed Versus Quality', or 'AI Scheduling Explained'), never a bare topic label.
+  - Emphasis Word: the one word of the cover headline it turns on, usually the thing it names. It is set in the accent colour.
   - Cover Subtitle: One sentence under 90 characters: what the reader gets or what it costs them, in plain editorial-magazine language. NEVER start with 'Explaining', 'Understanding', 'A look at', 'How to', or any other explainer-caption framing. No figure the idea does not state.
   - Cover Number: only when the author's experience or the evidence states one striking figure this post turns on, give it with a 4 to 10 word caption. Otherwise leave every field empty. Never invent or round a figure.
   - Secondary Visual Motif: One vivid sentence describing a SINGLE small flat line-icon detail that echoes this topic. Never a full studio scene, never multiple objects, never a table or professional-photography setup.
@@ -122,8 +122,8 @@ Return ONLY this JSON:
   "reader_objection": "the specific skeptical thought",
   "key_points": ["3-5 items, each a specific concrete point"],
   "thumbnail_card": {
-    "headline": "6-10 words, sentence case: a specific claim or promise to the reader, never a topic label",
-    "emphasis_word": "the one headline word the claim turns on",
+    "headline": "5-10 words, sentence case: the post's title, naming what it is about, never a topic label",
+    "emphasis_word": "the one headline word it turns on",
     "subtitle": "one sentence under 90 characters, stating what the reader gets or what it costs them",
     "number": { "value": "a figure the idea states, or empty", "unit": "e.g. seconds, or empty", "caption": "4-10 words, or empty" },
     "visual_register": "PHYSICAL_TRADE or ABSTRACT_DATA",

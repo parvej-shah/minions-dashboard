@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-10-03 — The cover headline is the post's title
+
+**Decision:** The headline on the cover image and the carousel's first slide is now the post's title: it names what the post is about (the tool, product or change) and what happened or why, so someone scrolling past knows the subject at once. When the post is the author's own account it is titled as their story ("Why we replaced regex with Jev"). Abstract one-line maxims about the topic ("A regex counter cannot judge if writing sounds human") are no longer used, and category labels ("AI scheduling explained") stay ruled out.
+**Why:** The user's test cover for the Jev post carried a general claim that didn't say what the post was about; a thumbnail is read in a second, and the title is what makes someone stop.
+**Status:** active
+
 ## 2026-10-03 — An idea the author adds themselves is written as their own account
 
 **Decision:** When the author adds their own idea with notes ("Add your own idea"), the draft treats those notes as the author's first-hand account: it may speak in the first person and use the figures and names the notes give, and it opens on the author's view rather than an imagined reader scene. Nothing beyond the notes may be claimed. The hook and the X post now get the same AI-pattern check and one rewrite as the body and the LinkedIn and Facebook posts.

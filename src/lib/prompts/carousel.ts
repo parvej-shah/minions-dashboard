@@ -61,7 +61,7 @@ Rules:
 - ${INNER_SLIDES.min} to ${INNER_SLIDES.max} slides after the cover. Fewer, sharper slides beat more.
 - One idea per slide, readable in three seconds on a phone. Plain words the reader uses. No slide repeats another's point.
 - Say only what the post says. Never add a figure, result, client, tool name or claim the post does not state. Never write first-person experience the post does not contain.
-- Cover headline: ${COVER_HEADLINE_WORDS.min}-${COVER_HEADLINE_WORDS.max} words, sentence case, the promise of the whole deck to the reader. "emphasis" is the one headline word the claim turns on. "kicker": one sentence, max 16 words, what the reader gets by swiping.
+- Cover headline: ${COVER_HEADLINE_WORDS.min}-${COVER_HEADLINE_WORDS.max} words, sentence case, the deck's title: someone scrolling past must know at once what it is about. Name the specific things the post names and what happened or why${input.memory.length ? "; when the post is the author's own account, title it as their story (e.g. \"Why we moved from regex to Jev\")" : ""}. Never an abstract maxim or a bare topic label. "emphasis" is the one headline word it turns on. "kicker": one sentence, max 16 words, what the reader gets by swiping.
 - "label": 2-4 words naming the topic, shown small on every slide.
 - "caption": the post text above the document, ${CAPTION_WORDS.min}-${CAPTION_WORDS.max} words. Open with the post's hook, lightly sharpened, then one or two short lines pointing into the carousel. Short paragraphs separated by a blank line. At most 2 hashtags at the end. No "comment X below", no "follow for more".
 - "document_title": the title LinkedIn shows on the document, max 10 words.

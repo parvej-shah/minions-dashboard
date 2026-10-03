@@ -66,7 +66,7 @@ export interface CoverCopy {
   notes: string[];
 }
 
-/** Explainer framing and category pairs: a cover must make a claim, not name a topic. */
+/** Explainer framing and category pairs: a cover must say what the post is about, not name a category. */
 const VAGUE = /\b(vs\.?|versus|explained|understanding|a look at|an introduction|introduction to|the future of|everything you need|deep dive|all about)\b/i;
 const MAX_WORDS = 14;
 
