@@ -247,9 +247,9 @@ export function useEditorialDraft(
       },
     };
 
-    const saved = await apiClient.patch<AssetItem>(`/api/assets/${activeAsset.id}`, payload);
+    const { asset: saved } = await apiClient.patch<{ asset?: AssetItem }>(`/api/assets/${activeAsset.id}`, payload);
     const redrawn = Boolean(saved?.hero_image_url && saved.hero_image_url !== activeAsset.hero_image_url);
-    if (redrawn) {
+    if (saved && redrawn) {
       // Keep the editor's text, pointed at the new cover, so the next save keeps it.
       setAssets((prev) => prev.map((a) => (a.id === saved.id ? saved : a)));
       if (bufferedAssetRef.current === saved.id) setEdited((p) => ({ ...p, body: withCoverUrl(p.body, saved.hero_image_url!) }));
