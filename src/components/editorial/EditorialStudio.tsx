@@ -109,9 +109,7 @@ export interface EditorialStudioProps {
  * staging cards, and the decision dock.
  *
  * All data loading and mutation lives in useEditorialDraft; this component
- * wires those to the view. It was previously a single 2,119-line file that
- * also contained two copies of a markdown renderer, three social mock feeds,
- * a fake publish state machine, and a direct browser call to the n8n webhook.
+ * wires those to the view.
  */
 export default function EditorialStudio({
   initialDraftId,

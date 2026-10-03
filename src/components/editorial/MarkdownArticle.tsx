@@ -19,9 +19,7 @@ export interface MarkdownArticleProps {
  * Renders an editorial body from markdown.
  *
  * One renderer serves both the split preview and the reading lane; they differ
- * only in typography, which is what `variant` selects. Previously these were
- * two ~180-line copies inside EditorialStudio, and only the reading copy
- * handled code fences and lists.
+ * only in typography, which is what `variant` selects.
  */
 export default function MarkdownArticle({
   body,

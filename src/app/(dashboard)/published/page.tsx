@@ -139,13 +139,7 @@ export default function PublishedPostsPage() {
     setSearchQuery("");
   };
 
-  /**
-   * Channel counts are the posts that actually carry copy for that channel.
-   *
-   * Every tab used to show `feed.length`, which asserted that all four channels
-   * had a post for every article — a draft with no LinkedIn variant still
-   * counted towards "LinkedIn Posts".
-   */
+  /** Channel counts are the posts that carry copy for that channel; a draft with no LinkedIn variant is not a LinkedIn post. */
   const linkedinReady = feed.filter((p) => (p.variants?.linkedin || "").trim().length > 0).length;
   const facebookReady = feed.filter((p) => (p.variants?.facebook || "").trim().length > 0).length;
   const twitterReady = feed.filter((p) => (p.variants?.twitter || "").trim().length > 0).length;

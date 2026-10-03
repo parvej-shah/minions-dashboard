@@ -5,11 +5,8 @@ import { apiClient } from "@/lib/api-client";
 import type { NavCounts } from "@/types";
 
 /**
- * Sidebar badge counts, served by one endpoint.
- *
- * The shell used to fan out five parallel fetches on every route change and
- * re-derive these client-side, refetching the whole dataset each navigation.
- * Counts stay null until loaded so badges hide rather than showing a fake zero.
+ * Sidebar badge counts, served by one endpoint. Counts stay null until loaded
+ * so badges hide rather than showing a fake zero.
  */
 export function useNavCounts() {
   const [counts, setCounts] = useState<NavCounts | null>(null);

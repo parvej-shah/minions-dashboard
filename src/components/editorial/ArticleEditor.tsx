@@ -36,10 +36,8 @@ export interface ArticleEditorProps {
 }
 
 /**
- * The reading / editing / split panel for an article body.
- *
- * The reading and split views render through one MarkdownArticle; they were
- * previously two separately-maintained copies of the same ~180-line renderer.
+ * The reading / editing / split panel for an article body. The reading and
+ * split views render through the same MarkdownArticle.
  */
 export default function ArticleEditor({
   activeAsset,

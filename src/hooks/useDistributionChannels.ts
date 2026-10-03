@@ -10,12 +10,7 @@ const EMPTY: DistributionChannelsPayload = {
   summary: { blog: false, facebook: false, linkedin: false, x: false },
 };
 
-/**
- * Distribution channel toggles.
- *
- * The client-side fallback catalogue this used to carry is gone: the channel
- * list now has one definition (src/constants/channels.ts) which the API serves.
- */
+/** Distribution channel toggles. The channel list has one definition (src/constants/channels.ts), which the API serves. */
 export function useDistributionChannels() {
   const resource = useApiResource<DistributionChannelsPayload>("/api/channels", EMPTY, {
     errorMessage: "Could not load distribution channels",

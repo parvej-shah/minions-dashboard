@@ -82,11 +82,8 @@ const EMPTY_EDITS = { title: "", hook: "", body: "", linkedin: "", facebook: "",
 
 /**
  * All Editorial Studio data and mutation logic, out of the view layer.
- *
- * Notably, publishing is now driven by the actual network call: the studio was
- * previously advancing through four decorative phases on 800/1600/2400ms
- * timers and firing the real request inside the last one, so the UI reported
- * success before — and regardless of whether — the request succeeded.
+ * Publishing is driven by the real network call, so the UI reports success only
+ * once the request has succeeded.
  */
 export function useEditorialDraft(
   initialDraftId?: string,

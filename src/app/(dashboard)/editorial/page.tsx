@@ -11,12 +11,7 @@ interface EditorialPageProps {
   searchParams: Promise<{ id?: string }>;
 }
 
-/**
- * `?id=` deep-links a specific draft (e.g. Published page's "Studio" link,
- * and /drafts/[id]'s redirect here). Previously silently ignored — this page
- * never read the param, so every deep link landed on whatever draft the
- * queue happened to select first instead of the intended one.
- */
+/** `?id=` opens a specific draft: the Published page's "Studio" link and /drafts/[id] both use it. */
 export default async function EditorialPage({ searchParams }: EditorialPageProps) {
   const { id } = await searchParams;
   return <EditorialStudio initialDraftId={id} isStandaloneRoute={false} />;

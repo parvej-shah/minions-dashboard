@@ -22,9 +22,9 @@ interface BrandLookPreviewProps {
 /**
  * A real sample cover in this look: the same renderer and checks as a posted
  * cover (/api/brand/cover-preview), redrawn as the colours, byline or photo
- * change, with the chosen illustration style. It used to be a CSS mock of the old 16:9 AI image, which could not
- * show what the renderer actually does (a colour deepened for contrast, a
- * photo that cannot load).
+ * change, with the chosen illustration style. Drawing it with the real renderer
+ * shows what a mock could not: a colour deepened for contrast, a photo that
+ * cannot load.
  */
 export default function BrandLookPreview({ colors, brandName, byline, logoUrl, art }: BrandLookPreviewProps) {
   const [src, setSrc] = useState<string | null>(null);

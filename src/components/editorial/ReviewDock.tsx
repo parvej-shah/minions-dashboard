@@ -48,14 +48,8 @@ export interface ReviewDockProps {
 
 /**
  * Sticky review-and-decision panel: save, publish, unpublish, delete, and the
- * draft's real metadata.
- *
- * The publish button reflects the actual request now. It previously stepped
- * through "1/3 Syncing / 2/3 Broadcasting / 3/3 Emitting" on fixed timers while
- * the real call ran inside the last one, so it reported progress that had no
- * relationship to what the server was doing. The per-model cost split shown
- * here was likewise four hardcoded constants that did not sum to the total;
- * only the recorded generation cost remains.
+ * draft's real metadata. The publish button follows the actual request, and
+ * the cost shown is the recorded generation cost, never an estimate.
  */
 export default function ReviewDock({
   activeAsset,

@@ -26,12 +26,8 @@ export interface DashboardShellProps {
 
 /**
  * Dashboard chrome: sidebar, mobile navigation, command palette, and the
- * harvest trigger.
- *
- * Every hook runs unconditionally. The login branch used to sit above the
- * hooks, so navigating to or from /login changed the hook count between
- * renders — React's documented crash condition. The login route now gets its
- * own layout instead of an early return here.
+ * harvest trigger. Every hook runs unconditionally; /login has its own layout
+ * rather than an early return here.
  */
 export default function DashboardShell({ children }: DashboardShellProps) {
   const pathname = usePathname();

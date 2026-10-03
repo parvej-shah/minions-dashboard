@@ -18,10 +18,8 @@ import { inputClass } from "@/components/ui/fieldStyles";
 /**
  * Where the idea harvester looks for market signals, per tenant.
  *
- * These four feeds used to be hardcoded in the n8n workflow and shared by
- * every tenant regardless of industry -- one of them was a Google News query
- * pinned to "pest control HVAC plumbing" -- which is a large part of why
- * harvested ideas repeated. Editing them here changes the next harvest.
+ * Every workspace has its own feeds, matched to its industry; editing them here
+ * changes the next harvest.
  */
 export default function SourcesTab() {
   const [sources, setSources] = useState<IdeaSourceItem[]>([]);
