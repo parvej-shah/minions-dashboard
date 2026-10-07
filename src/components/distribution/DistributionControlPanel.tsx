@@ -55,7 +55,7 @@ export function DistributionControlPanel({
 
     if (success) {
       showNotification(
-        `${channel.name} automated posting is now ${nextState ? "ACTIVATED" : "PAUSED"}.`
+        nextState ? `${channel.name} is on: approved posts go there.` : `${channel.name} is off: posts skip it.`
       );
     } else {
       setData((prev) => ({ ...prev, channels: previous }));
@@ -244,11 +244,11 @@ export function DistributionControlPanel({
                     }`}
                   />
                   <span className={isActive ? "text-brand font-semibold" : "text-subtle"}>
-                    {isActive ? "Broadcasting Active" : "Broadcast Paused"}
+                    {isActive ? "On" : "Off"}
                   </span>
                 </div>
                 <span className="text-[#8190A2] sm:text-right">
-                  {isActive ? "Auto-Posts on Publish" : "Skipped on Publish"}
+                  {isActive ? "Approved posts go here" : "Posts skip this channel"}
                 </span>
               </div>
 
@@ -263,10 +263,10 @@ export function DistributionControlPanel({
                     {ch.has_credential
                       ? ch.key === "blog"
                         ? "● Publishing to your own site"
-                        : "● Credential connected"
+                        : "● Connected"
                       : ch.key === "blog"
-                        ? "○ Publishing to our hosted blog"
-                        : "○ No credential yet"}
+                        ? "○ No site of your own connected"
+                        : "○ Not connected"}
                   </span>
                 </div>
                 <ChannelCredentialForm channel={ch} onSaved={reload} />

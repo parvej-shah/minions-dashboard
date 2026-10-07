@@ -38,6 +38,8 @@ export interface SocialVariantTabsProps {
   enabledTabs?: Record<SocialTab, boolean>;
   /** Blog channel off: there is no article to link, so no first-comment link. */
   blogEnabled?: boolean;
+  /** False when no channel posts the cover, so there is no thumbnail to choose. */
+  showCoverLink?: boolean;
 }
 
 interface PanelProps {
@@ -113,6 +115,7 @@ export default function SocialVariantTabs({
   copiedKey,
   enabledTabs,
   blogEnabled = true,
+  showCoverLink = true,
 }: SocialVariantTabsProps) {
   const author = activeAsset.cover?.author ?? null;
   const visibleChannels = SOCIAL_CHANNELS.filter((channel) => enabledTabs?.[channel.tab] ?? true);
@@ -144,7 +147,7 @@ export default function SocialVariantTabs({
           </span>
           <div>
             <h2 id="channel-preview-title" className="text-xl font-extrabold text-ink">Channel preview</h2>
-            <p className="mt-1 text-sm leading-relaxed text-muted">Choose a channel to preview and edit its copy. <a href="#cover-image" className="font-semibold text-brand underline underline-offset-2 hover:text-ink focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">Choose the thumbnail style below ↓</a></p>
+            <p className="mt-1 text-sm leading-relaxed text-muted">Choose a channel to preview and edit its copy.{showCoverLink && <> <a href="#cover-image" className="font-semibold text-brand underline underline-offset-2 hover:text-ink focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">Choose the thumbnail style below ↓</a></>}</p>
           </div>
         </div>
 

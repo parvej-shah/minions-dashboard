@@ -10,8 +10,9 @@ import { badRequest } from "@/server/http/errors";
 
 // The blog's webhook URL is vaulted, not stored in Postgres, so a connected blog has no readable destination.
 function targetDestinationFor(key: string, row: ClientChannel | undefined): string {
-  if (key === "blog") return row?.credentialRef ? "Your own site (connected)" : "Shared hosted blog";
-  if (row?.externalId) return `Connected (${row.externalId})`;
+  if (key === "blog") return row?.credentialRef ? "Your own site (connected)" : "Your Minions-hosted blog";
+  // The id itself (a LinkedIn URN, a Page id) means nothing to the owner; what it points at does.
+  if (row?.externalId) return row.externalId.startsWith("urn:li:organization:") ? "Connected to your company page" : key === "linkedin" ? "Connected to your profile" : "Connected";
   return row?.credentialRef ? "Connected" : "Not connected yet";
 }
 

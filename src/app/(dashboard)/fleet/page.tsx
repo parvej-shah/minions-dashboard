@@ -12,7 +12,7 @@ export default function FleetPage() {
   return (
     <div className="space-y-6 sm:space-y-8 max-w-7xl mx-auto pb-16">
       <div className="border-b border-line pb-5 sm:pb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">Broadcast & Distribution</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">Channels</h1>
         <p className="text-sm text-muted mt-2 max-w-3xl leading-relaxed">Connect the places where your approved posts should appear.</p>
       </div>
 
@@ -23,7 +23,7 @@ export default function FleetPage() {
         <div className="space-y-1 text-left">
           <h3 className="text-sm font-bold text-ink">Ready to review and publish?</h3>
           <p className="text-xs text-muted">
-            Approve drafts in Editorial Studio to broadcast live to your enabled channels.
+            Approve drafts in Editorial Studio and they go to the channels switched on above.
           </p>
         </div>
 

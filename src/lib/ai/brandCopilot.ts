@@ -212,7 +212,7 @@ Topics/claims to strictly avoid: ${input.avoidAnswer || "(not specified)"}
 Writing sample to match, if present: ${input.voiceSample ? input.voiceSample.slice(0, 1000) : "(not provided)"}
 ${input.writerExpertiseGuidance ? `\nAuthor standing (governs what the directives may claim as evidence, NOT how technical they are -- reading level comes from the audience above):\n${input.writerExpertiseGuidance}\n` : ""}
 Task:
-Write 5-6 sharp, specific brand directives grounded in the answers above (do not invent facts not implied by them), plus a 1-2 sentence positioning summary. Each directive's "instruction" must be a concrete, actionable rule for an AI writer -- not vague marketing language.
+Write 5-6 sharp, specific brand directives grounded in the answers above (do not invent facts not implied by them), plus a 1-2 sentence positioning summary. Each directive's "instruction" is shown to the owner on their brand page and read by the writer: one short, concrete sentence in the owner's own words, first person where natural (e.g. "I write about missed-call recovery for brokerages." or "No hype words: revolutionary, game-changing."). Never address the AI ("Position X as...", "Generate ideas...", "Ensure..."), never use ALL-CAPS labels, no vague marketing language.
 
 Categories to use (exactly these strings): "POSITIONING" (who they are / their differentiator), "TOPICS" (the subject-matter territory to generate ideas within), "VOICE" (tone and cadence), "FORBIDDEN" (topics/claims/buzzwords to never use).
 

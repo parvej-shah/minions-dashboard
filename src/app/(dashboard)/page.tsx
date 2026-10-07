@@ -292,7 +292,7 @@ export default function MissionControlPage() {
                     <div className="space-y-1 flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#ff6b4a]/10 text-[#ff6b4a] border border-[#ff6b4a]/20 shrink-0">
-                          READY TO REVIEW
+                          Ready for review
                         </span>
                         <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold shrink-0 ${
                           asset.audience === "ICP" ? "bg-blue-500/10 text-blue-400" : "bg-purple-500/10 text-purple-400"

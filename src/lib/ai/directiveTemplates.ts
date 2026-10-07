@@ -48,7 +48,7 @@ export function templateDirectives(input: TemplateInput) {
     directive(
       "POSITIONING",
       "CORE_POSITIONING_PERSPECTIVE",
-      `Position ${businessName} as an authoritative, grounded voice in ${industry}. Focus on practical realities and tangible outcomes over generic theory.`,
+      `A grounded, practical voice in ${industry}: real outcomes over generic theory.`,
       1
     ),
     ...(contentFocus
@@ -56,7 +56,7 @@ export function templateDirectives(input: TemplateInput) {
           directive(
             "TOPICS",
             "CORE_CONTENT_FOCUS",
-            `Generate ideas within this territory: ${contentFocus}. Prioritize specific, practical angles over broad industry commentary.`,
+            `${contentFocus.replace(/[.\s]+$/, "")}. Specific, practical angles over broad industry commentary.`,
             1
           ),
         ]
@@ -65,16 +65,16 @@ export function templateDirectives(input: TemplateInput) {
       "POSITIONING",
       "UNIQUE_VALUE_PROPOSITION",
       differentiator
-        ? `Highlight ${businessName}'s key differentiator: "${differentiator}". Anchor proof points and arguments around this operational strength.`
-        : "Emphasize verifiable execution, fast turnaround times, and transparent communication in all case studies.",
+        ? `What sets ${businessName} apart: ${differentiator.replace(/[.\s]+$/, "")}.`
+        : "Verifiable execution, fast turnaround and plain communication, shown in real examples.",
       1
     ),
     directive(
       "VOICE",
       "DEBUNK_INDUSTRY_MYTHS",
       myth
-        ? `Actively challenge the common industry misconception: "${myth}". Contrast flawed traditional approaches with our proven modern methodology.`
-        : "Call out low-quality industry shortcuts, hidden costs, and common pitfalls that clients frequently encounter.",
+        ? `A common belief I disagree with: ${myth.replace(/[.\s]+$/, "")}.`
+        : "Name the shortcuts, hidden costs and pitfalls clients run into.",
       2
     ),
     directive("VOICE", "PROSE_CADENCE_AND_RHYTHM", cadenceInstruction(voiceSample, preset), 2),
@@ -83,7 +83,7 @@ export function templateDirectives(input: TemplateInput) {
           directive(
             "FORBIDDEN",
             "STRICT_CONTENT_BOUNDARIES",
-            `FORBIDDEN: Never mention, promise, or discuss: "${avoid}". Keep all statements strictly within verified capabilities.`,
+            `Never mention or promise: ${avoid.replace(/[.\s]+$/, "")}. Only claim what I can show.`,
             1
           ),
         ]
@@ -91,7 +91,7 @@ export function templateDirectives(input: TemplateInput) {
     directive(
       "FORBIDDEN",
       "ANTI_FLUFF_VOCABULARY_FILTER",
-      `FORBIDDEN BUZZWORDS: Never use empty marketing buzzwords such as: ${preset.forbiddenWords.slice(0, MAX_FORBIDDEN_WORDS).join(", ")}. State facts directly with zero corporate filler.`,
+      `Buzzwords I never use: ${preset.forbiddenWords.slice(0, MAX_FORBIDDEN_WORDS).join(", ")}.`,
       1
     ),
   ];

@@ -4,6 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Image as ImageIcon, Layers } from "lucide-react";
 import type { AssetItem } from "@/types";
+import { statusLabel } from "@/lib/drafts/statusLabel";
 
 import { segment } from "@/components/ui/segment";
 export type QueueFilter = "ALL" | "PENDING_REVIEW" | "SCHEDULED" | "PUBLISHED" | "UNPUBLISHED" | "DRAFT";
@@ -213,11 +214,7 @@ export default function QueueRibbon({
                     ? "Reviewing"
                     : alreadyLive
                       ? "Live · Unreviewed"
-                      : asset.status === "PENDING_REVIEW"
-                        ? "Needs Review"
-                        : asset.status === "SCHEDULED"
-                          ? "Scheduled"
-                          : asset.status}
+                      : statusLabel(asset.status)}
                 </span>
               </div>
 

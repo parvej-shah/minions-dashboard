@@ -20,6 +20,7 @@ import type { DistributionChannelKey } from "@/types";
 import { formatPostTime } from "@/lib/postTime";
 import type { PublishState } from "@/hooks/useEditorialDraft";
 import type { AssetItem } from "@/types";
+import { statusLabel } from "@/lib/drafts/statusLabel";
 
 import { buttonStyles } from "@/components/ui/Button";
 export interface ReviewDockProps {
@@ -96,7 +97,7 @@ export default function ReviewDock({
               </span>
             ) : (
               <span className="text-[10px] font-mono text-brand bg-brand/10 px-2 py-0.5 rounded border border-brand/30">
-                {activeAsset.status}
+                {statusLabel(activeAsset.status)}
               </span>
             )}
           </div>

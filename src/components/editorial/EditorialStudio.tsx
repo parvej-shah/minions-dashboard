@@ -23,6 +23,7 @@ import ClaimsGate from "./ClaimsGate";
 import MobileActionBar from "./MobileActionBar";
 import DraftChecks from "./DraftChecks";
 import { plainReviewNotes } from "@/lib/drafts/plainNotes";
+import { postGoesTo } from "@/constants/postChannels";
 
 function EditorialStudioSkeleton() {
   return (
@@ -132,21 +133,29 @@ export default function EditorialStudio({
   const [listFilter, setListFilter] = useState<QueueFilter>("ALL");
   const [editorMode, setEditorMode] = useState<EditorMode>("preview");
   const [socialTab, setSocialTab] = useState<SocialTab>("LINKEDIN");
+  // Whether LinkedIn gets this draft's carousel, as the carousel card last loaded or set it.
+  const [carouselOn, setCarouselOn] = useState<{ id: string; on: boolean } | null>(null);
+  // A post limited to some channels (D18) previews only those.
+  const goesTo = (key: string) => postGoesTo(draft.activeAsset?.channels, key);
   const enabledSocialTabs = {
-    LINKEDIN: channels?.linkedin ?? true,
-    FACEBOOK: channels?.facebook ?? true,
-    TWITTER: channels?.x ?? true,
+    LINKEDIN: (channels?.linkedin ?? true) && goesTo("linkedin"),
+    FACEBOOK: (channels?.facebook ?? true) && goesTo("facebook"),
+    TWITTER: (channels?.x ?? true) && goesTo("x"),
   };
-  const anySocialChannelActive =
-    enabledSocialTabs.LINKEDIN || enabledSocialTabs.FACEBOOK || enabledSocialTabs.TWITTER;
-  const blogEnabled = channels?.blog ?? true;
+  const blogEnabled = (channels?.blog ?? true) && goesTo("blog");
+  // With the carousel on, LinkedIn posts the carousel and the text written for it
+  // (both in the carousel card), never the LinkedIn text or the cover below.
+  const linkedinGetsCarousel = enabledSocialTabs.LINKEDIN && carouselOn?.id === draft.activeAsset?.id && carouselOn?.on === true;
+  const previewTabs = { ...enabledSocialTabs, LINKEDIN: enabledSocialTabs.LINKEDIN && !linkedinGetsCarousel };
+  const anySocialChannelActive = previewTabs.LINKEDIN || previewTabs.FACEBOOK || previewTabs.TWITTER;
+  const coverGoesOut = !linkedinGetsCarousel || blogEnabled || enabledSocialTabs.FACEBOOK || enabledSocialTabs.TWITTER;
 
   // If the selected tab isn't one this tenant has connected (e.g. defaulted
   // to LinkedIn but only Facebook is on), display the first one that is,
   // without needing an effect to rewrite the underlying state.
   const firstActiveSocialTab =
-    (Object.keys(enabledSocialTabs) as SocialTab[]).find((t) => enabledSocialTabs[t]) ?? "LINKEDIN";
-  const displayedSocialTab = enabledSocialTabs[socialTab] ? socialTab : firstActiveSocialTab;
+    (Object.keys(previewTabs) as SocialTab[]).find((t) => previewTabs[t]) ?? "LINKEDIN";
+  const displayedSocialTab = previewTabs[socialTab] ? socialTab : firstActiveSocialTab;
   const [isEditingSocial, setIsEditingSocial] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [toggleLiveConfirmOpen, setToggleLiveConfirmOpen] = useState(false);
@@ -293,8 +302,9 @@ export default function EditorialStudio({
       onSave={handleSave}
       onCopy={copy}
       copiedKey={copiedKey}
-      enabledTabs={enabledSocialTabs}
+      enabledTabs={previewTabs}
       blogEnabled={blogEnabled}
+      showCoverLink={coverGoesOut}
     />
   );
 
@@ -321,11 +331,15 @@ export default function EditorialStudio({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-8 space-y-6">
-          {enabledSocialTabs.LINKEDIN && activeAsset.follow_up_format !== "COVER" && <CarouselCard key={activeAsset.id} activeAsset={activeAsset} onMessage={toast.show} />}
+          {enabledSocialTabs.LINKEDIN && activeAsset.follow_up_format !== "COVER" && (
+            <CarouselCard key={activeAsset.id} activeAsset={activeAsset} onMessage={toast.show} onCarouselOn={(on) => setCarouselOn({ id: activeAsset.id, on })} />
+          )}
           {socialVariants}
 
-          {/* Shown for every channel: LinkedIn posts carry the cover too. */}
-          <CoverImageCard activeAsset={activeAsset} isRendering={draft.isRenderingCover} onRerender={draft.rerenderCover} onMessage={toast.show} />
+          {/* Hidden only when nothing posts it: LinkedIn gets the carousel and no other channel is on. */}
+          {coverGoesOut && (
+            <CoverImageCard activeAsset={activeAsset} isRendering={draft.isRenderingCover} onRerender={draft.rerenderCover} onMessage={toast.show} />
+          )}
 
           {/* Blog off: the article is never published, so it is not shown for
               editing; it stays the source the cover and carousel are made from. */}

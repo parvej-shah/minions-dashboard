@@ -109,7 +109,7 @@ export function ChannelCredentialForm({
           className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap px-3 text-xs leading-none text-[#A0ACBA] hover:text-brand transition-colors"
         >
           <KeyRound className="w-3 h-3" />
-          {channel.has_credential ? "Rotate credential" : "Connect credential"}
+          {isBlog ? (channel.has_credential ? "Change your site" : "Connect your own site") : channel.has_credential ? "Replace connection" : "Connect"}
         </button>
         {channel.has_credential && (
           <button

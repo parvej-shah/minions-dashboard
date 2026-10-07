@@ -44,7 +44,16 @@ const ghostButton = "px-2.5 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 te
  * carousel or the cover image. Once the draft is published it is shown as it
  * went out.
  */
-export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: AssetItem; onMessage: (message: string) => void }) {
+export default function CarouselCard({
+  activeAsset,
+  onMessage,
+  onCarouselOn,
+}: {
+  activeAsset: AssetItem;
+  onMessage: (message: string) => void;
+  /** Told whether LinkedIn gets the carousel, on load and on every change, so the studio previews what goes out. */
+  onCarouselOn?: (on: boolean) => void;
+}) {
   const [state, setState] = useState<State | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
@@ -71,6 +80,13 @@ export default function CarouselCard({ activeAsset, onMessage }: { activeAsset: 
       cancelled = true;
     };
   }, [url, loadAttempt]);
+
+  const carouselOn = state ? Boolean(state.carousel?.active) : null;
+  useEffect(() => {
+    if (carouselOn !== null) onCarouselOn?.(carouselOn);
+    // Only a change of the choice is news; the callback is a new function each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [carouselOn]);
 
   const send = async (method: "POST" | "PATCH", body: unknown, kind: "make" | "save" | "toggle") => {
     setBusy(kind);
