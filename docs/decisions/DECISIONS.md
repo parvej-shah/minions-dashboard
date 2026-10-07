@@ -29,6 +29,13 @@ and link to it here.
 
 ---
 
+## 2026-10-07 — Idea harvesting stops at 15 unused ideas of any grade
+
+**Decision:** Minions stops finding new ideas for a workspace once 15 unused ideas are waiting, counting below-bar and never-checked ideas as well as passing ones. Rejected, drafted and claimed ideas don't count.
+**Why:** Only passing ideas used to count, so workspaces whose ideas mostly scored below the bar kept harvesting every night and piled up 30 or more unused ideas. Below-bar ideas are still drafted when nothing stronger is ready, so they are real stock.
+**Alternatives considered:** keeping the limit of 10 passing ideas, which never fills in a workspace whose harvests mostly score below the bar.
+**Status:** active
+
 ## 2026-10-03 — A published draft can go to LinkedIn again in the other format
 
 **Decision:** After a draft goes out on LinkedIn with its cover, the reviewer can post its carousel as a second LinkedIn post, and after a carousel post, its cover. The second post is a new draft: LinkedIn only, new text that does not open like the first post, same review and scheduling as any draft, one per published draft, and it does not count toward the monthly draft limit. The first post is never changed.
@@ -70,7 +77,7 @@ and link to it here.
 
 **Decision:** The Ideas page has no user-managed drafting queue. When automatic drafting is on, Minions drafts the oldest eligible unused idea; users can still start a specific draft directly or set a draft time. Harvesting pauses once 10 unused, gate-passed ideas are available.
 **Why:** Queue ordering added cognitive load without changing the regular drafting flow: automatic drafting can use the oldest available idea, and a bounded stock of 10 keeps the idea pool ready without accumulating excess.
-**Status:** active
+**Status:** active; the harvest limit is superseded by 2026-10-07 — Idea harvesting stops at 15 unused ideas of any grade
 
 ## 2026-10-03 — Ideas are shown oldest first with distinct draft states
 

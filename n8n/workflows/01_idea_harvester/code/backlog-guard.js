@@ -1,23 +1,24 @@
 const items = $input.all();
 const rawRows = items.map(item => item.json).filter(r => r && r.idea_id);
 
-// Only ideas the content plan can actually use count as backlog: refined,
-// unclaimed, and passed by the idea gate. Ungated ideas from before the gate,
-// and below-bar ones, never fill a slot ahead of time, so a pile of them must
-// not stop the harvest a waiting slot asked for.
-const usableBacklog = rawRows.filter(r => {
+// Every idea still waiting to be drafted counts as stock, whatever the gate
+// said: the content plan drafts below-bar and never-gated ideas too when no
+// passing one is ready (src/lib/plan/fill.ts). Rejected, drafted and claimed
+// ideas are not stock.
+const UNUSED_STATUSES = ['HARVESTED', 'REFINED', 'QUEUED'];
+const unusedStock = rawRows.filter(r => {
   const status = (r.status || '').trim().toUpperCase();
   const claimedAt = (r.claimed_at || '').trim();
   const verdict = (r.gate_verdict || '').trim().toUpperCase();
-  return status === 'REFINED' && !claimedAt && verdict === 'PASS';
+  return UNUSED_STATUSES.includes(status) && !claimedAt && verdict !== 'REJECT';
 });
 
-// Stop harvesting once 10 unused, gate-passed ideas are available.
-const isFull = usableBacklog.length >= 10;
+// Stop harvesting once 15 unused ideas are in stock.
+const isFull = unusedStock.length >= 15;
 
 return [{
   json: {
-    backlog_count: usableBacklog.length,
+    backlog_count: unusedStock.length,
     skip_harvest: isFull,
     existing_rows: rawRows
   }
