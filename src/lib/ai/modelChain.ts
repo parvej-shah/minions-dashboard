@@ -17,9 +17,12 @@
 import { DASHSCOPE_CHAT_URL } from "@/constants/dashscope";
 import { callCostUsd, recordCost } from "@/lib/ai/cost";
 
-/** Models with free quota on the account (QwenCloud › Benefits, 2026-09-24), strongest first. */
-const FREE_LARGE = ["deepseek-v4-pro", "glm-5.2", "deepseek-v3.2"];
-const FREE_SMALL = ["deepseek-v4-flash", "glm-5.1"];
+/**
+ * Models the account can reach (probed 2026-10-12). qwen3-max, deepseek-v3.2
+ * and deepseek-v4-flash no longer exist on it, and glm-5.2's free quota is
+ * ending, so none of them is tried any more.
+ */
+const LARGE = ["deepseek-v4-pro", "glm-5.1"];
 
 /**
  * Primary model -> what to try after it, in order. A model not listed here
@@ -27,17 +30,18 @@ const FREE_SMALL = ["deepseek-v4-flash", "glm-5.1"];
  * (a test checks that).
  */
 export const MODEL_FALLBACKS: Record<string, string[]> = {
-  // The large stages (strategist, writer, rewrite, harvest, pulse, craft, carousel). Read most like a
-  // person in a Jev-scored comparison (2026-10-03) and always returned valid JSON. deepseek-v4-pro
-  // comes late: it drafted longest, with the most AI figures, and broke JSON on rewrites.
-  // qwen3.8-max is left out while its free quota is used up; qwen3.7-max is the paid last resort.
-  "glm-5.2": ["qwen3-max", "deepseek-v3.2", "deepseek-v4-pro", "qwen3.7-max"],
-  "qwen3-max": FREE_LARGE,
-  // No prompt names it now (free quota used up); kept for any caller that still sends it.
-  "qwen3.8-max": [...FREE_LARGE, "qwen3.7-max"],
-  "qwen3.7-flash": [...FREE_SMALL, "qwen-flash"],
-  "qwen-flash": [...FREE_SMALL, "qwen3.7-flash"],
-  // Onboarding and the memory check (thinking off). Dated snapshots carry their own free quota, unlike the undated qwen-plus.
+  // The large stages (strategist, writer, rewrite, harvest, pulse, craft, carousel, follow-up, cover line).
+  // Writer comparison 2026-10-12 (same 6 strategies, Jev 0-4 "reads as one person"): deepseek-v4-pro 2.36,
+  // glm-5.2 2.30, glm-5.1 2.19, qwen3.7-max 2.13, qwen3.6-plus 1.71, qwen3.7-plus 1.45; all returned valid JSON.
+  // glm-5.1 wins on what is left: close to the top, the tightest drafts (301 words vs 391-456) and the fastest.
+  // deepseek-v4-pro comes next (longest drafts, broke JSON on rewrites on 2026-10-03); qwen3.7-max is the paid last resort.
+  "glm-5.1": ["deepseek-v4-pro", "qwen3.7-max"],
+  // Kept for any caller that still names them.
+  "glm-5.2": ["glm-5.1", "deepseek-v4-pro", "qwen3.7-max"],
+  "qwen3.8-max": [...LARGE, "qwen3.7-max"],
+  "qwen3.7-flash": ["glm-5.1", "qwen-flash"],
+  "qwen-flash": ["glm-5.1", "qwen3.7-flash"],
+  // Onboarding, the brand import and the memory check (thinking off). Dated snapshots carry their own free quota, unlike the undated qwen-plus.
   "qwen3.7-plus": ["qwen-plus-2025-09-11", "qwen-flash-2025-07-28"],
 };
 

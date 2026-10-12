@@ -96,7 +96,7 @@ Brand Context:
 ${brandContext}${toneProfileBlock}${voiceBlock}`;
 
   return {
-    model: "glm-5.2",
+    model: "glm-5.1",
     enable_thinking: false,
     temperature: 0.7,
     max_tokens: 4000,

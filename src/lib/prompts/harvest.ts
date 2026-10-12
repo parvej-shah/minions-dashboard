@@ -210,7 +210,7 @@ ${recentTheses.slice(0, 60).map(fenceSafe).join("\n")}
 Generate exactly ${plan.length} ideas for ${companyName}, one per slot.`;
 
   return {
-    model: "glm-5.2",
+    model: "glm-5.1",
     enable_thinking: false,
     // Lower than the old 0.9: ideas must now quote the author's experience
     // exactly, and the plan already varies what each run builds on.
