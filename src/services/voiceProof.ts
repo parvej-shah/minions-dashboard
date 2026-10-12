@@ -120,3 +120,64 @@ export async function saveVoiceAndProof(clientId: string, body: JsonObject) {
 
   return { success: true, examples_saved: examples.length, proofs_saved: proofs.length };
 }
+
+/**
+ * Adds proofs the author ticked on an import's review screen to the ones they
+ * already have, skipping a claim already there and stopping at the limit.
+ */
+export async function addProofs(clientId: string, rawProofs: unknown[]): Promise<number> {
+  const existing = await prisma.brandDirective.findMany({ where: { clientId, category: "PROOF" }, select: { instruction: true } });
+  const claims = new Set(existing.flatMap((row) => parseBrandProof(row.instruction)?.claim.toLowerCase() ?? []));
+  const room = MAX_PROOFS - existing.length;
+  const fresh: ReturnType<typeof cleanProof>[] = [];
+  for (const item of rawProofs) {
+    if (fresh.length >= room) break;
+    let proof: ReturnType<typeof cleanProof>;
+    try {
+      proof = cleanProof(item);
+    } catch {
+      continue;
+    }
+    const key = proof.claim.toLowerCase();
+    if (claims.has(key)) continue;
+    claims.add(key);
+    fresh.push(proof);
+  }
+  if (!fresh.length) return 0;
+
+  await prisma.brandDirective.createMany({
+    data: fresh.map((proof, index) => ({
+      id: `DIR-${Date.now().toString(36)}-${randomUUID().slice(0, 6)}`,
+      clientId,
+      category: "PROOF",
+      ruleKey: `${PROOF_DIRECTIVE_PREFIX}${existing.length + index + 1}`,
+      instruction: serializeBrandProof(proof),
+      priority: 1,
+      audienceScope: "ALL",
+      isActive: true,
+    })),
+  });
+  return fresh.length;
+}
+
+/** Sets voice settings read by an import, unless the author has already set their own. */
+export async function seedVoice(clientId: string, questionnaire: unknown, sample: string): Promise<{ voice: boolean; sample: boolean }> {
+  const cleaned = cleanQuestionnaire(questionnaire);
+  const [profile, examples] = await Promise.all([
+    prisma.brandProfile.findUnique({ where: { clientId }, select: { toneQuestionnaire: true } }),
+    prisma.toneExample.findMany({ where: { clientId }, select: { content: true } }),
+  ]);
+  const setVoice = Boolean(cleaned && profile && !profile.toneQuestionnaire);
+  if (setVoice) {
+    await prisma.brandProfile.update({ where: { clientId }, data: { toneQuestionnaire: cleaned as unknown as Prisma.InputJsonValue } });
+  }
+
+  const text = sample.trim();
+  const addSample =
+    text.length >= MIN_EXAMPLE_LENGTH &&
+    text.length <= MAX_EXAMPLE_LENGTH &&
+    examples.length < MAX_EXAMPLES &&
+    !examples.some((row) => row.content.trim() === text);
+  if (addSample) await prisma.toneExample.create({ data: { clientId, content: text, source: "LINKEDIN_PROFILE" } });
+  return { voice: setVoice, sample: addSample };
+}

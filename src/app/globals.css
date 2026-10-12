@@ -229,3 +229,33 @@
   .story-sheet-up, .story-pop, .story-shake, .story-confetti, .story-step-in { animation: none; }
   .story-confetti { display: none; }
 }
+
+/* Brand import (src/components/brandImport): the reading feed and the brand assembling itself. */
+@keyframes import-scan {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(500%); }
+}
+@keyframes import-blink {
+  50% { opacity: 0; }
+}
+@keyframes import-landed {
+  0% { box-shadow: 0 0 0 0 rgb(0 201 167 / 0); border-color: var(--color-line); }
+  35% { box-shadow: 0 0 0 4px rgb(0 201 167 / 0.25); border-color: var(--color-brand); }
+  100% { box-shadow: 0 0 0 0 rgb(0 201 167 / 0); border-color: var(--color-line); }
+}
+.import-scan { animation: import-scan 2.2s linear infinite; }
+.import-caret::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: var(--color-brand);
+  animation: import-blink 1s steps(1) infinite;
+}
+.import-landed { animation: import-landed 1.4s ease-out 1; }
+@media (prefers-reduced-motion: reduce) {
+  .import-scan, .import-landed { animation: none; }
+  .import-caret::after { animation: none; display: none; }
+}

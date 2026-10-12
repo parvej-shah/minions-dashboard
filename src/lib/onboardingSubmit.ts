@@ -3,6 +3,8 @@ import type { GeneratedDirective } from "@/lib/ai/brandCopilot";
 import { createDirective } from "@/lib/directivesClient";
 import { DEFAULT_CADENCE } from "@/lib/scheduling";
 import type { WizardFields } from "./onboardingDraft";
+import { matchKey } from "./brandImport/check";
+import type { ImportApproval } from "./brandImport/types";
 
 /**
  * A workspace holds at most 6 active rules per category (FORBIDDEN excepted),
@@ -113,4 +115,39 @@ async function saveVoiceSample(fields: WizardFields, voiceSample: string): Promi
     console.warn("Onboarding voice sample did not save:", err);
     return null;
   }
+}
+
+/**
+ * Setup's answers, filled from a brand import where the author typed nothing:
+ * the focus becomes what they want to be known for, the audience's "who" the
+ * reader, and their own About text the writing sample.
+ */
+export function fieldsWithImport(fields: WizardFields): WizardFields {
+  const found = fields.brandImport;
+  if (!found) return fields;
+  return {
+    ...fields,
+    contentFocus: fields.contentFocus.trim() || found.focus?.focus || "",
+    audienceDescription: fields.audienceDescription.trim() || found.icp?.who || "",
+    industry: fields.industry.trim() || found.focus?.industry || "",
+    websiteUrl: fields.websiteUrl.trim() || found.websiteUrl,
+    customSampleText: fields.customSampleText.trim() || (fields.keepImportedVoice ? found.voice?.about ?? "" : ""),
+  };
+}
+
+/** Saves what the author kept from the import. The item their first post came from is skipped; the first post saves it. */
+export async function saveImport(fields: WizardFields, story: string): Promise<void> {
+  const found = fields.brandImport;
+  if (!found) return;
+  const storyKey = matchKey(story);
+  const approval: ImportApproval = {
+    icp: found.icp ? { ...found.icp, who: fields.audienceDescription.trim() || found.icp.who } : null,
+    experience: found.experience.filter((item) => !storyKey.includes(matchKey(item.content))).map(({ kind, content }) => ({ kind, content })),
+    proofs: found.proofs
+      .filter((proof) => fields.approvedProofs.includes(proof.id))
+      .map(({ claim, source_url, source_title }) => ({ claim, source_url, source_title })),
+    // The About text was saved as the writing sample with the workspace.
+    voice: fields.keepImportedVoice && found.voice ? { questionnaire: found.voice.questionnaire, about: null } : null,
+  };
+  await apiClient.post("/api/brand/import/apply", approval);
 }

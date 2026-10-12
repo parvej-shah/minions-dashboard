@@ -15,7 +15,8 @@ import {
   type StoryKind,
   type WizardFields,
 } from "@/lib/onboardingDraft";
-import { requestBrief, saveWorkspace } from "@/lib/onboardingSubmit";
+import { fieldsWithImport, requestBrief, saveImport, saveWorkspace } from "@/lib/onboardingSubmit";
+import type { BrandImport } from "@/lib/brandImport/types";
 
 export interface OnboardingWizardState {
   /** False until the saved draft has been read, so the wizard can show a skeleton instead of step 1 flashing. */
@@ -83,6 +84,14 @@ export interface OnboardingWizardState {
   setStoryKind: (val: StoryKind) => void;
   /** Checks the answer, saves the workspace, starts the first draft and opens its screen. */
   writeFirstPost: () => Promise<void>;
+
+  // The brand import: what the LinkedIn PDF and website gave, as edited on the review screen.
+  brandImport: BrandImport | null;
+  setBrandImport: (val: BrandImport | null) => void;
+  approvedProofs: string[];
+  toggleProof: (id: string) => void;
+  keepImportedVoice: boolean;
+  setKeepImportedVoice: (val: boolean) => void;
 
   error: string | null;
   setError: (err: string | null) => void;
@@ -243,15 +252,18 @@ export function useOnboardingWizard(userId: string): OnboardingWizardState {
 
     setSaving(true);
     try {
-      const voiceSample = [fields.selectedVoice || DEFAULT_VOICE, fields.customSampleText.trim()].filter(Boolean).join(" ");
-      const brief = fields.directives.length > 0
-        ? { directives: fields.directives, positioning: fields.positioningSummary }
-        : await requestBrief(fields, voiceSample);
+      const answers = fieldsWithImport(fields);
+      const voiceSample = [answers.selectedVoice || DEFAULT_VOICE, answers.customSampleText.trim()].filter(Boolean).join(" ");
+      const brief = answers.directives.length > 0
+        ? { directives: answers.directives, positioning: answers.positioningSummary }
+        : await requestBrief(answers, voiceSample);
       update({ directives: brief.directives, positioningSummary: brief.positioning });
       // Only text the user wrote is a writing sample; the voice description
       // guides the brief, and saved as a sample it would show in Brand as a post they wrote.
-      const examplesSaved = await saveWorkspace(fields, brief, fields.customSampleText.trim());
+      const examplesSaved = await saveWorkspace(answers, brief, answers.customSampleText.trim());
       if (examplesSaved !== null) update({ importedVoiceCount: examplesSaved });
+      // The workspace exists now, so a failed import save is logged, not fatal: the Brand page can import again.
+      await saveImport(answers, story).catch((err) => console.warn("Imported brand did not save:", err));
 
       // The workspace exists now; a failed start is recoverable on the first-post screen, which offers a retry.
       await apiClient.post("/api/onboarding/first-post", { story, kind: fields.storyKind }).catch((err) => {
@@ -300,6 +312,13 @@ export function useOnboardingWizard(userId: string): OnboardingWizardState {
     setStoryText: setter("storyText"),
     setStoryKind: setter("storyKind"),
     writeFirstPost,
+    setBrandImport: setter("brandImport"),
+    toggleProof: (id: string) =>
+      setFields((prev) => ({
+        ...prev,
+        approvedProofs: prev.approvedProofs.includes(id) ? prev.approvedProofs.filter((p) => p !== id) : [...prev.approvedProofs, id],
+      })),
+    setKeepImportedVoice: setter("keepImportedVoice"),
     error,
     setError,
     goBack: () => {

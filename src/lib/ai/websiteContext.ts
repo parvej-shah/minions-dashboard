@@ -112,3 +112,69 @@ export async function fetchWebsiteContext(rawUrl: string): Promise<WebsiteContex
     return null;
   }
 }
+
+export interface WebsitePage {
+  url: string;
+  title: string;
+  text: string;
+}
+
+export interface WebsiteRead {
+  domain: string;
+  pages: WebsitePage[];
+}
+
+const PAGE_TEXT_MAX_CHARS = 5000;
+const MAX_EXTRA_PAGES = 4;
+// The pages that say who a business serves, what it sells and what customers ask.
+const USEFUL_PATH = /\/(about|company|team|services?|solutions?|products?|pricing|plans|faqs?|how-it-works|features|customers|case-stud|results|work|industr)/i;
+
+function pageLinks(html: string, base: URL): string[] {
+  const out: string[] = [];
+  for (const match of html.matchAll(/<a[^>]+href=["']([^"'#]+)["']/gi)) {
+    if (!URL.canParse(match[1], base)) continue;
+    const link = new URL(match[1], base);
+    if (link.hostname.replace(/^www\./, "") !== base.hostname.replace(/^www\./, "")) continue;
+    if (!USEFUL_PATH.test(link.pathname) || /\.(pdf|png|jpe?g|svg|zip)$/i.test(link.pathname)) continue;
+    link.search = "";
+    link.hash = "";
+    if (!out.includes(link.toString())) out.push(link.toString());
+  }
+  return out;
+}
+
+function toPage(html: string, finalUrl: string): WebsitePage {
+  const title = stripHtml(extractTag(html, /<title[^>]*>([\s\S]*?)<\/title>/i) ?? "");
+  const description = extractTag(html, /<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i) ?? "";
+  const main = html.match(/<main[\s\S]*?>([\s\S]*)<\/main>/i)?.[1] ?? html.match(/<body[\s\S]*?>([\s\S]*)<\/body>/i)?.[1] ?? html;
+  const body = stripHtml(main.replace(/<(nav|footer|header)[\s\S]*?<\/\1>/gi, " "));
+  return { url: finalUrl, title, text: [description, body].filter(Boolean).join(" — ").slice(0, PAGE_TEXT_MAX_CHARS) };
+}
+
+async function readPage(url: string): Promise<{ page: WebsitePage; html: string } | null> {
+  try {
+    const fetched = await fetchWithRedirects(url);
+    if (!fetched) return null;
+    return { page: toPage(fetched.html, fetched.finalUrl), html: fetched.html };
+  } catch (e) {
+    console.warn("[WebsiteContext] page read failed:", url, e);
+    return null;
+  }
+}
+
+/**
+ * Reads a site the way a new hire would skim it: the homepage, then up to
+ * four of its about, services, pricing or FAQ pages, in parallel. Best-effort
+ * like fetchWebsiteContext: null when even the homepage can't be read.
+ */
+export async function readWebsite(rawUrl: string): Promise<WebsiteRead | null> {
+  const url = normalizeUrl(rawUrl);
+  if (!url) return null;
+  const home = await readPage(url);
+  if (!home) return null;
+
+  const base = new URL(home.page.url);
+  const extra = pageLinks(home.html, base).filter((link) => link !== home.page.url).slice(0, MAX_EXTRA_PAGES);
+  const others = (await Promise.all(extra.map(readPage))).flatMap((read) => (read && read.page.text ? [read.page] : []));
+  return { domain: base.hostname.replace(/^www\./, ""), pages: [home.page, ...others] };
+}

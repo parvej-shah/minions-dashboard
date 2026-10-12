@@ -44,6 +44,8 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
   const kind = KINDS.find((k) => k.id === wizard.storyKind) ?? KINDS[0];
   const length = wizard.storyText.trim().length;
   const meter = Math.min(length / RICH_STORY, 1);
+  // Current work first: what someone is doing now makes the liveliest first post.
+  const picks = [...(wizard.brandImport?.experience ?? [])].sort((a, b) => (a.kind === b.kind ? 0 : a.kind === "CURRENT_WORK" ? -1 : 1)).slice(0, 3);
 
   const addStarter = (starter: string) => {
     const text = wizard.storyText.trim();
@@ -57,7 +59,36 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
         hint="Your first post is written from this, in your words. Nothing gets invented."
       />
 
-      <div role="radiogroup" aria-label="What kind of thing" className="mt-6 grid grid-cols-3 gap-2">
+      {picks.length > 0 && (
+        <div className="mt-6">
+          <p className="text-xs font-extrabold uppercase tracking-widest text-subtle">Start from your profile</p>
+          <ul className="mt-2.5 space-y-2">
+            {picks.map((item) => {
+              const picked = wizard.storyText.trim() === item.content;
+              return (
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    aria-pressed={picked}
+                    onClick={() => {
+                      wizard.setStoryText(item.content);
+                      wizard.setStoryKind(item.kind);
+                    }}
+                    className={`w-full rounded-2xl border-2 border-b-4 px-4 py-3 text-left text-sm leading-snug transition-[transform,border-width] duration-75 cursor-pointer active:translate-y-0.5 active:border-b-2 ${
+                      picked ? "border-brand border-b-brand-edge bg-brand/10 text-ink" : "border-line bg-surface text-muted hover:border-line-strong hover:bg-surface-2"
+                    }`}
+                  >
+                    {item.content}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <p className="mt-4 text-xs font-extrabold uppercase tracking-widest text-subtle">Then add the detail only you know, or write something new</p>
+        </div>
+      )}
+
+      <div role="radiogroup" aria-label="What kind of thing" className={`${picks.length ? "mt-3" : "mt-6"} grid grid-cols-3 gap-2`}>
         {KINDS.map((k) => {
           const selected = k.id === wizard.storyKind;
           return (
@@ -79,7 +110,7 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
       </div>
 
       <textarea
-        autoFocus
+        autoFocus={picks.length === 0}
         rows={5}
         value={wizard.storyText}
         onChange={(e) => wizard.setStoryText(e.target.value)}

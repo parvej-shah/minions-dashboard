@@ -29,6 +29,14 @@ and link to it here.
 
 ---
 
+## 2026-10-12 — Brand setup is read from LinkedIn and the website, not typed
+
+**Decision:** Onboarding opens with "drop your LinkedIn PDF (or résumé) and your website". Minions reads them, and the user watches their brand assemble live: positioning, audience, experience items and voice appear as each one is extracted. One review screen follows, where they remove or edit anything and tick which website claims are true; nothing is saved before "Looks right". The first post then starts from an experience item they pick. Typing the three setup questions stays as a small fallback link. Existing users get the same import as "Refresh from LinkedIn/website" on the Brand page, which only adds new items and never overwrites their edits.
+**Why:** Users objected to the Brand page as old-style forms that took hours to fill in. Reading what they have already written removes the typing while keeping D3's short onboarding.
+**Rules kept:** proof found on a website is never saved as verified without the user ticking it; experience items come only from facts in the PDF or site (roles, things built, stated results), never invented stories or lessons; completeness stays honest, not "100% done".
+**Alternatives considered:** saving everything as it streams (rejected: unreviewed AI output would reach drafts); import as an optional shortcut beside the questions (rejected: the questions are the friction).
+**Status:** active
+
 ## 2026-10-07 — Idea harvesting stops at 15 unused ideas of any grade
 
 **Decision:** Minions stops finding new ideas for a workspace once 15 unused ideas are waiting, counting below-bar and never-checked ideas as well as passing ones. Rejected, drafted and claimed ideas don't count.

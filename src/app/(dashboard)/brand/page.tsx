@@ -4,7 +4,9 @@ import { Suspense, useState, type ReactNode } from "react";
 import { createDirective } from "@/lib/directivesClient";
 import { useDirectiveActions } from "@/hooks/useDirectiveActions";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Mic2, Sparkles, Rss, Users2, Ban } from "lucide-react";
+import { Mic2, Sparkles, Rss, Users2, Ban, FileUp } from "lucide-react";
+import { BrandImportSheet } from "@/components/brandImport/BrandImportSheet";
+import { Button } from "@/components/ui/Button";
 import { BrandDirectiveItem, BrandTab } from "@/types";
 import LexiconTab from "@/components/brand/LexiconTab";
 import OverviewTab from "@/components/brand/OverviewTab";
@@ -43,6 +45,9 @@ function BrandStudio() {
   // Bumped after any profile edit so the completeness card re-reads.
   const [profileVersion, setProfileVersion] = useState(0);
   const bumpProfile = () => setProfileVersion((v) => v + 1);
+  // The LinkedIn import adds to several tabs at once; remounting them makes each re-read.
+  const [importing, setImporting] = useState(false);
+  const [importVersion, setImportVersion] = useState(0);
   const {
     data: directives,
     isLoading: directivesLoading,
@@ -88,12 +93,18 @@ function BrandStudio() {
           <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border-2 border-brand/30 bg-brand/10 text-brand">
             <Sparkles className="h-5 w-5" aria-hidden="true" />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="mb-1 text-[11px] font-mono tracking-[0.14em] text-brand uppercase">Your voice, your point of view</div>
             <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">Make every post sound like you</h1>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">Choose what to shape next. Your changes guide future drafts.</p>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">Choose what to shape next, or let Minions fill it in from your LinkedIn and website.</p>
           </div>
+          <Button variant="soft" icon={<FileUp className="h-4 w-4" />} onClick={() => setImporting(true)} className="hidden shrink-0 sm:inline-flex">
+            Fill from LinkedIn
+          </Button>
         </div>
+        <Button variant="soft" block icon={<FileUp className="h-4 w-4" />} onClick={() => setImporting(true)} className="sm:hidden">
+          Fill from LinkedIn
+        </Button>
 
         <nav aria-label="Brand settings" className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
           {BRAND_SECTIONS.map(({ tab, label, icon: Icon }) => (
@@ -101,6 +112,16 @@ function BrandStudio() {
           ))}
         </nav>
       </div>
+      {importing && (
+        <BrandImportSheet
+          onClose={() => setImporting(false)}
+          onApplied={() => {
+            bumpProfile();
+            setImportVersion((v) => v + 1);
+          }}
+        />
+      )}
+      <div key={importVersion} className="space-y-6">
       {activeTab === "overview" && <CompletenessCard version={profileVersion} onGo={goToSection} />}
 
       {activeTab === "overview" && <section className="space-y-3">
@@ -136,6 +157,7 @@ function BrandStudio() {
           onRemoveBannedWord={directiveActions.remove}
         />
       </section>}
+      </div>
     </div>
   );
 }

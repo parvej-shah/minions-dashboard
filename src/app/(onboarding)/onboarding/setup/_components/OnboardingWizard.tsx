@@ -2,22 +2,32 @@
 
 import { useState } from "react";
 import { useOnboardingWizard, type OnboardingWizardState } from "@/hooks/useOnboardingWizard";
+import { useBrandImport } from "@/hooks/useBrandImport";
 import { MEMORY_MIN_CHARS } from "@/constants/contentLanes";
-import { LessonFooter, LessonHeader, useEnterToContinue } from "./lesson";
+import { ImportDrop, type DroppedProfile } from "@/components/brandImport/ImportDrop";
+import { ImportLive } from "@/components/brandImport/ImportLive";
+import { ImportReview } from "@/components/brandImport/ImportReview";
+import { LessonFooter, LessonHeader, Question, useEnterToContinue } from "./lesson";
 import { AudienceQuestion, FocusQuestion, MIN_ANSWER } from "./BrandQuestions";
 import { StoryQuestion, storyPraise } from "./StoryQuestion";
 import { BriefBuilding } from "./BriefBuilding";
 import { WizardSkeleton } from "./WizardSkeleton";
 
 /**
- * Setup as a three-question lesson that ends in the user's first post:
- * what they want to be known for, who reads them, and one thing from their
- * work. Everything else (experience level, voice, company, publishing mode)
- * starts from a default and is changed later in Brand and Schedule.
+ * Setup ends in the user's first post. It starts by reading their LinkedIn
+ * PDF and website (decision 2026-10-12): they watch their brand assemble,
+ * check it on one screen, then pick something from their work to post about.
+ * "I'd rather type it" keeps the older path: what they want to be known for
+ * and who reads them, typed. Everything else starts from a default and is
+ * changed later in Brand and Schedule.
  */
-const LAST_SCREEN = 2;
+type Screen = "import" | "reading" | "review" | "focus" | "audience" | "story";
+
 // The first post's screen is the real finish line, so setup fills the bar only partway.
 const SETUP_SHARE = 0.75;
+const PROGRESS: Record<Screen, number> = { import: 0, reading: 1, review: 2, focus: 1, audience: 2, story: 3 };
+const SCREENS = 4;
+const IMPORT_ENDPOINT = "/api/onboarding/brand-import";
 
 export default function OnboardingWizard({ userId }: { userId: string }) {
   const wizard = useOnboardingWizard(userId);
@@ -27,37 +37,130 @@ export default function OnboardingWizard({ userId }: { userId: string }) {
   return <Lesson wizard={wizard} />;
 }
 
-function firstUnanswered(wizard: OnboardingWizardState) {
-  if (wizard.contentFocus.trim().length < MIN_ANSWER) return 0;
-  if (wizard.audienceDescription.trim().length < MIN_ANSWER) return 1;
-  return 2;
+function firstScreen(wizard: OnboardingWizardState): Screen {
+  if (wizard.brandImport) return "review";
+  if (wizard.contentFocus.trim().length < MIN_ANSWER) return "import";
+  if (wizard.audienceDescription.trim().length < MIN_ANSWER) return "audience";
+  return "story";
 }
 
 function Lesson({ wizard }: { wizard: OnboardingWizardState }) {
-  const [screen, setScreen] = useState(() => firstUnanswered(wizard));
+  const [screen, setScreen] = useState<Screen>(() => firstScreen(wizard));
+  const [profile, setProfile] = useState<DroppedProfile | null>(null);
+  const run = useBrandImport(IMPORT_ENDPOINT);
 
   const focusOk = wizard.contentFocus.trim().length >= MIN_ANSWER;
   const audienceOk = wizard.audienceDescription.trim().length >= MIN_ANSWER;
   const storyLength = wizard.storyText.trim().length;
   const storyOk = storyLength >= MEMORY_MIN_CHARS;
+  const canRead = Boolean(profile) || wizard.websiteUrl.trim().length > 3;
 
   const building = wizard.isGeneratingDirectives || wizard.saving;
-  const back = () => {
+  const go = (next: Screen) => {
     wizard.setError(null);
-    setScreen((s) => Math.max(0, s - 1));
+    setScreen(next);
   };
 
+  const startReading = () => {
+    wizard.setBrandImport(null);
+    void run.start({ profileText: profile?.text ?? "", websiteUrl: wizard.websiteUrl.trim() });
+    go("reading");
+  };
+
+  const typeInstead = () => {
+    run.reset();
+    wizard.setBrandImport(null);
+    go("focus");
+  };
+
+  const BACK: Partial<Record<Screen, Screen>> = {
+    reading: "import",
+    review: "import",
+    focus: "import",
+    audience: "focus",
+    story: wizard.brandImport ? "review" : "audience",
+  };
+  const back = () => {
+    if (screen === "reading") run.reset();
+    go(BACK[screen] ?? "import");
+  };
+
+  const secondaryLink = (label: string, onClick: () => void) => (
+    <button type="button" onClick={onClick} className="text-sm font-bold text-muted underline-offset-4 hover:text-ink hover:underline cursor-pointer">
+      {label}
+    </button>
+  );
+
   let body: React.ReactNode;
-  let footer: { label: string; onContinue: () => void; disabled?: boolean; praise?: string | null };
+  let footer: { label: string; onContinue: () => void; disabled?: boolean; loading?: boolean; praise?: string | null; error?: string | null; secondary?: React.ReactNode };
+  let wide = false;
 
   switch (screen) {
-    case 0:
-      body = <FocusQuestion wizard={wizard} />;
-      footer = { label: "Continue", onContinue: () => setScreen(1), disabled: !focusOk, praise: focusOk ? "Clear territory. Nice!" : null };
+    case "import":
+      body = (
+        <>
+          <Question
+            title="Let's skip the forms. Show me your LinkedIn."
+            hint="Minions reads your profile and website and sets up your brand while you watch. You check it before anything is saved."
+          />
+          <div className="mt-6">
+            <ImportDrop profile={profile} onProfile={setProfile} websiteUrl={wizard.websiteUrl} onWebsiteUrl={wizard.setWebsiteUrl} />
+          </div>
+        </>
+      );
+      footer = {
+        label: "Read my profile",
+        onContinue: startReading,
+        disabled: !canRead,
+        praise: profile ? "Got it. This takes about 20 seconds." : null,
+        secondary: secondaryLink("I'd rather type it", typeInstead),
+      };
       break;
-    case 1:
+    case "reading":
+      wide = true;
+      body = <ImportLive run={run} hadWebsite={Boolean(wizard.websiteUrl.trim())} />;
+      footer =
+        run.status === "error"
+          ? { label: "Try again", onContinue: startReading, error: run.error, secondary: secondaryLink("Type it instead", typeInstead) }
+          : {
+              label: run.status === "done" ? "Check it over" : "Reading…",
+              onContinue: () => {
+                wizard.setBrandImport(run.result);
+                go("review");
+              },
+              disabled: run.status !== "done",
+              loading: run.status === "reading",
+              praise: run.status === "done" ? "That's you. No typing needed." : null,
+            };
+      break;
+    case "review":
+      body = (
+        <>
+          <Question title="Here's what I found. Look right?" hint="Tap the pencil to fix anything, × to drop it. Nothing is saved until you continue." />
+          <div className="mt-6">
+            {wizard.brandImport && (
+              <ImportReview
+                result={wizard.brandImport}
+                onChange={wizard.setBrandImport}
+                approvedProofs={wizard.approvedProofs}
+                onToggleProof={wizard.toggleProof}
+                keepVoice={wizard.keepImportedVoice}
+                onKeepVoice={wizard.setKeepImportedVoice}
+                showFocus
+              />
+            )}
+          </div>
+        </>
+      );
+      footer = { label: "Looks right", onContinue: () => go("story"), secondary: secondaryLink("Read it again", () => go("import")) };
+      break;
+    case "focus":
+      body = <FocusQuestion wizard={wizard} />;
+      footer = { label: "Continue", onContinue: () => go("audience"), disabled: !focusOk, praise: focusOk ? "Clear territory. Nice!" : null };
+      break;
+    case "audience":
       body = <AudienceQuestion wizard={wizard} />;
-      footer = { label: "Continue", onContinue: () => setScreen(2), disabled: !audienceOk, praise: audienceOk ? "Now we know who's listening." : null };
+      footer = { label: "Continue", onContinue: () => go("story"), disabled: !audienceOk, praise: audienceOk ? "Now we know who's listening." : null };
       break;
     default:
       body = <StoryQuestion wizard={wizard} />;
@@ -69,24 +172,26 @@ function Lesson({ wizard }: { wizard: OnboardingWizardState }) {
       };
   }
 
-  useEnterToContinue(!footer.disabled && !building && screen < LAST_SCREEN, footer.onContinue);
+  const enterable = !footer.disabled && !building && screen !== "story" && screen !== "review";
+  useEnterToContinue(enterable, footer.onContinue);
 
   return (
     <div className="flex min-h-dvh flex-col bg-canvas text-ink">
-      <LessonHeader
-        progress={building ? SETUP_SHARE : (screen / (LAST_SCREEN + 1)) * SETUP_SHARE}
-        onBack={screen > 0 && !building ? back : undefined}
-      />
+      <LessonHeader progress={building ? SETUP_SHARE : (PROGRESS[screen] / SCREENS) * SETUP_SHARE} onBack={screen !== "import" && !building ? back : undefined} />
       {building ? (
         <BriefBuilding />
       ) : (
         <>
           <main className="flex-1">
-            <div key={screen} className="story-step-in mx-auto w-full max-w-2xl px-4 pt-4 pb-10 sm:px-6 sm:pt-8">
-              {body}
-            </div>
+            {wide ? (
+              body
+            ) : (
+              <div key={screen} className="story-step-in mx-auto w-full max-w-2xl px-4 pt-4 pb-10 sm:px-6 sm:pt-8">
+                {body}
+              </div>
+            )}
           </main>
-          <LessonFooter {...footer} error={wizard.error} />
+          <LessonFooter {...footer} error={footer.error ?? wizard.error} />
         </>
       )}
     </div>

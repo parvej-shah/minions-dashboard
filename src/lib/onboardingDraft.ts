@@ -1,9 +1,10 @@
+import type { BrandImport } from "@/lib/brandImport/types";
 import type { AiSuggestions, GeneratedDirective } from "@/lib/ai/brandCopilot";
 import { DEFAULT_WRITER_EXPERTISE, type WriterExpertise } from "@/constants/writerExpertise";
 import type { LinkedInProfile } from "@/types";
 
-/** What the first-post answer is, as a ProfessionalMemory kind. */
-export type StoryKind = "LESSON" | "OPINION" | "CURRENT_WORK";
+/** What the first-post answer is, as a ProfessionalMemory kind. PAST_EXPERIENCE only arrives by picking an item a brand import found. */
+export type StoryKind = "LESSON" | "OPINION" | "CURRENT_WORK" | "PAST_EXPERIENCE";
 export type PublishingMode = "review" | "auto";
 
 /** Every answer the setup wizard collects; the browser keeps it so a reload or an OAuth round trip loses nothing. */
@@ -32,6 +33,11 @@ export interface WizardFields {
   positioningSummary: string;
   storyText: string;
   storyKind: StoryKind;
+  /** What the LinkedIn PDF and website import found, as edited on the review screen. */
+  brandImport: BrandImport | null;
+  /** Ids of the website claims the author ticked as true. */
+  approvedProofs: string[];
+  keepImportedVoice: boolean;
 }
 
 export const INITIAL_FIELDS: WizardFields = {
@@ -59,9 +65,12 @@ export const INITIAL_FIELDS: WizardFields = {
   positioningSummary: "",
   storyText: "",
   storyKind: "LESSON",
+  brandImport: null,
+  approvedProofs: [],
+  keepImportedVoice: true,
 };
 
-const STORY_KINDS: StoryKind[] = ["LESSON", "OPINION", "CURRENT_WORK"];
+const STORY_KINDS: StoryKind[] = ["LESSON", "OPINION", "CURRENT_WORK", "PAST_EXPERIENCE"];
 const PUBLISHING_MODES: PublishingMode[] = ["review", "auto"];
 
 /** One draft per account, so a new signup on the same browser never inherits the previous account's answers. */
