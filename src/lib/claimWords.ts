@@ -43,7 +43,21 @@ const ACHIEVEMENT_VERBS: Record<string, string[]> = {
   tripled: ["tripl"],
 };
 
-const VERB_ALTERNATION = Object.keys(ACHIEVEMENT_VERBS).join("|");
+/**
+ * The same claims in the present tense ("I engineer", "we lead"). Plain service
+ * verbs ("I deliver", "we ship") are left out: a site describing its service
+ * backs them without using the word.
+ */
+const PRESENT_TENSE: Record<string, string> = {
+  build: "built", engineer: "engineered", architect: "architected", design: "designed", create: "created",
+  develop: "developed", invent: "invented", pioneer: "pioneered", launch: "launched", lead: "led",
+  spearhead: "spearheaded", manage: "managed", scale: "scaled", grow: "grew", transform: "transformed",
+  implement: "implemented", automate: "automated", double: "doubled", triple: "tripled",
+};
+
+const stemsFor = (verb: string) => ACHIEVEMENT_VERBS[PRESENT_TENSE[verb] ?? verb];
+
+const VERB_ALTERNATION = [...Object.keys(ACHIEVEMENT_VERBS), ...Object.keys(PRESENT_TENSE)].join("|");
 /** "I built", "we personally designed", "I've led", "I helped design" is not matched (helping is not leading). */
 const CLAIMED_VERB = new RegExp(`\\b(?:I|we)(?:'ve|’ve|\\s+have|\\s+had)?\\s+(?:\\w+ly\\s+)?(${VERB_ALTERNATION})\\b`, "gi");
 
@@ -53,7 +67,7 @@ export function overstatedVerbs(text: string, source: string): string[] {
   const out = new Set<string>();
   for (const m of text.matchAll(CLAIMED_VERB)) {
     const verb = m[1].toLowerCase();
-    if (!ACHIEVEMENT_VERBS[verb].some((stem) => new RegExp(`\\b${stem}`).test(src))) out.add(m[0]);
+    if (!stemsFor(verb).some((stem) => new RegExp(`\\b${stem}`).test(src))) out.add(m[0]);
   }
   return Array.from(out);
 }

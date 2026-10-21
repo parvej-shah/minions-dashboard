@@ -14,6 +14,13 @@ describe("overstatedVerbs", () => {
     expect(overstatedVerbs("We've personally designed it.", "Our designers did it.")).toEqual([]);
   });
 
+  it("catches the same claim in the present tense, but not plain service verbs", () => {
+    const site = "Our four-step process gets your AI crew answering calls. We integrate with Follow Up Boss.";
+    expect(overstatedVerbs("I engineer AI crews and we lead every launch.", site)).toEqual(["I engineer", "we lead"]);
+    expect(overstatedVerbs("I build AI crews.", "We build AI crews.")).toEqual([]);
+    expect(overstatedVerbs("I deliver AI phone agents through a four-step process.", site)).toEqual([]);
+  });
+
   it("leaves helping, third persons and idioms alone", () => {
     expect(overstatedVerbs("I helped design the flow. The team built it. I ran into the same wall.", "I helped.")).toEqual([]);
   });
