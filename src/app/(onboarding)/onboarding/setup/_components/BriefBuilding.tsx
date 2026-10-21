@@ -3,14 +3,14 @@
 import { useEffect, useState } from "react";
 import { Check, Loader2, Sparkles } from "lucide-react";
 
-const BUILD_STEPS = ["Reading your answers", "Building your brief", "Handing your story to the writer"];
+const BUILD_STEPS = ["Building your brief", "Saving your brand", "Handing your story to the writer"];
 
 /** Shown while the brief is written and the workspace saved: a checklist that ticks along. */
 export function BriefBuilding() {
   const [done, setDone] = useState(0);
   useEffect(() => {
-    // The last step stays spinning until the brief actually arrives.
-    const timer = window.setInterval(() => setDone((d) => Math.min(d + 1, BUILD_STEPS.length - 1)), 1600);
+    // Paced to a typical ~20s save; the last step stays spinning until the save actually finishes.
+    const timer = window.setInterval(() => setDone((d) => Math.min(d + 1, BUILD_STEPS.length - 1)), 6000);
     return () => window.clearInterval(timer);
   }, []);
 
@@ -20,7 +20,7 @@ export function BriefBuilding() {
         <Sparkles className="h-12 w-12 animate-pulse" strokeWidth={2.25} />
       </span>
       <h1 className="mt-8 text-2xl font-extrabold sm:text-3xl">Setting you up…</h1>
-      <p className="mt-2 max-w-sm text-sm text-muted">A few seconds. Your answers become the rules every post follows.</p>
+      <p className="mt-2 max-w-sm text-sm text-muted">About 20 seconds. Your answers become the rules every post follows.</p>
       <ol className="mt-8 w-full max-w-xs space-y-3 text-left" aria-live="polite">
         {BUILD_STEPS.map((label, i) => {
           const state = i < done ? "done" : i === done ? "active" : "todo";

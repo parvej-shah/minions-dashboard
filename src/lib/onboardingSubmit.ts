@@ -29,9 +29,9 @@ export function withinCategoryLimit(directives: GeneratedDirective[]): Generated
   });
 }
 
-/** Asks the brand copilot for the brief: positioning plus the rules every draft follows. */
-export async function requestBrief(fields: WizardFields, voiceSample: string): Promise<Brief> {
-  const res = await apiClient.post<{ directives?: GeneratedDirective[]; positioningSummary?: string }>("/api/onboarding/brand-copilot", {
+/** What the brand copilot is asked, so a brief already requested for the same answers can be reused. */
+export function briefRequest(fields: WizardFields, voiceSample: string) {
+  return {
     industry: fields.industry,
     businessName: fields.businessName.trim() || "Our Company",
     websiteUrl: fields.websiteUrl.trim(),
@@ -44,15 +44,25 @@ export async function requestBrief(fields: WizardFields, voiceSample: string): P
     avoidAnswer: fields.avoidAnswer,
     selectedPresetId: fields.selectedPresetId,
     headline: fields.linkedInProfile?.headline || undefined,
-  });
+  };
+}
+
+/** Asks the brand copilot for the brief: positioning plus the rules every draft follows. */
+export async function requestBrief(request: ReturnType<typeof briefRequest>): Promise<Brief> {
+  const res = await apiClient.post<{ directives?: GeneratedDirective[]; positioningSummary?: string }>("/api/onboarding/brand-copilot", request);
   return { directives: res?.directives ?? [], positioning: res?.positioningSummary ?? "" };
 }
 
 /**
  * Writes the workspace: brand, a voice sample the user wrote, the brief's rules
  * and the default schedule. Returns how many voice examples were saved, if any.
+ *
+ * Order matters. Setup creates the workspace, so it goes first. The voice route
+ * resets the voice settings, so `afterVoice` (the brand import, which may set
+ * them) runs after it. The schedule marks the workspace established, which
+ * closes the voice and rule routes, so it goes last. The rest runs side by side.
  */
-export async function saveWorkspace(fields: WizardFields, brief: Brief, voiceSample: string): Promise<number | null> {
+export async function saveWorkspace(fields: WizardFields, brief: Brief, voiceSample: string, afterVoice?: () => Promise<unknown>): Promise<number | null> {
   const businessName = fields.businessName.trim();
   const industry = fields.industry.trim() || "General Business";
 
@@ -72,24 +82,13 @@ export async function saveWorkspace(fields: WizardFields, brief: Brief, voiceSam
     hasAiDirectives: brief.directives.length > 0,
   });
 
-  const examplesSaved = await saveVoiceSample(fields, voiceSample);
-
-  const failed: string[] = [];
-  for (const directive of withinCategoryLimit(brief.directives)) {
-    try {
-      await createDirective({
-        category: directive.category,
-        key: directive.rule_key,
-        content: directive.instruction,
-        priority: directive.priority,
-        from_onboarding: true,
-      });
-    } catch (err) {
-      failed.push(directive.rule_key);
-      console.warn("Onboarding directive did not save:", err);
-    }
-  }
-  if (failed.length > 0) console.warn(`${failed.length} onboarding directive(s) failed to save: ${failed.join(", ")}`);
+  const [examplesSaved] = await Promise.all([
+    saveVoiceSample(fields, voiceSample).then(async (saved) => {
+      await afterVoice?.();
+      return saved;
+    }),
+    saveDirectives(brief),
+  ]);
 
   await apiClient.patch("/api/schedule", {
     cadence_type: DEFAULT_CADENCE.cadenceType,
@@ -103,6 +102,24 @@ export async function saveWorkspace(fields: WizardFields, brief: Brief, voiceSam
   });
 
   return examplesSaved;
+}
+
+/** Saves the brief's rules together; withinCategoryLimit already keeps each category under the limit. */
+async function saveDirectives(brief: Brief): Promise<void> {
+  const directives = withinCategoryLimit(brief.directives);
+  const results = await Promise.allSettled(
+    directives.map((directive) =>
+      createDirective({
+        category: directive.category,
+        key: directive.rule_key,
+        content: directive.instruction,
+        priority: directive.priority,
+        from_onboarding: true,
+      })
+    )
+  );
+  const failed = results.flatMap((r, i) => (r.status === "rejected" ? [directives[i].rule_key] : []));
+  if (failed.length > 0) console.warn(`${failed.length} onboarding directive(s) failed to save: ${failed.join(", ")}`);
 }
 
 /** The voice route needs the workspace, which setup creates for a new user, so this runs after setup. */

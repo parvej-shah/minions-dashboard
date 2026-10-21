@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient, toErrorMessage, ApiRequestError } from "@/lib/api-client";
 import type { BrandPreset } from "@/constants/brandPresets";
@@ -15,7 +15,7 @@ import {
   type StoryKind,
   type WizardFields,
 } from "@/lib/onboardingDraft";
-import { fieldsWithImport, requestBrief, saveImport, saveWorkspace } from "@/lib/onboardingSubmit";
+import { briefRequest, fieldsWithImport, requestBrief, saveImport, saveWorkspace, type Brief } from "@/lib/onboardingSubmit";
 import type { BrandImport } from "@/lib/brandImport/types";
 
 export interface OnboardingWizardState {
@@ -84,6 +84,8 @@ export interface OnboardingWizardState {
   setStoryKind: (val: StoryKind) => void;
   /** Checks the answer, saves the workspace, starts the first draft and opens its screen. */
   writeFirstPost: () => Promise<void>;
+  /** Starts the brief while the user is still on the story screen; it doesn't depend on the story. */
+  prepareBrief: () => void;
 
   // The brand import: what the LinkedIn PDF and website gave, as edited on the review screen.
   brandImport: BrandImport | null;
@@ -237,6 +239,36 @@ export function useOnboardingWizard(userId: string): OnboardingWizardState {
     }
   }
 
+  // The brief takes ~8s and depends only on setup's answers, so it is asked for
+  // once the story screen opens and reused at "Write my first post" if nothing changed.
+  const briefCache = useRef<{ key: string; brief: Promise<Brief> } | null>(null);
+
+  function setupAnswers() {
+    const answers = fieldsWithImport(fields);
+    const voiceSample = [answers.selectedVoice || DEFAULT_VOICE, answers.customSampleText.trim()].filter(Boolean).join(" ");
+    return { answers, voiceSample };
+  }
+
+  function briefFor(answers: WizardFields, voiceSample: string): Promise<Brief> {
+    if (answers.directives.length > 0) return Promise.resolve({ directives: answers.directives, positioning: answers.positioningSummary });
+    const request = briefRequest(answers, voiceSample);
+    const key = JSON.stringify(request);
+    if (briefCache.current?.key !== key) {
+      const brief = requestBrief(request);
+      // A failed early request is asked again at the finish, not reused.
+      brief.catch(() => {
+        if (briefCache.current?.brief === brief) briefCache.current = null;
+      });
+      briefCache.current = { key, brief };
+    }
+    return briefCache.current.brief;
+  }
+
+  function prepareBrief() {
+    const { answers, voiceSample } = setupAnswers();
+    void briefFor(answers, voiceSample).catch(() => {});
+  }
+
   async function writeFirstPost() {
     setError(null);
     const story = fields.storyText.trim();
@@ -252,18 +284,16 @@ export function useOnboardingWizard(userId: string): OnboardingWizardState {
 
     setSaving(true);
     try {
-      const answers = fieldsWithImport(fields);
-      const voiceSample = [answers.selectedVoice || DEFAULT_VOICE, answers.customSampleText.trim()].filter(Boolean).join(" ");
-      const brief = answers.directives.length > 0
-        ? { directives: answers.directives, positioning: answers.positioningSummary }
-        : await requestBrief(answers, voiceSample);
+      const { answers, voiceSample } = setupAnswers();
+      const brief = await briefFor(answers, voiceSample);
       update({ directives: brief.directives, positioningSummary: brief.positioning });
       // Only text the user wrote is a writing sample; the voice description
       // guides the brief, and saved as a sample it would show in Brand as a post they wrote.
-      const examplesSaved = await saveWorkspace(answers, brief, answers.customSampleText.trim());
+      // The workspace exists by the time the import saves, so a failed import is logged, not fatal: the Brand page can import again.
+      const examplesSaved = await saveWorkspace(answers, brief, answers.customSampleText.trim(), () =>
+        saveImport(answers, story).catch((err) => console.warn("Imported brand did not save:", err))
+      );
       if (examplesSaved !== null) update({ importedVoiceCount: examplesSaved });
-      // The workspace exists now, so a failed import save is logged, not fatal: the Brand page can import again.
-      await saveImport(answers, story).catch((err) => console.warn("Imported brand did not save:", err));
 
       // The workspace exists now; a failed start is recoverable on the first-post screen, which offers a retry.
       await apiClient.post("/api/onboarding/first-post", { story, kind: fields.storyKind }).catch((err) => {
@@ -312,6 +342,7 @@ export function useOnboardingWizard(userId: string): OnboardingWizardState {
     setStoryText: setter("storyText"),
     setStoryKind: setter("storyKind"),
     writeFirstPost,
+    prepareBrief,
     setBrandImport: setter("brandImport"),
     toggleProof: (id: string) =>
       setFields((prev) => ({

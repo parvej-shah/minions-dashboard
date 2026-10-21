@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Flame, Hammer, Lightbulb } from "lucide-react";
 import type { OnboardingWizardState } from "@/hooks/useOnboardingWizard";
 import type { StoryKind } from "@/lib/onboardingDraft";
@@ -41,6 +42,14 @@ export function storyPraise(length: number): string | null {
 }
 
 export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
+  const { prepareBrief } = wizard;
+  // The brief doesn't depend on the story, so it is written while the user picks one. Once per visit.
+  const askedForBrief = useRef(false);
+  useEffect(() => {
+    if (askedForBrief.current) return;
+    askedForBrief.current = true;
+    prepareBrief();
+  }, [prepareBrief]);
   const kind = KINDS.find((k) => k.id === wizard.storyKind) ?? KINDS[0];
   const length = wizard.storyText.trim().length;
   const meter = Math.min(length / RICH_STORY, 1);
