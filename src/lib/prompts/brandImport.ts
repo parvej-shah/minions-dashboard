@@ -68,6 +68,7 @@ Return up to 10 items. Each item is ONE concrete fact:
 
 Rules:
 - Use only what the source says. Never add a number, name, company, tool, place, result, reason or lesson that is not in it. No commentary ("impressive", "a huge win").
+- Keep the source's own verb. "We offer a demo" never becomes "I engineered a demo"; "worked on" never becomes "led" or "built".
 - Write each item in the first person, as the author would note it for themselves, 1 to 3 sentences, under 400 characters. Keep the specifics the source gives (what, for whom, scale, outcome).
 - evidence: copy, word for word, the shortest phrase from the source (at least 4 words) that shows this fact.
 - Prefer items with something specific: a result, a thing built, a type of customer. Skip bare job titles with no detail. Skip education unless it is unusual.

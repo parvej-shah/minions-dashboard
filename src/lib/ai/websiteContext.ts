@@ -21,12 +21,22 @@ function extractTag(html: string, pattern: RegExp): string | undefined {
   return match?.[1]?.trim();
 }
 
+/** A character for an entity's code point; a space when the page's entity is not a valid one. */
+const codePoint = (n: number) => (n > 0 && n <= 0x10ffff ? String.fromCodePoint(n) : " ");
+
 function stripHtml(html: string): string {
   return html
     .replace(/<script[\s\S]*?<\/script>/gi, " ")
     .replace(/<style[\s\S]*?<\/style>/gi, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/g, " ")
+    // Numeric entities ("I&#x27;m") would break the import's word-for-word quote checks.
+    .replace(/&#x([0-9a-f]{1,6});/gi, (_, hex: string) => codePoint(parseInt(hex, 16)))
+    .replace(/&#(\d{1,7});/g, (_, dec: string) => codePoint(Number(dec)))
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
     .replace(/&amp;/g, "&")
     .replace(/\s+/g, " ")
     .trim();

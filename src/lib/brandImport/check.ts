@@ -1,6 +1,7 @@
 import { MEMORY_MIN_CHARS } from "@/constants/contentLanes";
 import { parseIcpInput } from "@/lib/authorInput";
 import { unsupported } from "@/lib/pulse/extract";
+import { overstatedVerbs, unsupportedSpelledFigures } from "@/lib/claimWords";
 import type { BrandVoiceQuestionnaire } from "@/types";
 import type {
   ImportedExperience,
@@ -16,7 +17,9 @@ import type {
  * Checks what the model read from a profile and website before the author
  * sees it. The model only proposes; code keeps an experience item or a proof
  * only when the source really says it: its quoted evidence must be in the
- * text, and it may not add a figure or a name the source lacks. A proof is
+ * text, and it may not add a figure or a name the source lacks, write a
+ * figure out in words the source never states, or credit the author with a
+ * verb ("engineered", "led") the source never uses. A proof is
  * never more than a suggestion; it is saved only when the author ticks it.
  */
 
@@ -133,6 +136,8 @@ export function checkExperience(raw: unknown, sources: ImportSource[], makeId: (
     if (!kind || content.length < MEMORY_MIN_CHARS || content.length > EXPERIENCE_MAX_CHARS) continue;
     const source = sources.find((s) => quotedIn(s.text, evidence));
     if (!source || unsupported(content, source.text).length) continue;
+    // "We offer a demo" must not come back as "I engineered a demo", nor "a slow close" as "by day seven".
+    if (overstatedVerbs(content, source.text).length || unsupportedSpelledFigures(content, source.text).length) continue;
     const key = matchKey(content);
     if (seen.has(key)) continue;
     seen.add(key);

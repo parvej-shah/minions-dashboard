@@ -1,4 +1,5 @@
 import { contentWords, numbersIn, sharedWords, unsupportedNumbers } from "@/lib/harvest/text";
+import { overstatedVerbs, unsupportedSpelledFigures } from "@/lib/claimWords";
 import { leakedSpecifics } from "./generalize";
 import { measure, readabilityIssues, reflowParagraphs, type Readability } from "./readability";
 
@@ -17,6 +18,9 @@ import { measure, readabilityIssues, reflowParagraphs, type Readability } from "
  *  - A retold experience item gained details it never stated ("No new
  *    logo."), an outcome ("The result? More discovery calls."), or became a
  *    pattern ("I've stopped clients…", "hundreds of sites"). Each needs review.
+ *  - So does a figure written out in words that no input states ("by day
+ *    seven"), and crediting the author with a verb no item uses ("I
+ *    engineered" when the item says they helped).
  *
  *   claims_ok  Y        every checkable claim is backed
  *              N        something needs a reviewer's eye (unbacked claim, first-person without experience)
@@ -179,6 +183,14 @@ export function checkDraft(input: DraftCheckInput): DraftCheckResult {
     for (const m of sentence.matchAll(VAGUE_COUNT)) {
       if (!authorLower.includes(m[0].toLowerCase())) review.push(`States a count no item gives: "${m[0]}".`);
     }
+  }
+
+  const spelled = unsupportedSpelledFigures(text, known.join("\n"));
+  if (spelled.length) review.push(`States a figure in words that no input gives: ${spelled.map((f) => `"${f}"`).join(", ")}.`);
+  // Without an item, any first-person experience is already flagged below.
+  if (lived) {
+    const upgraded = overstatedVerbs(text, authorText.join("\n"));
+    if (upgraded.length) review.push(`Credits the author with what no item says they did: ${upgraded.map((v) => `"${v}"`).join(", ")}.`);
   }
 
   if (!lived && !input.trustBasis.includes("USER_NOTE")) {

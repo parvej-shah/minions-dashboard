@@ -54,6 +54,18 @@ describe("checkExperience", () => {
     expect(items).toEqual([]);
   });
 
+  it("drops an item that upgrades the source's verb or writes out a figure it never states", () => {
+    const items = checkExperience(
+      [
+        { kind: "CURRENT_WORK", content: "I pioneered AI voice agents that answer every buyer call for brokerages.", evidence: "answer every buyer call for real-estate brokerages" },
+        { kind: "PAST_EXPERIENCE", content: "Over seven years I shipped a dispatch system used by 40 fleets.", evidence: "shipped a dispatch system used by 40 fleets" },
+      ],
+      sources,
+      id
+    );
+    expect(items).toEqual([]);
+  });
+
   it("never proposes stories, lessons or opinions", () => {
     const items = checkExperience(
       [{ kind: "LESSON", content: "I learned that brokerages lose buyers when calls go unanswered.", evidence: "answer every buyer call" }],

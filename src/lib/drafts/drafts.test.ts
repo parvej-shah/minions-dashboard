@@ -196,6 +196,23 @@ describe("the draft check keeps a retold experience to what the item says", () =
     expect(r.claims_ok).toBe("Y");
   });
 
+  it("flags a figure in words no input gives (a real first post, 2026-10-21)", () => {
+    const r = checkDraft({ ...base, body: base.body + "\n\nBy day seven, the team is too drained to spot what matters." });
+    expect(r.claims_ok).toBe("N");
+    expect(r.reasons.join(" ")).toMatch(/figure in words that no input gives: "day seven"/);
+  });
+
+  it("flags a verb that credits the author with more than any item says", () => {
+    const r = checkDraft({ ...base, body: "I engineered Carolyn Greiner's content hierarchy from scratch." });
+    expect(r.claims_ok).toBe("N");
+    expect(r.reasons.join(" ")).toMatch(/no item says they did: "I engineered"/);
+  });
+
+  it("accepts the author's own verb", () => {
+    const r = checkDraft({ ...base, body: "I designed brands for coaches before this one." });
+    expect(r.claims_ok).toBe("Y");
+  });
+
   it("does not look for outcomes in a draft with no experience behind it", () => {
     const r = checkDraft({ ...base, trustBasis: ["MARKET_SIGNAL"], memory: [], body: "Most sites bury the offer.\n\nThe result? More bounces and fewer calls." });
     expect(r.reasons.join(" ")).not.toMatch(/outcome/);
