@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { ArrowLeft, PartyPopper, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Confetti from "@/components/ui/Confetti";
@@ -163,7 +164,8 @@ export function BrandImportSheet({ onClose, onApplied }: { onClose: () => void; 
   const back = stage === "review" ? () => setStage("reading") : stage === "reading" ? () => (run.reset(), setStage("drop")) : null;
   const message = error ?? (stage === "reading" ? (run.status === "error" ? run.error : nothingNew ? "Nothing new: your brand already has everything Minions found." : null) : null);
 
-  return (
+  // Rendered into <body> so the page's layout (e.g. a space-y parent's margin) can't shift the overlay.
+  return createPortal(
     <div role="dialog" aria-modal="true" aria-label="Fill your brand from LinkedIn" className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-canvas text-ink">
       <header className="sticky top-0 z-10 flex items-center justify-between border-b-2 border-line bg-canvas px-4 py-3 sm:px-6">
         {back ? (
@@ -188,6 +190,7 @@ export function BrandImportSheet({ onClose, onApplied }: { onClose: () => void; 
           </Button>
         </div>
       </footer>
-    </div>
+    </div>,
+    document.body
   );
 }

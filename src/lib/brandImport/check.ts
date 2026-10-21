@@ -172,7 +172,8 @@ export function checkProofs(raw: unknown, pages: ProofPage[], makeId: () => stri
 export function glimpses(source: string, count: number): string[] {
   return unwrap(source)
     .split(/\n+|(?<=[.!?])\s+/)
-    .map((line) => line.replace(/\s+/g, " ").trim())
+    // A page title's separator ("— 24/7 AI receptionist") is not part of the sentence.
+    .map((line) => line.replace(/\s+/g, " ").trim().replace(/^[^\p{L}\p{N}"“'‘(]+/u, ""))
     .filter((line) => line.length >= 30 && line.length <= 160 && line.split(" ").length >= 5 && !isLayout(line))
     .slice(0, count);
 }

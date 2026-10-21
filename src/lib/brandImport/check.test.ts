@@ -127,6 +127,10 @@ describe("plumbing", () => {
     expect(lines.every((l) => /^[A-Z]/.test(l))).toBe(true);
   });
 
+  it("drops a page title's leading separator", () => {
+    expect(glimpses("— 24/7 AI receptionist for real estate teams who miss calls.", 1)).toEqual(["24/7 AI receptionist for real estate teams who miss calls."]);
+  });
+
   it("leaves links and date ranges out of the reading feed", () => {
     const lines = glimpses("www.linkedin.com/in/someone-demo (LinkedIn)\nJanuary 2022 - Present (2 years 9 months)\nI build accounting automation for mid-sized finance teams.", 5);
     expect(lines).toEqual(["I build accounting automation for mid-sized finance teams."]);
