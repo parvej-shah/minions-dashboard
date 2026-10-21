@@ -27,12 +27,16 @@ describe("model fallback", () => {
   });
 
   it("moves down the chain when the free quota is used up, keeping the rest of the payload", async () => {
-    const { fetchImpl, calls } = fakeFetch({ "qwen3.8-max": [403, QUOTA], "deepseek-v4-pro": [403, QUOTA] });
+    const { fetchImpl, calls } = fakeFetch({ "qwen3.8-max": [403, QUOTA], "deepseek-v4-pro": [403, QUOTA], "deepseek-v4-pro-0813": [403, QUOTA] });
     const r = await chatWithFallback({ model: "qwen3.8-max", temperature: 0.7, messages: [{ role: "user", content: "x" }] }, "k", { fetchImpl });
     expect(r.model).toBe("glm-5.1");
     expect(r.status).toBe(200);
-    expect(r.skipped.map((s) => s.model)).toEqual(["qwen3.8-max", "deepseek-v4-pro"]);
-    expect(calls).toEqual(["qwen3.8-max", "deepseek-v4-pro", "glm-5.1"]);
+    expect(r.skipped.map((s) => s.model)).toEqual(["qwen3.8-max", "deepseek-v4-pro", "deepseek-v4-pro-0813"]);
+    expect(calls).toEqual(["qwen3.8-max", "deepseek-v4-pro", "deepseek-v4-pro-0813", "glm-5.1"]);
+  });
+
+  it("tries deepseek's dated snapshot, which has its own free quota, before the last resort", () => {
+    expect(modelChain("glm-5.1")).toEqual(["glm-5.1", "deepseek-v4-pro", "deepseek-v4-pro-0813", "qwen3.7-max"]);
   });
 
   it("returns any other error as it is, without switching model", async () => {

@@ -28,7 +28,7 @@ export function callCostUsd(model: string, body: string): number {
   try {
     const usage = JSON.parse(body)?.usage;
     if (!usage) return 0;
-    const price = PRICES[model.replace(/-\d{4}-\d{2}-\d{2}$/, "")] ?? UNKNOWN;
+    const price = PRICES[model.replace(/-(\d{4}-\d{2}-\d{2}|\d{4})$/, "")] ?? UNKNOWN;
     return ((Number(usage.prompt_tokens) || 0) * price.input + (Number(usage.completion_tokens) || 0) * price.output) / 1e6;
   } catch {
     return 0;

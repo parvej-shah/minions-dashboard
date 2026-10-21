@@ -5,7 +5,7 @@
  * on, so once a model's quota is used up DashScope refuses the call. Instead
  * of failing the run, the call moves down the model's chain: other models
  * that still have free quota first, and the model the stage used before the
- * switch as the paid last resort.
+ * switch as the last resort.
  *
  * Only an unavailable model moves the call on (quota used up, model not
  * offered, rate-limited). Any other error -- a bad request, a timeout, a 5xx --
@@ -18,11 +18,13 @@ import { DASHSCOPE_CHAT_URL } from "@/constants/dashscope";
 import { callCostUsd, recordCost } from "@/lib/ai/cost";
 
 /**
- * Models the account can reach (probed 2026-10-12). qwen3-max, deepseek-v3.2
+ * Models the account can reach (probed 2026-10-21). qwen3-max, deepseek-v3.2
  * and deepseek-v4-flash no longer exist on it, and glm-5.2's free quota is
- * ending, so none of them is tried any more.
+ * used up, so none of them is tried any more. deepseek-v4-pro-0813 is the
+ * same model under a dated name with its own free quota (to 2026-11-13).
  */
-const LARGE = ["deepseek-v4-pro", "glm-5.1"];
+const DEEPSEEK = ["deepseek-v4-pro", "deepseek-v4-pro-0813"];
+const LARGE = [...DEEPSEEK, "glm-5.1"];
 
 /**
  * Primary model -> what to try after it, in order. A model not listed here
@@ -34,10 +36,10 @@ export const MODEL_FALLBACKS: Record<string, string[]> = {
   // Writer comparison 2026-10-12 (same 6 strategies, Jev 0-4 "reads as one person"): deepseek-v4-pro 2.36,
   // glm-5.2 2.30, glm-5.1 2.19, qwen3.7-max 2.13, qwen3.6-plus 1.71, qwen3.7-plus 1.45; all returned valid JSON.
   // glm-5.1 wins on what is left: close to the top, the tightest drafts (301 words vs 391-456) and the fastest.
-  // deepseek-v4-pro comes next (longest drafts, broke JSON on rewrites on 2026-10-03); qwen3.7-max is the paid last resort.
-  "glm-5.1": ["deepseek-v4-pro", "qwen3.7-max"],
+  // deepseek-v4-pro comes next (longest drafts, broke JSON on rewrites on 2026-10-03), then qwen3.7-max as the last resort.
+  "glm-5.1": [...DEEPSEEK, "qwen3.7-max"],
   // Kept for any caller that still names them.
-  "glm-5.2": ["glm-5.1", "deepseek-v4-pro", "qwen3.7-max"],
+  "glm-5.2": ["glm-5.1", ...DEEPSEEK, "qwen3.7-max"],
   "qwen3.8-max": [...LARGE, "qwen3.7-max"],
   "qwen3.7-flash": ["glm-5.1", "qwen-flash"],
   "qwen-flash": ["glm-5.1", "qwen3.7-flash"],
