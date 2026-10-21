@@ -170,11 +170,30 @@ export function checkProofs(raw: unknown, pages: ProofPage[], makeId: () => stri
 
 /** Lines worth showing in the "reading" feed: real sentences from the source, not navigation. */
 export function glimpses(source: string, count: number): string[] {
-  return source
+  return unwrap(source)
     .split(/\n+|(?<=[.!?])\s+/)
     .map((line) => line.replace(/\s+/g, " ").trim())
-    // Links and date ranges ("January 2022 - Present") are layout, not something the author said.
-    .filter((line) => line.length >= 30 && line.length <= 160 && line.split(" ").length >= 5)
-    .filter((line) => !/https?:\/\/|www\.|linkedin\.com|@/i.test(line) && !/\b(19|20)\d{2}\b.*(present|\b(19|20)\d{2}\b)/i.test(line))
+    .filter((line) => line.length >= 30 && line.length <= 160 && line.split(" ").length >= 5 && !isLayout(line))
     .slice(0, count);
+}
+
+// Links and date ranges ("January 2022 - Present") are layout, not something the author said.
+const isLayout = (line: string) => /https?:\/\/|www\.|linkedin\.com|@/i.test(line) || /\b(19|20)\d{2}\b.*(present|\b(19|20)\d{2}\b)/i.test(line);
+
+/**
+ * A PDF wraps a paragraph over several lines. Joins a long line that stops
+ * mid-sentence to the next prose line, so a glimpse starts where its sentence
+ * does. Headings, short lines like a location, and layout stay apart.
+ */
+function unwrap(source: string): string {
+  const prose = (line: string) => !isLayout(line) && line.trim().length > 0;
+  const lines = source.split("\n");
+  let out = lines[0] ?? "";
+  for (let i = 1; i < lines.length; i++) {
+    const prev = lines[i - 1].trim();
+    const next = lines[i].trim();
+    const wrapped = prev.length >= 40 && !/[.!?:]$/.test(prev) && prose(prev) && prose(next) && (next.length >= 25 || /[.!?]$/.test(next));
+    out += (wrapped ? " " : "\n") + lines[i];
+  }
+  return out;
 }

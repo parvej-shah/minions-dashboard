@@ -121,6 +121,12 @@ describe("plumbing", () => {
     expect(lines).not.toContain("Experience");
   });
 
+  it("starts each glimpse where its sentence starts, across PDF line wraps", () => {
+    const lines = glimpses(PROFILE, 5);
+    expect(lines).toContain("Before that I ran engineering for a logistics startup and shipped a dispatch system used by 40 fleets.");
+    expect(lines.every((l) => /^[A-Z]/.test(l))).toBe(true);
+  });
+
   it("leaves links and date ranges out of the reading feed", () => {
     const lines = glimpses("www.linkedin.com/in/someone-demo (LinkedIn)\nJanuary 2022 - Present (2 years 9 months)\nI build accounting automation for mid-sized finance teams.", 5);
     expect(lines).toEqual(["I build accounting automation for mid-sized finance teams."]);
