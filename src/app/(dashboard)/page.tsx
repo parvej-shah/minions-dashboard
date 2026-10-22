@@ -111,7 +111,7 @@ export default function MissionControlPage() {
 
         <div className="grid w-full grid-cols-3 gap-2 lg:flex lg:w-auto lg:items-center lg:gap-2.5">
           <Link
-            href="/settings/schedule"
+            href="/editorial?schedule=1"
             aria-label="Open Schedule"
             className="flex min-h-12 w-full min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-[#1F2D3D] bg-[#0F1419] px-1.5 py-3 text-[11px] font-semibold text-[#F1F5F9] shadow-sm transition-all hover:border-[#00C9A7]/40 hover:bg-[#161D26] active:scale-[0.98] sm:gap-2 sm:px-4 sm:text-xs lg:w-auto lg:flex-none"
           >

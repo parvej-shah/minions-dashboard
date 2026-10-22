@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { FileText } from "lucide-react";
+import { CalendarClock, FileText } from "lucide-react";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import Toast from "@/components/ui/Toast";
 import EmptyState from "@/components/ui/EmptyState";
@@ -22,6 +22,7 @@ import ReviewDock from "./ReviewDock";
 import ClaimsGate from "./ClaimsGate";
 import MobileActionBar from "./MobileActionBar";
 import DraftChecks from "./DraftChecks";
+import DraftScheduleModal from "@/components/schedule/DraftScheduleModal";
 import { plainReviewNotes } from "@/lib/drafts/plainNotes";
 import { postGoesTo } from "@/constants/postChannels";
 
@@ -103,6 +104,8 @@ function EditorialStudioSkeleton() {
 export interface EditorialStudioProps {
   initialDraftId?: string;
   isStandaloneRoute?: boolean;
+  /** Opens the drafting schedule on load (`?schedule=1`, where /settings/schedule redirects). */
+  openSchedule?: boolean;
 }
 
 /**
@@ -115,6 +118,7 @@ export interface EditorialStudioProps {
 export default function EditorialStudio({
   initialDraftId,
   isStandaloneRoute = false,
+  openSchedule = false,
 }: EditorialStudioProps) {
   const channels = useChannelSummary();
   const { brandSettings: studioBrand } = useBrandSettings();
@@ -129,6 +133,27 @@ export default function EditorialStudio({
   const studioBlogHost =
     (normalizeDomain(studioBrand?.company_domain) ?? "your blog").replace(/^https?:\/\//, "") +
     (studioBrand?.company_domain ? "/blog" : "");
+
+  const [scheduleOpen, setScheduleOpen] = useState(openSchedule);
+  const closeSchedule = () => {
+    setScheduleOpen(false);
+    // Drop ?schedule=1 so a reload doesn't reopen it.
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("schedule")) {
+      url.searchParams.delete("schedule");
+      window.history.replaceState(null, "", url);
+    }
+  };
+  const scheduleButton = (
+    <button
+      type="button"
+      onClick={() => setScheduleOpen(true)}
+      className="flex min-h-10 cursor-pointer items-center gap-1.5 rounded-xl border border-line bg-canvas px-3 text-xs font-semibold text-ink transition-colors hover:border-brand/50 hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+    >
+      <CalendarClock className="h-3.5 w-3.5 text-[#38BDF8]" aria-hidden="true" /> Schedule
+    </button>
+  );
+  const scheduleModal = <DraftScheduleModal isOpen={scheduleOpen} onClose={closeSchedule} />;
 
   const [listFilter, setListFilter] = useState<QueueFilter>("ALL");
   const [editorMode, setEditorMode] = useState<EditorMode>("preview");
@@ -280,7 +305,9 @@ export default function EditorialStudio({
             draft.loadError ??
             "Nothing is waiting for review. Run the harvester and drafting pipeline from the Ideas page to generate one."
           }
+          action={scheduleButton}
         />
+        {scheduleModal}
       </div>
     );
   }
@@ -319,6 +346,7 @@ export default function EditorialStudio({
         onSelect={draft.selectAsset}
         onPrev={draft.prevDraft}
         onNext={draft.nextDraft}
+        action={scheduleButton}
       />
 
       <DraftHeader
@@ -444,6 +472,8 @@ export default function EditorialStudio({
         onConfirm={handleToggleLive}
         onClose={() => setToggleLiveConfirmOpen(false)}
       />
+
+      {scheduleModal}
     </div>
   );
 }

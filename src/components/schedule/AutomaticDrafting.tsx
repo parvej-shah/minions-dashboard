@@ -20,7 +20,7 @@ interface DraftingStatus {
 type Tone = "off" | "on" | "warn";
 
 function describe(s: DraftingStatus): { tone: Tone; title: string; detail: string } {
-  if (!s.exists) return { tone: "off", title: "Off", detail: "Save your schedule below before turning this on." };
+  if (!s.exists) return { tone: "off", title: "Off", detail: "Set your schedule below, then turn this on." };
   if (!s.drafting_on) {
     return { tone: "off", title: "Off", detail: "No drafts are prepared automatically while this is off." };
   }
@@ -49,7 +49,7 @@ const TONE_STYLE: Record<Tone, { box: string; dot: string; text: string }> = {
  * the setting. Replaces the separate "Schedule active" and "Fill slots
  * automatically" switches.
  */
-export default function AutomaticDrafting({ onChanged, onMessage, onEnableWithSave, canSaveSchedule, blockedByUnsavedChanges, scheduleSummary }: { onChanged: () => void; onMessage: (m: string) => void; onEnableWithSave: () => Promise<boolean>; canSaveSchedule: boolean; blockedByUnsavedChanges: boolean; scheduleSummary: string }) {
+export default function AutomaticDrafting({ onChanged, onMessage, onEnableWithSave, canSaveSchedule, blockedByUnsavedChanges }: { onChanged: () => void; onMessage: (m: string) => void; onEnableWithSave: () => Promise<boolean>; canSaveSchedule: boolean; blockedByUnsavedChanges: boolean }) {
   const { data, isLoading, error, reload } = useApiResource<DraftingStatus | null>("/api/plan/status", null, {
     errorMessage: "Could not load the drafting status",
   });
@@ -111,7 +111,7 @@ export default function AutomaticDrafting({ onChanged, onMessage, onEnableWithSa
   const showSaveAndEnable = !data.drafting_on && (!data.exists || blockedByUnsavedChanges);
 
   return (
-    <div className={`flex flex-col gap-4 rounded-2xl border bg-surface p-5 shadow-sm sm:flex-row sm:items-start sm:justify-between ${style.box}`}>
+    <div className={`flex flex-col gap-4 rounded-2xl border bg-surface p-4 shadow-sm sm:flex-row sm:px-5 sm:items-start sm:justify-between ${style.box}`}>
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2 text-sm font-bold text-ink">
           <Bot className="w-4 h-4 text-brand" />
@@ -121,7 +121,6 @@ export default function AutomaticDrafting({ onChanged, onMessage, onEnableWithSa
             {title}
           </span>
         </div>
-        <p className="mt-2 text-sm font-semibold leading-relaxed text-[#CBD5E1]">{scheduleSummary}</p>
         <p className="mt-1 text-xs leading-relaxed text-muted">{detail}</p>
         {saving && !showSaveAndEnable && (
           <p role="status" aria-live="polite" className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-medium text-brand">

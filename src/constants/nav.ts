@@ -1,7 +1,6 @@
 import {
   CreditCard,
   SlidersHorizontal,
-  CalendarClock,
   FileText,
   Globe,
   LayoutDashboard,
@@ -50,11 +49,6 @@ export function buildNavItems(): NavItem[] {
       name: "Channels",
       href: "/fleet",
       icon: SlidersHorizontal,
-    },
-    {
-      name: "Schedule",
-      href: "/settings/schedule",
-      icon: CalendarClock,
     },
     {
       name: "Billing",

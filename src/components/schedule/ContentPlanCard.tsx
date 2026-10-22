@@ -152,7 +152,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
   };
 
   return (
-    <div aria-busy={saving !== null} className="p-6 rounded-2xl bg-surface border border-line space-y-5 shadow-sm">
+    <div aria-busy={saving !== null} className="p-4 sm:p-5 rounded-2xl bg-surface border border-line space-y-3 shadow-sm">
       <div>
         <h2 className="text-sm font-bold text-ink flex items-center gap-2">
           <CalendarRange className="w-4 h-4 text-brand" />

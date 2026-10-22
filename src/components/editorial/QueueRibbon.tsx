@@ -18,6 +18,8 @@ export interface QueueRibbonProps {
   onSelect: (id: string) => void;
   onPrev: () => void;
   onNext: () => void;
+  /** Shown at the right of the header on every screen size. */
+  action?: React.ReactNode;
 }
 
 /** The horizontal review-queue rail and its filter pills. */
@@ -30,6 +32,7 @@ export default function QueueRibbon({
   onSelect,
   onPrev,
   onNext,
+  action,
 }: QueueRibbonProps) {
   const pendingCount = assets.filter((a) => a.status === "PENDING_REVIEW").length;
   const unpublishedCount = assets.filter((a) => a.status === "UNPUBLISHED").length;
@@ -127,8 +130,9 @@ export default function QueueRibbon({
         </div>
       </div>
 
-      <div className="hidden sm:flex items-center gap-2">
-        <div className="flex items-center gap-1 bg-canvas p-1 rounded-xl border border-line">
+      <div className="flex items-center gap-2">
+        {action}
+        <div className="hidden sm:flex items-center gap-1 bg-canvas p-1 rounded-xl border border-line">
           <button
             onClick={onPrev}
             title="Previous Draft (Key: [ )"
