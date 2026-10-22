@@ -50,6 +50,12 @@ and link to it here.
 **Why:** LinkedIn cannot swap the media on a live post, and republishing duplicated the whole post. A reworded second post a few days later reaches people the first missed without reading as a repost.
 **Status:** active
 
+## 2026-10-03 — Put core work destinations first in navigation
+
+**Decision:** Place Schedule immediately after Editorial Studio, Brand & Directives before Published Posts, and Published Posts before Channels and Billing.
+**Why:** Navigation order should prioritize the destinations users need for their regular work.
+**Status:** active
+
 ## 2026-10-03 — Remove repeated Mission Control pipeline cards
 
 **Decision:** Remove the Ideas, Drafting, Review and Published mini-card strip below the summary cards.

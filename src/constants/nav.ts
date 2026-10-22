@@ -36,14 +36,14 @@ export function buildNavItems(): NavItem[] {
       icon: FileText,
     },
     {
-      name: "Published Posts",
-      href: "/published",
-      icon: Globe,
-    },
-    {
       name: "Brand & Directives",
       href: "/brand",
       icon: Palette,
+    },
+    {
+      name: "Published Posts",
+      href: "/published",
+      icon: Globe,
     },
     {
       name: "Channels",
