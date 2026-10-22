@@ -104,7 +104,7 @@ function EditorialStudioSkeleton() {
 export interface EditorialStudioProps {
   initialDraftId?: string;
   isStandaloneRoute?: boolean;
-  /** Opens the drafting schedule on load (`?schedule=1`, where /settings/schedule redirects). */
+  /** Opens the drafting schedule on load (`?schedule=1`, used by the Mission Control Schedule button). */
   openSchedule?: boolean;
 }
 
