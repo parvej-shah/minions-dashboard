@@ -29,6 +29,13 @@ and link to it here.
 
 ---
 
+## 2026-10-23 — Unchecked claims warn at the publish button but don't block it
+
+**Decision:** In Editorial Studio the Claims Gate sits above "Ready to publish?", and while any claim is still flagged a gold warning sits right above Approve & publish, telling the author to mark it Verified or edit the post. Publishing stays allowed.
+**Why:** The gate sat below the publish buttons, so authors published without seeing flagged claims. Moving it up and warning at the button makes it hard to miss without stopping someone who already removed or checked the claim.
+**Alternatives considered:** disabling Publish and Schedule until every flagged claim is confirmed (rejected by the product owner for now: a claim edited out of the post stays flagged, so it would force a meaningless click); a confirm step on publish (more friction than a visible warning).
+**Status:** active
+
 ## 2026-10-12 — Brand setup is read from LinkedIn and the website, not typed
 
 **Decision:** Onboarding opens with "drop your LinkedIn PDF (or résumé) and your website". Minions reads them, and the user watches their brand assemble live: positioning, audience, experience items and voice appear as each one is extracted. One review screen follows, where they remove or edit anything and tick which website claims are true; nothing is saved before "Looks right". The first post then starts from an experience item they pick. Typing the three setup questions stays as a small fallback link. Existing users get the same import as "Refresh from LinkedIn/website" on the Brand page, which only adds new items and never overwrites their edits.

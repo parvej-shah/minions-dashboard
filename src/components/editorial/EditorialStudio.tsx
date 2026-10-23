@@ -396,7 +396,7 @@ export default function EditorialStudio({
         <div className="flex flex-col gap-6 lg:col-span-4 lg:sticky lg:top-6">
           <div className="order-1"><DraftChecks notes={reviewNotes} /></div>
           {activeAsset.claims.length > 0 && (
-            <div className="order-2 lg:order-3">
+            <div className="order-2">
               <ClaimsGate
                 activeAsset={activeAsset}
                 verifiedClaimsCount={verifiedClaimsCount}
@@ -406,7 +406,7 @@ export default function EditorialStudio({
               />
             </div>
           )}
-          <div id="editorial-publishing-options" tabIndex={-1} className="order-3 scroll-mt-6 outline-none lg:order-2">
+          <div id="editorial-publishing-options" tabIndex={-1} className="order-3 scroll-mt-6 outline-none">
             <ReviewDock
               activeAsset={activeAsset}
               isDirty={draft.isDirty}

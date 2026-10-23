@@ -83,6 +83,9 @@ export default function ReviewDock({
 
   /** Live-ness comes from the blog table, not the asset's own status. */
   const alreadyLive = blogEnabled && Boolean(activeAsset.live_blog_url) && activeAsset.status !== "PUBLISHED";
+  // Claims the draft check could not trace to the author. Publishing stays open;
+  // the warning sits on the button so it is not missed below the fold.
+  const flaggedClaims = activeAsset.claims.filter((claim) => claim.verified !== "Y").length;
 
   return (
         <div className="bg-surface rounded-2xl border border-line p-4 sm:p-5 space-y-4 shadow-xl">
@@ -301,6 +304,16 @@ export default function ReviewDock({
                 onChange={onSetChannels}
                 onMessage={onMessage}
               />)}
+
+              {flaggedClaims > 0 && (
+                <p role="note" className="flex items-start gap-1.5 rounded-lg border border-gold/40 bg-gold/10 px-2.5 py-2 text-xs font-medium text-[#FCD34D]">
+                  <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  <span>
+                    {flaggedClaims} claim{flaggedClaims === 1 ? " isn't" : "s aren't"} checked yet. Look at the Claims Gate above and mark{" "}
+                    {flaggedClaims === 1 ? "it" : "each one"} Verified, or edit the post.
+                  </span>
+                </p>
+              )}
 
               <button
                 onClick={onPublish}
