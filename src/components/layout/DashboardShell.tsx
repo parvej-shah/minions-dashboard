@@ -32,18 +32,31 @@ export interface DashboardShellProps {
 export default function DashboardShell({ children }: DashboardShellProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
 
   // A new signup has no workspace until onboarding saves its first step. If
   // they leave onboarding (or open "/" directly) every page here would fail
-  // with "not attached to a tenant", so send them back to finish it. The
-  // session is read fresh from the database (see the jwt callback), so this
-  // never bounces someone whose workspace was just created. Staff are exempt:
-  // they work through platform-admin and view-as-tenant.
+  // with "not attached to a tenant", so send them back to finish it. Staff are
+  // exempt: they work through platform-admin and view-as-tenant.
+  //
+  // The session in the browser is the copy fetched at sign-up, before the
+  // workspace existed, and a client-side move from onboarding keeps it. So
+  // re-read it first (the jwt callback reads the DB) and redirect only if it
+  // still has no workspace; otherwise "Review my post" bounced between here
+  // and setup, whose server check sees the finished workspace and sends it back.
   const needsWorkspace =
     status === "authenticated" && !!session?.user && !session.user.clientId && session.user.role !== "SYSTEM_ADMIN";
+  // update() changes identity with every session, so it is read through a ref:
+  // a user who truly has no workspace must get one re-read, not a loop of them.
+  const updateRef = React.useRef(update);
   React.useEffect(() => {
-    if (needsWorkspace) router.replace("/onboarding/setup");
+    updateRef.current = update;
+  }, [update]);
+  React.useEffect(() => {
+    if (!needsWorkspace) return;
+    void updateRef.current().then((fresh) => {
+      if (!fresh?.user?.clientId) router.replace("/onboarding/setup");
+    });
   }, [needsWorkspace, router]);
 
   const [isHarvesting, setIsHarvesting] = useState(false);
