@@ -23,9 +23,12 @@ import { buttonStyles } from "@/components/ui/Button";
 export function ChannelCredentialForm({
   channel,
   onSaved,
+  returnTo,
 }: {
   channel: DistributionChannelConfig;
   onSaved: () => void;
+  /** Where LinkedIn's sign-in comes back to; the Channels page when omitted. */
+  returnTo?: string;
 }) {
   const isBlog = channel.key === "blog";
   const [open, setOpen] = useState(false);
@@ -80,7 +83,7 @@ export function ChannelCredentialForm({
       return (
         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <a
-            href="/api/auth/linkedin/connect"
+            href={returnTo ? `/api/auth/linkedin/connect?return_to=${encodeURIComponent(returnTo)}` : "/api/auth/linkedin/connect"}
             onClick={(e) => e.stopPropagation()}
             className="min-h-11 w-full sm:w-fit flex items-center justify-center gap-2 whitespace-nowrap text-xs font-medium px-3.5 py-2 rounded-lg bg-[#0077b5] text-white hover:bg-[#0077b5]/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]"
           >

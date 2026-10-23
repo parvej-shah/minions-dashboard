@@ -60,10 +60,10 @@ function LinkedInSelectContent() {
         </div>
         <p className="text-red-400 font-medium">{error}</p>
         <button 
-          onClick={() => router.push(returnTo.startsWith("/onboarding") ? returnTo : "/fleet")}
+          onClick={() => router.push(returnTo.startsWith("/onboarding") || returnTo.startsWith("/editorial") ? returnTo : "/fleet")}
           className="px-4 py-2 text-sm font-medium rounded-lg border border-line text-ink hover:bg-line"
         >
-          {returnTo.startsWith("/onboarding") ? "Return to Onboarding" : "Return to Fleet"}
+          {returnTo.startsWith("/onboarding") ? "Return to Onboarding" : returnTo.startsWith("/editorial") ? "Return to Editorial Studio" : "Return to Channels"}
         </button>
       </div>
     );

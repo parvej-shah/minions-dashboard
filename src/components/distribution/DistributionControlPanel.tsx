@@ -21,12 +21,15 @@ interface DistributionControlPanelProps {
    * by the onboarding done page to show only the channels the tenant picked
    * during setup, not the full catalogue including ones they never chose. */
   channelFilter?: string[];
+  /** Where LinkedIn's sign-in comes back to; the Channels page when omitted. */
+  connectReturnTo?: string;
 }
 
 export function DistributionControlPanel({
   compact = false,
   onChannelChange,
   channelFilter,
+  connectReturnTo,
 }: DistributionControlPanelProps) {
   const { data, isLoading, pendingId, toggleChannel, setData, reload } = useDistributionChannels();
   const { message: notification, show: showNotification } = useToast(3500);
@@ -176,7 +179,7 @@ export function DistributionControlPanel({
       )}
 
       {/* Grid of 4 Channel Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+      <div className={`grid grid-cols-1 gap-3 sm:gap-4 ${channels.length > 1 ? "lg:grid-cols-2" : ""}`}>
         {channels.map((ch) => {
           const isActive = ch.is_active;
           const isBusy = updatingKey === ch.key;
@@ -269,7 +272,7 @@ export function DistributionControlPanel({
                         : "○ Not connected"}
                   </span>
                 </div>
-                <ChannelCredentialForm channel={ch} onSaved={reload} />
+                <ChannelCredentialForm channel={ch} onSaved={reload} returnTo={connectReturnTo} />
               </div>
             </div>
           );

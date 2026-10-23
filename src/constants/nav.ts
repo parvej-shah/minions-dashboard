@@ -1,6 +1,5 @@
 import {
   CreditCard,
-  SlidersHorizontal,
   FileText,
   Globe,
   LayoutDashboard,
@@ -44,11 +43,6 @@ export function buildNavItems(): NavItem[] {
       name: "Published Posts",
       href: "/published",
       icon: Globe,
-    },
-    {
-      name: "Channels",
-      href: "/fleet",
-      icon: SlidersHorizontal,
     },
     {
       name: "Billing",

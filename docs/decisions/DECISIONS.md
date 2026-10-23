@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-10-23 — LinkedIn is connected from Editorial Studio; Channels is hidden
+
+**Decision:** The Channels tab is hidden from the sidebar for now. LinkedIn, the channel posts go to, opens as a modal from a "LinkedIn" button beside "Schedule" in Editorial Studio, and LinkedIn's sign-in returns there. /fleet still works by URL for the blog, Facebook and X settings.
+**Why:** Connecting LinkedIn belongs next to the drafts it publishes; a separate Channels page was one more place to find for a single channel most users need.
+**Status:** active
+
 ## 2026-10-23 — Unchecked claims warn at the publish button but don't block it
 
 **Decision:** In Editorial Studio the Claims Gate sits above "Ready to publish?", and while any claim is still flagged a gold warning sits right above Approve & publish, telling the author to mark it Verified or edit the post. Publishing stays allowed.
