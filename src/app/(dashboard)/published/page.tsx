@@ -10,7 +10,6 @@ import {
   Share2,
   ExternalLink,
   Clock,
-  Layers,
   CheckCircle2,
   Search,
   ArrowUpRight,
@@ -22,16 +21,28 @@ import {
 import { PublishedPostRecord } from "@/types";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import EmptyState, { LoadingState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useToast } from "@/hooks/useToast";
 import { useChannelSummary } from "@/hooks/useChannelSummary";
 
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { buttonStyles } from "@/components/ui/Button";
-import { formatDateTime } from "@/utils/date";
+import { formatDate, formatDateTime } from "@/utils/date";
 export const dynamic = "force-dynamic";
 
 type TabPlatform = "BLOG" | "LINKEDIN" | "FACEBOOK" | "TWITTER";
+
+const FILTER_THRESHOLD = 6;
+const CHANNEL_NAME: Record<TabPlatform, string> = { BLOG: "blog", LINKEDIN: "LinkedIn", FACEBOOK: "Facebook", TWITTER: "X" };
+
+/** Where a post can be read on the channel being viewed, if it was recorded. */
+function liveLink(post: PublishedPostRecord, tab: TabPlatform): string | null {
+  if (tab === "BLOG") return post.published_url || null;
+  if (tab === "LINKEDIN") return post.channel_urls.linkedin;
+  if (tab === "FACEBOOK") return post.channel_urls.facebook;
+  return post.channel_urls.twitter;
+}
 
 export default function PublishedPostsPage() {
   // Every "live blog" affordance points at the tenant's own domain. These were
@@ -65,7 +76,6 @@ export default function PublishedPostsPage() {
   // to Blog but only LinkedIn is on), fall back to the first one that is,
   // without needing an effect to rewrite the underlying state.
   const activeTab = tabEnabled[rawActiveTab] ? rawActiveTab : firstEnabledTab;
-  const [audienceFilter, setAudienceFilter] = useState<string>("ALL");
   const [dateFilter, setDateFilter] = useState<string>("ALL");
   /**
    * The "now" the date filter is measured against, captured when the user picks
@@ -102,8 +112,6 @@ export default function PublishedPostsPage() {
   };
 
   const filteredPosts = feed.filter(post => {
-    if (audienceFilter !== "ALL" && post.audience !== audienceFilter) return false;
-
     if (dateFilter !== "ALL" && filterNow > 0) {
       const postDate = new Date(post.published_at).getTime();
       const now = filterNow;
@@ -134,7 +142,6 @@ export default function PublishedPostsPage() {
   });
 
   const resetFilters = () => {
-    setAudienceFilter("ALL");
     setDateFilter("ALL");
     setSearchQuery("");
   };
@@ -143,12 +150,9 @@ export default function PublishedPostsPage() {
   const linkedinReady = feed.filter((p) => (p.variants?.linkedin || "").trim().length > 0).length;
   const facebookReady = feed.filter((p) => (p.variants?.facebook || "").trim().length > 0).length;
   const twitterReady = feed.filter((p) => (p.variants?.twitter || "").trim().length > 0).length;
-  const channelCopyReady = feed.length + linkedinReady + facebookReady + twitterReady;
-  /** Social posts with a recorded permalink — the only evidence one went out. */
-  const socialPostsRecorded = feed.reduce(
-    (acc, p) => acc + Object.values(p.channel_urls).filter(Boolean).length,
-    0
-  );
+  // Filters earn their space only once the list is long enough to search.
+  const showFilters = feed.length >= FILTER_THRESHOLD;
+  const latest = feed[0]?.published_at;
 
   const allTabs: { id: TabPlatform; label: string; count: number; icon: LucideIcon; color: string }[] = [
     { id: "BLOG", label: "Blog Articles", count: feed.length, icon: Globe, color: "#00C9A7" },
@@ -176,11 +180,18 @@ export default function PublishedPostsPage() {
             Published library
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
-            Your published content
+            Your published posts
           </h1>
           <p className="text-xs sm:text-sm text-muted mt-1">
-            Live articles, ready-to-share channel copy, and the links you have recorded.
+            Everything Minions has posted for you, newest first.
           </p>
+          <div className="mt-2 text-xs font-semibold text-ink">
+            {isLoading ? (
+              <Skeleton className="h-4 w-48" />
+            ) : feed.length > 0 ? (
+              `${feed.length} post${feed.length === 1 ? "" : "s"} published · last on ${formatDate(latest)}`
+            ) : null}
+          </div>
         </div>
 
         {tabEnabled.BLOG && (
@@ -199,8 +210,8 @@ export default function PublishedPostsPage() {
         )}
       </div>
 
-      {/* Channel Switcher Tabs */}
-      <div className="flex flex-wrap items-center gap-1.5 border-b border-line pb-3">
+      {/* Channel Switcher Tabs: only when more than one channel is on */}
+      {tabs.length > 1 && <div className="flex flex-wrap items-center gap-1.5 border-b border-line pb-3">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;
@@ -224,46 +235,16 @@ export default function PublishedPostsPage() {
             </button>
           );
         })}
-      </div>
-
-      {/* Summary Stat Pills */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="p-4 rounded-2xl bg-surface border border-line flex items-center justify-between shadow-sm">
-          <div>
-            <div className="text-[11px] font-mono text-muted">POSTS LIVE</div>
-            <div className="text-xl font-bold text-ink mt-0.5">{feed.length} Articles</div>
-          </div>
-          <div className="w-9 h-9 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center text-brand">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-surface border border-line flex items-center justify-between shadow-sm">
-          <div>
-            <div className="text-[11px] font-mono text-muted">CHANNEL COPY READY</div>
-            <div className="text-xl font-bold text-ink mt-0.5">{channelCopyReady} Pieces</div>
-            <div className="text-[10px] text-subtle mt-0.5">
-              Live articles plus the social variants that exist
-            </div>
-            <div className="text-[10px] text-subtle">
-              {socialPostsRecorded} social post{socialPostsRecorded === 1 ? "" : "s"} recorded as live
-            </div>
-          </div>
-          <div className="w-9 h-9 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6]">
-            <Layers className="w-5 h-5" />
-          </div>
-        </div>
-
-      </div>
+      </div>}
 
       {/* Filter Bar */}
-      <div className="p-3 rounded-2xl bg-surface border border-line space-y-3">
+      {showFilters && <div className="p-3 rounded-2xl bg-surface border border-line space-y-3">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           <div className="relative w-full lg:w-80">
             <Search className="w-4 h-4 text-subtle absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder={`Search ${activeTab === "BLOG" ? "blog articles" : activeTab.toLowerCase() + " posts"}...`}
+              placeholder="Search your posts…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-surface-2 border border-line rounded-xl pl-9 pr-4 py-2 text-xs text-ink focus:outline-none focus:border-brand"
@@ -271,24 +252,6 @@ export default function PublishedPostsPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {/* Audience Filter */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] font-mono text-subtle shrink-0">Audience:</span>
-              {["ALL", "ICP", "PEER", "BRIDGE"].map((aud) => (
-                <button
-                  key={aud}
-                  onClick={() => setAudienceFilter(aud)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                    audienceFilter === aud
-                      ? "bg-surface-3 text-brand border border-brand/40 font-bold"
-                      : "text-subtle hover:text-muted"
-                  }`}
-                >
-                  {aud}
-                </button>
-              ))}
-            </div>
-
             {/* Time Filter */}
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] font-mono text-subtle shrink-0">Date:</span>
@@ -312,7 +275,7 @@ export default function PublishedPostsPage() {
             </div>
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* Dynamic Content by Tab */}
       {isLoading ? (
@@ -327,9 +290,9 @@ export default function PublishedPostsPage() {
           <div className="w-12 h-12 rounded-2xl bg-surface-2 border border-line text-subtle flex items-center justify-center mx-auto">
             <Search className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-ink">No broadcasts match your filters</h3>
+          <h3 className="text-base font-bold text-ink">No posts match your filters</h3>
           <p className="text-xs text-muted max-w-sm mx-auto">
-            Try adjusting your search query or filters.
+            Try a different search or date.
           </p>
           <button
             onClick={resetFilters}
@@ -390,34 +353,45 @@ export default function PublishedPostsPage() {
                 </div>
 
                 {/* Card Footer Actions */}
-                <div className="space-y-2 pt-3 border-t border-line">
-                  <div className="flex items-center justify-between text-[11px] font-mono text-subtle">
-                    <span className="flex items-center gap-1 truncate">
-                      <Clock className="w-3 h-3 shrink-0" />
-                      <span>{formatDateTime(post.published_at)}</span>
-                    </span>
+                <div className="space-y-3 pt-3 border-t border-line">
+                  <p className="flex items-center gap-1 text-[11px] font-mono text-subtle">
+                    <Clock className="w-3 h-3 shrink-0" />
+                    <span>{formatDateTime(post.published_at)}</span>
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {liveLink(post, activeTab) && (
+                      <a
+                        href={liveLink(post, activeTab) ?? undefined}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={buttonStyles({ size: "sm", className: "flex-1" })}
+                      >
+                        <span>View on {CHANNEL_NAME[activeTab]}</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
                     {post.asset_id ? (
                       <Link
                         href={`/editorial?id=${post.asset_id}`}
-                        className={buttonStyles({ variant: "soft", size: "sm" })}
+                        className={buttonStyles({ variant: "secondary", size: "sm" })}
                         title="Edit in Editorial Studio"
                       >
                         <Edit3 className="w-3 h-3" />
-                        <span>Open Studio</span>
+                        <span>Open in Studio</span>
                       </Link>
                     ) : (
                       <span
                         className="text-subtle flex items-center gap-1 text-[11px]"
-                        title="This blog post has no matching asset in the cockpit, so it cannot be opened in the Studio"
+                        title="This blog post has no matching draft, so it cannot be opened in the Studio"
                       >
                         <Edit3 className="w-3 h-3" />
-                        <span>No asset</span>
+                        <span>No draft</span>
                       </span>
                     )}
                   </div>
 
                   {activeTab === "BLOG" && (
-                    <div className="flex items-center justify-between gap-2 pt-1">
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => post.asset_id && setUnpublishTarget({ id: post.asset_id, title: post.title })}
                         disabled={!post.asset_id}
@@ -427,12 +401,6 @@ export default function PublishedPostsPage() {
                         <EyeOff className="w-3 h-3" />
                         <span>Unpublish</span>
                       </button>
-                      {post.published_url && (
-                        <a href={post.published_url} target="_blank" rel="noopener noreferrer" className={buttonStyles({ variant: "soft", size: "sm" })}>
-                          <span>View Live Article</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      )}
                     </div>
                   )}
                 </div>
@@ -445,7 +413,7 @@ export default function PublishedPostsPage() {
       {/* Unpublish Confirmation Modal */}
       <ConfirmModal
         isOpen={Boolean(unpublishTarget)}
-        title="Unpublish Broadcast"
+        title="Unpublish this post?"
         description={`Are you sure you want to unpublish "${unpublishTarget?.title}"? It will immediately be taken down from ${pageBlogHost} and returned to the review queue without deleting any content.`}
         confirmLabel="Unpublish Post"
         cancelLabel="Cancel"

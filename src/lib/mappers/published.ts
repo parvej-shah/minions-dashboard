@@ -1,6 +1,6 @@
 import type { Asset, Blog } from "@prisma/client";
 import { blogUrl } from "@/constants/config";
-import { EMPTY_CHANNEL_URLS, toChannelUrls } from "@/lib/channels";
+import { EMPTY_CHANNEL_URLS, linkedinPostUrl, toChannelUrls, type ChannelUrls } from "@/lib/channels";
 import { parsePublishedUrls } from "./asset";
 import type { AudienceLane, PublishedPostRecord } from "@/types";
 
@@ -52,6 +52,16 @@ export function toPublishedDTO(
       facebook: asset?.facebookVariant ?? "",
       twitter: asset?.xVariant ?? "",
     },
-    channel_urls: asset ? toChannelUrls(parsePublishedUrls(asset.publishedUrls)) : EMPTY_CHANNEL_URLS,
+    channel_urls: asset ? channelUrls(asset) : EMPTY_CHANNEL_URLS,
   };
+}
+
+/**
+ * The publisher records a LinkedIn post as its id in `linkedin_post_id`, never
+ * as a URL in `published_urls`, so the LinkedIn link is built from the id when
+ * no URL was recorded.
+ */
+function channelUrls(asset: Asset): ChannelUrls {
+  const urls = toChannelUrls(parsePublishedUrls(asset.publishedUrls));
+  return { ...urls, linkedin: urls.linkedin ?? linkedinPostUrl(asset.linkedinPostId) };
 }

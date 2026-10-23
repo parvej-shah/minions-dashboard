@@ -42,6 +42,16 @@ export function channelOf(url: string): SocialChannel | null {
  * merged, because a second URL for the same channel is a data problem, not a
  * second post to display.
  */
+/**
+ * The public link for a LinkedIn post id as the publisher stores it
+ * (`urn:li:share:…` or `urn:li:ugcPost:…`). LinkedIn resolves any post urn at
+ * /feed/update/.
+ */
+export function linkedinPostUrl(urn: string | null | undefined): string | null {
+  const id = urn?.trim();
+  return id && /^urn:li:(share|ugcPost|activity):\d+$/.test(id) ? `https://www.linkedin.com/feed/update/${id}/` : null;
+}
+
 export function toChannelUrls(urls: string[]): ChannelUrls {
   const result: ChannelUrls = { ...EMPTY_CHANNEL_URLS };
   for (const url of urls) {

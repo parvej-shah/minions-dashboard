@@ -246,6 +246,17 @@ describe("toPublishedDTO", () => {
     expect(dto.cost_usd).toBeNull();
     expect(dto.variants).toEqual({ linkedin: "", facebook: "", twitter: "" });
   });
+
+  it("links a LinkedIn post from the id the publisher stores", () => {
+    const dto = toPublishedDTO(blog, makeAsset({ linkedinPostId: "urn:li:ugcPost:7519359054805282816" }), 0);
+    expect(dto.channel_urls.linkedin).toBe("https://www.linkedin.com/feed/update/urn:li:ugcPost:7519359054805282816/");
+  });
+
+  it("prefers a recorded LinkedIn URL and ignores an id it cannot read", () => {
+    const recorded = makeAsset({ publishedUrls: "https://www.linkedin.com/posts/me-123", linkedinPostId: "urn:li:share:1" });
+    expect(toPublishedDTO(blog, recorded, 0).channel_urls.linkedin).toBe("https://www.linkedin.com/posts/me-123");
+    expect(toPublishedDTO(blog, makeAsset({ linkedinPostId: "pending" }), 0).channel_urls.linkedin).toBeNull();
+  });
 });
 
 describe("channel URLs", () => {
