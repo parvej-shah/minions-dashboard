@@ -7,7 +7,6 @@ import {
   ArrowUpRight,
   FileText,
   Globe,
-  LayoutDashboard,
   Lock,
   LogOut,
   Menu,
@@ -277,18 +276,6 @@ export function MobileBottomNav({
 }: Pick<MobileNavProps, "pathname" | "navCounts" | "setMobileMenuOpen">) {
   return (
   <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-xl border-t border-[#1f2b37] px-1 py-1.5 flex items-center justify-between pb-[max(0.65rem,env(safe-area-inset-bottom))] shadow-2xl shadow-black">
-    <Link
-      href="/"
-      className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all ${
-        pathname === "/"
-          ? "text-brand font-bold"
-          : "text-muted hover:text-white"
-      }`}
-    >
-      <LayoutDashboard className="w-5 h-5" />
-      <span className="text-[10px] font-medium">Mission</span>
-    </Link>
-
     <Link
       href="/ideas"
       className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all relative ${

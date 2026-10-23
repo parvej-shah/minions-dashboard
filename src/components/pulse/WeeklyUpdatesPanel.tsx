@@ -73,7 +73,7 @@ export default function WeeklyUpdatesPanel() {
           Weekly updates
         </h3>
         <p className="text-xs text-muted mt-0.5">
-          Once a week the home page asks what you built, learned, noticed or changed your mind about. The notes you keep
+          Once a week Editorial Studio asks what you built, learned, noticed or changed your mind about. The notes you keep
           land here, and the next harvest builds an idea on them first.
         </p>
       </div>

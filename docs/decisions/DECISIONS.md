@@ -29,6 +29,13 @@ and link to it here.
 
 ---
 
+## 2026-10-23 — Drop Mission Control; Editorial Studio is home
+
+**Decision:** The Mission Control page and its sidebar, bottom-bar and app-shortcut entries are gone. `/` now opens Editorial Studio. The weekly question moves to the top of the Studio, and the Daily Spark quote is dropped.
+**Why:** Every part of the page repeated another one (the review queue, the counts, the shortcut buttons, and a blog list most workspaces never see). That put an extra step between users and the Studio, where the work happens. A home page can come back once it shows something no other page does, such as reach over time.
+**Alternatives considered:** Renaming it "Home" and slimming it down. That still leaves a page with no job of its own.
+**Status:** active
+
 ## 2026-10-23 — Users can erase their own account from the account modal
 
 **Decision:** The account modal (avatar → Sign out) has a quiet "Erase my account" link. Erasing asks for the word "erase" typed out, then deletes the workspace and everything in it if it's theirs alone; a workspace shared with teammates or with a pending invite stays, and only their login goes. It's refused while a paid plan is still billing (cancel in Billing first), and staff accounts can't erase themselves here.
@@ -80,7 +87,7 @@ and link to it here.
 
 **Decision:** Remove the Ideas, Drafting, Review and Published mini-card strip below the summary cards.
 **Why:** It repeats the same counts and adds visual clutter.
-**Status:** active
+**Status:** superseded by [Drop Mission Control; Editorial Studio is home](#2026-10-23--drop-mission-control-editorial-studio-is-home)
 
 ## 2026-10-03 — Hide Content Performance from navigation
 
@@ -258,7 +265,7 @@ and link to it here.
 
 **Decision:** Daily Spark has no manual shuffle control. A page refresh selects a new thought, avoiding the previous one when browser session storage is available; the quote remains the focal point of the card.
 **Why:** The extra button made a passive thought feel like another task. Refresh-based variety keeps the card calm while still feeling fresh.
-**Status:** active
+**Status:** superseded by [Drop Mission Control; Editorial Studio is home](#2026-10-23--drop-mission-control-editorial-studio-is-home)
 
 ## 2026-09-30 — Lead with a useful thought, not a duplicate action
 
@@ -282,7 +289,7 @@ and link to it here.
 
 **Decision:** Mission Control shows the live blog broadcast section only when Blog publishing is enabled and the workspace has a company domain configured.
 **Why:** links to a blog are misleading when the workspace has no active blog destination.
-**Status:** active
+**Status:** superseded by [Drop Mission Control; Editorial Studio is home](#2026-10-23--drop-mission-control-editorial-studio-is-home)
 
 ## 2026-09-29 — Line icons are a cover illustration style, and icons need premium-size words
 

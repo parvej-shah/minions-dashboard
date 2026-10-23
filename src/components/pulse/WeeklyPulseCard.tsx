@@ -28,7 +28,7 @@ const NO_FOLLOWUPS: Followups = { problem: "", who: "", named: "", evidence: "" 
 const counts = () => window.dispatchEvent(new Event("minions-counts-updated"));
 
 /**
- * The weekly question on the home page (phase 6 of
+ * The weekly question at the top of Editorial Studio (phase 6 of
  * docs/product/authority-flywheel-plan.md). Ask, turn the answer into notes,
  * and save only the notes the author keeps. Shows nothing on the weeks it is
  * not open.
@@ -64,7 +64,7 @@ export default function WeeklyPulseCard() {
           void apiClient.patch("/api/pulse/settings", { timezone_confirmed: true }).catch(() => {});
         } else if (!p.settings.timezone_confirmed) setBrowserTz(tz);
       } catch {
-        // No card is better than a broken one on the home page.
+        // No card is better than a broken one in the Studio.
       }
     })();
     return () => {

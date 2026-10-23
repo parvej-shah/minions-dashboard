@@ -105,7 +105,7 @@ function EditorialStudioSkeleton() {
 export interface EditorialStudioProps {
   initialDraftId?: string;
   isStandaloneRoute?: boolean;
-  /** Opens the drafting schedule on load (`?schedule=1`, used by the Mission Control Schedule button). */
+  /** Opens the drafting schedule on load (`?schedule=1`). */
   openSchedule?: boolean;
   /** Opens the LinkedIn channel on load (`?linkedin=1`, where LinkedIn's sign-in comes back to). */
   openLinkedIn?: boolean;

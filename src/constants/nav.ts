@@ -2,7 +2,6 @@ import {
   CreditCard,
   FileText,
   Globe,
-  LayoutDashboard,
   Palette,
   Sparkles,
   type LucideIcon,
@@ -19,11 +18,6 @@ export interface NavItem {
 /** Sidebar destinations. */
 export function buildNavItems(): NavItem[] {
   return [
-    {
-      name: "Mission Control",
-      href: "/",
-      icon: LayoutDashboard,
-    },
     {
       name: "Idea Stream",
       href: "/ideas",

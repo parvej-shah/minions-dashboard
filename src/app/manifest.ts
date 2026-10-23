@@ -47,13 +47,6 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     shortcuts: [
       {
-        name: 'Mission Control',
-        short_name: 'Mission',
-        description: 'Executive live overview and fleet telemetry',
-        url: '/',
-        icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }],
-      },
-      {
         name: 'Idea Stream',
         short_name: 'Ideas',
         description: 'Harvested topic signals and editorial queues',
