@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { applyImportEvent, EMPTY_IMPORT } from "./types";
-import { bylineFromHeadline, checkExperience, checkIdentity, checkProofs, checkVoice, glimpses, parseReply, quotedIn } from "./check";
+import { bylineFromHeadline, checkExperience, checkIdentity, checkProofs, checkVoice, glimpses, parseReply, quotedIn, unglue } from "./check";
 
 const PROFILE = `Parvej Shah
 Founder at Minions AI | AI voice agents for real-estate brokerages
@@ -66,6 +66,19 @@ describe("checkExperience", () => {
     expect(items).toEqual([]);
   });
 
+  it("drops a bare job title, which gives a post nothing to say", () => {
+    const withRoles = [{ label: "LinkedIn profile", text: `${PROFILE}\nCoderVai\nFull Stack Developer\nNovember 2025 - Present` }];
+    const items = checkExperience(
+      [
+        { kind: "PAST_EXPERIENCE", content: "I work as a Full Stack Developer at CoderVai.", evidence: "CoderVai Full Stack Developer" },
+        { kind: "PAST_EXPERIENCE", content: "I served as a Full Stack Developer at CoderVai.", evidence: "CoderVai Full Stack Developer" },
+      ],
+      withRoles,
+      id
+    );
+    expect(items).toEqual([]);
+  });
+
   it("never proposes stories, lessons or opinions", () => {
     const items = checkExperience(
       [{ kind: "LESSON", content: "I learned that brokerages lose buyers when calls go unanswered.", evidence: "answer every buyer call" }],
@@ -79,10 +92,41 @@ describe("checkExperience", () => {
 describe("checkProofs", () => {
   const pages = [{ url: "https://getminions.ai/", title: "Minions", text: "Our agents answer in under 2 seconds. Trusted by 12 brokerages in Dubai." }];
 
+  it("keeps a fair restatement that adds linking words, even beside a security line", () => {
+    const site = [{ url: "https://getminions.ai/how", title: "How", text: "Our process gets your crew booking showings in three to six weeks, with encryption built in." }];
+    const proofs = checkProofs(
+      [{ claim: "The setup takes three to six weeks.", quote: "Our process gets your crew booking showings in three to six weeks, with encryption built in.", source_url: "https://getminions.ai/how" }],
+      site,
+      id
+    );
+    expect(proofs).toHaveLength(1);
+  });
+
   it("keeps a claim the page states word for word", () => {
     const proofs = checkProofs([{ claim: "Answers calls in under 2 seconds", quote: "Our agents answer in under 2 seconds.", source_url: "https://getminions.ai/" }], pages, id);
     expect(proofs).toHaveLength(1);
     expect(proofs[0].source_url).toBe("https://getminions.ai/");
+  });
+
+  it("drops a claim that says something other than its quote, a security badge, or an example's figure", () => {
+    const site = [
+      {
+        url: "https://getminions.ai/faq",
+        title: "FAQ",
+        text: "Test sub-1.8s voice response and buyer lead qualification live on your cell phone. All recordings are encrypted at rest using AES-256. Your conversations are never used to train public models. Annual Leaked Commission (GCI) -$ 408,372 in this illustrative example.",
+      },
+    ];
+    const proofs = checkProofs(
+      [
+        { claim: "AI answers calls in under 1.8 seconds.", quote: "Test sub-1.8s voice response and buyer lead qualification live on your cell phone.", source_url: "https://getminions.ai/faq" },
+        { claim: "Recordings are encrypted with AES-256.", quote: "All recordings are encrypted at rest using AES-256.", source_url: "https://getminions.ai/faq" },
+        { claim: "Conversations are never used to train public models.", quote: "Your conversations are never used to train public models.", source_url: "https://getminions.ai/faq" },
+        { claim: "Annual leaked commission of $408,372.", quote: "Annual Leaked Commission (GCI) -$ 408,372 in this illustrative example.", source_url: "https://getminions.ai/faq" },
+      ],
+      site,
+      id
+    );
+    expect(proofs).toEqual([]);
   });
 
   it("drops a claim whose quote is not on the page or whose numbers grew", () => {
@@ -153,6 +197,21 @@ describe("plumbing", () => {
     state = applyImportEvent(state, { type: "experience", items: [{ id: "b", kind: "PAST_EXPERIENCE", content: "y".repeat(30), from: "p" }] });
     state = applyImportEvent(state, { type: "step", step: "voice", state: "done" });
     expect(state.experience.map((e) => e.id)).toEqual(["a", "b"]);
+  });
+});
+
+describe("unglue", () => {
+  it("puts back the breaks LinkedIn's PDF drops from the About section", () => {
+    expect(unglue("never heard back in time.I'm the Founder")).toBe("never heard back in time.\nI'm the Founder");
+    expect(unglue("That's the part we build for.I write here")).toBe("That's the part we build for.\nI write here");
+    expect(unglue("nothing falls through between agentsBefore this, I spent")).toBe("nothing falls through between agents\nBefore this, I spent");
+    expect(unglue("in practice:→ AI voice agents that book showings→ Missed-call text-back")).toBe(
+      "in practice:\n→ AI voice agents that book showings\n→ Missed-call text-back"
+    );
+  });
+  it("leaves names and domains whole", () => {
+    const text = "Founder of Minions.AI (getminions.ai) on LinkedIn, built on kvCORE and an iPhone. #buildInPublic";
+    expect(unglue(text)).toBe(text);
   });
 });
 

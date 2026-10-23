@@ -71,7 +71,9 @@ Rules:
 - Keep the source's own verb. "We offer a demo" never becomes "I engineered a demo"; "worked on" never becomes "led" or "built".
 - Write each item in the first person, as the author would note it for themselves, 1 to 3 sentences, under 400 characters. Keep the specifics the source gives (what, for whom, scale, outcome).
 - evidence: copy, word for word, the shortest phrase from the source (at least 4 words) that shows this fact.
-- Prefer items with something specific: a result, a thing built, a type of customer. Skip bare job titles with no detail. Skip education unless it is unusual.
+- Prefer items with something specific: a result, a thing built, a type of customer. Skip education unless it is unusual.
+- Skip a role the source gives only as a title, company and dates: never "I work as a Data Annotator at X". Never pad a title with duties the source does not list ("focusing on software development tasks").
+- A role whose dates end in "Present" is CURRENT_WORK, written in the present tense. Only a role that has ended is PAST_EXPERIENCE.
 - One item per fact: never two items that say the same thing in different words.
 - From a company website, take only what the author's work is and who it serves. Skip prices, plans, guarantees, security or compliance lines (encryption, SOC 2, uptime) and other sales copy.
 - Do not invent stories, lessons or opinions. Those come from the author later.
@@ -100,7 +102,7 @@ Return:
 - icp.vocabulary: 4 to 8 words or phrases the buyer uses.
 Ground the ICP in the source. Each list item under 120 characters.
 
-- proofs: up to 6 specific claims the website makes about results, customers or numbers (e.g. "Answers calls in under 2 seconds", "Used by 40 brokerages"). For each: claim (a short restatement that adds nothing), quote (the sentence from the page, word for word), source_url (the page's url attribute). Skip vague marketing ("best-in-class", "trusted by leaders") and security or compliance badges. [] if the site states nothing specific.
+- proofs: up to 6 specific claims the website makes about results, customers or numbers (e.g. "Answers calls in under 2 seconds", "Used by 40 brokerages"). For each: claim (the fact as one plain sentence a post could cite, built from the quote's own words plus small linking words, adding no name or acronym the quote lacks (not even "AI" or "CRM"), keeping exactly what it measures: "sub-1.8s voice response" is reply speed, never "answers calls in 1.8 seconds"), quote (the whole sentence from the page that states it, word for word, one continuous passage, never pieces joined with "..."), source_url (the page's url attribute). Skip vague marketing ("best-in-class", "trusted by leaders"), security or compliance badges, and figures from a calculator, estimate or example. [] if the site states nothing specific.
 
 Return ONLY this JSON:
 {"icp":{"who":"","role":"","company_type":"","pains":[],"decisions":[],"questions":[],"buying_triggers":[],"vocabulary":[]},"proofs":[{"claim":"","quote":"","source_url":""}]}`;

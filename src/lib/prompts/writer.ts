@@ -51,7 +51,7 @@ LENGTH: ${isPost ? "A short piece: 250 to 450 words. At most two '## ' headings;
 
 HEADINGS: A '## ' heading is its own paragraph, a specific line a human editor would write (concrete nouns or stakes), never 'Introduction', 'Conclusion' or 'How It Works'.
 
-SEO & GEO: Use strategy.seo_keyword naturally once near the top and once later. Near the top, include one self-contained 2-3 sentence passage that answers the reader's core question plainly, quotable on its own.
+SEO & GEO: Use strategy.seo_keyword once near the top and once later, only where a person would say it. If it reads as a search term ("AI voice agent calendar integration"), use its words in natural order instead ("connecting the agent to your calendar"); never bend a sentence around it. Near the top, include one self-contained 2-3 sentence passage that answers the reader's core question plainly, quotable on its own.
 
 RHYTHM (write the way the author talks, not in an even beat):
 - Paragraphs of 1 to 4 sentences. Never a dense block; a one-line paragraph is fine where it earns it.

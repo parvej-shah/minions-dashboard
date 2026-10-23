@@ -18,6 +18,7 @@ import {
   glimpses,
   matchKey,
   parseReply,
+  unglue,
   type ImportSource,
 } from "@/lib/brandImport/check";
 import type { ImportedExperienceKind, ImportedIcp, ImportEvent, ImportMode } from "@/lib/brandImport/types";
@@ -52,8 +53,7 @@ export interface ImportInput {
 type Emit = (event: ImportEvent) => void;
 
 function cleanProfileText(value: unknown): string {
-  return asString(value)
-    .replace(/\r/g, "")
+  return unglue(asString(value).replace(/\r/g, ""))
     .replace(/[ \t]+/g, " ")
     .replace(/\n{3,}/g, "\n\n")
     .slice(0, PROFILE_MAX_CHARS);

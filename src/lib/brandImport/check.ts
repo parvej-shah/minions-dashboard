@@ -48,6 +48,20 @@ export function quotedIn(source: string, quote: string): boolean {
   return key.length >= MIN_QUOTE_CHARS && matchKey(source).includes(key);
 }
 
+/**
+ * LinkedIn's PDF drops the About section's line breaks, gluing a sentence to
+ * the next ("back in time.I'm", "between agentsBefore this") and a list item
+ * to its arrow ("transcribe calls→ Missed"). Puts the breaks back. A name like
+ * "Minions.AI" or "LinkedIn" stays whole: it needs a lowercase run before the
+ * capital and a lowercase letter after it.
+ */
+export function unglue(value: string): string {
+  return value
+    .replace(/([a-z\d)][.!?])(?=[A-Z][a-z’']|I\s)/g, "$1\n")
+    .replace(/(?<![#@\p{L}])([a-z]{3,})(?=[A-Z][a-z]{2,}\b)/gu, "$1\n")
+    .replace(/[ \t]*→[ \t]*/g, "\n→ ");
+}
+
 /** Reads the model's JSON reply, tolerating code fences. Null when there is none. */
 export function parseReply(content: string | null): Raw | null {
   if (!content) return null;
@@ -106,7 +120,8 @@ function choice<K extends keyof typeof CHOICES>(key: K, value: unknown, fallback
 export function checkVoice(raw: unknown, source: string): ImportedVoice | null {
   const r = obj(raw);
   const q = obj(r.questionnaire);
-  const about = text(r.about, ABOUT_MAX_CHARS);
+  // text() flattens line breaks, so unglue after it: the sample keeps its paragraphs.
+  const about = unglue(text(r.about, ABOUT_MAX_CHARS));
   const questionnaire: BrandVoiceQuestionnaire = {
     formality: choice("formality", q.formality, "balanced"),
     sentence_length: choice("sentence_length", q.sentence_length, "mixed"),
@@ -135,6 +150,13 @@ export interface ImportSource {
 const EXPERIENCE_KINDS: ImportedExperienceKind[] = ["CURRENT_WORK", "PAST_EXPERIENCE"];
 
 /**
+ * "I work as a Data Annotator at GenMorphics." A job title says nothing a post
+ * could be written from, and the model mislabels when it was. The prompt
+ * skips these; this catches the ones it lets through.
+ */
+const isBareRole = (content: string) => /^I (?:work|worked|serve|served|am|was) as (?:an? |the )?[^.,;]+ at [^.,;]+\.?$/i.test(content);
+
+/**
  * Keeps an experience item only when its evidence is quoted from one source
  * and its content adds nothing that source does not say.
  */
@@ -146,7 +168,7 @@ export function checkExperience(raw: unknown, sources: ImportSource[], makeId: (
     const kind = EXPERIENCE_KINDS.find((k) => k === r.kind);
     const content = text(r.content, EXPERIENCE_MAX_CHARS + 1);
     const evidence = text(r.evidence, 400);
-    if (!kind || content.length < MEMORY_MIN_CHARS || content.length > EXPERIENCE_MAX_CHARS) continue;
+    if (!kind || content.length < MEMORY_MIN_CHARS || content.length > EXPERIENCE_MAX_CHARS || isBareRole(content)) continue;
     const source = sources.find((s) => quotedIn(s.text, evidence));
     if (!source || unsupported(content, source.text).length) continue;
     // "We offer a demo" must not come back as "I engineered a demo", nor "a slow close" as "by day seven".
@@ -166,7 +188,35 @@ export interface ProofPage {
   text: string;
 }
 
-/** Keeps a proof only when the page it names states it, word for word, and the claim adds no figure or name. */
+// Not proof a post can cite: a security badge (judged on the claim, since a
+// page may mention encryption beside a real fact), or a figure from a
+// calculator or example (judged on both, since the quote is where it shows).
+const SECURITY_BADGE = /\b(encrypt\w*|AES(-256)?|TLS|SOC ?2|GDPR|HIPAA|ISO ?27001|uptime|used to train)\b/i;
+const MADE_UP_FIGURE = /\b(illustrative|example|estimated?|calculator|hypothetical)\b/i;
+const COMMON_WORDS = new Set(["the", "and", "with", "for", "that", "this", "your", "our", "are", "from", "into", "has", "have", "its", "can", "you", "all"]);
+// A third: a fair restatement adds linking words ("the setup takes"); a wrong one shares almost none.
+const MIN_SHARED_WORDS = 1 / 3;
+
+/** The claim's words, cut to their first five letters so "answers" meets "answer". */
+const claimWords = (value: string) =>
+  (value.toLowerCase().match(/\p{L}{3,}/gu) ?? []).filter((w) => !COMMON_WORDS.has(w)).map((w) => w.slice(0, 5));
+
+/**
+ * A claim restates its quote, so many of its words are the quote's. "AI
+ * answers calls in under 1.8 seconds" shares none with "sub-1.8s voice
+ * response": it says something the page does not.
+ */
+function restatesQuote(claim: string, quote: string): boolean {
+  const words = claimWords(claim);
+  if (!words.length) return false;
+  const quoted = new Set(claimWords(quote));
+  return words.filter((w) => quoted.has(w)).length / words.length >= MIN_SHARED_WORDS;
+}
+
+/**
+ * Keeps a proof only when the page it names states it, word for word, the
+ * claim adds no figure or name, and its words are the quote's.
+ */
 export function checkProofs(raw: unknown, pages: ProofPage[], makeId: () => string): ImportedProof[] {
   const out: ImportedProof[] = [];
   const seen = new Set<string>();
@@ -177,6 +227,7 @@ export function checkProofs(raw: unknown, pages: ProofPage[], makeId: () => stri
     if (claim.length < 10) continue;
     const page = pages.find((p) => p.url === text(r.source_url, 2000)) ?? pages.find((p) => quotedIn(p.text, quote));
     if (!page || !quotedIn(page.text, quote) || unsupported(claim, quote).length) continue;
+    if (!restatesQuote(claim, quote) || SECURITY_BADGE.test(claim) || MADE_UP_FIGURE.test(`${claim} ${quote}`)) continue;
     const key = matchKey(claim);
     if (seen.has(key)) continue;
     seen.add(key);
