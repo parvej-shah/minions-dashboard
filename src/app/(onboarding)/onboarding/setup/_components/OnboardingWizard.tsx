@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PlayCircle } from "lucide-react";
 import { useOnboardingWizard, type OnboardingWizardState } from "@/hooks/useOnboardingWizard";
 import { useBrandImport } from "@/hooks/useBrandImport";
 import { MEMORY_MIN_CHARS } from "@/constants/contentLanes";
@@ -28,6 +29,8 @@ const SETUP_SHARE = 0.75;
 const PROGRESS: Record<Screen, number> = { import: 0, reading: 1, review: 2, focus: 1, audience: 2, story: 3 };
 const SCREENS = 4;
 const IMPORT_ENDPOINT = "/api/onboarding/brand-import";
+// The whole setup, from saving the LinkedIn PDF to the first published post.
+const TUTORIAL_URL = "https://youtu.be/V1yrBqnExAE";
 
 export default function OnboardingWizard({ userId }: { userId: string }) {
   const wizard = useOnboardingWizard(userId);
@@ -106,6 +109,15 @@ function Lesson({ wizard }: { wizard: OnboardingWizardState }) {
           <div className="mt-6">
             <ImportDrop profile={profile} onProfile={setProfile} websiteUrl={wizard.websiteUrl} onWebsiteUrl={wizard.setWebsiteUrl} />
           </div>
+          <a
+            href={TUTORIAL_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-muted underline-offset-4 hover:text-ink hover:underline"
+          >
+            <PlayCircle className="h-4 w-4 text-brand" />
+            Not sure what to do? Watch the 3-minute walkthrough
+          </a>
         </>
       );
       footer = {
