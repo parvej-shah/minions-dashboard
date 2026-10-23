@@ -24,7 +24,7 @@ export default function LinkedInModal({ isOpen, onClose }: { isOpen: boolean; on
       }
     >
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:p-6">
-        <DistributionControlPanel channelFilter={LINKEDIN} connectReturnTo="/editorial?linkedin=1" />
+        <DistributionControlPanel channelFilter={LINKEDIN} connectReturnTo="/editorial?linkedin=1" embedded />
       </div>
     </Modal>
   );

@@ -23,6 +23,8 @@ interface DistributionControlPanelProps {
   channelFilter?: string[];
   /** Where LinkedIn's sign-in comes back to; the Channels page when omitted. */
   connectReturnTo?: string;
+  /** Drop the panel's own box and header, for a host (a modal) that already has them. */
+  embedded?: boolean;
 }
 
 export function DistributionControlPanel({
@@ -30,6 +32,7 @@ export function DistributionControlPanel({
   onChannelChange,
   channelFilter,
   connectReturnTo,
+  embedded = false,
 }: DistributionControlPanelProps) {
   const { data, isLoading, pendingId, toggleChannel, setData, reload } = useDistributionChannels();
   const { message: notification, show: showNotification } = useToast(3500);
@@ -153,28 +156,30 @@ export function DistributionControlPanel({
   }
 
   return (
-    <div className="p-4 sm:p-6 rounded-2xl bg-surface/70 border border-line/80 space-y-4 sm:space-y-5">
+    <div className={embedded ? "space-y-4" : "p-4 sm:p-6 rounded-2xl bg-surface/70 border border-line/80 space-y-4 sm:space-y-5"}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-line/60 pb-4">
-        <div className="min-w-0">
-          <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-ink">Publishing channels</h2>
-          <p className="text-sm text-muted mt-1 max-w-2xl leading-relaxed">Choose which connected channels receive posts when you publish.</p>
-        </div>
+      {!embedded && (
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-line/60 pb-4">
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-ink">Publishing channels</h2>
+            <p className="text-sm text-muted mt-1 max-w-2xl leading-relaxed">Choose which connected channels receive posts when you publish.</p>
+          </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="min-h-10 px-3 rounded-lg bg-[#111820] border border-line text-[#CBD5E1] inline-flex items-center text-xs font-medium tabular-nums">
-            {channels.filter((c) => c.is_active).length} of {channels.length} active
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="min-h-10 shrink-0 whitespace-nowrap px-3 rounded-lg bg-[#111820] border border-line text-[#CBD5E1] inline-flex items-center text-xs font-medium tabular-nums">
+              {channels.filter((c) => c.is_active).length} of {channels.length} active
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {notification && (
-        <div className="text-xs font-mono px-4 py-2 rounded-xl bg-brand/15 border border-brand/30 text-brand flex items-center justify-between animate-in fade-in duration-150">
-          <div className="flex items-center gap-2">
+        <div className="text-xs font-mono px-4 py-2 rounded-xl bg-brand/15 border border-brand/30 text-brand flex items-center justify-between gap-3 animate-in fade-in duration-150">
+          <div className="flex min-w-0 items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-brand shrink-0" />
             <span>{notification}</span>
           </div>
-          <span className="text-[10px] text-brand/70 font-mono">Changes saved</span>
+          <span className="shrink-0 whitespace-nowrap text-[10px] text-brand/70 font-mono">Changes saved</span>
         </div>
       )}
 
@@ -202,7 +207,7 @@ export function DistributionControlPanel({
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-bold text-ink truncate">{ch.name}</span>
                       {ch.badge && (
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-canvas text-muted border border-line">
+                        <span className="shrink-0 whitespace-nowrap text-[10px] font-mono px-1.5 py-0.5 rounded bg-canvas text-muted border border-line">
                           {ch.badge}
                         </span>
                       )}
@@ -239,8 +244,8 @@ export function DistributionControlPanel({
               </p>
 
               {/* Footer Status Pill */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs pt-3 border-t border-[#263443]/70">
-                <div className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs pt-3 border-t border-[#263443]/70">
+                <div className="flex items-center gap-1.5 whitespace-nowrap">
                   <span
                     className={`w-2 h-2 rounded-full shrink-0 ${
                       isActive ? "bg-brand animate-pulse" : "bg-subtle"
@@ -250,7 +255,7 @@ export function DistributionControlPanel({
                     {isActive ? "On" : "Off"}
                   </span>
                 </div>
-                <span className="text-[#8190A2] sm:text-right">
+                <span className="text-[#8190A2]">
                   {isActive ? "Approved posts go here" : "Posts skip this channel"}
                 </span>
               </div>
@@ -258,20 +263,16 @@ export function DistributionControlPanel({
               {/* Credential connection. Blog defaults to our own hosted blogs
                   table when nothing is connected — a webhook here redirects
                   publishing to the tenant's own site instead. */}
-              <div className="pt-3 border-t border-[#263443]/70">
-                <div className="flex items-center justify-between mb-2">
-                  <span
-                    className={`text-xs ${ch.has_credential ? "text-brand" : "text-[#A0ACBA]"}`}
-                  >
-                    {ch.has_credential
-                      ? ch.key === "blog"
-                        ? "● Publishing to your own site"
-                        : "● Connected"
-                      : ch.key === "blog"
-                        ? "○ No site of your own connected"
-                        : "○ Not connected"}
-                  </span>
-                </div>
+              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pt-3 border-t border-[#263443]/70">
+                <span className={`whitespace-nowrap text-xs ${ch.has_credential ? "text-brand" : "text-[#A0ACBA]"}`}>
+                  {ch.has_credential
+                    ? ch.key === "blog"
+                      ? "● Publishing to your own site"
+                      : "● Connected"
+                    : ch.key === "blog"
+                      ? "○ No site of your own connected"
+                      : "○ Not connected"}
+                </span>
                 <ChannelCredentialForm channel={ch} onSaved={reload} returnTo={connectReturnTo} />
               </div>
             </div>
