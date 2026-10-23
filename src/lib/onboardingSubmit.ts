@@ -165,6 +165,7 @@ export async function saveImport(fields: WizardFields, story: string): Promise<v
       .map(({ claim, source_url, source_title }) => ({ claim, source_url, source_title })),
     // The About text was saved as the writing sample with the workspace.
     voice: fields.keepImportedVoice && found.voice ? { questionnaire: found.voice.questionnaire, about: null } : null,
+    headline: found.identity?.headline || null,
   };
   await apiClient.post("/api/brand/import/apply", approval);
 }

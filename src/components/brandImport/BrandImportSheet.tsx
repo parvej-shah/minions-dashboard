@@ -34,6 +34,7 @@ function approvalOf(found: BrandImport, approvedProofs: string[], keepVoice: boo
     experience: found.experience.map(({ kind, content }) => ({ kind, content })),
     proofs: found.proofs.filter((p) => approvedProofs.includes(p.id)).map(({ claim, source_url, source_title }) => ({ claim, source_url, source_title })),
     voice: keepVoice ? found.voice : null,
+    headline: found.identity?.headline || null,
   };
 }
 

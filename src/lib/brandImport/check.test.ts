@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { applyImportEvent, EMPTY_IMPORT } from "./types";
-import { checkExperience, checkIdentity, checkProofs, checkVoice, glimpses, parseReply, quotedIn } from "./check";
+import { bylineFromHeadline, checkExperience, checkIdentity, checkProofs, checkVoice, glimpses, parseReply, quotedIn } from "./check";
 
 const PROFILE = `Parvej Shah
 Founder at Minions AI | AI voice agents for real-estate brokerages
@@ -153,5 +153,19 @@ describe("plumbing", () => {
     state = applyImportEvent(state, { type: "experience", items: [{ id: "b", kind: "PAST_EXPERIENCE", content: "y".repeat(30), from: "p" }] });
     state = applyImportEvent(state, { type: "step", step: "voice", state: "done" });
     expect(state.experience.map((e) => e.id)).toEqual(["a", "b"]);
+  });
+});
+
+describe("bylineFromHeadline", () => {
+  it("signs covers off with the headline's first part", () => {
+    expect(bylineFromHeadline("Founder at Minions.AI | Building AI Voice Agents for Sales & Business Operations")).toBe("Founder at Minions.AI");
+    expect(bylineFromHeadline("Head of Growth · Acme")).toBe("Head of Growth");
+    expect(bylineFromHeadline("  Staff Engineer  ")).toBe("Staff Engineer");
+  });
+
+  it("gives nothing for an empty or overlong headline", () => {
+    expect(bylineFromHeadline("")).toBeUndefined();
+    expect(bylineFromHeadline(null)).toBeUndefined();
+    expect(bylineFromHeadline("x".repeat(91))).toBeUndefined();
   });
 });

@@ -67,6 +67,19 @@ export function checkIdentity(raw: unknown, source: string): ImportedIdentity | 
   return { name, headline: text(r.headline, 220), company: text(r.company, 120) };
 }
 
+/** The longest cover sign-off line (the first-post screen's field allows the same). */
+export const MAX_BYLINE = 90;
+
+/**
+ * The cover's line under the author's name, from their LinkedIn headline: its
+ * first part, so "Founder at Acme | Building X for Y" signs off as "Founder at
+ * Acme". Undefined when there is no headline or that part is still too long.
+ */
+export function bylineFromHeadline(headline: string | null | undefined): string | undefined {
+  const first = (headline ?? "").split(/\s+[|•·–—]\s+/)[0]?.trim();
+  return first && first.length <= MAX_BYLINE ? first : undefined;
+}
+
 export function checkFocus(raw: unknown): ImportedFocus | null {
   const r = obj(raw);
   const focus = text(r.focus, 400);

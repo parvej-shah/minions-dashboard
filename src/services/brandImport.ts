@@ -8,6 +8,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { parseBrandProof } from "@/lib/brand-proof";
 import { renderAudienceRead, renderExperienceRead, renderProfileRead } from "@/lib/prompts/brandImport";
 import {
+  bylineFromHeadline,
   checkExperience,
   checkFocus,
   checkIcp,
@@ -267,8 +268,13 @@ async function addExperience(clientId: string, raw: unknown[]): Promise<number> 
 
 /** Saves what the author kept on the review screen. Never overwrites something they set themselves. */
 export async function applyBrandImport(clientId: string, body: JsonObject) {
-  const profile = await prisma.brandProfile.findUnique({ where: { clientId }, select: { id: true } });
+  const profile = await prisma.brandProfile.findUnique({ where: { clientId }, select: { id: true, coverByline: true } });
   if (!profile) throw badRequest("Finish setting up your workspace first.");
+
+  // Covers sign off with the author's role; their LinkedIn headline fills it
+  // unless they already set one (on the first-post screen or Brand page).
+  const byline = profile.coverByline?.trim() ? undefined : bylineFromHeadline(asString(body.headline));
+  if (byline) await prisma.brandProfile.update({ where: { clientId }, data: { coverByline: byline } });
 
   const audience = body.icp ? await mergeAudience(clientId, body.icp) : false;
   const experience = Array.isArray(body.experience) ? await addExperience(clientId, body.experience) : 0;

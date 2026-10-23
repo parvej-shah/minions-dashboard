@@ -126,4 +126,6 @@ export interface ImportApproval {
   experience: { kind: ImportedExperienceKind; content: string }[];
   proofs: { claim: string; source_url: string; source_title: string }[];
   voice: ImportedVoice | null;
+  /** The profile's LinkedIn headline; it becomes the cover sign-off when none is set. */
+  headline?: string | null;
 }
