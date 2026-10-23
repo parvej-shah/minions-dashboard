@@ -29,6 +29,13 @@ and link to it here.
 
 ---
 
+## 2026-10-23 — Users can erase their own account from the account modal
+
+**Decision:** The account modal (avatar → Sign out) has a quiet "Erase my account" link. Erasing asks for the word "erase" typed out, then deletes the workspace and everything in it if it's theirs alone; a workspace shared with teammates or with a pending invite stays, and only their login goes. It's refused while a paid plan is still billing (cancel in Billing first), and staff accounts can't erase themselves here.
+**Why:** People should be able to leave without emailing us, and test sign-ups needed a hand-run database script to reset.
+**Alternatives considered:** A soft delete with a grace period (more to build and explain; can come later if people erase by mistake).
+**Status:** active
+
 ## 2026-10-23 — LinkedIn is connected from Editorial Studio; Channels is hidden
 
 **Decision:** The Channels tab is hidden from the sidebar for now. LinkedIn, the channel posts go to, opens as a modal from a "LinkedIn" button beside "Schedule" in Editorial Studio, and LinkedIn's sign-in returns there. /fleet still works by URL for the blog, Facebook and X settings.
