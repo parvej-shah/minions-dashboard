@@ -70,7 +70,7 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
 
       {picks.length > 0 && (
         <div className="mt-6">
-          <p className="text-xs font-extrabold uppercase tracking-widest text-subtle">Start from your profile</p>
+          <p className="text-sm font-extrabold text-muted">Pick one from your profile</p>
           <ul className="mt-2.5 space-y-2">
             {picks.map((item) => {
               const picked = wizard.storyText.trim() === item.content;
@@ -93,7 +93,7 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
               );
             })}
           </ul>
-          <p className="mt-4 text-xs font-extrabold uppercase tracking-widest text-subtle">Then add the detail only you know, or write something new</p>
+          <p className="mt-5 text-sm font-extrabold text-muted">Then add a detail only you know, or write your own</p>
         </div>
       )}
 
@@ -130,26 +130,33 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
       />
 
       {/* How much detail there is: fills toward a "rich" answer, gold once it gets there. */}
-      <div className="mt-2.5 flex items-center gap-3" aria-hidden="true">
-        <div className="h-2 flex-1 overflow-hidden rounded-full bg-line">
-          <div
-            className={`h-full rounded-full transition-[width,background-color] duration-300 ${meter >= 1 ? "bg-gold" : "bg-brand"}`}
-            style={{ width: `${Math.max(meter * 100, length > 0 ? 4 : 0)}%` }}
-          />
+      {length > 0 && (
+        <div className="mt-2.5 flex items-center gap-3" aria-hidden="true">
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-line">
+            <div
+              className={`h-full rounded-full transition-[width,background-color] duration-300 ${meter >= 1 ? "bg-gold" : "bg-brand"}`}
+              style={{ width: `${Math.max(meter * 100, 4)}%` }}
+            />
+          </div>
+          <span className={`text-xs font-extrabold ${meter >= 1 ? "text-gold" : "text-subtle"}`}>
+            {meter >= 1 ? "Great detail" : length >= MEMORY_MIN_CHARS ? "Good" : "Keep going"}
+          </span>
         </div>
-        <span className={`text-xs font-extrabold ${meter >= 1 ? "text-gold" : "text-subtle"}`}>
-          {meter >= 1 ? "Great detail" : length >= MEMORY_MIN_CHARS ? "Good" : "Keep going"}
-        </span>
-      </div>
+      )}
 
-      <p className="mt-5 text-xs font-extrabold uppercase tracking-widest text-subtle">Stuck? Start with</p>
-      <div className="mt-2.5 flex flex-wrap gap-2">
-        {kind.starters.map((starter) => (
-          <ExampleChip key={starter} onClick={() => addStarter(starter)}>
-            {starter}…
-          </ExampleChip>
-        ))}
-      </div>
+      {/* Starters are for a blank page; once they're writing they only add noise. */}
+      {length === 0 && (
+        <>
+          <p className="mt-5 text-sm font-extrabold text-muted">Stuck? Start with</p>
+          <div className="mt-2.5 flex flex-wrap gap-2">
+            {kind.starters.map((starter) => (
+              <ExampleChip key={starter} onClick={() => addStarter(starter)}>
+                {starter}…
+              </ExampleChip>
+            ))}
+          </div>
+        </>
+      )}
     </>
   );
 }

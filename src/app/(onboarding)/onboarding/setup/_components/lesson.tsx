@@ -205,7 +205,7 @@ export function LessonFooter({
               <span className="pt-1.5">{error}</span>
             </p>
           ) : praise ? (
-            <p key={praise} className="flex items-center gap-2.5 text-base font-extrabold text-brand">
+            <p key={praise} className="flex items-center gap-2.5 text-sm font-extrabold leading-snug text-brand sm:text-base">
               <span className="animate-pop-in flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-brand-ink">
                 <Check className="h-5 w-5" strokeWidth={3.5} />
               </span>
@@ -222,7 +222,7 @@ export function LessonFooter({
           loading={loading}
           disabled={disabled}
           onClick={onContinue}
-          className="sm:w-auto sm:min-w-48"
+          className="shrink-0 whitespace-nowrap sm:w-auto sm:min-w-48"
         >
           {label}
         </Button>
