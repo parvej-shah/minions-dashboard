@@ -11,6 +11,8 @@ export interface MobileActionBarProps {
   isSaving: boolean;
   onSave: () => void;
   onReviewPublish: () => void;
+  /** Where the published post can be read, or null. */
+  liveUrl: string | null;
 }
 
 /** Floating save/publish bar shown below the lg breakpoint. */
@@ -20,6 +22,7 @@ export default function MobileActionBar({
   isSaving,
   onSave,
   onReviewPublish,
+  liveUrl,
 }: MobileActionBarProps) {
   return (
   <div className="lg:hidden fixed max-md:bottom-[calc(67px+max(0.65rem,env(safe-area-inset-bottom)))] md:bottom-0 left-0 right-0 z-35 border-t border-line bg-surface/95 px-4 py-2.5 backdrop-blur-xl shadow-2xl">
@@ -37,15 +40,17 @@ export default function MobileActionBar({
       </button>
 
       {activeAsset.status === "PUBLISHED" ? (
-        <a
-          href={activeAsset.doc_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={buttonStyles({ size: "md", className: "min-w-0 flex-1" })}
-        >
-          <span>Live</span>
-          <ExternalLink className="w-3 h-3" />
-        </a>
+        liveUrl && (
+          <a
+            href={liveUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonStyles({ size: "md", className: "min-w-0 flex-1" })}
+          >
+            <span>View post</span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        )
       ) : (
         <button
           onClick={onReviewPublish}

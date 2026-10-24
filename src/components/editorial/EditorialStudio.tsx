@@ -26,6 +26,7 @@ import DraftScheduleModal from "@/components/schedule/DraftScheduleModal";
 import LinkedInModal from "@/components/distribution/LinkedInModal";
 import { plainReviewNotes } from "@/lib/drafts/plainNotes";
 import { postGoesTo } from "@/constants/postChannels";
+import { liveLinks } from "@/lib/drafts/liveLinks";
 
 function EditorialStudioSkeleton() {
   return (
@@ -327,6 +328,8 @@ export default function EditorialStudio({
   }
 
   const statusLabel = draft.isSaving ? null : toast.message;
+  const isPublished = activeAsset.status === "PUBLISHED";
+  const wentToLinkedIn = Boolean(activeAsset.linkedin_url || activeAsset.linkedin_went_as);
 
   const socialVariants = anySocialChannelActive && (
     <SocialVariantTabs
@@ -369,6 +372,7 @@ export default function EditorialStudio({
         currentAssetIndex={currentAssetIndex}
         totalDrafts={assets.length}
         isStandaloneRoute={isStandaloneRoute}
+        blogEnabled={blogEnabled}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -408,8 +412,9 @@ export default function EditorialStudio({
         </div>
 
         <div className="flex flex-col gap-6 lg:col-span-4 lg:sticky lg:top-6">
-          <div className="order-1"><DraftChecks notes={reviewNotes} /></div>
-          {activeAsset.claims.length > 0 && (
+          {/* The checks are for deciding to publish; once it went out they are history. */}
+          {!isPublished && <div className="order-1"><DraftChecks notes={reviewNotes} /></div>}
+          {!isPublished && activeAsset.claims.length > 0 && (
             <div className="order-2">
               <ClaimsGate
                 activeAsset={activeAsset}
@@ -434,7 +439,6 @@ export default function EditorialStudio({
               setToggleLiveConfirmOpen={setToggleLiveConfirmOpen}
               setDeleteConfirmOpen={setDeleteConfirmOpen}
               blogEnabled={blogEnabled}
-              blogHost={(normalizeDomain(studioBrand?.company_domain) ?? "").replace(/^https?:\/\//, "")}
               onPostAgain={() => void draft.postAgain().then((m) => m && toast.show(m))}
               isPostingAgain={draft.isPostingAgain}
             />
@@ -447,6 +451,7 @@ export default function EditorialStudio({
         isDirty={draft.isDirty}
         isSaving={draft.isSaving}
         onSave={handleSave}
+        liveUrl={liveLinks(activeAsset, blogEnabled)[0]?.url ?? null}
         onReviewPublish={() => {
           const target = document.getElementById("editorial-publishing-options");
           target?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -461,9 +466,13 @@ export default function EditorialStudio({
 
       <ConfirmModal
         isOpen={deleteConfirmOpen}
-        title="Permanently Delete Asset"
-        description={`⚠️ Are you sure you want to permanently delete ${activeAsset.id}? This will permanently remove the blog post, draft content, and all claim verifications from the database.`}
-        confirmLabel="Delete Permanently"
+        title={isPublished || activeAsset.status === "UNPUBLISHED" ? "Remove this post from Minions?" : "Delete this draft?"}
+        description={
+          `“${activeAsset.title}” and its checks will be deleted for good.` +
+          (wentToLinkedIn ? " The post stays on LinkedIn; delete it there if you want it gone." : "") +
+          (blogEnabled && isPublished ? ` It also comes off ${studioBlogHost}.` : "")
+        }
+        confirmLabel={isPublished || activeAsset.status === "UNPUBLISHED" ? "Remove" : "Delete draft"}
         cancelLabel="Cancel"
         variant="danger"
         isLoading={draft.isDeleting}
@@ -473,15 +482,16 @@ export default function EditorialStudio({
 
       <ConfirmModal
         isOpen={toggleLiveConfirmOpen}
-        title={activeAsset.status === "PUBLISHED" ? "Unpublish Post" : "Republish Post Live"}
+        title={isPublished ? "Take it down from your blog?" : "Put it back on your blog?"}
         description={
-          activeAsset.status === "PUBLISHED"
-            ? `Are you sure you want to unpublish "${activeAsset.title}"? It will immediately be taken down from ${studioBlogHost} and returned to the review queue without deleting any content.`
-            : `Are you sure you want to republish "${activeAsset.title}" live to ${studioBlogHost}?`
+          isPublished
+            ? `“${activeAsset.title}” comes off ${studioBlogHost} right away. Nothing is deleted, and you can put it back.` +
+              (wentToLinkedIn ? " The LinkedIn post stays up." : "")
+            : `“${activeAsset.title}” goes back up on ${studioBlogHost}.`
         }
-        confirmLabel={activeAsset.status === "PUBLISHED" ? "Unpublish Post" : "Republish Live"}
+        confirmLabel={isPublished ? "Take it down" : "Put it back"}
         cancelLabel="Cancel"
-        variant={activeAsset.status === "PUBLISHED" ? "warning" : "primary"}
+        variant={isPublished ? "warning" : "primary"}
         isLoading={draft.isTogglingLive}
         onConfirm={handleToggleLive}
         onClose={() => setToggleLiveConfirmOpen(false)}

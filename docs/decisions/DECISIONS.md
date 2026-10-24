@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-10-24 — Published LinkedIn posts can't be "unpublished" from Minions
+
+**Decision:** A published post that went only to LinkedIn no longer offers Unpublish. Only a post on the workspace's blog can be taken down from the Studio ("Take down from blog"), and that dialog says the LinkedIn post stays up. Removing a post from Minions says the same. A published post's panel shows "View on LinkedIn" and drops the pre-publish checks.
+**Why:** Minions can't take a LinkedIn post down. Unpublish only marked it offline in Minions while it stayed live on LinkedIn, so the button promised something that didn't happen.
+**Status:** active
+
 ## 2026-10-23 — Drop Mission Control; Editorial Studio is home
 
 **Decision:** The Mission Control page and its sidebar, bottom-bar and app-shortcut entries are gone. `/` now opens Editorial Studio. The weekly question moves to the top of the Studio, and the Daily Spark quote is dropped.

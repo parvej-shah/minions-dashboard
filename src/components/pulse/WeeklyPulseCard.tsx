@@ -44,6 +44,8 @@ export default function WeeklyPulseCard() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
   const [browserTz, setBrowserTz] = useState<string | null>(null);
+  // The question waits as one line above the drafts until the author opens it.
+  const [expanded, setExpanded] = useState(false);
 
   const apply = useCallback((p: PulseDTO) => {
     setPulse(p);
@@ -166,10 +168,36 @@ export default function WeeklyPulseCard() {
   const kept = drafts.filter((d) => d.keep);
   const blocked = kept.some((d) => d.check?.confidential);
 
+  if (!confirming && !editing && !expanded && !answer.trim()) {
+    return (
+      <div className="space-y-3">
+        {tzBanner}
+        <section className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-coral/30 bg-surface px-4 py-3">
+          <MessageSquareText className="h-4 w-4 shrink-0 text-coral" aria-hidden="true" />
+          <p className="min-w-0 flex-1 text-sm text-ink">
+            <span className="font-semibold text-coral">This week: </span>
+            {pulse.question}
+          </p>
+          <div className="flex items-center gap-1.5">
+            <button type="button" onClick={() => setExpanded(true)} className={buttonStyles({ size: "sm" })}>
+              Answer
+            </button>
+            <button type="button" disabled={!!busy} onClick={() => void simple("snooze")} className="rounded-lg px-2.5 py-2 text-xs text-muted hover:text-ink disabled:opacity-50 cursor-pointer">
+              Later
+            </button>
+            <button type="button" aria-label="Skip this week" title="Skip this week" disabled={!!busy} onClick={() => void simple("skip")} className="rounded-lg p-2 text-subtle hover:text-ink disabled:opacity-50 cursor-pointer">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
       {tzBanner}
-      <section className="rounded-2xl border border-coral/30 bg-surface p-5 shadow-xl space-y-4">
+      <section className="rounded-2xl border border-coral/30 bg-surface p-5 space-y-4">
         <div className="flex items-start gap-3">
           <MessageSquareText className="mt-0.5 h-5 w-5 shrink-0 text-coral" />
           <div className="flex-1 min-w-0">
@@ -192,6 +220,7 @@ export default function WeeklyPulseCard() {
           <div className="space-y-3">
             <textarea
               rows={4}
+              autoFocus={expanded}
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               maxLength={3000}

@@ -2,9 +2,10 @@
 
 import React from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, Image as ImageIcon, Layers } from "lucide-react";
+import { ChevronLeft, ChevronRight, Image as ImageIcon } from "lucide-react";
 import type { AssetItem } from "@/types";
 import { statusLabel } from "@/lib/drafts/statusLabel";
+import { formatDate } from "@/utils/date";
 
 import { segment } from "@/components/ui/segment";
 export type QueueFilter = "ALL" | "PENDING_REVIEW" | "SCHEDULED" | "PUBLISHED" | "UNPUBLISHED" | "DRAFT";
@@ -50,117 +51,83 @@ export default function QueueRibbon({
     listFilter === "ALL" || listFilter === "DRAFT"
       ? assets
       : assets.filter((a) => a.status === listFilter);
+  const publishedCount = assets.filter((a) => a.status === "PUBLISHED").length;
+  // With one draft there is nothing to step through.
+  const showStepper = assets.length > 1;
+  const pill = (filter: QueueFilter, label: string) => (
+    <button
+      onClick={() => setListFilter(filter)}
+      className={`px-2.5 py-2 sm:py-1 text-xs font-medium rounded-lg transition-all cursor-pointer ${listFilter === filter ? segment.on : segment.off}`}
+    >
+      {label}
+    </button>
+  );
+  const stepper = (
+    <div className="flex items-center gap-1 bg-canvas p-1 rounded-xl border border-line">
+      <button
+        onClick={onPrev}
+        title="Previous draft (key: [ )"
+        aria-label="Previous draft"
+        className="min-h-9 min-w-9 rounded-lg text-muted hover:text-ink hover:bg-surface-2 transition-all flex items-center justify-center cursor-pointer"
+      >
+        <ChevronLeft className="w-4 h-4" />
+      </button>
+      <span className="whitespace-nowrap px-1.5 text-[11px] font-bold text-brand tabular-nums select-none">
+        {currentAssetIndex + 1} / {assets.length}
+      </span>
+      <button
+        onClick={onNext}
+        title="Next draft (key: ] )"
+        aria-label="Next draft"
+        className="min-h-9 min-w-9 rounded-lg text-muted hover:text-ink hover:bg-surface-2 transition-all flex items-center justify-center cursor-pointer"
+      >
+        <ChevronRight className="w-4 h-4" />
+      </button>
+    </div>
+  );
 
   return (
-  <div className="bg-surface rounded-2xl border border-line p-3 sm:p-4 space-y-3 shadow-xl">
+  <div className="bg-surface rounded-2xl border border-line p-3 sm:p-4 space-y-3">
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 border-b border-line/60 pb-3">
-      
-      {/* Left: Queue Title & Status Pills */}
       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-wrap">
-        <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-brand" />
-          <span className="text-xs font-bold text-ink uppercase tracking-wider font-mono">
-            Drafts to review
-          </span>
-        </div>
+        <h2 className="text-sm font-extrabold text-ink">Your drafts</h2>
 
-        <div className="flex items-center gap-1.5 bg-canvas p-1 rounded-xl border border-line max-w-full overflow-x-auto whitespace-nowrap no-scrollbar">
-          <button
-            onClick={() => setListFilter("PENDING_REVIEW")}
-            className={`px-2.5 py-2 sm:py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
-              listFilter === "PENDING_REVIEW"
-                ? segment.on
-                : segment.off
-            }`}
-          >
-            To review ({pendingCount})
-          </button>
-          <button
-            onClick={() => setListFilter("ALL")}
-            className={`px-2.5 py-2 sm:py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
-              listFilter === "ALL"
-                ? segment.on
-                : segment.off
-            }`}
-          >
-            All ({assets.length})
-          </button>
-          {scheduledCount > 0 && (
-            <button
-              onClick={() => setListFilter("SCHEDULED")}
-              className={`px-2.5 py-2 sm:py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
-                listFilter === "SCHEDULED"
-                  ? "bg-[#3B82F6] text-canvas font-bold shadow-sm"
-                  : "text-[#93C5FD] hover:bg-surface-2"
-              }`}
-            >
-              Scheduled ({scheduledCount})
-            </button>
-          )}
-          <button
-            onClick={() => setListFilter("PUBLISHED")}
-            className={`px-2.5 py-2 sm:py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
-              listFilter === "PUBLISHED"
-                ? segment.on
-                : segment.off
-            }`}
-          >
-            Published ({assets.filter(a => a.status === "PUBLISHED").length})
-          </button>
+        <div className="flex items-center gap-1 bg-canvas p-1 rounded-xl border border-line max-w-full overflow-x-auto whitespace-nowrap no-scrollbar">
+          {pill("PENDING_REVIEW", `To review (${pendingCount})`)}
+          {scheduledCount > 0 && pill("SCHEDULED", `Scheduled (${scheduledCount})`)}
+          {pill("PUBLISHED", `Published (${publishedCount})`)}
+          {unpublishedCount > 0 && pill("UNPUBLISHED", `Taken down (${unpublishedCount})`)}
+          {pill("ALL", `All (${assets.length})`)}
           {liveButUnreviewedCount > 0 && (
             <span
-              className="px-2.5 py-2 sm:py-0.5 text-xs font-medium rounded-lg text-gold bg-gold/10 border border-gold/30 cursor-default"
-              title="Already on the blog but still marked PENDING_REVIEW — publishing again duplicates the broadcast"
+              className="px-2.5 py-2 sm:py-1 text-xs font-medium rounded-lg text-gold bg-gold/10 border border-gold/30 cursor-default"
+              title="Already on the blog but still waiting for review. Publishing again posts it twice."
             >
-              Live · Unreviewed ({liveButUnreviewedCount})
+              Already live ({liveButUnreviewedCount})
             </span>
-          )}
-          {unpublishedCount > 0 && (
-            <button
-              onClick={() => setListFilter("UNPUBLISHED")}
-              className={`px-2.5 py-2 sm:py-0.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
-                listFilter === "UNPUBLISHED"
-                  ? "bg-gold text-canvas font-bold shadow-sm"
-                  : "text-gold hover:bg-surface-2"
-              }`}
-            >
-              Offline ({unpublishedCount})
-            </button>
           )}
         </div>
       </div>
 
       <div className="flex items-center gap-2">
         {action}
-        <div className="hidden sm:flex items-center gap-1 bg-canvas p-1 rounded-xl border border-line">
-          <button
-            onClick={onPrev}
-            title="Previous Draft (Key: [ )"
-            className="px-3 py-2 sm:px-2 sm:py-1 rounded-lg text-xs font-bold text-muted hover:text-ink hover:bg-surface-2 transition-all flex items-center gap-1 cursor-pointer"
-          >
-            <ChevronLeft className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-            <span className="hidden sm:inline">Prev</span>
-          </button>
-
-          <span className="px-2 text-[11px] font-mono font-bold text-brand select-none">
-            {currentAssetIndex + 1} / {assets.length}
-          </span>
-
-          <button
-            onClick={onNext}
-            title="Next Draft (Key: ] )"
-            className="px-3 py-2 sm:px-2 sm:py-1 rounded-lg text-xs font-bold text-muted hover:text-ink hover:bg-surface-2 transition-all flex items-center gap-1 cursor-pointer"
-          >
-            <span className="hidden sm:inline">Next</span>
-            <ChevronRight className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-          </button>
-        </div>
+        {showStepper && <div className="hidden sm:block">{stepper}</div>}
       </div>
     </div>
 
     {/* Horizontal Queue Card Rail (Tactile 1-Click Draft Switcher with Auto-Spotlight Scroll) */}
+    {queueAssets.length === 0 ? (
+      <p className="py-2 text-sm text-muted">
+        {listFilter === "PENDING_REVIEW" ? "Nothing waiting for review. New drafts show up here." : "Nothing here yet."}
+      </p>
+    ) : (
+      pendingCount === 0 && listFilter === "ALL" && (
+        <p className="text-xs text-muted">Nothing waiting for review. New drafts show up here.</p>
+      )
+    )}
+
     <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 pt-0.5 no-scrollbar scroll-smooth">
-      {queueAssets.map((asset, idx) => {
+      {queueAssets.map((asset) => {
         const isCurrent = asset.id === activeAsset.id;
         // Live on the blog but still sitting in the review queue.
         const alreadyLive = Boolean(asset.live_blog_url) && asset.status !== "PUBLISHED";
@@ -196,29 +163,23 @@ export default function QueueRibbon({
             {/* Info block */}
             <div className="min-w-0 flex-1 space-y-0.5">
               <div className="flex items-center justify-between gap-1">
-                <span className={`text-[10px] font-mono font-bold ${isCurrent ? "text-brand" : "text-muted"}`}>
-                  Draft #{idx + 1}
-                </span>
                 <span
-                  className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded shrink-0 whitespace-nowrap ${
-                    isCurrent
-                      ? "bg-brand/20 text-brand border border-brand/40"
-                      : asset.status === "PUBLISHED"
-                        ? "bg-brand/20 text-brand"
-                        : alreadyLive
-                        ? "bg-gold/25 text-gold border border-gold/40"
+                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap ${
+                    asset.status === "PUBLISHED"
+                      ? "bg-brand/15 text-brand"
+                      : alreadyLive
+                        ? "bg-gold/20 text-gold"
                         : asset.status === "PENDING_REVIEW"
-                          ? "bg-gold/20 text-gold"
+                          ? "bg-gold/15 text-gold"
                           : asset.status === "SCHEDULED"
                             ? "bg-[#3B82F6]/20 text-[#93C5FD]"
                             : "bg-subtle/20 text-muted"
                   }`}
                 >
-                  {isCurrent
-                    ? "Reviewing"
-                    : alreadyLive
-                      ? "Live · Unreviewed"
-                      : statusLabel(asset.status)}
+                  {alreadyLive ? "Already live" : statusLabel(asset.status)}
+                </span>
+                <span className="text-[10px] text-subtle whitespace-nowrap">
+                  {formatDate(asset.status === "PUBLISHED" ? asset.linkedin_published_at ?? asset.published_at : asset.created_at)}
                 </span>
               </div>
 
@@ -226,42 +187,13 @@ export default function QueueRibbon({
                 {asset.title}
               </div>
 
-              <div className="hidden sm:flex items-center gap-2 text-[10px] text-subtle font-mono">
-                <span>{asset.audience}</span>
-                <span>•</span>
-                <span>{asset.claims.length > 0 ? `${asset.claims.filter((c) => c.verified === 'Y').length}/${asset.claims.length} Claims` : 'Draft'}</span>
-              </div>
             </div>
           </button>
         );
       })}
     </div>
 
-    <div className="flex items-center justify-end border-t border-line/60 pt-2 sm:hidden">
-        <div className="flex items-center gap-1 bg-canvas p-1 rounded-xl border border-line">
-          <button
-            onClick={onPrev}
-            title="Previous Draft (Key: [ )"
-            className="min-h-10 min-w-10 px-2 py-2 sm:px-2 sm:py-1 rounded-lg text-xs font-bold text-muted hover:text-ink hover:bg-surface-2 transition-all flex items-center gap-1 cursor-pointer"
-          >
-            <ChevronLeft className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-            <span className="hidden sm:inline">Prev</span>
-          </button>
-
-          <span className="px-2 text-[11px] font-mono font-bold text-brand select-none">
-            {currentAssetIndex + 1} / {assets.length}
-          </span>
-
-          <button
-            onClick={onNext}
-            title="Next Draft (Key: ] )"
-            className="min-h-10 min-w-10 px-2 py-2 sm:px-2 sm:py-1 rounded-lg text-xs font-bold text-muted hover:text-ink hover:bg-surface-2 transition-all flex items-center gap-1 cursor-pointer"
-          >
-            <span className="hidden sm:inline">Next</span>
-            <ChevronRight className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-          </button>
-        </div>
-    </div>
+    {showStepper && <div className="flex justify-end border-t border-line/60 pt-2 sm:hidden">{stepper}</div>}
   </div>
   );
 }

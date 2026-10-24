@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { AlertTriangle, Check, ShieldCheck } from "lucide-react";
+import { AlertTriangle, Check, ChevronDown, ShieldCheck } from "lucide-react";
 import type { AssetItem } from "@/types";
 
 export interface ClaimsGateProps {
@@ -13,10 +13,8 @@ export interface ClaimsGateProps {
 }
 
 /**
- * The per-claim verification checklist.
- *
- * This read `activeAsset.claim_checks`, a field the API has never returned, so
- * the gate was permanently empty against real data. It reads `claims` now.
+ * The facts the draft states, each checked against what the author told us.
+ * All checked, it folds to one line; anything unchecked opens it.
  */
 export default function ClaimsGate({
   activeAsset,
@@ -26,79 +24,48 @@ export default function ClaimsGate({
   onToggleClaim,
 }: ClaimsGateProps) {
   return (
-        <div className="bg-surface rounded-2xl border border-line p-4 sm:p-5 space-y-3 shadow-xl">
-          <div className="flex items-center justify-between pb-2 border-b border-line/60">
-            <div className="flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-brand" />
-              <span className="text-xs font-bold text-ink font-mono uppercase tracking-wider">
-                Claims Gate
-              </span>
-            </div>
-            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
-              allClaimsVerified
-                ? "bg-brand/20 text-brand border border-brand/40"
-                : "bg-gold/20 text-gold border border-gold/40"
-            }`}>
-              {verifiedClaimsCount}/{totalClaims} PASSED
-            </span>
-          </div>
+    <details
+      key={activeAsset.id}
+      open={!allClaimsVerified}
+      className="group rounded-2xl border border-line bg-surface p-4 sm:p-5"
+    >
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 [&::-webkit-details-marker]:hidden">
+        <span className="flex items-center gap-2 text-sm font-extrabold text-ink">
+          <ShieldCheck className={`h-4 w-4 ${allClaimsVerified ? "text-brand" : "text-gold"}`} />
+          Facts in this post
+        </span>
+        <span className="flex items-center gap-1.5 text-xs font-semibold">
+          <span className={allClaimsVerified ? "text-brand" : "text-gold"}>
+            {allClaimsVerified ? `All ${totalClaims} checked` : `${verifiedClaimsCount} of ${totalClaims} checked`}
+          </span>
+          <ChevronDown className="h-4 w-4 text-subtle transition-transform group-open:rotate-180" />
+        </span>
+      </summary>
 
-          {/* Scrollable Claims Checklist */}
-          <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
-            {activeAsset.claims.length > 0 ? (
-              activeAsset.claims.map((claim) => {
-                const isVerified = claim.verified === "Y";
-                return (
-                  <div
-                    key={claim.id}
-                    className={`p-2.5 rounded-xl border transition-all space-y-1.5 ${
-                      isVerified
-                        ? "bg-canvas border-brand/30 hover:border-brand/60"
-                        : "bg-canvas border-gold/40 hover:border-gold/80"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-1">
-                      <span
-                        className={`text-[9px] font-semibold px-1.5 py-0.2 rounded font-mono ${
-                          claim.source === "GO_BENCHMARK"
-                            ? "bg-brand/15 text-brand"
-                            : claim.source === "OPERATOR_DISPATCH_DATA"
-                              ? "bg-[#3B82F6]/15 text-[#3B82F6]"
-                              : "bg-coral/15 text-coral"
-                        }`}
-                      >
-                        {claim.source === "GO_BENCHMARK"
-                          ? "Benchmark"
-                          : claim.source === "OPERATOR_DISPATCH_DATA"
-                            ? "Field Metric"
-                            : "Voice Telemetry"}
-                      </span>
-
-                      <button
-                        onClick={() => onToggleClaim(claim.id)}
-                        className={`px-2 py-0.5 rounded text-[10px] font-semibold flex items-center gap-1 transition-all cursor-pointer ${
-                          isVerified
-                            ? "bg-brand/20 text-brand"
-                            : "bg-gold/20 text-gold"
-                        }`}
-                      >
-                        {isVerified ? <Check className="w-2.5 h-2.5" /> : <AlertTriangle className="w-2.5 h-2.5" />}
-                        <span>{isVerified ? "Verified" : "Flagged"}</span>
-                      </button>
-                    </div>
-
-                    <p className="text-[11px] text-ink font-medium leading-snug">
-                      &quot;{claim.claim_text}&quot;
-                    </p>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="text-center py-4 text-xs text-subtle font-mono">
-                No claims checks attached to this draft.
-              </div>
-            )}
-          </div>
-        </div>
+      <ul className="mt-3 max-h-[340px] space-y-2 overflow-y-auto pr-1">
+        {activeAsset.claims.map((claim) => {
+          const isVerified = claim.verified === "Y";
+          return (
+            <li
+              key={claim.id}
+              className={`space-y-2 rounded-xl border bg-canvas p-3 ${isVerified ? "border-line" : "border-gold/40"}`}
+            >
+              <p className="text-xs font-medium leading-relaxed text-ink">&ldquo;{claim.claim_text}&rdquo;</p>
+              <button
+                type="button"
+                onClick={() => onToggleClaim(claim.id)}
+                title={isVerified ? "Mark as needing a look" : "Mark as checked"}
+                className={`flex min-h-8 cursor-pointer items-center gap-1 rounded-lg px-2 text-[11px] font-semibold transition-colors ${
+                  isVerified ? "bg-brand/15 text-brand hover:bg-brand/25" : "bg-gold/15 text-gold hover:bg-gold/25"
+                }`}
+              >
+                {isVerified ? <Check className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />}
+                <span>{isVerified ? "Checked" : "Needs a look · mark checked"}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </details>
   );
 }

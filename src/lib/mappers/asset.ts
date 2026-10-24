@@ -8,6 +8,7 @@ import {
 import type { AssetItem, AssetStatus, ClaimCheckItem, CoverSpecDTO } from "@/types";
 import type { AudienceLane } from "@/types";
 import { linkedinWentAs, type FollowUpFormat } from "@/lib/followUp";
+import { linkedinPostUrl, toChannelUrls } from "@/lib/channels";
 
 export const assetDTOSelect = {
   id: true, title: true, slug: true, hook: true, coreArgument: true, content: true,
@@ -17,7 +18,7 @@ export const assetDTOSelect = {
   linkedinVariant: true, facebookVariant: true, xVariant: true, version: true,
   generationCost: true, channels: true, scheduledFor: true, publishedAt: true,
   publishedUrls: true, createdAt: true, updatedAt: true,
-  linkedinPublishedAt: true, carouselSpec: true, followUpOf: true, followUpFormat: true,
+  linkedinPublishedAt: true, linkedinPostId: true, carouselSpec: true, followUpOf: true, followUpFormat: true,
   claims: {
     select: {
       id: true, claimText: true, claimType: true, source: true, verified: true,
@@ -139,6 +140,8 @@ export function toAssetDTO(
     },
     claims: asset.claims.map(toClaimDTO),
     linkedin_went_as: linkedinWentAs(asset),
+    linkedin_url: toChannelUrls(parsePublishedUrls(asset.publishedUrls)).linkedin ?? linkedinPostUrl(asset.linkedinPostId),
+    linkedin_published_at: asset.linkedinPublishedAt ? asset.linkedinPublishedAt.toISOString() : null,
     follow_up_of: asset.followUpOf,
     follow_up_format: (asset.followUpFormat as FollowUpFormat | null) ?? null,
     created_at: asset.createdAt.toISOString(),
