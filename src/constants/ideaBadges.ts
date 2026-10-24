@@ -18,9 +18,15 @@ export function getAudienceBadgeClass(aud: AudienceLane): string {
 }
 
 
+/** What an idea the author typed in is labelled, instead of the raw MANUAL. */
+export const MANUAL_SOURCE_LABEL = "Added by you";
+
 /** Source badge label and colour. */
 export function getSourceTag(source: string): { label: string; className: string } {
   const s = (source || "").toUpperCase();
+  if (!s || s === "MANUAL") {
+    return { label: MANUAL_SOURCE_LABEL, className: "bg-surface-3 text-muted border-[#2A3D52]" };
+  }
   if (s.includes("TECHCRUNCH")) {
     return {
       label: "TechCrunch AI",

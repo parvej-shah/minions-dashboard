@@ -39,14 +39,14 @@ export default function IdeaCard({
 }: IdeaCardProps) {
   const id = idea.ideaId || idea.id || "IDEA-0000";
   const title = idea.title || idea.raw_idea || "Untitled idea";
-  const excerpt = idea.excerpt || idea.angle || "Open this idea to see the thinking behind it.";
+  const excerpt = idea.excerpt || idea.angle;
   const status = (idea.status || "HARVESTED").toUpperCase();
   const sourceInfo = getSourceTag(idea.source || "MANUAL");
   const verdict = idea.authority ? GATE_VERDICT_BADGE[idea.authority.verdict] : null;
   const isClaiming = claimingIds.has(idea.id) || claimingIds.has(id);
   const isClaimed = ["CLAIMED", "PICKED", "DRAFTING"].includes(status) || justClaimedIds.has(idea.id) || justClaimedIds.has(id);
-  const isDrafted = ["DRAFTED", "REVIEW"].includes(status) || Boolean(idea.draftAssetId);
   const isPublished = status === "PUBLISHED";
+  const isDrafted = !isPublished && (["DRAFTED", "REVIEW"].includes(status) || Boolean(idea.draftAssetId));
   const isRejected = ["REJECTED", "DISCARDED", "FAILED"].includes(status);
   const stageLabel = isPublished ? "Published" : isDrafted ? "Draft ready" : isClaimed || isClaiming || status === "DRAFTING" ? "Drafting" : isRejected ? "Set aside" : "Ready to draft";
   const cardTone = isDrafted
@@ -103,8 +103,8 @@ export default function IdeaCard({
       </div>
 
       <div className="relative mt-4 flex-1">
-        <h3 className="text-lg font-extrabold leading-snug text-ink">{title}</h3>
-        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted">{excerpt}</p>
+        <h3 className="line-clamp-3 text-lg font-extrabold leading-snug text-ink" title={title}>{title}</h3>
+        {excerpt && <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted">{excerpt}</p>}
 
         {idea.authority && idea.authority.verdict !== "PASS" && idea.authority.reasons.length > 0 && (
           <p className={`mt-3 text-xs leading-relaxed ${idea.authority.verdict === "REJECT" ? "text-muted" : "text-gold"}`}>

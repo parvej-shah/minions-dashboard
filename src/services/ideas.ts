@@ -29,13 +29,22 @@ export async function createIdeaWithNextId(data: Omit<Prisma.IdeaUncheckedCreate
   return null;
 }
 
+const PUBLISHED_ASSET: Prisma.AssetWhereInput = {
+  OR: [{ status: "PUBLISHED" }, { publishedAt: { not: null } }, { linkedinPublishedAt: { not: null } }, { facebookPublishedAt: { not: null } }],
+};
+
+/**
+ * The publisher marks the draft published and never touches its idea, which
+ * stays at REVIEW. An idea whose draft went out reads as published here, so the
+ * Idea Stream agrees with Published Posts without n8n writing the idea row.
+ */
 export async function listIdeas(clientId: string) {
   const ideas = await prisma.idea.findMany({
     where: { clientId },
     orderBy: { createdAt: "desc" },
-    select: ideaDTOSelect,
+    select: { ...ideaDTOSelect, assets: { where: PUBLISHED_ASSET, select: { id: true }, take: 1 } },
   });
-  return ideas.map(toIdeaDTO);
+  return ideas.map(({ assets, ...idea }) => toIdeaDTO(assets.length > 0 ? { ...idea, status: "PUBLISHED" } : idea));
 }
 
 async function findOwnedIdea(clientId: string, id: string) {

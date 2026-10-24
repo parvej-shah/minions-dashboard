@@ -38,7 +38,7 @@ export const IDEA_STAGE_HINTS: Record<IdeaStage, string> = {
   QUEUED: "Waiting in the production queue",
   DRAFTING: "A drafting run has claimed this idea",
   DRAFTED: "Draft written, waiting for review",
-  PUBLISHED: "Live on your site",
+  PUBLISHED: "Posted",
   ARCHIVED: "Rejected or discarded",
 };
 

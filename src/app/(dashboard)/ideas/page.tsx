@@ -17,7 +17,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import Toast from "@/components/ui/Toast";
 import { isIdea, useIdeaStream } from "@/hooks/useIdeaStream";
 import { useToast } from "@/hooks/useToast";
-import { filterIdeas, type StageFilter } from "@/lib/ideaFilter";
+import { filterIdeas, type IdeaOrder, type StageFilter } from "@/lib/ideaFilter";
 import type { IdeaItem } from "@/types";
 
 interface DeleteTarget {
@@ -32,6 +32,7 @@ export default function IdeaStreamPage() {
 
   const [stage, setStage] = useState<StageFilter>("ALL");
   const [query, setQuery] = useState("");
+  const [order, setOrder] = useState<IdeaOrder>("OLDEST");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [detailIdea, setDetailIdea] = useState<IdeaItem | null>(null);
   const [editingIdea, setEditingIdea] = useState<IdeaItem | null>(null);
@@ -39,7 +40,7 @@ export default function IdeaStreamPage() {
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const visibleIdeas = useMemo(() => filterIdeas(ideas, stage, query), [ideas, stage, query]);
+  const visibleIdeas = useMemo(() => filterIdeas(ideas, stage, query, order), [ideas, stage, query, order]);
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
@@ -74,27 +75,20 @@ export default function IdeaStreamPage() {
         </section>
       )}
 
-      <section className="relative overflow-hidden rounded-[1.75rem] border-2 border-b-4 border-brand/35 border-b-brand-edge/70 bg-[linear-gradient(135deg,#0F1C1D_0%,#10171D_62%,#0E1419_100%)] p-5 sm:p-7">
-        <span className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full bg-brand/10 blur-3xl" aria-hidden="true" />
-        <div className="relative max-w-2xl">
-          <p className="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-brand">
-            <Sparkles className="h-4 w-4" aria-hidden="true" /> Ideas
-          </p>
+      <header className="flex flex-col gap-4 border-b border-line pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="max-w-xl">
           <h1 className="text-2xl font-extrabold leading-tight tracking-tight text-ink sm:text-3xl">Your ideas</h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
+          <p className="mt-1.5 text-sm leading-relaxed text-muted">
             When automatic drafting is on, Minions picks the oldest available idea and turns it into a draft.
           </p>
         </div>
-      </section>
-
-      <div className="flex justify-end border-b border-line pb-4">
-        <button type="button" onClick={() => setIsAddOpen(true)} className={buttonStyles({ variant: "secondary", size: "sm", className: "w-full sm:w-auto" })}>
+        <button type="button" onClick={() => setIsAddOpen(true)} className={buttonStyles({ size: "sm", className: "w-full shrink-0 sm:w-auto" })}>
           <Plus className="h-4 w-4" aria-hidden="true" />
           <span>Add your own idea</span>
         </button>
-      </div>
+      </header>
 
-      <IdeaFilters ideas={ideas} stage={stage} query={query} onStageChange={setStage} onQueryChange={setQuery} />
+      <IdeaFilters ideas={ideas} stage={stage} query={query} order={order} onStageChange={setStage} onQueryChange={setQuery} onOrderChange={setOrder} />
 
       {stream.draftError && (
         <div className="bg-[#2A1215] border border-[#7F1D1D] rounded-xl px-4 py-3 flex items-start gap-3">
@@ -170,7 +164,7 @@ export default function IdeaStreamPage() {
           onClose={() => setEditingIdea(null)}
           onSaved={(changes) => {
             setIdeas((prev) => prev.map((item) => (item.id === editingIdea.id ? { ...item, ...changes } : item)));
-            toast.show(`Idea ${editingIdea.id} updated successfully!`);
+            toast.show("Idea updated.");
             setEditingIdea(null);
           }}
           onFailed={(message) => toast.show(message, 5000)}

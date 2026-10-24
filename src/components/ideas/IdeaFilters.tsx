@@ -2,7 +2,7 @@
 
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { IDEA_STAGES, IDEA_STAGE_HINTS, IDEA_STAGE_LABELS } from "@/constants/ideaStage";
-import { countByStage, type StageFilter } from "@/lib/ideaFilter";
+import { countByStage, type IdeaOrder, type StageFilter } from "@/lib/ideaFilter";
 import type { IdeaItem } from "@/types";
 
 const STAGE_FILTERS: StageFilter[] = ["ALL", ...IDEA_STAGES];
@@ -11,12 +11,15 @@ interface Props {
   ideas: IdeaItem[];
   stage: StageFilter;
   query: string;
+  order: IdeaOrder;
   onStageChange: (stage: StageFilter) => void;
   onQueryChange: (query: string) => void;
+  onOrderChange: (order: IdeaOrder) => void;
 }
 
-/** The sticky search box and stage chips above the idea grid. */
-export default function IdeaFilters({ ideas, stage, query, onStageChange, onQueryChange }: Props) {
+/** The sticky search box and stage chips above the idea grid. Stages nothing is in stay out of the way. */
+export default function IdeaFilters({ ideas, stage, query, order, onStageChange, onQueryChange, onOrderChange }: Props) {
+  const stages = STAGE_FILTERS.filter((option) => option === "ALL" || option === stage || countByStage(ideas, option) > 0);
   return (
     <div className="sticky top-14 md:top-0 z-30 bg-[#0a0d12] -mx-4 sm:-mx-6 md:-mx-8 px-4 sm:px-6 md:px-8 pt-3 pb-3.5 space-y-3 border-b border-line shadow-xl shadow-black/40">
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
@@ -38,7 +41,17 @@ export default function IdeaFilters({ ideas, stage, query, onStageChange, onQuer
             </button>
           )}
         </div>
-        <span className="hidden shrink-0 text-xs font-medium text-muted sm:block">Oldest first</span>
+        <label className="flex shrink-0 items-center gap-2 text-xs text-muted">
+          <span>Sort</span>
+          <select
+            value={order}
+            onChange={(e) => onOrderChange(e.target.value as IdeaOrder)}
+            className="min-h-11 cursor-pointer rounded-xl border border-line bg-surface px-3 text-xs font-semibold text-ink outline-none focus:border-brand"
+          >
+            <option value="OLDEST">Oldest first (drafted next)</option>
+            <option value="NEWEST">Newest first</option>
+          </select>
+        </label>
       </div>
 
       <details className="lg:hidden rounded-xl border border-line bg-surface px-3">
@@ -56,7 +69,7 @@ export default function IdeaFilters({ ideas, stage, query, onStageChange, onQuer
               onChange={(e) => onStageChange(e.target.value as StageFilter)}
               className="min-h-11 w-full rounded-xl border border-line bg-canvas px-3 text-sm text-ink"
             >
-              {STAGE_FILTERS.map((option) => (
+              {stages.map((option) => (
                 <option key={option} value={option}>
                   {option === "ALL" ? "All stages" : IDEA_STAGE_LABELS[option]}
                 </option>
@@ -67,8 +80,7 @@ export default function IdeaFilters({ ideas, stage, query, onStageChange, onQuer
       </details>
 
       <div className="hidden lg:flex items-center gap-2 overflow-x-auto pb-1 pt-1 border-t border-line/40 scrollbar-none">
-        <span className="text-[11px] font-mono uppercase tracking-wider text-subtle mr-1 shrink-0">Stage:</span>
-        {STAGE_FILTERS.map((option) => {
+        {stages.map((option) => {
           const isSelected = stage === option;
           return (
             <button

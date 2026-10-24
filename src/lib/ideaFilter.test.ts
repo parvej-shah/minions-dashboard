@@ -14,6 +14,10 @@ describe("filterIdeas", () => {
     expect(filterIdeas([newer, older], "ALL", "").map((i) => i.id)).toEqual(["old", "new"]);
   });
 
+  it("can list the newest idea first", () => {
+    expect(filterIdeas([older, newer], "ALL", "", "NEWEST").map((i) => i.id)).toEqual(["new", "old"]);
+  });
+
   it("filters by the stage a status maps to, not the raw status", () => {
     expect(filterIdeas([older, newer], "QUEUED", "").map((i) => i.id)).toEqual(["new"]);
   });
