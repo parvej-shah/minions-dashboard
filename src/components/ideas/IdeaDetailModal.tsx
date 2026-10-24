@@ -111,10 +111,9 @@ export default function IdeaDetailModal({
           {(authority?.icp_problem || detailIdea.audience) && (
             <section className="space-y-2">
               <h3 className={sectionLabel}>Who it&apos;s for</h3>
-              <p className="text-sm leading-relaxed text-[#E2E8F0]">
-                <span className="font-semibold text-white">{AUDIENCE_TEXT[detailIdea.audience || "ICP"] ?? AUDIENCE_TEXT.ICP}</span>
-                {authority?.icp_problem ? <>, deciding {lowerFirst(authority.icp_problem)}</> : null}
-              </p>
+              <p className="text-sm font-semibold text-white">{AUDIENCE_TEXT[detailIdea.audience || "ICP"] ?? AUDIENCE_TEXT.ICP}</p>
+              {/* The problem is stored as a statement or a question, so it stands on its own line as written. */}
+              {authority?.icp_problem && <p className="text-sm leading-relaxed text-[#E2E8F0]">{authority.icp_problem}</p>}
             </section>
           )}
 
@@ -258,7 +257,3 @@ export default function IdeaDetailModal({
   );
 }
 
-/** "Whether to hire…" reads as "…, deciding whether to hire…". */
-function lowerFirst(text: string): string {
-  return text.charAt(0).toLowerCase() + text.slice(1);
-}
