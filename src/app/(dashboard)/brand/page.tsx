@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, type ReactNode } from "react";
+import { Suspense, useState } from "react";
 import { createDirective } from "@/lib/directivesClient";
 import { useDirectiveActions } from "@/hooks/useDirectiveActions";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -89,22 +89,18 @@ function BrandStudio() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 pb-16">
       <div className="space-y-5">
-        <div className="flex items-start gap-3">
-          <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border-2 border-brand/30 bg-brand/10 text-brand">
-            <Sparkles className="h-5 w-5" aria-hidden="true" />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">Your brand</h1>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">What Minions knows about you, so every post sounds like you.</p>
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="mb-1 text-[11px] font-mono tracking-[0.14em] text-brand uppercase">Your voice, your point of view</div>
-            <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">Make every post sound like you</h1>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">Choose what to shape next, or let Minions fill it in from your LinkedIn and website.</p>
+          <div className="shrink-0">
+            <Button variant="soft" icon={<FileUp className="h-4 w-4" />} onClick={() => setImporting(true)} className="w-full sm:w-auto">
+              Fill from LinkedIn
+            </Button>
+            <p className="mt-1 text-[11px] text-subtle sm:text-right">Adds what it finds. You check it first.</p>
           </div>
-          <Button variant="soft" icon={<FileUp className="h-4 w-4" />} onClick={() => setImporting(true)} className="hidden shrink-0 sm:inline-flex">
-            Fill from LinkedIn
-          </Button>
         </div>
-        <Button variant="soft" block icon={<FileUp className="h-4 w-4" />} onClick={() => setImporting(true)} className="sm:hidden">
-          Fill from LinkedIn
-        </Button>
 
         <nav aria-label="Brand settings" className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
           {BRAND_SECTIONS.map(({ tab, label, icon: Icon }) => (
@@ -125,27 +121,22 @@ function BrandStudio() {
       {activeTab === "overview" && <CompletenessCard version={profileVersion} onGo={goToSection} />}
 
       {activeTab === "overview" && <section className="space-y-3">
-        <SectionHeading icon={<Sparkles className="h-4 w-4" />} title="Brand basics" description="What you do, what you talk about, and the principles that make your content yours." />
         <OverviewTab directives={directives} setDirectives={setDirectives} onEditAudience={() => goToSection("experience")} />
       </section>}
 
       {activeTab === "experience" && <section className="space-y-3">
-        <SectionHeading icon={<Users2 className="h-4 w-4" />} title="Audience & experience" description="Help Minions write for the right people and draw on what you have actually learned." />
         <ExperienceTab onChange={bumpProfile} />
       </section>}
 
       {activeTab === "voice-proof" && <section className="space-y-3">
-        <SectionHeading icon={<Mic2 className="h-4 w-4" />} title="Writing voice & proof" description="Set the sound of your writing and the facts future posts are allowed to use." />
         <VoiceProofTab />
       </section>}
 
       {activeTab === "sources" && <section className="space-y-3">
-        <SectionHeading icon={<Rss className="h-4 w-4" />} title="Idea sources" description="Choose the feeds Minions watches for useful, less repetitive ideas." />
         <SourcesTab />
       </section>}
 
       {activeTab === "lexicon" && <section className="space-y-3">
-        <SectionHeading icon={<Ban className="h-4 w-4" />} title="Words & rules to avoid" description="Block words and set guardrails every new draft should follow." />
         <LexiconTab
           bannedWords={forbiddenDirectives}
           isLoading={directivesLoading}
@@ -157,18 +148,6 @@ function BrandStudio() {
           onRemoveBannedWord={directiveActions.remove}
         />
       </section>}
-      </div>
-    </div>
-  );
-}
-
-function SectionHeading({ icon, title, description }: { icon: ReactNode; title: string; description: string }) {
-  return (
-    <div className="flex items-start gap-3 border-b border-line/70 pb-3">
-      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-brand/25 bg-brand/10 text-brand">{icon}</span>
-      <div>
-        <h2 className="text-lg font-bold tracking-tight text-ink">{title}</h2>
-        <p className="mt-0.5 max-w-3xl text-xs leading-relaxed text-muted">{description}</p>
       </div>
     </div>
   );

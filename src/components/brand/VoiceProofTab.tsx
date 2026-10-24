@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Check, FileCheck2, Loader2, Mic2, Plus, ShieldCheck, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Check, ChevronDown, Loader2, Mic2, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { useApiResource } from "@/hooks/useApiResource";
 import { LoadingState } from "@/components/ui/EmptyState";
@@ -20,6 +20,19 @@ const OPTIONS: Array<{
   { key: "humor", label: "Humor", choices: [{ value: "none", label: "None" }, { value: "light", label: "Light" }, { value: "frequent", label: "Frequent" }] },
   { key: "emoji_use", label: "Emoji use", choices: [{ value: "never", label: "Never" }, { value: "sometimes", label: "Sometimes" }, { value: "often", label: "Often" }] },
 ];
+
+/** "getminions.ai · FAQ", or what is missing. */
+function sourceLabel(proof: BrandProofItem): string {
+  const url = proof.source_url.trim();
+  if (!url) return "No source yet";
+  let host = url;
+  try {
+    host = new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    // Not a full URL yet; show what was typed.
+  }
+  return proof.source_title.trim() ? `${host} · ${proof.source_title.trim()}` : host;
+}
 
 function newProof(): BrandProofItem {
   return { ...EMPTY_PROOF, id: `new-${crypto.randomUUID()}` };
@@ -52,11 +65,8 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
   const currentSnapshot = JSON.stringify({ questionnaire, examples, proofs });
   const isDirty = currentSnapshot !== savedSnapshot;
 
-  const voiceScore = useMemo(() => {
-    const usefulSamples = examples.filter((item) => item.trim().length >= 100).length;
-    const sampleCharacters = examples.reduce((sum, item) => sum + item.trim().length, 0);
-    return Math.min(100, 30 + usefulSamples * 14 + Math.min(30, Math.floor(sampleCharacters / 100)));
-  }, [examples]);
+  // Proofs fold to one line; only the one being edited opens.
+  const [openProof, setOpenProof] = useState<string | null>(null);
 
   const addSignaturePhrase = () => {
     const phrase = signatureDraft.trim();
@@ -90,20 +100,14 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
 
       <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
         <section className="rounded-2xl border border-line bg-surface p-5 sm:p-6 space-y-6">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <Mic2 className="h-4 w-4 text-brand" />
-                <h2 className="text-base font-bold text-ink">Your writing fingerprint</h2>
-              </div>
-              <p className="mt-1 text-xs leading-relaxed text-muted">
-                These choices and samples guide wording, rhythm, and personality on every platform.
-              </p>
+          <div>
+            <div className="flex items-center gap-2">
+              <Mic2 className="h-4 w-4 text-brand" />
+              <h2 className="text-base font-bold text-ink">How you write</h2>
             </div>
-            <div className="shrink-0 text-right">
-              <div className="text-xl font-bold text-brand">{voiceScore}%</div>
-              <div className="text-[10px] uppercase tracking-wider text-subtle">voice signal</div>
-            </div>
+            <p className="mt-1 text-xs leading-relaxed text-muted">
+              Minions copies the wording and rhythm of what you set here.
+            </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -179,45 +183,80 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
           <div>
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-[#FF7A59]" />
-              <h2 className="text-base font-bold text-ink">Proof library</h2>
+              <h2 className="text-base font-bold text-ink">Facts you can prove</h2>
             </div>
             <p className="mt-1 text-xs leading-relaxed text-muted">
-              Claims here may be used as facts. Every claim needs a source; anything else stays blocked for review.
+              Posts may state these as facts. Each one needs a source; any other fact in a draft is flagged for you to check.
             </p>
           </div>
 
-          {proofs.map((proof, index) => (
-            <div key={proof.id} className="rounded-xl border border-line bg-[#0B1016] p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-[11px] font-semibold text-brand"><FileCheck2 className="h-3.5 w-3.5" /> Proof {index + 1}</span>
-                <button type="button" onClick={() => setProofs(proofs.filter((_, itemIndex) => itemIndex !== index))} className="rounded-lg p-1.5 text-subtle hover:bg-red-500/10 hover:text-red-400" aria-label={`Remove proof ${index + 1}`}><Trash2 className="h-3.5 w-3.5" /></button>
-              </div>
-              <label htmlFor={`proof-claim-${proof.id}`} className="block text-xs font-semibold text-muted">Claim this source supports</label>
-              <textarea id={`proof-claim-${proof.id}`} rows={3} value={proof.claim} onChange={(event) => setProofs(proofs.map((item, itemIndex) => itemIndex === index ? { ...item, claim: event.target.value } : item))} placeholder="Exact claim this source supports" className="w-full resize-y rounded-lg border border-line bg-surface-2 p-3 text-xs text-ink outline-none placeholder:text-[#475569] focus:border-brand" />
-              <label htmlFor={`proof-url-${proof.id}`} className="block text-xs font-semibold text-muted">Source URL</label>
-              <input id={`proof-url-${proof.id}`} type="url" value={proof.source_url} onChange={(event) => setProofs(proofs.map((item, itemIndex) => itemIndex === index ? { ...item, source_url: event.target.value } : item))} placeholder="https://source.example/report" className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs text-ink outline-none placeholder:text-[#475569] focus:border-brand" />
-              <label htmlFor={`proof-title-${proof.id}`} className="block text-xs font-semibold text-muted">Source title (optional)</label>
-              <input id={`proof-title-${proof.id}`} value={proof.source_title} onChange={(event) => setProofs(proofs.map((item, itemIndex) => itemIndex === index ? { ...item, source_title: event.target.value } : item))} placeholder="Source title (optional)" className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs text-ink outline-none placeholder:text-[#475569] focus:border-brand" />
-            </div>
-          ))}
+          {proofs.length > 0 && (
+            <ul className="space-y-2">
+              {proofs.map((proof, index) => {
+                const isOpen = openProof === proof.id;
+                const update = (patch: Partial<BrandProofItem>) => setProofs(proofs.map((item, itemIndex) => (itemIndex === index ? { ...item, ...patch } : item)));
+                return (
+                  <li key={proof.id} className="rounded-xl border border-line bg-[#0B1016]">
+                    <div className="flex items-start gap-2 p-3">
+                      <button
+                        type="button"
+                        onClick={() => setOpenProof(isOpen ? null : proof.id)}
+                        aria-expanded={isOpen}
+                        className="min-w-0 flex-1 cursor-pointer text-left"
+                      >
+                        <p className={`text-xs leading-relaxed ${proof.claim.trim() ? "text-ink" : "text-subtle"}`}>{proof.claim.trim() || "New fact"}</p>
+                        <p className="mt-0.5 truncate text-[11px] text-subtle">{sourceLabel(proof)}</p>
+                      </button>
+                      <ChevronDown className={`mt-0.5 h-4 w-4 shrink-0 text-subtle transition-transform ${isOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+                      <button type="button" onClick={() => setProofs(proofs.filter((_, itemIndex) => itemIndex !== index))} className="rounded-lg p-1 text-subtle hover:bg-red-500/10 hover:text-red-400" aria-label={`Remove fact ${index + 1}`}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    {isOpen && (
+                      <div className="space-y-2 border-t border-line px-3 pb-3 pt-2">
+                        <label htmlFor={`proof-claim-${proof.id}`} className="block text-xs font-semibold text-muted">The fact</label>
+                        <textarea id={`proof-claim-${proof.id}`} rows={2} value={proof.claim} onChange={(event) => update({ claim: event.target.value })} placeholder="Exactly what the source supports" className="w-full resize-y rounded-lg border border-line bg-surface-2 p-3 text-xs text-ink outline-none placeholder:text-[#475569] focus:border-brand" />
+                        <label htmlFor={`proof-url-${proof.id}`} className="block text-xs font-semibold text-muted">Where it says so</label>
+                        <input id={`proof-url-${proof.id}`} type="url" value={proof.source_url} onChange={(event) => update({ source_url: event.target.value })} placeholder="https://source.example/report" className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs text-ink outline-none placeholder:text-[#475569] focus:border-brand" />
+                        <label htmlFor={`proof-title-${proof.id}`} className="block text-xs font-semibold text-muted">Page name (optional)</label>
+                        <input id={`proof-title-${proof.id}`} value={proof.source_title} onChange={(event) => update({ source_title: event.target.value })} placeholder="Page name" className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs text-ink outline-none placeholder:text-[#475569] focus:border-brand" />
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
 
-          <button type="button" disabled={proofs.length >= 10} onClick={() => setProofs([...proofs, newProof()])} className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[#334155] py-3 text-xs font-semibold text-muted hover:border-[#FF7A59]/60 hover:text-ink disabled:opacity-40">
-            <Plus className="h-3.5 w-3.5" /> Add a sourced claim
+          <button type="button" disabled={proofs.length >= 10} onClick={() => {
+            const proof = newProof();
+            setProofs([...proofs, proof]);
+            setOpenProof(proof.id);
+          }} className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[#334155] py-3 text-xs font-semibold text-muted hover:border-[#FF7A59]/60 hover:text-ink disabled:opacity-40">
+            <Plus className="h-3.5 w-3.5" /> Add a fact with its source
           </button>
 
-          <div className="rounded-xl border border-brand/20 bg-brand/5 p-3 text-[11px] leading-relaxed text-muted">
-            <span className="font-semibold text-brand">Safety rule:</span> generated links never count as proof. Only sources you approve here can unlock a factual claim.
-          </div>
         </section>
       </div>
 
-      <div className="sticky bottom-4 flex items-center justify-end gap-3 rounded-2xl border border-line bg-[#0D1520]/95 p-3 shadow-2xl backdrop-blur">
-        {saved && !isDirty && <span role="status" className="inline-flex items-center gap-1 text-xs text-emerald-400"><Check className="h-3.5 w-3.5" /> Saved to future drafts</span>}
-        <button type="button" onClick={save} disabled={saving || !isDirty} aria-busy={saving} className={buttonStyles({ size: "md" })}>
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-          Save voice & proof
-        </button>
-      </div>
+      {/* Shown only with something to save, as a small floating bar instead of a full-width one. */}
+      {(isDirty || saving || saved) && (
+        <div className="pointer-events-none sticky bottom-4 flex justify-end">
+          <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-line bg-[#0D1520]/95 p-2 pl-4 shadow-2xl backdrop-blur">
+            {saved && !isDirty ? (
+              <span role="status" className="inline-flex items-center gap-1 pr-2 text-xs text-emerald-400"><Check className="h-3.5 w-3.5" /> Saved. New drafts use it.</span>
+            ) : (
+              <>
+                <span className="text-xs text-gold">Unsaved changes</span>
+                <button type="button" onClick={save} disabled={saving} aria-busy={saving} className={buttonStyles({ size: "sm" })}>
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                  Save
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

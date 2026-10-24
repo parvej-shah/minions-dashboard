@@ -93,22 +93,29 @@ export default function MemorySection({ onChange }: { onChange: () => void }) {
               {rows.map((item) => (
                 <div
                   key={item.id}
-                  className={`rounded-lg border border-line bg-canvas px-3 py-2.5 ${item.is_active ? "" : "opacity-50"}`}
+                  className={`group rounded-lg border border-line bg-canvas px-3 py-2.5 ${item.is_active ? "" : "opacity-50"}`}
                 >
                   <p className="whitespace-pre-wrap text-sm text-ink">{item.content}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
-                    <button
-                      type="button"
-                      onClick={() => patch(item, { disclosure: item.disclosure === "PUBLIC" ? "GENERALIZE" : "PUBLIC" })}
-                      title={MEMORY_DISCLOSURE_META[item.disclosure].hint}
-                      className="rounded border border-line px-1.5 py-0.5 text-muted hover:text-ink cursor-pointer"
-                    >
-                      {MEMORY_DISCLOSURE_META[item.disclosure].label}
-                    </button>
+                    {/* Public is the default, so only a generalized item carries a tag; the switch sits with the other controls. */}
+                    {item.disclosure !== "PUBLIC" && (
+                      <span title={MEMORY_DISCLOSURE_META[item.disclosure].hint} className="rounded border border-line px-1.5 py-0.5 text-muted">
+                        Kept general
+                      </span>
+                    )}
                     <span className="text-subtle">
                       {item.used_in_ideas === 0 ? "Not used yet" : `Used in ${item.used_in_ideas} idea${item.used_in_ideas === 1 ? "" : "s"}`}
                     </span>
                     <span className="flex-1" />
+                    <span className="flex items-center gap-1 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+                    <button
+                      type="button"
+                      onClick={() => patch(item, { disclosure: item.disclosure === "PUBLIC" ? "GENERALIZE" : "PUBLIC" })}
+                      title={item.disclosure === "PUBLIC" ? MEMORY_DISCLOSURE_META.GENERALIZE.hint : MEMORY_DISCLOSURE_META.PUBLIC.hint}
+                      className="rounded px-1.5 py-0.5 text-subtle hover:text-ink cursor-pointer"
+                    >
+                      {item.disclosure === "PUBLIC" ? "Keep it general" : "Allow specifics"}
+                    </button>
                     <button
                       type="button"
                       onClick={() => patch(item, { is_active: !item.is_active })}
@@ -134,6 +141,7 @@ export default function MemorySection({ onChange }: { onChange: () => void }) {
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
+                    </span>
                   </div>
                 </div>
               ))}

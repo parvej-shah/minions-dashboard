@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { CalendarClock } from "lucide-react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { Skeleton, SkeletonGroup, SkeletonText } from "@/components/ui/Skeleton";
@@ -74,7 +75,7 @@ export default function WeeklyUpdatesPanel() {
         </h3>
         <p className="text-xs text-muted mt-0.5">
           Once a week Editorial Studio asks what you built, learned, noticed or changed your mind about. The notes you keep
-          land here, and the next harvest builds an idea on them first.
+          land here, and Minions builds its next ideas on them first.
         </p>
       </div>
 
@@ -104,7 +105,14 @@ export default function WeeklyUpdatesPanel() {
 
       {history && history.length === 0 && (
         <p className="rounded-lg border border-dashed border-line px-3 py-6 text-center text-xs text-subtle">
-          No weekly answers yet. The first question appears on {PULSE_DAYS[s.day - 1]}.
+          {pulse.state === "DUE" || pulse.state === "CONFIRM" ? (
+            <>
+              This week&apos;s question is open.{" "}
+              <Link href="/editorial" className="font-semibold text-brand hover:underline">Answer it in Editorial Studio</Link>
+            </>
+          ) : (
+            <>No weekly answers yet. The first question appears on {PULSE_DAYS[s.day - 1]}.</>
+          )}
         </p>
       )}
       <ul className="space-y-3">

@@ -29,7 +29,7 @@ export function buildNavItems(): NavItem[] {
       icon: FileText,
     },
     {
-      name: "Brand & Directives",
+      name: "Brand",
       href: "/brand",
       icon: Palette,
     },

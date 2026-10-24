@@ -29,6 +29,12 @@ and link to it here.
 
 ---
 
+## 2026-10-24 — Brand's "What you do" is about the writer, not the reader
+
+**Decision:** Setup saves the brief's positioning (what the writer does) as the brand positioning. If there is none, it saves what they want to be known for, and the audience only as a last resort. Brand shows it as "What you do". When an older workspace's positioning only repeats the audience, Brand asks the writer to say what they do instead of showing the audience twice.
+**Why:** Setup stored the audience description as the positioning, so Brand showed the same reader sentence under both Positioning and Audience. Covers and the draft check also read that field as facts about the writer.
+**Status:** active
+
 ## 2026-10-24 — Published LinkedIn posts can't be "unpublished" from Minions
 
 **Decision:** A published post that went only to LinkedIn no longer offers Unpublish. Only a post on the workspace's blog can be taken down from the Studio ("Take down from blog"), and that dialog says the LinkedIn post stays up. Removing a post from Minions says the same. A published post's panel shows "View on LinkedIn" and drops the pre-publish checks.

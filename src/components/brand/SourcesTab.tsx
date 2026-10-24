@@ -107,7 +107,7 @@ export default function SourcesTab() {
             Where ideas come from
           </h3>
           <p className="text-xs text-muted mt-0.5">
-            The harvester reads these feeds for market signals. More varied sources mean less
+            Minions reads these feeds for things worth posting about. More varied feeds mean less
             repetitive ideas.
           </p>
         </div>
@@ -122,8 +122,7 @@ export default function SourcesTab() {
         <div className="space-y-2">
           {sources.length === 0 && (
             <p className="rounded-lg border border-dashed border-line px-3 py-6 text-center text-xs text-subtle">
-              No sources yet. The harvester falls back to a general technology feed until you add
-              some.
+              No feeds yet. Until you add one, Minions reads a general technology feed.
             </p>
           )}
 
@@ -223,7 +222,7 @@ export default function SourcesTab() {
         ) : (
           <p className="border-t border-line/60 pt-4 text-xs text-subtle">
             You&apos;ve reached the limit of {MAX_SOURCES_PER_TENANT} sources. Remove one to add
-            another. Each source contributes up to {MAX_ITEMS_PER_SOURCE} signals per harvest.
+            another. Minions takes up to {MAX_ITEMS_PER_SOURCE} items from each feed when it looks for ideas.
           </p>
         )}
       </div>

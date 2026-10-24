@@ -518,7 +518,7 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
                       href="/brand"
                       className="text-xs font-mono text-brand hover:underline flex items-center gap-1"
                     >
-                      <span>Go to Brand & Directives to paste output</span>
+                      <span>Go to Brand to paste output</span>
                       <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>

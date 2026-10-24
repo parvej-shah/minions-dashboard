@@ -15,10 +15,21 @@ interface Props {
   items: BrandDirectiveItem[];
   onAdd: (category: BrandCategory, text: string) => Promise<void>;
   onRemove: (id: string) => Promise<void>;
+  /** The ideal customer's description, to tell a positioning that only repeats it. */
+  audience?: string;
 }
 
-/** The brand name and the one-line positioning, editable in place, with the identity notes under them. */
-export default function PositioningCard({ profile, setProfile, items, onAdd, onRemove }: Props) {
+const sameText = (a: string, b: string) => a.trim().toLowerCase().replace(/\s+/g, " ") === b.trim().toLowerCase().replace(/\s+/g, " ");
+
+/**
+ * The brand name and what the writer does, editable in place, with the identity
+ * notes under them. Setup used to save the audience here, so a positioning that
+ * only repeats the audience is treated as not written yet.
+ */
+export default function PositioningCard({ profile, setProfile, items, onAdd, onRemove, audience = "" }: Props) {
+  const positioning = profile?.positioning ?? "";
+  const repeatsAudience = Boolean(positioning && audience && sameText(positioning, audience));
+  const shown = repeatsAudience ? "" : positioning;
   const [isEditing, setIsEditing] = useState(false);
   const [positioningDraft, setPositioningDraft] = useState("");
   // brand_name is what every generated cover prints, so it is edited with the positioning.
@@ -29,7 +40,7 @@ export default function PositioningCard({ profile, setProfile, items, onAdd, onR
   const openEdit = () => {
     if (!profile) return;
     setError(null);
-    setPositioningDraft(profile.positioning);
+    setPositioningDraft(repeatsAudience ? profile.cover_byline || "" : profile.positioning);
     setBrandNameDraft(profile.brand_name);
     setIsEditing(true);
   };
@@ -58,10 +69,10 @@ export default function PositioningCard({ profile, setProfile, items, onAdd, onR
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-brand" />
-            <h3 className="text-sm font-bold text-ink">Positioning</h3>
+            <h3 className="text-sm font-bold text-ink">What you do</h3>
           </div>
           {!isEditing && (
-            <button type="button" onClick={openEdit} className="min-h-10 min-w-10 cursor-pointer rounded-lg p-2 text-muted hover:bg-surface-2 hover:text-brand" aria-label="Edit business name and positioning">
+            <button type="button" onClick={openEdit} className="min-h-10 min-w-10 cursor-pointer rounded-lg p-2 text-muted hover:bg-surface-2 hover:text-brand" aria-label="Edit your name and what you do">
               <Pencil className="w-3.5 h-3.5" />
             </button>
           )}
@@ -71,7 +82,7 @@ export default function PositioningCard({ profile, setProfile, items, onAdd, onR
           <div className="space-y-2">
             <div>
               <label htmlFor="brand-name" className="mb-1 block text-xs font-semibold text-muted">
-                Business name
+                Name on your covers
               </label>
               <input
                 id="brand-name"
@@ -85,12 +96,13 @@ export default function PositioningCard({ profile, setProfile, items, onAdd, onR
                 Shown on generated cover images and used throughout your content.
               </p>
             </div>
-            <label htmlFor="brand-positioning" className="block text-xs font-semibold text-muted">What you do and for whom</label>
+            <label htmlFor="brand-positioning" className="block text-xs font-semibold text-muted">What you do, in a line or two</label>
             <textarea
               id="brand-positioning"
               rows={3}
               value={positioningDraft}
               onChange={(e) => setPositioningDraft(e.target.value)}
+              placeholder="e.g. I build AI voice agents that answer every call for real-estate teams."
               className="w-full bg-surface-2 border border-line rounded-xl p-3 text-xs text-ink resize-none focus:outline-none focus:border-brand"
             />
             {error && <p role="alert" className="text-xs text-red-400">{error}</p>}
@@ -116,9 +128,14 @@ export default function PositioningCard({ profile, setProfile, items, onAdd, onR
             <p className="text-sm font-semibold text-ink">
               {profile?.brand_name || "Unnamed brand"}
             </p>
-            <p className="text-sm text-ink leading-relaxed">
-              {profile?.positioning || "Not set yet — tap edit to describe who you are."}
-            </p>
+            {shown ? (
+              <p className="text-sm text-ink leading-relaxed">{shown}</p>
+            ) : (
+              <button type="button" onClick={openEdit} className="text-left text-sm text-muted hover:text-ink cursor-pointer">
+                {repeatsAudience ? "This only repeated your audience. " : ""}
+                <span className="font-semibold text-brand">Say what you do in a line</span>, so posts introduce you right.
+              </button>
+            )}
           </div>
         )}
 
@@ -127,7 +144,7 @@ export default function PositioningCard({ profile, setProfile, items, onAdd, onR
           items={items}
           onAdd={onAdd}
           onRemove={onRemove}
-          placeholder="Add a differentiator or identity note…"
+          placeholder="What sets you apart…"
         />
       </div>
   );

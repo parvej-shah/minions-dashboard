@@ -95,21 +95,6 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-surface p-4 rounded-2xl border border-line">
-        <p className="text-sm leading-relaxed text-muted max-w-xl">
-          This is what the AI knows about your brand. Edit anything below, or let AI refresh it for you.
-        </p>
-        <button
-          type="button"
-          onClick={regenerateWithAI}
-          disabled={regenerating || !profile}
-          className="flex items-center gap-1.5 bg-surface-2 hover:bg-[#1E293B] border border-brand/40 text-brand text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm transition-all disabled:opacity-50"
-        >
-          {regenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-          Regenerate with AI
-        </button>
-      </div>
-
       {regenError && (
         <div className="p-3 rounded-xl border border-red-500/30 bg-red-500/5 text-xs text-red-400">{regenError}</div>
       )}
@@ -121,6 +106,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
           items={activeByCategory("POSITIONING")}
           onAdd={directiveActions.add}
           onRemove={directiveActions.remove}
+          audience={icp?.who ?? ""}
         />
 
         {/* Topics */}
@@ -188,6 +174,20 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
         </div>
 
         <CoverAppearanceCard profile={profile} setProfile={setProfile} />
+      </div>
+
+      {/* Kept quiet: it rewrites "What you do" and adds rules, so it is an occasional refresh, not a main action. */}
+      <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-xs text-subtle">
+        <span>Rewrites &ldquo;What you do&rdquo; and adds voice rules from what&apos;s here. Nothing is removed.</span>
+        <button
+          type="button"
+          onClick={regenerateWithAI}
+          disabled={regenerating || !profile}
+          className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-lg px-2 font-semibold text-brand hover:bg-brand/10 disabled:opacity-50"
+        >
+          {regenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+          Refresh with AI
+        </button>
       </div>
     </div>
   );

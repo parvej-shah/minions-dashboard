@@ -59,12 +59,21 @@ async function resolveIdentity(clientId: string, body: JsonObject, industry: str
   };
 }
 
+/**
+ * "What you do": the brief's positioning, which is about the writer, else what
+ * they want to be known for. The audience is only the last resort; saving it
+ * here made Brand show the reader twice, once as the writer's positioning.
+ */
+export function setupPositioning(body: JsonObject, icpDescription: string): string {
+  return asString(body.positioning) || asString(body.content_focus) || icpDescription;
+}
+
 async function upsertBrandProfile(
   clientId: string,
-  input: { icpDescription: string; websiteUrl: string; preset: BrandPreset | undefined; writerExpertise: ReturnType<typeof resolveWriterExpertise> },
+  input: { icpDescription: string; positioning: string; websiteUrl: string; preset: BrandPreset | undefined; writerExpertise: ReturnType<typeof resolveWriterExpertise> },
   identity: Awaited<ReturnType<typeof resolveIdentity>>
 ) {
-  const { icpDescription, websiteUrl, preset, writerExpertise } = input;
+  const { positioning, websiteUrl, preset, writerExpertise } = input;
   const toneFormality = preset?.toneFormality ?? DEFAULT_TONE_FORMALITY;
   const toneCadence = preset?.toneCadence ?? DEFAULT_TONE_CADENCE;
 
@@ -72,7 +81,7 @@ async function upsertBrandProfile(
   await prisma.brandProfile.upsert({
     where: { clientId },
     update: {
-      positioning: icpDescription,
+      positioning,
       ...(websiteUrl ? { companyDomain: websiteUrl } : {}),
       ...(identity.businessName ? { brandName: identity.businessName } : {}),
       ...(identity.logoOnUpdate ? { primaryLogoUrl: identity.logoOnUpdate } : {}),
@@ -85,7 +94,7 @@ async function upsertBrandProfile(
       clientId,
       brandName: identity.brandNameOnCreate,
       companyDomain: websiteUrl,
-      positioning: icpDescription,
+      positioning,
       primaryLogoUrl: identity.logoOnCreate,
       ...DEFAULT_PALETTE,
       toneFormality,
@@ -151,6 +160,7 @@ export async function saveOnboardingSetup(clientId: string, body: JsonObject) {
     clientId,
     {
       icpDescription,
+      positioning: setupPositioning(body, icpDescription),
       websiteUrl: normalizeDomain(asString(body.website_url)) || "",
       preset,
       writerExpertise: resolveWriterExpertise(body.writer_expertise),

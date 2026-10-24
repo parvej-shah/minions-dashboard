@@ -74,6 +74,8 @@ export async function saveWorkspace(fields: WizardFields, brief: Brief, voiceSam
     // writer, so it only stands in when they described no reader.
     icp_description: fields.audienceDescription.trim() || brief.positioning || `${businessName || "My Brand"} provides ${industry} solutions.`,
     content_focus: fields.contentFocus.trim(),
+    // The brief's positioning is about the writer: what Brand shows as "What you do".
+    positioning: brief.positioning.trim(),
     writer_expertise: fields.writerExpertise,
     channels: fields.channels,
     preset_id: fields.selectedPresetId,
