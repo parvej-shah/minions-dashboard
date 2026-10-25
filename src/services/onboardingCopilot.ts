@@ -16,7 +16,7 @@ export async function generateDirectives(body: JsonObject) {
   const audienceDescription = asString(body.audienceDescription);
   const contentFocus = asString(body.contentFocus);
   if (!audienceDescription || !contentFocus) {
-    throw badRequest("audienceDescription and contentFocus are required to create relevant ideas");
+    throw badRequest("Tell Minions what you want to be known for and who reads you, then try again.");
   }
 
   const differentiator = asString(body.differentiatorAnswer);

@@ -8,6 +8,7 @@ import { MEMORY_MIN_CHARS } from "@/constants/contentLanes";
 import { ImportDrop, type DroppedProfile } from "@/components/brandImport/ImportDrop";
 import { ImportLive } from "@/components/brandImport/ImportLive";
 import { ImportReview } from "@/components/brandImport/ImportReview";
+import { fieldsWithImport } from "@/lib/onboardingSubmit";
 import { LessonFooter, LessonHeader, Question, useEnterToContinue } from "./lesson";
 import { AudienceQuestion, FocusQuestion, MIN_ANSWER } from "./BrandQuestions";
 import { StoryQuestion, storyPraise } from "./StoryQuestion";
@@ -47,6 +48,18 @@ function firstScreen(wizard: OnboardingWizardState): Screen {
   return "story";
 }
 
+/**
+ * The first post needs a focus and a reader. An import can miss either, or
+ * the user can drop it in review, so whatever is still missing is asked
+ * before the story rather than failing at "Write my first post".
+ */
+function nextQuestion(wizard: OnboardingWizardState): Screen {
+  const answers = fieldsWithImport(wizard);
+  if (answers.contentFocus.trim().length < MIN_ANSWER) return "focus";
+  if (answers.audienceDescription.trim().length < MIN_ANSWER) return "audience";
+  return "story";
+}
+
 function Lesson({ wizard }: { wizard: OnboardingWizardState }) {
   const [screen, setScreen] = useState<Screen>(() => firstScreen(wizard));
   const [profile, setProfile] = useState<DroppedProfile | null>(null);
@@ -79,8 +92,8 @@ function Lesson({ wizard }: { wizard: OnboardingWizardState }) {
   const BACK: Partial<Record<Screen, Screen>> = {
     reading: "import",
     review: "import",
-    focus: "import",
-    audience: "focus",
+    focus: wizard.brandImport ? "review" : "import",
+    audience: wizard.brandImport ? "review" : "focus",
     story: wizard.brandImport ? "review" : "audience",
   };
   const back = () => {
@@ -164,21 +177,22 @@ function Lesson({ wizard }: { wizard: OnboardingWizardState }) {
           </div>
         </>
       );
-      footer = { label: "Looks right", onContinue: () => go("story"), secondary: secondaryLink("Read it again", () => go("import")) };
+      footer = { label: "Looks right", onContinue: () => go(nextQuestion(wizard)), secondary: secondaryLink("Read it again", () => go("import")) };
       break;
     case "focus":
       body = <FocusQuestion wizard={wizard} />;
-      footer = { label: "Continue", onContinue: () => go("audience"), disabled: !focusOk, praise: focusOk ? "Clear territory. Nice!" : null };
+      footer = { label: "Continue", onContinue: () => go(nextQuestion(wizard)), disabled: !focusOk, praise: focusOk ? "Clear territory. Nice!" : null };
       break;
     case "audience":
       body = <AudienceQuestion wizard={wizard} />;
-      footer = { label: "Continue", onContinue: () => go("story"), disabled: !audienceOk, praise: audienceOk ? "Now we know who's listening." : null };
+      footer = { label: "Continue", onContinue: () => go(nextQuestion(wizard)), disabled: !audienceOk, praise: audienceOk ? "Now we know who's listening." : null };
       break;
     default:
       body = <StoryQuestion wizard={wizard} />;
       footer = {
         label: "Write my first post",
-        onContinue: () => void wizard.writeFirstPost(),
+        // A draft saved before this check existed can still be missing an answer.
+        onContinue: () => (nextQuestion(wizard) === "story" ? void wizard.writeFirstPost() : go(nextQuestion(wizard))),
         disabled: !storyOk,
         praise: storyPraise(storyLength),
       };
