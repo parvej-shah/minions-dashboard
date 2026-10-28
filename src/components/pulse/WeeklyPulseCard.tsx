@@ -21,35 +21,31 @@ const inputClass =
   "w-full rounded-lg border border-line bg-[#0B1016] px-3 py-2 text-sm text-ink placeholder:text-[#475569] focus:border-brand focus:outline-none";
 const MIN_CHARS = 20;
 
-type Draft = CheckedCandidate & { keep: boolean };
-type Followups = { problem: string; who: string; named: "" | "YES" | "NO"; evidence: string };
-const NO_FOLLOWUPS: Followups = { problem: "", who: "", named: "", evidence: "" };
+type Draft = CheckedCandidate & { keep: boolean; open: boolean };
 
 const counts = () => window.dispatchEvent(new Event("minions-counts-updated"));
+// A note the privacy check flagged opens in the full editor; the rest read as plain text.
+const needsLook = (c: CheckedCandidate) => Boolean(c.check?.confidential || c.check?.issues.length);
 
 /**
  * The weekly question at the top of Editorial Studio (phase 6 of
- * docs/product/authority-flywheel-plan.md). Ask, turn the answer into notes,
- * and save only the notes the author keeps. Shows nothing on the weeks it is
- * not open.
+ * docs/product/authority-flywheel-plan.md). One line answers it; Minions turns
+ * the answer into notes the author saves with one click. Shows nothing on the
+ * weeks it is not open.
  */
 export default function WeeklyPulseCard() {
   const [pulse, setPulse] = useState<PulseDTO | null>(null);
   const [answer, setAnswer] = useState("");
-  const [followups, setFollowups] = useState<Followups>(NO_FOLLOWUPS);
-  const [showFollowups, setShowFollowups] = useState(false);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState<null | "answer" | "confirm" | "snooze" | "skip" | "tz">(null);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
   const [browserTz, setBrowserTz] = useState<string | null>(null);
-  // The question waits as one line above the drafts until the author opens it.
-  const [expanded, setExpanded] = useState(false);
 
   const apply = useCallback((p: PulseDTO) => {
     setPulse(p);
-    setDrafts(p.candidates.map((c) => ({ ...c, keep: true })));
+    setDrafts(p.candidates.map((c) => ({ ...c, keep: true, open: needsLook(c) })));
     if (p.answer) setAnswer((a) => a || p.answer || "");
   }, []);
 
@@ -93,9 +89,10 @@ export default function WeeklyPulseCard() {
       counts();
     });
 
+  const longEnough = answer.trim().length >= MIN_CHARS;
   const submit = () =>
     act("answer", async () => {
-      const p = await apiClient.post<PulseDTO>("/api/pulse", { action: "answer", answer, followups });
+      const p = await apiClient.post<PulseDTO>("/api/pulse", { action: "answer", answer });
       apply(p);
       setEditing(false);
     });
@@ -167,28 +164,60 @@ export default function WeeklyPulseCard() {
   const confirming = pulse.state === "CONFIRM" && !editing;
   const kept = drafts.filter((d) => d.keep);
   const blocked = kept.some((d) => d.check?.confidential);
+  const setDraft = (i: number, next: Draft) => setDrafts(drafts.map((x, j) => (j === i ? next : x)));
 
-  if (!confirming && !editing && !expanded && !answer.trim()) {
+  if (!confirming) {
+    // The answer is typed straight into the strip: Enter turns it into notes.
     return (
       <div className="space-y-3">
         {tzBanner}
-        <section className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-coral/30 bg-surface px-4 py-3">
-          <MessageSquareText className="h-4 w-4 shrink-0 text-coral" aria-hidden="true" />
-          <p className="min-w-0 flex-1 text-sm text-ink">
-            <span className="font-semibold text-coral">This week: </span>
-            {pulse.question}
+        <section className="space-y-2 rounded-2xl border border-coral/30 bg-surface px-4 py-3">
+          <p className="flex items-start gap-2 text-sm text-ink">
+            <MessageSquareText className="mt-0.5 h-4 w-4 shrink-0 text-coral" aria-hidden="true" />
+            <span>
+              <span className="font-semibold text-coral">This week: </span>
+              {pulse.question}
+            </span>
           </p>
-          <div className="flex items-center gap-1.5">
-            <button type="button" onClick={() => setExpanded(true)} className={buttonStyles({ size: "sm" })}>
-              Answer
-            </button>
-            <button type="button" disabled={!!busy} onClick={() => void simple("snooze")} className="rounded-lg px-2.5 py-2 text-xs text-muted hover:text-ink disabled:opacity-50 cursor-pointer">
-              Later
-            </button>
-            <button type="button" aria-label="Skip this week" title="Skip this week" disabled={!!busy} onClick={() => void simple("skip")} className="rounded-lg p-2 text-subtle hover:text-ink disabled:opacity-50 cursor-pointer">
-              <X className="h-4 w-4" />
-            </button>
+          <div className="flex flex-wrap items-start gap-2">
+            <textarea
+              rows={1}
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (longEnough && !busy) void submit();
+                }
+              }}
+              maxLength={3000}
+              placeholder="One line is enough, e.g. Agents only open the 3-line call summary, never the transcript."
+              aria-label="Your answer"
+              className={`${inputClass} min-w-0 flex-1 basis-64 resize-none [field-sizing:content] max-h-40`}
+            />
+            <div className="flex items-center gap-1.5">
+              <button type="button" disabled={!!busy || !longEnough} onClick={() => void submit()} className={buttonStyles({ size: "sm" })}>
+                {busy === "answer" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                {busy === "answer" ? "Reading…" : "Save"}
+              </button>
+              {editing ? (
+                <button type="button" onClick={() => setEditing(false)} className="rounded-lg px-2.5 py-2 text-xs text-muted hover:text-ink cursor-pointer">
+                  Back to the notes
+                </button>
+              ) : (
+                <>
+                  <button type="button" disabled={!!busy} onClick={() => void simple("snooze")} className="rounded-lg px-2.5 py-2 text-xs text-muted hover:text-ink disabled:opacity-50 cursor-pointer">
+                    Later
+                  </button>
+                  <button type="button" aria-label="Skip this week" title="Skip this week" disabled={!!busy} onClick={() => void simple("skip")} className="rounded-lg p-2 text-subtle hover:text-ink disabled:opacity-50 cursor-pointer">
+                    <X className="h-4 w-4" />
+                  </button>
+                </>
+              )}
+            </div>
           </div>
+          {answer.trim() && !longEnough && <p className="text-[11px] text-subtle">A few more words, so there is something specific to use.</p>}
+          {error && <p className="text-xs text-red-400">{error}</p>}
         </section>
       </div>
     );
@@ -197,120 +226,57 @@ export default function WeeklyPulseCard() {
   return (
     <div className="space-y-3">
       {tzBanner}
-      <section className="rounded-2xl border border-coral/30 bg-surface p-5 space-y-4">
-        <div className="flex items-start gap-3">
-          <MessageSquareText className="mt-0.5 h-5 w-5 shrink-0 text-coral" />
-          <div className="flex-1 min-w-0">
-            <div className="text-[11px] font-mono uppercase tracking-wider text-coral">This week</div>
-            <h2 className="text-base font-semibold text-ink">{pulse.question}</h2>
-            <p className="mt-0.5 text-xs text-muted">
-              {confirming
-                ? "Here is what Minions took from your answer. Edit or drop anything, then save. Nothing is stored until you do."
-                : "A few specific sentences are enough. Minions turns them into notes you confirm, and builds ideas only you could write from them."}
-            </p>
-          </div>
-          {!confirming && (
-            <button type="button" aria-label="Skip this week" disabled={!!busy} onClick={() => void simple("skip")} className="text-subtle hover:text-ink cursor-pointer">
-              <X className="h-4 w-4" />
-            </button>
-          )}
+      <section className="rounded-2xl border border-coral/30 bg-surface p-4 space-y-3">
+        <div className="flex items-start gap-2">
+          <MessageSquareText className="mt-0.5 h-4 w-4 shrink-0 text-coral" aria-hidden="true" />
+          <p className="text-sm text-ink">
+            <span className="font-semibold text-coral">From your answer: </span>
+            {drafts.length ? "save these notes for future posts. Nothing is stored until you do." : "nothing specific enough to save. Add what you did, learned or noticed."}
+          </p>
         </div>
 
-        {!confirming ? (
-          <div className="space-y-3">
-            <textarea
-              rows={4}
-              autoFocus={expanded}
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              maxLength={3000}
-              placeholder="e.g. Shipped the call-summary check for the pilot. I assumed agents wanted transcripts; they only open the 3-line summary."
-              aria-label="Your answer"
-              className={`${inputClass} resize-y`}
-            />
-            {showFollowups ? (
-              <div className="grid gap-2 sm:grid-cols-2">
-                <input className={inputClass} placeholder="The problem it solves (optional)" value={followups.problem} onChange={(e) => setFollowups({ ...followups, problem: e.target.value })} />
-                <input className={inputClass} placeholder="Who it helps (optional)" value={followups.who} onChange={(e) => setFollowups({ ...followups, who: e.target.value })} />
-                <input className={inputClass} placeholder="Any evidence: a number, a reaction (optional)" value={followups.evidence} onChange={(e) => setFollowups({ ...followups, evidence: e.target.value })} />
-                <div className="flex items-center gap-1.5 text-xs text-muted">
-                  <span className="mr-1">Can the specifics be named?</span>
-                  {(["YES", "NO", ""] as const).map((v) => (
-                    <button
-                      key={v || "unsure"}
-                      type="button"
-                      onClick={() => setFollowups({ ...followups, named: v })}
-                      className={`rounded-lg border px-2.5 py-1.5 cursor-pointer ${followups.named === v ? "border-brand bg-brand/10 text-ink" : "border-line"}`}
-                    >
-                      {v === "YES" ? "Yes" : v === "NO" ? "No" : "Not sure"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <button type="button" onClick={() => setShowFollowups(true)} className="text-xs text-brand hover:underline cursor-pointer">
-                + Add detail: the problem, who it helps, can it be named, evidence
-              </button>
-            )}
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                disabled={!!busy || answer.trim().length < MIN_CHARS}
-                onClick={() => void submit()}
-                className={buttonStyles({ size: "sm" })}
-              >
-                {busy === "answer" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                {busy === "answer" ? "Reading your update…" : "Turn into notes"}
-              </button>
-              {editing ? (
-                <button type="button" onClick={() => setEditing(false)} className="rounded-lg px-3 py-2 text-xs text-muted hover:text-ink cursor-pointer">
-                  Back to the notes
-                </button>
+        {drafts.length > 0 && (
+          <ul className="space-y-2">
+            {drafts.map((d, i) =>
+              !d.keep ? null : d.open ? (
+                <li key={i}>
+                  <CandidateEditor draft={d} onChange={(next) => setDraft(i, next)} />
+                </li>
               ) : (
-                <>
-                  <button type="button" disabled={!!busy} onClick={() => void simple("snooze")} className="rounded-lg border border-line px-3 py-2 text-xs text-ink disabled:opacity-50 cursor-pointer">
-                    Ask me tomorrow
+                <li key={i} className="flex items-start gap-2 rounded-lg border border-line bg-[#0B1016] px-3 py-2 text-sm text-ink">
+                  <span className="flex-1">{d.content}</span>
+                  <button type="button" onClick={() => setDraft(i, { ...d, open: true })} className="text-xs text-brand hover:underline cursor-pointer">
+                    Edit
                   </button>
-                  <button type="button" disabled={!!busy} onClick={() => void simple("skip")} className="rounded-lg px-3 py-2 text-xs text-muted hover:text-ink disabled:opacity-50 cursor-pointer">
-                    Skip this week
+                  <button type="button" aria-label="Drop this note" title="Drop this note" onClick={() => setDraft(i, { ...d, keep: false })} className="text-subtle hover:text-ink cursor-pointer">
+                    <X className="h-3.5 w-3.5" />
                   </button>
-                </>
-              )}
-              <span className="ml-auto text-[11px] text-subtle">{answer.trim().length < MIN_CHARS ? `At least ${MIN_CHARS} characters` : ""}</span>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {drafts.length === 0 && (
-              <p className="rounded-lg border border-line bg-[#0B1016] p-3 text-sm text-muted">
-                Nothing specific enough to save. Add what you did, learned or noticed, and Minions will try again.
-              </p>
+                </li>
+              )
             )}
-            {drafts.map((d, i) => (
-              <CandidateEditor key={i} draft={d} onChange={(next) => setDrafts(drafts.map((x, j) => (j === i ? next : x)))} />
-            ))}
-            <div className="flex flex-wrap items-center gap-2">
-              {drafts.length > 0 && (
-                <button
-                  type="button"
-                  disabled={!!busy || kept.length === 0 || blocked || kept.some((d) => d.content.trim().length < MIN_CHARS)}
-                  onClick={() => void confirm(drafts)}
-                  className={buttonStyles({ size: "sm" })}
-                >
-                  {busy === "confirm" && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                  Save {kept.length} note{kept.length === 1 ? "" : "s"}
-                </button>
-              )}
-              <button type="button" disabled={!!busy} onClick={() => setEditing(true)} className="rounded-lg border border-line px-3 py-2 text-xs text-ink disabled:opacity-50 cursor-pointer">
-                Edit my answer
-              </button>
-              <button type="button" disabled={!!busy} onClick={() => void confirm([])} className="rounded-lg px-3 py-2 text-xs text-muted hover:text-ink disabled:opacity-50 cursor-pointer">
-                Save nothing this week
-              </button>
-              {blocked && <span className="text-[11px] text-red-400">Remove the confidential detail before saving.</span>}
-            </div>
-          </div>
+          </ul>
         )}
+
+        <div className="flex flex-wrap items-center gap-2">
+          {kept.length > 0 && (
+            <button
+              type="button"
+              disabled={!!busy || blocked || kept.some((d) => d.content.trim().length < MIN_CHARS)}
+              onClick={() => void confirm(drafts)}
+              className={buttonStyles({ size: "sm" })}
+            >
+              {busy === "confirm" && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              Save {kept.length} note{kept.length === 1 ? "" : "s"}
+            </button>
+          )}
+          <button type="button" disabled={!!busy} onClick={() => setEditing(true)} className="rounded-lg border border-line px-3 py-2 text-xs text-ink disabled:opacity-50 cursor-pointer">
+            Edit my answer
+          </button>
+          <button type="button" disabled={!!busy} onClick={() => void confirm([])} className="rounded-lg px-3 py-2 text-xs text-muted hover:text-ink disabled:opacity-50 cursor-pointer">
+            Save nothing this week
+          </button>
+          {blocked && <span className="text-[11px] text-red-400">Remove the confidential detail before saving.</span>}
+        </div>
         {error && <p className="text-xs text-red-400">{error}</p>}
       </section>
     </div>

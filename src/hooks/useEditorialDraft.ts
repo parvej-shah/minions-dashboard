@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { blogUrl, normalizeDomain } from "@/constants/config";
 import type { AssetItem, AssetStatus, CoverSpecDTO } from "@/types";
+import { queueFor, stepWithin, type QueueFilter } from "@/lib/drafts/queue";
 
 export type PublishState = "idle" | "pending" | "success" | "error";
 
@@ -14,8 +15,9 @@ export interface EditorialDraftState {
   activeAsset: AssetItem | null;
   selectedAssetId: string | null;
   selectAsset: (id: string) => void;
-  nextDraft: () => void;
-  prevDraft: () => void;
+  /** Steps through the drafts the Studio's filter shows. */
+  nextDraft: (filter: QueueFilter) => void;
+  prevDraft: (filter: QueueFilter) => void;
 
   edited: {
     title: string;
@@ -128,7 +130,8 @@ export function useEditorialDraft(
         const matched = initialDraftId
           ? data.find((a) => a.id === initialDraftId || a.slug === initialDraftId)
           : undefined;
-        setSelectedAssetId(matched?.id ?? data[0]?.id ?? null);
+        // With no link to a draft, open on the first one waiting for review.
+        setSelectedAssetId(matched?.id ?? data.find((a) => a.status === "PENDING_REVIEW")?.id ?? data[0]?.id ?? null);
       } catch (err) {
         if (!cancelled) setLoadError(toErrorMessage(err, "Could not load drafts"));
       } finally {
@@ -221,11 +224,10 @@ export function useEditorialDraft(
   const selectAsset = useCallback((id: string) => setSelectedAssetId(id), []);
 
   const step = useCallback(
-    (delta: number) => {
-      if (assets.length <= 1 || !activeAssetId) return;
-      const index = assets.findIndex((a) => a.id === activeAssetId);
-      const next = (index + delta + assets.length) % assets.length;
-      setSelectedAssetId(assets[next].id);
+    (delta: number, filter: QueueFilter) => {
+      if (!activeAssetId) return;
+      const next = stepWithin(queueFor(assets, filter), assets, activeAssetId, delta);
+      if (next) setSelectedAssetId(next.id);
     },
     [assets, activeAssetId]
   );
@@ -502,8 +504,8 @@ export function useEditorialDraft(
     activeAsset,
     selectedAssetId: activeAssetId,
     selectAsset,
-    nextDraft: () => step(1),
-    prevDraft: () => step(-1),
+    nextDraft: (filter) => step(1, filter),
+    prevDraft: (filter) => step(-1, filter),
 
     edited,
     setEditedTitle: (v) => setEdited((p) => ({ ...p, title: v })),

@@ -495,3 +495,34 @@ reaches people who open the app on the right week.
 **Alternatives considered:** Emailing the weekly question (reverses D16; left
 for a separate call).
 **Status:** active
+
+## 2026-10-25 — Core promise: post consistently, in your own voice, with little effort
+
+**Decision:** The product's main job is three things together: the user posts
+on LinkedIn every week, the posts sound like them (not AI slop), and it takes
+little of their time or effort. Research, features and positioning are judged
+against these three.
+**Why:** The user research (two desk reports, 2026-10-25) kept returning to
+the same causes of going quiet: no time, blank page, and drafts that don't
+sound like the person. Staying lean means one promise, not a list of features.
+**Alternatives considered:** A comment helper (drafting comments on prospects'
+posts). Parked, not rejected: revisit after the core promise works.
+**Status:** active
+
+## 2026-10-28 — Less effort each week: a one-line weekly answer, review one draft at a time
+
+**Decision:** The weekly question is answered in the strip at the top of
+Studio: type a line, press Enter, then save the notes Minions took from it in
+one click (notes the privacy check flags still open in the full editor). The
+optional follow-up fields leave the card. Studio opens on the drafts waiting
+for review, its arrows step through only those, and a published or scheduled
+draft offers the next one. The first draft Minions wrote is now kept on the
+first edit, so how much authors rewrite can be measured.
+**Why:** Our own data (2026-10-28): only 2 workspaces ever answered the weekly
+question, and 42 of 75 drafts sat unreviewed. The Reddit research says
+consistent posters jot short notes and batch their posting, and that
+perfectionism stops people.
+**Alternatives considered:** Saving notes without the author's confirmation
+(drops the phase 6 rule that the author confirms; not needed yet). Emailing the
+question (reverses D16; still a separate call).
+**Status:** active

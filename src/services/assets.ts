@@ -7,6 +7,7 @@ import type { JsonObject } from "@/server/http/body";
 import { badRequest, conflict, notFound } from "@/server/http/errors";
 import { isPublished, refreshCoverIfStale } from "@/services/cover";
 import { followUpNotReady } from "@/lib/followUp";
+import { words } from "@/lib/drafts/editShare";
 import { releaseIdeaForRedraft, removeFromBlog, syncAssetToBlog, type BlogEditFields } from "@/services/publishing";
 
 export const ownedAssetWhere = (clientId: string, idOrSlug: string): Prisma.AssetWhereInput => ({
@@ -91,12 +92,32 @@ function blogEdits(body: JsonObject): BlogEditFields {
 
 const COVER_LINE = /^!\[[^\]]*\]\(([^)]*)\)/;
 
+type FirstDraftFields = { content: string; linkedinVariant: string | null; firstContent: string | null; firstLinkedin: string | null };
+
+/**
+ * The text Minions wrote, kept on the reviewer's first real change to it so
+ * edit size can be measured (scripts/edit-report.ts). Never overwritten.
+ */
+function keepFirstDraft(owned: FirstDraftFields, body: JsonObject): Prisma.AssetUncheckedUpdateInput {
+  const changed = (before: string | null, after: unknown) =>
+    typeof after === "string" && words(before).join(" ") !== words(after).join(" ");
+  const variants = (body.variants ?? {}) as Record<string, unknown>;
+  const linkedin = body.linkedin_variant ?? variants.linkedin;
+  return {
+    ...(owned.firstContent === null && changed(owned.content, body.content ?? body.body_content) && { firstContent: owned.content }),
+    ...(owned.firstLinkedin === null && owned.linkedinVariant && changed(owned.linkedinVariant, linkedin) && { firstLinkedin: owned.linkedinVariant }),
+  };
+}
+
 export async function updateAsset(clientId: string, idOrSlug: string, body: JsonObject) {
   if (body.status === "SCHEDULED") throw badRequest("Use POST /api/assets/{id}/schedule to schedule a post");
 
   const owned = await prisma.asset.findFirst({
     where: ownedAssetWhere(clientId, idOrSlug),
-    select: { id: true, status: true, publishedAt: true, heroImageUrl: true, followUpOf: true, followUpFormat: true, carouselSpec: true },
+    select: {
+      id: true, status: true, publishedAt: true, heroImageUrl: true, followUpOf: true, followUpFormat: true, carouselSpec: true,
+      content: true, linkedinVariant: true, firstContent: true, firstLinkedin: true,
+    },
   });
   if (!owned) throw notFound("Asset not found");
   // An editor open since the cover was redrawn still holds the old cover line,
@@ -118,7 +139,7 @@ export async function updateAsset(clientId: string, idOrSlug: string, body: Json
   if (goingOut) await refreshCoverIfStale(owned.id);
   let updated = await prisma.asset.update({
     where: { id: owned.id },
-    data: assetUpdateData(body, parseChannelsChange(body, owned)),
+    data: { ...assetUpdateData(body, parseChannelsChange(body, owned)), ...keepFirstDraft(owned, body) },
     include: { claims: true },
   });
   const variants = (body.variants ?? {}) as Record<string, unknown>;

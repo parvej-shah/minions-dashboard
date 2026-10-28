@@ -324,6 +324,10 @@ model Asset {
   // out in: the original's id, and CAROUSEL or COVER. Null on every other draft.
   followUpOf          String?   @map("follow_up_of")
   followUpFormat      String?   @map("follow_up_format")
+  // The text Minions wrote, kept on the reviewer's first change to it, so
+  // edit size can be measured (scripts/edit-report.ts). Never overwritten.
+  firstContent        String?   @map("first_content") @db.Text
+  firstLinkedin       String?   @map("first_linkedin_variant") @db.Text
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at")
 

@@ -6,16 +6,16 @@ import { ChevronLeft, ChevronRight, Image as ImageIcon } from "lucide-react";
 import type { AssetItem } from "@/types";
 import { statusLabel } from "@/lib/drafts/statusLabel";
 import { formatDate } from "@/utils/date";
+import { queueFor, type QueueFilter } from "@/lib/drafts/queue";
 
 import { segment } from "@/components/ui/segment";
-export type QueueFilter = "ALL" | "PENDING_REVIEW" | "SCHEDULED" | "PUBLISHED" | "UNPUBLISHED" | "DRAFT";
+export type { QueueFilter };
 
 export interface QueueRibbonProps {
   assets: AssetItem[];
   activeAsset: AssetItem;
   listFilter: QueueFilter;
   setListFilter: (filter: QueueFilter) => void;
-  currentAssetIndex: number;
   onSelect: (id: string) => void;
   onPrev: () => void;
   onNext: () => void;
@@ -29,7 +29,6 @@ export default function QueueRibbon({
   activeAsset,
   listFilter,
   setListFilter,
-  currentAssetIndex,
   onSelect,
   onPrev,
   onNext,
@@ -47,13 +46,11 @@ export default function QueueRibbon({
     (a) => Boolean(a.live_blog_url) && a.status !== "PUBLISHED"
   ).length;
 
-  const queueAssets =
-    listFilter === "ALL" || listFilter === "DRAFT"
-      ? assets
-      : assets.filter((a) => a.status === listFilter);
+  const queueAssets = queueFor(assets, listFilter);
   const publishedCount = assets.filter((a) => a.status === "PUBLISHED").length;
-  // With one draft there is nothing to step through.
-  const showStepper = assets.length > 1;
+  // The arrows step through the drafts this filter shows; with one there is nothing to step through.
+  const currentAssetIndex = queueAssets.findIndex((a) => a.id === activeAsset.id);
+  const showStepper = queueAssets.length > 1;
   const pill = (filter: QueueFilter, label: string) => (
     <button
       onClick={() => setListFilter(filter)}
@@ -73,7 +70,7 @@ export default function QueueRibbon({
         <ChevronLeft className="w-4 h-4" />
       </button>
       <span className="whitespace-nowrap px-1.5 text-[11px] font-bold text-brand tabular-nums select-none">
-        {currentAssetIndex + 1} / {assets.length}
+        {currentAssetIndex >= 0 ? `${currentAssetIndex + 1} / ${queueAssets.length}` : `${queueAssets.length} left`}
       </span>
       <button
         onClick={onNext}

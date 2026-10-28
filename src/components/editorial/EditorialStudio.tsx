@@ -27,6 +27,7 @@ import LinkedInModal from "@/components/distribution/LinkedInModal";
 import { plainReviewNotes } from "@/lib/drafts/plainNotes";
 import { postGoesTo } from "@/constants/postChannels";
 import { liveLinks } from "@/lib/drafts/liveLinks";
+import { nextPending, queueFor } from "@/lib/drafts/queue";
 
 function EditorialStudioSkeleton() {
   return (
@@ -170,7 +171,7 @@ export default function EditorialStudio({
     </>
   );
 
-  const [listFilter, setListFilter] = useState<QueueFilter>("ALL");
+  const [chosenFilter, setListFilter] = useState<QueueFilter | null>(null);
   const [editorMode, setEditorMode] = useState<EditorMode>("preview");
   const [socialTab, setSocialTab] = useState<SocialTab>("LINKEDIN");
   // Whether LinkedIn gets this draft's carousel, as the carousel card last loaded or set it.
@@ -202,9 +203,15 @@ export default function EditorialStudio({
 
   const { activeAsset, assets, edited } = draft;
 
-  const currentAssetIndex = activeAsset
-    ? assets.findIndex((a) => a.id === activeAsset.id)
-    : -1;
+  const pending = queueFor(assets, "PENDING_REVIEW");
+  // Until the reviewer picks a filter, Studio shows the drafts waiting for
+  // review, unless a link named a draft or none is waiting.
+  const listFilter: QueueFilter = chosenFilter ?? (!initialDraftId && pending.length > 0 ? "PENDING_REVIEW" : "ALL");
+  const pendingIndex = activeAsset ? pending.findIndex((a) => a.id === activeAsset.id) : -1;
+  const nextDraft = activeAsset ? nextPending(assets, activeAsset.id) : null;
+  const nextToReview = nextDraft
+    ? { left: pending.filter((a) => a.id !== activeAsset?.id).length, open: () => draft.selectAsset(nextDraft.id) }
+    : null;
 
   const wordCount = useMemo(
     () => edited.body.trim().split(/\s+/).filter(Boolean).length,
@@ -283,10 +290,10 @@ export default function EditorialStudio({
 
       if (e.key === "[" || (e.altKey && e.key === "ArrowLeft")) {
         e.preventDefault();
-        draft.prevDraft();
+        draft.prevDraft(listFilter);
       } else if (e.key === "]" || (e.altKey && e.key === "ArrowRight")) {
         e.preventDefault();
-        draft.nextDraft();
+        draft.nextDraft(listFilter);
       } else if (e.key === "1") {
         setEditorMode("preview");
       } else if (e.key === "2") {
@@ -359,18 +366,17 @@ export default function EditorialStudio({
         activeAsset={activeAsset}
         listFilter={listFilter}
         setListFilter={setListFilter}
-        currentAssetIndex={currentAssetIndex}
         onSelect={draft.selectAsset}
-        onPrev={draft.prevDraft}
-        onNext={draft.nextDraft}
+        onPrev={() => draft.prevDraft(listFilter)}
+        onNext={() => draft.nextDraft(listFilter)}
         action={panelButtons}
       />
 
       <DraftHeader
         activeAsset={activeAsset}
         title={edited.title}
-        currentAssetIndex={currentAssetIndex}
-        totalDrafts={assets.length}
+        currentAssetIndex={pendingIndex}
+        totalDrafts={pending.length}
         isStandaloneRoute={isStandaloneRoute}
         blogEnabled={blogEnabled}
       />
@@ -440,6 +446,7 @@ export default function EditorialStudio({
               setDeleteConfirmOpen={setDeleteConfirmOpen}
               blogEnabled={blogEnabled}
               onPostAgain={() => void draft.postAgain().then((m) => m && toast.show(m))}
+              nextToReview={nextToReview}
               isPostingAgain={draft.isPostingAgain}
             />
           </div>

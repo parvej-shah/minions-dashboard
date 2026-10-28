@@ -5,6 +5,7 @@ import {
   CalendarClock,
   CheckCircle2,
   AlertTriangle,
+  ArrowRight,
   ExternalLink,
   EyeOff,
   Globe,
@@ -43,6 +44,8 @@ export interface ReviewDockProps {
   /** Drafts a second LinkedIn post of this published draft in the format it did not use. */
   onPostAgain: () => void;
   isPostingAgain: boolean;
+  /** Once this draft is out of the queue: how many still wait, and how to open the next. */
+  nextToReview?: { left: number; open: () => void } | null;
 }
 
 /**
@@ -65,6 +68,7 @@ export default function ReviewDock({
   blogEnabled = true,
   onPostAgain,
   isPostingAgain,
+  nextToReview,
 }: ReviewDockProps) {
   const [picking, setPicking] = useState(false);
   const [pickingFor, setPickingFor] = useState<string | null>(null);
@@ -121,6 +125,13 @@ export default function ReviewDock({
             )}
           </div>
           {intro && <p className="-mt-2 text-xs leading-relaxed text-muted">{intro}</p>}
+
+          {nextToReview && (isPublished || activeAsset.status === "SCHEDULED") && (
+            <button type="button" onClick={nextToReview.open} className={buttonStyles({ size: "sm", block: true })}>
+              <span>Next draft ({nextToReview.left} to review)</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          )}
 
           {/* Main Publish Decision & Live Visibility Hub */}
           {isPublished ? (
