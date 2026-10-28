@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Minions.AI — Autonomous Agent Cockpit',
+    name: 'Minions.AI — LinkedIn posts in your voice',
     short_name: 'Minions.AI',
-    description: 'Executive Multi-Agent Orchestration, Editorial Staging & Omnichannel Broadcast Command Center',
+    description: 'Weekly LinkedIn posts from your own experience, in your own voice.',
     start_url: '/',
     id: '/',
     display: 'standalone',

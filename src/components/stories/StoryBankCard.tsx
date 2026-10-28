@@ -7,6 +7,7 @@ import { apiClient } from "@/lib/api-client";
 import { FULL_AT, SESSION_SIZE } from "@/lib/storyBank";
 import type { StoryBankDTO } from "@/services/storyBank";
 import StorySession from "./StorySession";
+import PasteCard from "./PasteCard";
 import type { SessionResult } from "./types";
 import { chunky } from "./chunky";
 
@@ -75,6 +76,9 @@ export default function StoryBankCard() {
       </div>
     );
   }
+
+  // Nothing of the author's own yet: pasting what they already wrote is the quickest start.
+  if (bank && bank.total === 0 && !dismissed) return <PasteCard onDismiss={dismiss} onDone={close} />;
 
   // Quiet by default: only when the bank is low and the author has added nothing this week.
   if (!bank || !bank.low || bank.added_this_week || dismissed || !bank.prompts.length) return null;

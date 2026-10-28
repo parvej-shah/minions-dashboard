@@ -13,8 +13,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Minions.AI — Autonomous Agent Cockpit",
-  description: "Executive Multi-Agent Orchestration, Editorial Staging & Omnichannel Broadcast Command Center",
+  title: { default: "Minions.AI — LinkedIn posts in your voice", template: "%s — Minions.AI" },
+  description: "Weekly LinkedIn posts from your own experience, in your own voice.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

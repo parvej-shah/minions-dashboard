@@ -13,13 +13,16 @@ const unusedStock = rawRows.filter(r => {
   return UNUSED_STATUSES.includes(status) && !claimedAt && verdict !== 'REJECT';
 });
 
-// Stop harvesting once 15 unused ideas are in stock.
-const isFull = unusedStock.length >= 15;
+// At most 10 unused ideas wait at once: stop harvesting when the stock is
+// full, and tell Assign Idea IDs how many new ideas still fit.
+const IDEA_CAP = 10;
+const isFull = unusedStock.length >= IDEA_CAP;
 
 return [{
   json: {
     backlog_count: unusedStock.length,
     skip_harvest: isFull,
+    room: Math.max(0, IDEA_CAP - unusedStock.length),
     existing_rows: rawRows
   }
 }];

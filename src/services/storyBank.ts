@@ -87,11 +87,37 @@ export async function extractStory(clientId: string, body: { prompt_id?: unknown
   return { candidates };
 }
 
-/** Saves the items the author kept from one answer. */
-export async function saveStories(clientId: string, body: { items?: unknown }): Promise<{ saved: number }> {
+/** Posts or notes pasted in one go: longer than an answer, a few posts' worth. */
+export const PASTE_MAX_CHARS = 6000;
+const PASTE_QUESTION = "Paste 2-3 posts or notes you have written before. Keep only what the author did, saw or learned, not general advice.";
+/** The writer copies the voice of a few samples; more than this adds nothing. */
+const MAX_VOICE_SAMPLES = 3;
+
+/** Posts or notes the author wrote before, in for the same checked items as an answer. Nothing is saved. */
+export async function extractPaste(clientId: string, body: { text?: unknown }): Promise<StoryExtractDTO> {
+  const text = typeof body.text === "string" ? body.text.trim() : "";
+  if (text.length < PULSE_ANSWER_MIN_CHARS) throw badRequest("Paste at least one post or note, so there is something to work from.");
+  if (text.length > PASTE_MAX_CHARS) throw badRequest(`Keep it under ${PASTE_MAX_CHARS} characters, about three posts.`);
+
+  const icp = await prisma.icpProfile.findUnique({ where: { clientId }, select: { who: true } });
+  const extracted = await extractItems(text, {}, icp?.who || undefined, PASTE_QUESTION);
+  if (extracted.dropped.length) console.info(`[story-bank] ${clientId}: dropped ${extracted.dropped.length} pasted item(s)`, extracted.dropped);
+  const candidates = await Promise.all(extracted.candidates.map(async (c) => ({ ...c, check: await checkMemory(c.content, c.disclosure).catch(() => null) })));
+  return { candidates };
+}
+
+/**
+ * Saves the items the author kept from one answer. Pasted posts (`sample`) are
+ * also kept as a voice sample while the workspace has fewer than three.
+ */
+export async function saveStories(clientId: string, body: { items?: unknown; sample?: unknown }): Promise<{ saved: number }> {
   const items = await parseConfirmedItems(clientId, body.items);
   if (!items.length) return { saved: 0 };
   await prisma.professionalMemory.createMany({ data: items.map((i) => ({ clientId, ...i, source: "BRAND_PAGE" })) });
+  const sample = typeof body.sample === "string" ? body.sample.trim().slice(0, PASTE_MAX_CHARS) : "";
+  if (sample.length >= PULSE_ANSWER_MIN_CHARS && (await prisma.toneExample.count({ where: { clientId } })) < MAX_VOICE_SAMPLES) {
+    await prisma.toneExample.create({ data: { clientId, content: sample, source: "pasted" } });
+  }
   return { saved: items.length };
 }
 

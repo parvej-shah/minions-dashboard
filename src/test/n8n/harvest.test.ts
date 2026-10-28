@@ -129,7 +129,7 @@ describe("model reply -> gate -> ideas table", () => {
     ],
   };
 
-  async function run() {
+  async function run(room = 10) {
     const ctx = brandContext();
     const payload = await built(ctx);
     const parsed = await runCodeNode(H, "Parse Harvest JSON", { input: [{ choices: [{ message: { content: JSON.stringify(reply) } }] }], nodes: { "Build Harvest Payload": [payload] } });
@@ -138,7 +138,7 @@ describe("model reply -> gate -> ideas table", () => {
     const gated = gateIdeas(gateInputFromContext({ mode: "harvest", ideas: attached, context: ctx, signals: payload.market_signals as Json[] }));
     const applied = await runCodeNode(H, "Apply Harvest Gate", { input: [{ ideas: gated.map((g, i) => ({ ...attached[i], ...g })) }] });
     const merged = await runCodeNode(H, "Merge Craft Into Ideas", { nodes: { "Apply Harvest Gate": applied, "Build Craft Payload": [{ skip_craft: true }] } });
-    const rows = await runCodeNode(H, "Assign Idea IDs", { nodes: { "Merge Craft Into Ideas": merged, "Read Global Max Idea ID": [{ id: "IDEA-0041" }] } });
+    const rows = await runCodeNode(H, "Assign Idea IDs", { nodes: { "Merge Craft Into Ideas": merged, "Read Global Max Idea ID": [{ id: "IDEA-0041" }], "Backlog Guard": [{ room }] } });
     return { ctx, applied, rows };
   }
 
@@ -148,6 +148,12 @@ describe("model reply -> gate -> ideas table", () => {
     expect(rows.map((r) => r.status)).toEqual(["REFINED", "REJECTED", "REFINED"]);
     expect(rows[1].rejection_reason).toMatch(/ICP/);
     expect(rows.map((r) => r.idea_id)).toEqual(["IDEA-0042", "IDEA-0043", "IDEA-0044"]);
+  });
+
+  it("keeps only as many new ideas as the backlog has room for, plus the archived rejects", async () => {
+    const { rows } = await run(1);
+    expect(rows.map((r) => r.gate_verdict)).toEqual(["PASS", "REJECT"]);
+    expect((await run(0)).rows.map((r) => r.gate_verdict)).toEqual(["REJECT"]);
   });
 
   it("carries the flywheel fields the gate set", async () => {
@@ -204,20 +210,20 @@ describe("the backlog guard", () => {
   const rows = (n: number, extra: Json) => Array.from({ length: n }, (_, i) => ({ idea_id: `IDEA-${i}`, status: "REFINED", claimed_at: null, ...extra }));
   const guard = async (input: Json[]) => (await runCodeNode(H, "Backlog Guard", { input }))[0];
 
-  it("skips once 15 unused ideas are in stock, whatever the gate said", async () => {
-    const stock = [...rows(5, { gate_verdict: "PASS" }), ...rows(5, { gate_verdict: "BELOW_BAR" }), ...rows(4, { gate_verdict: null }), ...rows(1, { status: "QUEUED", gate_verdict: null })];
-    expect(await guard(stock)).toMatchObject({ backlog_count: 15, skip_harvest: true });
-    expect(await guard(stock.slice(1))).toMatchObject({ backlog_count: 14, skip_harvest: false });
+  it("skips once 10 unused ideas are in stock, whatever the gate said", async () => {
+    const stock = [...rows(4, { gate_verdict: "PASS" }), ...rows(3, { gate_verdict: "BELOW_BAR" }), ...rows(2, { gate_verdict: null }), ...rows(1, { status: "QUEUED", gate_verdict: null })];
+    expect(await guard(stock)).toMatchObject({ backlog_count: 10, skip_harvest: true, room: 0 });
+    expect(await guard(stock.slice(3))).toMatchObject({ backlog_count: 7, skip_harvest: false, room: 3 });
   });
 
   it("does not count rejected, claimed or drafted ideas as stock", async () => {
     const out = await guard([
-      ...rows(10, { gate_verdict: "PASS" }),
+      ...rows(6, { gate_verdict: "PASS" }),
       ...rows(5, { gate_verdict: "REJECT" }),
       ...rows(5, { status: "REJECTED", gate_verdict: null }),
       ...rows(5, { gate_verdict: "PASS", claimed_at: "2026-10-07T00:00:00Z" }),
       ...rows(5, { status: "REVIEW", gate_verdict: "PASS" }),
     ]);
-    expect(out).toMatchObject({ backlog_count: 10, skip_harvest: false });
+    expect(out).toMatchObject({ backlog_count: 6, skip_harvest: false, room: 4 });
   });
 });

@@ -313,7 +313,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
     <ol class="steps">
       <li class="io"><b>Resolve Client ID</b>: takes <code>client_id</code> and the run id from the webhook body. It starts only from the webhook (dispatcher, dashboard, or 02 when no eligible idea is available) or a manual run.</li>
       <li class="io"><b>Read Ideas</b>: loads up to 2,000 of the tenant's ideas.</li>
-      <li class="gate"><b>Backlog Guard</b>: when 15 unused ideas (any gate verdict but REJECT) are in stock, the run skips and reports <code>skipped: true</code> in the callback.</li>
+      <li class="gate"><b>Backlog Guard</b>: when 10 unused ideas (any gate verdict but REJECT) are in stock, the run skips and reports <code>skipped: true</code> in the callback; otherwise it passes <code>room</code> (10 minus the stock), and Assign Idea IDs keeps only that many new non-rejected ideas.</li>
       <li class="io"><b>Fetch Brand Context</b>: branches into two parallel paths, A and B.</li>
       <li class="ai"><b>A · Refine</b>: any <code>NEW</code> rows are sent to the refiner (prompt below), gated in <code>refine</code> mode (a person's note is never dropped, only marked below the bar), and saved as <code>REFINED</code> with source <code>MANUAL</code>.</li>
       <li class="io"><b>B · Expand Tenant Sources → RSS</b>: reads one feed per active source. Without sources it falls back to Hacker News, TechCrunch AI and the n8n blog. Feed health goes to <code>/api/internal/source-status</code>.</li>
@@ -418,7 +418,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
     <thead><tr><th>Guard</th><th>Where</th><th>Rule</th><th>Effect</th></tr></thead>
     <tbody>
       <tr><td>Harvest budget</td><td>00 → /api/internal/harvest-slot</td><td>System-wide daily run limit across tenants</td><td>Tenant skipped for the day</td></tr>
-      <tr><td>Backlog guard</td><td>01 Backlog Guard</td><td>15 unused ideas (any gate verdict but REJECT)</td><td>Harvest skipped</td></tr>
+      <tr><td>Backlog guard</td><td>01 Backlog Guard</td><td>10 unused ideas (any gate verdict but REJECT); a run adds at most 10 minus the stock</td><td>Harvest skipped or trimmed</td></tr>
       <tr><td>Degraded context</td><td>01 Build Harvest Payload</td><td><code>context_complete=false</code> or empty rotation</td><td>Run throws</td></tr>
       <tr><td>Authority gate</td><td>01 Gate Harvest Ideas → /api/internal/harvest/gate</td><td>No ICP problem; restated thesis (Jaccard ≥ 0.5); cited memory missing, misquoted or unused; unsupported figure; Generalize specifics</td><td>Stored REJECTED with reasons</td></tr>
       <tr><td>Below the bar</td><td>same</td><td>No quoted, used memory item or proof</td><td>Kept, <code>BELOW_BAR</code>, LOW priority</td></tr>

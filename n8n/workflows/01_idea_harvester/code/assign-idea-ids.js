@@ -1,6 +1,16 @@
 // Reads the craft-merged output, not Dedupe Ideas directly -- craft_notes
 // and craft_source_url are attached downstream of dedupe.
-const ideas = $('Merge Craft Into Ideas').all().map(i => i.json);
+const merged = $('Merge Craft Into Ideas').all().map(i => i.json);
+
+// Only as many kept ideas as the backlog has room for (Backlog Guard caps the
+// unused stock at 10); rejected ideas are stored as archive and never count.
+const room = Number($('Backlog Guard').first().json.room ?? Infinity);
+let kept = 0;
+const ideas = merged.filter(idea => {
+  if ((idea.gate_verdict || '').toUpperCase() === 'REJECT') return true;
+  kept += 1;
+  return kept <= room;
+});
 
 const globalMaxRow = $('Read Global Max Idea ID').first().json || {};
 let maxNum = 0;

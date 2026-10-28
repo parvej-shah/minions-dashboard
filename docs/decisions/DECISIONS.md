@@ -81,7 +81,7 @@ and link to it here.
 **Decision:** Minions stops finding new ideas for a workspace once 15 unused ideas are waiting, counting below-bar and never-checked ideas as well as passing ones. Rejected, drafted and claimed ideas don't count.
 **Why:** Only passing ideas used to count, so workspaces whose ideas mostly scored below the bar kept harvesting every night and piled up 30 or more unused ideas. Below-bar ideas are still drafted when nothing stronger is ready, so they are real stock.
 **Alternatives considered:** keeping the limit of 10 passing ideas, which never fills in a workspace whose harvests mostly score below the bar.
-**Status:** active
+**Status:** superseded by 2026-10-28 — At most 10 unused ideas; ask for pasted posts when there's no own material
 
 ## 2026-10-03 — A published draft can go to LinkedIn again in the other format
 
@@ -525,4 +525,11 @@ perfectionism stops people.
 **Alternatives considered:** Saving notes without the author's confirmation
 (drops the phase 6 rule that the author confirms; not needed yet). Emailing the
 question (reverses D16; still a separate call).
+**Status:** active
+
+## 2026-10-28 — At most 10 unused ideas; ask for pasted posts when there's no own material
+
+**Decision:** At most 10 unused ideas wait in a workspace. Finding ideas stops at 10, and one run adds only what still fits. When the author adds their own material (the weekly question, a story session, pasted posts), the oldest waiting ideas are discarded to make room, news ideas before their own. A workspace with none of the author's own material sees one card in Studio: "paste 2–3 posts or notes you have written". Minions makes notes from them that the author keeps or drops; ideas start from those notes, and the pasted text becomes a voice sample. The card goes away for good once something is saved.
+**Why:** Unused ideas piled up to 28 in workspaces nobody drafted from, because a run could add several ideas past the old limit of 15. Seven workspaces had none of their own material, so their drafts came from news in a generic voice. The Reddit study found that people's voice comes from what they already wrote, and pasting old posts is less work than answering questions.
+**Alternatives considered:** keeping 15; asking those workspaces more questions (the story bank already did, and they didn't answer).
 **Status:** active

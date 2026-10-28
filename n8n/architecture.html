@@ -345,7 +345,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
     <ol class="steps">
       <li class="io"><b>Resolve Client ID</b>: takes <code>client_id</code> and the run id from the webhook body. It starts only from the webhook (dispatcher, dashboard, or 02 when no eligible idea is available) or a manual run.</li>
       <li class="io"><b>Read Ideas</b>: loads up to 2,000 of the tenant's ideas.</li>
-      <li class="gate"><b>Backlog Guard</b>: when 15 unused ideas (any gate verdict but REJECT) are in stock, the run skips and reports <code>skipped: true</code> in the callback.</li>
+      <li class="gate"><b>Backlog Guard</b>: when 10 unused ideas (any gate verdict but REJECT) are in stock, the run skips and reports <code>skipped: true</code> in the callback; otherwise it passes <code>room</code> (10 minus the stock), and Assign Idea IDs keeps only that many new non-rejected ideas.</li>
       <li class="io"><b>Fetch Brand Context</b>: branches into two parallel paths, A and B.</li>
       <li class="ai"><b>A · Refine</b>: any <code>NEW</code> rows are sent to the refiner (prompt below), gated in <code>refine</code> mode (a person's note is never dropped, only marked below the bar), and saved as <code>REFINED</code> with source <code>MANUAL</code>.</li>
       <li class="io"><b>B · Expand Tenant Sources → RSS</b>: reads one feed per active source. Without sources it falls back to Hacker News, TechCrunch AI and the n8n blog. Feed health goes to <code>/api/internal/source-status</code>.</li>
@@ -636,7 +636,7 @@ Brand Context:
   <div class="llm-top"><div><h4><span class="tag">LLM</span>Writer</h4><p>Writes the article as one argument in 3–5 sections shaped by the content mode, with an SEO/GEO answer passage, 1–3 sentence paragraphs and no invented evidence.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">02_idea_to_asset › Build Writer Payload → Render Writer Prompt → Qwen Call 2 Writer</p></div>
   <div class="params"><span>model</span><b>glm-5.1</b><span>temperature</span><b>0.7</b><span>max tokens</span><b>4,000</b></div></div>
   <div class="io"><div><h5>Input</h5>Strategy JSON, evidence block, brand context, tone questionnaire and up to 5 tone examples.</div><div><h5>Output</h5>{&quot;hook&quot;,&quot;body_text&quot;}; a non-JSON reply becomes the body.</div></div>
-  <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">809 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-writer-0">Copy</button></div><pre class="p" id="p-writer-0">You are the lead writer for <span class="v">{{company_name}}</span>. Write in this brand's own voice for its one reader, the ICP. Prioritize specificity, usefulness, and an earned point of view over imitation or generic polish.
+  <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">865 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-writer-0">Copy</button></div><pre class="p" id="p-writer-0">You are the lead writer for <span class="v">{{company_name}}</span>. Write in this brand's own voice for its one reader, the ICP. Prioritize specificity, usefulness, and an earned point of view over imitation or generic polish.
 
 VOICE: The author talking to a peer, not a brand lecturing a reader. The author's own view goes in the first person ('I think', 'what I'd check first', 'I'm still not sure about'); the evidence rules below decide what experience they may claim. Talk about the situation; never accuse the reader ('Your X is failing', 'You are doing Y wrong').
 
@@ -648,7 +648,7 @@ LENGTH: 350 to 800 words. Use '## ' headings only where the piece has distinct p
 
 HEADINGS: A '## ' heading is its own paragraph, a specific line a human editor would write (concrete nouns or stakes), never 'Introduction', 'Conclusion' or 'How It Works'.
 
-SEO &amp; GEO: Use strategy.seo_keyword naturally once near the top and once later. Near the top, include one self-contained 2-3 sentence passage that answers the reader's core question plainly, quotable on its own.
+SEO &amp; GEO: Use strategy.seo_keyword once near the top and once later, only where a person would say it. If it reads as a search term (&quot;AI voice agent calendar integration&quot;), use its words in natural order instead (&quot;connecting the agent to your calendar&quot;); never bend a sentence around it. Near the top, include one self-contained 2-3 sentence passage that answers the reader's core question plainly, quotable on its own.
 
 RHYTHM (write the way the author talks, not in an even beat):
 - Paragraphs of 1 to 4 sentences. Never a dense block; a one-line paragraph is fine where it earns it.
@@ -665,6 +665,7 @@ STYLE:
 - Do not end on a one-line maxim (&quot;The backend is the truth.&quot;). End on something specific: what the author would check first, what they are still unsure about, or a real question for peers.
 - Plain words over stock phrasing: never 'crucial', 'pivotal', 'underscore', 'foster', 'serves as', 'landscape', 'robust', 'leverage', 'unlock', 'here's the thing', 'the reality is'.
 - Words, not arrows or symbols ('→', '≈', '✅').
+- Contractions where people use them when they talk ('I'm', 'it's', 'don't', 'that's'), unless the tone profile says formal.
 - Stay on the reader's problem. Founders, the company story and contact details belong in the site footer, never in the article. Describe only real, current <span class="v">{{company_name}}</span> capabilities.
 
 EVIDENCE:
@@ -752,7 +753,7 @@ Supplied Evidence:
   <div class="llm-top"><div><h4><span class="tag">LLM</span>Platform variants</h4><p>Rewrites the article as LinkedIn, Facebook and X posts. LinkedIn must open with the strategist's hook; links are added as first comments at publish time.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">02_idea_to_asset › Parse Claims and Gate → Render Variants Prompt → Qwen Call 4 Variants</p></div>
   <div class="params"><span>model</span><b>qwen-flash</b><span>temperature</span><b>0.55</b><span>max tokens</span><b>2,500</b></div></div>
   <div class="io"><div><h5>Input</h5>Hook, edited body, brand context, tone profile and examples, audience, title.</div><div><h5>Output</h5>{&quot;li_variant&quot;,&quot;fb_variant&quot;,&quot;x_variant&quot;}, then markdown-stripped and validated.</div></div>
-  <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">980 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-variants-0">Copy</button></div><pre class="p" id="p-variants-0">You are the platform-distribution stage for a <span class="v">{{company_name}}</span> content asset.
+  <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">999 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-variants-0">Copy</button></div><pre class="p" id="p-variants-0">You are the platform-distribution stage for a <span class="v">{{company_name}}</span> content asset.
 You must generate 3 platform variants (LinkedIn, Facebook, and Twitter/X), each precisely shaped to the authentic voice, reader attitude, and algorithm of that specific platform.
 
 CRITICAL VOICE &amp; PERSONA RULES (MANDATORY):
@@ -790,6 +791,7 @@ Sound like a person, not a model (all variants):
 - Do not end on a one-line maxim (&quot;The backend is the truth.&quot;). End on something specific: what the author would check first, what they are still unsure about, or a real question for peers.
 - Plain words over stock phrasing: never 'crucial', 'pivotal', 'underscore', 'foster', 'serves as', 'landscape', 'robust', 'leverage', 'unlock', 'here's the thing', 'the reality is'.
 - Words, not arrows or symbols ('→', '≈', '✅').
+- Contractions where people use them when they talk ('I'm', 'it's', 'don't', 'that's'), unless the tone profile says formal.
 
 Universal Rules:
 - NEVER state statistics not in the body, and keep each one's exact sense: a median stays a median, &quot;about&quot; stays &quot;about&quot;.
@@ -1010,7 +1012,7 @@ Return ONLY JSON, no markdown:
     <thead><tr><th>Guard</th><th>Where</th><th>Rule</th><th>Effect</th></tr></thead>
     <tbody>
       <tr><td>Harvest budget</td><td>00 → /api/internal/harvest-slot</td><td>System-wide daily run limit across tenants</td><td>Tenant skipped for the day</td></tr>
-      <tr><td>Backlog guard</td><td>01 Backlog Guard</td><td>15 unused ideas (any gate verdict but REJECT)</td><td>Harvest skipped</td></tr>
+      <tr><td>Backlog guard</td><td>01 Backlog Guard</td><td>10 unused ideas (any gate verdict but REJECT); a run adds at most 10 minus the stock</td><td>Harvest skipped or trimmed</td></tr>
       <tr><td>Degraded context</td><td>01 Build Harvest Payload</td><td><code>context_complete=false</code> or empty rotation</td><td>Run throws</td></tr>
       <tr><td>Authority gate</td><td>01 Gate Harvest Ideas → /api/internal/harvest/gate</td><td>No ICP problem; restated thesis (Jaccard ≥ 0.5); cited memory missing, misquoted or unused; unsupported figure; Generalize specifics</td><td>Stored REJECTED with reasons</td></tr>
       <tr><td>Below the bar</td><td>same</td><td>No quoted, used memory item or proof</td><td>Kept, <code>BELOW_BAR</code>, LOW priority</td></tr>

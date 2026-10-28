@@ -4,7 +4,6 @@ Budget: 120 lines max. Newest entries at top of each section.
 RULE: every entry below is EXACTLY ONE LINE. No multi-line entries, no sub-bullets, no wrapped continuation lines. Compress until it fits.
 
 ## Active issues
-[FIRST-DRAFT-MIGRATION] Apply prisma/sql/2026-10-28-asset-first-draft.sql to production BEFORE pushing the 2026-10-28 commit (Prisma selects assets.first_content; deploy without it breaks every asset read).
 [PHASE7-EXIT] Tenant zero drafts Mon/Wed/Fri 09:00 Asia/Dhaka with review ON; exit = two weeks with every slot filled, clock starts Wed 2026-09-30 (the Mon 09-28 slot was dropped by the timezone move).
 [PHASE6-EXIT] Waiting on the user: two answered Weekly Pulse weeks (only 1, week of 2026-09-21, is ANSWERED so far — checked 2026-09-28).
 
@@ -19,7 +18,7 @@ RULE: every entry below is EXACTLY ONE LINE. No multi-line entries, no sub-bulle
 [TIMEZONE] Default workspace timezone is Asia/Dhaka (DEFAULT_TIMEZONE in src/constants/config.ts + clients.timezone column default).
 [DRAFT-SWITCH] A workspace drafts on its own only when 00b is active AND filler_enabled AND client ACTIVE; is_active is always true now and hidden. Settings › Schedule shows one Automatic drafting switch.
 [HEARTBEATS] Job state comes from job_heartbeats check-ins (platform-admin › Automations), not n8n's active flag; RUNNING = last check-in within 3 intervals.
-[HARVEST-BUDGET] 10 harvests/day across all tenants, per UTC day, resets 00:00 UTC; the backlog guard in 01 pauses at 10 unused gate-PASS ideas.
+[HARVEST-BUDGET] 10 harvests/day across all tenants, per UTC day, resets 00:00 UTC; at most 10 unused ideas (src/lib/ideaStock.ts IDEA_CAP, repeated in 01 Backlog Guard); material-triggered harvests discard the oldest down to 5 first.
 [N8N] Workflows live in n8n/workflows/<slug>; push with `npm run n8n:push -- <slug> [--apply]` (dry run first), then `npm run n8n:docs`; the n8n API is flaky, use timeouts/retries. Never delete the image nodes.
 [SQL] Migrations in prisma/sql are gitignored (*.sql) — `git add -f`; apply with psql "${DATABASE_URL%%\?*}" -v ON_ERROR_STOP=1 -f after sourcing .env.local.
 [NEVER] Never run `vercel link` / `vercel env pull` in this repo (overwrites .env.local). Never type secrets into web fields. Keep skip_hero on when testing.
@@ -29,6 +28,7 @@ RULE: every entry below is EXACTLY ONE LINE. No multi-line entries, no sub-bulle
 [PERMISSION] Ask before any production action (DB writes, n8n --apply, go-live changes, pushes that deploy).
 
 ## Sessions
+2026-10-28 | cap ideas at 10 + paste-posts card + tab title | decision: 01 stops at 10 unused and adds only what fits; own-material harvests make room (news ideas go first); workspaces with no own material get a Studio card to paste 2-3 posts (notes confirmed, paste kept as voice sample if <3); tab title 'Minions.AI — LinkedIn posts in your voice' | changed: lib/ideaStock.ts, services/{ideaStock,harvestRun,storyBank}.ts, api/story-bank, stories/{PasteCard,StoryBankCard}.tsx, 01 backlog-guard/assign-idea-ids, layout/manifest/editorial page, scripts/trim-idea-stock.ts | docs: DECISIONS.md, n8n docs | open: n8n 01 --apply, push, ideas:trim --apply (173 ideas) need OK
 2026-10-28 | research follow-up: product data check + three changes | decision: keep first draft on first edit (assets.first_content/first_linkedin_variant, npm run edits:report); weekly question = one-line strip, one-click save of notes; Studio opens on To review, arrows step in filter, Next draft after publish | changed: prisma/schema.prisma, prisma/sql/2026-10-28-asset-first-draft.sql, services/assets.ts, lib/drafts/{editShare,queue}.ts, components/pulse/WeeklyPulseCard.tsx, components/editorial/{EditorialStudio,QueueRibbon,ReviewDock}.tsx, hooks/useEditorialDraft.ts, scripts/edit-report.ts, tasks/1-3.md | docs: DECISIONS.md | open: migration + push need OK; UI not checked in a browser; data: 2 workspaces ever answered weekly question, 42/75 drafts unreviewed
 2026-10-25 | LinkedIn user research: Reddit study (82 threads, 3,251 comments, hand-verified tags) | decision: core promise = weekly posting + sounds like the user + low effort; comment helper parked (DECISIONS.md) | changed: docs/decisions/DECISIONS.md | docs: report https://claude.ai/artifact/7ghPmcVNDAeX9fi3tztwRH | open: Reddit readable only via Arctic Shift archive API (reddit.com, Chrome, Firecrawl blocked); top reasons people stop = no results, ideas, habit; voice comes from user's own material; voice notes ~not mentioned
 2026-10-25 | disk cleanup | decision: cleared caches, old Claude CLI versions, Claude VM bundle, Antigravity/Codex history, .next; root 6.6G→35G free | changed: none in repo (removed stray `we`) | docs: none | open: old snap revisions need sudo

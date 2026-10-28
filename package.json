@@ -20,7 +20,8 @@
     "eval:covers": "tsx --env-file=.env.local src/test/eval/covers.ts",
     "eval:pulse": "tsx --env-file=.env.local src/test/eval/pulse.ts",
     "pulse:report": "tsx --env-file=.env.local scripts/pulse-report.ts",
-    "edits:report": "tsx --env-file=.env.local scripts/edit-report.ts"
+    "edits:report": "tsx --env-file=.env.local scripts/edit-report.ts",
+    "ideas:trim": "tsx --env-file=.env.local scripts/trim-idea-stock.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1111.0",

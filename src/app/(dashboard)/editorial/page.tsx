@@ -4,8 +4,7 @@ import WeeklyPulseCard from "@/components/pulse/WeeklyPulseCard";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Editorial Studio — Minions Cockpit",
-  description: "Executive Content Staging, Typography Reading Lane, Claims Gate & Omnichannel Broadcast Command",
+  title: "Studio",
 };
 
 interface EditorialPageProps {
