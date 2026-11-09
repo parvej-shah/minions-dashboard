@@ -583,6 +583,8 @@ model IcpProfile {
   questions      String[] @default([])
   buyingTriggers String[] @default([]) @map("buying_triggers")
   vocabulary     String[] @default([])
+  /// OUTCOME: they buy the result (business owners); TECHNICAL: they want to know how it works.
+  buyer          String   @default("OUTCOME")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
 

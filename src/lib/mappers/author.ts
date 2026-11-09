@@ -2,9 +2,10 @@ import type { IcpProfile, ProfessionalMemory } from "@prisma/client";
 import type { IcpProfileItem, MemoryItem } from "@/types/author";
 import type { MemoryDisclosure, MemoryKind } from "@/constants/contentLanes";
 import { EMPTY_ICP } from "@/services/authorContext";
+import { icpBuyer } from "@/constants/contentLanes";
 
 export function toIcpDTO(row: IcpProfile | null): IcpProfileItem {
-  if (!row) return { ...EMPTY_ICP, updated_at: null };
+  if (!row) return { ...EMPTY_ICP, buyer: "OUTCOME", updated_at: null };
   return {
     who: row.who,
     role: row.role,
@@ -14,6 +15,7 @@ export function toIcpDTO(row: IcpProfile | null): IcpProfileItem {
     questions: row.questions,
     buying_triggers: row.buyingTriggers,
     vocabulary: row.vocabulary,
+    buyer: icpBuyer(row),
     updated_at: row.updatedAt.toISOString(),
   };
 }

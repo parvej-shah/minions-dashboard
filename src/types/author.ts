@@ -10,6 +10,8 @@ export interface IcpProfileItem {
   questions: string[];
   buying_triggers: string[];
   vocabulary: string[];
+  /** OUTCOME: they buy the result; TECHNICAL: they want to know how it works. */
+  buyer: "OUTCOME" | "TECHNICAL";
   updated_at: string | null;
 }
 

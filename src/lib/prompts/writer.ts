@@ -3,6 +3,7 @@ import { evidenceRules, type DraftAuthorContext } from "@/lib/drafts/authorConte
 import { resolveContentMode } from "@/lib/drafts/strategy";
 import { authorBlock } from "./strategist";
 import { SOUND_HUMAN } from "./soundHuman";
+import { buysOutcome, OUTCOME_FIRST } from "./outcomeFirst";
 
 /** 02_idea_to_asset › Build Writer Payload */
 export interface WriterInput {
@@ -28,6 +29,7 @@ export function renderWriter(input: WriterInput): ChatPayload {
   const toneQuestionnaire = input.tone_questionnaire || null;
 
   const author = input.author?.found ? input.author : undefined;
+  const outcome = buysOutcome(author);
   // STORY and CASE_NOTE need evidence the idea may not have; code decides.
   const mode = author ? resolveContentMode(strategy.content_mode, author.trust_basis) : String(strategy.content_mode || "INSIGHT");
   const isPost = author?.recommended_format === "POST";
@@ -43,7 +45,9 @@ ONE ARGUMENT: The piece argues strategy.core_argument and nothing else. Open wit
 
 THE AUTHOR'S ADVANTAGE IS THE POINT: The piece must carry the specific detail from THE AUTHOR'S EXPERIENCE below (the event, the finding, the mechanism), not just its topic. That detail is what makes this piece one only this author could write. Use it as stated; never embellish it.`
       : ""
-  }
+  }${outcome ? `
+
+${OUTCOME_FIRST}` : ""}
 
 SHAPE: This is ${mode === "STORY" ? "a STORY: the moment, the tension, what changed, the lesson" : mode === "HOW_TO" ? "a HOW_TO: the problem, the method, the checks" : mode === "CASE_NOTE" ? "a CASE_NOTE: context, what was done, the result, its limits" : mode === "OPINION" ? "an OPINION: the position, the reasons, the strongest counterpoint, the conclusion" : "an INSIGHT: the observation, why it happens, what it means for the reader"}. These are the moves, not a template: use the ones the idea earns, in the order that serves the argument. There is no required section list.${author?.vision ? " You may close on the vision given, in one or two sentences." : ""}
 

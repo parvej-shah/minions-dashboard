@@ -20,6 +20,11 @@ const ICP_LISTS: { key: IcpListKey; label: string; placeholder: string }[] = [
   { key: "vocabulary", label: "Words they use", placeholder: "A word or phrase they use for it" },
 ];
 
+const BUYER_OPTIONS: { value: IcpProfileItem["buyer"]; label: string; hint: string }[] = [
+  { value: "OUTCOME", label: "The outcome", hint: "Business owners and buyers who care what changes, not how it works. Posts lead with results." },
+  { value: "TECHNICAL", label: "How it works", hint: "Engineers and technical buyers. Posts can go into the technology." },
+];
+
 function ListEditor({
   label,
   placeholder,
@@ -174,6 +179,30 @@ export default function IcpEditor({ onChange }: { onChange: () => void }) {
           />
         </div>
       </div>
+      <fieldset className="space-y-2">
+        <legend className="text-xs font-semibold text-muted">What they buy</legend>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {BUYER_OPTIONS.map((opt) => (
+            <label
+              key={opt.value}
+              className={`flex cursor-pointer gap-2 rounded-lg border p-3 text-xs ${icp.buyer === opt.value ? "border-brand bg-brand/5" : "border-line bg-canvas"}`}
+            >
+              <input
+                type="radio"
+                name="icp-buyer"
+                value={opt.value}
+                checked={icp.buyer === opt.value}
+                onChange={() => setIcp({ ...icp, buyer: opt.value })}
+                className="mt-0.5 accent-[var(--color-brand)]"
+              />
+              <span>
+                <span className="block font-semibold text-ink">{opt.label}</span>
+                <span className="text-muted">{opt.hint}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {ICP_LISTS.map(({ key, label, placeholder }) => (
           <ListEditor key={key} label={label} placeholder={placeholder} items={icp[key]} onChange={(items) => setIcp({ ...icp, [key]: items })} />

@@ -73,4 +73,13 @@ export const MEMORY_MAX_CHARS = 1000;
 export const MAX_MEMORY_ITEMS = 200;
 /** Each ICP list (pains, decisions, ...) is capped so the prompt stays bounded. */
 export const ICP_LIST_MAX = 8;
+
+/** How the ICP buys: for the result (most business owners) or for how it works (technical buyers). */
+export const ICP_BUYERS = ["OUTCOME", "TECHNICAL"] as const;
+export type IcpBuyer = (typeof ICP_BUYERS)[number];
+
+/** The ICP's buyer type: OUTCOME unless it says TECHNICAL (profiles saved before the switch have none). */
+export function icpBuyer(icp: { buyer?: unknown } | null | undefined): IcpBuyer {
+  return icp?.buyer === "TECHNICAL" ? "TECHNICAL" : "OUTCOME";
+}
 export const ICP_ITEM_MAX_CHARS = 200;

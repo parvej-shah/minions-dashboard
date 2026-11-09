@@ -17,3 +17,4 @@
 | 13 | Reviewer picks the carousel design (optional, before and after) | CLAUDE | DONE (pushed 5f59dda; UI to check on production) | tasks/13.md |
 | 14 | Move every model call to models with free quota (+ hero image on qwen-image-2.1-pro, n8n applied) | CLAUDE | DONE (pushed 08471e0) | tasks/14.md |
 | 15 | Remove the AI image cover path (n8n 04, hero + ingest routes, cover prompts) | CLAUDE | DONE (02 applied, 04 deleted live, pushed) | tasks/15.md |
+| 16 | Outcome-first posts for business-owner buyers (ICP buyer switch) | CLAUDE | IN PROGRESS | tasks/16.md |

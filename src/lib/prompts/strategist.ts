@@ -1,3 +1,4 @@
+import { buysOutcome, OUTCOME_COVER, OUTCOME_FIRST } from "./outcomeFirst";
 import type { ChatPayload } from "./types";
 import type { DraftAuthorContext } from "@/lib/drafts/authorContext";
 import { evidenceRules } from "@/lib/drafts/authorContext";
@@ -67,6 +68,7 @@ export function renderStrategist(input: StrategistInput): ChatPayload {
   const cappedBrand = input.brand_context || "";
   const writerStanding = input.writer_standing || "";
   const author = input.author;
+  const outcome = buysOutcome(author);
   // Decided in code (src/lib/drafts/strategy.ts): from what the idea rests on
   // and its lane, not from a substring of the pillar name.
   const hook = author?.found ? author.hook : hookFor({ pillar: target.pillar });
@@ -87,7 +89,7 @@ Step 2b — The Argument: One central argument, built on the author's advantage 
   The author posted the arguments under RECENTLY POSTED below in the last few weeks. Do not argue any of them again, even in new words; find the point about this idea that they did not make.` : ""}
 Step 3 — The Visual Art Direction for Cover Art:
   - First decide the visual register from the article's ACTUAL subject matter: PHYSICAL_TRADE or ABSTRACT_DATA.
-  - Cover Headline: 3 to 6 words and at most 40 characters, in sentence case, so it sets large in two lines a phone reads in one second. It is the thumbnail's cover line, not the article title: shorter and sharper than the title, written for someone scrolling past, who must know at once what the post is about. Name the specific things the post names (the tool, product, process or change) and what happened or why, and make it make sense with no other context.${author?.memory.length ? ` This post is the author's own account, so title it as their story, in their words: what they did and why (e.g. 'Why we moved from regex to Jev', 'How we stopped losing after-hours calls', 'What our first 50 bookings taught us'), never an abstract maxim about the topic.` : ` Title it as a specific question or claim about the reader's situation (e.g. 'Why voice agents lose bookings after hours'), never an abstract maxim.`} Never an abstract category pairing (not 'Fluency Vs Accuracy', 'Speed Versus Quality', or 'AI Scheduling Explained'), never a bare topic label.
+  - Cover Headline: 3 to 6 words and at most 40 characters, in sentence case, so it sets large in two lines a phone reads in one second. It is the thumbnail's cover line, not the article title: shorter and sharper than the title, written for someone scrolling past, who must know at once what the post is about. Name the specific things the post names (the tool, product, process or change) and what happened or why, and make it make sense with no other context.${author?.memory.length ? ` This post is the author's own account, so title it as their story, in their words: what they did and why (e.g. 'Why we moved from regex to Jev', 'How we stopped losing after-hours calls', 'What our first 50 bookings taught us'), never an abstract maxim about the topic.` : ` Title it as a specific question or claim about the reader's situation (e.g. 'Why voice agents lose bookings after hours'), never an abstract maxim.`}${outcome ? OUTCOME_COVER : ""} Never an abstract category pairing (not 'Fluency Vs Accuracy', 'Speed Versus Quality', or 'AI Scheduling Explained'), never a bare topic label.
   - Emphasis Word: the one word of the cover headline it turns on, usually the thing it names. It is set in the accent colour.
   - Cover Subtitle: One sentence under 90 characters: what the reader gets or what it costs them, in plain editorial-magazine language. NEVER start with 'Explaining', 'Understanding', 'A look at', 'How to', or any other explainer-caption framing. No figure the idea does not state.
   - Cover Number: only when the author's experience or the evidence states one striking figure this post turns on, give it with a 4 to 10 word caption that says what was measured, so the figure makes sense to someone who sees nothing else. Otherwise leave every field empty. Never invent or round a figure.
@@ -101,7 +103,8 @@ Step 5 — Headline Craft: Write a clear, specific title in this brand's voice. 
 
 Formatting Rules:
 - NEVER use em dashes ('—' or '--'). Use periods, commas, colons, or parentheses.
-- Avoid pretentious or guru jargon: never use words like 'dogma', 'undeniable truth', 'guru', 'revolutionizing'.
+- Avoid pretentious or guru jargon: never use words like 'dogma', 'undeniable truth', 'guru', 'revolutionizing'.${outcome ? `
+- ${OUTCOME_FIRST} This applies to the title, the hook, the core argument and every key point.` : ""}
 
 Evidence Discipline:
 - Only state a statistic, percentage, or dollar figure as fact if it is grounded in the Brand Context, the author's experience or Evidence provided.

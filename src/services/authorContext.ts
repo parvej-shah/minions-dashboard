@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import { icpBuyer, type IcpBuyer } from "@/constants/contentLanes";
+export { icpBuyer, type IcpBuyer };
 import { DEFAULT_LANES, defaultLaneId, type LanePurpose, type MemoryDisclosure, type MemoryKind, type ProfileTarget } from "@/constants/contentLanes";
 
 /**
@@ -17,6 +19,8 @@ export interface IcpContext {
   questions: string[];
   buying_triggers: string[];
   vocabulary: string[];
+  /** Missing on contexts built before the switch: read it with icpBuyer(). */
+  buyer?: IcpBuyer;
 }
 
 export interface MemoryContext {
@@ -57,6 +61,7 @@ export const EMPTY_ICP: IcpContext = {
   questions: [],
   buying_triggers: [],
   vocabulary: [],
+  buyer: "OUTCOME",
 };
 
 /** Memory sent per harvest, most useful first. Keeps the prompt bounded. */
@@ -71,6 +76,7 @@ type IcpRow = {
   questions: string[];
   buyingTriggers: string[];
   vocabulary: string[];
+  buyer?: string;
 };
 type MemoryRow = { id: string; kind: string; content: string; disclosure: string; usedCount: number; source?: string; createdAt?: Date };
 
@@ -89,6 +95,7 @@ export function toIcpContext(row: IcpRow | null): IcpContext {
     questions: row.questions,
     buying_triggers: row.buyingTriggers,
     vocabulary: row.vocabulary,
+    buyer: icpBuyer(row),
   };
 }
 

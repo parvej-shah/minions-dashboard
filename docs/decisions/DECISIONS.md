@@ -28,6 +28,13 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-09 — Posts lead with the outcome for business-owner buyers
+
+**Decision:** Every ICP now says what the reader buys: the outcome (the default) or how it works. For outcome buyers, posts and covers lead with what changes in the reader's business (customers, time, money, risk). The technology gets at most one plain sentence per point, in the reader's words, as the reason it works. A workspace that sells to technical buyers switches to "How it works" on the Brand page and keeps the technical depth.
+**Why:** Most workspaces sell services to business owners, who care about the result, not the technology. Drafts were leading with the mechanism (e.g. "Latency over 1.8 seconds kills calls").
+**Alternatives considered:** Outcome-first for everyone with no switch: rejected, because technical-buyer workspaces need the depth.
+**Status:** active
+
 ## 2026-11-09 — No AI-generated cover images
 
 **Decision:** Covers are only drawn in code from the brand's layouts. The AI image option (Qwen Image through n8n 04_hero_image) is removed, not just switched off.

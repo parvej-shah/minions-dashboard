@@ -1,6 +1,7 @@
 import {
   ICP_ITEM_MAX_CHARS,
   ICP_LIST_MAX,
+  icpBuyer,
   MEMORY_DISCLOSURES,
   MEMORY_KINDS,
   MEMORY_MAX_CHARS,
@@ -36,6 +37,7 @@ export function parseIcpInput(body: unknown): IcpContext | { error: string } {
     questions: cleanList(b.questions),
     buying_triggers: cleanList(b.buying_triggers),
     vocabulary: cleanList(b.vocabulary),
+    buyer: icpBuyer(b),
   };
 }
 

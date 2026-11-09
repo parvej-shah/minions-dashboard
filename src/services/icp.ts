@@ -3,6 +3,7 @@ import { toIcpDTO } from "@/lib/mappers/author";
 import { parseIcpInput } from "@/lib/authorInput";
 import { syncIcpDirective } from "@/lib/icpDirective";
 import { ensureAuthorDefaults } from "@/services/authorContext";
+import { icpBuyer } from "@/constants/contentLanes";
 import { badRequest } from "@/server/http/errors";
 
 export async function getIcp(clientId: string) {
@@ -23,6 +24,7 @@ export async function saveIcp(clientId: string, input: unknown) {
     questions: icp.questions,
     buyingTriggers: icp.buying_triggers,
     vocabulary: icp.vocabulary,
+    buyer: icpBuyer(icp),
   };
   const row = await prisma.icpProfile.upsert({
     where: { clientId },

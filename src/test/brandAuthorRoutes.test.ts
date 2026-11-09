@@ -114,6 +114,7 @@ describe("PUT /api/brand/icp", () => {
     // De-duplicated and trimmed.
     expect(m.icpUpsert.mock.calls[0][0].update.pains).toEqual(["Missed calls"]);
     expect(m.dirUpdateMany.mock.calls[0][0].where).toEqual({ clientId: "c1", category: "AUDIENCE", isActive: true, id: { not: "DIR-ICP-c1" } });
-    expect(m.dirUpsert.mock.calls[0][0].create).toMatchObject({ id: "DIR-ICP-c1", category: "AUDIENCE", audienceScope: "ICP", instruction: "Owners of roofing firms. Their pains: Missed calls." });
+    expect(m.dirUpsert.mock.calls[0][0].create).toMatchObject({ id: "DIR-ICP-c1", category: "AUDIENCE", audienceScope: "ICP", instruction: "Owners of roofing firms. Their pains: Missed calls. They buy the outcome, not the technology: lead with what changes for them and keep how it works to one plain sentence." });
+    expect(m.icpUpsert.mock.calls[0][0].update.buyer).toBe("OUTCOME");
   });
 });

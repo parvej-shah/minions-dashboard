@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { IcpContext } from "@/services/authorContext";
+import { icpBuyer } from "@/constants/contentLanes";
 
 /**
  * The ICP, written as the one AUDIENCE directive the current prompts read.
@@ -17,11 +18,16 @@ function icpDirectiveId(clientId: string): string {
 
 const list = (label: string, items: string[]) => (items.length ? `${label}: ${items.join("; ")}.` : "");
 
+const BUYER_LINE = {
+  OUTCOME: "They buy the outcome, not the technology: lead with what changes for them and keep how it works to one plain sentence.",
+  TECHNICAL: "They are technical buyers: they want to know how it works, so technical depth is welcome.",
+} as const;
+
 export function renderIcpDirective(icp: IcpContext): string {
   const who = [icp.who, icp.role && `Role: ${icp.role}.`, icp.company_type && `Company: ${icp.company_type}.`]
     .filter(Boolean)
     .join(" ");
-  return [
+  const body = [
     who,
     list("Their pains", icp.pains),
     list("Decisions they are making", icp.decisions),
@@ -32,6 +38,8 @@ export function renderIcpDirective(icp: IcpContext): string {
     .filter(Boolean)
     .join(" ")
     .trim();
+  // Only a profile with something in it gets a directive at all.
+  return body ? `${body} ${BUYER_LINE[icpBuyer(icp)]}` : "";
 }
 
 /**

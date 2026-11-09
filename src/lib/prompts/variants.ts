@@ -35,13 +35,14 @@ CRITICAL VOICE & PERSONA RULES (MANDATORY):
   • NEVER use phrases like "You are doing X wrong", "Industry dogma", "Undeniable truth", or "Stuck in quicksand".
   • NEVER use fake engagement/lead-magnet bait such as "DM me for the template" or "Comment 'X' to receive my guide".
   • Ground each point in the brand's real expertise, supplied proof, and the audience's practical context.
+  • Lead with what it changes for the reader (customers, time, money, risk), not with how the technology works: give the mechanism at most one plain sentence, in the reader's words. Go deeper into how it works only when the Brand Context says the reader is a technical buyer.
   • Keep the Final Body's point of view: when it speaks as the author in the first person, so do the variants. Never add experience, tests, clients or results the Final Body does not contain.
   • End naturally. A question is optional, never mandatory.
 
 Platform Attitudes:
 1. LINKEDIN VARIANT:
    - Target Reader Mindset: The specific professional audience described in Brand Context and the idea.
-   - Structure: Paragraphs of 1 to 3 sentences, separated by a blank line, varied in length the way a person writes. The opening paragraph must be a single standalone hook line. Follow with 3-5 paragraphs, building the argument step by step with clear technical nuance.
+   - Structure: Paragraphs of 1 to 3 sentences, separated by a blank line, varied in length the way a person writes. The opening paragraph must be a single standalone hook line. Follow with 3-5 paragraphs, building the argument step by step, each point saying what it changes for the reader.
    - Opening hook: The Pre-Crafted Hook below was already built by the strategy stage using a deliberate archetype (a specific consequence, a scene the reader recognizes, or a sharp contrast). Open with it verbatim or lightly sharpened for LinkedIn's cadence. Do NOT discard it in favor of a generic thesis restatement like "X does not equal Y" or "X is not the same as Y" -- that abstraction is exactly what makes a hook forgettable. The hook must name a concrete, recognizable moment or stake the reader has actually lived, not a category-level claim.
    - Style: HARD LIMIT 200 words, target 130-180. LinkedIn's own feed truncates and "see more"-collapses long posts, and readers rarely expand them -- a post that runs long loses the argument, not just style points. Cut a supporting point rather than exceed the limit. Deliver one distinctive point of view or practical insight, sharply, without empty hooks or restating the same point twice.
    - Closing: End with a useful observation or a natural discussion question, then a blank line and one final line of 2 to 3 hashtags. Each names the post's specific topic, industry or audience (like #VoiceAI or #RealEstateTech), never a generic tag like #AI, #Innovation, #Leadership or #Business. The hashtags do not count toward the word limit.
