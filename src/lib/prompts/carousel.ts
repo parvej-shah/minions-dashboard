@@ -2,6 +2,7 @@ import type { ChatPayload } from "./types";
 import { DATA_CLOSE, DATA_OPEN, fenceSafe } from "./harvest";
 import { ICON_MEANING } from "@/lib/covers/icons";
 import { CAPTION_WORDS, COVER_HEADLINE_WORDS, INNER_SLIDES, WORD_CAPS } from "@/lib/carousel/plan";
+import { SLIDE_STYLES } from "@/lib/carousel/slides";
 
 /**
  * The carousel slide plan (phase 11, D19): one call turns a reviewed draft
@@ -47,6 +48,11 @@ Pick ONE design for the pages after the cover, to suit the post's tone:
 - EDITORIAL: the opening and closing pages set apart in the brand's strong colour. Considered and calm: arguments, teardowns, contrasts.
 - BOLD: every page in the brand's strong colour, with an accent edge. Energetic and direct: steps, checklists, a clear call to change something.
 - MINIMAL: every page plain and quiet, the accent only in the words. Reflective and personal: lessons, stories, the author's own experience.
+- POSTER: pages take turns dark and light, giant numerals, one accent ribbon running across every page. Loud and confident: strong opinions, myths busted, a bold call.
+- SWISS: light editorial pages on a fine column grid, the key word in italic, a large page number, a dark closing page. Precise and expert: frameworks, analysis, how something really works.
+- AURORA: every page dark with soft colour glows and a glass panel. Modern and technical: AI, software, product and future-facing posts.
+- BENTO: the words on raised cards over a soft grey page, key words highlighted. Friendly and practical: how-tos, tool stacks, checklists to keep.
+Vary the design from post to post; choose by tone, not habit.
 
 Layouts and their word limits (hard limits, counted in code):
 - STAKES: "statement" (max ${cap("STAKES", "statement")} words), optional "body" (max ${cap("STAKES", "body")}), optional "emphasis" (one word of the statement). Why this matters to the reader now.
@@ -56,9 +62,11 @@ Layouts and their word limits (hard limits, counted in code):
 - CHECKLIST: "title" (max ${cap("CHECKLIST", "title")}), "items": 2-5 items, each max ${cap("CHECKLIST", "item")} words, each starting with a verb.
 - NUMBER: "value", optional "unit", "caption" (max ${cap("NUMBER", "caption")}). ONLY for a figure the post itself states. Otherwise never use it.
 - QUOTE: "quote" (max ${cap("QUOTE", "quote")}), optional "attribution". ONLY the author's own words, copied from THE AUTHOR'S EXPERIENCE. Otherwise never use it.
+- GRID: "title" (max ${cap("GRID", "title")} words), "items": 3-6 tiles, each a "label" (max ${cap("GRID", "item")} words) and an "icon" from the icon list below. ONLY when the post names 3 to 6 parallel things (parts, tools, signals); it may stand in for one POINT slide or a CHECKLIST.
+- PUNCH: "lines": 3-4 lines, each max ${cap("PUNCH", "line")} words, that land one after another (the last line is the turn), then optional "checks": 0-4 items, each max ${cap("PUNCH", "item")} words, starting with a verb. ONLY when the post has a short, sharp sequence (e.g. "Demo: quiet room." "Live: a car." "Buyer: gone."); at most once, before CLOSE.
 - CLOSE: "takeaway" (max ${cap("CLOSE", "takeaway")}: the one line to remember), "save_line" (max ${cap("CLOSE", "saveLine")}: starts "Save this for", naming the reader's real next moment, e.g. "Save this for your next vendor demo."). Always the last slide, exactly once.
 
-Icons: a STAKES, POINT or STEP slide may carry one optional "icon", a small line drawing shown faint under the words. You decide, slide by slide, whether one helps: use it only where a concrete object makes the slide's point easier to see at a glance. Some decks want an icon on several slides, some on one, many on none; none is always acceptable. Never use an icon just to fill space, and never the same icon twice. Choose only from this list (name: what it can stand for):
+Icons: a STAKES, POINT or STEP slide may carry one optional "icon", a small line drawing shown faint under the words. You decide, slide by slide, whether one helps: use it only where a concrete object makes the slide's point easier to see at a glance. Some decks want an icon on several slides, some on one, many on none; none is always acceptable. Never use an icon just to fill space, and never the same icon twice. Every GRID tile carries one icon, a different one per tile. Choose only from this list (name: what it can stand for):
 ${Object.entries(ICON_MEANING).map(([name, meaning]) => `${name}: ${meaning}`).join("\n")}
 
 Rules:
@@ -80,7 +88,7 @@ ${input.banned.length ? `- Never use these phrases: ${input.banned.join("; ")}.\
 Return ONLY this JSON:
 {
   "structure": "CHECKLIST | STEPS | DECISION | CONTRAST | TEARDOWN",
-  "style": "EDITORIAL | BOLD | MINIMAL",
+  "style": "${SLIDE_STYLES.join(" | ")}",
   "label": "2-4 words",
   "cover": { "headline": "...", "emphasis": "one word of the headline", "kicker": "..." },
   "slides": [ { "layout": "STAKES", "statement": "...", "body": "...", "emphasis": "...", "icon": "OPTIONAL_ICON_NAME" } ],

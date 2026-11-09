@@ -28,6 +28,14 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-09 — Seven carousel designs, plus Grid and Punch pages
+
+**Decision:** The carousel writer now picks from seven page designs: Editorial, Bold and Minimal, plus Poster (alternating dark and light, a ribbon across the pages), Swiss (a fine column grid, italic key word, dark close), Aurora (dark, colour glows, glass panel) and Bento (raised cards on a grey page). It chooses one per post by tone. It may also use a Grid page (3 to 6 icon tiles) and a Punch page (3 or 4 short lines, then checks).
+**Why:** the user wanted carousels that feel modern and premium and less alike from post to post. They reviewed sample decks in every new design and approved all of them for production.
+**Alternatives considered:** shipping only one or two of the new designs; letting the reviewer pick the design by hand (possible later, in the Studio).
+**Status:** active
+
+---
 ## 2026-11-09 — Covers use Bricolage Grotesque and Plus Jakarta Sans
 
 **Decision:** Every cover and carousel page now sets headlines, quotes and big numbers in Bricolage Grotesque (ExtraBold) and the label, subtitle, list text and author line in Plus Jakarta Sans, for every workspace. This replaces Newsreader and Inter. Both are free for commercial use (SIL Open Font License). The quote mark is drawn as a shape, and the quote text is upright because Bricolage has no italic.

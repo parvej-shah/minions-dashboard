@@ -3,7 +3,8 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_COVER_BRAND } from "@/lib/covers/brand";
 import { renderCarousel, type CarouselInput } from "@/lib/prompts/carousel";
-import { checkPlan, namesIn, parsePlan, quantities, repairPlan, suggestCarousel, toDeck, type PlanSources } from "./plan";
+import { checkPlan, namesIn, parsePlan, quantities, repairPlan, suggestCarousel, toDeck, WORD_CAPS, type PlanSources } from "./plan";
+import { SLIDE_STYLES } from "./slides";
 
 const body = "Demos run in controlled environments. On a live call, two seconds of silence and the buyer hangs up. Test latency on live calls before you buy.";
 const sources: PlanSources = { texts: [body], memory: ["We lost a showing because the calendar write failed silently."], banned: ["game changer"] };
@@ -202,6 +203,15 @@ describe("carousel prompt", () => {
     const actual = renderCarousel(input);
     if (process.env.UPDATE_GOLDEN === "1") fs.writeFileSync(file, JSON.stringify(actual, null, 2) + "\n");
     expect(actual).toEqual(JSON.parse(fs.readFileSync(file, "utf8")));
+  });
+
+  it("offers every slide style, and the GRID and PUNCH pages with their limits", () => {
+    const system = renderCarousel(input).messages[0].content;
+    for (const style of SLIDE_STYLES) expect(system).toContain(`- ${style}: `);
+    expect(system).toContain(`"style": "${SLIDE_STYLES.join(" | ")}"`);
+    expect(system).toContain(`- GRID: "title" (max ${WORD_CAPS.GRID.title} words)`);
+    expect(system).toContain(`3-6 tiles, each a "label" (max ${WORD_CAPS.GRID.item} words)`);
+    expect(system).toContain(`- PUNCH: "lines": 3-4 lines, each max ${WORD_CAPS.PUNCH.line} words`);
   });
 
   it("sends the gate failures back on the retry", () => {
