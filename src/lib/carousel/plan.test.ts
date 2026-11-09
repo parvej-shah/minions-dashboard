@@ -214,6 +214,13 @@ describe("carousel prompt", () => {
     expect(system).toContain(`- PUNCH: "lines": 3-4 lines, each max ${WORD_CAPS.PUNCH.line} words`);
   });
 
+  it("fixes the design when the reviewer chose one", () => {
+    const system = renderCarousel({ ...input, style: "BENTO" }).messages[0].content;
+    expect(system).toContain("The design is fixed: BENTO");
+    expect(system).not.toContain("- SWISS: ");
+    expect(system).toContain(`"style": "BENTO"`);
+  });
+
   it("sends the gate failures back on the retry", () => {
     const retry = renderCarousel({ ...input, feedback: ["Slide 3 (POINT): title has 15 words; the most is 12."] });
     expect(retry.messages[1].content).toContain("Your previous plan failed these checks");

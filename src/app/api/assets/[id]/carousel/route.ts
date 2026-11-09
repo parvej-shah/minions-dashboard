@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { parsePlan } from "@/lib/carousel/plan";
+import { SLIDE_STYLES, type SlideStyle } from "@/lib/carousel/slides";
 import { requireOwnedAssetId } from "@/services/assets";
 import { carouselState, editCarousel, generateCarousel, setCarouselActive, type CarouselResult } from "@/services/carousel";
 import { readJsonOrEmpty } from "@/server/http/body";
@@ -22,9 +23,13 @@ export const GET = route<"tenant", Params>({ auth: "tenant", failure: "Failed to
   return { success: true, ...state };
 });
 
-export const POST = route<"tenant", Params>({ auth: "tenant", failure: "Failed to make the carousel" }, async ({ clientId, params }) =>
-  reply(await generateCarousel(await requireOwnedAssetId(clientId, params.id)))
-);
+// Optional { style }: the reviewer's choice of design; without it the writer picks.
+export const POST = route<"tenant", Params>({ auth: "tenant", failure: "Failed to make the carousel" }, async ({ clientId, params, request }) => {
+  const assetId = await requireOwnedAssetId(clientId, params.id);
+  const { style } = await readJsonOrEmpty(request);
+  if (style !== undefined && style !== null && style !== "" && !SLIDE_STYLES.includes(style as SlideStyle)) throw badRequest(`style must be one of ${SLIDE_STYLES.join(", ")}.`);
+  return reply(await generateCarousel(assetId, { style: style ? (style as SlideStyle) : undefined }));
+});
 
 // { active: boolean } switches LinkedIn between carousel and cover; { plan } is an edit in the model's JSON shape.
 export const PATCH = route<"tenant", Params>({ auth: "tenant", failure: "Failed to update the carousel" }, async ({ clientId, params, request }) => {

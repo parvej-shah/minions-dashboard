@@ -5,7 +5,7 @@ import { AlertTriangle, ExternalLink, GalleryHorizontal, Loader2, PenLine, Refre
 import type { AssetItem } from "@/types";
 import type { StoredCarousel } from "@/services/carousel";
 import type { CarouselPlan } from "@/lib/carousel/plan";
-import type { Slide } from "@/lib/carousel/slides";
+import type { Slide, SlideStyle } from "@/lib/carousel/slides";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import CarouselPdfPages from "./CarouselPdfPages";
 import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
@@ -36,6 +36,18 @@ const LAYOUT_NAMES: Record<Slide["layout"], string> = {
   STAKES: "Why it matters", POINT: "Point", STEP: "Step", CONTRAST: "Assumption vs practice", CHECKLIST: "Checklist", NUMBER: "Figure", QUOTE: "Quote", CLOSE: "Close", GRID: "Tiles", PUNCH: "Punch lines",
 };
 
+/** The designs a reviewer can pick, with a hint at what each looks like. Every SlideStyle must be listed. */
+const STYLE_NAMES: Record<SlideStyle, string> = {
+  EDITORIAL: "Editorial: calm, strong-colour open and close",
+  BOLD: "Bold: every page in your strong colour",
+  MINIMAL: "Minimal: plain and quiet",
+  POSTER: "Poster: dark and light pages, a ribbon across them",
+  SWISS: "Swiss: column grid, italic key word",
+  AURORA: "Aurora: dark, colour glows, glass panel",
+  BENTO: "Bento: cards on a soft grey page",
+};
+const STYLES = Object.keys(STYLE_NAMES) as SlideStyle[];
+
 const input = "w-full bg-surface-2 border border-line rounded-lg px-3 py-1.5 text-sm text-ink focus:outline-none focus:border-brand resize-none";
 const pageClass = "snap-start shrink-0 w-[70%] sm:w-[220px] aspect-[4/5] rounded-lg border border-line object-cover";
 const ghostButton = "px-2.5 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 text-xs font-medium text-brand border border-brand/30 hover:border-brand transition-all inline-flex items-center gap-1.5 disabled:opacity-50";
@@ -60,7 +72,9 @@ export default function CarouselCard({
   const [state, setState] = useState<State | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
-  const [busy, setBusy] = useState<"make" | "save" | "toggle" | null>(null);
+  const [busy, setBusy] = useState<"make" | "save" | "toggle" | "style" | null>(null);
+  // The reviewer's optional choice of design for a new carousel; empty lets the writer choose.
+  const [chosenStyle, setChosenStyle] = useState<SlideStyle | "">("");
   const [errors, setErrors] = useState<string[]>([]);
   const [draft, setDraft] = useState<CarouselPlan | null>(null);
   const [confirmRemake, setConfirmRemake] = useState(false);
@@ -91,7 +105,7 @@ export default function CarouselCard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [carouselOn]);
 
-  const send = async (method: "POST" | "PATCH", body: unknown, kind: "make" | "save" | "toggle") => {
+  const send = async (method: "POST" | "PATCH", body: unknown, kind: "make" | "save" | "toggle" | "style") => {
     setBusy(kind);
     setErrors([]);
     try {
@@ -100,7 +114,7 @@ export default function CarouselCard({
       if (json.success) {
         setState((s) => (s ? { ...s, carousel: json.carousel } : s));
         setDraft(null);
-        onMessage(kind === "make" ? "Carousel ready. Check every page." : kind === "save" ? "Carousel redrawn." : json.carousel.active ? "LinkedIn will post the carousel." : "LinkedIn will post the cover image.");
+        onMessage(kind === "make" ? "Carousel ready. Check every page." : kind === "save" ? "Carousel redrawn." : kind === "style" ? `Carousel redrawn in ${STYLE_NAMES[json.carousel.plan.style as SlideStyle]?.split(":")[0] ?? "the new design"}.` : json.carousel.active ? "LinkedIn will post the carousel." : "LinkedIn will post the cover image.");
       } else {
         setErrors(json.errors?.length ? json.errors : []);
         onMessage(json.error ?? "The carousel could not be updated.");
@@ -168,10 +182,25 @@ export default function CarouselCard({
           {locked ? (
             <p className="text-xs text-subtle">This draft is published without a carousel.</p>
           ) : (
-            <button type="button" disabled={busy !== null} onClick={() => void send("POST", null, "make")} className={ghostButton}>
-              {busy === "make" ? <Loader2 className="w-3 h-3 animate-spin" /> : <GalleryHorizontal className="w-3 h-3" />}
-              {busy === "make" ? "Writing the slides, about a minute" : "Make carousel"}
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="flex items-center gap-2 text-xs text-muted">
+                <span>Design</span>
+                <select
+                  aria-label="Carousel design"
+                  disabled={busy !== null}
+                  value={chosenStyle}
+                  onChange={(e) => setChosenStyle(e.target.value as SlideStyle | "")}
+                  className="bg-surface-2 border border-line rounded-lg px-2 py-1.5 text-xs text-ink focus:outline-none focus:border-brand"
+                >
+                  <option value="">Let the writer choose</option>
+                  {STYLES.map((k) => <option key={k} value={k}>{STYLE_NAMES[k]}</option>)}
+                </select>
+              </label>
+              <button type="button" disabled={busy !== null} onClick={() => void send("POST", chosenStyle ? { style: chosenStyle } : null, "make")} className={ghostButton}>
+                {busy === "make" ? <Loader2 className="w-3 h-3 animate-spin" /> : <GalleryHorizontal className="w-3 h-3" />}
+                {busy === "make" ? "Writing the slides, about a minute" : "Make carousel"}
+              </button>
+            </div>
           )}
         </div>
       ) : (
@@ -279,6 +308,22 @@ export default function CarouselCard({
                 <span className="text-[10px] font-mono uppercase tracking-wider text-subtle block mb-1">Post text with the carousel</span>
                 <p className="text-xs leading-relaxed text-ink whitespace-pre-line">{carousel.caption}</p>
               </div>
+              {!locked && (
+                <label className="flex flex-wrap items-center gap-2 text-xs text-muted">
+                  <span>Design</span>
+                  <select
+                    aria-label="Carousel design"
+                    disabled={busy !== null}
+                    // Plans stored before styles were drawn in EDITORIAL.
+                    value={carousel.plan.style ?? "EDITORIAL"}
+                    onChange={(e) => void send("PATCH", { plan: { ...carousel.plan, style: e.target.value } }, "style")}
+                    className="bg-surface-2 border border-line rounded-lg px-2 py-1.5 text-xs text-ink focus:outline-none focus:border-brand"
+                  >
+                    {STYLES.map((k) => <option key={k} value={k}>{STYLE_NAMES[k]}</option>)}
+                  </select>
+                  {busy === "style" ? <span className="inline-flex items-center gap-1 text-subtle"><Loader2 className="w-3 h-3 animate-spin" /> Redrawing…</span> : <span className="text-subtle">Same words, redrawn at once.</span>}
+                </label>
+              )}
               <div className="flex flex-wrap gap-2">
                 {!locked && (
                   <>
@@ -316,14 +361,14 @@ export default function CarouselCard({
       <ConfirmModal
         isOpen={confirmRemake}
         title="Make the carousel again?"
-        description="The slides are written again from the draft, and any edits you made to this carousel are replaced."
+        description="The slides are written again from the draft in the same design, and any edits you made to this carousel are replaced."
         confirmLabel="Make again"
         cancelLabel="Keep this one"
         variant="warning"
         isLoading={false}
         onConfirm={() => {
           setConfirmRemake(false);
-          void send("POST", null, "make");
+          void send("POST", carousel ? { style: carousel.plan.style } : null, "make");
         }}
         onClose={() => setConfirmRemake(false)}
       />

@@ -8,7 +8,7 @@ import type { CoverSpec } from "@/lib/covers/layouts";
 import { evidenceRules, manualIdeaNote } from "@/lib/drafts/authorContext";
 import { COVER_HEADLINE_WORDS, checkPlan, namesIn, parsePlan, repairPlan, suggestCarousel, toDeck, type CarouselPlan, type PlanSources } from "@/lib/carousel/plan";
 import { renderCarouselPdf, renderSlidePng } from "@/lib/carousel/render";
-import type { Deck } from "@/lib/carousel/slides";
+import type { Deck, SlideStyle } from "@/lib/carousel/slides";
 import { renderCarousel, type CarouselInput } from "@/lib/prompts/carousel";
 import { bodyOf, defaultByline, hostedCoverPhoto, isPublished } from "./cover";
 import { tenantBannedPhrases } from "./bannedScrub";
@@ -189,13 +189,13 @@ async function dropReplaced(assetId: string, old: StoredCarousel | null): Promis
 type Planned = { ok: true; plan: CarouselPlan; deck: Deck; attempts: number; model: string } | { ok: false; error: string; errors: string[] };
 
 /** The model's plan, repaired in code, through every gate; each retry is told exactly what failed. */
-async function planWithModel(ctx: Context, chat: Chat): Promise<Planned> {
+async function planWithModel(ctx: Context, chat: Chat, style?: SlideStyle): Promise<Planned> {
   let errors: string[] = [];
   const started = Date.now();
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     // A retry only when there is time for it inside the route's limit.
     if (attempt > 1 && Date.now() - started > RETRY_CUTOFF_MS) break;
-    const res = await chat({ ...renderCarousel({ ...ctx.input, feedback: attempt > 1 ? errors : undefined }) });
+    const res = await chat({ ...renderCarousel({ ...ctx.input, style, feedback: attempt > 1 ? errors : undefined }) });
     if (res.status >= 400) return { ok: false, error: `The model call failed (${res.status}). Try again in a minute.`, errors: [] };
     let content = "";
     try {
@@ -206,7 +206,8 @@ async function planWithModel(ctx: Context, chat: Chat): Promise<Planned> {
     const parsed = parsePlan(content);
     errors = parsed.errors;
     if (!parsed.plan || errors.length) continue;
-    const repaired = repairPlan(parsed.plan, ctx.sources);
+    // The reviewer's chosen design wins over whatever the model wrote.
+    const repaired = { ...repairPlan(parsed.plan, ctx.sources), ...(style ? { style } : {}) };
     // The deck opens with the post's own cover title, so the two never disagree.
     const plan = ctx.postCover ? { ...repaired, cover: { ...repaired.cover, ...ctx.postCover } } : repaired;
     const gated = gate(ctx, plan);
@@ -218,13 +219,13 @@ async function planWithModel(ctx: Context, chat: Chat): Promise<Planned> {
   return { ok: false, error: "The slides did not come out right this time. Make it again, or LinkedIn posts the cover image.", errors: [] };
 }
 
-/** Plans a carousel with the model, draws it and switches it on. */
-export async function generateCarousel(assetId: string, { chat = defaultChat }: { chat?: Chat } = {}): Promise<CarouselResult> {
+/** Plans a carousel with the model, draws it and switches it on. `style` is the reviewer's optional choice of design. */
+export async function generateCarousel(assetId: string, { chat = defaultChat, style }: { chat?: Chat; style?: SlideStyle } = {}): Promise<CarouselResult> {
   const ctx = await loadContext(assetId);
   if ("error" in ctx) return { ok: false, error: ctx.error, errors: [] };
   if (ctx.locked) return { ok: false, error: CAROUSEL_LOCKED, errors: [], locked: true };
   if (ctx.followUpFormat === "COVER") return { ok: false, error: COVER_POST_NO_CAROUSEL, errors: [], locked: true };
-  const { value: planned, costUsd } = await withCostMeter(() => planWithModel(ctx, chat));
+  const { value: planned, costUsd } = await withCostMeter(() => planWithModel(ctx, chat, style));
   if (!planned.ok) return planned;
   return { ok: true, carousel: await renderAndStore(ctx, planned.plan, planned.deck, { active: true, model: planned.model, attempts: planned.attempts }, costUsd) };
 }

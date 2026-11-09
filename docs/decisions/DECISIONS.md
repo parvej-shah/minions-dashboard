@@ -28,6 +28,13 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-09 — Reviewers can choose the carousel design
+
+**Decision:** On the carousel card a reviewer may pick one of the seven designs before the slides are written (the default is "Let the writer choose"), and switch a finished carousel to another design at any time. A switch redraws the same words with no AI call; if the words don't fit the new design it is refused with the reason and the carousel stays as it was. "Make again" keeps the current design.
+**Why:** the user wanted control over the look without paying for, or waiting on, a rewrite.
+**Status:** active
+
+---
 ## 2026-11-09 — Seven carousel designs, plus Grid and Punch pages
 
 **Decision:** The carousel writer now picks from seven page designs: Editorial, Bold and Minimal, plus Poster (alternating dark and light, a ribbon across the pages), Swiss (a fine column grid, italic key word, dark close), Aurora (dark, colour glows, glass panel) and Bento (raised cards on a grey page). It chooses one per post by tone. It may also use a Grid page (3 to 6 icon tiles) and a Punch page (3 or 4 short lines, then checks).

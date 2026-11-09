@@ -13,4 +13,5 @@
 | 9 | Poster-style carousel + modern banner samples (local) | CLAUDE | IN PROGRESS (carousel needs a more premium redesign; banners moved to task 10) | tasks/9.md |
 | 10 | Modern banner types in production + cut-out upload + italic font | CLAUDE | DONE | tasks/10.md |
 | 11 | Three premium carousel styles: SWISS, AURORA, BENTO (local samples) | CLAUDE | DONE (approved; shipped with task 12) | tasks/11.md |
-| 12 | Writer offers all 7 carousel styles + GRID and PUNCH pages | CLAUDE | DONE locally (push awaits user OK) | tasks/12.md |
+| 12 | Writer offers all 7 carousel styles + GRID and PUNCH pages | CLAUDE | DONE | pushed 494a803 |
+| 13 | Reviewer picks the carousel design (optional, before and after) | CLAUDE | DONE locally (push awaits user OK; UI not checked in a browser) | tasks/13.md |

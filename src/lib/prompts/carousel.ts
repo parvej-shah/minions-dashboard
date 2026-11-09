@@ -2,7 +2,7 @@ import type { ChatPayload } from "./types";
 import { DATA_CLOSE, DATA_OPEN, fenceSafe } from "./harvest";
 import { ICON_MEANING } from "@/lib/covers/icons";
 import { CAPTION_WORDS, COVER_HEADLINE_WORDS, INNER_SLIDES, WORD_CAPS } from "@/lib/carousel/plan";
-import { SLIDE_STYLES } from "@/lib/carousel/slides";
+import { SLIDE_STYLES, type SlideStyle } from "@/lib/carousel/slides";
 
 /**
  * The carousel slide plan (phase 11, D19): one call turns a reviewed draft
@@ -28,8 +28,29 @@ export interface CarouselInput {
   unverified?: string[];
   /** A second post of a draft already on LinkedIn: what that first post said, which the caption must not echo. */
   posted_post?: string;
+  /** The design the reviewer chose; without one the writer picks by tone. */
+  style?: SlideStyle;
   /** The previous attempt's gate failures, for the one retry. */
   feedback?: string[];
+}
+
+/** What each design looks like and which posts it suits: the writer picks by tone. */
+const STYLE_NOTES: Record<SlideStyle, string> = {
+  EDITORIAL: "the opening and closing pages set apart in the brand's strong colour. Considered and calm: arguments, teardowns, contrasts.",
+  BOLD: "every page in the brand's strong colour, with an accent edge. Energetic and direct: steps, checklists, a clear call to change something.",
+  MINIMAL: "every page plain and quiet, the accent only in the words. Reflective and personal: lessons, stories, the author's own experience.",
+  POSTER: "pages take turns dark and light, giant numerals, one accent ribbon running across every page. Loud and confident: strong opinions, myths busted, a bold call.",
+  SWISS: "light editorial pages on a fine column grid, the key word in italic, a large page number, a dark closing page. Precise and expert: frameworks, analysis, how something really works.",
+  AURORA: "every page dark with soft colour glows and a glass panel. Modern and technical: AI, software, product and future-facing posts.",
+  BENTO: "the words on raised cards over a soft grey page, key words highlighted. Friendly and practical: how-tos, tool stacks, checklists to keep.",
+};
+
+/** The design list for the writer, or the one design the reviewer chose. */
+function designSection(style?: SlideStyle): string {
+  if (style) return `The design is fixed: ${style} (${STYLE_NOTES[style].split(". ")[0]}). Set "style" to "${style}".`;
+  return `Pick ONE design for the pages after the cover, to suit the post's tone:
+${SLIDE_STYLES.map((k) => `- ${k}: ${STYLE_NOTES[k]}`).join("\n")}
+Vary the design from post to post; choose by tone, not habit.`;
 }
 
 const cap = (layout: keyof typeof WORD_CAPS, field: string) => WORD_CAPS[layout][field];
@@ -44,15 +65,7 @@ A carousel is kept and sent on when it gives the reader a structure worth keepin
 - CONTRAST: STAKES, 2-3 CONTRAST slides, one POINT, CLOSE.
 - TEARDOWN: STAKES, 3-4 POINT slides (what broke and why), CLOSE.
 
-Pick ONE design for the pages after the cover, to suit the post's tone:
-- EDITORIAL: the opening and closing pages set apart in the brand's strong colour. Considered and calm: arguments, teardowns, contrasts.
-- BOLD: every page in the brand's strong colour, with an accent edge. Energetic and direct: steps, checklists, a clear call to change something.
-- MINIMAL: every page plain and quiet, the accent only in the words. Reflective and personal: lessons, stories, the author's own experience.
-- POSTER: pages take turns dark and light, giant numerals, one accent ribbon running across every page. Loud and confident: strong opinions, myths busted, a bold call.
-- SWISS: light editorial pages on a fine column grid, the key word in italic, a large page number, a dark closing page. Precise and expert: frameworks, analysis, how something really works.
-- AURORA: every page dark with soft colour glows and a glass panel. Modern and technical: AI, software, product and future-facing posts.
-- BENTO: the words on raised cards over a soft grey page, key words highlighted. Friendly and practical: how-tos, tool stacks, checklists to keep.
-Vary the design from post to post; choose by tone, not habit.
+${designSection(input.style)}
 
 Layouts and their word limits (hard limits, counted in code):
 - STAKES: "statement" (max ${cap("STAKES", "statement")} words), optional "body" (max ${cap("STAKES", "body")}), optional "emphasis" (one word of the statement). Why this matters to the reader now.
@@ -88,7 +101,7 @@ ${input.banned.length ? `- Never use these phrases: ${input.banned.join("; ")}.\
 Return ONLY this JSON:
 {
   "structure": "CHECKLIST | STEPS | DECISION | CONTRAST | TEARDOWN",
-  "style": "${SLIDE_STYLES.join(" | ")}",
+  "style": "${input.style ?? SLIDE_STYLES.join(" | ")}",
   "label": "2-4 words",
   "cover": { "headline": "...", "emphasis": "one word of the headline", "kicker": "..." },
   "slides": [ { "layout": "STAKES", "statement": "...", "body": "...", "emphasis": "...", "icon": "OPTIONAL_ICON_NAME" } ],

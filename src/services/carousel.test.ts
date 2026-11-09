@@ -87,6 +87,26 @@ describe("making a carousel", () => {
     expect(chat).toHaveBeenCalledTimes(2);
   }, 60_000);
 
+  it("uses the reviewer's chosen style even when the model picks another", async () => {
+    const chat = vi.fn().mockResolvedValue(reply({ ...plan, style: "BOLD" }));
+    const result = await generateCarousel("a1", { chat, style: "AURORA" });
+    expect(result.ok && result.carousel.plan.style).toBe("AURORA");
+    const sent = chat.mock.calls[0][0] as { messages: { content: string }[] };
+    expect(sent.messages[0].content).toContain("The design is fixed: AURORA");
+  }, 60_000);
+
+  it("switches an existing carousel to another style with no model call", async () => {
+    const chat = vi.fn().mockResolvedValue(reply({ ...plan, style: "EDITORIAL" }));
+    const made = await generateCarousel("a1", { chat });
+    if (!made.ok) throw new Error("setup failed");
+    db.asset.findUnique.mockResolvedValue({ ...asset, carouselSpec: made.carousel });
+    db.asset.update.mockClear();
+    const switched = await editCarousel("a1", { ...made.carousel.plan, style: "SWISS" });
+    expect(switched.ok && switched.carousel.plan.style).toBe("SWISS");
+    expect(chat).toHaveBeenCalledTimes(1);
+    expect(db.asset.update).toHaveBeenCalledTimes(1);
+  }, 60_000);
+
   it("never changes a published draft's carousel", async () => {
     db.asset.findUnique.mockResolvedValue({ ...asset, status: "PUBLISHED" });
     const chat = vi.fn();
