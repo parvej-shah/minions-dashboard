@@ -7,7 +7,7 @@ import { useChannelSummary } from "@/hooks/useChannelSummary";
 import { DEFAULT_TIMEZONE } from "@/constants/config";
 import { countFor, defaultShow, postsFor, statusLine, type PostShow } from "@/lib/posts/library";
 import { liveLinks } from "@/lib/drafts/liveLinks";
-import { segment } from "@/components/ui/segment";
+import { Segmented, SearchField } from "@/components/ui/Filters";
 import { buttonStyles } from "@/components/ui/Button";
 import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
 import { cardClass } from "@/components/ui/Card";
@@ -56,37 +56,13 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
           {show === "needs" && countFor(assets.data, "needs") > 0 ? "Nothing goes out until you approve it." : null}
         </PageHeader>
         <div className="flex flex-wrap items-center gap-3">
-          <div role="group" aria-label="Show" className={segment.track}>
-            {SHOWS.map((s) => {
-              const n = countFor(assets.data, s.key);
-              return (
-                <button
-                  key={s.key}
-                  type="button"
-                  aria-pressed={show === s.key}
-                  onClick={() => pick(s.key)}
-                  className={`min-h-9 cursor-pointer px-4 text-[15px] ${show === s.key ? segment.on : segment.off}`}
-                >
-                  {s.label}
-                  {s.key === "needs" && n > 0 ? ` · ${n}` : ""}
-                </button>
-              );
-            })}
-          </div>
-          <label className="flex min-h-11 flex-[0_1_220px] items-center gap-2 rounded-full bg-surface-3 px-4">
-            <span className="sr-only">Search posts</span>
-            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="shrink-0 text-muted">
-              <circle cx="11" cy="11" r="7" />
-              <path d="M20 20l-3.5-3.5" />
-            </svg>
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search"
-              className="w-full bg-transparent text-[15px] text-ink outline-none placeholder:text-muted"
-            />
-          </label>
+          <Segmented
+            label="Show"
+            options={SHOWS.map((s) => ({ key: s.key, label: s.label, count: s.key === "needs" ? countFor(assets.data, s.key) : undefined }))}
+            value={show}
+            onChange={pick}
+          />
+          <SearchField label="Search posts" value={query} onChange={setQuery} />
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { postButtonLabel, whereText } from "./decision";
+import { postButtonLabel, shortWhen, whereText } from "./decision";
 
 const ALL = { blog: true, linkedin: true, facebook: false, x: false };
 
@@ -26,5 +26,13 @@ describe("postButtonLabel", () => {
   });
   it("adds the date beyond a week", () => {
     expect(postButtonLabel("2026-11-20T03:00:00Z", tz, now)).toBe("Post on Fri 20 Nov, 09:00");
+  });
+});
+
+describe("shortWhen", () => {
+  it("is the same time in fewer words", () => {
+    const now = new Date("2026-11-09T02:30:00Z");
+    expect(shortWhen("2026-11-09T15:00:00Z", "Asia/Dhaka", now)).toBe("today 21:00");
+    expect(shortWhen("2026-11-11T03:00:00Z", "Asia/Dhaka", now)).toBe("Wed 09:00");
   });
 });

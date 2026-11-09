@@ -17,14 +17,21 @@ export function StatusLabel({ tone, children, className = "" }: { tone: StatusTo
   return <p className={`text-sm font-semibold ${STATUS_TEXT[tone]} ${className}`}>● {children}</p>;
 }
 
-/** The big page title, with an optional small line above it (the date, a count). */
-export function PageHeader({ kicker, title, children }: { kicker?: React.ReactNode; title: React.ReactNode; children?: React.ReactNode }) {
-  return (
-    <header className="space-y-2">
+/** The big page title, with an optional small line above it, a line below, and an action on the right. */
+export function PageHeader({ kicker, title, children, action }: { kicker?: React.ReactNode; title: React.ReactNode; children?: React.ReactNode; action?: React.ReactNode }) {
+  const head = (
+    <header className="max-w-[560px] space-y-2">
       {kicker && <p className="text-[15px] text-muted">{kicker}</p>}
       <h1 className="text-[40px] font-bold leading-[1.08] tracking-[-0.035em] text-ink sm:text-5xl">{title}</h1>
       {children && <div className="pt-1 text-[17px] leading-relaxed text-muted">{children}</div>}
     </header>
+  );
+  if (!action) return head;
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-5">
+      {head}
+      {action}
+    </div>
   );
 }
 

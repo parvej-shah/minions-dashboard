@@ -20,14 +20,19 @@ function dayKey(d: Date, timeZone: string) {
   return new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
 }
 
-/** The primary button: "Post today at 21:00", "Post on Wed 09:00", or with the date beyond a week. */
-export function postButtonLabel(iso: string, timeZone: string, now: Date): string {
+/** A posting time in a few words: "today 21:00", "Wed 09:00", or with the date beyond a week. */
+export function shortWhen(iso: string, timeZone: string, now: Date): string {
   const at = new Date(iso);
   const time = new Intl.DateTimeFormat("en-GB", { timeZone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(at);
-  if (dayKey(at, timeZone) === dayKey(now, timeZone)) return `Post today at ${time}`;
+  if (dayKey(at, timeZone) === dayKey(now, timeZone)) return `today ${time}`;
   if (at.getTime() - now.getTime() < 6 * 86_400_000) {
-    const weekday = new Intl.DateTimeFormat("en-GB", { timeZone, weekday: "short" }).format(at);
-    return `Post on ${weekday} ${time}`;
+    return `${new Intl.DateTimeFormat("en-GB", { timeZone, weekday: "short" }).format(at)} ${time}`;
   }
-  return `Post on ${slotLabel(iso, timeZone)}`;
+  return slotLabel(iso, timeZone);
+}
+
+/** The primary button: "Post today at 21:00", "Post on Wed 09:00", or with the date beyond a week. */
+export function postButtonLabel(iso: string, timeZone: string, now: Date): string {
+  const when = shortWhen(iso, timeZone, now);
+  return when.startsWith("today ") ? `Post today at ${when.slice(6)}` : `Post on ${when}`;
 }

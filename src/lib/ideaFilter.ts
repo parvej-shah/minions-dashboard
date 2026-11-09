@@ -10,7 +10,7 @@ const createdAt = (idea: IdeaItem) => {
   return Number.isFinite(time) ? time : 0;
 };
 
-function matchesQuery(idea: IdeaItem, query: string): boolean {
+export function matchesQuery(idea: IdeaItem, query: string): boolean {
   const needle = query.toLowerCase();
   const haystacks = [idea.title || idea.raw_idea, idea.excerpt || idea.angle, idOf(idea), ...(idea.tags ?? [])];
   return haystacks.some((text) => (text ?? "").toLowerCase().includes(needle));

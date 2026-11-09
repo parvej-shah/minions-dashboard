@@ -44,6 +44,10 @@
     60% { transform: scale(1.04); opacity: 1; }
     100% { transform: scale(1); }
   }
+  @keyframes indeterminate {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(300%); }
+  }
   @keyframes rise-in {
     from { transform: translateY(8px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
@@ -51,7 +55,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-shimmer, .animate-pop-in, .animate-rise-in { animation: none; }
+  .animate-shimmer, .animate-pop-in, .animate-rise-in, [class*="animate-[indeterminate"] { animation: none; }
 }
 
 :root {
