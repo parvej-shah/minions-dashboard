@@ -22,10 +22,10 @@
 | 18 | Ghostwriter brand for parvejshalabib007s-workspace | CLAUDE | DONE (applied in prod; pushed c53476a) | tasks/18.md |
 | 19 | Unpublish from LinkedIn in the Studio (deletes the LinkedIn post, back to review) | CLAUDE | DONE (pushed e448e86) | tasks/19.md |
 | 20 | Calm redesign: research + direction board (UI only, engine untouched) | CLAUDE | DONE (approved 2026-11-09, blue) | tasks/20.md |
-| 21 | Calm foundation: light tokens, calm primitives, top menu | CLAUDE | DONE (local) | tasks/21.md |
-| 22 | Today page at / | CLAUDE | DONE (local) | tasks/22.md |
-| 23 | Posts library (/posts) | CLAUDE | DONE (local) | tasks/23.md |
-| 24 | Review screen (Studio rebuilt) | CLAUDE | DONE (local) | tasks/24.md |
-| 25 | Ideas | CLAUDE | DONE (local) | tasks/25.md |
-| 26 | Remaining screens calm pass | CLAUDE | DONE (local) | tasks/26.md |
-| 27 | Sweep + browser pass, then ask to push | CLAUDE | DONE (local, push awaits OK) | tasks/27.md |
+| 21 | Calm foundation: light tokens, calm primitives, top menu | CLAUDE | DONE (pushed 2026-11-10) | tasks/21.md |
+| 22 | Today page at / | CLAUDE | DONE (pushed 2026-11-10) | tasks/22.md |
+| 23 | Posts library (/posts) | CLAUDE | DONE (pushed 2026-11-10) | tasks/23.md |
+| 24 | Review screen (Studio rebuilt) | CLAUDE | DONE (pushed 2026-11-10) | tasks/24.md |
+| 25 | Ideas | CLAUDE | DONE (pushed 2026-11-10) | tasks/25.md |
+| 26 | Remaining screens calm pass | CLAUDE | DONE (pushed 2026-11-10) | tasks/26.md |
+| 27 | Sweep + browser pass, then ask to push | CLAUDE | DONE (pushed 2026-11-10) | tasks/27.md |
