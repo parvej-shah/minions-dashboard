@@ -28,6 +28,12 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-09 — A workspace markets Minions Ghostwriter itself
+
+**Decision:** The parvejshalabib007s-workspace now markets Minions Ghostwriter (this product) to founders and consultants who run small B2B service businesses and should post on LinkedIn but don't. Its posts come from our own build story and data (the decisions in this log), lead with the outcome, and never claim customers or results we don't have. The user posts them by hand. Tenant zero stays the voice AI brand.
+**Why:** We want to start marketing the product now, and our own build-in-public data is the most credible material we have.
+**Status:** active
+
 ## 2026-11-09 — Outcome-first posts name no products or assistants
 
 **Decision:** Posts for outcome buyers don't name products, named assistants, tools or vendors (e.g. "via Zip"). They say what the thing does for the reader ("a text goes back within five seconds"). The company's own name is still allowed. The bsse1610 workspace's brand rules and stories were rewritten to drop the crew names (Rex, Zip, Pip, Gia, Otto).
