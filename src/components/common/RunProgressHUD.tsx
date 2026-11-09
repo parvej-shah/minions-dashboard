@@ -143,7 +143,7 @@ export default function RunProgressHUD<J extends RunJob>({ job, config, onDismis
       aria-label={config.ariaLabel}
       className={`fixed bottom-5 right-5 z-50 w-[420px] max-w-[calc(100vw-2.5rem)] rounded-2xl bg-surface-2/95 border ${
         isCompleted ? theme.frameDone : hasFailed ? "border-danger/60 shadow-danger/20" : "border-line shadow-black/80"
-      } shadow-2xl backdrop-blur-xl transition-all duration-300 overflow-hidden flex flex-col`}
+      } shadow-float backdrop-blur-xl transition-all duration-300 overflow-hidden flex flex-col`}
     >
       <div className={`h-1 w-full transition-all duration-500 ${isCompleted ? theme.barDone : hasFailed ? "bg-danger" : theme.barRunning}`} />
 

@@ -28,4 +28,4 @@
 | 24 | Review screen (Studio rebuilt) | CLAUDE | DONE (local) | tasks/24.md |
 | 25 | Ideas | CLAUDE | DONE (local) | tasks/25.md |
 | 26 | Remaining screens calm pass | CLAUDE | DONE (local) | tasks/26.md |
-| 27 | Sweep + browser pass, then ask to push | CLAUDE | IN PROGRESS | tasks/27.md |
+| 27 | Sweep + browser pass, then ask to push | CLAUDE | DONE (local, push awaits OK) | tasks/27.md |

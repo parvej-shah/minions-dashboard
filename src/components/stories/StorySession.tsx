@@ -5,7 +5,6 @@ import {
   BookOpen,
   Check,
   FlaskConical,
-  Flame,
   GraduationCap,
   Hammer,
   History,
@@ -22,7 +21,7 @@ import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { MEMORY_KIND_META, MEMORY_MIN_CHARS, type MemoryKind } from "@/constants/contentLanes";
 import type { StoryPrompt } from "@/lib/storyBank";
 import type { StoryExtractDTO } from "@/services/storyBank";
-import { chunky } from "./chunky";
+import { sessionButtons } from "./sessionButtons";
 import Celebration from "./Celebration";
 import ResultSheet from "./ResultSheet";
 import type { Note, SessionResult } from "./types";
@@ -49,13 +48,9 @@ type Phase = "answer" | "checking" | "review" | "empty" | "saving";
  */
 export default function StorySession({
   prompts,
-  streak,
-  addedThisWeek,
   onClose,
 }: {
   prompts: StoryPrompt[];
-  streak: number;
-  addedThisWeek: boolean;
   onClose: (result: SessionResult) => void;
 }) {
   const [step, setStep] = useState(0);
@@ -197,36 +192,26 @@ export default function StorySession({
     });
   };
 
-  const newStreak = saved > 0 && !addedThisWeek ? streak + 1 : streak;
-
   return (
     <div role="dialog" aria-modal="true" aria-label="Story session" className="fixed inset-0 z-[80] flex flex-col bg-surface-2 text-ink">
-      {/* Top bar: close, progress, streak */}
+      {/* Top bar: close and progress */}
       <header className="mx-auto flex w-full max-w-2xl items-center gap-4 px-4 pt-5 pb-3 sm:px-6">
         <button type="button" onClick={askToLeave} aria-label="Close the session" className="rounded-lg p-1 text-subtle transition-colors hover:text-ink cursor-pointer">
           <X className="h-6 w-6" strokeWidth={2.5} />
         </button>
         <div
-          className="relative h-4 flex-1 overflow-hidden rounded-full bg-line"
+          className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-line"
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={prompts.length}
           aria-valuenow={finished ? prompts.length : step}
         >
-          <div className="h-full rounded-full bg-brand transition-[width] duration-500 ease-out" style={{ width: `${Math.max(progress, 0.04) * 100}%` }}>
-            <div className="mx-2 mt-[3px] h-[4px] rounded-full bg-white/30" />
-          </div>
-        </div>
-        <div className="flex items-center gap-1 text-sm font-semibold text-coral" title={`${newStreak}-week streak`}>
-          <Flame className={`h-5 w-5 ${newStreak > 0 ? "fill-coral" : "text-subtle"}`} />
-          <span key={newStreak} className={newStreak > streak ? "story-pop" : ""}>
-            {newStreak}
-          </span>
+          <div className="h-full rounded-full bg-brand transition-[width] duration-500 ease-out" style={{ width: `${Math.max(progress, 0.04) * 100}%` }}></div>
         </div>
       </header>
 
       {finished ? (
-        <Celebration saved={finished.saved} streak={newStreak} grew={newStreak > streak} harvest={finished.harvest} onDone={() => onClose(finished)} />
+        <Celebration saved={finished.saved} harvest={finished.harvest} onDone={() => onClose(finished)} />
       ) : (
         <>
           {/* The question */}
@@ -260,7 +245,7 @@ export default function StorySession({
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
                 {prompt.starters.map((s) => (
-                  <button key={s} type="button" disabled={phase !== "answer"} onClick={() => addStarter(s)} className={chunky.chip}>
+                  <button key={s} type="button" disabled={phase !== "answer"} onClick={() => addStarter(s)} className={sessionButtons.chip}>
                     {s}…
                   </button>
                 ))}
@@ -282,10 +267,10 @@ export default function StorySession({
           {(phase === "answer" || phase === "checking" || (phase === "saving" && !notes.length)) && (
             <footer className="border-t border-line bg-surface-2">
               <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5">
-                <button type="button" disabled={phase !== "answer"} onClick={() => void next(saved)} className={chunky.ghost}>
+                <button type="button" disabled={phase !== "answer"} onClick={() => void next(saved)} className={sessionButtons.ghost}>
                   Skip
                 </button>
-                <button type="button" disabled={phase !== "answer" || !answer.trim()} onClick={() => void check()} className={`${chunky.primary} min-w-[9rem] sm:min-w-[11rem]`}>
+                <button type="button" disabled={phase !== "answer" || !answer.trim()} onClick={() => void check()} className={`${sessionButtons.primary} min-w-[9rem] sm:min-w-[11rem]`}>
                   {phase !== "answer" ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" /> {phase === "checking" ? "Reading" : "Saving"}
@@ -324,7 +309,7 @@ export default function StorySession({
                     <p className="text-sm text-gold">Say what happened, who it was for, or what changed. One specific moment beats a general summary.</p>
                   </div>
                 </div>
-                <button type="button" onClick={() => setPhase("answer")} className={`${chunky.amber} mt-4 w-full`}>
+                <button type="button" onClick={() => setPhase("answer")} className={`${sessionButtons.secondary} mt-4 w-full`}>
                   Try again
                 </button>
               </div>
@@ -344,7 +329,7 @@ export default function StorySession({
                   : "Nothing is saved yet. The answer you are writing will be lost."}
               </p>
               <div className="mt-5 flex flex-col gap-3">
-                <button type="button" autoFocus onClick={() => setQuitting(false)} className={`${chunky.primary} w-full`}>
+                <button type="button" autoFocus onClick={() => setQuitting(false)} className={`${sessionButtons.primary} w-full`}>
                   Keep going
                 </button>
                 <button type="button" onClick={() => void leave()} className="py-2 text-sm font-semibold text-danger hover:text-danger cursor-pointer">

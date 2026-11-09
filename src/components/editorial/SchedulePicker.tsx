@@ -96,7 +96,7 @@ export default function SchedulePicker({ current, busy, confirmLabel, onConfirm,
 
   const today = utcToZoned(new Date(), settings.timezone).date;
   const inputClass =
-    "w-full bg-canvas border border-line rounded-lg px-2.5 py-1.5 text-xs text-ink focus:outline-none focus:border-brand [color-scheme:dark]";
+    "w-full bg-canvas border border-line rounded-lg px-2.5 py-1.5 text-xs text-ink focus:outline-none focus:border-brand";
 
   return (
     <form

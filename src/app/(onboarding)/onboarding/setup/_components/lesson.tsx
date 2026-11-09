@@ -70,7 +70,7 @@ export function ExampleChip({ children, selected, onClick }: { children: React.R
       onClick={onClick}
       aria-pressed={selected}
       className={`rounded-xl border px-3 py-2 text-sm font-bold transition-[transform,border-width] duration-75 cursor-pointer active:translate-y-0.5 active:border-b ${
-        selected ? "border-brand border-b-brand-edge bg-brand/10 text-brand" : "border-line bg-surface text-ink hover:border-line-strong hover:bg-surface-2"
+        selected ? "border-brand bg-brand/10 text-brand" : "border-line bg-surface text-ink hover:border-line-strong hover:bg-surface-2"
       }`}
     >
       {children}
@@ -133,8 +133,8 @@ export function OptionList<T extends string>({
             className={`group relative flex items-start gap-3 rounded-2xl border p-4 text-left transition-[transform,border-width,background-color,border-color] duration-75 cursor-pointer active:translate-y-0.5 active:border-b ${
               selected
                 ? gold
-                  ? "border-gold border-b-gold-edge bg-gold/10"
-                  : "border-brand border-b-brand-edge bg-brand/10"
+                  ? "border-gold bg-gold/10"
+                  : "border-brand bg-brand/10"
                 : "border-line bg-surface hover:border-line-strong hover:bg-surface-2"
             }`}
           >

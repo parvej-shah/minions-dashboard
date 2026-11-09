@@ -1,73 +1,80 @@
 # Minions UI kit
 
-The bar is a lesson app (Duolingo): one obvious next action per screen,
-buttons you can feel, instant feedback, and nothing that flashes while it
-loads. Build new screens from these pieces rather than raw hex and one-off
-classes.
+The bar is Apple.com: light grounds, big plain type, one blue action per
+screen, soft cards with no borders, and nothing that flashes while it loads.
+Busy people should feel calm, not rushed. Build new screens from these
+pieces rather than raw hex and one-off classes.
 
 ## Tokens (`src/app/globals.css` → `@theme`)
 
 Every token is a Tailwind utility (`bg-brand`, `text-muted`, `border-line`,
-`border-b-brand-edge`).
+`shadow-soft`).
 
 | Token | Use |
 |---|---|
-| `canvas` / `surface` / `surface-2` / `surface-3` | page, card, raised, hover on raised |
-| `line` / `line-strong` | borders |
+| `canvas` / `surface` / `surface-2` / `surface-3` | page, card, well or weekend tile, hover on well |
+| `line` / `line-strong` | hairlines and input borders |
 | `ink` / `muted` / `subtle` | primary, secondary, tertiary text |
-| `brand` (+ `-hover`, `-edge`, `-ink`) | the one action colour |
-| `coral` | needs attention (drafts waiting) |
-| `gold` | streaks and rewards |
+| `brand` (+ `-hover`, `-ink`) | the one action colour (#0066CC) |
+| `coral` | needs you (posts waiting) |
+| `gold` | caution |
 | `danger` | destructive actions and errors |
+| `success` | scheduled, done |
+| `shadow-soft` | cards |
+| `shadow-float` | things over the page: menus, toasts, drawers, modals |
 
-Animations: `animate-shimmer` (skeletons), `animate-pop-in` (a thing
-arriving), `animate-rise-in` (content entering). All stop under
-reduced motion.
+Type: page titles 40–56px semibold, card titles 28–32px semibold, body
+17px. No mono, no uppercase labels, no extra-bold.
+
+Animations: `animate-shimmer` (skeletons), `animate-pop-in` and
+`story-pop` (a gentle fade-and-settle, no bounce), `animate-rise-in`
+(content entering), `animate-[indeterminate_…]` (working bars). All stop
+under reduced motion. No confetti, streaks or 3D edges.
 
 ## Components
 
-- **`Button` / `buttonStyles()`**: the tactile button (use `buttonStyles()` on a `<Link>`). The
-  variants are `primary`, `soft` (brand-tinted, for real actions that should
-  not compete with the primary), `secondary`, `light` (third-party sign-in), `ghost`,
-  `gold`, `coral` and `danger`, in sizes `sm`, `md` and `lg`. `block` makes it
-  full width. `shout` uppercases the label, for one-word lesson actions such as
-  CONTINUE. `loading` keeps the button's width, shows a spinner and blocks
-  double clicks.
-  Put at most one `primary` on each screen.
-- **`Card` / `cardClass()`**: the design's surface: `rounded-[28px]`, white,
-  `shadow-soft`, no border. Tones `default`, `well` (grey, for empty states),
-  `brand`, `coral`, `gold`; padding `none`, `md`, `lg` (hero cards).
-- **`Text.tsx`**: `PageHeader` (date line + big title), `SectionHeader`
-  (title + "All posts ›" link), `CardTitle` (the hero card's heading) and
-  `StatusLabel` ("● Needs you" in coral/success/muted/brand). Use these
-  instead of copying the type sizes.
+- **`Button` / `buttonStyles()`**: the pill button (use `buttonStyles()` on a
+  `<Link>`). Variants `primary` (filled blue), `soft` (blue outline),
+  `secondary` (grey outline), `light` (third-party sign-in), `ghost` (blue
+  text), `danger`; `gold` and `coral` map onto the calm ones for old callers.
+  Sizes `sm`, `md`, `lg`; `block` is full width; `loading` keeps the width,
+  shows a spinner and blocks double clicks. At most one `primary` per screen.
+- **`Card` / `cardClass()`**: `rounded-[28px]`, white, `shadow-soft`, no
+  border. Tones `default`, `well` (grey, for empty states), `brand`, `coral`,
+  `gold`; padding `none`, `md`, `lg` (hero cards).
+- **`Text.tsx`**: `PageHeader` (kicker line + big title + optional `action`
+  on the right), `SectionHeader` (title + "All posts ›" link), `CardTitle`
+  and `StatusLabel` ("● Needs you" in coral/success/muted/brand). Use these
+  instead of copying type sizes.
+- **`Filters.tsx`**: `Segmented` (the grey pill control: Up next · Written ·
+  Set aside) and `SearchField` (rounded search with a clear button).
+- **`Menu`**: the ⋯ menu. Closes on outside click and Escape; arrow keys move
+  between items.
+- **`segment`** (`segment.ts`): raw classes behind `Segmented`, for tabs that
+  are links.
 - **`Skeleton`, `SkeletonText`, `SkeletonCard`, `SkeletonGroup`,
-  `PageSkeleton`**: placeholders shaped like the content that is on its way.
-  Wrap a group in `SkeletonGroup` so screen readers hear a single "Loading".
-- **`segment`** (`segment.ts`): classes for segmented tabs such as
-  Queue | Stream | Calendar. Use `${segment.on}` for the chosen tab and
-  `${segment.off}` for the rest.
+  `PageSkeleton`**: placeholders shaped like the content on its way. Wrap a
+  group in `SkeletonGroup` so screen readers hear a single "Loading".
 - **`LoadingState`** (in `EmptyState.tsx`): skeleton rows with one loading
-  announcement. Use it wherever a list is still fetching.
-- **`ProgressBar`**: a thick, rounded bar for steps and goals. The value runs
-  from 0 to 1.
-- **`Modal`** (variants `center` and `sheet`, the phone-full-screen one),
-  **`Drawer`** (right-hand slide-over for forms), **`ConfirmModal`**,
-  **`Toast`** (positions `top`, `bottom`, `lifted` above the phone tab bar),
-  **`EmptyState`**, **`ErrorLine`** and **`Confetti`**.
+  announcement.
+- **`ProgressBar`**: a thin rounded bar; value 0 to 1.
+- **`Modal`** (`center` and `sheet`), **`Drawer`**, **`ConfirmModal`**,
+  **`Toast`**, **`EmptyState`**, **`ErrorLine`**.
 - **`fieldStyles`**: `inputClass`, `sectionClass` and `sectionCardClass` for
   settings forms.
+- **`PostThumb`** (`components/posts`): a post cover that always stays inside
+  its box (4:5, `min-w-0`, absolute image). Use it wherever a cover sits in a
+  flex or grid row.
 
 ## Rules
 
 1. **Never flash the wrong screen.** Decide on the server where someone
-   belongs, and redirect before anything renders. `src/lib/homeRoute.ts` does
-   this for sign-in and `/onboarding`. Client-side checks are only a fallback,
-   and they show a skeleton while they run.
-2. **Loading shows the page's shape, not a spinner.** Give each route group a
-   `loading.tsx` that uses `PageSkeleton`. Inside a page, show skeletons where
-   the numbers will go. Don't show `0` and then jump.
-3. **One next step.** Every screen has one primary action. Anything else is
+   belongs and redirect before anything renders (`src/lib/homeRoute.ts`).
+2. **Loading shows the page's shape, not a spinner.** Each route group has a
+   `loading.tsx` using `PageSkeleton`; inside a page, skeletons sit where the
+   numbers will go.
+3. **One next step.** One primary per screen; everything else is soft,
    secondary or ghost.
-4. **Feedback on every press.** Buttons sink when pressed, and async buttons
-   use `loading`.
+4. **Nothing spills.** Flex children that hold images or long text get
+   `min-w-0`; rows that can run out of room use `flex-wrap`. Check every
+   screen at 390px wide.

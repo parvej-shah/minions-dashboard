@@ -3,7 +3,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { BadgeCheck, Briefcase, Check, Globe, Loader2, Mic2, ScanText, Target, UserRound, Users2 } from "lucide-react";
-import Confetti from "@/components/ui/Confetti";
 import type { BrandImportRun, StepState } from "@/hooks/useBrandImport";
 import type { BrandImport, ImportStep } from "@/lib/brandImport/types";
 
@@ -70,7 +69,6 @@ function Ring({ value, done }: { value: number; done: boolean }) {
         />
       </svg>
       <span className={`text-sm font-semibold ${done ? "text-gold" : "text-ink"}`}>{Math.round(value * 100)}%</span>
-      {done && <Confetti burst="big" />}
     </span>
   );
 }

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, PartyPopper, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import Confetti from "@/components/ui/Confetti";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { useBrandImport } from "@/hooks/useBrandImport";
 import type { BrandImport, ImportApproval } from "@/lib/brandImport/types";
@@ -150,9 +149,8 @@ export function BrandImportSheet({ onClose, onApplied }: { onClose: () => void; 
       const parts = saved ? savedSummary(saved) : [];
       body = (
         <div className="flex flex-1 flex-col items-center justify-center px-4 py-16 text-center">
-          <span className="story-pop relative flex h-24 w-24 items-center justify-center rounded-full border-b-8 border-gold-edge bg-gold text-white">
+          <span className="story-pop relative flex h-20 w-20 items-center justify-center rounded-full bg-gold/10 text-gold">
             <PartyPopper className="h-11 w-11" strokeWidth={2.25} />
-            <Confetti burst="big" />
           </span>
           <h1 className="mt-8 text-2xl font-bold text-ink sm:text-3xl">{parts.length ? "Your brand just got richer" : "Nothing needed saving"}</h1>
           <p className="mt-2 max-w-md text-muted">{parts.length ? `Added ${parts.join(", ")}. Your next ideas and drafts use it.` : "Everything was already in your brand."}</p>

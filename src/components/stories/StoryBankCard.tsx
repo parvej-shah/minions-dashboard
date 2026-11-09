@@ -17,7 +17,7 @@ const HIDE_MS = 7 * 86_400_000;
 
 /**
  * The home card that appears when the story bank runs low: how many unused
- * stories are left, the weekly streak, and a button into the session. At most
+ * stories are left, and a button into the session. At most
  * once a week: it stays away in any week the author already added a story,
  * and the X hides it for seven days.
  */
@@ -117,7 +117,7 @@ export default function StoryBankCard() {
       {/* On <body>, so no transformed ancestor can trap the full-screen layer. */}
       {open &&
         createPortal(
-          <StorySession prompts={bank.prompts} streak={bank.streak_weeks} addedThisWeek={bank.added_this_week} onClose={close} />,
+          <StorySession prompts={bank.prompts} onClose={close} />,
           document.body
         )}
     </>

@@ -58,11 +58,11 @@ export default function IdeaRow(p: IdeaRowProps) {
         : null;
 
   return (
-    <li className="flex items-start gap-5 border-b border-line px-1 py-[22px]">
+    <li className="flex flex-wrap items-start gap-x-5 gap-y-2 border-b border-line px-1 py-[22px]">
       {view === "next" && (
         <p aria-hidden="true" className="mt-0.5 w-6 shrink-0 text-[15px] font-semibold text-muted">{p.place}</p>
       )}
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+      <div className="flex min-w-0 flex-[1_1_0] flex-col gap-1.5">
         {kicker && <p className="text-[13px] font-semibold text-ink">{kicker}</p>}
         <button type="button" onClick={p.onOpen} title={title} className="line-clamp-2 w-fit cursor-pointer text-left text-[19px] font-semibold leading-snug tracking-[-0.015em] text-ink hover:text-brand">
           {title}
@@ -76,7 +76,8 @@ export default function IdeaRow(p: IdeaRowProps) {
           )}
         </p>
       </div>
-      <div className="flex shrink-0 items-center gap-1">
+      {/* On a phone the actions sit under the text so the title keeps the full width. */}
+      <div className={`flex basis-full items-center gap-1 sm:basis-auto sm:shrink-0 sm:pl-0 ${view === "next" ? "pl-[34px]" : "-ml-2.5 sm:ml-0"}`}>
         {view === "next" && (
           <button type="button" onClick={p.onWrite} disabled={p.starting} className={textButton}>
             {p.starting ? "Starting…" : "Write now"}

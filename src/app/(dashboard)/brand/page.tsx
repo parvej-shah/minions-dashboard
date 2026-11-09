@@ -107,7 +107,7 @@ function BrandStudio() {
 
         <nav aria-label="Brand settings" className={segment.track}>
           {BRAND_SECTIONS.map(({ tab, label, icon: Icon }) => (
-            <button key={tab} type="button" onClick={() => goToSection(tab)} aria-current={activeTab === tab ? "page" : undefined} className={`inline-flex min-h-9 cursor-pointer items-center gap-2 px-4 text-[15px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${activeTab === tab ? segment.on : segment.off}`}><Icon className="h-4 w-4" aria-hidden="true" />{label}</button>
+            <button key={tab} type="button" onClick={() => goToSection(tab)} aria-current={activeTab === tab ? "page" : undefined} className={`inline-flex min-h-9 cursor-pointer items-center gap-2 px-4 text-[15px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand ${activeTab === tab ? segment.on : segment.off}`}><Icon className="h-4 w-4" aria-hidden="true" />{label}</button>
           ))}
         </nav>
       </div>

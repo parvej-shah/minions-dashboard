@@ -16,7 +16,7 @@ export function BriefBuilding() {
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 text-center">
-      <span className="story-pop relative flex h-24 w-24 items-center justify-center rounded-full border-b-8 border-brand-edge bg-brand text-brand-ink">
+      <span className="story-pop relative flex h-20 w-20 items-center justify-center rounded-full bg-brand/10 text-brand">
         <Sparkles className="h-12 w-12 animate-pulse" strokeWidth={2.25} />
       </span>
       <h1 className="mt-8 text-2xl font-bold sm:text-3xl">Setting you up…</h1>

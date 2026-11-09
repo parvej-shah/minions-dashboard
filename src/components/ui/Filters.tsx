@@ -23,7 +23,7 @@ export function Segmented<T extends string>({
           type="button"
           aria-pressed={value === o.key}
           onClick={() => onChange(o.key)}
-          className={`min-h-9 cursor-pointer px-4 text-[15px] ${value === o.key ? segment.on : segment.off}`}
+          className={`min-h-9 cursor-pointer px-4 text-[15px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand ${value === o.key ? segment.on : segment.off}`}
         >
           {o.label}
           {o.count ? ` · ${o.count}` : ""}
@@ -36,7 +36,7 @@ export function Segmented<T extends string>({
 /** The rounded grey search field. */
 export function SearchField({ label, value, onChange, className = "" }: { label: string; value: string; onChange: (v: string) => void; className?: string }) {
   return (
-    <label className={`flex min-h-11 flex-[0_1_260px] items-center gap-2 rounded-full bg-surface-3 px-4 ${className}`}>
+    <label className={`flex min-h-11 flex-[1_1_220px] items-center sm:flex-[0_1_260px] gap-2 rounded-full bg-surface-3 px-4 ${className}`}>
       <span className="sr-only">{label}</span>
       <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="shrink-0 text-muted">
         <circle cx="11" cy="11" r="7" />

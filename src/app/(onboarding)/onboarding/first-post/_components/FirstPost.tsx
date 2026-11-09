@@ -10,7 +10,6 @@ import { plainReviewNotes } from "@/lib/drafts/plainNotes";
 import { buttonStyles } from "@/components/ui/Button";
 import LinkedInPostPreview from "@/components/editorial/LinkedInPostPreview";
 import DraftChecks from "@/components/editorial/DraftChecks";
-import Confetti from "@/components/ui/Confetti";
 import { LessonFooter, LessonHeader, lessonInput } from "../../setup/_components/lesson";
 import { WaitingSkeleton } from "./FirstPostSkeleton";
 
@@ -209,7 +208,7 @@ function Writing({ startedAt, story }: { startedAt: string | null; story: string
 
   return (
     <main className="flex flex-1 flex-col items-center px-4 pt-8 pb-16 text-center sm:pt-12">
-      <span className="story-pop relative flex h-24 w-24 items-center justify-center rounded-full border-b-8 border-brand-edge bg-brand text-brand-ink">
+      <span className="story-pop relative flex h-20 w-20 items-center justify-center rounded-full bg-brand/10 text-brand">
         <PenLine className="h-11 w-11 animate-pulse" strokeWidth={2.25} />
       </span>
       <h1 className="mt-8 text-2xl font-bold sm:text-3xl">Writing your first post…</h1>
@@ -303,8 +302,7 @@ function Ready({ asset, author, story, children }: { asset: AssetItem; author: {
       <div className="story-step-in mx-auto w-full max-w-xl px-4 pt-4 pb-10 sm:px-6 sm:pt-8">
         <div className="flex flex-col items-center text-center">
           <div className="relative">
-            <Confetti />
-            <span className="story-pop relative flex h-16 w-16 items-center justify-center rounded-full border-gold-edge bg-gold text-white">
+            <span className="story-pop relative flex h-16 w-16 items-center justify-center rounded-full bg-gold/10 text-gold">
               <Sparkles className="h-8 w-8" strokeWidth={2.25} />
             </span>
           </div>
@@ -337,8 +335,7 @@ function Scheduled({ asset }: { asset: AssetItem }) {
   return (
     <main className="flex flex-1 flex-col items-center px-4 pt-10 pb-16 text-center">
       <div className="relative">
-        <Confetti />
-        <span className="story-pop relative flex h-24 w-24 items-center justify-center rounded-full border-b-8 border-brand-edge bg-brand text-brand-ink">
+        <span className="story-pop relative flex h-20 w-20 items-center justify-center rounded-full bg-brand/10 text-brand">
           <CalendarCheck className="h-11 w-11" strokeWidth={2.25} />
         </span>
       </div>
@@ -372,7 +369,7 @@ function Scheduled({ asset }: { asset: AssetItem }) {
 function Stuck({ title, detail, story }: { title: string; detail: string; story?: string | null }) {
   return (
     <main className="flex flex-1 flex-col items-center px-4 pt-12 pb-10 text-center">
-      <span className="story-shake flex h-20 w-20 items-center justify-center rounded-full border-b-8 border-coral-edge bg-coral text-white">
+      <span className="story-shake flex h-20 w-20 items-center justify-center rounded-full bg-coral/10 text-coral">
         <RotateCcw className="h-9 w-9" strokeWidth={2.5} />
       </span>
       <h1 className="mt-6 text-2xl font-bold">{title}</h1>

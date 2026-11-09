@@ -190,12 +190,12 @@ export default function ScheduleSettings() {
   }
 
   const chip = "cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50";
-  const field = "rounded-lg border border-line bg-canvas px-2.5 py-1.5 text-sm text-ink [color-scheme:dark] focus:border-brand focus:outline-none disabled:cursor-not-allowed disabled:opacity-50";
+  const field = "rounded-lg border border-line bg-canvas px-2.5 py-1.5 text-sm text-ink focus:border-brand focus:outline-none disabled:cursor-not-allowed disabled:opacity-50";
 
   return (
     <div className="space-y-4">
       <AutomaticDrafting
-        key={statusKey}
+        key={`status-${statusKey}`}
         blockedByUnsavedChanges={hasUnsavedChanges || saving}
         canSaveSchedule={canSave}
         onChanged={() => setPlanKey((key) => key + 1)}
@@ -324,7 +324,7 @@ export default function ScheduleSettings() {
         </div>
       </section>
 
-      <ContentPlanCard key={planKey} onMessage={toast.show} />
+      <ContentPlanCard key={`plan-${planKey}`} onMessage={toast.show} />
 
       {toast.message && <div role="status" className="fixed bottom-6 right-6 z-50 max-w-sm rounded-xl border border-line bg-surface-2 px-4 py-3 text-sm font-semibold text-ink shadow-soft">{toast.message}</div>}
     </div>

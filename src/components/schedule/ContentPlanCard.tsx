@@ -140,7 +140,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
     byDay.set(day, [...(byDay.get(day) ?? []), s]);
   }
   const selectClass =
-    "rounded-lg bg-canvas border border-line px-2.5 py-1.5 text-xs text-ink transition-colors focus:outline-none focus:border-brand [color-scheme:dark] cursor-pointer disabled:cursor-not-allowed disabled:opacity-60";
+    "rounded-lg bg-canvas border border-line px-2.5 py-1.5 text-xs text-ink transition-colors focus:outline-none focus:border-brand cursor-pointer disabled:cursor-not-allowed disabled:opacity-60";
 
   const pinFor = (s: WeekSlot) => slotKey(localParts(new Date(s.slot_at), tz).weekday, utcToZoned(new Date(s.slot_at), tz).time);
   const setPin = (s: WeekSlot, laneId: string) => {

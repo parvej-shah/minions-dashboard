@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Loader2 } from "lucide-react";
-import { chunky } from "./chunky";
+import { sessionButtons } from "./sessionButtons";
 import NoteCard from "./NoteCard";
 import type { Note } from "./types";
 
@@ -56,7 +56,7 @@ export default function ResultSheet({
           <button type="button" disabled={busy} onClick={onEdit} className="py-2 text-sm font-semibold text-success hover:text-ink cursor-pointer disabled:opacity-50">
             Edit my answer
           </button>
-          <button type="button" disabled={busy || disabled} onClick={onKeep} className={`${chunky.primary} w-full sm:ml-auto sm:w-auto sm:min-w-[11rem]`}>
+          <button type="button" disabled={busy || disabled} onClick={onKeep} className={`${sessionButtons.primary} w-full sm:ml-auto sm:w-auto sm:min-w-[11rem]`}>
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : kept > 1 ? `Keep ${kept}` : "Continue"}
           </button>
         </div>

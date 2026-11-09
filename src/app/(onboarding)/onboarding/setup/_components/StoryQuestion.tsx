@@ -84,7 +84,7 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
                       wizard.setStoryKind(item.kind);
                     }}
                     className={`w-full rounded-2xl border px-4 py-3 text-left text-sm leading-snug transition-[transform,border-width] duration-75 cursor-pointer active:translate-y-0.5 active:border-b ${
-                      picked ? "border-brand border-b-brand-edge bg-brand/10 text-ink" : "border-line bg-surface text-muted hover:border-line-strong hover:bg-surface-2"
+                      picked ? "border-brand bg-brand/10 text-ink" : "border-line bg-surface text-muted hover:border-line-strong hover:bg-surface-2"
                     }`}
                   >
                     {item.content}
@@ -108,7 +108,7 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
               aria-checked={selected}
               onClick={() => wizard.setStoryKind(k.id)}
               className={`flex flex-col items-center gap-1.5 rounded-2xl border px-2 py-3 text-center text-xs font-semibold leading-tight transition-[transform,border-width] duration-75 cursor-pointer active:translate-y-0.5 active:border-b sm:text-sm ${
-                selected ? "border-brand border-b-brand-edge bg-brand/10 text-brand" : "border-line bg-surface text-muted hover:border-line-strong hover:bg-surface-2"
+                selected ? "border-brand bg-brand/10 text-brand" : "border-line bg-surface text-muted hover:border-line-strong hover:bg-surface-2"
               }`}
             >
               {k.icon}

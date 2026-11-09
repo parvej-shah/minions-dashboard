@@ -37,7 +37,7 @@ export default function Toast({
       aria-live="polite"
       className={`fixed left-1/2 -translate-x-1/2 z-[60] ${
         POSITIONS[position]
-      } flex items-center gap-2 px-4 py-2.5 rounded-xl border backdrop-blur-md shadow-2xl text-xs font-semibold animate-in fade-in slide-in-from-bottom-2 duration-200 ${tone}`}
+      } flex items-center gap-2 px-4 py-2.5 rounded-xl border backdrop-blur-md shadow-float text-xs font-semibold animate-in fade-in slide-in-from-bottom-2 duration-200 ${tone}`}
     >
       {variant === "error" ? (
         <AlertTriangle className="w-3.5 h-3.5 shrink-0" />

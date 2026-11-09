@@ -55,7 +55,7 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
         <PageHeader title="Posts">
           {show === "needs" && countFor(assets.data, "needs") > 0 ? "Nothing goes out until you approve it." : null}
         </PageHeader>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex min-w-0 max-w-full flex-wrap items-center gap-3">
           <Segmented
             label="Show"
             options={SHOWS.map((s) => ({ key: s.key, label: s.label, count: s.key === "needs" ? countFor(assets.data, s.key) : undefined }))}

@@ -84,7 +84,7 @@ export function ImportDrop({
         >
           <span
             className={`flex h-16 w-16 items-center justify-center rounded-2xl transition-transform group-hover:-translate-y-0.5 ${
-              dragging ? "border-brand-edge bg-brand text-brand-ink" : "border-line bg-surface-2 text-brand"
+              dragging ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface-2 text-brand"
             }`}
           >
             {reading ? <Loader2 className="h-8 w-8 animate-spin" /> : <FileUp className="h-8 w-8" strokeWidth={2.25} />}
