@@ -22,7 +22,7 @@ import type { ReactNode } from "react";
 import { faceStyle, metricsFor } from "@/lib/covers/fonts";
 import { balance, fit, type Fitted, type TextBox } from "@/lib/covers/fit";
 import { contrast } from "@/lib/covers/brand";
-import { blockColour } from "@/lib/covers/backgrounds";
+import { blockColour, mix } from "@/lib/covers/backgrounds";
 import { textWidth } from "@/lib/covers/metrics";
 import { ICONS, type IconName } from "@/lib/covers/icons";
 import { COVER_SIZE, CoverFitError, INNER, Lines, PAD, coverElement, initials, rgba, type CoverAuthor, type CoverBrand, type CoverSpec } from "@/lib/covers/layouts";
@@ -43,8 +43,17 @@ export type SlideLayout = (typeof SLIDE_LAYOUTS)[number];
  * whole deck (a ribbon with a node per page, glows sitting on the seams), key
  * words on a highlighter block, giant numerals, a split contrast page. It
  * trades some centre height for the ribbon's lane (POSTER_CENTRE).
+ * SWISS: paper pages on a faint column grid, hairline rules, the emphasis word
+ * in a real italic in the accent, a giant italic folio bottom right, the
+ * closing page dark.
+ * AURORA: every page dark, soft colour glows on one deck-wide drawing (they
+ * cross the seams) over a fine dot grid, the words on a frosted glass panel.
+ * BENTO: a soft grey tray with the label, the words and the footer on raised
+ * paper cards, key words on a soft highlighter.
+ * The last three were added 2026-11-09 (tasks/11.md) and are not offered to
+ * the writer yet.
  */
-export const SLIDE_STYLES = ["EDITORIAL", "BOLD", "MINIMAL", "POSTER"] as const;
+export const SLIDE_STYLES = ["EDITORIAL", "BOLD", "MINIMAL", "POSTER", "SWISS", "AURORA", "BENTO"] as const;
 export type SlideStyle = (typeof SLIDE_STYLES)[number];
 export const DEFAULT_SLIDE_STYLE: SlideStyle = "EDITORIAL";
 
@@ -103,6 +112,19 @@ const CENTRE = SLIDE_SIZE.height - PAD * 2 - TOP_ROW - TOP_GAP - BOTTOM_GAP - TR
 const LANE = 120;
 const POSTER_NAME_ROW = 56;
 const POSTER_CENTRE = SLIDE_SIZE.height - PAD * 2 - TOP_ROW - TOP_GAP - LANE - POSTER_NAME_ROW;
+/** SWISS: the gap above the footer rule, and the footer under it (name, swipe cue, giant folio). */
+const SWISS_GAP = 40;
+const SWISS_FOOT = 110;
+const SWISS_CENTRE = SLIDE_SIZE.height - PAD * 2 - TOP_ROW - TOP_GAP - SWISS_GAP - 2 - SWISS_FOOT;
+/** AURORA and BENTO: how far the panel or card reaches outside the words, and the footer under it. */
+const AURORA_INSET = 44;
+const AURORA_GAP = 76;
+const BENTO_INSET = 40;
+const BENTO_GAP = 64;
+const CARD_FOOT = 56;
+const AURORA_CENTRE = SLIDE_SIZE.height - PAD * 2 - TOP_ROW - TOP_GAP - AURORA_GAP - CARD_FOOT;
+const BENTO_CENTRE = SLIDE_SIZE.height - PAD * 2 - TOP_ROW - TOP_GAP - BENTO_GAP - CARD_FOOT;
+const CENTRE_FOR: Record<SlideStyle, number> = { EDITORIAL: CENTRE, BOLD: CENTRE, MINIMAL: CENTRE, POSTER: POSTER_CENTRE, SWISS: SWISS_CENTRE, AURORA: AURORA_CENTRE, BENTO: BENTO_CENTRE };
 /** The ribbon's centre line, from the top of the page. */
 const RIBBON_Y = PAD + TOP_ROW + TOP_GAP + POSTER_CENTRE + LANE / 2;
 
@@ -348,12 +370,19 @@ function MarkLines({ fitted, face, tracking = 0, lineHeight, color, emphasis, ma
   );
 }
 
-/** A headline with its emphasis: in the accent colour, or on POSTER's highlighter block. */
+/**
+ * A headline with its emphasis: in the accent colour; on POSTER's highlighter
+ * block; on BENTO's soft highlighter; or (SWISS) set in the real italic, which
+ * is narrower than the headline face, so the fitted breaks hold.
+ */
 function Words({ fitted, face, tracking, lineHeight, page, emphasis }: { fitted: Fitted; face: Face; tracking: number; lineHeight: number; page: Page; emphasis?: string }) {
   if (page.style === "POSTER" && emphasis) {
     return <MarkLines fitted={fitted} face={face} tracking={tracking} lineHeight={lineHeight} color={page.ink} emphasis={emphasis} mark={page.accent} onMark={onColour(page.brand, page.accent)} />;
   }
-  return <Lines fitted={fitted} face={face} tracking={tracking} lineHeight={lineHeight} color={page.ink} emphasis={emphasis} accent={page.accent} />;
+  if (page.style === "BENTO" && emphasis) {
+    return <MarkLines fitted={fitted} face={face} tracking={tracking} lineHeight={lineHeight} color={page.ink} emphasis={emphasis} mark={rgba(page.accent, 0.22)} onMark={page.ink} />;
+  }
+  return <Lines fitted={fitted} face={face} tracking={tracking} lineHeight={lineHeight} color={page.ink} emphasis={emphasis} accent={page.accent} emphasisFace={page.style === "SWISS" ? "italic" : undefined} />;
 }
 
 /** A title (serif) with an optional body line under it, sharing the height left by `reserved`. */
@@ -378,13 +407,36 @@ const NUMERAL = 150;
 /** POSTER: the numeral is the page's hero, set thin and huge. */
 const GIANT_NUMERAL = 210;
 
+/** SWISS: the numeral in the real italic, huge and in the accent. */
+const ITALIC_NUMERAL = 230;
+/** BENTO: the numeral on a small accent-tinted pill. */
+const PILL = 64;
+
 function PointCentre({ slide, page, n }: { slide: Extract<Slide, { layout: "POINT" }>; page: Page; n: number }) {
-  const giant = page.style === "POSTER";
+  const num = String(n).padStart(2, "0");
+  if (page.style === "SWISS") {
+    const h = Math.round(ITALIC_NUMERAL * 0.78);
+    return (
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", alignItems: "flex-end", ...faceStyle("italic"), fontSize: ITALIC_NUMERAL, lineHeight: 0.78, height: h, marginBottom: 40, color: page.accent }}>{`${num}.`}</div>
+        {TitleBody({ title: slide.title, body: slide.body, emphasis: slide.emphasis, page, reserved: h + 40 })}
+      </div>
+    );
+  }
+  if (page.style === "BENTO") {
+    return (
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", alignSelf: "flex-start", alignItems: "center", height: PILL, padding: "0 28px", borderRadius: PILL / 2, background: rgba(page.accent, 0.16), marginBottom: 44, ...faceStyle("sansBold"), fontSize: 30, letterSpacing: 0.08 * 30, color: page.ink }}>{`POINT ${num}`}</div>
+        {TitleBody({ title: slide.title, body: slide.body, emphasis: slide.emphasis, page, reserved: PILL + 44 })}
+      </div>
+    );
+  }
+  const giant = page.style === "POSTER" || page.style === "AURORA";
   const size = giant ? GIANT_NUMERAL : NUMERAL;
   const height = giant ? Math.round(size * 0.8) : size;
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <div style={{ display: "flex", alignItems: "flex-end", ...faceStyle(giant ? "sans" : "serifItalic"), fontSize: size, lineHeight: giant ? 0.8 : 1, height, letterSpacing: giant ? -0.05 * size : 0, marginBottom: 40, color: page.accent }}>{String(n).padStart(2, "0")}</div>
+      <div style={{ display: "flex", alignItems: "flex-end", ...faceStyle(giant ? "sans" : "serifItalic"), fontSize: size, lineHeight: giant ? 0.8 : 1, height, letterSpacing: giant ? -0.05 * size : 0, marginBottom: 40, color: page.accent }}>{num}</div>
       {TitleBody({ title: slide.title, body: slide.body, emphasis: slide.emphasis, page, reserved: height + 40 })}
     </div>
   );
@@ -457,7 +509,7 @@ function SplitContrast({ slide, page }: { slide: Extract<Slide, { layout: "CONTR
 }
 
 function ContrastCentre({ slide, page }: { slide: Extract<Slide, { layout: "CONTRAST" }>; page: Page }) {
-  if (page.style === "POSTER") return SplitContrast({ slide, page });
+  if (page.style === "POSTER" || page.style === "AURORA" || page.style === "BENTO") return SplitContrast({ slide, page });
   const labels = 2 * (30 + 28);
   const divider = 2 + 2 * 64;
   const half = (page.centre - labels - divider) / 2;
@@ -613,7 +665,7 @@ function GridCentre({ slide, page }: { slide: Extract<Slide, { layout: "GRID" }>
   const rowCount = Math.ceil(items.length / cols);
   const gridHeight = rowCount * tileHeight + (rowCount - 1) * TILE.gap;
   const title = fitOrThrow("title", slide.title, page.centre - gridHeight - 64, LH.title);
-  const tile = page.style === "POSTER" ? rgba(page.ink, 0.07) : rgba(page.ink, 0.05);
+  const tile = page.style === "POSTER" || page.style === "AURORA" ? rgba(page.ink, 0.07) : rgba(page.ink, 0.05);
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Lines fitted={title} face="serif" tracking={-0.015} lineHeight={LH.title} color={page.ink} />
@@ -675,6 +727,11 @@ function PunchCentre({ slide, page }: { slide: Extract<Slide, { layout: "PUNCH" 
       {fitted.map((f, i) =>
         i === last && page.style === "POSTER" ? (
           <MarkLines key={i} fitted={f} face="serif" tracking={-0.02} lineHeight={1.08} color={page.ink} emphasis={f.lines[0]} mark={page.accent} onMark={onColour(page.brand, page.accent)} />
+        ) : i === last && page.style === "BENTO" ? (
+          <MarkLines key={i} fitted={f} face="serif" tracking={-0.02} lineHeight={1.08} color={page.ink} emphasis={f.lines[0]} mark={rgba(page.accent, 0.22)} onMark={page.ink} />
+        ) : i === last && page.style === "SWISS" ? (
+          // The real italic is narrower than the face the line was fitted in.
+          <Lines key={i} fitted={f} face="italic" lineHeight={1.08} color={page.accent} />
         ) : (
           <Lines key={i} fitted={f} face="serif" tracking={-0.02} lineHeight={1.08} color={i === last ? page.accent : page.ink} />
         ),
@@ -792,6 +849,174 @@ function PosterFrame({ deck, page, icon, ghost, children }: { deck: Deck; page: 
   );
 }
 
+/** SWISS: a faint four-column grid, the hairlines a designer leaves on. */
+function swissGrid(colour: string): string {
+  const W = SLIDE_SIZE.width;
+  const H = SLIDE_SIZE.height;
+  const xs = Array.from({ length: 5 }, (_, k) => PAD + (k * INNER) / 4);
+  return svg(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">${xs.map((x) => `<rect x="${x - 0.75}" y="0" width="1.5" height="${H}" fill="${colour}"/>`).join("")}</svg>`);
+}
+
+/**
+ * AURORA: one drawing the width of the deck, sliced per page like POSTER's.
+ * Large blurred glows, alternating corners in the accent and the secondary,
+ * with one on every seam so the colour crosses from page to page, over a fine
+ * dot grid.
+ */
+function auroraSlice(page: Page, deckBrand: CoverBrand): string {
+  const W = SLIDE_SIZE.width;
+  const H = SLIDE_SIZE.height;
+  const x0 = page.index * W;
+  const glow = deckBrand.accentOnInk;
+  const corners = Array.from({ length: page.total }, (_, k) =>
+    k % 2
+      ? `<ellipse cx="${k * W + 240}" cy="1220" rx="460" ry="330" fill="${glow}" fill-opacity="0.38"/>`
+      : `<ellipse cx="${k * W + 860}" cy="120" rx="460" ry="330" fill="${glow}" fill-opacity="0.34"/>`,
+  ).join("");
+  const seams = Array.from({ length: page.total - 1 }, (_, k) => `<circle cx="${(k + 1) * W}" cy="${k % 2 ? 380 : 900}" r="300" fill="${mix(glow, deckBrand.paper, 0.35)}" fill-opacity="0.22"/>`).join("");
+  return svg(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="${x0} 0 ${W} ${H}">
+    <defs><filter id="b" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="140"/></filter>
+    <pattern id="d" x="0" y="0" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="1.6" fill="${deckBrand.paper}" fill-opacity="0.07"/></pattern></defs>
+    <g filter="url(#b)">${corners}${seams}</g>
+    <rect x="${x0}" y="0" width="${W}" height="${H}" fill="url(#d)"/></svg>`);
+}
+
+/** The author's round photo, or their initials on the accent. */
+function Avatar({ deck, page, size }: { deck: Deck; page: Page; size: number }) {
+  const { author } = deck;
+  return author.photo ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={author.photo} width={size} height={size} style={{ borderRadius: size / 2, objectFit: "cover" }} alt="" />
+  ) : (
+    <div style={{ width: size, height: size, borderRadius: size / 2, background: page.accent, color: onColour(page.brand, page.accent), display: "flex", alignItems: "center", justifyContent: "center", ...faceStyle("sansBold"), fontSize: Math.round(size * 0.38) }}>{initials(author.name)}</div>
+  );
+}
+
+/**
+ * The SWISS, AURORA and BENTO frame. The words keep the same box as every
+ * other style (INNER wide); AURORA's glass panel and BENTO's card are drawn
+ * behind them, reaching into the margin, so a fit never changes with them.
+ */
+function ModernFrame({ deck, page, icon, children }: { deck: Deck; page: Page; icon?: IconName; children: ReactNode }) {
+  const { style, ink, paper, accent, index, total, brand } = page;
+  const label = fitOrThrow("chrome", deck.label.toUpperCase());
+  const name = fitOrThrow("chrome", deck.author.name);
+  const last = index === total - 1;
+  const centreTop = PAD + TOP_ROW + TOP_GAP;
+  const x0 = index * SLIDE_SIZE.width;
+  const bento = style === "BENTO";
+  const tray = bento ? mix(paper, ink, 0.07) : paper;
+  const shadow = `0 1px 2px ${rgba(ink, 0.06)}, 0 24px 48px -28px ${rgba(ink, 0.35)}`;
+
+  const centre = icon ? (
+    <div style={{ height: page.centre, display: "flex", flexDirection: "column" }}>
+      <div style={{ height: page.room, display: "flex", flexDirection: "column", justifyContent: page.top ? "flex-start" : "center" }}>{children}</div>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: ICON_GAP }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={iconSrc(icon, page)} width={ICON} height={ICON} alt="" />
+      </div>
+    </div>
+  ) : (
+    <div style={{ height: page.centre, display: "flex", flexDirection: "column", justifyContent: page.top ? "flex-start" : "center" }}>{children}</div>
+  );
+
+  // Behind everything: the grid, the glows and the glass, or the card.
+  const behind =
+    style === "SWISS" ? (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={swissGrid(rgba(ink, 0.06))} width={SLIDE_SIZE.width} height={SLIDE_SIZE.height} style={{ position: "absolute", left: 0, top: 0 }} alt="" />
+    ) : style === "AURORA" ? (
+      <div style={{ display: "flex", position: "absolute", left: 0, top: 0, width: SLIDE_SIZE.width, height: SLIDE_SIZE.height }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={auroraSlice(page, deck.brand)} data-slice={String(x0)} width={SLIDE_SIZE.width} height={SLIDE_SIZE.height} style={{ position: "absolute", left: 0, top: 0 }} alt="" />
+        <div style={{ display: "flex", position: "absolute", left: PAD - AURORA_INSET, top: centreTop - AURORA_INSET, width: INNER + AURORA_INSET * 2, height: page.centre + AURORA_INSET * 2, borderRadius: 48, border: `2px solid ${rgba(ink, 0.14)}`, backgroundImage: `linear-gradient(155deg, ${rgba(ink, 0.13)} 0%, ${rgba(ink, 0.04)} 50%, ${rgba(ink, 0.08)} 100%)` }} />
+      </div>
+    ) : (
+      <div style={{ display: "flex", position: "absolute", left: PAD - BENTO_INSET, top: centreTop - BENTO_INSET, width: INNER + BENTO_INSET * 2, height: page.centre + BENTO_INSET * 2, borderRadius: 44, background: paper, boxShadow: shadow }} />
+    );
+
+  // Top row: the label (SWISS: an accent square and tracked caps; AURORA: an outlined pill; BENTO: a raised pill) and where in the deck this is.
+  const labelText = <Lines fitted={label} face="sansSemi" tracking={0.12} lineHeight={1} color={rgba(ink, 0.78)} />;
+  const top =
+    style === "SWISS" ? (
+      <div style={{ display: "flex", flexDirection: "column", height: TOP_ROW }}>
+        <div style={{ display: "flex", alignItems: "center", height: TOP_ROW - 2 }}>
+          <div style={{ width: 16, height: 16, background: accent, marginRight: 20 }} />
+          {labelText}
+        </div>
+        <div style={{ display: "flex", width: INNER, height: 2, background: rgba(ink, 0.85), marginTop: 18 }} />
+      </div>
+    ) : (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: TOP_ROW, marginLeft: -(bento ? BENTO_INSET : AURORA_INSET), marginRight: -(bento ? BENTO_INSET : AURORA_INSET) }}>
+        <div style={{ display: "flex", alignItems: "center", height: 52, padding: "0 26px", borderRadius: 26, ...(bento ? { background: paper, boxShadow: shadow } : { border: `2px solid ${rgba(ink, 0.18)}`, background: rgba(ink, 0.05) }) }}>
+          <div style={{ width: 12, height: 12, borderRadius: 6, background: accent, marginRight: 16, ...(bento ? {} : { boxShadow: `0 0 14px ${accent}` }) }} />
+          {labelText}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", height: 52, padding: "0 22px", borderRadius: 26, ...(bento ? { background: paper, boxShadow: shadow } : {}) }}>
+          {Array.from({ length: total }, (_, i) => (
+            <div key={i} style={{ display: "flex", width: i === index ? 30 : 10, height: 10, borderRadius: 5, marginLeft: i ? 8 : 0, background: i === index ? accent : rgba(ink, i < index ? 0.45 : 0.18) }} />
+          ))}
+        </div>
+      </div>
+    );
+
+  const folio = String(index + 1).padStart(2, "0");
+  const foot =
+    style === "SWISS" ? (
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", width: INNER, height: 2, background: rgba(ink, 0.85), marginTop: SWISS_GAP }} />
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", height: SWISS_FOOT }}>
+          <div style={{ display: "flex", flexDirection: "column", paddingBottom: 6 }}>
+            {last ? null : <Lines fitted={name} face="sansSemi" tracking={0.12} lineHeight={1} color={rgba(ink, 0.66)} />}
+            {last ? null : (
+              <div style={{ display: "flex", alignItems: "center", marginTop: 14, ...faceStyle("sansSemi"), fontSize: 22, letterSpacing: 0.16 * 22, color: accent }}>
+                SWIPE
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={arrow(accent)} width={30} height={18} style={{ marginLeft: 14 }} alt="" />
+              </div>
+            )}
+          </div>
+          <div style={{ display: "flex", alignItems: "flex-end" }}>
+            <div style={{ display: "flex", ...faceStyle("italic"), fontSize: 108, lineHeight: 0.8, color: accent }}>{folio}</div>
+            <div style={{ display: "flex", marginLeft: 10, marginBottom: 6, ...faceStyle("sansSemi"), fontSize: 24, letterSpacing: 0.12 * 24, color: rgba(ink, 0.45) }}>{`/ ${String(total).padStart(2, "0")}`}</div>
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: CARD_FOOT, marginTop: bento ? BENTO_GAP : AURORA_GAP, marginLeft: -(bento ? BENTO_INSET : AURORA_INSET), marginRight: -(bento ? BENTO_INSET : AURORA_INSET) }}>
+        {last ? (
+          <div style={{ display: "flex" }} />
+        ) : (
+          <div style={{ display: "flex", alignItems: "center", height: 64, padding: "0 26px 0 8px", borderRadius: 32, ...(bento ? { background: paper, boxShadow: shadow } : { background: rgba(ink, 0.05), border: `2px solid ${rgba(ink, 0.12)}` }) }}>
+            {Avatar({ deck, page, size: 48 })}
+            <div style={{ display: "flex", marginLeft: 16 }}>
+              <Lines fitted={name} face="sansSemi" tracking={0.04} lineHeight={1} color={rgba(ink, 0.8)} />
+            </div>
+          </div>
+        )}
+        {last ? null : bento ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={swipeButton(accent, onColour(brand, accent))} width={64} height={64} alt="" />
+        ) : (
+          <div style={{ display: "flex", alignItems: "center", height: 64, padding: "0 28px", borderRadius: 32, background: accent, ...faceStyle("sansSemi"), fontSize: 26, letterSpacing: 0.06 * 26, color: onColour(brand, accent) }}>
+            Swipe
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={arrow(onColour(brand, accent))} width={30} height={18} style={{ marginLeft: 14 }} alt="" />
+          </div>
+        )}
+      </div>
+    );
+
+  return (
+    <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: tray, padding: PAD, position: "relative", overflow: "hidden" }}>
+      {behind}
+      <div style={{ display: "flex", flexDirection: "column", marginBottom: TOP_GAP }}>{top}</div>
+      {centre}
+      {foot}
+    </div>
+  );
+}
+
 /** The word a STAKES page carries faint and huge behind it: the emphasis, else the statement's longest word. */
 function ghostWord(slide: Slide): string | undefined {
   if (slide.layout !== "STAKES") return undefined;
@@ -805,6 +1030,9 @@ const DARK: SlideLayout[] = ["STAKES", "CLOSE"];
 function isDark(style: SlideStyle, layout: SlideLayout, index: number): boolean {
   // POSTER takes turns, opening dark on page 2.
   if (style === "POSTER") return index % 2 === 1;
+  if (style === "AURORA") return true;
+  if (style === "BENTO") return false;
+  if (style === "SWISS") return layout === "CLOSE";
   if (style === "BOLD") return true;
   if (style === "MINIMAL") return false;
   return DARK.includes(layout);
@@ -818,7 +1046,7 @@ export function slideElement(deck: Deck, i: number) {
   const { brand } = deck;
   const style = deck.style ?? DEFAULT_SLIDE_STYLE;
   const dark = isDark(style, slide.layout, i);
-  const centre = style === "POSTER" ? POSTER_CENTRE : CENTRE;
+  const centre = CENTRE_FOR[style];
   const base = {
     style,
     brand,
@@ -841,7 +1069,7 @@ export function slideElement(deck: Deck, i: number) {
     : slide.layout === "STEP" ? StepCentre({ slide, page, n, of: same.length })
     : slide.layout === "CONTRAST" ? ContrastCentre({ slide, page })
     : slide.layout === "CHECKLIST" ? ChecklistCentre({ slide, page })
-    : slide.layout === "NUMBER" ? NumberCentre({ slide, page, secondary: dark || style === "POSTER" ? page.accent : brand.secondary })
+    : slide.layout === "NUMBER" ? NumberCentre({ slide, page, secondary: dark || style !== "EDITORIAL" && style !== "BOLD" && style !== "MINIMAL" ? page.accent : brand.secondary })
     : slide.layout === "QUOTE" ? QuoteCentre({ slide, page })
     : slide.layout === "GRID" ? GridCentre({ slide, page })
     : slide.layout === "PUNCH" ? PunchCentre({ slide, page })
@@ -852,7 +1080,9 @@ export function slideElement(deck: Deck, i: number) {
   const plain: Page = { ...base, room: centre, onMain: (size) => (full = size) };
   const words = draw(plain);
   const frame = (page: Page, children: ReactNode, withIcon?: IconName) =>
-    style === "POSTER" ? PosterFrame({ deck, page, icon: withIcon, ghost: ghostWord(slide), children }) : Frame({ deck, page, icon: withIcon, children });
+    style === "POSTER" ? PosterFrame({ deck, page, icon: withIcon, ghost: ghostWord(slide), children })
+    : style === "SWISS" || style === "AURORA" || style === "BENTO" ? ModernFrame({ deck, page, icon: withIcon, children })
+    : Frame({ deck, page, icon: withIcon, children });
   if (icon) {
     const page: Page = { ...base, room: centre - ICON - ICON_GAP, mainMin: Math.max(ICON_FLOOR[slide.layout] ?? 0, Math.ceil(full * ICON_KEEP)) };
     try {

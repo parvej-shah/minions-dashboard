@@ -16,7 +16,7 @@ import type { CoverSpec } from "@/lib/covers/layouts";
 import type { PosterShape } from "@/lib/covers/shape";
 import { parsePlan, toDeck, type CarouselPlan } from "@/lib/carousel/plan";
 import { renderSlidePng } from "@/lib/carousel/render";
-import type { Deck, Slide } from "@/lib/carousel/slides";
+import type { Deck, Slide, SlideStyle } from "@/lib/carousel/slides";
 import { BANNER_DESIGNS } from "@/lib/covers/modern";
 import { renderCoverPng } from "@/lib/covers/render";
 import { prepareCutout } from "@/lib/covers/photo";
@@ -24,6 +24,8 @@ import { hostedCoverPhoto, defaultByline } from "@/services/cover";
 
 const CLIENT = "cmtvi4a7r000104l5kn6bi71o";
 const OUT = process.argv[2] ?? "poster-samples/2026-11-09-design";
+/** The styles to draw each deck in (tasks/11.md: the premium three, POSTER for comparison). */
+const STYLES: SlideStyle[] = (process.env.STYLES ?? "SWISS,AURORA,BENTO,POSTER").split(",") as SlideStyle[];
 
 /** The decks to redraw, and what each shows off. */
 const DECKS: { id: string; why: string; extra?: (plan: CarouselPlan, shape?: PosterShape) => Slide[] }[] = [
@@ -84,8 +86,8 @@ async function grid(pngs: Buffer[], file: string, cols = 4) {
     const dir = join(OUT, `deck-${n + 1}`);
     mkdirSync(dir, { recursive: true });
 
-    for (const style of ["POSTER", plan.style] as const) {
-      const built = toDeck({ ...plan, style, slides: style === "POSTER" ? slides : plan.slides }, { author, brand, cover });
+    for (const style of STYLES) {
+      const built = toDeck({ ...plan, style, slides }, { author, brand, cover });
       if (built.errors.length) console.log(`deck ${n + 1} ${style}: ${built.errors.join(" | ")}`);
       const deck: Deck = built.deck;
       const pngs: Buffer[] = [];
@@ -96,9 +98,9 @@ async function grid(pngs: Buffer[], file: string, cols = 4) {
           console.log(`deck ${n + 1} ${style} page ${i + 1}: ${(e as Error).message}`);
         }
       }
-      const tag = style === "POSTER" ? "new-POSTER" : `old-${style}`;
-      if (style === "POSTER") pngs.forEach((p, i) => writeFileSync(join(dir, `${String(i + 1).padStart(2, "0")}.png`), p));
-      await strip(pngs, join(dir, `strip-${tag}.png`));
+      mkdirSync(join(dir, style), { recursive: true });
+      pngs.forEach((p, i) => writeFileSync(join(dir, style, `${String(i + 1).padStart(2, "0")}.png`), p));
+      await strip(pngs, join(dir, `strip-${style}.png`));
     }
     console.log(`deck ${n + 1}: ${asset.title.slice(0, 70)} — ${d.why}`);
   }
@@ -113,15 +115,22 @@ async function grid(pngs: Buffer[], file: string, cols = 4) {
       { layout: "NUMBER", value: "3", unit: "seconds", caption: "of silence and a live caller hangs up." },
       { layout: "CLOSE", takeaway: "Judge a voice agent by the calendar, not the call.", saveLine: "Save this for your next demo." },
     ];
-    const deck: Deck = { cover: { layout: "STATEMENT", headline: "What a real booking touches", author, brand }, slides: demo, label: "Demo copy", author, brand, style: "POSTER" };
-    const dir = join(OUT, "layouts-demo-copy");
-    mkdirSync(dir, { recursive: true });
-    const pngs: Buffer[] = [];
-    for (let i = 1; i <= demo.length; i++) pngs.push(await renderSlidePng(deck, i));
-    pngs.forEach((p, i) => writeFileSync(join(dir, `${String(i + 2).padStart(2, "0")}-${demo[i].layout}.png`), p));
-    await strip(pngs, join(dir, "strip.png"));
+    for (const style of STYLES) {
+      const deck: Deck = { cover: { layout: "STATEMENT", headline: "What a real booking touches", author, brand }, slides: demo, label: "Demo copy", author, brand, style };
+      const dir = join(OUT, "layouts-demo-copy", style);
+      mkdirSync(dir, { recursive: true });
+      const pngs: Buffer[] = [];
+      for (let i = 1; i <= demo.length; i++) pngs.push(await renderSlidePng(deck, i));
+      pngs.forEach((p, i) => writeFileSync(join(dir, `${String(i + 2).padStart(2, "0")}-${demo[i].layout}.png`), p));
+      await strip(pngs, join(OUT, "layouts-demo-copy", `strip-${style}.png`));
+    }
   }
 
+  if (!process.env.BANNERS) {
+    console.log(`\nSamples written to ${OUT}/`);
+    await prisma.$disconnect();
+    return;
+  }
   // Banners: every design on real headlines from recent drafts.
   const recent = await prisma.asset.findMany({ where: { clientId: CLIENT, followUpOf: null }, orderBy: { createdAt: "desc" }, take: 14, select: { title: true, coverSpec: true, hook: true } });
   const heads = recent

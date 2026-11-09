@@ -37,7 +37,7 @@ describe("carousel plan gates", () => {
   it("keeps the model's design, and gives a plan stored without one the original design", () => {
     expect(plan({ style: "bold" }).style).toBe("BOLD");
     expect(plan().style).toBe("EDITORIAL");
-    expect(parsePlan(JSON.stringify({ ...good, style: "NEON" })).errors).toContain("style must be one of EDITORIAL, BOLD, MINIMAL, POSTER.");
+    expect(parsePlan(JSON.stringify({ ...good, style: "NEON" })).errors).toContain("style must be one of EDITORIAL, BOLD, MINIMAL, POSTER, SWISS, AURORA, BENTO.");
   });
 
   it("keeps known icons, and drops unknown, repeated or misplaced ones without failing the plan", () => {

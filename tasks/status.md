@@ -12,3 +12,4 @@
 | 8 | Unusable cover layouts disabled, not refused on click | CLAUDE | DONE | pushed 6c7a431 |
 | 9 | Poster-style carousel + modern banner samples (local) | CLAUDE | IN PROGRESS (carousel needs a more premium redesign; banners moved to task 10) | tasks/9.md |
 | 10 | Modern banner types in production + cut-out upload + italic font | CLAUDE | DONE | tasks/10.md |
+| 11 | Three premium carousel styles: SWISS, AURORA, BENTO (local samples) | CLAUDE | IN PROGRESS (awaiting user review; then offer to the writer + push) | tasks/11.md |

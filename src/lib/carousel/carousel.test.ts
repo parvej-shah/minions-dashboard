@@ -95,6 +95,20 @@ describe("slide layouts", () => {
     expect(slice(2)).toBe("2160");
   });
 
+  it("AURORA is dark throughout and slices one deck-wide drawing; SWISS closes dark; BENTO stays light", () => {
+    const bg = (style: Deck["style"], i: number) => (slideElement({ ...deck(EVERY_LAYOUT), style }, i).props as { style: { background: string } }).style.background;
+    const last = EVERY_LAYOUT.length;
+    for (let i = 1; i <= last; i++) {
+      expect(bg("AURORA", i)).toBe(brand.ink);
+      expect(bg("BENTO", i)).not.toBe(brand.ink);
+    }
+    expect(bg("SWISS", 1)).toBe(brand.paper);
+    expect(bg("SWISS", last)).toBe(brand.ink);
+    const slice = (i: number) => JSON.stringify(slideElement({ ...deck(EVERY_LAYOUT), style: "AURORA" }, i)).match(/"data-slice":"(\d+)"/)?.[1];
+    expect(slice(1)).toBe("1080");
+    expect(slice(3)).toBe("3240");
+  });
+
   it("takes 2 to 5 checklist items", () => {
     const list = (n: number) => deck([{ layout: "CHECKLIST", title: "Checks", items: Array.from({ length: n }, (_, i) => `Check ${i + 1}`) }]);
     expect(() => slideElement(list(1), 1)).toThrow(CoverFitError);
