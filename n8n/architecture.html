@@ -246,7 +246,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
       <div class="spine"><span class="dot" style="--c:var(--coral)"></span>
         <div class="stage"><h3>Generate cover <span class="wf">04_hero_image</span></h3>
           <p>Runs asynchronously; it used to take about 43s of a 98s draft. Sends the type-led cover prompt to Qwen Image 3.0 Pro at 1280×720. If the model refuses or returns nothing, it retries once with a neutral, text-free still-life prompt. The image is stored in R2 as WebP and attached to the asset.</p>
-          <div class="chips"><span class="chip img">qwen-image-3.0-pro</span><span class="chip">safe retry</span></div></div>
+          <div class="chips"><span class="chip img">qwen-image-2.1-pro</span><span class="chip">safe retry</span></div></div>
       </div>
       <div class="writes"><div class="w"><span class="arrow">→</span>/api/media/ingest → <b>R2</b></div><div class="w"><span class="arrow">→</span>/api/internal/assets/hero</div><div class="w">hero_status READY · FAILED · BLOCKED_BY_SAFETY</div></div>
     </div>
@@ -322,19 +322,19 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
   </div>
   <div class="tbl"><table><thead><tr><th>Stage</th><th>Model</th><th>Temp</th><th>Max tokens / size</th><th>Returns</th></tr></thead><tbody>
 <tr><th colspan="5">Content pipeline (n8n → /api/internal/prompts)</th></tr>
-<tr><td><a href="#p-refine">Refine human notes</a></td><td><code>qwen-flash</code></td><td class="num">0.6</td><td class="num">3,000</td><td>JSON array: angle, audience, pillar, priority, batch_rank, evidence_required, why, icp_relevance per row.</td></tr>
-<tr><td><a href="#p-harvest">Harvest ideas</a></td><td><code>glm-5.1</code></td><td class="num">0.7</td><td class="num">4,000</td><td>{&quot;ideas&quot;:[…]}, one per angle, with signal_index, priority and icp_relevance 0–100.</td></tr>
-<tr><td><a href="#p-craft">Craft notes</a></td><td><code>glm-5.1</code></td><td class="num">0.4</td><td class="num">1,200</td><td>{&quot;notes&quot;:[{&quot;index&quot;,&quot;craft_notes&quot;}]}, stored on the idea with craft_source_url.</td></tr>
-<tr><td><a href="#p-strategist">Executive strategist</a></td><td><code>glm-5.1</code></td><td class="num">0.5</td><td class="num">2,000</td><td>title, inversion_hook, core_argument, content_mode, reader, reader_objection, key_points, thumbnail_card, seo_keyword, narrative_thread, cta, evidence_needs.</td></tr>
-<tr><td><a href="#p-writer">Writer</a></td><td><code>glm-5.1</code></td><td class="num">0.7</td><td class="num">4,000</td><td>{&quot;hook&quot;,&quot;body_text&quot;}; a non-JSON reply becomes the body.</td></tr>
-<tr><td><a href="#p-editor">Editor &amp; claim extractor</a></td><td><code>qwen3.7-flash</code></td><td class="num">0.3</td><td class="num">4,000</td><td>hook, body, claims[] (claim_text, claim_type, source_url/title/date), forbidden_hits[].</td></tr>
-<tr><td><a href="#p-variants">Platform variants</a></td><td><code>qwen-flash</code></td><td class="num">0.55</td><td class="num">2,500</td><td>{&quot;li_variant&quot;,&quot;fb_variant&quot;,&quot;x_variant&quot;}, then markdown-stripped and validated.</td></tr>
-<tr><td><a href="#p-cover">Cover image</a></td><td><code>qwen-image-3.0-pro</code></td><td class="num">—</td><td class="num">1280×720</td><td>Signed image URL → /api/media/ingest (R2 WebP) → asset hero.</td></tr>
-<tr><td><a href="#p-cover_safe">Safe retry cover</a></td><td><code>qwen-image-3.0-pro</code></td><td class="num">—</td><td class="num">1280×720</td><td>Same path as the main cover; hero_provider QWEN_IMAGE_SAFE_RETRY.</td></tr>
-<tr><td><a href="#p-memory_check">Experience generalization check</a></td><td><code>qwen3.7-plus</code></td><td class="num">0</td><td class="num">700</td><td>{&quot;issues&quot;:[{text,kind,reason}],&quot;confidential&quot;:bool,&quot;generalized&quot;:&quot;rewrite without the specifics&quot;}</td></tr>
+<tr><td><a href="#p-refine">Refine human notes</a></td><td><code>deepseek-v4.1-flash</code></td><td class="num">0.6</td><td class="num">3,000</td><td>JSON array: angle, audience, pillar, priority, batch_rank, evidence_required, why, icp_relevance per row.</td></tr>
+<tr><td><a href="#p-harvest">Harvest ideas</a></td><td><code>qwen3.8-max-0902</code></td><td class="num">0.7</td><td class="num">4,000</td><td>{&quot;ideas&quot;:[…]}, one per angle, with signal_index, priority and icp_relevance 0–100.</td></tr>
+<tr><td><a href="#p-craft">Craft notes</a></td><td><code>qwen3.8-max-0902</code></td><td class="num">0.4</td><td class="num">1,200</td><td>{&quot;notes&quot;:[{&quot;index&quot;,&quot;craft_notes&quot;}]}, stored on the idea with craft_source_url.</td></tr>
+<tr><td><a href="#p-strategist">Executive strategist</a></td><td><code>qwen3.8-max-0902</code></td><td class="num">0.5</td><td class="num">2,000</td><td>title, inversion_hook, core_argument, content_mode, reader, reader_objection, key_points, thumbnail_card, seo_keyword, narrative_thread, cta, evidence_needs.</td></tr>
+<tr><td><a href="#p-writer">Writer</a></td><td><code>qwen3.8-max-0902</code></td><td class="num">0.7</td><td class="num">4,000</td><td>{&quot;hook&quot;,&quot;body_text&quot;}; a non-JSON reply becomes the body.</td></tr>
+<tr><td><a href="#p-editor">Editor &amp; claim extractor</a></td><td><code>deepseek-v4.1-flash</code></td><td class="num">0.3</td><td class="num">4,000</td><td>hook, body, claims[] (claim_text, claim_type, source_url/title/date), forbidden_hits[].</td></tr>
+<tr><td><a href="#p-variants">Platform variants</a></td><td><code>deepseek-v4.1-flash</code></td><td class="num">0.55</td><td class="num">2,500</td><td>{&quot;li_variant&quot;,&quot;fb_variant&quot;,&quot;x_variant&quot;}, then markdown-stripped and validated.</td></tr>
+<tr><td><a href="#p-cover">Cover image</a></td><td><code>qwen-image-2.1-pro</code></td><td class="num">—</td><td class="num">1280×720</td><td>Signed image URL → /api/media/ingest (R2 WebP) → asset hero.</td></tr>
+<tr><td><a href="#p-cover_safe">Safe retry cover</a></td><td><code>qwen-image-2.1-pro</code></td><td class="num">—</td><td class="num">1280×720</td><td>Same path as the main cover; hero_provider QWEN_IMAGE_SAFE_RETRY.</td></tr>
+<tr><td><a href="#p-memory_check">Experience generalization check</a></td><td><code>deepseek-v4.1-flash</code></td><td class="num">0</td><td class="num">700</td><td>{&quot;issues&quot;:[{text,kind,reason}],&quot;confidential&quot;:bool,&quot;generalized&quot;:&quot;rewrite without the specifics&quot;}</td></tr>
 <tr><th colspan="5">Dashboard (onboarding)</th></tr>
-<tr><td><a href="#p-onboarding_suggestions">Brand interview suggestions</a></td><td><code>qwen3.7-plus</code></td><td class="num">0.7</td><td class="num">800</td><td>{&quot;myths&quot;:[3],&quot;differentiators&quot;:[3],&quot;avoids&quot;:[3]}</td></tr>
-<tr><td><a href="#p-onboarding_directives">Brand copilot directives</a></td><td><code>qwen3.7-plus</code></td><td class="num">0.7</td><td class="num">800</td><td>{&quot;positioningSummary&quot;,&quot;directives&quot;:[{category,rule_key,instruction,priority}]}, capped at 6.</td></tr>
+<tr><td><a href="#p-onboarding_suggestions">Brand interview suggestions</a></td><td><code>deepseek-v4.1-flash</code></td><td class="num">0.7</td><td class="num">800</td><td>{&quot;myths&quot;:[3],&quot;differentiators&quot;:[3],&quot;avoids&quot;:[3]}</td></tr>
+<tr><td><a href="#p-onboarding_directives">Brand copilot directives</a></td><td><code>deepseek-v4.1-flash</code></td><td class="num">0.7</td><td class="num">800</td><td>{&quot;positioningSummary&quot;,&quot;directives&quot;:[{category,rule_key,instruction,priority}]}, capped at 6.</td></tr>
 </tbody></table></div>
 </section>
 
@@ -358,7 +358,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
 
     <article class="llm" id="p-refine">
   <div class="llm-top"><div><h4><span class="tag">LLM</span>Refine human notes</h4><p>Turns rough notes a team member typed into the Ideas page into structured ideas, grounded in the tenant's priority 1–2 brand directives.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">01_idea_harvester › Build Refine Payload → Render Refine Prompt → Qwen Refine</p></div>
-  <div class="params"><span>model</span><b>qwen-flash</b><span>temperature</span><b>0.6</b><span>max tokens</span><b>3,000</b></div></div>
+  <div class="params"><span>model</span><b>deepseek-v4.1-flash</b><span>temperature</span><b>0.6</b><span>max tokens</span><b>3,000</b></div></div>
   <div class="io"><div><h5>Input</h5>The tenant's directives (from /api/brand/context) and every NEW idea row.</div><div><h5>Output</h5>JSON array: angle, audience, pillar, priority, batch_rank, evidence_required, why, icp_relevance per row.</div></div>
   <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">341 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-refine-0">Copy</button></div><pre class="p" id="p-refine-0">You are the idea refiner for the current tenant's brand. Use the supplied Brand Context as the source of truth.
 Your job is to take raw, unshaped notes entered by a human team member and sharpen each into a strategic content idea.
@@ -413,7 +413,7 @@ DATA&gt;&gt;&gt;</pre></div></details>
 </article>
     <article class="llm" id="p-harvest">
   <div class="llm-top"><div><h4><span class="tag">LLM</span>Harvest ideas</h4><p>The main idea generator: exactly one idea per angle in this run's pillar rotation, using a market signal only when it is directly relevant. High temperature keeps runs varied; the thesis dedupe filters repeats afterwards.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">01_idea_harvester › Build Harvest Payload → Render Harvest Prompt → Qwen Harvest</p></div>
-  <div class="params"><span>model</span><b>glm-5.1</b><span>temperature</span><b>0.7</b><span>max tokens</span><b>4,000</b></div></div>
+  <div class="params"><span>model</span><b>qwen3.8-max-0902</b><span>temperature</span><b>0.7</b><span>max tokens</span><b>4,000</b></div></div>
   <div class="io"><div><h5>Input</h5>Brand context (positioning, author standing, directive blocks, proof, forbidden words, rotation, recent theses) and up to 18 RSS signals.</div><div><h5>Output</h5>{&quot;ideas&quot;:[…]}, one per angle, with signal_index, priority and icp_relevance 0–100.</div></div>
   <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">709 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-harvest-0">Copy</button></div><pre class="p" id="p-harvest-0">You are the content strategist for <span class="v">{{company_name}}</span>. You find post ideas that only this author could write, for one reader: their ICP.
 
@@ -509,7 +509,7 @@ Generate exactly 3 ideas for <span class="v">{{company_name}}</span>, one per sl
 </article>
     <article class="llm" id="p-craft">
   <div class="llm-top"><div><h4><span class="tag">LLM</span>Craft notes</h4><p>Studies how each source article is built (opening, argument order, evidence types, objections, close) without borrowing its words or claims. Merge Craft Into Ideas then strips any 9-word run copied from the source.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">01_idea_harvester › Build Craft Payload → Render Craft Prompt → Qwen Craft Notes</p></div>
-  <div class="params"><span>model</span><b>glm-5.1</b><span>temperature</span><b>0.4</b><span>max tokens</span><b>1,200</b></div></div>
+  <div class="params"><span>model</span><b>qwen3.8-max-0902</b><span>temperature</span><b>0.4</b><span>max tokens</span><b>1,200</b></div></div>
   <div class="io"><div><h5>Input</h5>The fetched text of each idea's source article.</div><div><h5>Output</h5>{&quot;notes&quot;:[{&quot;index&quot;,&quot;craft_notes&quot;}]}, stored on the idea with craft_source_url.</div></div>
   <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">157 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-craft-0">Copy</button></div><pre class="p" id="p-craft-0">You are studying how a piece of writing is BUILT, the way a musician studies a song's arrangement rather than its lyrics.
 
@@ -558,7 +558,7 @@ URL: <span class="v">{{url}}</span>
 
     <article class="llm" id="p-strategist">
   <div class="llm-top"><div><h4><span class="tag">LLM</span>Executive strategist</h4><p>Settles the argument before any writing: the hook (archetype picked in code from the pillar), reader, content mode, key points, SEO keyword, throughline, and the cover brief.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">02_idea_to_asset › Assemble Brand Context → Render Strategist Prompt → Executive Strategist Agent</p></div>
-  <div class="params"><span>model</span><b>glm-5.1</b><span>temperature</span><b>0.5</b><span>max tokens</span><b>2,000</b></div></div>
+  <div class="params"><span>model</span><b>qwen3.8-max-0902</b><span>temperature</span><b>0.5</b><span>max tokens</span><b>2,000</b></div></div>
   <div class="io"><div><h5>Input</h5>The idea, the assembled brand block (≤8,000 chars, with verified proof) and the author standing.</div><div><h5>Output</h5>title, inversion_hook, core_argument, content_mode, reader, reader_objection, key_points, thumbnail_card, seo_keyword, narrative_thread, cta, evidence_needs.</div></div>
   <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">2,024 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-strategist-0">Copy</button></div><pre class="p" id="p-strategist-0">You are the lead strategist and visual art director for <span class="v">{{brand_name}}</span>, setting a distinctive, evidence-aware standard rooted in this brand's own voice and audience.
 
@@ -634,7 +634,7 @@ Brand Context:
 </article>
     <article class="llm" id="p-writer">
   <div class="llm-top"><div><h4><span class="tag">LLM</span>Writer</h4><p>Writes the article as one argument in 3–5 sections shaped by the content mode, with an SEO/GEO answer passage, 1–3 sentence paragraphs and no invented evidence.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">02_idea_to_asset › Build Writer Payload → Render Writer Prompt → Qwen Call 2 Writer</p></div>
-  <div class="params"><span>model</span><b>glm-5.1</b><span>temperature</span><b>0.7</b><span>max tokens</span><b>4,000</b></div></div>
+  <div class="params"><span>model</span><b>qwen3.8-max-0902</b><span>temperature</span><b>0.7</b><span>max tokens</span><b>4,000</b></div></div>
   <div class="io"><div><h5>Input</h5>Strategy JSON, evidence block, brand context, tone questionnaire and up to 5 tone examples.</div><div><h5>Output</h5>{&quot;hook&quot;,&quot;body_text&quot;}; a non-JSON reply becomes the body.</div></div>
   <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">865 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-writer-0">Copy</button></div><pre class="p" id="p-writer-0">You are the lead writer for <span class="v">{{company_name}}</span>. Write in this brand's own voice for its one reader, the ICP. Prioritize specificity, usefulness, and an earned point of view over imitation or generic polish.
 
@@ -701,7 +701,7 @@ Match this voice (few-shot examples of how <span class="v">{{company_name}}</spa
 </article>
     <article class="llm" id="p-editor">
   <div class="llm-top"><div><h4><span class="tag">LLM</span>Editor &amp; claim extractor</h4><p>Tightens the draft while keeping its structure, then lists and classifies every checkable assertion. Its claims feed the deterministic claims gate.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">02_idea_to_asset › Parse Writer Output → Render Editor Prompt → Qwen Call 3 Editor</p></div>
-  <div class="params"><span>model</span><b>qwen3.7-flash</b><span>temperature</span><b>0.3</b><span>max tokens</span><b>4,000</b></div></div>
+  <div class="params"><span>model</span><b>deepseek-v4.1-flash</b><span>temperature</span><b>0.3</b><span>max tokens</span><b>4,000</b></div></div>
   <div class="io"><div><h5>Input</h5>Hook, draft body, brand context, supplied evidence.</div><div><h5>Output</h5>hook, body, claims[] (claim_text, claim_type, source_url/title/date), forbidden_hits[].</div></div>
   <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">542 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-editor-0">Copy</button></div><pre class="p" id="p-editor-0">You are the editor for <span class="v">{{company_name}}</span>. Preserve the brand's point of view while improving clarity, specificity, accuracy, and platform-ready readability.
 
@@ -751,7 +751,7 @@ Supplied Evidence:
 </article>
     <article class="llm" id="p-variants">
   <div class="llm-top"><div><h4><span class="tag">LLM</span>Platform variants</h4><p>Rewrites the article as LinkedIn, Facebook and X posts. LinkedIn must open with the strategist's hook; links are added as first comments at publish time.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">02_idea_to_asset › Parse Claims and Gate → Render Variants Prompt → Qwen Call 4 Variants</p></div>
-  <div class="params"><span>model</span><b>qwen-flash</b><span>temperature</span><b>0.55</b><span>max tokens</span><b>2,500</b></div></div>
+  <div class="params"><span>model</span><b>deepseek-v4.1-flash</b><span>temperature</span><b>0.55</b><span>max tokens</span><b>2,500</b></div></div>
   <div class="io"><div><h5>Input</h5>Hook, edited body, brand context, tone profile and examples, audience, title.</div><div><h5>Output</h5>{&quot;li_variant&quot;,&quot;fb_variant&quot;,&quot;x_variant&quot;}, then markdown-stripped and validated.</div></div>
   <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">999 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-variants-0">Copy</button></div><pre class="p" id="p-variants-0">You are the platform-distribution stage for a <span class="v">{{company_name}}</span> content asset.
 You must generate 3 platform variants (LinkedIn, Facebook, and Twitter/X), each precisely shaped to the authentic voice, reader attitude, and algorithm of that specific platform.
@@ -846,7 +846,7 @@ Title: <span class="v">{{title}}</span></pre></div></details>
     </ol>
     <article class="llm" id="p-cover">
   <div class="llm-top"><div><h4><span class="tag img">image</span>Cover image</h4><p>A type-led editorial cover on a cream ground: headline with one word in brand coral, a short kicker, a small wordmark and one corner line icon (the strategist's motif, or the keyword router's). Sent with prompt_extend on, 1280×720.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">04_hero_image › Read Hero Request → Render Cover Prompt → Qwen Image 3.0 Pro Generation</p></div>
-  <div class="params"><span>model</span><b>qwen-image-3.0-pro</b><span>size</span><b>1280×720</b></div></div>
+  <div class="params"><span>model</span><b>qwen-image-2.1-pro</b><span>size</span><b>1280×720</b></div></div>
   <div class="io"><div><h5>Input</h5>thumbnail_card, title, idea text and trade, brand colors and name.</div><div><h5>Output</h5>Signed image URL → /api/media/ingest (R2 WebP) → asset hero.</div></div>
   <details class="prompt"><summary><span>Show full prompt</span><span class="n">344 words</span></summary><div class="pbody"><div class="plabel"><span>Image prompt</span><button class="copy" type="button" data-for="p-cover-0">Copy</button></div><pre class="p" id="p-cover-0">High-end editorial blog cover and thumbnail (16:9 widescreen, 1K resolution, clean commercial graphic design, NOT photorealistic studio photography):
 
@@ -867,7 +867,7 @@ Aesthetic Style: The exact editorial standard of a modern SaaS/dev-tools blog (S
 </article>
     <article class="llm" id="p-cover_safe">
   <div class="llm-top"><div><h4><span class="tag img">image</span>Safe retry cover</h4><p>Used only when the main cover returns no image, usually a content-safety refusal. Fixed, text-free and tenant-neutral; sent with prompt_extend off.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">04_hero_image › Needs Safe Image Retry? → Render Safe Cover Prompt → Qwen Image Safe Retry</p></div>
-  <div class="params"><span>model</span><b>qwen-image-3.0-pro</b><span>size</span><b>1280×720</b></div></div>
+  <div class="params"><span>model</span><b>qwen-image-2.1-pro</b><span>size</span><b>1280×720</b></div></div>
   <div class="io"><div><h5>Input</h5>None.</div><div><h5>Output</h5>Same path as the main cover; hero_provider QWEN_IMAGE_SAFE_RETRY.</div></div>
   <details class="prompt"><summary><span>Show full prompt</span><span class="n">63 words</span></summary><div class="pbody"><div class="plabel"><span>Image prompt</span><button class="copy" type="button" data-for="p-cover_safe-0">Copy</button></div><pre class="p" id="p-cover_safe-0">Create a premium 16:9 editorial still-life photograph for a business publication. Use a deep graphite desk, a clean unmarked paper document, a matte metal paperweight, and a red pen. Use restrained teal and coral accent lighting, crisp softbox shadows, realistic materials, generous negative space, and no text. Do not include people, logos, brand names, interfaces, legal claims, headlines, badges, watermarks, or readable writing.</pre></div></details>
 </article>
@@ -906,7 +906,7 @@ Aesthetic Style: The exact editorial standard of a modern SaaS/dev-tools blog (S
   <div class="wfblock">
     <article class="llm" id="p-onboarding_suggestions">
   <div class="llm-top"><div><h4><span class="tag">LLM</span>Brand interview suggestions</h4><p>Onboarding step 2: tap-to-use suggestion chips for the three brand-interview questions. Single user message; on failure the static INDUSTRY_SUGGESTIONS map is used.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">dashboard · src/lib/ai/brandCopilot.ts → POST /api/onboarding/brand-suggestions</p></div>
-  <div class="params"><span>model</span><b>qwen3.7-plus</b><span>temperature</span><b>0.7</b><span>max tokens</span><b>800</b></div></div>
+  <div class="params"><span>model</span><b>deepseek-v4.1-flash</b><span>temperature</span><b>0.7</b><span>max tokens</span><b>800</b></div></div>
   <div class="io"><div><h5>Input</h5>Business name, industry, headline, website summary (≤800 chars), up to 3 post samples.</div><div><h5>Output</h5>{&quot;myths&quot;:[3],&quot;differentiators&quot;:[3],&quot;avoids&quot;:[3]}</div></div>
   <details class="prompt"><summary><span>Show full prompt</span><span class="n">207 words</span></summary><div class="pbody"><div class="plabel"><span>User message (only message)</span><button class="copy" type="button" data-for="p-onboarding_suggestions-0">Copy</button></div><pre class="p" id="p-onboarding_suggestions-0">You are a world-class brand strategist calibrating a personalized content engine during onboarding.
 
@@ -939,7 +939,7 @@ Return ONLY a single valid JSON object (no markdown, no explanation, no fake com
 </article>
     <article class="llm" id="p-onboarding_directives">
   <div class="llm-top"><div><h4><span class="tag">LLM</span>Brand copilot directives</h4><p>Onboarding step 3: turns the user's three answers into the 5–6 brand directives and positioning summary every later prompt reads. Single user message; on failure the route uses fixed templates.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">dashboard · src/lib/ai/brandCopilot.ts → POST /api/onboarding/brand-copilot</p></div>
-  <div class="params"><span>model</span><b>qwen3.7-plus</b><span>temperature</span><b>0.7</b><span>max tokens</span><b>800</b></div></div>
+  <div class="params"><span>model</span><b>deepseek-v4.1-flash</b><span>temperature</span><b>0.7</b><span>max tokens</span><b>800</b></div></div>
   <div class="io"><div><h5>Input</h5>Business, industry, audience, content focus, headline, website summary, the three answers, voice sample, author standing.</div><div><h5>Output</h5>{&quot;positioningSummary&quot;,&quot;directives&quot;:[{category,rule_key,instruction,priority}]}, capped at 6.</div></div>
   <details class="prompt"><summary><span>Show full prompt</span><span class="n">237 words</span></summary><div class="pbody"><div class="plabel"><span>User message (only message)</span><button class="copy" type="button" data-for="p-onboarding_directives-0">Copy</button></div><pre class="p" id="p-onboarding_directives-0">You are a world-class editorial strategist setting up a brand's content guardrails during onboarding.
 
@@ -974,7 +974,7 @@ Return ONLY a single valid JSON object (no markdown, no explanation):
 </article>
     <article class="llm" id="p-memory_check">
   <div class="llm-top"><div><h4><span class="tag">LLM</span>Experience generalization check</h4><p>Brand page › Audience &amp; Experience: runs before an experience item is saved (decision D4, no confidential data). Code first finds contact details, secrets, money and links; the model adds names, places and anything confidential, and each span it flags is kept only if it really occurs in the text. Contact details, secrets and confidential items block the save.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">dashboard · src/lib/ai/memoryCheck.ts → POST /api/brand/memory/check</p></div>
-  <div class="params"><span>model</span><b>qwen3.7-plus</b><span>temperature</span><b>0</b><span>max tokens</span><b>700</b></div></div>
+  <div class="params"><span>model</span><b>deepseek-v4.1-flash</b><span>temperature</span><b>0</b><span>max tokens</span><b>700</b></div></div>
   <div class="io"><div><h5>Input</h5>The item text and its disclosure (PUBLIC or GENERALIZE, which changes the rule). The item is fenced as data.</div><div><h5>Output</h5>{&quot;issues&quot;:[{text,kind,reason}],&quot;confidential&quot;:bool,&quot;generalized&quot;:&quot;rewrite without the specifics&quot;}</div></div>
   <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">278 words</span></summary><div class="pbody"><div class="plabel"><span>User message, disclosure = GENERALIZE</span><button class="copy" type="button" data-for="p-memory_check-0">Copy</button></div><pre class="p" id="p-memory_check-0">You review one item an author saved about their own professional experience. It will be used to write public LinkedIn posts in their name.
 

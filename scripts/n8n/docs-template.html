@@ -238,7 +238,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
       <div class="spine"><span class="dot" style="--c:var(--coral)"></span>
         <div class="stage"><h3>Generate cover <span class="wf">04_hero_image</span></h3>
           <p>Runs asynchronously; it used to take about 43s of a 98s draft. Sends the type-led cover prompt to Qwen Image 3.0 Pro at 1280×720. If the model refuses or returns nothing, it retries once with a neutral, text-free still-life prompt. The image is stored in R2 as WebP and attached to the asset.</p>
-          <div class="chips"><span class="chip img">qwen-image-3.0-pro</span><span class="chip">safe retry</span></div></div>
+          <div class="chips"><span class="chip img">qwen-image-2.1-pro</span><span class="chip">safe retry</span></div></div>
       </div>
       <div class="writes"><div class="w"><span class="arrow">→</span>/api/media/ingest → <b>R2</b></div><div class="w"><span class="arrow">→</span>/api/internal/assets/hero</div><div class="w">hero_status READY · FAILED · BLOCKED_BY_SAFETY</div></div>
     </div>

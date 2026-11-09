@@ -310,7 +310,7 @@
             }
           ]
         },
-        "jsonBody": "={{ JSON.stringify({ model: \"qwen-image-3.0-pro\", input: { messages: [{ role: \"user\", content: [{ text: $json.image_prompt }] }] }, parameters: { prompt_extend: true, size: \"1280*720\" } }) }}",
+        "jsonBody": "={{ JSON.stringify({ model: \"qwen-image-2.1-pro\", input: { messages: [{ role: \"user\", content: [{ text: $json.image_prompt }] }] }, parameters: { prompt_extend: true, size: \"1280*720\" } }) }}",
         "method": "POST",
         "options": {
           "response": {
@@ -354,7 +354,7 @@
             }
           ]
         },
-        "jsonBody": "={{ JSON.stringify({ model: \"qwen-image-3.0-pro\", input: { messages: [{ role: \"user\", content: [{ text: $json.image_prompt }] }] }, parameters: { prompt_extend: false, size: \"1280*720\" } }) }}",
+        "jsonBody": "={{ JSON.stringify({ model: \"qwen-image-2.1-pro\", input: { messages: [{ role: \"user\", content: [{ text: $json.image_prompt }] }] }, parameters: { prompt_extend: false, size: \"1280*720\" } }) }}",
         "method": "POST",
         "options": {
           "response": {

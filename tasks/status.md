@@ -15,4 +15,4 @@
 | 11 | Three premium carousel styles: SWISS, AURORA, BENTO (local samples) | CLAUDE | DONE (approved; shipped with task 12) | tasks/11.md |
 | 12 | Writer offers all 7 carousel styles + GRID and PUNCH pages | CLAUDE | DONE | pushed 494a803 |
 | 13 | Reviewer picks the carousel design (optional, before and after) | CLAUDE | DONE (pushed 5f59dda; UI to check on production) | tasks/13.md |
-| 14 | Move every model call to models with free quota | CLAUDE | DONE (local; push needs OK) | tasks/14.md |
+| 14 | Move every model call to models with free quota (+ hero image on qwen-image-2.1-pro, n8n applied) | CLAUDE | DONE (pushed 08471e0) | tasks/14.md |

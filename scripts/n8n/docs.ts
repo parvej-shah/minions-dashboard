@@ -188,7 +188,7 @@ function stageCard(stage: PromptStage): Card {
   if (stage === "cover" || stage === "cover_safe") {
     return {
       id: stage, kind: "image", title: d.title, node: d.node, description: d.description, input: d.input, output: d.output,
-      params: [["model", "qwen-image-3.0-pro"], ["size", "1280×720"]],
+      params: [["model", "qwen-image-2.1-pro"], ["size", "1280×720"]],
       blocks: [["Image prompt", String(out.image_prompt)]],
     };
   }
