@@ -1,5 +1,5 @@
 {
-  "model": "qwen3.7-flash",
+  "model": "deepseek-v4.1-flash",
   "enable_thinking": false,
   "temperature": 0.3,
   "max_tokens": 4000,

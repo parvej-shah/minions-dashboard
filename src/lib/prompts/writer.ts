@@ -97,7 +97,7 @@ Brand Context:
 ${brandContext}${toneProfileBlock}${voiceBlock}`;
 
   return {
-    model: "glm-5.1",
+    model: "qwen3.8-max-0902",
     enable_thinking: false,
     temperature: 0.7,
     max_tokens: 4000,

@@ -13,7 +13,7 @@ import type { MemoryCheckResult, MemoryIssue, MemoryIssueKind } from "@/types/au
  * "issue" never reaches the user.
  */
 
-export const MEMORY_CHECK_MODEL = { model: "qwen3.7-plus", temperature: 0, max_tokens: 700 } as const;
+export const MEMORY_CHECK_MODEL = { model: "deepseek-v4.1-flash", temperature: 0, max_tokens: 700 } as const;
 
 /** Kinds that block saving: Minions never stores these, whatever the disclosure. */
 const BLOCKING: ReadonlySet<MemoryIssueKind> = new Set(["CONTACT", "CONFIDENTIAL"]);

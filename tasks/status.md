@@ -14,4 +14,5 @@
 | 10 | Modern banner types in production + cut-out upload + italic font | CLAUDE | DONE | tasks/10.md |
 | 11 | Three premium carousel styles: SWISS, AURORA, BENTO (local samples) | CLAUDE | DONE (approved; shipped with task 12) | tasks/11.md |
 | 12 | Writer offers all 7 carousel styles + GRID and PUNCH pages | CLAUDE | DONE | pushed 494a803 |
-| 13 | Reviewer picks the carousel design (optional, before and after) | CLAUDE | DONE locally (push awaits user OK; UI not checked in a browser) | tasks/13.md |
+| 13 | Reviewer picks the carousel design (optional, before and after) | CLAUDE | DONE (pushed 5f59dda; UI to check on production) | tasks/13.md |
+| 14 | Move every model call to models with free quota | CLAUDE | DONE (local; push needs OK) | tasks/14.md |

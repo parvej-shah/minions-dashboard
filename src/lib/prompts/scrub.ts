@@ -27,7 +27,7 @@ Return ONLY this JSON, one entry per sentence, with the same ids:
   const user = input.sentences.map((s, i) => `${i + 1}. ${s}`).join("\n");
 
   return {
-    model: "qwen3.7-flash",
+    model: "deepseek-v4.1-flash",
     enable_thinking: false,
     temperature: 0.2,
     max_tokens: 2000,

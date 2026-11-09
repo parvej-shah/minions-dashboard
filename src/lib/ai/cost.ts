@@ -19,6 +19,9 @@ const PRICES: Record<string, { input: number; output: number }> = {
   "deepseek-v3.2": { input: 0.57, output: 1.71 },
   "deepseek-v4-pro": { input: 2.4, output: 4.8 },
   "deepseek-v4-flash": { input: 0.2, output: 0.4 },
+  // Not on the price page yet (2026-11-09); priced like the model each one replaces.
+  "deepseek-v4.1-flash": { input: 0.2, output: 0.4 },
+  "qwen3.8-flash": { input: 0.03, output: 0.13 },
 };
 /** A model missing above is priced like the dearest large model, so a cost is never understated. */
 const UNKNOWN = { input: 2.5, output: 7.5 };

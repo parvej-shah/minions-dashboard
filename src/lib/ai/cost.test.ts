@@ -9,6 +9,11 @@ describe("callCostUsd", () => {
     expect(callCostUsd("qwen-flash-2025-07-28", reply(1_000_000, 0))).toBeCloseTo(0.05);
   });
 
+  it("prices a dated snapshot of the models in use like the model itself", () => {
+    expect(callCostUsd("deepseek-v4.1-flash-1017", reply(1_000_000, 0))).toBeCloseTo(0.2);
+    expect(callCostUsd("qwen3.8-max-0902", reply(1_000_000, 0))).toBeCloseTo(2);
+  });
+
   it("prices an unknown model like the dearest large one, and a reply without usage at 0", () => {
     expect(callCostUsd("mystery-model", reply(1_000_000, 0))).toBeCloseTo(2.5);
     expect(callCostUsd("glm-5.2", "{}")).toBe(0);

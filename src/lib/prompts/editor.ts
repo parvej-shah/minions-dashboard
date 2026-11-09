@@ -73,7 +73,7 @@ Supplied Evidence:
 ${evidenceBlock}${experience.length ? `\n\nThe author's own experience (a claim resting on it is sourced to the author):\n${experience.map((e) => `- ${e}`).join("\n")}` : ""}`;
 
   return {
-    model: "qwen3.7-flash",
+    model: "deepseek-v4.1-flash",
     enable_thinking: false,
     temperature: 0.3,
     max_tokens: 4000,

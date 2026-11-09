@@ -9,7 +9,7 @@ import type { ChatPayload } from "./types";
  */
 
 // The onboarding model: answers short structured calls in ~10s with thinking off.
-const MODEL = "qwen3.7-plus";
+const MODEL = "deepseek-v4.1-flash";
 
 export interface ImportSourceText {
   label: string;

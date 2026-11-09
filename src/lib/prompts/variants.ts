@@ -94,7 +94,7 @@ Idea Audience: ${audience}
 Title: ${title}`;
 
   return {
-    model: "qwen-flash",
+    model: "deepseek-v4.1-flash",
     enable_thinking: false,
     temperature: 0.55,
     max_tokens: 2500,

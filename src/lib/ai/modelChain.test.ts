@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { chatWithFallback, isModelUnavailable, modelChain, MODEL_FALLBACKS } from "./modelChain";
+import { chatWithFallback, isModelUnavailable, modelChain, MODEL_FALLBACKS, USED_UP } from "./modelChain";
 
 const QUOTA = JSON.stringify({ error: { code: "AllocationQuota.FreeTierOnly", message: "The free tier of the model has been exhausted." } });
 const OK = (model: string) => JSON.stringify({ model, choices: [{ message: { content: "{}" } }] });
@@ -27,16 +27,22 @@ describe("model fallback", () => {
   });
 
   it("moves down the chain when the free quota is used up, keeping the rest of the payload", async () => {
-    const { fetchImpl, calls } = fakeFetch({ "qwen3.8-max": [403, QUOTA], "deepseek-v4-pro": [403, QUOTA], "deepseek-v4-pro-0813": [403, QUOTA] });
-    const r = await chatWithFallback({ model: "qwen3.8-max", temperature: 0.7, messages: [{ role: "user", content: "x" }] }, "k", { fetchImpl });
-    expect(r.model).toBe("glm-5.1");
+    const { fetchImpl, calls } = fakeFetch({ "qwen3.8-max-0902": [403, QUOTA], "deepseek-v4-pro-0813": [403, QUOTA] });
+    const r = await chatWithFallback({ model: "qwen3.8-max-0902", temperature: 0.7, messages: [{ role: "user", content: "x" }] }, "k", { fetchImpl });
+    expect(r.model).toBe("deepseek-v4.1-flash-1017");
     expect(r.status).toBe(200);
-    expect(r.skipped.map((s) => s.model)).toEqual(["qwen3.8-max", "deepseek-v4-pro", "deepseek-v4-pro-0813"]);
-    expect(calls).toEqual(["qwen3.8-max", "deepseek-v4-pro", "deepseek-v4-pro-0813", "glm-5.1"]);
+    expect(r.skipped.map((s) => s.model)).toEqual(["qwen3.8-max-0902", "deepseek-v4-pro-0813"]);
+    expect(calls).toEqual(["qwen3.8-max-0902", "deepseek-v4-pro-0813", "deepseek-v4.1-flash-1017"]);
   });
 
-  it("tries deepseek's dated snapshot, which has its own free quota, before the last resort", () => {
-    expect(modelChain("glm-5.1")).toEqual(["glm-5.1", "deepseek-v4-pro", "deepseek-v4-pro-0813", "qwen3.7-max"]);
+  it("runs the large stages on models with free quota, ending on one that lasts longest", () => {
+    expect(modelChain("qwen3.8-max-0902")).toEqual(["qwen3.8-max-0902", "deepseek-v4-pro-0813", "deepseek-v4.1-flash-1017"]);
+    expect(modelChain("deepseek-v4.1-flash")).toEqual(["deepseek-v4.1-flash", "deepseek-v4.1-flash-1017", "qwen3.8-flash"]);
+  });
+
+  it("sends a caller that still names a used-up model on to the new chain", () => {
+    expect(modelChain("glm-5.1")).toEqual(["glm-5.1", ...modelChain("qwen3.8-max-0902")]);
+    expect(modelChain("qwen3.7-plus")).toEqual(["qwen3.7-plus", ...modelChain("deepseek-v4.1-flash")]);
   });
 
   it("returns any other error as it is, without switching model", async () => {
@@ -80,10 +86,12 @@ describe("model fallback", () => {
   it("every model a pipeline prompt uses has a fallback chain", () => {
     const dir = path.join(process.cwd(), "src/lib/prompts");
     const models = new Set<string>();
-    for (const f of fs.readdirSync(dir).filter((f) => f.endsWith(".ts"))) {
-      for (const m of fs.readFileSync(path.join(dir, f), "utf8").matchAll(/model: "([^"]+)"/g)) models.add(m[1]);
+    const files = [...fs.readdirSync(dir).filter((f) => f.endsWith(".ts")).map((f) => path.join(dir, f)), "src/lib/ai/brandCopilot.ts", "src/lib/ai/memoryCheck.ts"];
+    for (const f of files) {
+      for (const m of fs.readFileSync(f, "utf8").matchAll(/(?:model: |MODEL = )"([^"]+)"/g)) models.add(m[1]);
     }
-    expect(models.size).toBeGreaterThan(2);
+    expect([...models].sort()).toEqual(["deepseek-v4.1-flash", "qwen3.8-max-0902"]);
     for (const m of models) expect(MODEL_FALLBACKS[m], m).toBeDefined();
+    for (const m of models) expect(USED_UP.includes(m), `${m} has no free quota left`).toBe(false);
   });
 });

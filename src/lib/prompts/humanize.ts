@@ -40,7 +40,7 @@ Rules:
 Return ONLY this JSON: {"text": "the full revised ${input.kind}"}`;
 
   return {
-    model: "glm-5.1",
+    model: "qwen3.8-max-0902",
     enable_thinking: false,
     temperature: 0.6,
     max_tokens: 3000,

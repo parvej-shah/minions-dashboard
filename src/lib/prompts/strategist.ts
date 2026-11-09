@@ -152,7 +152,7 @@ Brand Context:
 ${cappedBrand}${author?.found ? `\n\n${authorBlock(author)}` : ""}${recentPostsBlock(author) ? `\n\n${recentPostsBlock(author)}` : ""}`;
 
   return {
-    model: "glm-5.1",
+    model: "qwen3.8-max-0902",
     enable_thinking: false,
     temperature: 0.5,
     max_tokens: 2000,

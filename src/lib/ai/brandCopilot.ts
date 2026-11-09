@@ -8,7 +8,7 @@
 
 import { chat, isQwenConfigured } from "./qwen";
 
-// qwen3.7-plus answers these prompts in ~11s with thinking off; the older 12s cap
+// qwen3.7-plus (the model before deepseek-v4.1-flash) took ~11s with thinking off; the older 12s cap
 // would have cut it off just before the answer.
 const DEFAULT_TIMEOUT_MS = 30000;
 
@@ -34,7 +34,7 @@ export interface GeneratedDirective {
 }
 
 /** Model settings for both onboarding calls (single user message, no system prompt). */
-export const ONBOARDING_MODEL = { model: "qwen3.7-plus", temperature: 0.7, max_tokens: 800 } as const;
+export const ONBOARDING_MODEL = { model: "deepseek-v4.1-flash", temperature: 0.7, max_tokens: 800 } as const;
 
 /**
  * One user-message Qwen call that degrades to null on any failure. Exported

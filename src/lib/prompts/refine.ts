@@ -91,7 +91,7 @@ No preamble, no markdown fences.`;
   });
 
   return {
-    model: "qwen-flash",
+    model: "deepseek-v4.1-flash",
     enable_thinking: false,
     temperature: 0.6,
     max_tokens: 3000,

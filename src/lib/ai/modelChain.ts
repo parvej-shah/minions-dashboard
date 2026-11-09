@@ -18,13 +18,26 @@ import { DASHSCOPE_CHAT_URL } from "@/constants/dashscope";
 import { callCostUsd, recordCost } from "@/lib/ai/cost";
 
 /**
- * Models the account can reach (probed 2026-10-21). qwen3-max, deepseek-v3.2
- * and deepseek-v4-flash no longer exist on it, and glm-5.2's free quota is
- * used up, so none of them is tried any more. deepseek-v4-pro-0813 is the
- * same model under a dated name with its own free quota (to 2026-11-13).
+ * Free quota on 2026-11-09 (home.qwencloud.com/benefits, Singapore; each
+ * model probed with a real call). Every model a prompt used until then had
+ * none left: glm-5.1, qwen3.7-flash, qwen-flash, qwen3.7-plus and the
+ * qwen-flash snapshot answer 403 "free quota has been exhausted";
+ * qwen-plus-2025-09-11 no longer exists. A test keeps prompts off these.
+ * Not used: kimi-k3 and kimi-k3.1-pro refuse temperature 0.7, glm-5.3 runs
+ * only with thinking on.
  */
-const DEEPSEEK = ["deepseek-v4-pro", "deepseek-v4-pro-0813"];
-const LARGE = [...DEEPSEEK, "glm-5.1"];
+export const USED_UP = ["glm-5.1", "glm-5.2", "qwen3.8-max", "qwen3.7-max", "qwen3.7-flash", "qwen-flash", "qwen3.7-plus", "deepseek-v4-pro"];
+
+/** The large stages (strategist, writer, rewrite, harvest, pulse, craft, carousel, follow-up, cover line). */
+export const LARGE_MODEL = "qwen3.8-max-0902";
+/** The short stages (editor, scrub, refine, variants) plus brand import, onboarding and the memory check. */
+export const SMALL_MODEL = "deepseek-v4.1-flash";
+
+// Free quota until: qwen3.8-max-0902 2026-12-01, deepseek-v4-pro-0813 2026-11-13,
+// deepseek-v4.1-flash 2026-12-13, deepseek-v4.1-flash-1017 2027-01-17, qwen3.8-flash 2026-11-25.
+// Each chain ends on deepseek-v4.1-flash-1017 or qwen3.8-flash so a draft is not lost while either lasts.
+const LARGE = ["deepseek-v4-pro-0813", "deepseek-v4.1-flash-1017"];
+const SMALL = ["deepseek-v4.1-flash-1017", "qwen3.8-flash"];
 
 /**
  * Primary model -> what to try after it, in order. A model not listed here
@@ -32,19 +45,13 @@ const LARGE = [...DEEPSEEK, "glm-5.1"];
  * (a test checks that).
  */
 export const MODEL_FALLBACKS: Record<string, string[]> = {
-  // The large stages (strategist, writer, rewrite, harvest, pulse, craft, carousel, follow-up, cover line).
-  // Writer comparison 2026-10-12 (same 6 strategies, Jev 0-4 "reads as one person"): deepseek-v4-pro 2.36,
-  // glm-5.2 2.30, glm-5.1 2.19, qwen3.7-max 2.13, qwen3.6-plus 1.71, qwen3.7-plus 1.45; all returned valid JSON.
-  // glm-5.1 wins on what is left: close to the top, the tightest drafts (301 words vs 391-456) and the fastest.
-  // deepseek-v4-pro comes next (longest drafts, broke JSON on rewrites on 2026-10-03), then qwen3.7-max as the last resort.
-  "glm-5.1": [...DEEPSEEK, "qwen3.7-max"],
-  // Kept for any caller that still names them.
-  "glm-5.2": ["glm-5.1", ...DEEPSEEK, "qwen3.7-max"],
-  "qwen3.8-max": [...LARGE, "qwen3.7-max"],
-  "qwen3.7-flash": ["glm-5.1", "qwen-flash"],
-  "qwen-flash": ["glm-5.1", "qwen3.7-flash"],
-  // Onboarding, the brand import and the memory check (thinking off). Dated snapshots carry their own free quota, unlike the undated qwen-plus.
-  "qwen3.7-plus": ["qwen-plus-2025-09-11", "qwen-flash-2025-07-28"],
+  // Writer prompt 2026-11-09: valid JSON, 45s. qwen3.8-max (undated) was the writer before glm.
+  [LARGE_MODEL]: LARGE,
+  // Editor prompt 2026-11-09: valid JSON in 1.2s and kept to the source; qwen3.8-flash added sentences.
+  [SMALL_MODEL]: SMALL,
+  // Used-up models, kept for any caller that still names them.
+  ...Object.fromEntries(["glm-5.1", "glm-5.2", "qwen3.8-max", "qwen3.7-max", "deepseek-v4-pro"].map((m) => [m, [LARGE_MODEL, ...LARGE]])),
+  ...Object.fromEntries(["qwen3.7-flash", "qwen-flash", "qwen3.7-plus"].map((m) => [m, [SMALL_MODEL, ...SMALL]])),
 };
 
 export function modelChain(primary: string): string[] {

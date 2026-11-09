@@ -19,7 +19,7 @@ export { numbersIn };
 type Json = Record<string, unknown>;
 
 /** Deliberately not the harvest model, so the judge is not grading its own style. */
-export const JUDGE_MODEL = "qwen3-max";
+export const JUDGE_MODEL = "qwen3.8-max-0902";
 
 export interface Verdict {
   icp_problem: boolean;
