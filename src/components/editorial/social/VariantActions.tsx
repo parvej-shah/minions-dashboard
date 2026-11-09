@@ -18,7 +18,7 @@ export default function VariantActions({ isEditing, onToggleEdit, onCopy, isCopi
       <button
         type="button"
         onClick={onToggleEdit}
-        className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border-2 border-b-4 px-4 py-2 text-sm font-extrabold transition-all cursor-pointer active:translate-y-1 active:border-b-0 sm:flex-none ${
+        className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border px-4 py-2 text-sm font-semibold transition-all cursor-pointer active:translate-y-1 active:border-b-0 sm:flex-none ${
           isEditing ? "bg-brand/15 text-brand border-brand/40 shadow-xs" : "bg-surface-2 hover:bg-surface-3 text-muted hover:text-ink border-line"
         }`}
       >

@@ -110,11 +110,11 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
   };
 
   return (
-    <div id="cover-image" className="scroll-mt-6 bg-surface rounded-2xl border border-line p-4 sm:p-5 space-y-3 shadow-xl">
+    <div id="cover-image" className="scroll-mt-24 rounded-[28px] bg-surface shadow-soft p-6 sm:p-8 space-y-4">
       <div className="flex items-center justify-between pb-2 border-b border-line/60">
         <div className="flex items-center gap-2">
           <ImageIcon className="w-4 h-4 text-brand" />
-          <span className="text-xs font-bold text-ink font-mono uppercase tracking-wider">Cover</span>
+          <span className="text-[17px] font-semibold text-ink">Cover</span>
         </div>
         <span className="text-[10px] font-mono text-subtle">
           {isRendering ? "Drawing…" : isCoverPending ? "Drawing…" : coverNeedsAttention ? "Cover needs attention" : isTemplate ? "Portrait · 1080×1350" : "AI image · 1280×720"}

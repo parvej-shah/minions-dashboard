@@ -139,19 +139,19 @@ export default function SocialVariantTabs({
   const isShown = (tab: SocialTab) => socialTab === tab && visibleChannels.some((channel) => channel.tab === tab);
 
   return (
-    <section aria-labelledby="channel-preview-title" className="overflow-hidden rounded-3xl border-2 border-b-4 border-line bg-surface shadow-xl">
+    <section aria-labelledby="channel-preview-title" className="overflow-hidden rounded-[28px] bg-surface shadow-soft">
       <div className="flex flex-col gap-4 border-b-2 border-line bg-gradient-to-br from-brand/10 via-surface to-surface p-4 sm:p-5">
         <div className="flex items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-brand/30 bg-brand/10 text-brand">
             <Share2 className="h-5 w-5" aria-hidden="true" />
           </span>
           <div>
-            <h2 id="channel-preview-title" className="text-xl font-extrabold text-ink">Channel preview</h2>
+            <h2 id="channel-preview-title" className="text-xl font-semibold text-ink">Channel preview</h2>
             <p className="mt-1 text-sm leading-relaxed text-muted">Choose a channel to preview and edit its copy.{showCoverLink && <> <a href="#cover-image" className="font-semibold text-brand underline underline-offset-2 hover:text-ink focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">Choose the thumbnail style below ↓</a></>}</p>
           </div>
         </div>
 
-        <div role="tablist" aria-label="Publishing channel" className="grid w-full grid-cols-1 gap-2 rounded-2xl border border-line bg-canvas p-1.5 sm:flex sm:w-auto sm:flex-wrap">
+        <div role="tablist" aria-label="Publishing channel" className="grid w-full grid-cols-1 gap-2 rounded-full bg-surface-3 p-1 sm:flex sm:w-auto sm:flex-wrap">
           {visibleChannels.map((channel) => (
             <button
               key={channel.tab}
@@ -159,7 +159,7 @@ export default function SocialVariantTabs({
               role="tab"
               aria-selected={socialTab === channel.tab}
               onClick={() => setSocialTab(channel.tab)}
-              className={`flex min-h-11 items-center justify-center gap-1.5 rounded-xl border-b-4 px-4 py-2 text-sm font-extrabold transition-all cursor-pointer active:translate-y-1 active:border-b-0 ${
+              className={`flex min-h-11 items-center justify-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all cursor-pointer active:translate-y-1 active:border-b-0 ${
                 socialTab === channel.tab ? channel.tabActiveClass : "text-muted border-line hover:text-ink hover:bg-surface-2"
               }`}
             >
@@ -208,7 +208,7 @@ export default function SocialVariantTabs({
                 {blogEnabled && activeAsset.doc_url && (
                   <div className="bg-brand/5 border border-brand/20 rounded-xl p-3.5 space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono font-bold text-brand uppercase flex items-center gap-1.5">
+                      <span className="text-xs font-semibold text-brand flex items-center gap-1.5">
                         <MessageSquare className="w-3.5 h-3.5" />
                         First Comment (Link Anchor)
                       </span>
@@ -284,7 +284,7 @@ export default function SocialVariantTabs({
               <>
                 {activeAsset.doc_url && (
                   <div className="bg-[#1877F2]/5 border border-[#1877F2]/20 rounded-xl p-3.5 space-y-1.5">
-                    <span className="text-[10px] font-mono font-bold text-[#1877F2] uppercase block">
+                    <span className="text-xs font-semibold text-[#1877F2] block">
                       First Comment (Pinned Link)
                     </span>
                     <p className="text-xs font-mono text-muted break-all">

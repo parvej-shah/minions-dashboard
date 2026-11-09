@@ -151,7 +151,7 @@ function MarkdownBlockView({
               {block.title}
             </h3>
           ) : (
-            <h2 className="text-lg sm:text-2xl font-extrabold text-ink pb-2 border-b border-line/60 flex items-center gap-2.5 break-words [overflow-wrap:anywhere] font-sans tracking-tight">
+            <h2 className="text-lg sm:text-2xl font-semibold text-ink pb-2 border-b border-line/60 flex items-center gap-2.5 break-words [overflow-wrap:anywhere] font-sans tracking-tight">
               <span className="text-brand font-mono text-base font-bold shrink-0">#</span>
               <span>{block.title}</span>
             </h2>

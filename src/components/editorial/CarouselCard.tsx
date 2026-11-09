@@ -127,15 +127,15 @@ export default function CarouselCard({
   };
 
   if (!state && loadError) return (
-    <div className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
+    <div className="rounded-[28px] bg-surface shadow-soft p-6 sm:p-8">
       <p className="font-semibold text-ink">Could not load the LinkedIn carousel</p>
       <button type="button" onClick={() => { setLoadError(false); setLoadAttempt((n) => n + 1); }} className="mt-3 inline-flex min-h-11 items-center rounded-xl border border-brand/40 px-4 text-sm font-bold text-brand cursor-pointer hover:bg-brand/10">Try again</button>
     </div>
   );
   if (!state) return (
-    <SkeletonGroup label="Loading LinkedIn carousel" className="space-y-4 rounded-2xl border border-line bg-surface p-4 sm:p-5">
+    <SkeletonGroup label="Loading LinkedIn carousel" className="space-y-4 rounded-[28px] bg-surface shadow-soft p-6 sm:p-8">
       <div className="flex items-center justify-between border-b border-line pb-3"><Skeleton className="h-4 w-44" /><Skeleton className="h-3 w-16" /></div>
-      <div className="space-y-3 rounded-2xl border-2 border-line bg-canvas p-4">
+      <div className="space-y-3 rounded-2xl bg-surface-2 p-4">
         <Skeleton className="h-5 w-64 max-w-full" /><Skeleton className="h-4 w-72 max-w-full" />
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2"><Skeleton className="h-20 w-full rounded-xl" /><Skeleton className="h-20 w-full rounded-xl" /></div>
       </div>
@@ -162,11 +162,11 @@ export default function CarouselCard({
   };
 
   return (
-    <div className="bg-surface rounded-2xl border border-line p-4 sm:p-5 space-y-3 shadow-xl">
+    <div className="rounded-[28px] bg-surface shadow-soft p-6 sm:p-8 space-y-4">
       <div className="flex items-center justify-between gap-2 pb-2 border-b border-line/60">
         <div className="flex items-center gap-2">
           <GalleryHorizontal className="w-4 h-4 text-brand" />
-          <span className="text-xs font-bold text-ink font-mono uppercase tracking-wider">LinkedIn carousel</span>
+          <span className="text-[17px] font-semibold text-ink">LinkedIn carousel</span>
         </div>
         <span className="text-[10px] font-mono text-subtle">
           {busy === "make" ? "Writing the slides…" : carousel ? `${pageCount} pages` : suggested.yes ? "Suggested" : "Optional"}
@@ -207,8 +207,8 @@ export default function CarouselCard({
         <>
           {/* A second post that exists to share the carousel has no choice to make. */}
           {!locked && activeAsset.follow_up_format !== "CAROUSEL" && (
-            <div className="rounded-2xl border-2 border-brand/40 bg-brand/5 p-4 sm:p-5">
-              <h3 className="text-base font-extrabold text-ink">What should publish on LinkedIn?</h3>
+            <div className="rounded-2xl bg-brand/5 p-4 sm:p-5">
+              <h3 className="text-base font-semibold text-ink">What should publish on LinkedIn?</h3>
               <p className="mt-1 text-sm text-muted">Choose the swipeable carousel or a single cover image.</p>
               <div role="group" aria-label="LinkedIn image format" className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {[
@@ -221,10 +221,10 @@ export default function CarouselCard({
                     aria-pressed={carousel.active === active}
                     disabled={busy !== null || carousel.active === active}
                     onClick={() => void send("PATCH", { active }, "toggle")}
-                    className={`flex min-h-20 items-center gap-3 rounded-xl border-2 border-b-4 px-4 py-3 text-left transition-all cursor-pointer active:translate-y-1 active:border-b-2 disabled:cursor-default ${carousel.active === active ? "border-brand bg-brand/15 text-ink" : "border-line bg-surface text-muted hover:border-brand/50 hover:text-ink"}`}
+                    className={`flex min-h-20 items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all cursor-pointer active:translate-y-1 active:border-b-2 disabled:cursor-default ${carousel.active === active ? "border-brand bg-brand/15 text-ink" : "border-line bg-surface text-muted hover:border-brand/50 hover:text-ink"}`}
                   >
                     <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
-                    <span className="flex-1"><span className="block text-sm font-extrabold">{label}</span><span className="block text-xs">{detail}</span></span>
+                    <span className="flex-1"><span className="block text-sm font-semibold">{label}</span><span className="block text-xs">{detail}</span></span>
                     {busy === "toggle" && carousel.active !== active ? <Loader2 className="h-4 w-4 animate-spin" aria-label="Saving choice" /> : carousel.active === active ? <span className="text-xs font-bold text-brand">Selected</span> : null}
                   </button>
                 ))}
@@ -264,7 +264,7 @@ export default function CarouselCard({
               </label>
               {draft.slides.map((slide, i) => (
                 <fieldset key={i} className="border border-line rounded-lg p-2.5 space-y-2">
-                  <legend className="px-1 text-[10px] font-mono uppercase tracking-wider text-subtle">
+                  <legend className="px-1 text-sm text-muted">
                     Page {i + 2} · {LAYOUT_NAMES[slide.layout]}
                   </legend>
                   {FIELDS[slide.layout].map((f) => {
@@ -305,7 +305,7 @@ export default function CarouselCard({
           ) : (
             <div className="space-y-2">
               <div className="rounded-lg bg-surface-2 border border-line p-2.5">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-subtle block mb-1">Post text with the carousel</span>
+                <span className="text-sm text-muted block mb-1">Post text with the carousel</span>
                 <p className="text-xs leading-relaxed text-ink whitespace-pre-line">{carousel.caption}</p>
               </div>
               {!locked && (

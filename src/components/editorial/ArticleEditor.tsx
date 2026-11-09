@@ -57,7 +57,7 @@ export default function ArticleEditor({
   readingTimeMinutes,
 }: ArticleEditorProps) {
   return (
-          <div className="bg-surface rounded-2xl border border-line p-5 sm:p-6 space-y-5 shadow-xl">
+          <div className="rounded-[28px] bg-surface shadow-soft p-6 sm:p-8 space-y-5">
             {/* Header Toolbar */}
             <div className="flex flex-col gap-3 border-b border-line pb-3 2xl:flex-row 2xl:items-center 2xl:justify-between">
               <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
@@ -270,7 +270,7 @@ export default function ArticleEditor({
                     <span>•</span>
                     <span className="text-muted">{wordCount} words</span>
                   </div>
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-ink leading-tight break-words [overflow-wrap:anywhere] font-sans">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight text-ink leading-tight break-words [overflow-wrap:anywhere] font-sans">
                     {edited.title}
                   </h1>
                   {(edited.hook || activeAsset.hook) && (

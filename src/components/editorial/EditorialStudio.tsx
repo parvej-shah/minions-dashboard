@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { CalendarClock, FileText } from "lucide-react";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import Toast from "@/components/ui/Toast";
@@ -12,93 +13,38 @@ import { useToast } from "@/hooks/useToast";
 import { useChannelSummary } from "@/hooks/useChannelSummary";
 import { useBrandSettings } from "@/hooks/useBrandSettings";
 import { normalizeDomain } from "@/constants/config";
-import QueueRibbon, { type QueueFilter } from "./QueueRibbon";
-import DraftHeader from "./DraftHeader";
 import CoverImageCard from "./CoverImageCard";
 import CarouselCard from "./CarouselCard";
 import ArticleEditor, { type EditorMode } from "./ArticleEditor";
 import SocialVariantTabs, { type SocialTab } from "./social/SocialVariantTabs";
-import ReviewDock from "./ReviewDock";
+import ReviewDecision from "./ReviewDecision";
+import { useWorkspaceTimezone } from "./SchedulePicker";
 import ClaimsGate from "./ClaimsGate";
 import MobileActionBar from "./MobileActionBar";
-import DraftChecks from "./DraftChecks";
+import DraftChecks, { checksSummary } from "./DraftChecks";
 import DraftScheduleModal from "@/components/schedule/DraftScheduleModal";
 import LinkedInModal from "@/components/distribution/LinkedInModal";
 import { plainReviewNotes } from "@/lib/drafts/plainNotes";
 import { postGoesTo } from "@/constants/postChannels";
 import { liveLinks } from "@/lib/drafts/liveLinks";
-import { nextPending, queueFor } from "@/lib/drafts/queue";
+import { nextPending, queueFor, type QueueFilter } from "@/lib/drafts/queue";
+import { statusLine } from "@/lib/posts/library";
+import { DEFAULT_TIMEZONE } from "@/constants/config";
+import { buttonStyles } from "@/components/ui/Button";
+import { StatusLabel } from "@/components/ui/Text";
 
 function EditorialStudioSkeleton() {
   return (
-    <SkeletonGroup label="Loading Editorial Studio" className="mx-auto max-w-[1400px] space-y-6 pb-32 lg:pb-16">
-      <section className="space-y-3 rounded-2xl border border-line bg-surface p-4">
-        <div className="flex flex-col gap-3 border-b border-line pb-3 sm:flex-row sm:items-center sm:justify-between">
-          <Skeleton className="h-5 w-52" />
-          <Skeleton className="h-9 w-36 rounded-xl" />
+    <SkeletonGroup label="Loading the post" className="mx-auto max-w-[1040px] space-y-8 pb-32 lg:pb-16">
+      <div className="flex justify-between"><Skeleton className="h-5 w-20" /><Skeleton className="h-5 w-40" /><Skeleton className="h-5 w-16" /></div>
+      <div className="space-y-3"><Skeleton className="h-4 w-28" /><Skeleton className="h-10 w-3/4" /></div>
+      <div className="flex flex-wrap items-start gap-12">
+        <Skeleton className="h-[560px] min-w-0 flex-[999_1_520px] rounded-[28px]" />
+        <div className="min-w-0 flex-[1_1_300px] space-y-5">
+          <Skeleton className="h-4 w-20" /><Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-16" /><Skeleton className="h-6 w-40" />
+          <Skeleton className="h-12 w-full rounded-full" /><Skeleton className="h-12 w-full rounded-full" />
         </div>
-        <div className="flex gap-3 overflow-hidden">
-          {[0, 1, 2, 3].map((item) => <Skeleton key={item} className="h-16 min-w-64 rounded-xl" />)}
-        </div>
-      </section>
-
-      <div className="flex flex-col gap-3 border-b border-line pb-5 sm:flex-row sm:items-end sm:justify-between">
-        <div className="w-full max-w-2xl space-y-3">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-4 w-64 max-w-full" />
-        </div>
-        <Skeleton className="h-10 w-32 rounded-xl" />
-      </div>
-
-      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
-        <div className="space-y-6 lg:col-span-8">
-          <section className="space-y-4 rounded-2xl border border-line bg-surface p-4 sm:p-5">
-            <div className="flex items-center justify-between border-b border-line pb-3">
-              <Skeleton className="h-4 w-44" />
-              <Skeleton className="h-3 w-16" />
-            </div>
-            <div className="space-y-3 rounded-2xl border-2 border-line bg-canvas p-4">
-              <Skeleton className="h-5 w-64 max-w-full" />
-              <Skeleton className="h-4 w-72 max-w-full" />
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <Skeleton className="h-20 w-full rounded-xl" />
-                <Skeleton className="h-20 w-full rounded-xl" />
-              </div>
-            </div>
-            <div className="flex gap-2 overflow-hidden">
-              {[0, 1, 2].map((item) => <Skeleton key={item} className="aspect-[4/5] w-[70%] shrink-0 rounded-lg sm:w-[220px]" />)}
-            </div>
-            <Skeleton className="h-28 w-full rounded-xl" />
-          </section>
-          <section className="space-y-4 rounded-3xl border-2 border-line bg-surface p-4 sm:p-5">
-            <Skeleton className="h-6 w-44" />
-            <Skeleton className="h-4 w-80 max-w-full" />
-            <div className="flex flex-wrap gap-2"><Skeleton className="h-11 w-28 rounded-xl" /><Skeleton className="h-11 w-28 rounded-xl" /></div>
-            <div className="space-y-4 rounded-2xl border border-line bg-canvas p-4">
-              <div className="flex items-center gap-3"><Skeleton className="h-10 w-10 rounded-full" /><Skeleton className="h-4 w-36" /></div>
-              <Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-5/6" />
-              <Skeleton className="mx-auto aspect-[4/5] w-full max-w-[420px] rounded-xl" />
-            </div>
-          </section>
-          <section className="space-y-4 rounded-2xl border border-line bg-surface p-5">
-            <Skeleton className="h-5 w-28" />
-            <div className="flex flex-col gap-4 sm:flex-row"><Skeleton className="aspect-[4/5] w-full rounded-xl sm:w-[280px]" /><Skeleton className="h-36 w-full rounded-xl" /></div>
-          </section>
-        </div>
-        <aside className="space-y-6 lg:col-span-4">
-          <section className="space-y-4 rounded-2xl border-2 border-b-4 border-line bg-surface p-5">
-            <Skeleton className="h-5 w-28" />
-            <Skeleton className="h-12 w-full rounded-xl" />
-            <Skeleton className="h-12 w-full rounded-xl" />
-            <Skeleton className="h-12 w-full rounded-xl" />
-          </section>
-          <section className="space-y-3 rounded-2xl border border-line bg-surface p-5">
-            <Skeleton className="h-5 w-32" />
-            <Skeleton className="h-16 w-full rounded-xl" />
-            <Skeleton className="h-16 w-full rounded-xl" />
-          </section>
-        </aside>
       </div>
     </SkeletonGroup>
   );
@@ -106,7 +52,6 @@ function EditorialStudioSkeleton() {
 
 export interface EditorialStudioProps {
   initialDraftId?: string;
-  isStandaloneRoute?: boolean;
   /** Opens the drafting schedule on load (`?schedule=1`). */
   openSchedule?: boolean;
   /** Opens the LinkedIn channel on load (`?linkedin=1`, where LinkedIn's sign-in comes back to). */
@@ -114,15 +59,14 @@ export interface EditorialStudioProps {
 }
 
 /**
- * Editorial Studio: composes the review queue, the article editor, the social
- * staging cards, and the decision dock.
+ * The Review screen (task 24): one post on the left, the one decision about it
+ * on the right, sticky.
  *
  * All data loading and mutation lives in useEditorialDraft; this component
  * wires those to the view.
  */
 export default function EditorialStudio({
   initialDraftId,
-  isStandaloneRoute = false,
   openSchedule = false,
   openLinkedIn = false,
 }: EditorialStudioProps) {
@@ -153,14 +97,14 @@ export default function EditorialStudio({
       window.history.replaceState(null, "", url);
     }
   };
-  const panelButton = "flex min-h-10 cursor-pointer items-center gap-1.5 rounded-xl border border-line bg-canvas px-3 text-xs font-semibold text-ink transition-colors hover:border-brand/50 hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
+  const panelButton = buttonStyles({ variant: "secondary" });
   const panelButtons = (
     <>
       <button type="button" onClick={() => setPanel("linkedin")} className={panelButton}>
-        <span className="text-[11px] font-black text-[#0A66C2]" aria-hidden="true">in</span> LinkedIn
+        <span className="font-bold text-[#0A66C2]" aria-hidden="true">in</span> Connect LinkedIn
       </button>
       <button type="button" onClick={() => setPanel("schedule")} className={panelButton}>
-        <CalendarClock className="h-3.5 w-3.5 text-brand" aria-hidden="true" /> Schedule
+        <CalendarClock className="h-4 w-4 text-brand" aria-hidden="true" /> Posting schedule
       </button>
     </>
   );
@@ -171,7 +115,6 @@ export default function EditorialStudio({
     </>
   );
 
-  const [chosenFilter, setListFilter] = useState<QueueFilter | null>(null);
   const [editorMode, setEditorMode] = useState<EditorMode>("preview");
   const [socialTab, setSocialTab] = useState<SocialTab>("LINKEDIN");
   // Whether LinkedIn gets this draft's carousel, as the carousel card last loaded or set it.
@@ -205,9 +148,13 @@ export default function EditorialStudio({
   const { activeAsset, assets, edited } = draft;
 
   const pending = queueFor(assets, "PENDING_REVIEW");
-  // Until the reviewer picks a filter, Studio shows the drafts waiting for
-  // review, unless a link named a draft or none is waiting.
-  const listFilter: QueueFilter = chosenFilter ?? (!initialDraftId && pending.length > 0 ? "PENDING_REVIEW" : "ALL");
+  // [ and ] step through the waiting posts while on one, else through all of them.
+  const listFilter: QueueFilter = activeAsset?.status === "PENDING_REVIEW" ? "PENDING_REVIEW" : "ALL";
+  const timezone = useWorkspaceTimezone() ?? DEFAULT_TIMEZONE;
+  const takenTimes = useMemo(
+    () => assets.filter((a) => a.status === "SCHEDULED" && a.scheduled_for && a.id !== activeAsset?.id).map((a) => a.scheduled_for!),
+    [assets, activeAsset?.id]
+  );
   const pendingIndex = activeAsset ? pending.findIndex((a) => a.id === activeAsset.id) : -1;
   const nextDraft = activeAsset ? nextPending(assets, activeAsset.id) : null;
   const nextToReview = nextDraft
@@ -319,25 +266,17 @@ export default function EditorialStudio({
     return () => window.removeEventListener("keydown", handleKeyDown);
   });
 
-  // Keep the spotlighted queue card scrolled into view.
-  useEffect(() => {
-    if (!draft.selectedAssetId) return;
-    document
-      .getElementById(`queue-card-${draft.selectedAssetId}`)
-      ?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-  }, [draft.selectedAssetId]);
-
   if (draft.isLoading) return <EditorialStudioSkeleton />;
 
   if (!activeAsset) {
     return (
-      <div className="max-w-[1400px] mx-auto py-10">
+      <div className="mx-auto max-w-[1040px] py-10">
         <EmptyState
           icon={<FileText className="w-8 h-8" />}
-          title={draft.loadError ? "Could not load drafts" : "No drafts in the queue"}
+          title={draft.loadError ? "We couldn't load your posts" : "No posts yet"}
           description={
             draft.loadError ??
-            "Nothing is waiting for review. Run the harvester and drafting pipeline from the Ideas page to generate one."
+            "Nothing is waiting for you. Pick an idea on the Ideas page and Minions writes the post for you to review."
           }
           action={panelButtons}
         />
@@ -371,34 +310,43 @@ export default function EditorialStudio({
     />
   );
 
+  const status = statusLine(activeAsset, timezone);
+  const waitingLabel =
+    pendingIndex >= 0 ? `Post ${pendingIndex + 1} of ${pending.length} waiting` : pending.length > 0 ? `${pending.length} waiting for you` : "";
+  const unchecked = activeAsset.claims.filter((c) => c.verified !== "Y").length;
+  const seriousNotes = reviewNotes.filter((n) => n.tone !== "tip").length;
+  // "Edit text": the article when the blog is on, else the social post.
+  const startEditing = () => {
+    if (blogEnabled) setEditorMode("edit");
+    else setIsEditingSocial(true);
+    document.getElementById(blogEnabled ? "post-editor" : "post-preview")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto pb-32 lg:pb-16">
-      <QueueRibbon
-        assets={assets}
-        activeAsset={activeAsset}
-        listFilter={listFilter}
-        setListFilter={setListFilter}
-        onSelect={draft.selectAsset}
-        onPrev={() => draft.prevDraft(listFilter)}
-        onNext={() => draft.nextDraft(listFilter)}
-        action={panelButtons}
-      />
+    <div className="mx-auto max-w-[1040px] space-y-8 pb-32 lg:pb-16">
+      <nav aria-label="Posts" className="flex flex-wrap items-center justify-between gap-3 text-[15px]">
+        <Link href="/posts" className="text-brand hover:underline">‹ Posts</Link>
+        {waitingLabel && <p className="text-muted">{waitingLabel}</p>}
+        {nextDraft ? (
+          <button type="button" onClick={() => draft.selectAsset(nextDraft.id)} className="cursor-pointer text-brand hover:underline">
+            Next ›
+          </button>
+        ) : (
+          <span aria-hidden="true" />
+        )}
+      </nav>
 
-      <DraftHeader
-        activeAsset={activeAsset}
-        title={edited.title}
-        currentAssetIndex={pendingIndex}
-        totalDrafts={pending.length}
-        isStandaloneRoute={isStandaloneRoute}
-        blogEnabled={blogEnabled}
-      />
+      <header className="space-y-2">
+        <StatusLabel tone={status.tone}>{status.text}</StatusLabel>
+        <h1 className="break-words text-[32px] font-bold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[40px]">{edited.title}</h1>
+      </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <div className="lg:col-span-8 space-y-6">
+      <div className="flex flex-wrap items-start gap-12">
+        <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-8">
+          <div id="post-preview" className="scroll-mt-24">{socialVariants}</div>
           {enabledSocialTabs.LINKEDIN && activeAsset.follow_up_format !== "COVER" && (
             <CarouselCard key={activeAsset.id} activeAsset={activeAsset} onMessage={toast.show} onCarouselOn={(on) => setCarouselOn({ id: activeAsset.id, on })} />
           )}
-          {socialVariants}
 
           {/* Hidden only when nothing posts it: LinkedIn gets the carousel and no other channel is on. */}
           {coverGoesOut && (
@@ -408,63 +356,75 @@ export default function EditorialStudio({
           {/* Blog off: the article is never published, so it is not shown for
               editing; it stays the source the cover and carousel are made from. */}
           {blogEnabled && (
-            <ArticleEditor
-              activeAsset={activeAsset}
-              edited={edited}
-              setEditedTitle={draft.setEditedTitle}
-              setEditedHook={draft.setEditedHook}
-              setEditedBody={draft.setEditedBody}
-              editorMode={editorMode}
-              setEditorMode={setEditorMode}
-              isDirty={draft.isDirty}
-              isSaving={draft.isSaving}
-                statusLabel={statusLabel}
-              onSave={handleSave}
-              onCopy={copy}
-              copiedKey={copiedKey}
-              wordCount={wordCount}
-              readingTimeMinutes={readingTimeMinutes}
-            />
-          )}
-
-        </div>
-
-        <div className="flex flex-col gap-6 lg:col-span-4 lg:sticky lg:top-6">
-          {/* The checks are for deciding to publish; once it went out they are history. */}
-          {!isPublished && <div className="order-1"><DraftChecks notes={reviewNotes} /></div>}
-          {!isPublished && activeAsset.claims.length > 0 && (
-            <div className="order-2">
-              <ClaimsGate
+            <div id="post-editor" className="scroll-mt-24">
+              <ArticleEditor
                 activeAsset={activeAsset}
-                verifiedClaimsCount={verifiedClaimsCount}
-                totalClaims={totalClaims}
-                allClaimsVerified={allClaimsVerified}
-                onToggleClaim={draft.toggleClaim}
+                edited={edited}
+                setEditedTitle={draft.setEditedTitle}
+                setEditedHook={draft.setEditedHook}
+                setEditedBody={draft.setEditedBody}
+                editorMode={editorMode}
+                setEditorMode={setEditorMode}
+                isDirty={draft.isDirty}
+                isSaving={draft.isSaving}
+                statusLabel={statusLabel}
+                onSave={handleSave}
+                onCopy={copy}
+                copiedKey={copiedKey}
+                wordCount={wordCount}
+                readingTimeMinutes={readingTimeMinutes}
               />
             </div>
           )}
-          <div id="editorial-publishing-options" tabIndex={-1} className="order-3 scroll-mt-6 outline-none">
-            <ReviewDock
-              activeAsset={activeAsset}
-              isDirty={draft.isDirty}
-              publishState={draft.publishState}
-              onPublish={handlePublish}
-              onSchedule={handleSchedule}
-              onUnschedule={handleUnschedule}
-              onMarkPosted={handleMarkPosted}
-              workspaceChannels={channels}
-              onSetChannels={(c) => void draft.setPostChannels(c).then((m) => m && toast.show(m))}
-              onMessage={toast.show}
-              setToggleLiveConfirmOpen={setToggleLiveConfirmOpen}
-              setDeleteConfirmOpen={setDeleteConfirmOpen}
-              setUnpublishLinkedInConfirmOpen={setUnpublishLinkedInConfirmOpen}
-              blogEnabled={blogEnabled}
-              onPostAgain={() => void draft.postAgain().then((m) => m && toast.show(m))}
-              nextToReview={nextToReview}
-              isPostingAgain={draft.isPostingAgain}
-            />
-          </div>
         </div>
+
+        <aside
+          id="editorial-publishing-options"
+          tabIndex={-1}
+          aria-label="Decision"
+          className="min-w-0 flex-[1_1_300px] scroll-mt-24 outline-none lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:pr-1 lg:[scrollbar-width:thin]"
+        >
+          <ReviewDecision
+            activeAsset={activeAsset}
+            isDirty={draft.isDirty}
+            publishState={draft.publishState}
+            onPublish={handlePublish}
+            onSchedule={handleSchedule}
+            onUnschedule={handleUnschedule}
+            onMarkPosted={handleMarkPosted}
+            onEdit={startEditing}
+            takenTimes={takenTimes}
+            workspaceChannels={channels}
+            onSetChannels={(c) => void draft.setPostChannels(c).then((m) => m && toast.show(m))}
+            onMessage={toast.show}
+            setToggleLiveConfirmOpen={setToggleLiveConfirmOpen}
+            setDeleteConfirmOpen={setDeleteConfirmOpen}
+            setUnpublishLinkedInConfirmOpen={setUnpublishLinkedInConfirmOpen}
+            blogEnabled={blogEnabled}
+            onPostAgain={() => void draft.postAgain().then((m) => m && toast.show(m))}
+            nextToReview={nextToReview}
+            isPostingAgain={draft.isPostingAgain}
+            detailsSummary={checksSummary(reviewNotes, unchecked)}
+            detailsOpen={seriousNotes + unchecked > 0}
+            details={
+              // The checks are for deciding to post; once it went out they are history.
+              isPublished ? undefined : (
+                <>
+                  <DraftChecks notes={reviewNotes} />
+                  {activeAsset.claims.length > 0 && (
+                    <ClaimsGate
+                      activeAsset={activeAsset}
+                      verifiedClaimsCount={verifiedClaimsCount}
+                      totalClaims={totalClaims}
+                      allClaimsVerified={allClaimsVerified}
+                      onToggleClaim={draft.toggleClaim}
+                    />
+                  )}
+                </>
+              )
+            }
+          />
+        </aside>
       </div>
 
       <MobileActionBar

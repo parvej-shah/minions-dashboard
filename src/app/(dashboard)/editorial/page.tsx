@@ -14,6 +14,6 @@ interface EditorialPageProps {
 export default async function EditorialPage({ searchParams }: EditorialPageProps) {
   const { id, schedule, linkedin } = await searchParams;
   return (
-    <EditorialStudio initialDraftId={id} isStandaloneRoute={false} openSchedule={schedule === "1"} openLinkedIn={linkedin === "1"} />
+    <EditorialStudio initialDraftId={id} openSchedule={schedule === "1"} openLinkedIn={linkedin === "1"} />
   );
 }

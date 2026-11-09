@@ -25,7 +25,7 @@ export default function MobileActionBar({
   liveUrl,
 }: MobileActionBarProps) {
   return (
-  <div className="lg:hidden fixed max-md:bottom-[calc(67px+max(0.65rem,env(safe-area-inset-bottom)))] md:bottom-0 left-0 right-0 z-35 border-t border-line bg-surface/95 px-4 py-2.5 backdrop-blur-xl shadow-2xl">
+  <div className="lg:hidden fixed max-md:bottom-[calc(67px+max(0.65rem,env(safe-area-inset-bottom)))] md:bottom-0 left-0 right-0 z-35 border-t border-line bg-surface/95 px-4 py-2.5 backdrop-blur-xl">
     <div className="mx-auto flex max-w-lg items-center gap-2">
       <button
         onClick={onSave}
@@ -54,11 +54,11 @@ export default function MobileActionBar({
       ) : (
         <button
           onClick={onReviewPublish}
-          aria-label="Go to publishing options"
+          aria-label="Go to the decision"
           className={buttonStyles({ size: "md", className: "min-w-0 flex-1" })}
         >
           <CheckCircle2 className="w-4 h-4" />
-          <span>Publish options</span>
+          <span>Decide</span>
         </button>
       )}
     </div>

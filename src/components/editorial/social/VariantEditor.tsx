@@ -37,10 +37,10 @@ export default function VariantEditor({ value, onChange, placeholder, minHeight,
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full resize-none rounded-2xl border-2 border-brand/50 bg-canvas p-4 text-[15px] leading-7 text-ink shadow-inner outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/10"
+        className="w-full resize-none rounded-2xl border border-brand/50 bg-canvas p-4 text-[15px] leading-7 text-ink shadow-inner outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/10"
       />
 
-      <div className="sticky bottom-3 z-10 flex flex-col gap-3 rounded-2xl border-2 border-line bg-surface/95 p-3 shadow-2xl backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+      <div className="sticky bottom-3 z-10 flex flex-col gap-3 rounded-2xl border border-line bg-surface/95 p-3 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2 text-[11px] font-mono text-muted">
           <span className={overLimit ? "text-danger font-bold" : undefined}>
             {charLimit !== undefined ? `${value.length}/${charLimit}` : value.length.toLocaleString()} characters

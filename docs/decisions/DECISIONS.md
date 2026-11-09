@@ -28,6 +28,13 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-09 — Approving a post puts it in the next free posting time
+
+**Decision:** On the review screen the main button for a waiting post reads "Post on <day time>" and schedules it into the next posting time no other post holds. Posting right away, another time, marking it posted by hand and deleting are quieter options under it.
+**Why:** The owner's decision is "yes, this one"; the schedule they already set says when. One click, and the button says exactly when it goes out.
+**Alternatives considered:** "Approve & publish" now as the main button (posts at odd hours, ignores the schedule); asking for a time every approval (one more decision per post).
+**Status:** active
+
 ## 2026-11-09 — Calm, light redesign: four places, one decision per screen
 
 **Decision:** The dashboard is rebuilt light (Apple-style neutrals, one blue action colour) with a top menu of four places: Today (home), Ideas, Posts, Brand. Billing, team, channels, schedule and the blog link move under the avatar. Today opens on the one thing to do (posts waiting for your OK, or "all caught up"); Posts is one image grid filtered Needs you / Scheduled / Posted; the review screen shows the post first with one primary button that says when it goes out. Confetti, streaks and 3D buttons go.
