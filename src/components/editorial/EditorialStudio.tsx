@@ -395,7 +395,7 @@ export default function EditorialStudio({
 
           {/* Hidden only when nothing posts it: LinkedIn gets the carousel and no other channel is on. */}
           {coverGoesOut && (
-            <CoverImageCard activeAsset={activeAsset} isRendering={draft.isRenderingCover} onRerender={draft.rerenderCover} onMessage={toast.show} />
+            <CoverImageCard activeAsset={activeAsset} isRendering={draft.isRenderingCover} onRerender={draft.rerenderCover} onCheckShape={draft.checkCoverShape} onMessage={toast.show} />
           )}
 
           {/* Blog off: the article is never published, so it is not shown for

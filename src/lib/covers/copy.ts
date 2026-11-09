@@ -228,6 +228,9 @@ function pickNumber(card: CoverCard, body: string, claimsOk: string, notes: stri
   return { number: { value, unit: clean(card.number?.unit) || undefined }, caption };
 }
 
+/** A draft's body without the cover image line at its top. */
+export const bodyOf = (content: string) => content.replace(/^!\[[^\]]*\]\([^)]*\)\s*/, "");
+
 /** Where a cover quote is taken from: the LinkedIn post when there is one, else the body. */
 export const quoteSource = (draft: { body: string; post?: string | null }) => draft.post?.trim() || draft.body;
 

@@ -53,10 +53,12 @@ export interface CoverSpecDTO {
   list: string[] | null;
   grid: { label: string; icon: string }[] | null;
   punch: { lines: string[]; checks: string[] } | null;
-  /** Whether the post's points were read yet; until then List, Grid and Punch are offered and read on click. */
+  /** Whether the post's points were read yet; until then List, Grid and Punch are disabled. */
   shape_read: boolean;
   /** Whether the brand photo can fill a Photo cover (an opaque headshot, big enough). */
   photo_ok: boolean;
+  /** Whether the post has a sentence a Quote cover can use. */
+  quote_ok: boolean;
 }
 
 /**

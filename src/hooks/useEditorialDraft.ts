@@ -62,6 +62,8 @@ export interface EditorialDraftState {
   /** Re-draws the active draft's cover in code, optionally with a reviewer's edit. Returns a toast message. */
   isRenderingCover: boolean;
   rerenderCover: (edit?: CoverEditInput) => Promise<string>;
+  /** Reads a draft's points onto its cover (no redraw), so List, Grid and Punch can be offered. False when it failed. */
+  checkCoverShape: (assetId: string) => Promise<boolean>;
 
   /** Drafts a second LinkedIn post of the published draft in the format it did not use, and opens it. */
   isPostingAgain: boolean;
@@ -503,6 +505,18 @@ export function useEditorialDraft(
     [activeAsset, isRenderingCover]
   );
 
+  const checkCoverShape = useCallback(async (assetId: string): Promise<boolean> => {
+    try {
+      await apiClient.post(`/api/assets/${assetId}/cover/shape`, {});
+      const fresh = await apiClient.get<AssetItem>(`/api/assets/${assetId}`);
+      // Only the cover facts change: the reviewer's unsaved edits stay in their buffers.
+      setAssets((prev) => prev.map((a) => (a.id === fresh.id ? { ...a, cover: fresh.cover } : a)));
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   const [isPostingAgain, setIsPostingAgain] = useState(false);
   const postAgain = useCallback(async (): Promise<string> => {
     if (!activeAsset || isPostingAgain) return "";
@@ -563,6 +577,7 @@ export function useEditorialDraft(
 
     isRenderingCover,
     rerenderCover,
+    checkCoverShape,
 
     isPostingAgain,
     postAgain,

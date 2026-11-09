@@ -7,6 +7,7 @@ import {
 } from "@/constants/config";
 import type { AssetItem, AssetStatus, ClaimCheckItem, CoverSpecDTO } from "@/types";
 import type { PosterShape } from "@/lib/covers/shape";
+import { bodyOf, pickQuote, quoteSource } from "@/lib/covers/copy";
 import type { AudienceLane } from "@/types";
 import { linkedinWentAs, type FollowUpFormat } from "@/lib/followUp";
 import { linkedinPostUrl, toChannelUrls } from "@/lib/channels";
@@ -76,7 +77,7 @@ export function toClaimDTO(claim: ClaimDTORecord): ClaimCheckItem {
  * The single Prisma-row -> wire-shape conversion for an editorial asset.
  * A missing trade is UNSPECIFIED, never presented as a real one.
  */
-function toCoverDTO(raw: unknown): CoverSpecDTO | null {
+function toCoverDTO(raw: unknown, draft: { content: string | null; linkedinVariant: string | null }): CoverSpecDTO | null {
   if (!raw || typeof raw !== "object") return null;
   const c = raw as Record<string, unknown>;
   const str = (v: unknown) => (typeof v === "string" && v ? v : null);
@@ -104,6 +105,7 @@ function toCoverDTO(raw: unknown): CoverSpecDTO | null {
     punch: shape?.punch ?? null,
     shape_read: Boolean(shape),
     photo_ok: a?.photo_ok === true,
+    quote_ok: Boolean(pickQuote(quoteSource({ body: bodyOf(draft.content ?? ""), post: draft.linkedinVariant }))),
   };
 }
 
@@ -131,7 +133,7 @@ export function toAssetDTO(
     hero_error_code: asset.heroErrorCode,
     hero_provider: asset.heroProvider,
     hero_attempts: asset.heroAttempts ?? 0,
-    cover: toCoverDTO(asset.coverSpec),
+    cover: toCoverDTO(asset.coverSpec, asset),
     doc_url: asset.docUrl || blogUrl(asset.slug, domain) || "",
     version: asset.version || 1,
     generation_cost: Number(asset.generationCost) || DEFAULT_GENERATION_COST,

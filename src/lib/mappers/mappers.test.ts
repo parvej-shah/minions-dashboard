@@ -153,6 +153,13 @@ describe("toAssetDTO", () => {
     );
   });
 
+  it("says whether the post has a line a Quote cover can use", () => {
+    const coverSpec = { layout: "HEADLINE", headline: "A headline" };
+    const quotable = "The cheapest call is not the shortest one. It is the one that books the visit.";
+    expect(toAssetDTO(makeAsset({ coverSpec, linkedinVariant: quotable })).cover?.quote_ok).toBe(true);
+    expect(toAssetDTO(makeAsset({ coverSpec, linkedinVariant: "Short. 10 calls." })).cover?.quote_ok).toBe(false);
+  });
+
   it("exposes social bodies under variants, not three loose *_variant keys", () => {
     const dto = toAssetDTO(makeAsset());
     expect(dto.variants).toEqual({ linkedin: "LI copy", facebook: "", twitter: "" });

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { deleteFromR2, r2KeyFromUrl, uploadToR2 } from "@/lib/r2";
 import { coverBrand } from "@/lib/covers/brand";
-import { checkCoverLine, chooseCoverCopy, coverOptions, coverOutOfDate, scoreHeadline, pickQuote, quoteSource, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
+import { bodyOf, checkCoverLine, chooseCoverCopy, coverOptions, coverOutOfDate, scoreHeadline, pickQuote, quoteSource, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
 import { askJev } from "@/lib/ai/jev";
 import { chatWithFallback } from "@/lib/ai/modelChain";
 import { withCostMeter } from "@/lib/ai/cost";
@@ -140,7 +140,7 @@ export function defaultByline(positioning: string): string | undefined {
 }
 
 /** The draft body without the cover image line it carries once a cover is attached. */
-export const bodyOf = (content: string) => content.replace(/^!\[[^\]]*\]\([^)]*\)\s*/, "");
+export { bodyOf };
 
 /** The asset's content with its cover line set to url (replacing an old one). */
 export function withCoverLine(content: string, title: string, url: string): string {
@@ -520,6 +520,30 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   });
   await dropReplacedCover(asset.id, asset.heroImageUrl, url);
   return { ok: true, url, spec: stored };
+}
+
+/**
+ * Reads the post's points onto a cover drawn before they were read, without
+ * redrawing it, so the Studio knows whether List, Grid and Punch can be
+ * offered. Once per draft: a cover that has them is left alone.
+ */
+export async function readCoverShape(assetId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const asset = await prisma.asset.findUnique({ where: { id: assetId }, select: { title: true, content: true, linkedinVariant: true, coverSpec: true } });
+  const spec = asset?.coverSpec as Partial<StoredCoverSpec> | null | undefined;
+  if (!asset || !spec?.layout) return { ok: false, error: "This draft has no cover yet." };
+  if (spec.card?.shape !== undefined) return { ok: true };
+  const body = bodyOf(asset.content ?? "");
+  const notes: string[] = [];
+  const metered = await withCostMeter(() =>
+    readPosterShape({ title: asset.title ?? "", post: quoteSource({ body, post: asset.linkedinVariant }), body: `${body}\n${asset.linkedinVariant ?? ""}` }, notes)
+  );
+  if (!metered.value) return { ok: false, error: "Could not read the post's points just now." };
+  const stored: Partial<StoredCoverSpec> = { ...spec, card: { ...(spec.card ?? {}), shape: metered.value } };
+  await prisma.asset.update({
+    where: { id: assetId },
+    data: { coverSpec: stored as object, ...(metered.costUsd ? { generationCost: { increment: metered.costUsd } } : {}) },
+  });
+  return { ok: true };
 }
 
 /**

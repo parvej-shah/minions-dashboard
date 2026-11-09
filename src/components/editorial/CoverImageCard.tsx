@@ -1,17 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AlertTriangle, ExternalLink, Image as ImageIcon, Loader2, PenLine, RefreshCw, Shuffle } from "lucide-react";
 import type { AssetItem, CoverSpecDTO } from "@/types";
 import type { CoverEditInput } from "@/hooks/useEditorialDraft";
 import { COVER_ART_STYLES, COVER_ART_STYLE_META } from "@/lib/covers/artStyles";
+import { layoutUnavailable } from "@/lib/covers/available";
 
 import { buttonStyles } from "@/components/ui/Button";
 export interface CoverImageCardProps {
   activeAsset: AssetItem;
   isRendering: boolean;
   onRerender: (edit?: CoverEditInput) => Promise<string>;
+  /** Reads the post's points onto a cover that lacks them; false when it failed. */
+  onCheckShape: (assetId: string) => Promise<boolean>;
   onMessage: (message: string) => void;
 }
 
@@ -28,17 +31,6 @@ const LAYOUTS: { id: Layout; label: string; hint: string }[] = [
   { id: "NUMBER", label: "Number", hint: "A figure the draft states, set large" },
 ];
 
-/** Why a layout can't be used on this cover, or null when it can. */
-function unavailableReason(id: Layout, cover: CoverSpecDTO): string | null {
-  // Until the post's points are read, List, Grid and Punch are offered and read on click.
-  if (id === "NUMBER" && !cover.number) return "This draft states no figure a Number cover could use";
-  if (id === "LIST" && cover.shape_read && !cover.list) return "The post doesn't name 3 or 4 separate points";
-  if (id === "GRID" && cover.shape_read && !cover.grid) return "The post doesn't name 3 to 6 parallel things";
-  if (id === "PUNCH" && cover.shape_read && !cover.punch) return "The post has no short punch lines";
-  if (id === "PHOTO" && !cover.photo_ok) return "Needs an opaque headshot (at least 600 px) on the Brand page";
-  return null;
-}
-
 const hasArt = (layout: Layout) => layout === "HEADLINE" || layout === "STATEMENT";
 const lines = (text: string) => text.split("\n").map((l) => l.trim()).filter(Boolean);
 const same = (a: string[], b: string[] | undefined) => a.join("\n") === (b ?? []).join("\n");
@@ -50,7 +42,7 @@ const same = (a: string[], b: string[] | undefined) => a.join("\n") === (b ?? []
  * re-drawn in a second, with no model call. Older drafts may carry a 16:9 AI
  * image cover; those are shown as they are.
  */
-export default function CoverImageCard({ activeAsset, isRendering, onRerender, onMessage }: CoverImageCardProps) {
+export default function CoverImageCard({ activeAsset, isRendering, onRerender, onCheckShape, onMessage }: CoverImageCardProps) {
   const cover = activeAsset.cover;
   const isTemplate = activeAsset.hero_provider === "template";
   // Once a post is out, its cover is the file the post points at: it can no longer be redrawn.
@@ -67,6 +59,19 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
   const [emphasis, setEmphasis] = useState("");
   const [items, setItems] = useState("");
   const [checks, setChecks] = useState("");
+
+  // A cover drawn before the post's points were read: read them once, so
+  // List, Grid and Punch are enabled only when the post really has them.
+  const tried = useRef(new Set<string>());
+  const [checking, setChecking] = useState<string | null>(null);
+  const needsCheck = Boolean(cover && !cover.shape_read && !isLocked);
+  useEffect(() => {
+    const id = activeAsset.id;
+    if (!needsCheck || tried.current.has(id)) return;
+    tried.current.add(id);
+    setChecking(id);
+    void onCheckShape(id).finally(() => setChecking((c) => (c === id ? null : c)));
+  }, [activeAsset.id, needsCheck, onCheckShape]);
 
   const run = async (edit?: CoverEditInput) => {
     const message = await onRerender(edit);
@@ -156,23 +161,26 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                 <span className="text-[11px] font-medium text-muted block mb-1.5">Layout</span>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                   {LAYOUTS.map((l) => {
-                    const why = unavailableReason(l.id, cover);
+                    // The current layout is never disabled for a reason: it is already drawn.
+                    const why = cover.layout === l.id ? null : layoutUnavailable(l.id, cover, { checking: checking === activeAsset.id });
                     return (
-                      <button
-                        key={l.id}
-                        type="button"
-                        title={why ?? l.hint}
-                        aria-pressed={cover.layout === l.id}
-                        disabled={isRendering || Boolean(why) || cover.layout === l.id}
-                        onClick={() => void run({ layout: l.id })}
-                        className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                          cover.layout === l.id
-                            ? "bg-brand/15 border-brand text-brand"
-                            : "bg-surface-2 border-line text-ink hover:border-brand/60 disabled:opacity-40 disabled:hover:border-line"
-                        }`}
-                      >
-                        {l.label}
-                      </button>
+                      // The wrapper carries the tooltip and cursor: a disabled button gets no hover in some browsers.
+                      <span key={l.id} title={why ? `Not available: ${why}` : l.hint} className={`flex ${why ? "cursor-not-allowed" : ""}`}>
+                        <button
+                          type="button"
+                          aria-pressed={cover.layout === l.id}
+                          aria-label={why ? `${l.label} (not available: ${why})` : l.label}
+                          disabled={isRendering || Boolean(why) || cover.layout === l.id}
+                          onClick={() => void run({ layout: l.id })}
+                          className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                            cover.layout === l.id
+                              ? "bg-brand/15 border-brand text-brand"
+                              : "bg-surface-2 border-line text-ink hover:border-brand/60 disabled:opacity-40 disabled:hover:border-line disabled:cursor-not-allowed disabled:line-through"
+                          }`}
+                        >
+                          {l.label}
+                        </button>
+                      </span>
                     );
                   })}
                 </div>
