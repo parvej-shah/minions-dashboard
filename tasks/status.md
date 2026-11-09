@@ -18,3 +18,4 @@
 | 14 | Move every model call to models with free quota (+ hero image on qwen-image-2.1-pro, n8n applied) | CLAUDE | DONE (pushed 08471e0) | tasks/14.md |
 | 15 | Remove the AI image cover path (n8n 04, hero + ingest routes, cover prompts) | CLAUDE | DONE (02 applied, 04 deleted live, pushed) | tasks/15.md |
 | 16 | Outcome-first posts for business-owner buyers (ICP buyer switch) | CLAUDE | DONE (SQL applied, pushed e7cced4) | tasks/16.md |
+| 17 | No product names in outcome-first posts; bsse1610 crew names removed | CLAUDE | DONE (data applied; prompt committed, not pushed) | tasks/17.md |

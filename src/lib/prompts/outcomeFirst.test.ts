@@ -25,6 +25,13 @@ describe("outcome-first drafting for readers who buy the outcome", () => {
     expect(strategist(withBuyer("OUTCOME"))).toContain("name the consequence the reader feels");
   });
 
+  it("forbids product, assistant and tool names for an outcome buyer", () => {
+    for (const out of [strategist(withBuyer("OUTCOME")), writer(withBuyer("OUTCOME"))]) {
+      expect(out).toContain("No product, assistant or tool names");
+    }
+    expect(writer(withBuyer("TECHNICAL"))).not.toContain("No product, assistant or tool names");
+  });
+
   it("keeps technical depth for a technical buyer", () => {
     expect(strategist(withBuyer("TECHNICAL"))).not.toContain("OUTCOME FIRST");
     expect(writer(withBuyer("TECHNICAL"))).not.toContain("OUTCOME FIRST");

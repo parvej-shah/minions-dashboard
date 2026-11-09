@@ -28,6 +28,12 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-09 — Outcome-first posts name no products or assistants
+
+**Decision:** Posts for outcome buyers don't name products, named assistants, tools or vendors (e.g. "via Zip"). They say what the thing does for the reader ("a text goes back within five seconds"). The company's own name is still allowed. The bsse1610 workspace's brand rules and stories were rewritten to drop the crew names (Rex, Zip, Pip, Gia, Otto).
+**Why:** A business owner has never heard of "Zip"; an unexplained name reads as jargon and pulls attention from the result.
+**Status:** active
+
 ## 2026-11-09 — Posts lead with the outcome for business-owner buyers
 
 **Decision:** Every ICP now says what the reader buys: the outcome (the default) or how it works. For outcome buyers, posts and covers lead with what changes in the reader's business (customers, time, money, risk). The technology gets at most one plain sentence per point, in the reader's words, as the reason it works. A workspace that sells to technical buyers switches to "How it works" on the Brand page and keeps the technical depth.
