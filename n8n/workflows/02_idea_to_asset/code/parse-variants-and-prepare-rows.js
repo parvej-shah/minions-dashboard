@@ -30,11 +30,8 @@ function parseModelJson(text) {
 }
 
 const rawInput = $input.all()[0]?.json || {};
-let brandCtx = {};
-try { brandCtx = $('Assemble Brand Context').first().json || {}; } catch (e) {}
 const gateData = $('Parse Claims and Gate').first().json;
 const strategyData = $('Parse Strategy JSON').first().json?.strategy || {};
-const ideaData = $('Select Target').first().json || {};
 
 let liVariant = '';
 let fbVariant = '';
@@ -85,26 +82,11 @@ const slug = cleanedTitle
   .replace(/[\s_-]+/g, "-")
   .replace(/^-+|-+$/g, "");
 
-// The cover prompt is rendered by the dashboard (src/lib/prompts/cover.ts) when
-// 04_hero_image runs. This node only gathers what it needs.
+// Render Cover sends cover_inputs.thumbnail_card to /api/internal/covers,
+// which draws the cover in code.
 const visualCard = strategyData.thumbnail_card || {};
 const cardHeadline = visualCard.headline || cleanedTitle.toUpperCase();
-const coverInputs = {
-  company_name: brandCtx.company_name || 'the brand',
-  colors: {
-    primary_ink: brandCtx.primary_ink || '#12242A',
-    brand_teal: brandCtx.brand_teal || '#0E5C63',
-    brand_coral: brandCtx.brand_coral || '#FF6B4A',
-    brand_cream: brandCtx.brand_cream || '#F5F7FA',
-    accent_blue: brandCtx.accent_blue || '#7C8CFF'
-  },
-  thumbnail_card: visualCard,
-  narrative_thread: strategyData.narrative_thread || '',
-  title: cleanedTitle,
-  raw_idea: ideaData.raw_idea || '',
-  angle: ideaData.angle || '',
-  target_trade: ideaData.target_trade || ''
-};
+const coverInputs = { thumbnail_card: visualCard };
 
 const supabasePayload = {
   slug: slug,

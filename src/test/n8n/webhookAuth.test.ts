@@ -7,7 +7,7 @@ import { runCodeNode, workflowNodes } from "./harness";
  */
 
 const CRED_ID = "pePrDfuS5BrzrPCk";
-const SLUGS = ["00_tenant_dispatcher", "00b_posting_scheduler_dispatcher", "00c_pipeline_error_alert", "01_idea_harvester", "02_idea_to_asset", "03_review_publisher", "04_hero_image"];
+const SLUGS = ["00_tenant_dispatcher", "00b_posting_scheduler_dispatcher", "00c_pipeline_error_alert", "01_idea_harvester", "02_idea_to_asset", "03_review_publisher"];
 const RUN = "cmtvsrrpm000004l8my0ysedg";
 
 type Node = ReturnType<typeof workflowNodes>[number] & { credentials?: Record<string, { id: string }> };
@@ -16,7 +16,7 @@ const all = SLUGS.flatMap((slug) => (workflowNodes(slug) as Node[]).map((n) => (
 describe("n8n webhook authentication", () => {
   it("every trigger webhook requires the Cockpit header credential", () => {
     const hooks = all.filter(({ n }) => n.type.endsWith(".webhook"));
-    expect(hooks.length).toBe(4);
+    expect(hooks.length).toBe(3);
     for (const { slug, n } of hooks) {
       expect(n.parameters.authentication, `${slug} > ${n.name}`).toBe("headerAuth");
       expect(n.credentials?.httpHeaderAuth?.id, `${slug} > ${n.name}`).toBe(CRED_ID);

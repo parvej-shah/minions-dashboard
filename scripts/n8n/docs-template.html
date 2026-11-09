@@ -196,7 +196,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
   <p class="lede">How an RSS headline becomes a reviewed blog post, a cover image and three social posts. The page covers every workflow, every hand-off between n8n, the dashboard and Supabase, and every prompt the system sends to a model. That includes the n8n content pipeline, the dashboard's onboarding calls, and the text fragments that code injects into those prompts. Everything is copied word for word from the live workflow JSON and the repo.</p>
   {{FACTS}}
   <nav class="toc" aria-label="Sections">
-    <a href="#map">Pipeline map</a><a href="#lifecycle">Idea lifecycle</a><a href="#models">Models</a><a href="#harvest">01 Harvest</a><a href="#draft">02 Draft</a><a href="#hero">04 Cover</a><a href="#publish">03 Publish</a><a href="#workflows">Workflows</a><a href="#fragments">Injected fragments</a><a href="#onboarding">Onboarding prompts</a><a href="#ops">Ops</a><a href="#guards">Guardrails</a><a href="#data">Data &amp; services</a><a href="#risks">Open risks</a>
+    <a href="#map">Pipeline map</a><a href="#lifecycle">Idea lifecycle</a><a href="#models">Models</a><a href="#harvest">01 Harvest</a><a href="#draft">02 Draft</a><a href="#publish">03 Publish</a><a href="#workflows">Workflows</a><a href="#fragments">Injected fragments</a><a href="#onboarding">Onboarding prompts</a><a href="#ops">Ops</a><a href="#guards">Guardrails</a><a href="#data">Data &amp; services</a><a href="#risks">Open risks</a>
   </nav>
 </header>
 
@@ -228,19 +228,19 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
       <div class="trig"><span class="t">webhook test-idea-to-asset</span><span class="t">dashboard “Refine &amp; Draft”</span></div>
       <div class="spine"><span class="dot" style="--c:var(--violet)"></span>
         <div class="stage"><h3>Draft asset <span class="wf">02_idea_to_asset</span></h3>
-          <p>Picks one idea and claims it with a compare-and-set PATCH to <code>PICKED</code>. Four model calls follow: the strategist sets the angle and cover brief, the writer drafts the article, the editor cleans it and extracts claims, and the distributor writes the LinkedIn, Facebook and X versions. Deterministic gates check claims, banned words and variant rules. The asset is saved with its cover <code>PENDING</code>, and cover generation is handed off without waiting for it to finish.</p>
+          <p>Picks one idea and claims it with a compare-and-set PATCH to <code>PICKED</code>. Four model calls follow: the strategist sets the angle and cover brief, the writer drafts the article, the editor cleans it and extracts claims, and the distributor writes the LinkedIn, Facebook and X versions. Deterministic gates check claims, banned words and variant rules. The asset is saved with its cover <code>PENDING</code>, and the cover is drawn in code right after.</p>
           <div class="chips"><span class="chip llm">Strategist · qwen3.8-max</span><span class="chip llm">Writer · qwen3-max</span><span class="chip llm">Editor · qwen3.7-flash</span><span class="chip llm">Variants · qwen-flash</span></div></div>
       </div>
       <div class="writes"><div class="w"><span class="arrow">→</span><b>assets</b> PENDING_REVIEW</div><div class="w"><span class="arrow">→</span><b>claims</b></div><div class="w"><span class="arrow">→</span><b>ideas</b> status REVIEW</div><div class="w"><span class="arrow">→</span>Telegram “draft ready”</div></div>
     </div>
     <div class="row">
-      <div class="trig"><span class="t">webhook hero-image</span><span class="t">fired by 02</span></div>
+      <div class="trig"><span class="t">Asset Write OK?</span><span class="t">in 02</span></div>
       <div class="spine"><span class="dot" style="--c:var(--coral)"></span>
-        <div class="stage"><h3>Generate cover <span class="wf">04_hero_image</span></h3>
-          <p>Runs asynchronously; it used to take about 43s of a 98s draft. Sends the type-led cover prompt to Qwen Image 3.0 Pro at 1280×720. If the model refuses or returns nothing, it retries once with a neutral, text-free still-life prompt. The image is stored in R2 as WebP and attached to the asset.</p>
-          <div class="chips"><span class="chip img">qwen-image-2.1-pro</span><span class="chip">safe retry</span></div></div>
+        <div class="stage"><h3>Draw cover <span class="wf">/api/internal/covers</span></h3>
+          <p>02's Render Cover asks the dashboard to draw the cover in code (src/lib/covers): no image model, about a second, free. The cover goes to R2 and the asset's cover becomes READY or FAILED.</p>
+          <div class="chips"><span class="chip">code-drawn</span></div></div>
       </div>
-      <div class="writes"><div class="w"><span class="arrow">→</span>/api/media/ingest → <b>R2</b></div><div class="w"><span class="arrow">→</span>/api/internal/assets/hero</div><div class="w">hero_status READY · FAILED · BLOCKED_BY_SAFETY</div></div>
+      <div class="writes"><div class="w"><span class="arrow">→</span><b>R2</b></div><div class="w">hero_status READY · FAILED</div></div>
     </div>
     <div class="row">
       <div class="trig"><span class="t">editor opens /editorial</span></div>
@@ -335,7 +335,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
   <div class="sec-head"><h2>02 · Idea to asset</h2><p><code>0ZeUkMgGXpBKVB2A</code> · {{NODES:02_idea_to_asset}}. The strategist writes the brief, the writer drafts, the editor fact-checks, and the distributor adapts the piece per platform. Brand voice comes from three sources: <code>brand_directives</code> (priority 1–2 and audience-scoped), <code>brand_profile</code>, and up to 5 <code>tone_examples</code>.</p></div>
   <div class="wfblock">
     <ol class="steps">
-      <li class="io"><b>Generate run_id</b>: carries <code>idea_id</code>, <code>client_id</code>, the callback details, <code>skip_hero</code> and <code>cover_mode</code> (TEMPLATE by default; AI_IMAGE sends the cover to 04) from the dashboard. It starts only from the webhook or a manual run.</li>
+      <li class="io"><b>Generate run_id</b>: carries <code>idea_id</code>, <code>client_id</code>, and the callback details from the dashboard. It starts only from the webhook or a manual run.</li>
       <li class="gate"><b>Select Target → Claim Idea Row</b>: chooses the idea, then PATCHes it to <code>PICKED</code> only if <code>status</code>, <code>claimed_at</code> and a null <code>draft_asset_id</code> still match. If another run already claimed it, this run does nothing. If there is nothing to draft, it fires the harvester (<code>SCHEDULER_CASCADE_EMPTY_QUEUE</code>).</li>
       <li class="io"><b>Read Brand · Brand Profile · Tone Examples · Posting Schedule</b>: loaded in parallel.</li>
       <li class="io"><b>Fetch Author Context</b>: <code>/api/internal/drafts/context</code> returns what the idea rests on: the ICP problem, the author's advantage, the experience items (GENERALIZE ones as a lesson-only rewrite, checked in code and cached), the ICP, the author's standing, the hook and the content modes the evidence allows. Ideas from before phase 3 get <code>found: false</code> and draft as before.</li>
@@ -344,37 +344,16 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
       <li class="gate"><b>Need Evidence?</b>: if the idea is <code>evidence_required = Y</code> or the strategist listed <code>evidence_needs</code>, the signals are formatted as <code>SUPPLIED_SOURCE_n</code> leads and each need becomes an <code>UNVERIFIED_NEED_n</code> marker that must not be stated as fact.</li>
       <li class="ai"><b>Writer</b>: drafts one argument around the author's advantage, with no fixed section template; STORY and CASE_NOTE only when the evidence carries them; POST (250–450 words) or ARTICLE length. <b>Editor</b>: keeps one central argument, cuts for mobile reading, extracts claims.</li>
       <li class="gate"><b>Check Draft → Parse Claims and Gate</b>: <code>/api/internal/drafts/check</code> (<code>src/lib/drafts/check.ts</code>) splits paragraphs over 3 sentences, sources each claim to approved proof, the author's experience or a supplied signal, and sets <code>claims_ok</code>. BLOCKED: a figure found in no input (whatever the editor called it), a Generalize item's names or figures, an unapproved customer result. N: an unbacked claim, or first-person experience with none behind the idea. Readability issues go to <code>review_notes</code>, shown on the Editorial page.</li>
-      <li class="ai"><b>Variants</b>: writes the LinkedIn, Facebook and X posts. The same node assembles the <b>cover image prompt</b>.</li>
+      <li class="ai"><b>Variants</b>: writes the LinkedIn, Facebook and X posts. The same node gathers the strategist's cover card.</li>
       <li class="gate"><b>Validate Social Variants</b>: checks for empty variants, X over 280 characters or more than 1 hashtag, LinkedIn over 2 hashtags, the Minions brand appearing in another tenant's copy, and invented client stories.</li>
       <li class="gate"><b>Prepare Asset Row</b>: runs a word-boundary scan for FORBIDDEN directives, and any hit makes the draft <code>BLOCKED</code>. It assigns a byline (a random founder for tenant zero, otherwise “{Brand} Team”) and sets <code>hero_status: PENDING</code>. Auto-publish requires claims Y, no review, and a permanent hero, so in practice drafts are never auto-published.</li>
-      <li class="io"><b>Sync Idea (REVIEW) → Sync Asset → Asset Write OK?</b>: any non-2xx response throws, so the error workflow marks the run FAILED. The run then writes claims, sends a Telegram notice, and reports COMPLETED with the <code>assetId</code>, while in parallel <b>AI Image Cover? → Render Cover</b> has the dashboard draw the cover in code (<code>/api/internal/covers</code>, <code>src/lib/covers</code>): the copy and layout are chosen and checked in code, no figure the draft does not state, a quote only word for word from the body, layouts rotating per tenant. It costs nothing and leaves the cover READY or FAILED. Only <code>cover_mode: AI_IMAGE</code> without <code>skip_hero</code> takes the kept <b>Dispatch Hero Generation</b> path to 04's Qwen image.</li>
+      <li class="io"><b>Sync Idea (REVIEW) → Sync Asset → Asset Write OK?</b>: any non-2xx response throws, so the error workflow marks the run FAILED. The run then writes claims, sends a Telegram notice, and reports COMPLETED with the <code>assetId</code>, while in parallel <b>Render Cover</b> has the dashboard draw the cover in code (<code>/api/internal/covers</code>, <code>src/lib/covers</code>): the copy and layout are chosen and checked in code, no figure the draft does not state, a quote only word for word from the body, layouts rotating per tenant. It costs nothing and leaves the cover READY or FAILED.</li>
     </ol>
 
     {{PROMPT:strategist}}
     {{PROMPT:writer}}
     {{PROMPT:editor}}
     {{PROMPT:variants}}
-  </div>
-</section>
-
-<!-- ============ HERO ============ -->
-<section id="hero">
-  <div class="sec-head"><h2>04 · Hero image</h2><p><code>10vre0a16gvu32Hu</code> · {{NODES:04_hero_image}}. 02 (Parse Variants and Prepare Rows) sends <code>cover_inputs</code>: the strategist's <code>thumbnail_card</code>, the title and the tenant's brand colors. 04 renders the prompt through <code>/api/internal/prompts/cover</code>.</p></div>
-  <div class="wfblock">
-    <div class="twocol">
-      <div class="note" style="--c:var(--coral)"><b>Headline</b> comes from <code>thumbnail_card.headline</code> (3–5 bold words); one word is rendered in brand coral. <b>Kicker</b> is <code>thumbnail_card.subtitle</code>, cut at a word boundary to 90 characters or fewer. <b>Wordmark</b> is the company name, set in top-right ink.</div>
-      <div class="note" style="--c:var(--coral)"><b>Corner icon</b>: the strategist's <code>physical_scene</code> is used unless it mentions trade hardware on a non-trade account, is shorter than 25 characters, or mentions a “clipboard”. In those cases a keyword router picks a line glyph instead: chat bubble, soundwave, bar chart, node flow or dashboard card for abstract topics, and wrench+droplet, gauge, headset, bolt, roof or magnifier for trade topics.</div>
-    </div>
-    <ol class="steps">
-      <li class="io"><b>Read Hero Request → Render Cover Prompt</b>: reads <code>asset_id</code> and <code>cover_inputs</code>, then renders the cover prompt. A pre-rendered <code>image_prompt</code> from an older 02 run skips the render.</li>
-      <li class="ai"><b>Qwen Image 3.0 Pro</b>: <code>size 1280*720</code>, <code>prompt_extend: true</code>, 120s timeout.</li>
-      <li class="gate"><b>Needs Safe Image Retry? → Render Safe Cover Prompt</b>: if no image URL comes back, it retries with the fixed safe prompt and <code>prompt_extend: false</code>.</li>
-      <li class="io"><b>Upload Hero to R2</b>: calls <code>/api/media/ingest</code>, which downloads the image, converts it with sharp to WebP, and stores it under <code>assets/</code>.</li>
-      <li class="gate"><b>Resolve Hero Outcome</b>: sets READY only when the R2 upload succeeded. An Alibaba URL alone never counts, because it expires in about 24h. A safety refusal (DataInspectionFailed) sets BLOCKED_BY_SAFETY; anything else sets FAILED.</li>
-      <li class="io"><b>Attach Hero to Asset → Attach OK?</b>: throws on a non-2xx response so a cover that silently never arrives becomes a visible error.</li>
-    </ol>
-    {{PROMPT:cover}}
-    {{PROMPT:cover_safe}}
   </div>
 </section>
 
@@ -431,8 +410,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
       <tr><td>Banned words</td><td>02 Prepare Asset Row</td><td>FORBIDDEN directive found in body or any variant</td><td><code>BLOCKED</code></td></tr>
       <tr><td>Variant validation</td><td>02 Validate Social Variants</td><td>Empty, X &gt; 280 chars or &gt; 1 hashtag, LinkedIn &gt; 2 hashtags, brand leak, fake client story</td><td>Errors listed in Telegram</td></tr>
       <tr><td>Em-dash scrub</td><td>every parse node</td><td><code>—</code> and <code>--</code> → <code>, </code></td><td>Rewritten in place</td></tr>
-      <tr><td>Write verification</td><td>02 Asset Write OK? · 04 Attach OK?</td><td>Non-2xx from PostgREST / hero attach</td><td>Throws → run FAILED</td></tr>
-      <tr><td>Permanent hero</td><td>04 Resolve Hero Outcome</td><td>Only an R2 URL is READY</td><td>Expiring URL never stored</td></tr>
+      <tr><td>Write verification</td><td>02 Asset Write OK?</td><td>Non-2xx from PostgREST</td><td>Throws → run FAILED</td></tr>
       <tr><td>Stale claim</td><td>00c sweeper</td><td>PICKED more than 30 min with no asset</td><td>Reset to HARVESTED</td></tr>
     </tbody>
   </table></div>
@@ -451,7 +429,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
         <tr><td><code>brand_profile</code></td><td>02</td><td>dashboard</td></tr>
         <tr><td><code>tone_examples</code></td><td>02</td><td>dashboard</td></tr>
         <tr><td><code>posting_schedules</code></td><td>02, 00b</td><td>00b</td></tr>
-        <tr><td><code>assets</code></td><td>02, 03</td><td>02, 03, 04 (via API)</td></tr>
+        <tr><td><code>assets</code></td><td>02, 03</td><td>02, 03</td></tr>
         <tr><td><code>claims</code></td><td>—</td><td>02</td></tr>
         <tr><td><code>blogs</code></td><td>getminions.ai</td><td>03 (tenant zero)</td></tr>
         <tr><td><code>pipeline_runs</code></td><td>dashboard HUD</td><td>callbacks, 00b, 00c</td></tr>
@@ -464,8 +442,6 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
         <tr><td><code>/api/brand/context</code></td><td>01</td></tr>
         <tr><td><code>/api/ideas/craft</code></td><td>01</td></tr>
         <tr><td><code>/api/internal/source-status</code></td><td>01</td></tr>
-        <tr><td><code>/api/media/ingest</code></td><td>04</td></tr>
-        <tr><td><code>/api/internal/assets/hero</code></td><td>04</td></tr>
         <tr><td><code>/api/channels/credential</code></td><td>03</td></tr>
         <tr><td><code>/api/pipeline/runs/{id}</code></td><td>01, 02, 00c (callbacks)</td></tr>
         <tr><td><code>/api/internal/schedule/eligible-tenants</code></td><td>00b</td></tr>
@@ -478,7 +454,6 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
       <tr><td><code>/api/pipeline/harvest</code>, onboarding complete</td><td><code>/webhook/test-harvester</code></td><td>MINIONS_COCKPIT_EDITORIAL · TENANT_DISPATCHER_SCHEDULED · SCHEDULER_CASCADE_EMPTY_QUEUE</td></tr>
       <tr><td><code>/api/pipeline/draft</code></td><td><code>/webhook/test-idea-to-asset</code></td><td>MINIONS_COCKPIT_EDITORIAL · POSTING_SCHEDULER</td></tr>
       <tr><td><code>/api/pipeline/publish</code></td><td><code>/webhook/publish-approved-asset</code></td><td>MINIONS_COCKPIT_EDITORIAL</td></tr>
-      <tr><td>02 Dispatch Hero Generation</td><td><code>/webhook/hero-image</code></td><td>—</td></tr>
     </tbody>
   </table></div>
 </section>

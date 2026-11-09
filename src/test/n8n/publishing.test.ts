@@ -80,12 +80,3 @@ describe("03_review_publisher sends a switched-on carousel as a LinkedIn documen
   });
 });
 
-describe("04_hero_image attaches with its own credential", () => {
-  it("does not depend on a secret relayed in the request body", () => {
-    const attach = workflowNodes("04_hero_image").find((n) => n.name === "Attach Hero to Asset")!;
-    const headers = JSON.stringify(attach.parameters.headerParameters ?? {});
-    expect(headers).not.toContain("callback_secret");
-    expect(attach.parameters.authentication).toBe("genericCredentialType");
-    expect(String(attach.parameters.url)).toBe("https://minions.getminions.ai/api/internal/assets/hero");
-  });
-});

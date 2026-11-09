@@ -22,9 +22,8 @@ try { idea = $('Select Target').first().json || {}; } catch (e) {}
 const clientId = $('Generate run_id').first().json.client_id;
 
 // The cover is not made here. The asset is saved with the cover PENDING, and
-// once it is written either the dashboard draws it in code (TEMPLATE, about a
-// second, /api/internal/covers) or 04_hero_image makes it with Qwen
-// (AI_IMAGE). Both always leave it READY or FAILED.
+// once it is written the dashboard draws it in code (about a second,
+// /api/internal/covers), which always leaves it READY or FAILED.
 //
 // PENDING is deliberately NOT permanent: autoPublish multiplies against
 // heroIsPermanent below, so a draft can never publish while its cover is still
@@ -79,15 +78,8 @@ try {
     requireReview = sched[0].require_review;
   }
 } catch (e) {}
-// A hero that is not permanent is an Alibaba signed URL that dies in ~24h.
-// Publishing it puts a cover on the blog that 404s the next day, and the same
-// expiring URL is embedded in the markdown body. Never auto-publish that --
-// hold it for review so the failure is visible and re-runnable.
-//
-// The upload silently returned nothing for every asset drafted so far: the
-// session gate answered 307 to /login for /api/media/ingest and n8n does not
-// follow redirects, so the node read an empty body and fell through to the
-// signed URL with no error anywhere.
+// The cover is still PENDING here (drawn after the asset is written), so it is
+// never permanent yet and a draft never auto-publishes without its cover.
 const autoPublish = isClaimsOk && !requireReview && heroIsPermanent;
 const docUrl = '';
 const blogUrl = clientId === 'tenant-zero-getminions-ai' ? `https://getminions.ai/blog/${prep.slug}` : '';

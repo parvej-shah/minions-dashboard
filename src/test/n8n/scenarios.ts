@@ -133,17 +133,6 @@ const editorOut = {
   claims: [{ claim_text: "Acme holds an Ohio master plumber license", claim_type: "FACT" }],
 };
 
-function coverNodes(overrides: { strategy?: Json; target?: Json; brand?: Json; title?: string } = {}): Record<string, Json[]> {
-  return {
-    "Assemble Brand Context": [{ ...assembled, accent_blue: "#7C8CFF", brand_cream: "#F5F7FA", ...overrides.brand }],
-    "Parse Claims and Gate": [{ asset_id: "asset-1", idea_id: "IDEA-0042", audience: "ICP", title: overrides.title ?? "Your Water Heater Is Filling With Rock", hook: editorOut.hook, core_argument: strategy.core_argument, edited_body: editorOut.edited_body, claims_ok: "Y", claims: [] }],
-    "Parse Strategy JSON": [{ strategy: { ...strategy, ...overrides.strategy } }],
-    "Select Target": [target("How It Works", overrides.target)],
-  };
-}
-
-const variantsResponse = llm({ li_variant: "LinkedIn post", fb_variant: "Facebook post", x_variant: "X post" });
-
 export const SCENARIOS: Scenario[] = [
   {
     name: "refine",
@@ -264,40 +253,6 @@ export const SCENARIOS: Scenario[] = [
     opts: {
       input: [checkDraft({ hook: editorOut.hook, body: editorOut.edited_body, claims: editorOut.claims, approvedProofs: [], allowCustomerResult: false, trustBasis: [], memory: [], knownText: [] }) as unknown as Json],
       nodes: { "Parse Editor Output": [editorOut], "Select Target": [target("How It Works")], "Assemble Brand Context": [assembled], "Read Brand": directiveRows },
-    },
-  },
-  {
-    name: "cover-strategist-scene",
-    slug: "02_idea_to_asset",
-    node: "Parse Variants and Prepare Rows",
-    stage: "cover",
-    opts: { input: [variantsResponse], nodes: coverNodes({ target: { target_trade: "Plumbing" } }) },
-  },
-  {
-    name: "cover-abstract-router",
-    slug: "02_idea_to_asset",
-    node: "Parse Variants and Prepare Rows",
-    stage: "cover",
-    opts: {
-      input: [variantsResponse],
-      nodes: coverNodes({
-        strategy: { thumbnail_card: { headline: "Chatbots Lose The Call", subtitle: "Short.", visual_register: "ABSTRACT_DATA", physical_scene: "A multimeter and wire strippers on a bench." }, narrative_thread: "x" },
-        target: { raw_idea: "Conversational AI agents drop dispatch calls", angle: "Agents need structure" },
-      }),
-    },
-  },
-  {
-    name: "cover-trade-router",
-    slug: "02_idea_to_asset",
-    node: "Parse Variants and Prepare Rows",
-    stage: "cover",
-    opts: {
-      input: [variantsResponse],
-      nodes: coverNodes({
-        strategy: { thumbnail_card: { headline: "Roofs Fail At Flashing", subtitle: "", visual_register: "PHYSICAL_TRADE", physical_scene: "" }, narrative_thread: "" },
-        target: { raw_idea: "Storm damage starts at the flashing", angle: "Inspect after hail", target_trade: "Roofing" },
-        title: "Storm Damage Starts At The Flashing",
-      }),
     },
   },
 ];

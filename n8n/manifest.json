@@ -31,10 +31,6 @@
       "id": "4GNbfvmveKtbJrVd",
       "slug": "03_review_publisher",
       "schedule": "Every 5 min: safety-net poll for approved assets the webhook missed."
-    },
-    {
-      "id": "10vre0a16gvu32Hu",
-      "slug": "04_hero_image"
     }
   ],
   "ignored": [
@@ -241,12 +237,6 @@
     },
     {
       "rule": "unchecked-write",
-      "workflow": "02_idea_to_asset",
-      "node": "Dispatch Hero Generation",
-      "reason": "OPEN RISK: if 04 cannot be reached the asset's cover stays PENDING with no alert."
-    },
-    {
-      "rule": "unchecked-write",
       "workflow": "01_idea_harvester",
       "node": "Sync Ideas to DB",
       "reason": "OPEN RISK: a rejected upsert still reports the harvest COMPLETED with ideas that were never stored."
@@ -280,12 +270,6 @@
       "workflow": "03_review_publisher",
       "node": "Publish_to_LinkedIn",
       "reason": "OPEN RISK: a failed LinkedIn post is still marked published, with linkedin_post_id null."
-    },
-    {
-      "rule": "prompt-outside-repo",
-      "workflow": "04_hero_image",
-      "node": "Qwen Image 3.0 Pro Generation",
-      "reason": "Back-compat path for a draft already in flight during the prompt migration, which still sends a pre-rendered image_prompt. Remove the Needs Cover Render? branch and this entry after 2026-10-01."
     }
   ]
 }

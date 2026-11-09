@@ -28,6 +28,13 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-09 — No AI-generated cover images
+
+**Decision:** Covers are only drawn in code from the brand's layouts. The AI image option (Qwen Image through n8n 04_hero_image) is removed, not just switched off.
+**Why:** No workspace used it (nothing asked for it since covers moved to code), every cover is code-drawn for free in about a second, and its free image quota is gone.
+**Alternatives considered:** keep it dormant behind `cover_mode: AI_IMAGE` (rejected: dead code, a public image-download route and a paid model to keep alive).
+**Status:** active
+
 ## 2026-11-09 — Reviewers can choose the carousel design
 
 **Decision:** On the carousel card a reviewer may pick one of the seven designs before the slides are written (the default is "Let the writer choose"), and switch a finished carousel to another design at any time. A switch redraws the same words with no AI call; if the words don't fit the new design it is refused with the reason and the carousel stays as it was. "Make again" keeps the current design.

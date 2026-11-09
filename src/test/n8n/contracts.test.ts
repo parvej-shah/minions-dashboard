@@ -3,7 +3,7 @@ import { readCode, runCodeNode, workflowNodes } from "./harness";
 import { SCENARIOS } from "./scenarios";
 import { brandContext, harvestContext } from "./fixtures";
 import { verbatimGuard } from "@/lib/ai/craftExtract";
-import { RUN_CALLBACK_STATUSES, TERMINAL_HERO_STATUSES } from "@/constants/pipelineContracts";
+import { RUN_CALLBACK_STATUSES } from "@/constants/pipelineContracts";
 import { renderPrompt, type PromptStage } from "@/lib/prompts";
 import type { ChatPayload } from "@/lib/prompts/types";
 
@@ -113,21 +113,6 @@ describe("n8n -> dashboard callbacks", () => {
     }
     expect(checked).toBeGreaterThanOrEqual(5);
   });
-
-  const hero = { "Read Hero Request": [{ asset_id: "a1", app_url: "https://app.example" }] };
-
-  it.each([
-    ["uploaded to R2", { "Qwen Image 3.0 Pro Generation": [{ output: { choices: [{ message: { content: [{ image: "https://oss.example/x.png" }] } }] } }], "Upload Hero to R2": [{ url: "https://r2.example/x.webp" }] }, "READY"],
-    ["safety refusal", { "Qwen Image 3.0 Pro Generation": [{ code: "DataInspectionFailed" }], "Qwen Image Safe Retry": [{ code: "DataInspectionFailed" }], "Upload Hero to R2": [{}] }, "BLOCKED_BY_SAFETY"],
-    ["upload failed", { "Qwen Image 3.0 Pro Generation": [{ output: { choices: [{ message: { content: [{ image: "https://oss.example/x.png" }] } }] } }], "Upload Hero to R2": [{ error: "timeout" }] }, "FAILED"],
-  ])("Resolve Hero Outcome (%s) sends what /api/internal/assets/hero accepts", async (_label, nodes, expected) => {
-    const [out] = await runCodeNode("04_hero_image", "Resolve Hero Outcome", { nodes: { ...hero, ...nodes } });
-    expect(TERMINAL_HERO_STATUSES).toContain(out.hero_status);
-    expect(out.hero_status).toBe(expected);
-    // The route rejects READY without an https URL; an expiring provider URL must never be sent as READY.
-    if (out.hero_status === "READY") expect(String(out.hero_image_url)).toMatch(/^https:\/\/r2\.example/);
-    else expect(out.hero_image_url).toBeNull();
-  });
 });
 
 describe("02_idea_to_asset: fields read from Assemble Brand Context", () => {
@@ -151,22 +136,6 @@ describe("02_idea_to_asset: fields read from Assemble Brand Context", () => {
     const missing = [...reads].filter((k) => !(k in out));
     expect(reads.size).toBeGreaterThan(5);
     expect(missing, `read downstream but never output: ${missing.join(", ")}`).toEqual([]);
-  });
-
-  it("the tenant's cover colors reach cover_inputs", async () => {
-    const strategist = SCENARIOS.find((s) => s.stage === "strategist")!;
-    const profile = { ...(strategist.opts.nodes!["Fetch Brand Context"][0]), brand_cream: "#ABCDEF", accent_blue: "#123456" };
-    const [assembled] = await runCodeNode("02_idea_to_asset", "Assemble Brand Context", {
-      nodes: { ...strategist.opts.nodes, "Fetch Brand Context": [profile] },
-    });
-    const cover = SCENARIOS.find((s) => s.name === "cover-strategist-scene")!;
-    const [out] = await runCodeNode("02_idea_to_asset", "Parse Variants and Prepare Rows", {
-      ...cover.opts,
-      nodes: { ...cover.opts.nodes, "Assemble Brand Context": [assembled] },
-    });
-    const colors = (out.cover_inputs as { colors: Record<string, string> }).colors;
-    expect(colors.brand_cream).toBe("#ABCDEF");
-    expect(colors.accent_blue).toBe("#123456");
   });
 });
 

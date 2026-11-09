@@ -8,8 +8,8 @@ import { authConfig } from "./auth.config";
  * gate answers 307 to /login, the node reads an empty body, and the workflow
  * carries on with whatever default it had.
  *
- * That exact failure published every generated cover image on a 24-hour
- * Alibaba URL -- /api/media/ingest returned the permanent R2 URL correctly
+ * That exact failure once published every AI cover image on a 24-hour
+ * Alibaba URL: the upload route returned the permanent R2 URL correctly
  * when called directly, but n8n never saw the response.
  */
 function authorized(pathname: string, signedIn: boolean): boolean {
@@ -21,7 +21,6 @@ function authorized(pathname: string, signedIn: boolean): boolean {
 describe("session gate public paths", () => {
   const n8nRoutes = [
     "/api/brand/context",
-    "/api/media/ingest",
     "/api/ideas/craft",
     "/api/webhooks/stripe",
     "/api/internal/schedule/eligible-tenants",
@@ -50,7 +49,7 @@ describe("session gate public paths", () => {
    */
   it("keeps the gate list narrow", () => {
     const paths = ["/docs", "/api/llms", "/api/version", "/api/auth", "/api/webhooks",
-      "/api/channels", "/api/brand/context", "/api/media/ingest", "/api/ideas/craft",
+      "/api/channels", "/api/brand/context", "/api/ideas/craft",
       "/api/internal", "/api/pipeline/runs", "/login"];
     for (const p of paths) expect(authorized(p, false)).toBe(true);
     // A route NOT on the list stays gated even if it shares a prefix segment.

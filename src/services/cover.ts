@@ -22,7 +22,7 @@ import { isBanner } from "@/lib/covers/bannerTypes";
  * docs/product/authority-flywheel-plan.md). Called by 02_idea_to_asset once
  * the draft is saved, and by the dashboard when a reviewer edits the cover.
  * No image model is involved, so a cover costs nothing and takes about a
- * second; 04_hero_image's Qwen path is kept, bypassed, for optional artwork.
+ * second.
  */
 
 const COVER_PROVIDER = "template";

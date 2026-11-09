@@ -16,9 +16,9 @@ export const authConfig: NextAuthConfig = {
       //
       // Omitting a route here fails in a way that looks like success: the gate
       // answers 307 to /login, n8n does not follow redirects, so the node reads an
-      // empty body and continues. That is exactly how every generated cover image
-      // ended up published on a 24-hour Alibaba URL -- /api/media/ingest returned
-      // the R2 URL correctly when called directly, but n8n never saw it.
+      // empty body and continues. That is how every AI cover image once ended
+      // up published on a 24-hour Alibaba URL: the upload route returned the R2
+      // URL correctly when called directly, but n8n never saw it.
       const publicPaths = [
         "/docs",
         "/api/llms",
@@ -27,7 +27,6 @@ export const authConfig: NextAuthConfig = {
         "/api/webhooks",
         "/api/channels",
         "/api/brand/context",
-        "/api/media/ingest",
         "/api/ideas/craft",
         "/api/internal",
         // n8n PATCHes the terminal state of a run here when a workflow finishes

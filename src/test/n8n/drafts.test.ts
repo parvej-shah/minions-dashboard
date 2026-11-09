@@ -80,22 +80,17 @@ describe("02 fetches the author context and runs the dashboard's draft check", (
   });
 });
 
-describe("covers are drawn in code; the AI image path is kept behind cover_mode", () => {
-  it("Generate run_id carries skip_hero and cover_mode (TEMPLATE unless AI_IMAGE is asked for)", async () => {
-    const [on] = await runCodeNode(D, "Generate run_id", { input: [{ body: { client_id: "c1", skip_hero: true, cover_mode: "ai_image" } }] });
-    const [off] = await runCodeNode(D, "Generate run_id", { input: [{ body: { client_id: "c1", cover_mode: "anything" } }] });
-    expect(on).toMatchObject({ skip_hero: true, cover_mode: "AI_IMAGE" });
-    expect(off).toMatchObject({ skip_hero: false, cover_mode: "TEMPLATE" });
+describe("covers are drawn in code; there is no AI image path", () => {
+  it("the saved asset goes straight to Render Cover", () => {
+    expect(conn("Asset Write OK?")[0]).toContain("Render Cover");
+    for (const name of ["AI Image Cover?", "Dispatch Hero Generation"]) expect(workflowNodes(D).some((n) => n.name === name), name).toBe(false);
+    expect(JSON.stringify(workflowNodes(D))).not.toMatch(/hero-image|AI_IMAGE|cover_mode|skip_hero/);
   });
 
-  it("the saved asset goes to Render Cover unless AI_IMAGE is asked for without skip_hero", () => {
-    expect(conn("Asset Write OK?")[0]).toContain("AI Image Cover?");
-    expect(conn("Asset Write OK?")[0]).not.toContain("Dispatch Hero Generation");
-    expect(conn("AI Image Cover?")[0]).toEqual(["Dispatch Hero Generation"]);
-    expect(conn("AI Image Cover?")[1]).toEqual(["Render Cover"]);
-    const condition = JSON.stringify(node("AI Image Cover?").parameters);
-    expect(condition).toContain("AI_IMAGE");
-    expect(condition).toContain("skip_hero");
+  it("Generate run_id no longer carries cover_mode or skip_hero", async () => {
+    const [out] = await runCodeNode(D, "Generate run_id", { input: [{ body: { client_id: "c1", skip_hero: true, cover_mode: "ai_image" } }] });
+    expect(out).not.toHaveProperty("cover_mode");
+    expect(out).not.toHaveProperty("skip_hero");
   });
 
   it("Render Cover posts the asset and the strategist's cover card to the dashboard", () => {

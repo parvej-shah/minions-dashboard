@@ -2,9 +2,8 @@ import { describe, it, expect } from "vitest";
 import type { HeroStatus } from "@/types";
 
 /**
- * Cover generation moved off the drafting critical path: Qwen Image 3.0 Pro was
- * ~43s of a ~98s run, so the draft is now saved with `hero_status: PENDING` and
- * 04_hero_image attaches the image a minute or so later.
+ * The draft is saved with `hero_status: PENDING` and the cover is drawn in
+ * code right after (/api/internal/covers), which leaves it READY or FAILED.
  *
  * That split is only safe because a PENDING cover is never treated as a usable
  * one. These pin the two rules that keep it safe.
@@ -19,7 +18,7 @@ function autoPublish(opts: {
   return opts.claimsOk && !opts.requireReview && opts.heroIsPermanent;
 }
 
-/** Mirrors the terminal-state check in /api/internal/assets/hero. */
+/** The states a cover settles in (BLOCKED_BY_SAFETY only on old AI-image rows). */
 const TERMINAL: HeroStatus[] = ["READY", "BLOCKED_BY_SAFETY", "FAILED"];
 function isTerminal(status: string): boolean {
   return (TERMINAL as string[]).includes(status);

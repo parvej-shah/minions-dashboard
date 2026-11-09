@@ -13,7 +13,6 @@ import path from "node:path";
 import { renderPrompt, type PromptStage } from "@/lib/prompts";
 import type { ChatPayload } from "@/lib/prompts/types";
 import { hookFor } from "@/lib/drafts/strategy";
-import { renderCover } from "@/lib/prompts/cover";
 import { CONTENT_ANGLES, ANGLES_PER_RUN } from "@/constants/contentAngles";
 import { WRITER_EXPERTISE_OPTIONS, DEFAULT_WRITER_EXPERTISE } from "@/constants/writerExpertise";
 import { buildBrandDirectivesPrompt, buildBrandSuggestionsPrompt, ONBOARDING_MODEL } from "@/lib/ai/brandCopilot";
@@ -144,30 +143,6 @@ const STAGE_DOCS: Record<PromptStage, StageDoc> = {
       title: ph("title"),
     },
   },
-  cover: {
-    title: "Cover image",
-    node: "04_hero_image › Read Hero Request → Render Cover Prompt → Qwen Image 3.0 Pro Generation",
-    description: "A type-led editorial cover on a cream ground: headline with one word in brand coral, a short kicker, a small wordmark and one corner line icon (the strategist's motif, or the keyword router's). Sent with prompt_extend on, 1280×720.",
-    input: "thumbnail_card, title, idea text and trade, brand colors and name.",
-    output: "Signed image URL → /api/media/ingest (R2 WebP) → asset hero.",
-    sample: {
-      company_name: ph("company_name"),
-      colors: { primary_ink: ph("primary_ink"), brand_teal: ph("brand_teal"), brand_coral: ph("brand_coral"), brand_cream: ph("brand_cream"), accent_blue: ph("accent_blue") },
-      thumbnail_card: { headline: ph("headline"), subtitle: ph("kicker"), visual_register: "PHYSICAL_TRADE", physical_scene: ph("corner_icon (strategist motif or router text)") },
-      title: ph("title"),
-      raw_idea: "",
-      angle: "",
-      target_trade: "",
-    },
-  },
-  cover_safe: {
-    title: "Safe retry cover",
-    node: "04_hero_image › Needs Safe Image Retry? → Render Safe Cover Prompt → Qwen Image Safe Retry",
-    description: "Used only when the main cover returns no image, usually a content-safety refusal. Fixed, text-free and tenant-neutral; sent with prompt_extend off.",
-    input: "None.",
-    output: "Same path as the main cover; hero_provider QWEN_IMAGE_SAFE_RETRY.",
-    sample: {},
-  },
 };
 
 interface Card {
@@ -185,13 +160,6 @@ interface Card {
 function stageCard(stage: PromptStage): Card {
   const d = STAGE_DOCS[stage];
   const out = renderPrompt(stage, d.sample);
-  if (stage === "cover" || stage === "cover_safe") {
-    return {
-      id: stage, kind: "image", title: d.title, node: d.node, description: d.description, input: d.input, output: d.output,
-      params: [["model", "qwen-image-2.1-pro"], ["size", "1280×720"]],
-      blocks: [["Image prompt", String(out.image_prompt)]],
-    };
-  }
   const p = out.payload as ChatPayload;
   return {
     id: stage, kind: "LLM", title: d.title, node: d.node, description: d.description, input: d.input, output: d.output,
@@ -352,29 +320,6 @@ function fragments(): string {
     .join("");
   out.push(`<article class="llm" id="f-hooks"><div class="llm-top"><div><h4><span class="tag">fragment</span>Hook archetypes</h4><p><code>hookFor()</code> in <code>src/lib/drafts/strategy.ts</code>: from what the idea rests on (source type) and its lane, first match wins.</p></div></div><div class="tbl" style="border:0;border-top:1px solid var(--line);border-radius:0"><table><thead><tr><th>Archetype</th><th>When</th><th>Instruction</th></tr></thead><tbody>${hooks}</tbody></table></div></article>`);
 
-  // Probe the real router: an empty physical_scene forces it, and the title
-  // carries the keyword being tested.
-  const probe = (register: string, title: string, trade = "") => {
-    const prompt = renderCover({ company_name: "x", colors: {}, thumbnail_card: { headline: "x", visual_register: register }, title, target_trade: trade }).image_prompt;
-    const start = prompt.indexOf("combined):\n") + "combined):\n".length;
-    return prompt.slice(start, prompt.indexOf("\nRender it as", start));
-  };
-  const router: [string, string, string][] = [
-    ["abstract", "conversation · chatbot · agent · ai · prompt · llm · intent", probe("ABSTRACT_DATA", "chatbot")],
-    ["abstract", "voice · call · latency · telecom · audio · phone · dispatch", probe("ABSTRACT_DATA", "latency")],
-    ["abstract", "price · pricing · revenue · cost · econom · margin · roi", probe("ABSTRACT_DATA", "pricing")],
-    ["abstract", "architect · system · infrastructure · pipeline · workflow · automation", probe("ABSTRACT_DATA", "pipeline")],
-    ["abstract", "(fallback)", probe("ABSTRACT_DATA", "unrelated")],
-    ["trade", "slab · leak · pipe · plumb · water", probe("PHYSICAL_TRADE", "leak", "plumbing")],
-    ["trade", "attic · heat · capacitor · compressor · hvac · refrigerant", probe("PHYSICAL_TRADE", "compressor", "hvac")],
-    ["trade", "voice · call · telecom · latency · audio · phone", probe("PHYSICAL_TRADE", "phone", "roofing")],
-    ["trade", "electric · wire · volt · panel · breaker", probe("PHYSICAL_TRADE", "breaker", "electrical")],
-    ["trade", "roof · storm · hail · flashing", probe("PHYSICAL_TRADE", "hail", "roofing")],
-    ["trade", "pest · termite · moisture", probe("PHYSICAL_TRADE", "termite", "pest control")],
-    ["trade", "(fallback)", probe("PHYSICAL_TRADE", "unrelated")],
-  ];
-  const rows = router.map(([r, k, t]) => `<tr><td>${r}</td><td><code>${esc(k)}</code></td><td>${fmt(t)}</td></tr>`).join("");
-  out.push(`<article class="llm" id="f-icons"><div class="llm-top"><div><h4><span class="tag img">fragment</span>Cover corner-icon router</h4><p>In <code>src/lib/prompts/cover.ts</code>. Replaces the strategist's <code>physical_scene</code> when it is empty, shorter than 25 characters, mentions a clipboard, or shows trade hardware on a non-trade topic. Keywords match title + idea + angle + trade; first match wins.</p></div></div><div class="tbl" style="border:0;border-top:1px solid var(--line);border-radius:0"><table><thead><tr><th>Register</th><th>Keywords</th><th>Injected text</th></tr></thead><tbody>${rows}</tbody></table></div></article>`);
   return out.join("\n");
 }
 
@@ -390,11 +335,9 @@ function facts(cards: Card[]): string {
   const manifest = readManifest();
   const wfs = manifest.workflows.map((e) => readWorkflowFiles(e.slug));
   const text = cards.filter((c) => c.kind === "LLM").length;
-  const image = cards.filter((c) => c.kind === "image").length;
   return `<div class="facts">
     <span><b>${wfs.length}</b> pipeline workflows (${wfs.filter((w) => w.active).length} active)</span>
     <span><b>${text}</b> text-model prompts</span>
-    <span><b>${image}</b> image prompts</span>
     <span><b>1</b> human gate</span>
     <span>LLM host <b>DashScope (intl)</b></span>
     <span>DB <b>Supabase Postgres</b></span>

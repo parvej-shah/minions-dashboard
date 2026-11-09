@@ -154,9 +154,8 @@ export function useEditorialDraft(
   /**
    * Poll while any draft is still waiting on its cover image.
    *
-   * Cover generation runs outside the drafting workflow now (it was ~43s of a
-   * ~98s run), so the asset is saved with `hero_status: PENDING` and filled in
-   * a minute or so later by 04_hero_image. Without this the cover only appears
+   * The asset is saved with `hero_status: PENDING` and the cover is drawn in
+   * code just after the draft is written. Without this the cover only appears
    * on a manual browser reload, which reads as the image never arriving.
    *
    * Polling stops as soon as nothing is pending, so a settled studio is idle.

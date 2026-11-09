@@ -19,7 +19,6 @@ export const AUTOMATION_JOBS: AutomationJob[] = [
   { key: "00c_pipeline_error_alert", name: "Error alert", when: "When a job fails", does: "Sends a Telegram alert and marks the failed run.", everyMinutes: null },
   { key: "01_idea_harvester", name: "Idea harvester", when: "When started", does: "Finds and checks new ideas for one workspace.", everyMinutes: null },
   { key: "02_idea_to_asset", name: "Drafter", when: "When started", does: "Writes a draft from one idea.", everyMinutes: null },
-  { key: "04_hero_image", name: "Cover image", when: "When started", does: "Makes the image for a draft's cover.", everyMinutes: null },
 ];
 
 
