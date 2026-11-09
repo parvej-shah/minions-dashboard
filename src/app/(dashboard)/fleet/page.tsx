@@ -43,7 +43,7 @@ export default function FleetPage() {
             <span>Idea Stream</span>
           </Link>
           <Link
-            href="/published"
+            href="/posts?show=posted"
             className="px-3.5 py-2 rounded-xl bg-surface hover:bg-surface-3 border border-line text-ink font-medium text-xs flex items-center gap-2 transition-colors"
           >
             <Globe className="w-3.5 h-3.5 text-brand" />

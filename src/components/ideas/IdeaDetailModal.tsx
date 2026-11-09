@@ -216,7 +216,7 @@ export default function IdeaDetailModal({
 
           <div className="ml-auto flex items-center gap-2">
             {stage === "PUBLISHED" ? (
-              <Link href="/published" onClick={() => onClose()} className={buttonStyles({ size: "sm" })}>
+              <Link href="/posts?show=posted" onClick={() => onClose()} className={buttonStyles({ size: "sm" })}>
                 <CheckCircle2 className="w-4 h-4" />
                 <span>See it in Published</span>
               </Link>

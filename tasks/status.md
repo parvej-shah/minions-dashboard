@@ -24,8 +24,8 @@
 | 20 | Calm redesign: research + direction board (UI only, engine untouched) | CLAUDE | DONE (approved 2026-11-09, blue) | tasks/20.md |
 | 21 | Calm foundation: light tokens, calm primitives, top menu | CLAUDE | DONE (local) | tasks/21.md |
 | 22 | Today page at / | CLAUDE | DONE (local) | tasks/22.md |
-| 23 | Posts library (/posts) | CLAUDE | IN PROGRESS | tasks/23.md |
-| 24 | Review screen (Studio rebuilt) | CLAUDE | TODO | tasks/24.md |
+| 23 | Posts library (/posts) | CLAUDE | DONE (local) | tasks/23.md |
+| 24 | Review screen (Studio rebuilt) | CLAUDE | IN PROGRESS | tasks/24.md |
 | 25 | Ideas | CLAUDE | TODO | tasks/25.md |
 | 26 | Remaining screens calm pass | CLAUDE | TODO | tasks/26.md |
 | 27 | Sweep + browser pass, then ask to push | CLAUDE | TODO | tasks/27.md |

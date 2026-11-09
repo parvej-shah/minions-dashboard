@@ -127,7 +127,7 @@ export default function IdeaCard({
         </button>
 
         {isPublished ? (
-          <Link href="/published" className={buttonStyles({ variant: "soft", size: "sm" })}>
+          <Link href="/posts?show=posted" className={buttonStyles({ variant: "soft", size: "sm" })}>
             <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> Published
           </Link>
         ) : isDrafted ? (
