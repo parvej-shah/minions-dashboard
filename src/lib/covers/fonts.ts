@@ -5,17 +5,21 @@ import { readMetrics, type FontMetrics } from "./metrics";
 /**
  * The cover type system, the same for every tenant: one consistent face is
  * part of how a reader learns to recognise an author's posts (phase 5
- * decision, 2026-09-24). Newsreader for headlines and quotes, Inter for the
- * label, kicker and author line. Both SIL Open Font License, see fonts/OFL-*.txt.
+ * decision, 2026-09-24; faces changed 2026-11-09). Bricolage Grotesque
+ * ExtraBold for headlines and quotes, Plus Jakarta Sans for the label,
+ * kicker and author line. Both SIL Open Font License, see fonts/OFL-*.txt.
+ * They are static instances cut from the Google Fonts variable files, since
+ * Satori and the width metrics need static TTFs. "serifItalic" is an upright
+ * semi-bold: Bricolage has no italic.
  */
 export type Face = "serif" | "serifItalic" | "sans" | "sansSemi" | "sansBold";
 
 const FILES: Record<Face, { file: string; name: string; weight: 400 | 500 | 600 | 800; style: "normal" | "italic" }> = {
-  serif: { file: "newsreader-600-normal.ttf", name: "Newsreader", weight: 600, style: "normal" },
-  serifItalic: { file: "newsreader-500-italic.ttf", name: "Newsreader", weight: 500, style: "italic" },
-  sans: { file: "inter-400-normal.ttf", name: "Inter", weight: 400, style: "normal" },
-  sansSemi: { file: "inter-600-normal.ttf", name: "Inter", weight: 600, style: "normal" },
-  sansBold: { file: "inter-800-normal.ttf", name: "Inter", weight: 800, style: "normal" },
+  serif: { file: "bricolage-800-normal.ttf", name: "Bricolage Grotesque", weight: 800, style: "normal" },
+  serifItalic: { file: "bricolage-600-normal.ttf", name: "Bricolage Grotesque", weight: 600, style: "normal" },
+  sans: { file: "jakarta-400-normal.ttf", name: "Plus Jakarta Sans", weight: 400, style: "normal" },
+  sansSemi: { file: "jakarta-600-normal.ttf", name: "Plus Jakarta Sans", weight: 600, style: "normal" },
+  sansBold: { file: "jakarta-800-normal.ttf", name: "Plus Jakarta Sans", weight: 800, style: "normal" },
 };
 
 /** CSS for a face, to spread into a Satori style. */

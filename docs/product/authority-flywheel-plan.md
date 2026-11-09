@@ -265,7 +265,7 @@ Exit: no generated text inside images, and the cover cost for a text-only cover 
 - **Logo or headshot on the cover when the tenant uploaded one.** Otherwise an initials monogram.
   - LinkedIn photo URLs expire (tenant cmtvi4a7r…'s returned 404), so an uploaded image must be copied to R2.
 - **Layouts:** HEADLINE, STATEMENT (dark), QUOTE, NUMBER.
-  - All four share one frame: topic label, centre, author signature.
+  - All four share one frame: topic label, centre, author signature. *(Superseded 2026-11-09: five poster types, each with its own background; see DECISIONS.md "Five poster types, each with its own background".)*
   - Headline line breaks are set in code (`src/lib/covers/fit.ts`), so copy that cannot fit is rejected, never cut.
 
 ### Phase 6: Weekly alignment (about 1 week)

@@ -8,6 +8,15 @@ import { route } from "@/server/http/route";
 
 export const maxDuration = 60;
 
+/** A list of short strings from the body, or undefined; anything else is refused. */
+function stringList(value: unknown, name: string, max = 6): string[] | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || value.length > max || !value.every((v) => typeof v === "string" && v.length <= 80)) {
+    throw badRequest(`${name} must be a list of at most ${max} short lines`);
+  }
+  return value.map((v: string) => v.trim());
+}
+
 export const POST = route<"tenant", { id: string }>({ auth: "tenant", failure: "Failed to render cover" }, async ({ clientId, params, request }) => {
   const assetId = await requireOwnedAssetId(clientId, params.id);
   const body = await readJsonOrEmpty(request);
@@ -24,9 +33,17 @@ export const POST = route<"tenant", { id: string }>({ auth: "tenant", failure: "
     emphasis: asOptionalString(body.emphasis, 40),
     art,
     art_reroll: body.art_reroll === true,
+    list: stringList(body.list, "list", 4),
+    grid_labels: stringList(body.grid_labels, "grid_labels", 6),
+    punch: body.punch === undefined ? undefined : punchOf(body.punch),
   };
 
   const result = await renderAssetCover(assetId, { edit });
   if (!result.ok) throw new HttpError(result.locked ? 409 : 422, result.error);
   return { success: true, hero_image_url: result.url, cover: result.spec };
 });
+
+function punchOf(value: unknown): { lines: string[]; checks: string[] } {
+  const p = (value && typeof value === "object" ? value : {}) as { lines?: unknown; checks?: unknown };
+  return { lines: stringList(p.lines, "punch.lines", 4) ?? [], checks: stringList(p.checks, "punch.checks", 4) ?? [] };
+}

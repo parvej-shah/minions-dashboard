@@ -15,12 +15,33 @@ export interface CoverImageCardProps {
   onMessage: (message: string) => void;
 }
 
-const LAYOUTS: { id: CoverSpecDTO["layout"]; label: string; hint: string }[] = [
-  { id: "HEADLINE", label: "Headline", hint: "Headline and subtitle on the light paper" },
-  { id: "STATEMENT", label: "Statement", hint: "The same on dark, to break up a run of posts" },
-  { id: "QUOTE", label: "Quote", hint: "A line taken word for word from the draft" },
+type Layout = CoverSpecDTO["layout"];
+
+const LAYOUTS: { id: Layout; label: string; hint: string }[] = [
+  { id: "HEADLINE", label: "Headline", hint: "The headline on a soft gradient" },
+  { id: "STATEMENT", label: "Statement", hint: "The headline on a dark glow" },
+  { id: "LIST", label: "List", hint: "The post's 3 or 4 points, numbered, on grid paper" },
+  { id: "GRID", label: "Grid", hint: "3 to 6 things the post names, as icon tiles on folded paper" },
+  { id: "PUNCH", label: "Punch", hint: "Short lines that land one after another, over a colour band" },
+  { id: "PHOTO", label: "Photo", hint: "Your headshot large, the headline below" },
+  { id: "QUOTE", label: "Quote", hint: "A line taken word for word from the post" },
   { id: "NUMBER", label: "Number", hint: "A figure the draft states, set large" },
 ];
+
+/** Why a layout can't be used on this cover, or null when it can. */
+function unavailableReason(id: Layout, cover: CoverSpecDTO): string | null {
+  // Until the post's points are read, List, Grid and Punch are offered and read on click.
+  if (id === "NUMBER" && !cover.number) return "This draft states no figure a Number cover could use";
+  if (id === "LIST" && cover.shape_read && !cover.list) return "The post doesn't name 3 or 4 separate points";
+  if (id === "GRID" && cover.shape_read && !cover.grid) return "The post doesn't name 3 to 6 parallel things";
+  if (id === "PUNCH" && cover.shape_read && !cover.punch) return "The post has no short punch lines";
+  if (id === "PHOTO" && !cover.photo_ok) return "Needs an opaque headshot (at least 600 px) on the Brand page";
+  return null;
+}
+
+const hasArt = (layout: Layout) => layout === "HEADLINE" || layout === "STATEMENT";
+const lines = (text: string) => text.split("\n").map((l) => l.trim()).filter(Boolean);
+const same = (a: string[], b: string[] | undefined) => a.join("\n") === (b ?? []).join("\n");
 
 /**
  * The draft's cover. Covers are drawn in code (phase 5): portrait
@@ -44,6 +65,8 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
   const [headline, setHeadline] = useState("");
   const [kicker, setKicker] = useState("");
   const [emphasis, setEmphasis] = useState("");
+  const [items, setItems] = useState("");
+  const [checks, setChecks] = useState("");
 
   const run = async (edit?: CoverEditInput) => {
     const message = await onRerender(edit);
@@ -55,11 +78,21 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
     setHeadline(cover?.headline ?? activeAsset.title);
     setKicker(cover?.kicker ?? "");
     setEmphasis(cover?.emphasis ?? "");
+    const layout = cover?.layout;
+    setItems((layout === "LIST" ? cover?.list : layout === "GRID" ? cover?.grid?.map((g) => g.label) : layout === "PUNCH" ? cover?.punch?.lines : null)?.join("\n") ?? "");
+    setChecks(layout === "PUNCH" ? (cover?.punch?.checks ?? []).join("\n") : "");
     setEditing(true);
   };
 
   const saveEdit = async () => {
-    const message = await run({ headline, kicker, emphasis });
+    const edit: CoverEditInput = { headline, kicker, emphasis };
+    // Only a changed list is sent, so an untouched one is not re-checked.
+    if (cover?.layout === "LIST" && !same(lines(items), cover.list ?? undefined)) edit.list = lines(items);
+    if (cover?.layout === "GRID" && !same(lines(items), cover.grid?.map((g) => g.label))) edit.grid_labels = lines(items);
+    if (cover?.layout === "PUNCH" && (!same(lines(items), cover.punch?.lines) || !same(lines(checks), cover.punch?.checks))) {
+      edit.punch = { lines: lines(items), checks: lines(checks) };
+    }
+    const message = await run(edit);
     if (message.startsWith("Cover updated")) setEditing(false);
   };
 
@@ -121,16 +154,16 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
             <>
               <div>
                 <span className="text-[11px] font-medium text-muted block mb-1.5">Layout</span>
-                <div className="grid grid-cols-2 gap-1.5">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                   {LAYOUTS.map((l) => {
-                    const unavailable = l.id === "NUMBER" && !cover.number;
+                    const why = unavailableReason(l.id, cover);
                     return (
                       <button
                         key={l.id}
                         type="button"
-                        title={unavailable ? "This draft states no figure a NUMBER cover could use" : l.hint}
+                        title={why ?? l.hint}
                         aria-pressed={cover.layout === l.id}
-                        disabled={isRendering || unavailable || cover.layout === l.id}
+                        disabled={isRendering || Boolean(why) || cover.layout === l.id}
                         onClick={() => void run({ layout: l.id })}
                         className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                           cover.layout === l.id
@@ -150,12 +183,12 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                 <div className="flex flex-wrap gap-1.5">
                   {COVER_ART_STYLES.map((s) => {
                     const current = (cover.art_style ?? "NONE") === s;
-                    const noRoom = cover.layout === "QUOTE" || cover.layout === "NUMBER";
+                    const noRoom = !hasArt(cover.layout);
                     return (
                       <button
                         key={s}
                         type="button"
-                        title={noRoom ? "Quote and Number covers have no illustration" : COVER_ART_STYLE_META[s].description}
+                        title={noRoom ? "Only Headline and Statement covers have an illustration" : COVER_ART_STYLE_META[s].description}
                         aria-pressed={current}
                         disabled={isRendering || current || noRoom}
                         onClick={() => void run({ art: s })}
@@ -180,8 +213,8 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                     </button>
                   )}
                 </div>
-                {cover.layout === "QUOTE" || cover.layout === "NUMBER" ? (
-                  <p className="text-[11px] text-subtle mt-1.5">Quote and Number covers have no illustration. Switch to Headline or Statement to add one.</p>
+                {!hasArt(cover.layout) ? (
+                  <p className="text-[11px] text-subtle mt-1.5">Only Headline and Statement covers have an illustration. Switch to one of them to add it.</p>
                 ) : cover.art_style && cover.art_style !== "NONE" && !cover.art_drawn ? (
                   <p className="text-[11px] text-subtle mt-1.5">Left off on this cover: the headline needed the space. A shorter headline makes room for it.</p>
                 ) : null}
@@ -190,7 +223,9 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
               {editing ? (
                 <div className="space-y-2">
                   <label className="block">
-                    <span className="text-[11px] font-medium text-muted block mb-1">Headline (6–10 words works best)</span>
+                    <span className="text-[11px] font-medium text-muted block mb-1">
+                      {cover.layout === "PUNCH" ? "Lead-in line" : "Headline (6–10 words works best)"}
+                    </span>
                     <textarea
                       value={headline}
                       onChange={(e) => setHeadline(e.target.value)}
@@ -208,16 +243,48 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                       className="w-full bg-surface-2 border border-line rounded-lg px-3 py-1.5 text-sm text-ink focus:outline-none focus:border-brand"
                     />
                   </label>
-                  <label className="block">
-                    <span className="text-[11px] font-medium text-muted block mb-1">Subtitle (optional)</span>
-                    <textarea
-                      value={kicker}
-                      onChange={(e) => setKicker(e.target.value)}
-                      rows={2}
-                      maxLength={160}
-                      className="w-full bg-surface-2 border border-line rounded-lg px-3 py-1.5 text-sm text-ink focus:outline-none focus:border-brand resize-none"
-                    />
-                  </label>
+                  {hasArt(cover.layout) && (
+                    <label className="block">
+                      <span className="text-[11px] font-medium text-muted block mb-1">Subtitle (optional)</span>
+                      <textarea
+                        value={kicker}
+                        onChange={(e) => setKicker(e.target.value)}
+                        rows={2}
+                        maxLength={160}
+                        className="w-full bg-surface-2 border border-line rounded-lg px-3 py-1.5 text-sm text-ink focus:outline-none focus:border-brand resize-none"
+                      />
+                    </label>
+                  )}
+                  {(cover.layout === "LIST" || cover.layout === "GRID" || cover.layout === "PUNCH") && (
+                    <label className="block">
+                      <span className="text-[11px] font-medium text-muted block mb-1">
+                        {cover.layout === "LIST"
+                          ? "Points, one per line (3–4, 2–6 words each)"
+                          : cover.layout === "GRID"
+                            ? `Tile labels, one per line (${cover.grid?.length ?? 0}, 1–3 words each)`
+                            : "Punch lines, one per line (3–4, up to 5 words; the last is in the accent colour)"}
+                      </span>
+                      <textarea
+                        value={items}
+                        onChange={(e) => setItems(e.target.value)}
+                        rows={4}
+                        maxLength={400}
+                        className="w-full bg-surface-2 border border-line rounded-lg px-3 py-1.5 text-sm text-ink focus:outline-none focus:border-brand resize-none"
+                      />
+                    </label>
+                  )}
+                  {cover.layout === "PUNCH" && (
+                    <label className="block">
+                      <span className="text-[11px] font-medium text-muted block mb-1">Checks, one per line (3–4, 2–5 words each)</span>
+                      <textarea
+                        value={checks}
+                        onChange={(e) => setChecks(e.target.value)}
+                        rows={4}
+                        maxLength={400}
+                        className="w-full bg-surface-2 border border-line rounded-lg px-3 py-1.5 text-sm text-ink focus:outline-none focus:border-brand resize-none"
+                      />
+                    </label>
+                  )}
                   <div className="flex gap-2">
                     <button
                       type="button"
@@ -236,7 +303,17 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
               ) : (
                 <div className="space-y-1.5">
                   <p className="text-sm font-semibold text-ink leading-snug">{cover.layout === "QUOTE" && cover.quote ? `“${cover.quote}”` : cover.headline}</p>
-                  {cover.kicker && cover.layout !== "QUOTE" && <p className="text-xs text-muted leading-relaxed">{cover.kicker}</p>}
+                  {cover.kicker && hasArt(cover.layout) && <p className="text-xs text-muted leading-relaxed">{cover.kicker}</p>}
+                  {(() => {
+                    const shown = cover.layout === "LIST" ? cover.list : cover.layout === "GRID" ? cover.grid?.map((g) => g.label) : cover.layout === "PUNCH" ? cover.punch?.lines : null;
+                    return shown?.length ? (
+                      <ul className="text-xs text-muted leading-relaxed list-disc pl-4">
+                        {shown.map((t) => (
+                          <li key={t}>{t}</li>
+                        ))}
+                      </ul>
+                    ) : null;
+                  })()}
                   <button
                     type="button"
                     disabled={isRendering}
@@ -244,7 +321,7 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                     className="mt-1 px-2.5 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 text-xs font-medium text-brand border border-brand/30 hover:border-brand transition-all inline-flex items-center gap-1.5 disabled:opacity-50"
                   >
                     <PenLine className="w-3 h-3" />
-                    Edit wording
+                    Edit text
                   </button>
                 </div>
               )}

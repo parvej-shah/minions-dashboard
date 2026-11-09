@@ -95,7 +95,7 @@ describe("every illustration draws in the brand's colours", () => {
 
 describe("the illustration never costs the headline its size", () => {
   const brand = DEFAULT_COVER_BRAND;
-  const long = "Your voice agent confirms every booking on the call but the calendar never sees them";
+  const long = "Your voice agent confirms every booking but the calendar never sees them";
   const art = { choice: { style: "SHAPES" as const, motif: "WAVEFORM" as const }, seed: "x" };
 
   it("keeps the picture beside a long headline, which stays within three lines", () => {

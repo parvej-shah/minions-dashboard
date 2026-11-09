@@ -28,6 +28,22 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-09 — Covers use Bricolage Grotesque and Plus Jakarta Sans
+
+**Decision:** Every cover and carousel page now sets headlines, quotes and big numbers in Bricolage Grotesque (ExtraBold) and the label, subtitle, list text and author line in Plus Jakarta Sans, for every workspace. This replaces Newsreader and Inter. Both are free for commercial use (SIL Open Font License). The quote mark is drawn as a shape, and the quote text is upright because Bricolage has no italic.
+**Why:** the serif and neutral sans looked like most other LinkedIn graphics and didn't stand out in a feed. A heavy, characterful sans stays readable at phone-thumbnail size. Compared against Fraunces, DM Serif Display and Instrument Serif on the same posters; the thin serif vanished at thumbnail size.
+**Alternatives considered:** DM Serif Display with Manrope (the safe serif upgrade); Fraunces with Manrope (warm, but needed spacing work).
+**Status:** active. Supersedes the Newsreader and Inter part of the fixed type system decided 2026-09-24 in [authority-flywheel-plan.md](../product/authority-flywheel-plan.md) (phase 5); one shared type system for every tenant stands.
+
+---
+## 2026-11-09 — Five poster types, each with its own background
+
+**Decision:** Covers and carousel pages come in five poster types, and each type always has its own background: a two-tone hook on a soft gradient, a problem with a numbered list on a grain grid, an icon grid on folded paper, short punch lines with a checklist on a colour block, and a photo-led poster (the author's photo, large) on a dark glow. Every background is drawn only from the workspace's brand colours, and every poster uses the one shared type system (see the fonts entry above). The cut-paper waves background is kept as a spare. Reviewers can't change a type's background, but they can switch any cover to another type the post supports and edit its text (headline, list points, tile labels, punch lines), held to the same checks as generated text. All posters share the author line; carousel pages also carry a slide number.
+**How a cover's type is chosen:** the post decides which types fit (a list of 3-4 points, 3-6 parallel things, short punch lines, the author's own story, or a figure or quote Jev judged strong). Among those, the type this workspace used least recently wins, and the last cover's type is never repeated. The photo poster needs an opaque headshot and the author's own story, and appears at most once in four covers. The first post gets the photo poster when there is a usable headshot, otherwise Statement (updates 2026-10-01). Copy that can't fit falls to the next type, ending at Headline.
+**Why:** Every post had the same frame, so a feed of covers looked identical. The user wanted the variety to stand out but stay in the brand's colours. Prototypes in our own renderer showed all six backgrounds work for any palette with no tuning per tenant.
+**Alternatives considered:** Letting a reviewer pick any background for any type (rejected for now: fixed pairs keep every type distinct and are simpler to check for contrast and fit). Copying a reference design's torn-paper edge (rejected: it's that designer's signature).
+**Status:** active. Supersedes the "all four share one frame" rule decided 2026-09-24 in [authority-flywheel-plan.md](../product/authority-flywheel-plan.md) (phase 5); the fixed type system from that decision stands.
+
 
 ## 2026-10-24 — Brand's "What you do" is about the writer, not the reader
 
@@ -202,6 +218,8 @@ and link to it here.
 **Status:** superseded by [Phone review puts checks before publishing](#2026-10-02--phone-review-puts-checks-before-publishing)
 
 ## 2026-10-01 — The first post's cover is Statement with Shapes; Statement leads after it
+
+*Partly superseded 2026-11-09: the first post now gets the photo poster when there is a usable headshot, and types rotate by what the post holds.*
 
 **Decision:** The cover drawn for the first post (setup) is always the dark Statement layout with the Shapes illustration, never a number or quote cover. For every other draft, a verified figure still gets a Number cover and a strong line a Quote cover; otherwise Statement is now chosen before Headline. The rotation that avoids repeating the previous cover's layout stays. Reviewers can still change any cover in Editorial Studio. Always using Statement for every draft was rejected.
 **Why:** Statement with Shapes is the boldest, cleanest first impression, and a figure or quote picked out of someone's very first post can feel random. Forcing one layout on every draft would make a LinkedIn feed look the same post after post, and Number and Quote covers stop the scroll better when the post really has a figure or a strong line.

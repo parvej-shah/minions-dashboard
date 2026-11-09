@@ -11,6 +11,10 @@ import { renderCoverPng } from "@/lib/covers/render";
 import { chooseArt, parseArtStyle, DEFAULT_COVER_ART_STYLE, type CoverArtStyle } from "@/lib/covers/art";
 import { numbersIn } from "@/lib/harvest/text";
 import { FIRST_POST_TAG } from "@/constants/firstPost";
+import { renderPosterShape } from "@/lib/prompts/posterShape";
+import { editShape, parseShape, shapeJson, type PosterShape, type ShapeEdit } from "@/lib/covers/shape";
+import { eligibleTypes, fallbackOrder, pickPosterType } from "@/lib/covers/posterType";
+import { dataUrlFitsPoster } from "@/lib/covers/photo";
 
 /**
  * Draws an asset's cover in code and attaches it (phase 5 of
@@ -22,8 +26,11 @@ import { FIRST_POST_TAG } from "@/constants/firstPost";
 
 const COVER_PROVIDER = "template";
 
-/** What a reviewer may change on a cover. Everything else comes from the draft and the brand. */
-export interface CoverEdit {
+/**
+ * What a reviewer may change on a cover: the type, the wording and a
+ * poster's items. Everything else comes from the draft and the brand.
+ */
+export interface CoverEdit extends ShapeEdit {
   layout?: CoverLayout;
   headline?: string;
   kicker?: string;
@@ -36,7 +43,7 @@ export interface CoverEdit {
 
 /** The stored record: the spec without the embedded photo, plus how the copy was chosen. */
 export type StoredCoverSpec = Omit<CoverSpec, "author"> & {
-  author: { name: string; role?: string; has_photo: boolean };
+  author: { name: string; role?: string; has_photo: boolean; photo_ok?: boolean };
   card: CoverCard;
   /** The illustration style this cover was drawn with, NONE included, so a re-draw keeps it. */
   art_style: CoverArtStyle;
@@ -155,7 +162,7 @@ function attempts(spec: CoverSpec, title: string): CoverSpec[] {
 function copyAttempts(spec: CoverSpec, title: string): CoverSpec[] {
   const out = [spec];
   if (spec.kicker) out.push({ ...spec, kicker: undefined });
-  if (title && title !== spec.headline) out.push({ ...spec, layout: spec.layout === "STATEMENT" ? "STATEMENT" : "HEADLINE", headline: title, emphasis: undefined, kicker: undefined, quote: undefined, number: undefined });
+  if (title && title !== spec.headline) out.push({ ...spec, layout: spec.layout === "QUOTE" || spec.layout === "NUMBER" ? "HEADLINE" : spec.layout, headline: title, emphasis: undefined, kicker: undefined, quote: undefined, number: undefined });
   const plain: CoverSpec = { ...spec, layout: "HEADLINE", headline: title || spec.headline, emphasis: undefined, kicker: undefined, quote: undefined, number: undefined, label: undefined };
   // Last: one line over the limit, because a draft without a cover is worse than a long headline.
   out.push(plain, { ...plain, looseHeadline: true });
@@ -244,6 +251,33 @@ export async function writeCoverLine(draft: { title: string; post: string; body:
   return best.l;
 }
 
+/** Read alongside the cover line, inside the same 60 s cover call. */
+const SHAPE_BUDGET_MS = 20_000;
+
+/**
+ * What the post holds that a poster can show (shape.ts), with every part
+ * checked against the draft. Undefined when the model did not answer in
+ * time, so the next draw tries again.
+ */
+export async function readPosterShape(draft: { title: string; post: string; body: string }, notes: string[]): Promise<PosterShape | undefined> {
+  const apiKey = process.env.DASHSCOPE_API_KEY;
+  if (!apiKey) return undefined;
+  const call = chatWithFallback(renderPosterShape({ title: draft.title, post: draft.post }), apiKey).then((res) => (res.status < 300 ? shapeJson(res.body) : null));
+  const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), SHAPE_BUDGET_MS));
+  const raw = await Promise.race([call, timeout]).catch(() => null);
+  return raw ? parseShape(raw, draft.body, notes) : undefined;
+}
+
+/** The poster's items from the shape; each layout draws only its own. */
+const posterParts = (shape?: PosterShape) => ({ list: shape?.list?.items, grid: shape?.grid?.items, punch: shape?.punch });
+
+/** Layouts that need a part of the shape, and what to say when the post lacks it. */
+const NEEDS_SHAPE: Partial<Record<CoverLayout, { part: "list" | "grid" | "punch"; missing: string }>> = {
+  LIST: { part: "list", missing: "This post does not name 3 or 4 separate points for a List cover." },
+  GRID: { part: "grid", missing: "This post does not name 3 to 6 parallel things for a Grid cover." },
+  PUNCH: { part: "punch", missing: "This post has no short punch lines for a Punch cover." },
+};
+
 export async function renderAssetCover(assetId: string, input: { card?: CoverCard; edit?: CoverEdit } = {}): Promise<CoverResult> {
   const asset = await prisma.asset.findUnique({
     where: { id: assetId },
@@ -265,7 +299,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     prisma.asset.findMany({
       where: { clientId: asset.clientId, id: { not: asset.id }, heroProvider: COVER_PROVIDER },
       orderBy: { createdAt: "desc" },
-      take: 6,
+      take: 8,
       select: { coverSpec: true },
     }),
   ]);
@@ -296,16 +330,24 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   // that none beat the headline); written again only when the draft no longer
   // supports it. A reviewer's edit never rewrites it.
   let lineCostUsd = 0;
-  if (!input.edit && (card.cover_line === undefined || (card.cover_line && checkCoverLine(card.cover_line, body)))) {
-    const current = chooseCoverCopy({ ...copyInput, card: { ...card, cover_line: undefined } }).headline;
-    const metered = await withCostMeter(() => writeCoverLine({ title: asset.title ?? "", post: quoteSource({ body, post: asset.linkedinVariant }), body }, current, lineNotes));
-    const line = metered.value;
-    lineCostUsd = metered.costUsd;
-    if (line !== undefined) {
-      card = { ...card, cover_line: line };
-      copyInput.card = card;
-    }
-  }
+  const post = quoteSource({ body, post: asset.linkedinVariant });
+  // Every figure on a poster must be in the draft or the LinkedIn post beside it.
+  const shapeBody = `${body}\n${asset.linkedinVariant ?? ""}`;
+  const shapeNotes: string[] = [];
+  const needsLine = !input.edit && (card.cover_line === undefined || (card.cover_line && checkCoverLine(card.cover_line, body)));
+  // The shape is read once per draft, beside the cover line; an edit reads it
+  // only when the reviewer asks for a type that needs it (below).
+  const needsShape = !input.edit && card.shape === undefined;
+  const [lineRun, shapeRun] = await Promise.all([
+    needsLine
+      ? withCostMeter(() => writeCoverLine({ title: asset.title ?? "", post, body }, chooseCoverCopy({ ...copyInput, card: { ...card, cover_line: undefined } }).headline, lineNotes))
+      : null,
+    needsShape ? withCostMeter(() => readPosterShape({ title: asset.title ?? "", post, body: shapeBody }, shapeNotes)) : null,
+  ]);
+  lineCostUsd = (lineRun?.costUsd ?? 0) + (shapeRun?.costUsd ?? 0);
+  if (lineRun?.value !== undefined && lineRun) card = { ...card, cover_line: lineRun.value };
+  if (shapeRun?.value) card = { ...card, shape: shapeRun.value };
+  copyInput.card = card;
   // Judged only when the layout is being chosen: an edit keeps the drawn one.
   const headlineCopy = chooseCoverCopy(copyInput);
   const judged = firstPost || input.edit ? {} : await judgeOptions(coverOptions(copyInput), headlineCopy.headline, reader);
@@ -331,14 +373,47 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     role: profile.coverByline?.trim() || defaultByline(profile.positioning ?? ""),
     photo: await coverPhoto(profile),
   };
+  const photoOk = dataUrlFitsPoster(author.photo);
+
+  // The poster type (posterType.ts): what the post holds decides which types
+  // fit, and the one this workspace used least recently wins. A figure or
+  // quote counts only when copy.ts chose it after Jev's judgement.
+  const typeInput = {
+    shape: card.shape,
+    judged: { number: copy.layout === "NUMBER", quote: copy.layout === "QUOTE" },
+    photoOk,
+    recent: copyInput.recentLayouts,
+    firstPost,
+  };
+  const order = fallbackOrder(pickPosterType(typeInput), eligibleTypes(typeInput));
+  /** The cover drawn as one type: the figure or quote copy for its own type, the headline copy for the rest. */
+  const specFor = (layout: CoverLayout): CoverSpec => {
+    const c = layout === copy.layout ? copy : headlineCopy;
+    return {
+      layout,
+      headline: c.headline,
+      emphasis: c.emphasis,
+      kicker: c.kicker,
+      quote: c.quote,
+      number: c.number ?? copy.number,
+      author,
+      brand,
+      // Only Headline and Statement have room for an illustration.
+      art: layout === "HEADLINE" || layout === "STATEMENT" ? art : undefined,
+      ...posterParts(card.shape),
+    };
+  };
 
   // A reviewer's edit changes one thing on the cover they are looking at: the
   // rest (layout, headline, subtitle) stays as drawn, never re-picked.
   const kept = input.edit && previous?.layout && previous.headline ? previous : null;
-  const base = kept ?? copy;
   // No audience label: the illustration and the headline open the cover (user decision, 2026-09-25).
-  let spec: CoverSpec = { layout: base.layout!, headline: base.headline!, emphasis: base.emphasis, kicker: base.kicker, quote: base.quote, number: base.number, author, brand, art };
-  const notes = [...lineNotes, ...copy.notes, ...brandNotes];
+  let spec: CoverSpec = kept
+    ? { layout: kept.layout!, headline: kept.headline!, emphasis: kept.emphasis, kicker: kept.kicker, quote: kept.quote, number: kept.number, author, brand, art, ...posterParts(card.shape) }
+    : input.edit
+      ? { ...specFor(copy.layout), art }
+      : specFor(order[0]);
+  const notes = [...lineNotes, ...shapeNotes, ...copy.notes, ...brandNotes];
   let headlineSource: StoredCoverSpec["headline_source"] = kept?.headline_source ?? copy.headline_source;
   let score = kept?.score ?? copy.score;
 
@@ -359,8 +434,27 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
       if (bad.length) return { ok: false, error: `The subtitle states ${bad.join(", ")}, which the draft does not.` };
       spec = { ...spec, kicker: edit.kicker.trim() || undefined };
     }
+    // A type or items that need the shape: read it now if this draft never had it.
+    const wantsShape = Boolean(edit.list || edit.grid_labels || edit.punch || (edit.layout && NEEDS_SHAPE[edit.layout]));
+    if (wantsShape && card.shape === undefined) {
+      const metered = await withCostMeter(() => readPosterShape({ title: asset.title ?? "", post, body: shapeBody }, notes));
+      lineCostUsd += metered.costUsd;
+      if (!metered.value) return { ok: false, error: "Could not read the post's points just now. Try again in a minute." };
+      card = { ...card, shape: metered.value };
+    }
+    if (card.shape && (edit.list || edit.grid_labels || edit.punch)) {
+      const changed = editShape(card.shape, edit, shapeBody);
+      if ("error" in changed) return { ok: false, error: changed.error };
+      card = { ...card, shape: changed.shape };
+    }
+    spec = { ...spec, ...posterParts(card.shape) };
     if (edit.layout) {
       if (!COVER_LAYOUTS.includes(edit.layout)) return { ok: false, error: `Unknown layout ${edit.layout}` };
+      const need = NEEDS_SHAPE[edit.layout];
+      if (need && !card.shape?.[need.part]) return { ok: false, error: need.missing };
+      if (edit.layout === "PHOTO" && !photoOk) {
+        return { ok: false, error: author.photo ? "The brand photo can't fill a Photo cover: it needs an opaque headshot at least 600 px wide (a logo with a transparent background won't do)." : "Add a headshot on the Brand page to use the Photo cover." };
+      }
       if (edit.layout === "NUMBER" && !spec.number) return { ok: false, error: "This draft has no verified figure for a NUMBER cover." };
       if (edit.layout === "QUOTE") {
         const quote = pickQuote(quoteSource({ body, post: asset.linkedinVariant }));
@@ -371,9 +465,19 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     }
   }
 
+  // Generated: each type in order (its own copy only), the last with every
+  // fallback down to the plain headline. An edit keeps the type it asked for;
+  // only the four original types fall back to the plain headline.
+  const title = asset.title ?? "";
+  const sameType = (s: CoverSpec) => attempts(s, title).filter((a) => a.layout === s.layout && !a.looseHeadline);
+  const tries = !input.edit
+    ? order.flatMap((l, i) => (i === order.length - 1 ? attempts(specFor(l), title) : sameType(specFor(l))))
+    : NEEDS_SHAPE[spec.layout] || spec.layout === "PHOTO"
+      ? sameType(spec)
+      : attempts(spec, title);
   let png: Buffer | null = null;
   let used = spec;
-  for (const attempt of attempts(spec, asset.title ?? "")) {
+  for (const attempt of tries) {
     try {
       png = await renderCoverPng(attempt);
       used = attempt;
@@ -383,14 +487,14 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
       notes.push(e.message);
     }
   }
-  if (!png) return { ok: false, error: `No cover copy fits: ${notes.slice(-1)[0] ?? "unknown"}` };
+  if (!png) return { ok: false, error: input.edit && spec.layout !== "HEADLINE" ? `That doesn't fit on a ${spec.layout.toLowerCase()} cover: ${notes.slice(-1)[0] ?? "unknown"}. Try shorter wording.` : `No cover copy fits: ${notes.slice(-1)[0] ?? "unknown"}` };
 
   const { url } = await uploadToR2(`covers/${asset.clientId}/${asset.id}-${Date.now()}.png`, png, "image/png");
   const stored: StoredCoverSpec = {
     ...used,
-    author: { name: author.name, role: author.role, has_photo: Boolean(author.photo) },
+    author: { name: author.name, role: author.role, has_photo: Boolean(author.photo), photo_ok: photoOk },
     // The chosen art is kept even when this layout or fit dropped it, so switching back restores it.
-    art: used.art ?? spec.art,
+    art: used.art ?? spec.art ?? art,
     art_style: artStyle,
     art_drawn: Boolean(used.art) && (used.layout === "HEADLINE" || used.layout === "STATEMENT"),
     card,
@@ -432,9 +536,11 @@ export async function refreshCoverIfStale(assetId: string): Promise<boolean> {
   const why = coverOutOfDate(spec, draft);
   if (!why) return false;
   const reviewerHeadline = spec.headline_source === "reviewer" && spec.headline && !coverOutOfDate({ headline: spec.headline }, draft);
+  // The post changed, so its points are read again when next needed.
+  const card = spec.card ? { card: { ...spec.card, shape: undefined } } : {};
   const result = reviewerHeadline
-    ? await renderAssetCover(assetId, { edit: { headline: spec.headline, emphasis: spec.emphasis, kicker: coverOutOfDate({ kicker: spec.kicker }, draft) ? "" : undefined, layout: spec.layout === "QUOTE" || spec.layout === "NUMBER" ? "STATEMENT" : undefined } })
-    : await renderAssetCover(assetId);
+    ? await renderAssetCover(assetId, { ...card, edit: { headline: spec.headline, emphasis: spec.emphasis, kicker: coverOutOfDate({ kicker: spec.kicker }, draft) ? "" : undefined, layout: spec.layout && ["QUOTE", "NUMBER", "LIST", "GRID", "PUNCH"].includes(spec.layout) ? "STATEMENT" : undefined } })
+    : await renderAssetCover(assetId, card);
   if (!result.ok) console.warn(`[cover] ${assetId} is out of date (${why}) and could not be redrawn: ${result.error}`);
   return result.ok;
 }

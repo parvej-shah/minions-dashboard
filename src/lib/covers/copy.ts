@@ -18,6 +18,7 @@
  */
 import { contentWords, numbersIn, sharedWords } from "@/lib/harvest/text";
 import { headlineFits, type CoverLayout } from "./layouts";
+import type { PosterShape } from "./shape";
 
 export interface CoverCard {
   headline?: string;
@@ -34,6 +35,8 @@ export interface CoverCard {
   shape_motif?: string;
   doodle_motif?: string;
   icon_motif?: string;
+  /** What the post holds that a poster can show (shape.ts), read once per draft; absent until read. */
+  shape?: PosterShape;
 }
 
 export interface CoverCopyInput {
@@ -102,7 +105,7 @@ function sentenceCase(t: string): string {
 }
 
 /** Figures in cover text that the body never states. Cover text may not add a figure. */
-function newFigures(text: string, body: string): string[] {
+export function newFigures(text: string, body: string): string[] {
   const inBody = new Set(numbersIn(body));
   return numbersIn(text).filter((n) => !inBody.has(n));
 }
@@ -306,11 +309,23 @@ const squash = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()
  * as current while its figures are.
  */
 export function coverOutOfDate(
-  cover: { layout?: string; headline?: string; kicker?: string; quote?: string; number?: { value: string } | null; headline_source?: string },
+  cover: {
+    layout?: string;
+    headline?: string;
+    kicker?: string;
+    quote?: string;
+    number?: { value: string } | null;
+    headline_source?: string;
+    list?: string[];
+    grid?: { label: string }[];
+    punch?: { lines: string[]; checks: string[] };
+  },
   draft: { title: string; body: string; post?: string | null }
 ): string | null {
   if (cover.quote && cover.layout === "QUOTE" && !squash(quoteSource(draft)).includes(squash(cover.quote))) return "its quote is not in the post";
-  const text = [cover.headline, cover.kicker, cover.layout === "NUMBER" ? cover.number?.value : ""].filter(Boolean).join(" ");
+  // A poster's items are on the cover only in their own layout.
+  const items = cover.layout === "LIST" ? cover.list : cover.layout === "GRID" ? cover.grid?.map((g) => g.label) : cover.layout === "PUNCH" && cover.punch ? [...cover.punch.lines, ...cover.punch.checks] : [];
+  const text = [cover.headline, cover.kicker, cover.layout === "NUMBER" ? cover.number?.value : "", ...(items ?? [])].filter(Boolean).join(" ");
   const figures = newFigures(text, draft.body);
   if (figures.length) return `it states ${figures.join(", ")}, which the post no longer does`;
   if (cover.headline_source === "title" && cover.headline && squash(cover.headline) !== squash(draft.title)) return "its headline is the post's old title";

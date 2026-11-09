@@ -6,6 +6,7 @@ import {
   blogUrl,
 } from "@/constants/config";
 import type { AssetItem, AssetStatus, ClaimCheckItem, CoverSpecDTO } from "@/types";
+import type { PosterShape } from "@/lib/covers/shape";
 import type { AudienceLane } from "@/types";
 import { linkedinWentAs, type FollowUpFormat } from "@/lib/followUp";
 import { linkedinPostUrl, toChannelUrls } from "@/lib/channels";
@@ -83,6 +84,8 @@ function toCoverDTO(raw: unknown): CoverSpecDTO | null {
   const number = c.number && typeof c.number === "object" ? (c.number as { value: string; unit?: string }) : null;
   const a = c.author && typeof c.author === "object" ? (c.author as Record<string, unknown>) : null;
   const author = a && str(a.name) ? { name: String(a.name), role: str(a.role) } : null;
+  const card = c.card && typeof c.card === "object" ? (c.card as { shape?: PosterShape }) : null;
+  const shape = card?.shape && typeof card.shape === "object" ? card.shape : null;
   return {
     layout: c.layout as CoverSpecDTO["layout"],
     label: str(c.label),
@@ -96,6 +99,11 @@ function toCoverDTO(raw: unknown): CoverSpecDTO | null {
     art_style: str(c.art_style),
     art_drawn: c.art_drawn === true,
     notes: Array.isArray(c.notes) ? c.notes.filter((n): n is string => typeof n === "string") : [],
+    list: shape?.list?.items ?? null,
+    grid: shape?.grid?.items ?? null,
+    punch: shape?.punch ?? null,
+    shape_read: Boolean(shape),
+    photo_ok: a?.photo_ok === true,
   };
 }
 

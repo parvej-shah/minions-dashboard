@@ -33,7 +33,7 @@ export interface SocialVariants {
 
 /** How a code-drawn cover was made (phase 5), for the cover editor. */
 export interface CoverSpecDTO {
-  layout: "HEADLINE" | "STATEMENT" | "QUOTE" | "NUMBER";
+  layout: "HEADLINE" | "STATEMENT" | "QUOTE" | "NUMBER" | "LIST" | "GRID" | "PUNCH" | "PHOTO";
   label: string | null;
   headline: string;
   emphasis: string | null;
@@ -49,6 +49,14 @@ export interface CoverSpecDTO {
   art_drawn: boolean;
   /** Why an option was not used: a strategist headline that failed, a figure the draft does not state. */
   notes: string[];
+  /** The poster items read from the post (null when the post has none of that kind). */
+  list: string[] | null;
+  grid: { label: string; icon: string }[] | null;
+  punch: { lines: string[]; checks: string[] } | null;
+  /** Whether the post's points were read yet; until then List, Grid and Punch are offered and read on click. */
+  shape_read: boolean;
+  /** Whether the brand photo can fill a Photo cover (an opaque headshot, big enough). */
+  photo_ok: boolean;
 }
 
 /**

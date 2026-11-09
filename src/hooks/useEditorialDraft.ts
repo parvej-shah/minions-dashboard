@@ -73,6 +73,9 @@ export interface CoverEditInput {
   emphasis?: string;
   art?: "SHAPES" | "DOODLES" | "ICONS" | "NONE";
   art_reroll?: boolean;
+  list?: string[];
+  grid_labels?: string[];
+  punch?: { lines: string[]; checks: string[] };
 }
 
 /** The body with its leading cover image line pointed at url (the editor may hold an older one). */
@@ -464,8 +467,8 @@ export function useEditorialDraft(
         // Say what happened, so a click that changed less than asked is not a mystery.
         const c = fresh.cover;
         if (edit.art && edit.art !== "NONE" && c && !c.art_drawn) {
-          return c.layout === "QUOTE" || c.layout === "NUMBER"
-            ? "Cover updated. Quote and Number covers have no illustration."
+          return c.layout !== "HEADLINE" && c.layout !== "STATEMENT"
+            ? "Cover updated. Only Headline and Statement covers have an illustration."
             : "Cover updated. The illustration was left off: the headline needed the space.";
         }
         return "Cover updated";

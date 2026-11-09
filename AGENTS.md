@@ -8,32 +8,19 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-## Lead Agent Protocol (Claude = lead, Antigravity = worker)
+## Working protocol
 
-Roles
+One agent does all the work; nothing is delegated (user, 2026-11-09).
 
-- You are the lead: plan, delegate, verify. The user only talks to you.
-- Antigravity handles routine work: boilerplate, CRUD, UI, tests, docs, simple refactors.
-- You keep for yourself: architecture, security, tricky logic, integrations, anything where a mistake is costly.
-
-Workflow
-
-1. Break the request into small tasks. Write each to /tasks/<n>.md with:
-   Goal | Files to touch | Constraints | Acceptance tests | "Do not touch" list.
-2. Classify each task: [CLAUDE] or [ANTIGRAVITY].
-3. Do all [CLAUDE] tasks yourself.
-4. For [ANTIGRAVITY] tasks, tell the user exactly:
-   "Open Antigravity and say: Do /tasks/<n>.md, then work only on branch task-<n>."
-5. When the user says a task is done, review the git diff, run the tests, and check the acceptance criteria.
-   If it fails, write specific feedback into /tasks/<n>.md under "Revision" and ask the user to re-run it.
-6. Merge only after tests pass. Keep /tasks/status.md updated (TODO / IN PROGRESS / BLOCKED / DONE).
-7. If Antigravity is rate-limited, mark the task BLOCKED, continue other work, and remind the user to resume after the reset.
-
-Rules
-
-- Write the acceptance tests BEFORE delegating.
-- Never delegate a task you can't verify.
-- End every reply with: Done / Blocked / Needs your decision.
+1. Break the request into small tasks. Write each to `tasks/<n>.md`:
+   Goal | Files to touch | Constraints | Acceptance tests | Do not touch.
+2. Write the acceptance tests before the code.
+3. Before calling a task done, run `npm test`, `npx tsc --noEmit` and lint,
+   and check every acceptance criterion.
+4. Keep `tasks/status.md` current (TODO / IN PROGRESS / BLOCKED / DONE).
+5. Never push without the user's OK: a push to main deploys production.
+6. Never run `vercel link` or `vercel env pull`.
+7. End every reply with: Done / Blocked / Needs your decision.
 
 # Session memory
 
@@ -71,20 +58,3 @@ message. Don't duplicate product-strategy calls that belong in the D-table in
 
 When unsure, ask: would the product owner care about it? If not, leave it
 out.
-
-# Worker protocol (Antigravity)
-
-Claude is the lead and writes tasks; you do the ones handed to you.
-
-- Work only on the task file you were given (`tasks/<n>.md`) and only on
-  branch `task-<n>`, in the folder you were opened in. Never switch to or
-  commit on `main`, never push, never merge.
-- Touch only the files the task lists. Leave everything under "Do not touch" alone.
-- Meet every acceptance test. Before you say you're done, run `npm test`,
-  `npx tsc --noEmit` and `npx eslint` on the files you changed, and fix what fails.
-- Commit your work on `task-<n>` with a message that says what changed and why.
-- If the task is unclear or needs a file it doesn't list, stop and write the
-  question under `## Questions` in the task file instead of guessing.
-- If the task file has a `## Revision` section, do that first.
-- Never run `vercel link` or `vercel env pull`, touch `.env*` files, run
-  database migrations or writes, or change n8n workflows.

@@ -1,6 +1,5 @@
 # Task <n>: <title>
 
-Owner: [CLAUDE] / [ANTIGRAVITY]  ·  Branch: task-<n>
 
 ## Goal
 What should be true when this is done, in one or two sentences.
@@ -19,5 +18,3 @@ What should be true when this is done, in one or two sentences.
 - src/constants/nav.ts, docs/decisions/DECISIONS.md, .env*, prisma/, n8n/
 
 ## Questions
-
-## Revision
