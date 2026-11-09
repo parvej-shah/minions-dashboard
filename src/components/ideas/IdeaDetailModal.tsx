@@ -89,7 +89,7 @@ export default function IdeaDetailModal({
 
           <button
             onClick={() => onClose()}
-            className="flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-transparent text-muted transition-all hover:border-line hover:bg-surface-2 hover:text-white"
+            className="flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-transparent text-muted transition-all hover:border-line hover:bg-surface-2 hover:text-ink"
             title="Close"
             aria-label="Close"
           >
@@ -99,28 +99,28 @@ export default function IdeaDetailModal({
 
         {/* Modal Body: Scrollable Content */}
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-5 text-ink sm:p-6">
-          <h2 className="text-xl sm:text-2xl font-extrabold leading-snug text-white break-words">{title}</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold leading-snug text-ink break-words">{title}</h2>
 
           {point && (
             <section className="space-y-2">
               <h3 className={sectionLabel}>The point</h3>
-              <p className="text-sm leading-relaxed text-[#E2E8F0] whitespace-pre-wrap break-words">{point}</p>
+              <p className="text-sm leading-relaxed text-ink whitespace-pre-wrap break-words">{point}</p>
             </section>
           )}
 
           {(authority?.icp_problem || detailIdea.audience) && (
             <section className="space-y-2">
               <h3 className={sectionLabel}>Who it&apos;s for</h3>
-              <p className="text-sm font-semibold text-white">{AUDIENCE_TEXT[detailIdea.audience || "ICP"] ?? AUDIENCE_TEXT.ICP}</p>
+              <p className="text-sm font-semibold text-ink">{AUDIENCE_TEXT[detailIdea.audience || "ICP"] ?? AUDIENCE_TEXT.ICP}</p>
               {/* The problem is stored as a statement or a question, so it stands on its own line as written. */}
-              {authority?.icp_problem && <p className="text-sm leading-relaxed text-[#E2E8F0]">{authority.icp_problem}</p>}
+              {authority?.icp_problem && <p className="text-sm leading-relaxed text-ink">{authority.icp_problem}</p>}
             </section>
           )}
 
           {authority?.author_advantage && (
             <section className="space-y-2">
               <h3 className={sectionLabel}>Your angle</h3>
-              <p className="text-sm leading-relaxed text-[#E2E8F0]">{authority.author_advantage}</p>
+              <p className="text-sm leading-relaxed text-ink">{authority.author_advantage}</p>
               {authority.trust_basis.length > 0 && (
                 <p className="text-xs text-subtle">
                   Based on your {authority.trust_basis.map((t) => t.toLowerCase().replace(/_/g, " ")).join(" and ")}.
@@ -143,7 +143,7 @@ export default function IdeaDetailModal({
           {(detailIdea.why || signals.length > 0 || detailIdea.source_url) && (
             <section className="space-y-2">
               <h3 className={sectionLabel}>Why it&apos;s worth posting</h3>
-              {detailIdea.why && <p className="text-sm leading-relaxed text-[#CBD5E1]">{detailIdea.why}</p>}
+              {detailIdea.why && <p className="text-sm leading-relaxed text-ink">{detailIdea.why}</p>}
               {signals.length > 0 && (
                 <ul className="space-y-2">
                   {signals.map((sig, idx) => (
@@ -151,7 +151,7 @@ export default function IdeaDetailModal({
                       <div className="flex items-start justify-between gap-2">
                         <p className="text-xs font-semibold leading-snug text-ink">{sig.title || "Untitled source"}</p>
                         {sig.url && (
-                          <a href={sig.url} target="_blank" rel="noopener noreferrer" className="shrink-0 p-1 text-brand hover:text-white" aria-label="Open this source">
+                          <a href={sig.url} target="_blank" rel="noopener noreferrer" className="shrink-0 p-1 text-brand hover:text-ink" aria-label="Open this source">
                             <ExternalLink className="w-3.5 h-3.5" />
                           </a>
                         )}
@@ -195,7 +195,7 @@ export default function IdeaDetailModal({
               onClose();
               onEdit(detailIdea);
             }}
-            className={`${iconButton} hover:bg-surface-3 hover:text-white`}
+            className={`${iconButton} hover:bg-surface-3 hover:text-ink`}
             title="Edit idea"
             aria-label="Edit idea"
           >

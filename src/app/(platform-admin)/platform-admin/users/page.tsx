@@ -18,9 +18,9 @@ interface UserRow {
 }
 
 const ROLE_COLORS: Record<string, string> = {
-  SYSTEM_ADMIN: "bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/30",
+  SYSTEM_ADMIN: "bg-brand/10 text-brand border-brand/30",
   OWNER: "bg-brand/10 text-brand border-brand/30",
-  MARKETING_DIRECTOR: "bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/30",
+  MARKETING_DIRECTOR: "bg-brand/10 text-brand border-brand/30",
   MEMBER: "bg-subtle/10 text-muted border-subtle/30",
 };
 

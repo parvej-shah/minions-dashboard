@@ -28,6 +28,13 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-09 — Calm, light redesign: four places, one decision per screen
+
+**Decision:** The dashboard is rebuilt light (Apple-style neutrals, one blue action colour) with a top menu of four places: Today (home), Ideas, Posts, Brand. Billing, team, channels, schedule and the blog link move under the avatar. Today opens on the one thing to do (posts waiting for your OK, or "all caught up"); Posts is one image grid filtered Needs you / Scheduled / Posted; the review screen shows the post first with one primary button that says when it goes out. Confetti, streaks and 3D buttons go.
+**Why:** Busy owners found the dark, dense Studio heavy and were afraid to act. Research (apple.com, Pinterest UI boards, 2026-11-09) pointed to white space, one action per view, and image-first lists. Today is not a repeat of other pages: it is the next decision.
+**Alternatives considered:** Restyling the dark theme (still dense); keeping Studio as home (the review queue and its tools overwhelm first).
+**Status:** active
+
 ## 2026-11-09 — Unpublish from LinkedIn in the Studio
 
 **Decision:** A published post that Minions sent to LinkedIn shows "Unpublish from LinkedIn". After a confirm, Minions deletes the post on LinkedIn, takes it off the blog, and returns the draft to the review queue with its content kept. A post copied to LinkedIn by hand, or one that also went to Facebook, still can't be unpublished from Minions. Supersedes 2026-10-24.
@@ -117,7 +124,7 @@ and link to it here.
 **Decision:** The Mission Control page and its sidebar, bottom-bar and app-shortcut entries are gone. `/` now opens Editorial Studio. The weekly question moves to the top of the Studio, and the Daily Spark quote is dropped.
 **Why:** Every part of the page repeated another one (the review queue, the counts, the shortcut buttons, and a blog list most workspaces never see). That put an extra step between users and the Studio, where the work happens. A home page can come back once it shows something no other page does, such as reach over time.
 **Alternatives considered:** Renaming it "Home" and slimming it down. That still leaves a page with no job of its own.
-**Status:** active
+**Status:** superseded by [Calm, light redesign](#2026-11-09--calm-light-redesign-four-places-one-decision-per-screen)
 
 ## 2026-10-23 — Users can erase their own account from the account modal
 

@@ -42,7 +42,7 @@ export default function VariantEditor({ value, onChange, placeholder, minHeight,
 
       <div className="sticky bottom-3 z-10 flex flex-col gap-3 rounded-2xl border-2 border-line bg-surface/95 p-3 shadow-2xl backdrop-blur sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2 text-[11px] font-mono text-muted">
-          <span className={overLimit ? "text-red-400 font-bold" : undefined}>
+          <span className={overLimit ? "text-danger font-bold" : undefined}>
             {charLimit !== undefined ? `${value.length}/${charLimit}` : value.length.toLocaleString()} characters
           </span>
           <span>•</span>

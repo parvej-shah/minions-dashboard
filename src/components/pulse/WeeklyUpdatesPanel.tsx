@@ -10,7 +10,7 @@ import { PULSE_DAYS } from "@/lib/pulse/week";
 import type { PulseDTO, PulseHistoryItem } from "@/services/pulse";
 import { sectionClass } from "@/components/ui/fieldStyles";
 
-const selectClass = "rounded-lg border border-line bg-[#0B1016] px-2.5 py-1.5 text-xs text-ink cursor-pointer";
+const selectClass = "rounded-lg border border-line bg-surface-2 px-2.5 py-1.5 text-xs text-ink cursor-pointer";
 
 function timezones(current: string): string[] {
   try {
@@ -55,7 +55,7 @@ export default function WeeklyUpdatesPanel() {
   };
 
   if (!pulse) {
-    if (error) return <p className="text-xs text-red-400">{error}</p>;
+    if (error) return <p className="text-xs text-danger">{error}</p>;
     return (
       <SkeletonGroup label="Loading weekly updates" className={sectionClass}>
         <Skeleton className="h-5 w-40" />
@@ -101,7 +101,7 @@ export default function WeeklyUpdatesPanel() {
         </select>
       </div>
 
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-xs text-danger">{error}</p>}
 
       {history && history.length === 0 && (
         <p className="rounded-lg border border-dashed border-line px-3 py-6 text-center text-xs text-subtle">
@@ -117,7 +117,7 @@ export default function WeeklyUpdatesPanel() {
       )}
       <ul className="space-y-3">
         {(history ?? []).map((h) => (
-          <li key={h.week_start} className="rounded-xl border border-line bg-[#0B1016] p-3 space-y-2">
+          <li key={h.week_start} className="rounded-xl border border-line bg-surface-2 p-3 space-y-2">
             <div className="flex items-center justify-between text-[11px] font-mono text-subtle">
               <span>Week of {h.week_start}</span>
               <span>{h.status === "SKIPPED" ? "Skipped" : `${h.memories.length} note${h.memories.length === 1 ? "" : "s"} kept`}</span>

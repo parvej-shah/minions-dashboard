@@ -21,3 +21,11 @@
 | 17 | No product names in outcome-first posts; bsse1610 crew names removed | CLAUDE | DONE (data applied; pushed 3b4ebd7) | tasks/17.md |
 | 18 | Ghostwriter brand for parvejshalabib007s-workspace | CLAUDE | DONE (applied in prod; pushed c53476a) | tasks/18.md |
 | 19 | Unpublish from LinkedIn in the Studio (deletes the LinkedIn post, back to review) | CLAUDE | DONE (pushed e448e86) | tasks/19.md |
+| 20 | Calm redesign: research + direction board (UI only, engine untouched) | CLAUDE | DONE (approved 2026-11-09, blue) | tasks/20.md |
+| 21 | Calm foundation: light tokens, calm primitives, top menu | CLAUDE | DONE (local) | tasks/21.md |
+| 22 | Today page at / | CLAUDE | IN PROGRESS | tasks/22.md |
+| 23 | Posts library (/posts) | CLAUDE | TODO | tasks/23.md |
+| 24 | Review screen (Studio rebuilt) | CLAUDE | TODO | tasks/24.md |
+| 25 | Ideas | CLAUDE | TODO | tasks/25.md |
+| 26 | Remaining screens calm pass | CLAUDE | TODO | tasks/26.md |
+| 27 | Sweep + browser pass, then ask to push | CLAUDE | TODO | tasks/27.md |

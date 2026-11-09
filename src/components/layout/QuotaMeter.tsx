@@ -23,33 +23,22 @@ export default function QuotaMeter({ quota, compact = false }: QuotaMeterProps) 
 
   if (compact) {
     return (
-      <div
-        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#161d24] border border-[#1f2b37] text-[10px] font-mono"
-        title={`${used} of ${limit} posts used this month (${quota.planKey} plan)`}
-      >
-        <span className={`font-bold ${textColor}`}>
-          {used}/{limit}
-        </span>
-        <span className="text-subtle">posts</span>
-      </div>
+      <span className={`text-sm ${textColor}`} title={`${used} of ${limit} posts used this month (${quota.planKey} plan)`}>
+        {used}/{limit} posts
+      </span>
     );
   }
 
   return (
-    <div className="px-3 py-2.5 rounded-xl bg-[#161d24] border border-[#1f2b37] space-y-1.5">
-      <div className="flex items-center justify-between text-[10px] font-mono">
-        <span className="text-subtle uppercase tracking-wider">
-          {quota.planKey} plan
-        </span>
-        <span className={`font-bold ${textColor}`}>
-          {used} / {limit} Posts Used
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-muted">Posts this month</span>
+        <span className={textColor}>
+          {used} of {limit}
         </span>
       </div>
-      <div className="h-1.5 rounded-full bg-[#0b0f14] overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all ${barColor}`}
-          style={{ width: `${pct}%` }}
-        />
+      <div className="h-1 overflow-hidden rounded-full bg-surface-3">
+        <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
       </div>
     </div>
   );

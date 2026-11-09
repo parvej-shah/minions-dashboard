@@ -5,7 +5,7 @@ import type { PlainNote, PlainNoteTone } from "@/lib/drafts/plainNotes";
 
 const TONE: Record<PlainNoteTone, { icon: typeof Eye; dot: string; label: string }> = {
   fix: { icon: AlertTriangle, dot: "bg-coral text-white", label: "Fix" },
-  check: { icon: Eye, dot: "bg-gold text-[#1F1300]", label: "Check" },
+  check: { icon: Eye, dot: "bg-gold text-white", label: "Check" },
   tip: { icon: Lightbulb, dot: "bg-surface-2 text-muted", label: "Tip" },
 };
 
@@ -37,7 +37,7 @@ export default function DraftChecks({ notes, className = "" }: { notes: PlainNot
           const tone = TONE[note.tone];
           const Icon = tone.icon;
           return (
-            <li key={i} className="flex items-start gap-2.5 text-sm leading-snug text-[#CBD5E1]">
+            <li key={i} className="flex items-start gap-2.5 text-sm leading-snug text-ink">
               <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${tone.dot}`} aria-label={tone.label}>
                 <Icon className="h-3.5 w-3.5" strokeWidth={2.75} />
               </span>

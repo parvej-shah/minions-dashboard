@@ -53,7 +53,7 @@ export default function Modal({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex justify-center bg-black/80 backdrop-blur-md animate-in fade-in duration-150 ${
+      className={`fixed inset-0 z-50 flex justify-center bg-black/30 backdrop-blur-sm animate-in fade-in duration-150 ${
         isSheet ? "items-end sm:items-center sm:p-4" : "items-center p-4"
       }`}
       onClick={closeOnBackdrop ? onClose : undefined}
@@ -62,10 +62,10 @@ export default function Modal({
       <div
         role="dialog"
         aria-modal="true"
-        className={`relative w-full ${maxWidthClass} bg-[#0D1520] border-line shadow-2xl overflow-hidden ${
+        className={`relative w-full ${maxWidthClass} bg-surface border-line shadow-[0_24px_64px_rgba(0,0,0,0.18)] overflow-hidden ${
           isSheet
-            ? "flex h-[100dvh] flex-col sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:border animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150"
-            : "rounded-2xl border animate-in zoom-in-95 duration-150"
+            ? "flex h-[100dvh] flex-col sm:h-auto sm:max-h-[90vh] sm:rounded-3xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150"
+            : "rounded-3xl animate-in zoom-in-95 duration-150"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -77,7 +77,7 @@ export default function Modal({
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="p-1 rounded-lg text-subtle hover:text-white hover:bg-white/5 transition-colors cursor-pointer shrink-0"
+                className="p-1 rounded-lg text-subtle hover:text-ink hover:bg-surface-2 transition-colors cursor-pointer shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>

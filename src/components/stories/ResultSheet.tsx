@@ -29,7 +29,7 @@ export default function ResultSheet({
   const kept = notes.filter((n) => n.keep).length;
   const set = (i: number, next: Note) => onChange(notes.map((n, j) => (j === i ? next : n)));
   return (
-    <section className="story-sheet-up fixed inset-x-0 bottom-0 z-10 max-h-[85vh] overflow-y-auto border-t-2 border-brand/30 bg-[#0C2420]">
+    <section className="story-sheet-up fixed inset-x-0 bottom-0 z-10 max-h-[85vh] overflow-y-auto border-t-2 border-brand/30 bg-success/5">
       <div className="mx-auto w-full max-w-2xl px-4 py-5 sm:px-6">
         <div className="flex items-center gap-3">
           <span className="story-pop flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-brand-ink">
@@ -37,7 +37,7 @@ export default function ResultSheet({
           </span>
           <div className="min-w-0">
             <h3 className="text-lg font-extrabold text-brand">{praise}</h3>
-            <p className="text-sm text-[#A7D8CE]">
+            <p className="text-sm text-success">
               {notes.length === 1 ? "Here is the note Minions made." : `Minions made ${notes.length} notes.`} Fix anything that is not quite right.
             </p>
           </div>
@@ -49,11 +49,11 @@ export default function ResultSheet({
           ))}
         </div>
 
-        {blocked && <p className="mt-3 text-sm font-semibold text-red-400">Remove the private detail flagged above, or keep that note general.</p>}
-        {error && <p className="mt-3 text-sm font-semibold text-red-400">{error}</p>}
+        {blocked && <p className="mt-3 text-sm font-semibold text-danger">Remove the private detail flagged above, or keep that note general.</p>}
+        {error && <p className="mt-3 text-sm font-semibold text-danger">{error}</p>}
 
         <div className="mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-          <button type="button" disabled={busy} onClick={onEdit} className="py-2 text-sm font-extrabold uppercase tracking-wider text-[#A7D8CE] hover:text-white cursor-pointer disabled:opacity-50">
+          <button type="button" disabled={busy} onClick={onEdit} className="py-2 text-sm font-extrabold uppercase tracking-wider text-success hover:text-ink cursor-pointer disabled:opacity-50">
             Edit my answer
           </button>
           <button type="button" disabled={busy || disabled} onClick={onKeep} className={`${chunky.primary} w-full sm:ml-auto sm:w-auto sm:min-w-[11rem]`}>

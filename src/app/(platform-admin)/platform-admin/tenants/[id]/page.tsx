@@ -252,7 +252,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
       </Section>
 
       {toast.message && (
-        <div className="fixed bottom-6 right-6 z-50 bg-line text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold">
+        <div className="fixed bottom-6 right-6 z-50 bg-ink text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold">
           {toast.message}
         </div>
       )}

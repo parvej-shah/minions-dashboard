@@ -57,8 +57,8 @@ export default function LinkedInPostPreview({ author, text, imageUrl, className 
         )}
         <div className="min-w-0 flex-1 leading-tight">
           <p className="truncate text-sm font-semibold">{author.name}</p>
-          {author.headline && <p className="truncate text-xs text-[#666666]">{author.headline}</p>}
-          <p className="mt-0.5 flex items-center gap-1 text-xs text-[#666666]">
+          {author.headline && <p className="truncate text-xs text-muted">{author.headline}</p>}
+          <p className="mt-0.5 flex items-center gap-1 text-xs text-muted">
             Now · <Globe2 className="h-3 w-3" aria-label="Public" />
           </p>
         </div>
@@ -69,7 +69,7 @@ export default function LinkedInPostPreview({ author, text, imageUrl, className 
         {fold !== null && !expanded && (
           <>
             {"… "}
-            <button type="button" onClick={() => setExpanded(true)} className="font-semibold text-[#666666] hover:text-[#0A66C2] hover:underline cursor-pointer">
+            <button type="button" onClick={() => setExpanded(true)} className="font-semibold text-muted hover:text-[#0A66C2] hover:underline cursor-pointer">
               see more
             </button>
           </>
@@ -80,7 +80,7 @@ export default function LinkedInPostPreview({ author, text, imageUrl, className 
         <Image src={imageUrl} alt="" width={1200} height={627} unoptimized className="block h-auto w-full border-y border-[#E0DFDC]" />
       )}
 
-      <footer className="grid grid-cols-4 border-t border-[#E0DFDC] px-2 py-1 text-xs font-semibold text-[#666666]" aria-hidden="true">
+      <footer className="grid grid-cols-4 border-t border-[#E0DFDC] px-2 py-1 text-xs font-semibold text-muted" aria-hidden="true">
         {[
           { icon: ThumbsUp, label: "Like" },
           { icon: MessageSquare, label: "Comment" },

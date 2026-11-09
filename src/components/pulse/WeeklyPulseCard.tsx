@@ -18,7 +18,7 @@ import StoryBankCard from "@/components/stories/StoryBankCard";
 
 import { buttonStyles } from "@/components/ui/Button";
 const inputClass =
-  "w-full rounded-lg border border-line bg-[#0B1016] px-3 py-2 text-sm text-ink placeholder:text-[#475569] focus:border-brand focus:outline-none";
+  "w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-sm text-ink placeholder:text-subtle focus:border-brand focus:outline-none";
 const MIN_CHARS = 20;
 
 type Draft = CheckedCandidate & { keep: boolean; open: boolean };
@@ -120,7 +120,7 @@ export default function WeeklyPulseCard() {
   if (!pulse) return null;
 
   const tzBanner = browserTz && (
-    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-line bg-[#0B1016] px-4 py-3 text-xs text-muted">
+    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-line bg-surface-2 px-4 py-3 text-xs text-muted">
       <Clock className="h-4 w-4 text-brand" />
       <span className="flex-1 min-w-[200px]">
         This workspace runs on <b className="text-ink">{pulse.settings.timezone}</b>. Your browser says{" "}
@@ -217,7 +217,7 @@ export default function WeeklyPulseCard() {
             </div>
           </div>
           {answer.trim() && !longEnough && <p className="text-[11px] text-subtle">A few more words, so there is something specific to use.</p>}
-          {error && <p className="text-xs text-red-400">{error}</p>}
+          {error && <p className="text-xs text-danger">{error}</p>}
         </section>
       </div>
     );
@@ -243,7 +243,7 @@ export default function WeeklyPulseCard() {
                   <CandidateEditor draft={d} onChange={(next) => setDraft(i, next)} />
                 </li>
               ) : (
-                <li key={i} className="flex items-start gap-2 rounded-lg border border-line bg-[#0B1016] px-3 py-2 text-sm text-ink">
+                <li key={i} className="flex items-start gap-2 rounded-lg border border-line bg-surface-2 px-3 py-2 text-sm text-ink">
                   <span className="flex-1">{d.content}</span>
                   <button type="button" onClick={() => setDraft(i, { ...d, open: true })} className="text-xs text-brand hover:underline cursor-pointer">
                     Edit
@@ -275,9 +275,9 @@ export default function WeeklyPulseCard() {
           <button type="button" disabled={!!busy} onClick={() => void confirm([])} className="rounded-lg px-3 py-2 text-xs text-muted hover:text-ink disabled:opacity-50 cursor-pointer">
             Save nothing this week
           </button>
-          {blocked && <span className="text-[11px] text-red-400">Remove the confidential detail before saving.</span>}
+          {blocked && <span className="text-[11px] text-danger">Remove the confidential detail before saving.</span>}
         </div>
-        {error && <p className="text-xs text-red-400">{error}</p>}
+        {error && <p className="text-xs text-danger">{error}</p>}
       </section>
     </div>
   );
@@ -286,7 +286,7 @@ export default function WeeklyPulseCard() {
 function CandidateEditor({ draft, onChange }: { draft: Draft; onChange: (d: Draft) => void }) {
   const issues = draft.check?.issues ?? [];
   return (
-    <div className={`space-y-2 rounded-xl border p-3 ${draft.keep ? "border-line bg-[#0B1016]" : "border-line/50 opacity-50"}`}>
+    <div className={`space-y-2 rounded-xl border p-3 ${draft.keep ? "border-line bg-surface-2" : "border-line/50 opacity-50"}`}>
       <div className="flex flex-wrap items-center gap-2">
         <label className="inline-flex items-center gap-1.5 text-xs text-muted cursor-pointer">
           <input type="checkbox" checked={draft.keep} onChange={(e) => onChange({ ...draft, keep: e.target.checked })} className="accent-brand" />
@@ -296,7 +296,7 @@ function CandidateEditor({ draft, onChange }: { draft: Draft; onChange: (d: Draf
           value={draft.kind}
           onChange={(e) => onChange({ ...draft, kind: e.target.value as MemoryKind })}
           aria-label="Kind of note"
-          className="rounded-lg border border-line bg-[#0B1016] px-2 py-1 text-xs text-ink cursor-pointer"
+          className="rounded-lg border border-line bg-surface-2 px-2 py-1 text-xs text-ink cursor-pointer"
         >
           {MEMORY_KINDS.map((k) => (
             <option key={k} value={k}>

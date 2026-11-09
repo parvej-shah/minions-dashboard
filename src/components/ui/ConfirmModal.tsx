@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { AlertTriangle, Trash2, Loader2, Info } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Modal from "./Modal";
 
 export type ConfirmVariant = "danger" | "warning" | "primary";
@@ -18,31 +18,14 @@ export interface ConfirmModalProps {
   onClose: () => void;
 }
 
-const VARIANT_STYLES: Record<
-  ConfirmVariant,
-  { iconBg: string; icon: React.ReactNode; glow: string; confirmBtn: string }
-> = {
-  danger: {
-    iconBg: "bg-red-500/10 border-red-500/30 text-red-400",
-    icon: <Trash2 className="w-5 h-5" />,
-    glow: "from-red-500/10",
-    confirmBtn: "bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-600/20",
-  },
-  warning: {
-    iconBg: "bg-amber-500/10 border-amber-500/30 text-amber-400",
-    icon: <AlertTriangle className="w-5 h-5" />,
-    glow: "from-amber-500/10",
-    confirmBtn: "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-600/20",
-  },
-  primary: {
-    iconBg: "bg-brand/10 border-brand/30 text-brand",
-    icon: <Info className="w-5 h-5" />,
-    glow: "from-brand/10",
-    confirmBtn:
-      "bg-brand hover:bg-brand-hover text-canvas font-extrabold shadow-lg shadow-brand/20",
-  },
+/** The confirm button's colour: red only for things that delete, blue otherwise. */
+const CONFIRM_BUTTON: Record<ConfirmVariant, string> = {
+  danger: "bg-danger text-white hover:bg-danger/90",
+  warning: "bg-ink text-white hover:bg-ink/85",
+  primary: "bg-brand text-brand-ink hover:bg-brand-hover",
 };
 
+/** A plain question, one sentence of what happens, Cancel and one clear action. */
 export default function ConfirmModal({
   isOpen,
   title,
@@ -54,38 +37,21 @@ export default function ConfirmModal({
   onConfirm,
   onClose,
 }: ConfirmModalProps) {
-  const styles = VARIANT_STYLES[variant];
-
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       closeOnBackdrop={!isLoading}
-      title={
-        <div className="flex items-center gap-3.5">
-          <div
-            className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${styles.iconBg}`}
-          >
-            {styles.icon}
-          </div>
-          <h3 className="text-base font-bold text-white tracking-tight">{title}</h3>
-        </div>
-      }
+      title={<h3 className="text-[21px] font-semibold leading-snug tracking-tight text-ink">{title}</h3>}
     >
-      {/* Ambient top glow */}
-      <div
-        className={`absolute -top-12 left-1/2 -translate-x-1/2 w-48 h-12 bg-gradient-to-b ${styles.glow} to-transparent blur-2xl pointer-events-none rounded-full`}
-      />
-
-      <div className="p-6 pt-5 space-y-5">
-        <p className="text-xs text-muted leading-relaxed pl-0.5">{description}</p>
-
-        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-line/60">
+      <div className="space-y-6 p-6 pt-3">
+        <p className="text-[15px] leading-relaxed text-muted">{description}</p>
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-muted hover:text-white hover:bg-surface-2 border border-line transition-all cursor-pointer"
+            className="min-h-11 cursor-pointer rounded-full border border-line-strong px-5 text-[15px] font-medium text-ink transition-colors hover:bg-surface-2"
           >
             {cancelLabel}
           </button>
@@ -93,9 +59,9 @@ export default function ConfirmModal({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95 ${styles.confirmBtn}`}
+            className={`flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full px-5 text-[15px] font-medium transition-colors disabled:opacity-50 ${CONFIRM_BUTTON[variant]}`}
           >
-            {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+            {isLoading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
             <span>{confirmLabel}</span>
           </button>
         </div>

@@ -37,7 +37,7 @@ export default function ImpersonationBanner() {
   };
 
   return (
-    <div className="bg-[#8B5CF6]/20 border-b border-[#8B5CF6]/40 px-4 sm:px-6 py-2 text-xs font-medium text-[#8B5CF6] flex items-center justify-between">
+    <div className="bg-brand/20 border-b border-brand/40 px-4 sm:px-6 py-2 text-xs font-medium text-brand flex items-center justify-between">
       <span className="flex items-center gap-2">
         <Eye className="w-3.5 h-3.5" />
         Viewing as <strong>{data.client.name}</strong> (support session)

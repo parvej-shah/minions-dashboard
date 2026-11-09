@@ -45,7 +45,7 @@ export default function CommandPalette({
       hideCloseButton
       closeOnBackdrop
     >
-      <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[#1f2b37]">
+      <div className="flex items-center gap-3 px-4 py-3.5 border-b border-line">
         <Search className="w-5 h-5 text-brand" />
         <input
           type="text"
@@ -58,7 +58,7 @@ export default function CommandPalette({
         <button
           type="button"
           onClick={onClose}
-          className="text-[10px] font-mono text-muted hover:text-white px-2 py-1 rounded bg-[#161d24] border border-[#1f2b37] cursor-pointer"
+          className="text-[10px] font-mono text-muted hover:text-ink px-2 py-1 rounded bg-surface-2 border border-line cursor-pointer"
         >
           ESC
         </button>
@@ -77,7 +77,7 @@ export default function CommandPalette({
                 key={item.href}
                 type="button"
                 onClick={() => onNavigate(item.href)}
-                className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#161d24] flex items-center justify-between text-xs transition-colors group cursor-pointer"
+                className="w-full text-left px-3 py-2 rounded-xl hover:bg-surface-2 flex items-center justify-between text-xs transition-colors group cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
                   <Icon className="w-4 h-4 text-brand" />

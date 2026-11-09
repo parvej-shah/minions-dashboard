@@ -88,7 +88,7 @@ export default function ScheduleModal({
               <div className="w-7 h-7 rounded-lg bg-brand/10 border border-brand/30 flex items-center justify-center text-brand">
                 <CalendarDays className="w-4 h-4" />
               </div>
-              <h3 className="text-base font-bold text-white">
+              <h3 className="text-base font-bold text-ink">
                 Schedule idea
               </h3>
             </div>
@@ -99,7 +99,7 @@ export default function ScheduleModal({
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-muted hover:text-white hover:bg-surface-2 transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl text-muted hover:text-ink hover:bg-surface-2 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -108,7 +108,7 @@ export default function ScheduleModal({
         {/* Body */}
         <div className="p-6 space-y-6">
           {error && (
-            <div className="p-3 bg-red-950/40 border border-red-800/50 rounded-xl text-xs text-red-300 flex items-center gap-2">
+            <div className="p-3 bg-danger/5/40 border border-danger/50 rounded-xl text-xs text-danger flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -125,7 +125,7 @@ export default function ScheduleModal({
                 onClick={() => setPreset(1, 9, 0)}
                 className="p-2.5 rounded-xl bg-surface-2 hover:bg-line border border-line hover:border-brand/50 text-left text-xs transition-all cursor-pointer group"
               >
-                <div className="font-semibold text-white group-hover:text-brand">Tomorrow 9:00 AM</div>
+                <div className="font-semibold text-ink group-hover:text-brand">Tomorrow 9:00 AM</div>
                 <div className="text-[10px] text-subtle">Morning slot</div>
               </button>
 
@@ -134,7 +134,7 @@ export default function ScheduleModal({
                 onClick={() => setPreset(1, 14, 0)}
                 className="p-2.5 rounded-xl bg-surface-2 hover:bg-line border border-line hover:border-brand/50 text-left text-xs transition-all cursor-pointer group"
               >
-                <div className="font-semibold text-white group-hover:text-brand">Tomorrow 2:00 PM</div>
+                <div className="font-semibold text-ink group-hover:text-brand">Tomorrow 2:00 PM</div>
                 <div className="text-[10px] text-subtle">Afternoon slot</div>
               </button>
 
@@ -143,7 +143,7 @@ export default function ScheduleModal({
                 onClick={() => setPreset(2, 10, 0)}
                 className="p-2.5 rounded-xl bg-surface-2 hover:bg-line border border-line hover:border-brand/50 text-left text-xs transition-all cursor-pointer group"
               >
-                <div className="font-semibold text-white group-hover:text-brand">In 2 Days 10:00 AM</div>
+                <div className="font-semibold text-ink group-hover:text-brand">In 2 Days 10:00 AM</div>
                 <div className="text-[10px] text-subtle">Midweek buffer</div>
               </button>
 
@@ -152,7 +152,7 @@ export default function ScheduleModal({
                 onClick={() => setPreset(7, 9, 0)}
                 className="p-2.5 rounded-xl bg-surface-2 hover:bg-line border border-line hover:border-brand/50 text-left text-xs transition-all cursor-pointer group"
               >
-                <div className="font-semibold text-white group-hover:text-brand">Next Week 9:00 AM</div>
+                <div className="font-semibold text-ink group-hover:text-brand">Next Week 9:00 AM</div>
                 <div className="text-[10px] text-subtle">Future queue</div>
               </button>
             </div>
@@ -168,7 +168,7 @@ export default function ScheduleModal({
                 type="datetime-local"
                 value={selectedDateTime}
                 onChange={(e) => setSelectedDateTime(e.target.value)}
-                className="w-full bg-canvas border border-line focus:border-brand rounded-xl px-4 py-3 text-xs sm:text-sm text-white font-mono outline-none transition-colors cursor-pointer"
+                className="w-full bg-canvas border border-line focus:border-brand rounded-xl px-4 py-3 text-xs sm:text-sm text-ink font-mono outline-none transition-colors cursor-pointer"
               />
             </div>
             <p className="text-[11px] text-subtle">
@@ -196,7 +196,7 @@ export default function ScheduleModal({
               type="button"
               onClick={onClose}
               disabled={isSaving}
-              className="px-4 py-2 text-xs font-semibold text-muted hover:text-white hover:bg-surface-2 rounded-xl transition-colors cursor-pointer"
+              className="px-4 py-2 text-xs font-semibold text-muted hover:text-ink hover:bg-surface-2 rounded-xl transition-colors cursor-pointer"
             >
               Cancel
             </button>

@@ -59,7 +59,7 @@ export function Question({ title, hint }: { title: React.ReactNode; hint?: React
 }
 
 export const lessonInput =
-  "w-full rounded-2xl border-2 border-line bg-surface px-4 py-3.5 text-base leading-relaxed text-ink placeholder:text-[#3B4A5E] " +
+  "w-full rounded-2xl border-2 border-line bg-surface px-4 py-3.5 text-base leading-relaxed text-ink placeholder:text-muted " +
   "transition-colors focus:border-brand focus:outline-none sm:text-lg";
 
 /** A tap-to-fill example, like a word bank tile. */
@@ -70,7 +70,7 @@ export function ExampleChip({ children, selected, onClick }: { children: React.R
       onClick={onClick}
       aria-pressed={selected}
       className={`rounded-xl border-2 border-b-4 px-3 py-2 text-sm font-bold transition-[transform,border-width] duration-75 cursor-pointer active:translate-y-0.5 active:border-b-2 ${
-        selected ? "border-brand border-b-brand-edge bg-brand/10 text-brand" : "border-line bg-surface text-[#CBD5E1] hover:border-line-strong hover:bg-surface-2"
+        selected ? "border-brand border-b-brand-edge bg-brand/10 text-brand" : "border-line bg-surface text-ink hover:border-line-strong hover:bg-surface-2"
       }`}
     >
       {children}
@@ -140,7 +140,7 @@ export function OptionList<T extends string>({
           >
             <span
               className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
-                selected ? (gold ? "bg-gold text-[#1F1300]" : "bg-brand text-brand-ink") : "bg-surface-2 text-muted"
+                selected ? (gold ? "bg-gold text-white" : "bg-brand text-brand-ink") : "bg-surface-2 text-muted"
               }`}
             >
               {option.icon}
@@ -192,13 +192,13 @@ export function LessonFooter({
   error?: string | null;
   secondary?: React.ReactNode;
 }) {
-  const tone = error ? "border-danger/40 bg-[#1F1113]" : praise ? "border-brand/30 bg-[#0C1D1B]" : "border-line bg-canvas";
+  const tone = error ? "border-danger/40 bg-danger/5" : praise ? "border-brand/30 bg-success/5" : "border-line bg-canvas";
   return (
     <footer className={`sticky bottom-0 z-10 border-t-2 transition-colors duration-200 ${tone}`}>
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
         <div className="min-h-0 sm:min-h-11 sm:flex sm:items-center" aria-live="polite">
           {error ? (
-            <p key={error} role="alert" className="story-shake flex items-start gap-2.5 text-sm font-bold text-red-300">
+            <p key={error} role="alert" className="story-shake flex items-start gap-2.5 text-sm font-bold text-danger">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-danger text-white">
                 <AlertCircle className="h-5 w-5" strokeWidth={2.5} />
               </span>

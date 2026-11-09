@@ -207,12 +207,12 @@ export default function ReviewDock({
             </div>
           ) : activeAsset.status === "SCHEDULED" ? (
             <div className="space-y-2 pt-1">
-              <div className="w-full bg-[#3B82F6]/10 border border-[#3B82F6]/40 text-[#93C5FD] p-2.5 rounded-xl text-xs space-y-1">
+              <div className="w-full bg-brand/10 border border-brand/40 text-brand p-2.5 rounded-xl text-xs space-y-1">
                 <div className="flex items-center gap-1.5 font-bold">
                   <CalendarClock className="w-4 h-4" />
                   <span>Scheduled</span>
                 </div>
-                <p className="text-[11px] text-[#CBD5E1]">
+                <p className="text-[11px] text-ink">
                   {activeAsset.scheduled_for && timezone
                     ? `Goes out ${formatPostTime(activeAsset.scheduled_for, timezone)} (${zoneLabel(timezone)}).`
                     : "Goes out at the chosen time."}{" "}
@@ -317,7 +317,7 @@ export default function ReviewDock({
               />)}
 
               {flaggedClaims > 0 && (
-                <p role="note" className="flex items-start gap-1.5 rounded-lg border border-gold/40 bg-gold/10 px-2.5 py-2 text-xs font-medium text-[#FCD34D]">
+                <p role="note" className="flex items-start gap-1.5 rounded-lg border border-gold/40 bg-gold/10 px-2.5 py-2 text-xs font-medium text-gold">
                   <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                   <span>
                     {flaggedClaims} fact{flaggedClaims === 1 ? " isn't" : "s aren't"} checked yet. Look at Facts in this post above and mark{" "}

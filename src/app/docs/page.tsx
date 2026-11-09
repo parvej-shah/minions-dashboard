@@ -82,7 +82,7 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
         {/* PUBLIC TOP NAVBAR */}
         <nav className="flex items-center justify-between py-4 border-b border-line/60 mb-6">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-[#008B74] flex items-center justify-center font-bold text-black text-sm shadow-md">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-brand flex items-center justify-center font-bold text-black text-sm shadow-md">
               M
             </div>
             <div>
@@ -201,7 +201,7 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
                 </div>
 
                 <div className="p-6 rounded-2xl bg-surface border border-line space-y-4">
-                  <div className="w-10 h-10 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6]">
+                  <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center text-brand">
                     <Layers className="w-5 h-5" />
                   </div>
                   <h2 className="text-lg font-bold text-ink">The 4-Stage Autonomous Pipeline</h2>
@@ -211,7 +211,7 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
                       <p>Monitors industry signals, GitHub releases, and competitor whitepapers to produce high-conviction editorial proposals.</p>
                     </div>
                     <div className="p-3 rounded-xl bg-canvas border border-line space-y-1">
-                      <div className="font-bold text-[#8B5CF6] font-mono">2. Asset Drafter & Visual Engine</div>
+                      <div className="font-bold text-brand font-mono">2. Asset Drafter & Visual Engine</div>
                       <p>Drafts long-form markdown articles, tailored social hooks, and synthesizes 1200x630 branded widescreen cover art.</p>
                     </div>
                     <div className="p-3 rounded-xl bg-canvas border border-line space-y-1">
@@ -219,7 +219,7 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
                       <p>Executive review interface with 1-click approvals, inline markdown editing, and distribution toggles.</p>
                     </div>
                     <div className="p-3 rounded-xl bg-canvas border border-line space-y-1">
-                      <div className="font-bold text-[#3B82F6] font-mono">4. Omnichannel Broadcast Engine</div>
+                      <div className="font-bold text-brand font-mono">4. Omnichannel Broadcast Engine</div>
                       <p>Broadcasts live to your blog webhook, LinkedIn (with auto-first comment link), Facebook, and X.</p>
                     </div>
                   </div>
@@ -474,7 +474,7 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
                     <p className="text-xs text-muted">Defines exact reader titles and what proof points they respect (e.g. unit economics, code snippets).</p>
                   </div>
                   <div className="p-4 rounded-xl bg-canvas border border-line space-y-1.5">
-                    <div className="text-xs font-mono text-[#8B5CF6] font-bold">2. Voice Pillars</div>
+                    <div className="text-xs font-mono text-brand font-bold">2. Voice Pillars</div>
                     <p className="text-xs text-muted">Strict editorial philosophy (e.g. "Always start with the operational failure before the solution").</p>
                   </div>
                   <div className="p-4 rounded-xl bg-canvas border border-line space-y-1.5">
@@ -482,7 +482,7 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
                     <p className="text-xs text-muted">Blacklist of overused AI cliches (e.g. "game-changer", "delve", "tapestry", "seamlessly").</p>
                   </div>
                   <div className="p-4 rounded-xl bg-canvas border border-line space-y-1.5">
-                    <div className="text-xs font-mono text-[#3B82F6] font-bold">4. Few-Shot Posts</div>
+                    <div className="text-xs font-mono text-brand font-bold">4. Few-Shot Posts</div>
                     <p className="text-xs text-muted">2-3 authentic exemplary posts that the model mirrors for formatting, rhythm, and cadence.</p>
                   </div>
                 </div>
@@ -561,8 +561,8 @@ Write 2 high-conviction, authentic LinkedIn posts demonstrating:
                     className="p-4 rounded-xl bg-canvas border border-line hover:border-brand transition-all block group"
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <div className="font-mono text-xs font-bold text-[#3B82F6]">/llms-full.txt</div>
-                      <ExternalLink className="w-3.5 h-3.5 text-subtle group-hover:text-[#3B82F6]" />
+                      <div className="font-mono text-xs font-bold text-brand">/llms-full.txt</div>
+                      <ExternalLink className="w-3.5 h-3.5 text-subtle group-hover:text-brand" />
                     </div>
                     <p className="text-xs text-muted">Exhaustive technical documentation, security verification, and framework templates.</p>
                   </a>

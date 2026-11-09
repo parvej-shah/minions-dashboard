@@ -34,7 +34,7 @@ const CONFIG: RunHudConfig<HarvestingJob> = {
     markActive: "text-gold",
     doneNote: "text-coral",
     doneLink:
-      "inline-flex items-center gap-1.5 bg-coral hover:bg-[#ff522b] text-white text-xs font-extrabold px-3.5 py-1.5 rounded-xl shadow-lg shadow-coral/20 transition-all cursor-pointer",
+      "inline-flex items-center gap-1.5 bg-coral hover:bg-coral text-white text-xs font-extrabold px-3.5 py-1.5 rounded-xl shadow-lg shadow-coral/20 transition-all cursor-pointer",
   },
   runningLine: (_job, stage) => stage.description,
   doneLine: (_job, metadata) => `Found ${typeof metadata.harvestedCount === "number" ? metadata.harvestedCount : 0} new signals`,

@@ -21,7 +21,7 @@ interface Props {
 export default function IdeaFilters({ ideas, stage, query, order, onStageChange, onQueryChange, onOrderChange }: Props) {
   const stages = STAGE_FILTERS.filter((option) => option === "ALL" || option === stage || countByStage(ideas, option) > 0);
   return (
-    <div className="sticky top-14 md:top-0 z-30 bg-[#0a0d12] -mx-4 sm:-mx-6 md:-mx-8 px-4 sm:px-6 md:px-8 pt-3 pb-3.5 space-y-3 border-b border-line shadow-xl shadow-black/40">
+    <div className="sticky top-14 md:top-0 z-30 bg-canvas -mx-4 sm:-mx-6 md:-mx-8 px-4 sm:px-6 md:px-8 pt-3 pb-3.5 space-y-3 border-b border-line shadow-xl shadow-black/40">
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-subtle absolute left-3.5 top-1/2 -translate-y-1/2" />

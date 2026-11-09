@@ -46,7 +46,7 @@ export default function DraftHeader({
       {isStandaloneRoute && (
         <Link
           href="/editorial"
-          className="p-2.5 rounded-xl bg-surface border border-line text-muted hover:text-ink hover:bg-surface-2 hover:border-[#2A3D52] transition-all shrink-0"
+          className="p-2.5 rounded-xl bg-surface border border-line text-muted hover:text-ink hover:bg-surface-2 hover:border-line-strong transition-all shrink-0"
           title="Return to Editorial Studio"
         >
           <ArrowLeft className="w-4 h-4" />

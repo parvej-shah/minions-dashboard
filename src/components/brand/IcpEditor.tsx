@@ -58,7 +58,7 @@ function ListEditor({
                 type="button"
                 aria-label={`Remove ${item}`}
                 onClick={() => onChange(items.filter((i) => i !== item))}
-                className="text-subtle hover:text-red-400 cursor-pointer"
+                className="text-subtle hover:text-danger cursor-pointer"
               >
                 <X className="h-3 w-3" />
               </button>

@@ -61,15 +61,15 @@ export default function AdminAuthModal({
 
   return (
     <Modal isOpen onClose={onClose} maxWidthClass="max-w-lg" hideCloseButton>
-      <div className="text-white">
-        <div className="p-5 sm:p-6 border-b border-[#1f2b37] flex items-center justify-between">
+      <div className="text-ink">
+        <div className="p-5 sm:p-6 border-b border-line flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl border flex items-center justify-center bg-coral/10 border-coral/30 text-coral">
               <Lock className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold tracking-tight text-white text-base">Minions</span>
+                <span className="font-bold tracking-tight text-ink text-base">Minions</span>
                 <span className="text-coral font-bold text-base">.AI</span>
               </div>
               <p className="text-xs text-muted mt-0.5">Sign in to continue</p>
@@ -87,7 +87,7 @@ export default function AdminAuthModal({
             <button
               onClick={handleGoogleOAuth}
               disabled={isProcessing}
-              className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-[#12242a] font-bold py-3 px-4 rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50 text-xs sm:text-sm"
+              className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-ink font-bold py-3 px-4 rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50 text-xs sm:text-sm"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
@@ -112,7 +112,7 @@ export default function AdminAuthModal({
               </span>
             </button>
 
-            <div className="p-3.5 rounded-xl bg-[#161d24] border border-[#1f2b37] space-y-2 text-xs text-muted">
+            <div className="p-3.5 rounded-xl bg-surface-2 border border-line space-y-2 text-xs text-muted">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-brand shrink-0" />
                 <span>Secure OAuth 2.0 authentication</span>
@@ -125,7 +125,7 @@ export default function AdminAuthModal({
           </div>
 
           {authError && (
-            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2 animate-in fade-in">
+            <div className="p-3 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs flex items-center gap-2 animate-in fade-in">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{authError}</span>
             </div>
@@ -141,7 +141,7 @@ function CloseButton({ onClose }: { onClose: () => void }) {
     <button
       type="button"
       onClick={onClose}
-      className="p-1.5 rounded-lg hover:bg-[#161d24] text-muted hover:text-white transition-colors cursor-pointer"
+      className="p-1.5 rounded-lg hover:bg-surface-2 text-muted hover:text-ink transition-colors cursor-pointer"
       aria-label="Close"
     >
       <X className="w-4 h-4" />
@@ -175,7 +175,7 @@ function AccountPanel({ user, onClose, onLogout }: { user: AdminUser; onClose: (
   if (erasing) {
     return (
       <div className="p-5 sm:p-6 text-ink">
-        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-danger/15 text-red-300">
+        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-danger/15 text-danger">
           <Trash2 className="h-5 w-5" />
         </span>
         <h2 className="mt-4 text-lg font-bold">Erase your account?</h2>
@@ -195,7 +195,7 @@ function AccountPanel({ user, onClose, onLogout }: { user: AdminUser; onClose: (
           />
         </label>
         {error && (
-          <p role="alert" className="mt-3 flex items-start gap-2 text-sm text-red-300">
+          <p role="alert" className="mt-3 flex items-start gap-2 text-sm text-danger">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             {error}
           </p>
@@ -240,7 +240,7 @@ function AccountPanel({ user, onClose, onLogout }: { user: AdminUser; onClose: (
         <button
           type="button"
           onClick={() => setErasing(true)}
-          className="mx-auto mt-3 block rounded-lg px-2 py-1.5 text-xs font-medium text-muted transition-colors hover:text-red-300 cursor-pointer"
+          className="mx-auto mt-3 block rounded-lg px-2 py-1.5 text-xs font-medium text-muted transition-colors hover:text-danger cursor-pointer"
         >
           Erase my account
         </button>

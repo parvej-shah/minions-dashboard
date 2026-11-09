@@ -174,7 +174,7 @@ export default function SocialVariantTabs({
           <ChannelPanel
             {...forChannel("LINKEDIN")}
             panelClass="space-y-4 rounded-2xl border border-line bg-canvas p-4 font-sans sm:p-5 sm:shadow-lg"
-            previewClass="whitespace-pre-line break-words rounded-none border-0 bg-transparent p-0 font-sans text-[14px] leading-[1.65] text-ink select-text sm:rounded-xl sm:border sm:border-line/60 sm:bg-[#0B0F14] sm:p-4.5 sm:text-xs sm:leading-relaxed"
+            previewClass="whitespace-pre-line break-words rounded-none border-0 bg-transparent p-0 font-sans text-[14px] leading-[1.65] text-ink select-text sm:rounded-xl sm:border sm:border-line/60 sm:bg-surface-2 sm:p-4.5 sm:text-xs sm:leading-relaxed"
             identity={
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-full bg-[#0077B5]/20 border border-[#0077B5]/40 flex items-center justify-center font-bold text-xs text-[#0077B5] shrink-0">
@@ -196,7 +196,7 @@ export default function SocialVariantTabs({
               <>
                 {activeAsset.hero_image_url && activeAsset.hero_status === "READY" && (
                   <div
-                    className={`relative w-full overflow-hidden rounded-xl border border-line bg-[#0B0F14] ${
+                    className={`relative w-full overflow-hidden rounded-xl border border-line bg-surface-2 ${
                       activeAsset.hero_provider === "template" ? "aspect-[4/5] max-w-[420px] mx-auto" : "aspect-[16/9]"
                     }`}
                   >
@@ -261,7 +261,7 @@ export default function SocialVariantTabs({
           <ChannelPanel
             {...forChannel("FACEBOOK")}
             panelClass="bg-canvas rounded-2xl border border-line p-5 space-y-4 font-sans shadow-lg"
-            previewClass="text-xs text-ink leading-relaxed whitespace-pre-line bg-[#0B0F14] p-4.5 rounded-xl border border-line/60 font-sans select-text"
+            previewClass="text-xs text-ink leading-relaxed whitespace-pre-line bg-surface-2 p-4.5 rounded-xl border border-line/60 font-sans select-text"
             identity={
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-[#1877F2]/20 border border-[#1877F2]/40 flex items-center justify-center font-bold text-xs text-[#1877F2] shrink-0">
@@ -317,10 +317,10 @@ export default function SocialVariantTabs({
           <ChannelPanel
             {...forChannel("TWITTER")}
             panelClass="bg-canvas rounded-2xl border border-line p-5 space-y-4 font-sans shadow-lg"
-            previewClass="text-xs text-ink leading-relaxed whitespace-pre-line bg-[#0B0F14] p-4.5 rounded-xl border border-line/60 font-sans select-text"
+            previewClass="text-xs text-ink leading-relaxed whitespace-pre-line bg-surface-2 p-4.5 rounded-xl border border-line/60 font-sans select-text"
             identity={
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center font-bold text-xs text-white shrink-0">
+                <div className="w-10 h-10 rounded-full bg-surface-2 border border-line flex items-center justify-center font-bold text-xs text-ink shrink-0">
                   𝕏
                 </div>
                 <div>

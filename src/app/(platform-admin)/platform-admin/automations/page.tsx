@@ -31,7 +31,7 @@ interface Payload {
 const STATE: Record<Job["state"], { label: string; cls: string }> = {
   RUNNING: { label: "Running", cls: "bg-brand/10 text-brand border-brand/30" },
   STOPPED: { label: "Not running", cls: "bg-subtle/10 text-muted border-subtle/30" },
-  ON_DEMAND: { label: "When called", cls: "bg-[#3B82F6]/10 text-[#93C5FD] border-[#3B82F6]/30" },
+  ON_DEMAND: { label: "When called", cls: "bg-brand/10 text-brand border-brand/30" },
 };
 
 function ago(iso: string | null): string {

@@ -50,14 +50,14 @@ export default function IdeaCard({
   const isRejected = ["REJECTED", "DISCARDED", "FAILED"].includes(status);
   const stageLabel = isPublished ? "Published" : isDrafted ? "Draft ready" : isClaimed || isClaiming || status === "DRAFTING" ? "Drafting" : isRejected ? "Set aside" : "Ready to draft";
   const cardTone = isDrafted
-    ? "border-blue-500/35 bg-blue-950/20 hover:border-blue-400/60"
+    ? "border-brand/35 bg-brand/5/20 hover:border-brand/60"
     : isPublished
       ? "border-brand/35 bg-brand/[0.04] hover:border-brand/55"
       : isClaimed || isClaiming || status === "DRAFTING"
         ? "border-gold/35 bg-gold/[0.035] hover:border-gold/55"
         : "border-line bg-surface hover:border-brand/40";
   const stageTone = isDrafted
-    ? "border-blue-500/30 bg-blue-500/10 text-blue-300"
+    ? "border-brand/30 bg-brand/10 text-brand"
     : isPublished
       ? "border-brand/30 bg-brand/10 text-brand"
       : isClaimed || isClaiming || status === "DRAFTING"
@@ -68,7 +68,7 @@ export default function IdeaCard({
 
   return (
     <article className={`group relative flex flex-col overflow-hidden rounded-2xl border-2 border-b-4 p-5 transition-all hover:-translate-y-0.5 ${cardTone}`}>
-      <span className={`pointer-events-none absolute -right-10 -top-12 h-32 w-32 rounded-full blur-2xl transition-colors ${isDrafted ? "bg-blue-500/5 group-hover:bg-blue-500/10" : "bg-brand/5 group-hover:bg-brand/10"}`} aria-hidden="true" />
+      <span className={`pointer-events-none absolute -right-10 -top-12 h-32 w-32 rounded-full blur-2xl transition-colors ${isDrafted ? "bg-brand/5 group-hover:bg-brand/10" : "bg-brand/5 group-hover:bg-brand/10"}`} aria-hidden="true" />
 
       <div className="relative flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-wrap items-center gap-2">

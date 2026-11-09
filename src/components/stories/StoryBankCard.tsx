@@ -95,8 +95,8 @@ export default function StoryBankCard() {
             <div className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest">
               <span className="text-gold">Story bank low</span>
               {bank.streak_weeks > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#FF9F43]/10 px-2 py-0.5 text-[#FF9F43]">
-                  <Flame className="h-3 w-3 fill-[#FF9F43]" /> {bank.streak_weeks}-week streak
+                <span className="inline-flex items-center gap-1 rounded-full bg-coral/10 px-2 py-0.5 text-coral">
+                  <Flame className="h-3 w-3 fill-coral" /> {bank.streak_weeks}-week streak
                 </span>
               )}
             </div>

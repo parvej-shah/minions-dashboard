@@ -155,7 +155,7 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
                 <input type="file" accept="image/png,image/jpeg" className="hidden" onChange={(e) => void uploadPhoto(e.target.files?.[0])} />
               </label>
             </div>
-            {photoError && <p className="text-[11px] text-[#F87171] mt-1">{photoError}</p>}
+            {photoError && <p className="text-[11px] text-danger mt-1">{photoError}</p>}
           </div>
           <div>
             <label className="text-[11px] font-medium text-muted block mb-1">Cut-out photo for the Cut-out cover (a PNG of you with the background removed)</label>
@@ -177,7 +177,7 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
                 </button>
               )}
             </div>
-            {cutoutError && <p className="text-[11px] text-[#F87171] mt-1">{cutoutError}</p>}
+            {cutoutError && <p className="text-[11px] text-danger mt-1">{cutoutError}</p>}
           </div>
           <div>
             <label className="text-[11px] font-medium text-muted block mb-1">Byline under your name (empty: the first sentence of your positioning)</label>
@@ -229,7 +229,7 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
             ))}
           </div>
           <BrandLookPreview colors={lookDraft} brandName={profile?.brand_name} byline={lookDraft.cover_byline} logoUrl={lookDraft.primary_logo_url} art={lookDraft.cover_art} />
-          {error && <p role="alert" className="text-xs text-red-400">{error}</p>}
+          {error && <p role="alert" className="text-xs text-danger">{error}</p>}
           <div className="flex justify-end gap-2">
             <button
               onClick={() => setIsEditing(false)}

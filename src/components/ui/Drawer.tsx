@@ -27,7 +27,7 @@ export default function Drawer({ onClose, closeLabel, header, footer, busy = fal
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div
-        className="fixed inset-0 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200"
+        className="fixed inset-0 bg-black/30 backdrop-blur-xs animate-in fade-in duration-200"
         onClick={busy ? undefined : onClose}
         role="presentation"
       />

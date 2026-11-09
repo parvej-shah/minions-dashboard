@@ -91,13 +91,13 @@ export default function IdeaStreamPage() {
       <IdeaFilters ideas={ideas} stage={stage} query={query} order={order} onStageChange={setStage} onQueryChange={setQuery} onOrderChange={setOrder} />
 
       {stream.draftError && (
-        <div className="bg-[#2A1215] border border-[#7F1D1D] rounded-xl px-4 py-3 flex items-start gap-3">
-          <AlertCircle className="w-4 h-4 text-[#F87171] mt-0.5 shrink-0" />
-          <div className="flex-1 text-xs text-[#FCA5A5]">
+        <div className="bg-danger/5 border border-danger/30 rounded-xl px-4 py-3 flex items-start gap-3">
+          <AlertCircle className="w-4 h-4 text-danger mt-0.5 shrink-0" />
+          <div className="flex-1 text-xs text-danger">
             <span className="font-semibold">Could not start drafting: </span>
             {stream.draftError}
           </div>
-          <button onClick={stream.clearDraftError} className="text-[#FCA5A5] hover:text-white cursor-pointer">
+          <button onClick={stream.clearDraftError} className="text-danger hover:text-ink cursor-pointer">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>

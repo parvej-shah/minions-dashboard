@@ -85,7 +85,7 @@ export function ChannelCredentialForm({
           <a
             href={returnTo ? `/api/auth/linkedin/connect?return_to=${encodeURIComponent(returnTo)}` : "/api/auth/linkedin/connect"}
             onClick={(e) => e.stopPropagation()}
-            className="min-h-11 w-fit inline-flex items-center justify-center gap-2 whitespace-nowrap text-xs font-medium px-3.5 py-2 rounded-lg bg-[#0077b5] text-white hover:bg-[#0077b5]/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]"
+            className="min-h-11 w-fit inline-flex items-center justify-center gap-2 whitespace-nowrap text-xs font-medium px-3.5 py-2 rounded-lg bg-[#0077b5] text-white hover:bg-[#0077b5]/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           >
             <KeyRound className="w-3 h-3" />
             {channel.has_credential ? "Reconnect with LinkedIn" : "Sign In with LinkedIn"}
@@ -95,7 +95,7 @@ export function ChannelCredentialForm({
               type="button"
               onClick={handleDisconnect}
               disabled={disconnecting}
-              className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap px-3 text-xs text-[#ff8b75] hover:text-coral hover:underline disabled:opacity-50"
+              className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap px-3 text-xs text-coral hover:text-coral hover:underline disabled:opacity-50"
             >
               {disconnecting ? "Disconnecting…" : "Disconnect"}
             </button>
@@ -109,7 +109,7 @@ export function ChannelCredentialForm({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap px-3 text-xs leading-none text-[#A0ACBA] hover:text-brand transition-colors"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap px-3 text-xs leading-none text-muted hover:text-brand transition-colors"
         >
           <KeyRound className="w-3 h-3" />
           {isBlog ? (channel.has_credential ? "Change your site" : "Connect your own site") : channel.has_credential ? "Replace connection" : "Connect"}
@@ -135,7 +135,7 @@ export function ChannelCredentialForm({
           value={externalId}
           onChange={(e) => setExternalId(e.target.value)}
           placeholder="Page / org ID (e.g. Facebook Page ID)"
-          className="w-full rounded-lg bg-canvas border border-line px-3 py-1.5 text-[11px] font-mono text-ink placeholder:text-[#475569] focus:outline-none focus:border-brand"
+          className="w-full rounded-lg bg-canvas border border-line px-3 py-1.5 text-[11px] font-mono text-ink placeholder:text-subtle focus:outline-none focus:border-brand"
         />
       )}
       <input
@@ -143,7 +143,7 @@ export function ChannelCredentialForm({
         value={token}
         onChange={(e) => setToken(e.target.value)}
         placeholder={isBlog ? "https://yoursite.com/webhook/..." : "Access token"}
-        className="w-full rounded-lg bg-canvas border border-line px-3 py-1.5 text-[11px] font-mono text-ink placeholder:text-[#475569] focus:outline-none focus:border-brand"
+        className="w-full rounded-lg bg-canvas border border-line px-3 py-1.5 text-[11px] font-mono text-ink placeholder:text-subtle focus:outline-none focus:border-brand"
       />
       {error && <p className="text-[11px] text-coral">{error}</p>}
       <div className="flex items-center gap-2">
@@ -161,7 +161,7 @@ export function ChannelCredentialForm({
             setOpen(false);
             setError(null);
           }}
-          className="min-h-11 w-full sm:w-auto px-4 rounded-lg border border-[#273342] text-sm text-[#A0ACBA] hover:text-ink"
+          className="min-h-11 w-full sm:w-auto px-4 rounded-lg border border-line-strong text-sm text-muted hover:text-ink"
         >
           Cancel
         </button>

@@ -255,7 +255,7 @@ function StoryCard({ story, className = "" }: { story: string; className?: strin
         <Quote className="h-3.5 w-3.5" aria-hidden="true" />
         Built from what you told us
       </figcaption>
-      <blockquote className="mt-2 line-clamp-4 text-sm leading-relaxed text-[#CBD5E1]">{story}</blockquote>
+      <blockquote className="mt-2 line-clamp-4 text-sm leading-relaxed text-ink">{story}</blockquote>
     </figure>
   );
 }
@@ -304,7 +304,7 @@ function Ready({ asset, author, story, children }: { asset: AssetItem; author: {
         <div className="flex flex-col items-center text-center">
           <div className="relative">
             <Confetti />
-            <span className="story-pop relative flex h-16 w-16 items-center justify-center rounded-full border-b-[6px] border-gold-edge bg-gold text-[#1F1300]">
+            <span className="story-pop relative flex h-16 w-16 items-center justify-center rounded-full border-b-[6px] border-gold-edge bg-gold text-white">
               <Sparkles className="h-8 w-8" strokeWidth={2.25} />
             </span>
           </div>

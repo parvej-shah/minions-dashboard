@@ -110,13 +110,13 @@ export default function TeamPage() {
 
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <Mail className="absolute left-3.5 top-3 w-4 h-4 text-[#475569]" />
+              <Mail className="absolute left-3.5 top-3 w-4 h-4 text-subtle" />
               <input
                 type="email"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
                 placeholder="colleague@company.com"
-                className="w-full rounded-xl bg-canvas border border-line pl-10 pr-4 py-2.5 text-sm text-ink placeholder:text-[#475569] focus:outline-none focus:border-brand"
+                className="w-full rounded-xl bg-canvas border border-line pl-10 pr-4 py-2.5 text-sm text-ink placeholder:text-subtle focus:outline-none focus:border-brand"
               />
             </div>
             <select
@@ -149,7 +149,7 @@ export default function TeamPage() {
       <div className="p-6 rounded-2xl bg-surface border border-line space-y-4 shadow-sm">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-ink flex items-center gap-2">
-            <Shield className="w-4 h-4 text-[#3B82F6]" />
+            <Shield className="w-4 h-4 text-brand" />
             Active Workspace Members &amp; Invites ({members.length})
           </h3>
           <button
@@ -194,7 +194,7 @@ export default function TeamPage() {
                             Pending Invite
                           </span>
                         ) : (
-                          <span className="flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          <span className="flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-success/10 text-success border border-success/20">
                             <Check className="w-2.5 h-2.5" />
                             Active
                           </span>

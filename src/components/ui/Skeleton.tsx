@@ -9,7 +9,7 @@ export function Skeleton({ className = "" }: { className?: string }) {
   return (
     <div
       aria-hidden="true"
-      className={`rounded-xl bg-[linear-gradient(90deg,#131B24_0%,#1C2733_50%,#131B24_100%)] bg-[length:200%_100%] animate-shimmer ${className}`}
+      className={`rounded-xl bg-[linear-gradient(90deg,#EDEDF0_0%,#F5F5F7_50%,#EDEDF0_100%)] bg-[length:200%_100%] animate-shimmer ${className}`}
     />
   );
 }
@@ -38,7 +38,7 @@ export function SkeletonGroup({ label = "Loading", className = "", children }: {
 /** A card-shaped placeholder: icon, title and a couple of lines. */
 export function SkeletonCard({ className = "" }: { className?: string }) {
   return (
-    <div className={`rounded-2xl border-2 border-line bg-surface p-5 ${className}`}>
+    <div className={`rounded-3xl bg-surface p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.04)] ${className}`}>
       <div className="flex items-start gap-3">
         <Skeleton className="h-10 w-10 shrink-0 rounded-xl" />
         <div className="flex-1 space-y-3 pt-1">
@@ -64,7 +64,7 @@ export function PageSkeleton({ label = "Loading page" }: { label?: string }) {
       <SkeletonCard />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="space-y-3 rounded-2xl border-2 border-line bg-surface p-5">
+          <div key={i} className="space-y-3 rounded-3xl bg-surface p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.04)]">
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-7 w-16" />
           </div>

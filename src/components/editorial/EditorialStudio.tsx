@@ -160,7 +160,7 @@ export default function EditorialStudio({
         <span className="text-[11px] font-black text-[#0A66C2]" aria-hidden="true">in</span> LinkedIn
       </button>
       <button type="button" onClick={() => setPanel("schedule")} className={panelButton}>
-        <CalendarClock className="h-3.5 w-3.5 text-[#38BDF8]" aria-hidden="true" /> Schedule
+        <CalendarClock className="h-3.5 w-3.5 text-brand" aria-hidden="true" /> Schedule
       </button>
     </>
   );

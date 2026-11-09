@@ -67,7 +67,7 @@ export default function AutomaticDrafting({ onChanged, onMessage, onEnableWithSa
 
   if (error) {
     return (
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold/40 bg-surface p-5 text-sm text-[#FCD34D]">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold/40 bg-surface p-5 text-sm text-gold">
         <span>{error}</span>
         <button type="button" onClick={() => void retry()} disabled={retrying} aria-busy={retrying} className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-lg border border-gold/40 px-3 font-semibold hover:bg-gold/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50">
           {retrying && <RefreshCw className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
@@ -128,7 +128,7 @@ export default function AutomaticDrafting({ onChanged, onMessage, onEnableWithSa
             {data.drafting_on ? "Turning automatic drafting off…" : "Turning automatic drafting on…"}
           </p>
         )}
-        {blockedByUnsavedChanges && data.exists && !data.drafting_on && <p className="mt-2 text-xs font-medium text-[#FBBF24]">Save these settings to use the new schedule.</p>}
+        {blockedByUnsavedChanges && data.exists && !data.drafting_on && <p className="mt-2 text-xs font-medium text-gold">Save these settings to use the new schedule.</p>}
       </div>
       {showSaveAndEnable ? (
         <button
@@ -136,7 +136,7 @@ export default function AutomaticDrafting({ onChanged, onMessage, onEnableWithSa
           aria-busy={saving}
           disabled={saving || !canSaveSchedule}
           onClick={() => void saveAndEnable()}
-          className="inline-flex min-h-11 w-full shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-xl border-b-4 border-brand-edge bg-brand px-4 text-sm font-extrabold text-[#06231E] transition-colors hover:bg-[#1AD8B6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:border-line disabled:bg-line disabled:text-subtle sm:w-auto"
+          className="inline-flex min-h-11 w-full shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-xl border-b-4 border-brand-edge bg-brand px-4 text-sm font-extrabold text-white transition-colors hover:bg-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:border-line disabled:bg-line disabled:text-subtle sm:w-auto"
         >
           {saving && <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />}
           {saving ? "Saving & turning on…" : "Save & turn on"}

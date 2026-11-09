@@ -118,7 +118,7 @@ export function DistributionControlPanel({
                 className={`p-2.5 rounded-xl border text-left transition-all relative flex flex-col justify-between gap-1.5 cursor-pointer ${
                   isActive
                     ? "bg-surface-2 border-brand/40 shadow-sm shadow-brand/5"
-                    : "bg-[#0A0E14] border-line opacity-60 hover:opacity-100"
+                    : "bg-surface-2 border-line opacity-60 hover:opacity-100"
                 }`}
               >
                 <div className="flex items-center justify-between gap-1">
@@ -143,7 +143,7 @@ export function DistributionControlPanel({
                       isActive ? "bg-brand" : "bg-subtle"
                     }`}
                   />
-                  <span className={isActive ? "text-brand font-semibold" : "text-[#A0ACBA]"}>
+                  <span className={isActive ? "text-brand font-semibold" : "text-muted"}>
                     {isActive ? "Auto Post" : "Paused"}
                   </span>
                 </div>
@@ -166,7 +166,7 @@ export function DistributionControlPanel({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="min-h-10 shrink-0 whitespace-nowrap px-3 rounded-lg bg-[#111820] border border-line text-[#CBD5E1] inline-flex items-center text-xs font-medium tabular-nums">
+            <span className="min-h-10 shrink-0 whitespace-nowrap px-3 rounded-lg bg-surface border border-line text-ink inline-flex items-center text-xs font-medium tabular-nums">
               {channels.filter((c) => c.is_active).length} of {channels.length} active
             </span>
           </div>
@@ -194,13 +194,13 @@ export function DistributionControlPanel({
               key={ch.id}
               className={`p-4 sm:p-5 rounded-xl border transition-colors flex flex-col justify-between gap-4 relative ${
                 isActive
-                  ? "bg-[#111A20] border-brand/35"
-                  : "bg-[#0C1117] border-[#273342]"
+                  ? "bg-surface border-brand/35"
+                  : "bg-surface-2 border-line-strong"
               }`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-[#080D12] border border-[#263443] flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-surface-2 border border-line-strong flex items-center justify-center shrink-0">
                     {getPlatformIcon(ch.platform)}
                   </div>
                   <div className="min-w-0">
@@ -212,7 +212,7 @@ export function DistributionControlPanel({
                         </span>
                       )}
                     </div>
-                    <div className="text-xs text-[#8493A5] truncate mt-1">
+                    <div className="text-xs text-muted truncate mt-1">
                       {ch.target_destination}
                     </div>
                   </div>
@@ -239,12 +239,12 @@ export function DistributionControlPanel({
               </div>
 
               {/* Description */}
-              <p className="text-sm text-[#AAB6C5] leading-relaxed">
+              <p className="text-sm text-muted leading-relaxed">
                 {ch.description}
               </p>
 
               {/* Footer Status Pill */}
-              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs pt-3 border-t border-[#263443]/70">
+              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs pt-3 border-t border-line-strong/70">
                 <div className="flex items-center gap-1.5 whitespace-nowrap">
                   <span
                     className={`w-2 h-2 rounded-full shrink-0 ${
@@ -255,7 +255,7 @@ export function DistributionControlPanel({
                     {isActive ? "On" : "Off"}
                   </span>
                 </div>
-                <span className="text-[#8190A2]">
+                <span className="text-muted">
                   {isActive ? "Approved posts go here" : "Posts skip this channel"}
                 </span>
               </div>
@@ -263,8 +263,8 @@ export function DistributionControlPanel({
               {/* Credential connection. Blog defaults to our own hosted blogs
                   table when nothing is connected — a webhook here redirects
                   publishing to the tenant's own site instead. */}
-              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pt-3 border-t border-[#263443]/70">
-                <span className={`whitespace-nowrap text-xs ${ch.has_credential ? "text-brand" : "text-[#A0ACBA]"}`}>
+              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pt-3 border-t border-line-strong/70">
+                <span className={`whitespace-nowrap text-xs ${ch.has_credential ? "text-brand" : "text-muted"}`}>
                   {ch.has_credential
                     ? ch.key === "blog"
                       ? "● Publishing to your own site"

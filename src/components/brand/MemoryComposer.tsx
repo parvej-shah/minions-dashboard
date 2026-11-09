@@ -87,7 +87,7 @@ export default function Composer({
   }
 
   return (
-    <div className="space-y-3 rounded-xl border border-line bg-[#0B1016] p-4">
+    <div className="space-y-3 rounded-xl border border-line bg-surface-2 p-4">
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-[200px_1fr]">
         <select
           value={draft.kind}
@@ -128,7 +128,7 @@ export default function Composer({
           </button>
         ))}
         <span className="flex-1" />
-        <span className={`text-[11px] ${length > MEMORY_MAX_CHARS ? "text-red-400" : "text-subtle"}`}>
+        <span className={`text-[11px] ${length > MEMORY_MAX_CHARS ? "text-danger" : "text-subtle"}`}>
           {length}/{MEMORY_MAX_CHARS}
         </span>
         {draft.id && (
@@ -160,9 +160,9 @@ export default function Composer({
       {error && <ErrorLine text={error} />}
 
       {check && (
-        <div className={`space-y-3 rounded-lg border px-3 py-3 ${check.confidential ? "border-red-500/40 bg-red-500/5" : "border-amber-500/40 bg-amber-500/5"}`}>
+        <div className={`space-y-3 rounded-lg border px-3 py-3 ${check.confidential ? "border-danger/40 bg-danger/5" : "border-gold/40 bg-gold/5"}`}>
           <p className="flex items-start gap-2 text-xs font-semibold text-ink">
-            <ShieldAlert className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${check.confidential ? "text-red-400" : "text-amber-400"}`} />
+            <ShieldAlert className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${check.confidential ? "text-danger" : "text-gold"}`} />
             {check.confidential
               ? "This looks confidential. Minions doesn't keep confidential material, so remove it or use the version below."
               : draft.disclosure === "GENERALIZE"
@@ -200,7 +200,7 @@ export default function Composer({
                 type="button"
                 onClick={() => persist(draft.content)}
                 disabled={busy !== null}
-                className="rounded-lg border border-line px-3 py-1.5 text-xs text-ink hover:border-[#2A3D52] disabled:opacity-50 cursor-pointer"
+                className="rounded-lg border border-line px-3 py-1.5 text-xs text-ink hover:border-line-strong disabled:opacity-50 cursor-pointer"
               >
                 Save as written
               </button>

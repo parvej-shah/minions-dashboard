@@ -93,7 +93,7 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
   return (
     <div className="space-y-5">
       {(loadError || saveError) && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-3 text-xs text-red-400">
+        <div className="rounded-xl border border-danger/30 bg-danger/5 p-3 text-xs text-danger">
           {loadError || saveError}
         </div>
       )}
@@ -141,7 +141,7 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
               </button>
             </div>
             {examples.length === 0 && (
-              <button type="button" onClick={() => setExamples([""])} className="w-full rounded-xl border border-dashed border-[#334155] p-5 text-xs text-muted hover:border-brand/60 hover:text-ink">
+              <button type="button" onClick={() => setExamples([""])} className="w-full rounded-xl border border-dashed border-line-strong p-5 text-xs text-muted hover:border-brand/60 hover:text-ink">
                 Add your first writing sample
               </button>
             )}
@@ -153,9 +153,9 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
                   value={example}
                   onChange={(event) => setExamples(examples.map((item, itemIndex) => itemIndex === index ? event.target.value : item))}
                   placeholder="Paste something that sounds unmistakably like you…"
-                  className="w-full resize-y rounded-xl border border-line bg-canvas p-3 pr-10 text-xs leading-relaxed text-ink outline-none placeholder:text-[#475569] focus:border-brand"
+                  className="w-full resize-y rounded-xl border border-line bg-canvas p-3 pr-10 text-xs leading-relaxed text-ink outline-none placeholder:text-subtle focus:border-brand"
                 />
-                <button type="button" onClick={() => setExamples(examples.filter((_, itemIndex) => itemIndex !== index))} className="absolute right-2 top-2 rounded-lg p-1.5 text-subtle hover:bg-red-500/10 hover:text-red-400" aria-label={`Remove sample ${index + 1}`}>
+                <button type="button" onClick={() => setExamples(examples.filter((_, itemIndex) => itemIndex !== index))} className="absolute right-2 top-2 rounded-lg p-1.5 text-subtle hover:bg-danger/10 hover:text-danger" aria-label={`Remove sample ${index + 1}`}>
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -166,7 +166,7 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
             <h3 className="text-sm font-semibold text-ink">Phrases you naturally use</h3>
             <div className="flex flex-wrap gap-1.5">
               {questionnaire.signature_phrases.map((phrase) => (
-                <button key={phrase} type="button" onClick={() => setQuestionnaire({ ...questionnaire, signature_phrases: questionnaire.signature_phrases.filter((item) => item !== phrase) })} className="rounded-lg border border-line bg-surface-2 px-2.5 py-1 text-[11px] text-ink hover:border-red-500/40" title="Remove phrase">
+                <button key={phrase} type="button" onClick={() => setQuestionnaire({ ...questionnaire, signature_phrases: questionnaire.signature_phrases.filter((item) => item !== phrase) })} className="rounded-lg border border-line bg-surface-2 px-2.5 py-1 text-[11px] text-ink hover:border-danger/40" title="Remove phrase">
                   {phrase} ×
                 </button>
               ))}
@@ -182,7 +182,7 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
         <section className="rounded-2xl border border-line bg-surface p-5 sm:p-6 space-y-5">
           <div>
             <div className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-[#FF7A59]" />
+              <ShieldCheck className="h-4 w-4 text-coral" />
               <h2 className="text-base font-bold text-ink">Facts you can prove</h2>
             </div>
             <p className="mt-1 text-xs leading-relaxed text-muted">
@@ -196,7 +196,7 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
                 const isOpen = openProof === proof.id;
                 const update = (patch: Partial<BrandProofItem>) => setProofs(proofs.map((item, itemIndex) => (itemIndex === index ? { ...item, ...patch } : item)));
                 return (
-                  <li key={proof.id} className="rounded-xl border border-line bg-[#0B1016]">
+                  <li key={proof.id} className="rounded-xl border border-line bg-surface-2">
                     <div className="flex items-start gap-2 p-3">
                       <button
                         type="button"
@@ -208,18 +208,18 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
                         <p className="mt-0.5 truncate text-[11px] text-subtle">{sourceLabel(proof)}</p>
                       </button>
                       <ChevronDown className={`mt-0.5 h-4 w-4 shrink-0 text-subtle transition-transform ${isOpen ? "rotate-180" : ""}`} aria-hidden="true" />
-                      <button type="button" onClick={() => setProofs(proofs.filter((_, itemIndex) => itemIndex !== index))} className="rounded-lg p-1 text-subtle hover:bg-red-500/10 hover:text-red-400" aria-label={`Remove fact ${index + 1}`}>
+                      <button type="button" onClick={() => setProofs(proofs.filter((_, itemIndex) => itemIndex !== index))} className="rounded-lg p-1 text-subtle hover:bg-danger/10 hover:text-danger" aria-label={`Remove fact ${index + 1}`}>
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
                     {isOpen && (
                       <div className="space-y-2 border-t border-line px-3 pb-3 pt-2">
                         <label htmlFor={`proof-claim-${proof.id}`} className="block text-xs font-semibold text-muted">The fact</label>
-                        <textarea id={`proof-claim-${proof.id}`} rows={2} value={proof.claim} onChange={(event) => update({ claim: event.target.value })} placeholder="Exactly what the source supports" className="w-full resize-y rounded-lg border border-line bg-surface-2 p-3 text-xs text-ink outline-none placeholder:text-[#475569] focus:border-brand" />
+                        <textarea id={`proof-claim-${proof.id}`} rows={2} value={proof.claim} onChange={(event) => update({ claim: event.target.value })} placeholder="Exactly what the source supports" className="w-full resize-y rounded-lg border border-line bg-surface-2 p-3 text-xs text-ink outline-none placeholder:text-subtle focus:border-brand" />
                         <label htmlFor={`proof-url-${proof.id}`} className="block text-xs font-semibold text-muted">Where it says so</label>
-                        <input id={`proof-url-${proof.id}`} type="url" value={proof.source_url} onChange={(event) => update({ source_url: event.target.value })} placeholder="https://source.example/report" className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs text-ink outline-none placeholder:text-[#475569] focus:border-brand" />
+                        <input id={`proof-url-${proof.id}`} type="url" value={proof.source_url} onChange={(event) => update({ source_url: event.target.value })} placeholder="https://source.example/report" className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs text-ink outline-none placeholder:text-subtle focus:border-brand" />
                         <label htmlFor={`proof-title-${proof.id}`} className="block text-xs font-semibold text-muted">Page name (optional)</label>
-                        <input id={`proof-title-${proof.id}`} value={proof.source_title} onChange={(event) => update({ source_title: event.target.value })} placeholder="Page name" className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs text-ink outline-none placeholder:text-[#475569] focus:border-brand" />
+                        <input id={`proof-title-${proof.id}`} value={proof.source_title} onChange={(event) => update({ source_title: event.target.value })} placeholder="Page name" className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs text-ink outline-none placeholder:text-subtle focus:border-brand" />
                       </div>
                     )}
                   </li>
@@ -232,7 +232,7 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
             const proof = newProof();
             setProofs([...proofs, proof]);
             setOpenProof(proof.id);
-          }} className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[#334155] py-3 text-xs font-semibold text-muted hover:border-[#FF7A59]/60 hover:text-ink disabled:opacity-40">
+          }} className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-line-strong py-3 text-xs font-semibold text-muted hover:border-coral/60 hover:text-ink disabled:opacity-40">
             <Plus className="h-3.5 w-3.5" /> Add a fact with its source
           </button>
 
@@ -242,9 +242,9 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
       {/* Shown only with something to save, as a small floating bar instead of a full-width one. */}
       {(isDirty || saving || saved) && (
         <div className="pointer-events-none sticky bottom-4 flex justify-end">
-          <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-line bg-[#0D1520]/95 p-2 pl-4 shadow-2xl backdrop-blur">
+          <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-line bg-surface/95 p-2 pl-4 shadow-2xl backdrop-blur">
             {saved && !isDirty ? (
-              <span role="status" className="inline-flex items-center gap-1 pr-2 text-xs text-emerald-400"><Check className="h-3.5 w-3.5" /> Saved. New drafts use it.</span>
+              <span role="status" className="inline-flex items-center gap-1 pr-2 text-xs text-success"><Check className="h-3.5 w-3.5" /> Saved. New drafts use it.</span>
             ) : (
               <>
                 <span className="text-xs text-gold">Unsaved changes</span>

@@ -1,9 +1,10 @@
 /**
- * Segmented tabs (Queue | Stream | Calendar, Preview | Edit...): the chosen
- * segment is a small brand key sitting on its edge; the rest are quiet text.
- * Use as `${segment.on}` / `${segment.off}` inside the segment's className.
+ * Segmented control (All | Needs you | Posted, Preview | Edit...): a soft gray
+ * track where the chosen segment is a white pill. Put `segment.track` on the
+ * wrapper, `${segment.on}` / `${segment.off}` on each segment.
  */
 export const segment = {
-  on: "bg-brand text-brand-ink font-extrabold shadow-[0_3px_0_var(--color-brand-edge)]",
-  off: "text-muted hover:bg-surface-2 hover:text-ink",
+  track: "inline-flex flex-wrap gap-1 rounded-full bg-surface-3 p-1",
+  on: "rounded-full bg-surface text-ink font-medium shadow-[0_1px_3px_rgba(0,0,0,0.08)]",
+  off: "rounded-full text-muted hover:text-ink",
 };

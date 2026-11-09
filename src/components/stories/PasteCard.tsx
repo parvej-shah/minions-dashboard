@@ -83,7 +83,7 @@ export default function PasteCard({ onDismiss, onDone }: { onDismiss: () => void
               <NoteCard key={i} note={n} solo={notes.length === 1} onChange={(next) => setNotes(notes.map((x, j) => (j === i ? next : x)))} />
             ))}
           </div>
-          {blocked && <p className="text-xs font-semibold text-red-400">Remove the private detail flagged above, or keep that note general.</p>}
+          {blocked && <p className="text-xs font-semibold text-danger">Remove the private detail flagged above, or keep that note general.</p>}
           <div className="flex flex-wrap items-center gap-2">
             <button type="button" disabled={busy || !kept.length || blocked} onClick={() => void save()} className={buttonStyles({ size: "sm" })}>
               {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
@@ -103,7 +103,7 @@ export default function PasteCard({ onDismiss, onDone }: { onDismiss: () => void
             maxLength={MAX_CHARS}
             placeholder="Paste your posts or notes here."
             aria-label="Your posts or notes"
-            className="w-full resize-y rounded-xl border border-line bg-[#0B1016] px-3 py-2 text-sm text-ink placeholder:text-subtle focus:border-brand focus:outline-none"
+            className="w-full resize-y rounded-xl border border-line bg-surface-2 px-3 py-2 text-sm text-ink placeholder:text-subtle focus:border-brand focus:outline-none"
           />
           <button type="button" disabled={busy || text.trim().length < MEMORY_MIN_CHARS} onClick={() => void find()} className={buttonStyles({ size: "sm" })}>
             {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
@@ -111,7 +111,7 @@ export default function PasteCard({ onDismiss, onDone }: { onDismiss: () => void
           </button>
         </>
       )}
-      {error && <p className="text-xs font-semibold text-red-400">{error}</p>}
+      {error && <p className="text-xs font-semibold text-danger">{error}</p>}
     </section>
   );
 }

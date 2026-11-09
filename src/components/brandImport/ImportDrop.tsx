@@ -94,7 +94,7 @@ export function ImportDrop({
         </button>
       )}
       <input ref={input} type="file" accept="application/pdf,.pdf" className="hidden" onChange={(e) => void take(e.target.files?.[0])} />
-      {error && <p role="alert" className="text-sm font-bold text-red-300">{error}</p>}
+      {error && <p role="alert" className="text-sm font-bold text-danger">{error}</p>}
 
       <details className="group rounded-2xl border-2 border-line bg-surface px-4 py-3 text-sm text-muted">
         <summary className="flex cursor-pointer list-none items-center justify-between font-bold text-ink">

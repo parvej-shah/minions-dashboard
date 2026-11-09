@@ -55,10 +55,10 @@ function LinkedInSelectContent() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center">
-          <AlertCircle className="w-8 h-8 text-red-400" />
+        <div className="w-16 h-16 rounded-full bg-danger/10 flex items-center justify-center">
+          <AlertCircle className="w-8 h-8 text-danger" />
         </div>
-        <p className="text-red-400 font-medium">{error}</p>
+        <p className="text-danger font-medium">{error}</p>
         <button 
           onClick={() => router.push(returnTo.startsWith("/onboarding") || returnTo.startsWith("/editorial") ? returnTo : "/fleet")}
           className="px-4 py-2 text-sm font-medium rounded-lg border border-line text-ink hover:bg-line"

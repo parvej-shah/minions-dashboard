@@ -51,22 +51,22 @@ export default function WorkspaceSwitcher() {
       <button
         onClick={() => setOpen((v) => !v)}
         disabled={switching}
-        className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-[#161d24] border border-[#1f2b37] text-xs text-ink hover:border-brand/50 transition-all disabled:opacity-60"
+        className="flex min-h-10 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-surface-2 px-3 text-sm text-ink transition-colors hover:bg-surface-3 disabled:opacity-60"
       >
         <div className="flex items-center gap-2 min-w-0">
-          <Building2 className="w-3.5 h-3.5 text-brand shrink-0" />
-          <span className="truncate font-semibold">{active.name}</span>
+          <Building2 className="h-4 w-4 shrink-0 text-muted" />
+          <span className="truncate font-medium">{active.name}</span>
         </div>
         <ChevronsUpDown className="w-3.5 h-3.5 text-subtle shrink-0" />
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full mt-1.5 w-full rounded-xl bg-surface border border-[#1f2b37] shadow-2xl overflow-hidden">
+        <div className="absolute z-50 top-full mt-1.5 w-full overflow-hidden rounded-xl bg-surface shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_rgba(0,0,0,0.12)]">
           {workspaces.map((w) => (
             <button
               key={w.client_id}
               onClick={() => switchTo(w.client_id)}
-              className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-xs text-left hover:bg-[#161d24] transition-colors"
+              className="flex min-h-10 w-full cursor-pointer items-center justify-between gap-2 px-3 text-left text-sm transition-colors hover:bg-surface-2"
             >
               <span className="truncate text-ink">{w.name}</span>
               {w.client_id === active.client_id && <Check className="w-3.5 h-3.5 text-brand shrink-0" />}

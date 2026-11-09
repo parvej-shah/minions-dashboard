@@ -48,7 +48,7 @@ export default function TagList({
             className="inline-flex items-center gap-1.5 bg-surface-2 border border-line text-ink text-[11px] px-3 py-1.5 rounded-lg leading-relaxed"
           >
             {item.content}
-            <button type="button" onClick={() => onRemove(item.id)} aria-label={`Remove ${item.content}`} className="min-h-7 min-w-7 cursor-pointer text-subtle hover:text-red-400">
+            <button type="button" onClick={() => onRemove(item.id)} aria-label={`Remove ${item.content}`} className="min-h-7 min-w-7 cursor-pointer text-subtle hover:text-danger">
               <X className="w-3 h-3" />
             </button>
           </span>
@@ -78,7 +78,7 @@ export default function TagList({
           {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
         </button>
       </div>
-      {error && <p className="text-[11px] text-red-400">{error}</p>}
+      {error && <p className="text-[11px] text-danger">{error}</p>}
     </div>
   );
 }

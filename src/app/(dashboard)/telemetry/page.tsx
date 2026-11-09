@@ -102,7 +102,7 @@ export default function TelemetryPage() {
         <div className="p-5 rounded-2xl bg-surface border border-line space-y-2 shadow-sm">
           <div className="flex items-center justify-between text-xs font-mono text-muted">
             <span>WORDS GENERATED</span>
-            <Type className="w-4 h-4 text-[#3B82F6]" />
+            <Type className="w-4 h-4 text-brand" />
           </div>
           <div className="text-2xl font-bold text-ink">
             {isLoading ? <Skeleton className="h-8 w-24" /> : summaryData.wordsGenerated.toLocaleString()}
@@ -170,13 +170,13 @@ export default function TelemetryPage() {
         {isLoading && <LoadingState label="Loading posts…" />}
         <div className="space-y-3 sm:hidden">
           {ledgerData.map((row) => (
-            <article key={row.asset_id} className="rounded-xl border border-line bg-[#0B1016] p-4">
+            <article key={row.asset_id} className="rounded-xl border border-line bg-surface-2 p-4">
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h4 className="line-clamp-2 text-sm font-semibold leading-relaxed text-ink">{row.title}</h4>
-                  <p className="mt-1 text-xs text-[#8493A5]">{formatTimestamp(row.created_at)}</p>
+                  <p className="mt-1 text-xs text-muted">{formatTimestamp(row.created_at)}</p>
                 </div>
-                <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${row.audience === "ICP" ? "border-[#3B82F6]/30 bg-[#3B82F6]/10 text-[#60A5FA]" : row.audience === "PEER" ? "border-[#8B5CF6]/30 bg-[#8B5CF6]/10 text-[#A78BFA]" : "border-brand/30 bg-brand/10 text-brand"}`}>{row.audience}</span>
+                <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${row.audience === "ICP" ? "border-brand/30 bg-brand/10 text-brand" : row.audience === "PEER" ? "border-brand/30 bg-brand/10 text-brand" : "border-brand/30 bg-brand/10 text-brand"}`}>{row.audience}</span>
               </div>
               <Link href={`/drafts/${row.asset_id}`} className={buttonStyles({ variant: "secondary", className: "w-full" })}>
                 Open in Studio <ArrowUpRight className="h-4 w-4" />
@@ -220,9 +220,9 @@ export default function TelemetryPage() {
                     <span
                       className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
                         row.audience === "ICP"
-                          ? "bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/30"
+                          ? "bg-brand/10 text-brand border-brand/30"
                           : row.audience === "PEER"
-                          ? "bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/30"
+                          ? "bg-brand/10 text-brand border-brand/30"
                           : "bg-brand/10 text-brand border-brand/30"
                       }`}
                     >

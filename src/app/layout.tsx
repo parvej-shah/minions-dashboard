@@ -5,7 +5,7 @@ import { PwaRegister } from "@/components/pwa/PwaRegister";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 
 export const viewport: Viewport = {
-  themeColor: "#070B0F",
+  themeColor: "#FBFBFD",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "Minions.AI",
   },
   formatDetection: {
@@ -44,13 +44,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="shortcut icon" href="/favicon.ico" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Minions.AI" />
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
       </head>

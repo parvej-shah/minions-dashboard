@@ -24,7 +24,7 @@ interface TenantRow {
 
 const STATUS_COLORS: Record<string, string> = {
   ACTIVE: "bg-brand/10 text-brand border-brand/30",
-  TRIAL: "bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/30",
+  TRIAL: "bg-brand/10 text-brand border-brand/30",
   PAST_DUE: "bg-gold/10 text-gold border-gold/30",
   SUSPENDED: "bg-danger/10 text-danger border-danger/30",
   CANCELED: "bg-subtle/10 text-subtle border-subtle/30",
@@ -78,7 +78,7 @@ export default function PlatformAdminPage() {
             <div className="text-[11px] font-mono text-muted">ACTIVE</div>
             <div className="text-xl font-bold text-ink mt-0.5">{activeTenants}</div>
           </div>
-          <Users className="w-5 h-5 text-[#3B82F6]" />
+          <Users className="w-5 h-5 text-brand" />
         </div>
         <div className="p-4 rounded-2xl bg-surface border border-line flex items-center justify-between">
           <div>

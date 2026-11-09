@@ -60,8 +60,8 @@ function MarkdownBlockView({
   copiedKey?: string | null;
 }) {
   const paragraphClass = compact
-    ? "break-words [overflow-wrap:anywhere] leading-relaxed text-[#CBD5E1] text-xs"
-    : "text-[15px] sm:text-[16px] text-[#E2E8F0] leading-[1.8] font-normal tracking-normal font-sans selection:bg-brand/20 break-words [overflow-wrap:anywhere]";
+    ? "break-words [overflow-wrap:anywhere] leading-relaxed text-ink text-xs"
+    : "text-[15px] sm:text-[16px] text-ink leading-[1.8] font-normal tracking-normal font-sans selection:bg-brand/20 break-words [overflow-wrap:anywhere]";
 
   switch (block.kind) {
     case "image": {
@@ -88,7 +88,7 @@ function MarkdownBlockView({
               }`}
             />
             {!compact && (
-              <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10 rounded-2xl" />
+              <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/5 rounded-2xl" />
             )}
           </div>
           {block.alt.trim() && (
@@ -123,7 +123,7 @@ function MarkdownBlockView({
           <p
             className={
               compact
-                ? "text-xs text-[#CBD5E1] break-words [overflow-wrap:anywhere] leading-relaxed font-medium"
+                ? "text-xs text-ink break-words [overflow-wrap:anywhere] leading-relaxed font-medium"
                 : "text-base sm:text-lg leading-relaxed text-ink font-medium"
             }
           >
@@ -193,7 +193,7 @@ function MarkdownBlockView({
             <li
               key={itemIndex}
               className={`font-sans leading-relaxed flex items-start gap-2.5 break-words [overflow-wrap:anywhere] ${
-                compact ? "text-xs text-[#CBD5E1]" : "text-[15px] sm:text-[16px] text-ink/90"
+                compact ? "text-xs text-ink" : "text-[15px] sm:text-[16px] text-ink/90"
               }`}
             >
               <span className="text-brand font-mono font-bold text-xs mt-1 shrink-0">▸</span>

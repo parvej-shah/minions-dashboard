@@ -6,25 +6,27 @@
  * border-b-brand-edge... Use these instead of raw hex in new code.
  */
 @theme {
-  --color-canvas: #070B0F;       /* page background */
-  --color-surface: #0F1419;      /* cards */
-  --color-surface-2: #161D26;    /* raised */
-  --color-surface-3: #1E2733;    /* hover on raised */
-  --color-line: #1F2D3D;         /* borders */
-  --color-line-strong: #2B3D52;
-  --color-ink: #F1F5F9;          /* primary text */
-  --color-muted: #94A3B8;        /* secondary text */
-  --color-subtle: #64748B;       /* tertiary text */
-  --color-brand: #00C9A7;        /* the one action colour */
-  --color-brand-hover: #1AD8B6;
-  --color-brand-edge: #00917A;   /* the 3D bottom edge of brand buttons */
-  --color-brand-ink: #04201A;    /* text on brand */
-  --color-coral: #FF6B4A;        /* needs attention */
-  --color-coral-edge: #C2410C;
-  --color-gold: #F59E0B;         /* streaks, rewards */
-  --color-gold-edge: #B45309;
-  --color-danger: #EF4444;
-  --color-danger-edge: #B91C1C;
+  /* Calm light theme (tasks/20-21): Apple-style neutrals, one blue for action. */
+  --color-canvas: #FBFBFD;       /* page background */
+  --color-surface: #FFFFFF;      /* cards */
+  --color-surface-2: #F5F5F7;    /* sections, wells, hover */
+  --color-surface-3: #EDEDF0;    /* hover on surface-2, segmented track */
+  --color-line: #E5E5EA;         /* hairlines */
+  --color-line-strong: #D2D2D7;
+  --color-ink: #1D1D1F;          /* primary text */
+  --color-muted: #5E5E63;        /* secondary text */
+  --color-subtle: #6E6E73;       /* tertiary text */
+  --color-brand: #0066CC;        /* the one action colour */
+  --color-brand-hover: #0058B0;
+  --color-brand-edge: #0066CC;   /* kept for old classes; no 3D edge any more */
+  --color-brand-ink: #FFFFFF;    /* text on brand */
+  --color-coral: #B25000;        /* needs you */
+  --color-coral-edge: #B25000;
+  --color-gold: #9A6700;         /* caution */
+  --color-gold-edge: #9A6700;
+  --color-danger: #C4281C;
+  --color-danger-edge: #C4281C;
+  --color-success: #1F7A45;      /* scheduled, done */
 
   --animate-shimmer: shimmer 1.4s ease-in-out infinite;
   --animate-pop-in: pop-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
@@ -50,53 +52,47 @@
 }
 
 :root {
-  /* Minions.AI Official Brand Palette from getminions.ai */
-  --bg: #0a0d12;
-  --surface: #0f1419;
-  --surface-2: #161d24;
-  --surface-3: #1e2631;
-  --border: #1f2b37;
-  --border-2: #2a3a4b;
-  
-  /* Primary Accents */
-  --coral: #ff6b4a;
-  --coral-hover: #ff522b;
-  --coral-muted: rgba(255, 107, 74, 0.12);
-  --coral-glow: rgba(255, 107, 74, 0.08);
-
-  --teal-brand: #0e5c63;
-  --teal-light: #167a84;
-  --teal-muted: rgba(14, 92, 99, 0.15);
-
-  --cream: #fff8f0;
-  --ink: #12242a;
-  
-  /* Status & Accents */
-  --emerald: #10B981;
-  --emerald-muted: rgba(16, 185, 129, 0.12);
-  --amber: #F59E0B;
-  --red: #EF4444;
-  --blue: #3B82F6;
-  --purple: #8B5CF6;
-  
-  /* Text */
-  --text: #FFFFFF;
-  --text-2: #94A3B8;
-  --text-3: #64748B;
-  --code-bg: #0b0f14;
+  /* Legacy names kept for older CSS; they point at the light tokens. */
+  --bg: var(--color-canvas);
+  --surface: var(--color-surface);
+  --surface-2: var(--color-surface-2);
+  --surface-3: var(--color-surface-3);
+  --border: var(--color-line);
+  --border-2: var(--color-line-strong);
+  --coral: var(--color-coral);
+  --coral-hover: var(--color-coral);
+  --coral-muted: rgba(178, 80, 0, 0.1);
+  --coral-glow: rgba(178, 80, 0, 0.06);
+  --teal-brand: var(--color-brand);
+  --teal-light: var(--color-brand-hover);
+  --teal-muted: rgba(0, 102, 204, 0.1);
+  --cream: #FFFFFF;
+  --ink: var(--color-ink);
+  --emerald: var(--color-success);
+  --emerald-muted: rgba(31, 122, 69, 0.1);
+  --amber: var(--color-gold);
+  --red: var(--color-danger);
+  --blue: var(--color-brand);
+  --purple: var(--color-brand);
+  --text: var(--color-ink);
+  --text-2: var(--color-muted);
+  --text-3: var(--color-subtle);
+  --code-bg: var(--color-surface-2);
 }
 
 @layer base {
   body {
     background-color: var(--bg);
     color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Display", -apple-system, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+    font-size: 17px;
+    letter-spacing: -0.01em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 }
 
-/* Custom Sleek Dark Scrollbars */
+/* Quiet scrollbars */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -137,15 +133,15 @@
 
 .cockpit-card-interactive:hover {
   background: var(--surface-2);
-  border-color: var(--coral);
-  box-shadow: 0 8px 24px -8px var(--coral-muted);
+  border-color: var(--border-2);
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.08);
 }
 
 .prose-reading {
   font-family: -apple-system, BlinkMacSystemFont, "Inter", "Georgia", serif;
   font-size: 16.5px;
   line-height: 1.75;
-  color: #E2E8F0;
+  color: var(--color-ink);
 }
 
 /* Dashboard readability scale
@@ -239,9 +235,9 @@
   50% { opacity: 0; }
 }
 @keyframes import-landed {
-  0% { box-shadow: 0 0 0 0 rgb(0 201 167 / 0); border-color: var(--color-line); }
-  35% { box-shadow: 0 0 0 4px rgb(0 201 167 / 0.25); border-color: var(--color-brand); }
-  100% { box-shadow: 0 0 0 0 rgb(0 201 167 / 0); border-color: var(--color-line); }
+  0% { box-shadow: 0 0 0 0 rgb(0 102 204 / 0); border-color: var(--color-line); }
+  35% { box-shadow: 0 0 0 4px rgb(0 102 204 / 0.2); border-color: var(--color-brand); }
+  100% { box-shadow: 0 0 0 0 rgb(0 102 204 / 0); border-color: var(--color-line); }
 }
 .import-scan { animation: import-scan 2.2s linear infinite; }
 .import-caret::after {

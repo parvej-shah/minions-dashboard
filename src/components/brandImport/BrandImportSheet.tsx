@@ -150,7 +150,7 @@ export function BrandImportSheet({ onClose, onApplied }: { onClose: () => void; 
       const parts = saved ? savedSummary(saved) : [];
       body = (
         <div className="flex flex-1 flex-col items-center justify-center px-4 py-16 text-center">
-          <span className="story-pop relative flex h-24 w-24 items-center justify-center rounded-full border-b-8 border-gold-edge bg-gold text-[#1F1300]">
+          <span className="story-pop relative flex h-24 w-24 items-center justify-center rounded-full border-b-8 border-gold-edge bg-gold text-white">
             <PartyPopper className="h-11 w-11" strokeWidth={2.25} />
             <Confetti burst="big" />
           </span>
@@ -183,7 +183,7 @@ export function BrandImportSheet({ onClose, onApplied }: { onClose: () => void; 
       <main className="flex flex-1 flex-col">{body}</main>
       <footer className="sticky bottom-0 border-t-2 border-line bg-canvas">
         <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p role={error || run.status === "error" ? "alert" : undefined} className={`text-sm font-bold ${error || run.status === "error" ? "text-red-300" : "text-muted"}`}>
+          <p role={error || run.status === "error" ? "alert" : undefined} className={`text-sm font-bold ${error || run.status === "error" ? "text-danger" : "text-muted"}`}>
             {message}
           </p>
           <Button size="lg" shout block onClick={action.onClick} disabled={action.disabled} loading={action.loading} className="sm:w-auto sm:min-w-48">

@@ -221,7 +221,7 @@ export default function ScheduleSettings() {
             ))}
           </div>
           {data.cadence_type === "EVERY_N_DAYS" && (
-            <label className="flex items-center gap-2 text-sm text-[#CBD5E1]">
+            <label className="flex items-center gap-2 text-sm text-ink">
               every
               <input
                 type="number"
@@ -308,9 +308,9 @@ export default function ScheduleSettings() {
           </button>
         </div>
 
-        {saveError && <p role="alert" className="rounded-xl border border-gold/40 bg-gold/10 p-3 text-sm text-[#FCD34D]">{saveError}</p>}
+        {saveError && <p role="alert" className="rounded-xl border border-gold/40 bg-gold/10 p-3 text-sm text-gold">{saveError}</p>}
         <div className="flex flex-wrap items-center justify-end gap-3">
-          {problem ? <span className="text-xs text-[#FBBF24]">{problem}</span> : hasUnsavedChanges && <span className="text-xs text-muted">Not saved yet</span>}
+          {problem ? <span className="text-xs text-gold">{problem}</span> : hasUnsavedChanges && <span className="text-xs text-muted">Not saved yet</span>}
           <button
             type="button"
             onClick={() => void handleSave()}

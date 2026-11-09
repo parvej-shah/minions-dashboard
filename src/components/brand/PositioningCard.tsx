@@ -105,7 +105,7 @@ export default function PositioningCard({ profile, setProfile, items, onAdd, onR
               placeholder="e.g. I build AI voice agents that answer every call for real-estate teams."
               className="w-full bg-surface-2 border border-line rounded-xl p-3 text-xs text-ink resize-none focus:outline-none focus:border-brand"
             />
-            {error && <p role="alert" className="text-xs text-red-400">{error}</p>}
+            {error && <p role="alert" className="text-xs text-danger">{error}</p>}
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setIsEditing(false)}

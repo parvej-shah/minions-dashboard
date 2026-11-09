@@ -246,7 +246,7 @@ export default function ArticleEditor({
                     <h2 className="text-lg font-bold text-ink leading-tight break-words [overflow-wrap:anywhere]">{edited.title}</h2>
                     {edited.hook && <p className="text-xs text-muted italic mt-1 break-words [overflow-wrap:anywhere]">{edited.hook}</p>}
                   </div>
-                  <div className="space-y-3 text-xs text-[#E2E8F0] font-sans leading-relaxed max-w-full">
+                  <div className="space-y-3 text-xs text-ink font-sans leading-relaxed max-w-full">
                     <MarkdownArticle
                       body={edited.body}
                       variant="compact"

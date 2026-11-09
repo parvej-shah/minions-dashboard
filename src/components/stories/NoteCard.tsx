@@ -7,7 +7,7 @@ export default function NoteCard({ note, solo, onChange }: { note: Note; solo: b
   const issues = note.check?.issues ?? [];
   const setPrivacy = (disclosure: MemoryDisclosure) => onChange({ ...note, disclosure });
   return (
-    <div className={`rounded-2xl border-2 bg-[#0B1016] p-3 transition-opacity ${note.keep ? "border-brand/40" : "border-line opacity-50"}`}>
+    <div className={`rounded-2xl border-2 bg-surface-2 p-3 transition-opacity ${note.keep ? "border-brand/40" : "border-line opacity-50"}`}>
       <textarea
         value={note.content}
         maxLength={MEMORY_MAX_CHARS}
@@ -49,7 +49,7 @@ export default function NoteCard({ note, solo, onChange }: { note: Note; solo: b
               type="button"
               aria-pressed={note.disclosure === v}
               onClick={() => setPrivacy(v)}
-              className={`rounded-lg px-2.5 py-1 cursor-pointer ${note.disclosure === v ? "bg-brand/15 text-brand" : "text-subtle hover:text-[#CBD5E1]"}`}
+              className={`rounded-lg px-2.5 py-1 cursor-pointer ${note.disclosure === v ? "bg-brand/15 text-brand" : "text-subtle hover:text-ink"}`}
             >
               {label}
             </button>
@@ -60,7 +60,7 @@ export default function NoteCard({ note, solo, onChange }: { note: Note; solo: b
             type="button"
             aria-pressed={note.keep}
             onClick={() => onChange({ ...note, keep: !note.keep })}
-            className="ml-auto text-xs font-extrabold uppercase tracking-wider text-muted hover:text-white cursor-pointer"
+            className="ml-auto text-xs font-extrabold uppercase tracking-wider text-muted hover:text-ink cursor-pointer"
           >
             {note.keep ? "Drop" : "Keep"}
           </button>

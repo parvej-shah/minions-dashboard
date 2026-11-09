@@ -265,7 +265,7 @@ export default function PublishedPostsPage() {
                   onClick={() => applyDateFilter(df.value)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                     dateFilter === df.value
-                      ? "bg-surface-3 text-[#3B82F6] border border-[#3B82F6]/40 font-bold"
+                      ? "bg-surface-3 text-brand border border-brand/40 font-bold"
                       : "text-subtle hover:text-muted"
                   }`}
                 >
@@ -317,10 +317,10 @@ export default function PublishedPostsPage() {
                       activeTab === "BLOG"
                         ? "bg-brand/10 text-brand border border-brand/30"
                         : activeTab === "LINKEDIN"
-                          ? "bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/30"
+                          ? "bg-brand/10 text-brand border border-brand/30"
                           : activeTab === "FACEBOOK"
-                            ? "bg-[#8B5CF6]/10 text-[#8B5CF6] border border-[#8B5CF6]/30"
-                            : "bg-[#0EA5E9]/10 text-[#0EA5E9] border border-[#0EA5E9]/30"
+                            ? "bg-brand/10 text-brand border border-brand/30"
+                            : "bg-brand/10 text-brand border border-brand/30"
                     }`}>
                       {activeTab === "BLOG" && "🌐 Live Blog"}
                       {activeTab === "LINKEDIN" && "💼 LinkedIn"}

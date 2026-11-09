@@ -42,7 +42,7 @@ export default function LexiconTab({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
             <h3 className="text-base font-bold text-ink flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-red-400" />
+              <AlertTriangle className="w-4 h-4 text-danger" />
               Words to avoid
             </h3>
             <p className="text-xs text-muted mt-0.5">
@@ -68,14 +68,14 @@ export default function LexiconTab({
               type="button"
               onClick={onAddBannedWord}
               disabled={isSubmitting || !newBannedWord.trim()}
-              className="min-h-11 w-full cursor-pointer rounded-xl border border-red-500/40 bg-red-500/20 px-4 text-sm font-bold text-red-400 transition-colors hover:bg-red-500/30 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+              className="min-h-11 w-full cursor-pointer rounded-xl border border-danger/40 bg-danger/20 px-4 text-sm font-bold text-danger transition-colors hover:bg-danger/30 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
             >
               {isSubmitting ? "Adding…" : "Add word"}
             </button>
           </div>
         </div>
 
-        {error && <p id="banned-word-error" role="alert" className="text-sm text-red-400">{error}</p>}
+        {error && <p id="banned-word-error" role="alert" className="text-sm text-danger">{error}</p>}
 
         {/* Tag Cloud */}
         {isLoading ? (
@@ -86,14 +86,14 @@ export default function LexiconTab({
             {words.map((directive) => (
               <span
                 key={directive.id}
-                className="inline-flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-mono px-3 py-1.5 rounded-xl"
+                className="inline-flex items-center gap-1.5 bg-danger/10 border border-danger/20 text-danger text-xs font-mono px-3 py-1.5 rounded-xl"
               >
                 <span>&quot;{directive.content}&quot;</span>
                 <button
                   type="button"
                   onClick={() => onRemoveBannedWord(directive.id)}
                   aria-label={`Remove ${directive.content}`}
-                  className="min-h-8 min-w-8 cursor-pointer text-red-400 hover:text-red-200 transition-colors ml-1"
+                  className="min-h-8 min-w-8 cursor-pointer text-danger hover:text-danger transition-colors ml-1"
                   title="Remove from blacklist"
                 >
                   ✕

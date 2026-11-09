@@ -16,7 +16,7 @@ export interface EmptyStateProps {
  */
 export default function EmptyState({ icon, title, description, action }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center text-center py-16 px-6 rounded-2xl border border-dashed border-line bg-[#0D1520]/40">
+    <div className="flex flex-col items-center justify-center text-center py-16 px-6 rounded-2xl border border-dashed border-line bg-surface/40">
       {icon && <div className="mb-3 text-subtle">{icon}</div>}
       <h3 className="text-sm font-bold text-ink">{title}</h3>
       {description && (

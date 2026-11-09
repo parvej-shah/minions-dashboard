@@ -136,7 +136,7 @@ export default function QueueRibbon({
             className={`flex items-center gap-3 p-2.5 px-3 rounded-xl border text-left shrink-0 transition-all duration-200 cursor-pointer min-w-[220px] max-w-[290px] sm:min-w-[250px] relative ${
               isCurrent
                 ? "bg-surface-2 border-brand shadow-lg shadow-brand/20 ring-2 ring-brand scale-[1.02] z-10 opacity-100"
-                : "bg-canvas border-line hover:border-[#2A3D52] hover:bg-surface-2/70 opacity-65 hover:opacity-100"
+                : "bg-canvas border-line hover:border-line-strong hover:bg-surface-2/70 opacity-65 hover:opacity-100"
             }`}
           >
             {/* Micro Thumbnail */}
@@ -169,7 +169,7 @@ export default function QueueRibbon({
                         : asset.status === "PENDING_REVIEW"
                           ? "bg-gold/15 text-gold"
                           : asset.status === "SCHEDULED"
-                            ? "bg-[#3B82F6]/20 text-[#93C5FD]"
+                            ? "bg-brand/20 text-brand"
                             : "bg-subtle/20 text-muted"
                   }`}
                 >
@@ -180,7 +180,7 @@ export default function QueueRibbon({
                 </span>
               </div>
 
-              <div className={`text-xs font-semibold line-clamp-2 break-words ${isCurrent ? "text-ink font-bold" : "text-[#CBD5E1]"}`}>
+              <div className={`text-xs font-semibold line-clamp-2 break-words ${isCurrent ? "text-ink font-bold" : "text-ink"}`}>
                 {asset.title}
               </div>
 

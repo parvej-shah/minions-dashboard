@@ -39,7 +39,7 @@ export default function Celebration({
         </div>
         {saved > 0 && harvest && !harvest.started && <p className="mt-4 max-w-sm text-xs text-subtle">{harvest.message}</p>}
       </main>
-      <footer className="border-t-2 border-line bg-[#0B1016]">
+      <footer className="border-t-2 border-line bg-surface-2">
         <div className="mx-auto w-full max-w-2xl px-4 py-4 sm:px-6 sm:py-5">
           <button type="button" autoFocus onClick={onDone} className={`${chunky.primary} w-full`}>
             Continue
@@ -53,7 +53,7 @@ export default function Celebration({
 function StatTile({ label, tone, value, pop }: { label: string; tone: string; value: string; pop?: boolean }) {
   return (
     <div className="overflow-hidden rounded-2xl border-2" style={{ borderColor: tone }}>
-      <div className="py-1 text-[10px] font-extrabold uppercase tracking-widest text-[#0B1016]" style={{ background: tone }}>
+      <div className="py-1 text-[10px] font-extrabold uppercase tracking-widest text-white" style={{ background: tone }}>
         {label}
       </div>
       <div className={`py-3 text-xl font-extrabold ${pop ? "story-pop" : ""}`} style={{ color: tone }}>

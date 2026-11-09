@@ -3,7 +3,7 @@ import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
 export default function IdeasSkeleton() {
   return (
     <SkeletonGroup label="Loading your ideas" className="mx-auto max-w-7xl space-y-6 pb-16">
-      <section className="relative overflow-hidden rounded-[1.75rem] border-2 border-b-4 border-brand/35 border-b-brand-edge/70 bg-[linear-gradient(135deg,#0F1C1D_0%,#10171D_62%,#0E1419_100%)] p-5 sm:p-7">
+      <section className="relative overflow-hidden rounded-[1.75rem] bg-surface shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.04)] p-5 sm:p-7">
         <div className="max-w-2xl space-y-3">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-9 w-56 max-w-full" />
@@ -15,7 +15,7 @@ export default function IdeasSkeleton() {
         <Skeleton className="h-11 w-full rounded-xl sm:w-40" />
       </div>
 
-      <div className="sticky top-14 z-30 -mx-4 space-y-3 border-b border-line bg-[#0a0d12] px-4 pb-3.5 pt-3 shadow-xl shadow-black/40 sm:-mx-6 sm:px-6 md:-mx-8 md:top-0 md:px-8">
+      <div className="sticky top-14 z-30 -mx-4 space-y-3 border-b border-line bg-canvas px-4 pb-3.5 pt-3 shadow-xl shadow-black/40 sm:-mx-6 sm:px-6 md:-mx-8 md:top-0 md:px-8">
         <Skeleton className="h-11 w-full max-w-md rounded-xl" />
         <div className="hidden items-center gap-2 border-t border-line/40 pt-2 lg:flex">
           <Skeleton className="h-6 w-12" />

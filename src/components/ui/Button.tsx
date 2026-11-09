@@ -2,44 +2,36 @@ import React from "react";
 import { Loader2 } from "lucide-react";
 
 /**
- * The tactile button: a thick bottom edge the button sinks into when pressed,
- * like a physical key. One primary (brand) button per screen; everything else
- * is soft, secondary or ghost.
+ * Calm pill buttons (Apple-style). One primary (filled blue) per screen;
+ * secondary is outlined blue, ghost is quiet text. Old variant names map onto
+ * these so every caller keeps working.
  */
 export type ButtonVariant = "primary" | "soft" | "secondary" | "light" | "ghost" | "gold" | "coral" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-2xl font-extrabold select-none cursor-pointer " +
-  "transition-[transform,border-width,background-color,color] duration-75 " +
-  "active:translate-y-1 active:border-b-0 " +
+  "inline-flex items-center justify-center gap-2 rounded-full font-medium select-none cursor-pointer " +
+  "transition-colors duration-150 " +
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand " +
-  "disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-b-4 aria-disabled:pointer-events-none";
+  "disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none";
 
 const variants: Record<ButtonVariant, string> = {
-  primary:
-    "border-b-4 border-brand-edge bg-brand text-brand-ink hover:bg-brand-hover " +
-    "disabled:bg-line disabled:border-[#16202B] disabled:text-subtle",
-  /** Brand-tinted: a real action that should not compete with the screen's primary. */
-  soft:
-    "border-2 border-b-4 border-brand/30 bg-brand/10 text-brand hover:bg-brand/20 hover:border-brand/50 " +
-    "disabled:text-subtle disabled:border-line disabled:bg-transparent",
-  secondary:
-    "border-2 border-b-4 border-line bg-surface text-ink hover:bg-surface-2 hover:border-line-strong " +
-    "disabled:text-subtle",
+  primary: "bg-brand text-brand-ink hover:bg-brand-hover",
+  /** An outlined blue action that should not compete with the primary. */
+  soft: "border border-brand text-brand bg-transparent hover:bg-brand/5",
+  secondary: "border border-line-strong bg-surface text-ink hover:bg-surface-2",
   /** White, for third-party sign-in buttons that must look like the provider's. */
-  light: "border-b-4 border-[#CBD5E1] bg-white text-canvas hover:bg-ink disabled:text-subtle",
-  ghost:
-    "border-b-4 border-transparent bg-transparent text-muted hover:bg-surface-2 hover:text-ink active:border-b-0 disabled:text-subtle",
-  gold: "border-b-4 border-gold-edge bg-gold text-[#1F1300] hover:bg-[#FBB12E]",
-  coral: "border-b-4 border-coral-edge bg-coral text-[#2A0A02] hover:bg-[#FF8266]",
-  danger: "border-b-4 border-danger-edge bg-danger text-white hover:bg-[#F25C5C]",
+  light: "border border-line-strong bg-white text-ink hover:bg-surface-2",
+  ghost: "bg-transparent text-brand hover:bg-brand/5",
+  gold: "border border-line-strong bg-surface text-ink hover:bg-surface-2",
+  coral: "bg-brand text-brand-ink hover:bg-brand-hover",
+  danger: "bg-danger text-white hover:bg-danger/90",
 };
 
 const sizes: Record<ButtonSize, string> = {
-  sm: "min-h-9 px-3.5 text-xs",
-  md: "min-h-11 px-5 text-sm",
-  lg: "min-h-14 px-6 text-base",
+  sm: "min-h-9 px-4 text-sm",
+  md: "min-h-11 px-5 text-[15px]",
+  lg: "min-h-12 px-7 text-[17px]",
 };
 
 export interface ButtonStyleOptions {
@@ -47,14 +39,14 @@ export interface ButtonStyleOptions {
   size?: ButtonSize;
   /** Full width. */
   block?: boolean;
-  /** Uppercase lesson-app label; reserve for big one-word actions (CONTINUE, CHECK). */
+  /** Kept for old callers; no longer changes the label. */
   shout?: boolean;
   className?: string;
 }
 
 /** The class string, for elements that are not a <button>, such as a <Link>. */
-export function buttonStyles({ variant = "primary", size = "md", block, shout, className = "" }: ButtonStyleOptions = {}) {
-  return [base, variants[variant], sizes[size], block && "w-full", shout && "uppercase tracking-wider", className]
+export function buttonStyles({ variant = "primary", size = "md", block, className = "" }: ButtonStyleOptions = {}) {
+  return [base, variants[variant], sizes[size], block && "w-full", className]
     .filter(Boolean)
     .join(" ");
 }

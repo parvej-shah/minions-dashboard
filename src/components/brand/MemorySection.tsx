@@ -137,7 +137,7 @@ export default function MemorySection({ onChange }: { onChange: () => void }) {
                       type="button"
                       onClick={() => remove(item)}
                       aria-label="Delete"
-                      className="rounded p-1 text-subtle hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
+                      className="rounded p-1 text-subtle hover:bg-danger/10 hover:text-danger cursor-pointer"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>

@@ -96,7 +96,7 @@ export default function OverviewTab({ directives, setDirectives, onEditAudience 
   return (
     <div className="space-y-6">
       {regenError && (
-        <div className="p-3 rounded-xl border border-red-500/30 bg-red-500/5 text-xs text-red-400">{regenError}</div>
+        <div className="p-3 rounded-xl border border-danger/30 bg-danger/5 text-xs text-danger">{regenError}</div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

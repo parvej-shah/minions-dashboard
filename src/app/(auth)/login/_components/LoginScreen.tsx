@@ -96,14 +96,14 @@ export default function LoginScreen() {
         </ol>
 
         {errorMessage && (
-          <div role="alert" className="story-shake mt-6 flex items-start gap-2 rounded-2xl border-2 border-danger/40 bg-danger/10 p-3 text-sm text-red-200">
+          <div role="alert" className="story-shake mt-6 flex items-start gap-2 rounded-2xl border-2 border-danger/40 bg-danger/10 p-3 text-sm text-danger">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-danger" aria-hidden="true" />
             <span className="flex-1">{errorMessage}</span>
             <button
               type="button"
               onClick={() => setErrorMessage(null)}
               aria-label="Dismiss"
-              className="rounded-lg p-1 text-red-300 hover:bg-danger/20 hover:text-white cursor-pointer"
+              className="rounded-lg p-1 text-danger hover:bg-danger/20 hover:text-white cursor-pointer"
             >
               <X className="h-4 w-4" />
             </button>

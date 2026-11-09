@@ -113,7 +113,7 @@ export default function SourcesTab() {
         </div>
 
         {error && (
-          <div className="flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+          <div className="flex items-start gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             <span>{error}</span>
           </div>
@@ -149,7 +149,7 @@ export default function SourcesTab() {
                 </div>
                 <p className="truncate text-[11px] text-subtle">{source.query || source.url}</p>
                 {source.last_error && (
-                  <p className="mt-0.5 flex items-center gap-1 text-[11px] text-red-400">
+                  <p className="mt-0.5 flex items-center gap-1 text-[11px] text-danger">
                     <AlertTriangle className="h-3 w-3 shrink-0" />
                     Last fetch failed: {source.last_error}
                   </p>
@@ -159,7 +159,7 @@ export default function SourcesTab() {
                 type="button"
                 onClick={() => handleDelete(source.id)}
                 aria-label={`Remove ${source.label}`}
-                className="shrink-0 rounded-lg p-1.5 text-subtle transition-colors hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
+                className="shrink-0 rounded-lg p-1.5 text-subtle transition-colors hover:bg-danger/10 hover:text-danger cursor-pointer"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>

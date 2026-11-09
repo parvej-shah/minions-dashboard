@@ -46,8 +46,8 @@ const OBJECTIVE_LABEL: Record<string, string> = {
 
 const METHOD_STYLE: Record<FillMethod, string> = {
   LANE: "bg-brand/10 text-brand border-brand/30",
-  OTHER_LANE: "bg-[#3B82F6]/10 text-[#93C5FD] border-[#3B82F6]/30",
-  TARGETED_HARVEST: "bg-[#A78BFA]/10 text-[#C4B5FD] border-[#A78BFA]/30",
+  OTHER_LANE: "bg-brand/10 text-brand border-brand/30",
+  TARGETED_HARVEST: "bg-brand/10 text-brand border-brand/30",
   BELOW_BAR: "bg-gold/10 text-gold border-gold/30",
 };
 
@@ -112,7 +112,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
           onClick={() => void retry()}
           disabled={retrying}
           aria-busy={retrying}
-          className="inline-flex shrink-0 items-center gap-1.5 text-brand transition-colors cursor-pointer hover:text-[#5EEAD4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex shrink-0 items-center gap-1.5 text-brand transition-colors cursor-pointer hover:text-success focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:cursor-not-allowed disabled:opacity-60"
         >
           {retrying && <RefreshCw className="h-3 w-3 animate-spin" />}
           {retrying ? "Trying again…" : "Try again"}
@@ -171,7 +171,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
       </div>
 
       <details className="group border-t border-line/60 pt-4">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-lg text-sm font-semibold text-[#CBD5E1] transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-lg text-sm font-semibold text-ink transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand [&::-webkit-details-marker]:hidden">
           <span>Preview upcoming drafts <span className="ml-1 text-xs font-normal text-muted">({plan.week.slots.length})</span></span>
           <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" aria-hidden="true" />
         </summary>
@@ -224,7 +224,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
                         </span>
                       </div>
                       {s.idea_title ? (
-                        <p className="text-xs text-[#CBD5E1] leading-snug line-clamp-2">{s.idea_title}</p>
+                        <p className="text-xs text-ink leading-snug line-clamp-2">{s.idea_title}</p>
                       ) : null}
                       {s.fill_method === "BELOW_BAR" && s.gate_reasons.length > 0 && (
                         <p className="text-[11px] text-gold flex items-start gap-1.5">
@@ -251,7 +251,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
         </p>
 
       {needsNudge && (
-        <div className="rounded-xl border border-gold/30 bg-gold/10 p-3 text-xs text-[#FCD34D] flex items-start gap-2">
+        <div className="rounded-xl border border-gold/30 bg-gold/10 p-3 text-xs text-gold flex items-start gap-2">
           <Lightbulb className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
             Some slots have no strong idea yet. A recent piece of work, a lesson or a client question gives the harvester something only you could say.{" "}
@@ -265,7 +265,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
       </details>
 
       <details className="group border-t border-line pt-4">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-lg text-sm font-semibold text-[#CBD5E1] transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-lg text-sm font-semibold text-ink transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand [&::-webkit-details-marker]:hidden">
           Fine-tune your content plan
           <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
         </summary>

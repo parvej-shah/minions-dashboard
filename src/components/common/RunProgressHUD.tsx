@@ -141,7 +141,7 @@ export default function RunProgressHUD<J extends RunJob>({ job, config, onDismis
     <aside
       role="complementary"
       aria-label={config.ariaLabel}
-      className={`fixed bottom-5 right-5 z-50 w-[420px] max-w-[calc(100vw-2.5rem)] rounded-2xl bg-[#0B0F14]/95 border ${
+      className={`fixed bottom-5 right-5 z-50 w-[420px] max-w-[calc(100vw-2.5rem)] rounded-2xl bg-surface-2/95 border ${
         isCompleted ? theme.frameDone : hasFailed ? "border-danger/60 shadow-danger/20" : "border-line shadow-black/80"
       } shadow-2xl backdrop-blur-xl transition-all duration-300 overflow-hidden flex flex-col`}
     >
@@ -159,7 +159,7 @@ export default function RunProgressHUD<J extends RunJob>({ job, config, onDismis
 
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-white tracking-wide font-mono uppercase">
+              <span className="text-xs font-bold text-ink tracking-wide font-mono uppercase">
                 {isCompleted ? config.headings.done : hasFailed ? config.headings.failed : config.headings.running}
               </span>
               <span
@@ -177,7 +177,7 @@ export default function RunProgressHUD<J extends RunJob>({ job, config, onDismis
         <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={() => setIsMinimized(!isMinimized)}
-            className="p-1 rounded text-subtle hover:text-white hover:bg-surface-2 transition-colors cursor-pointer"
+            className="p-1 rounded text-subtle hover:text-ink hover:bg-surface-2 transition-colors cursor-pointer"
             title={isMinimized ? "Expand" : "Minimize"}
           >
             {isMinimized ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -242,7 +242,7 @@ export default function RunProgressHUD<J extends RunJob>({ job, config, onDismis
                     </div>
 
                     <div className="min-w-0">
-                      <span className={`block text-xs font-semibold truncate ${isStagePending ? "text-subtle" : "text-white"}`}>{stage.name}</span>
+                      <span className={`block text-xs font-semibold truncate ${isStagePending ? "text-subtle" : "text-ink"}`}>{stage.name}</span>
                       <p className="text-[10px] text-muted truncate">
                         {isStagePending ? `Typically ${Math.round(stage.typicalMs / 1000)}s` : stage.description}
                       </p>

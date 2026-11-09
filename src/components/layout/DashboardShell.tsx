@@ -7,8 +7,8 @@ import { signInWithGoogle } from "@/lib/googleSignIn";
 import { X } from "lucide-react";
 import AdminAuthModal from "@/components/auth/AdminAuthModal";
 import CommandPalette from "./CommandPalette";
-import Sidebar from "./Sidebar";
-import { MobileBottomNav, MobileDrawer, MobileTopBar } from "./MobileNav";
+import AccountMenu from "./AccountMenu";
+import { BottomTabs, TopNav } from "./TopNav";
 import { useNavCounts } from "@/hooks/useNavCounts";
 import { useChannelSummary } from "@/hooks/useChannelSummary";
 import { useBrandSettings } from "@/hooks/useBrandSettings";
@@ -25,8 +25,8 @@ export interface DashboardShellProps {
 }
 
 /**
- * Dashboard chrome: sidebar, mobile navigation, command palette, and the
- * harvest trigger. Every hook runs unconditionally; /login has its own layout
+ * Dashboard chrome: the thin top menu (four places + avatar menu), the phone
+ * tab bar, the command palette, and the harvest trigger. Every hook runs unconditionally; /login has its own layout
  * rather than an early return here.
  */
 export default function DashboardShell({ children }: DashboardShellProps) {
@@ -61,7 +61,6 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
   const [isHarvesting, setIsHarvesting] = useState(false);
   const [activeHarvestJob, setActiveHarvestJob] = useState<HarvestingJob | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [showPalette, setShowPalette] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -84,7 +83,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       }
       setActiveHarvestJob({ startedAt, runId: result.run_id });
     } catch (error) {
-      notify(`⚠️ Harvest request failed: ${toErrorMessage(error, "Could not reach the harvester pipeline.")}`);
+      notify(`Could not look for new ideas: ${toErrorMessage(error, "Could not reach the harvester pipeline.")}`);
       setActiveHarvestJob(null);
     } finally {
       setIsHarvesting(false);
@@ -94,7 +93,6 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   const quickNav = useCallback(
     (url: string) => {
       setShowPalette(false);
-      setMobileMenuOpen(false);
       setSearchQuery("");
       router.push(url);
     },
@@ -110,7 +108,6 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       }
       if (e.key === "Escape") {
         setShowPalette(false);
-        setMobileMenuOpen(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -132,7 +129,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get("onboarding_success") === "true") {
-        notify("🎉 Brand Brief saved. Minions is now finding your first content ideas.");
+        notify("Your brand is saved. Minions is finding your first ideas.");
         urlParams.delete("onboarding_success");
         const remainingQuery = urlParams.toString();
         window.history.replaceState(
@@ -147,24 +144,8 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   const handleSignIn = useCallback(() => signInWithGoogle("/onboarding"), []);
   const handleSignOut = useCallback(() => signOut({ callbackUrl: "/login" }), []);
 
-  const mobileNavProps = {
-    navItems,
-    navCounts,
-    pathname,
-    session,
-    mobileMenuOpen,
-    setMobileMenuOpen,
-    onOpenPalette: () => setShowPalette(true),
-    onOpenAuthModal: () => setAuthModalOpen(true),
-    onSignIn: handleSignIn,
-    onSignOut: handleSignOut,
-    isHarvesting,
-    onHarvest: triggerHarvest,
-    blogEnabled,
-  };
-
   return (
-    <div className="dashboard-readable flex min-h-screen bg-[#0a0d12] text-ink">
+    <div className="min-h-screen bg-canvas text-ink">
       <CommandPalette
         isOpen={showPalette}
         onClose={() => setShowPalette(false)}
@@ -174,51 +155,41 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         onNavigate={quickNav}
       />
 
-      <Sidebar
+      <ImpersonationBanner />
+      <TopNav
         navItems={navItems}
         navCounts={navCounts}
         pathname={pathname}
-        session={session}
-        sessionLoading={status === "loading"}
-        isHarvesting={isHarvesting}
-        onHarvest={triggerHarvest}
-        onOpenPalette={() => setShowPalette(true)}
-        onOpenAuthModal={() => setAuthModalOpen(true)}
-        onSignIn={handleSignIn}
-        onSignOut={handleSignOut}
-        blogEnabled={blogEnabled}
+        account={
+          <AccountMenu
+            session={session}
+            navCounts={navCounts}
+            blogEnabled={blogEnabled}
+            isHarvesting={isHarvesting}
+            onHarvest={triggerHarvest}
+            onOpenAccount={() => setAuthModalOpen(true)}
+            onSignIn={handleSignIn}
+            onSignOut={handleSignOut}
+          />
+        }
       />
 
-      <MobileDrawer {...mobileNavProps} />
+      {notification && (
+        <div role="status" className="mx-auto mt-4 flex max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
+          <p className="flex-1 rounded-2xl bg-surface px-4 py-3 text-[15px] text-ink shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.06)]">
+            {notification}
+          </p>
+          <button type="button" onClick={clearNotification} aria-label="Dismiss" className="cursor-pointer rounded-full p-2 text-muted hover:bg-surface-2 hover:text-ink">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
-      {/* MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <ImpersonationBanner />
-        <MobileTopBar
-          onOpenPalette={() => setShowPalette(true)}
-          isHarvesting={isHarvesting}
-          onHarvest={triggerHarvest}
-        />
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-8 sm:px-6 sm:pt-12 md:pb-16">
+        {redirecting ? <PageSkeleton label="Opening your workspace" /> : children}
+      </main>
 
-        {notification && (
-          <div className="bg-brand/20 border-b border-brand/40 px-4 sm:px-6 py-2 text-xs font-medium text-brand flex items-center justify-between animate-in slide-in-from-top-2">
-            <span>{notification}</span>
-            <button onClick={clearNotification} className="hover:opacity-75 cursor-pointer">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
-
-        <main className="p-3.5 pb-28 sm:p-6 md:p-8 md:pb-8 flex-1 max-w-7xl w-full mx-auto">
-          {redirecting ? <PageSkeleton label="Opening your workspace" /> : children}
-        </main>
-      </div>
-
-      <MobileBottomNav
-        pathname={pathname}
-        navCounts={navCounts}
-        setMobileMenuOpen={setMobileMenuOpen}
-      />
+      <BottomTabs navItems={navItems} navCounts={navCounts} pathname={pathname} />
 
       <HarvestingProgressHUD 
         job={activeHarvestJob} 
