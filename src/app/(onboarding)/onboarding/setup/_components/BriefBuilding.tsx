@@ -19,7 +19,7 @@ export function BriefBuilding() {
       <span className="story-pop relative flex h-24 w-24 items-center justify-center rounded-full border-b-8 border-brand-edge bg-brand text-brand-ink">
         <Sparkles className="h-12 w-12 animate-pulse" strokeWidth={2.25} />
       </span>
-      <h1 className="mt-8 text-2xl font-extrabold sm:text-3xl">Setting you up…</h1>
+      <h1 className="mt-8 text-2xl font-bold sm:text-3xl">Setting you up…</h1>
       <p className="mt-2 max-w-sm text-sm text-muted">About 20 seconds. Your answers become the rules every post follows.</p>
       <ol className="mt-8 w-full max-w-xs space-y-3 text-left" aria-live="polite">
         {BUILD_STEPS.map((label, i) => {
@@ -27,7 +27,7 @@ export function BriefBuilding() {
           return (
             <li key={label} className={`flex items-center gap-3 text-base font-bold ${state === "todo" ? "text-subtle" : "text-ink"}`}>
               <span
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 ${
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${
                   state === "done" ? "border-brand bg-brand text-brand-ink" : state === "active" ? "border-brand text-brand" : "border-line"
                 }`}
               >

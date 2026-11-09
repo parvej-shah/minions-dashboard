@@ -57,7 +57,7 @@ export function PwaRegister() {
   return (
     <aside
       aria-label="App update"
-      className="fixed inset-x-3 top-[max(0.75rem,env(safe-area-inset-top))] z-[100] mx-auto flex max-w-lg items-center gap-3 rounded-2xl border border-line bg-surface p-3 shadow-2xl"
+      className="fixed inset-x-3 top-[max(0.75rem,env(safe-area-inset-top))] z-[100] mx-auto flex max-w-lg items-center gap-3 rounded-2xl border border-line bg-surface p-3 shadow-float"
     >
       <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold text-ink">An update is ready</p>

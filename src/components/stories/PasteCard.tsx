@@ -63,7 +63,7 @@ export default function PasteCard({ onDismiss, onDone }: { onDismiss: () => void
   };
 
   return (
-    <section className="relative space-y-3 rounded-2xl border border-gold/30 bg-surface px-4 py-3">
+    <section className="relative space-y-3 rounded-[28px] bg-surface shadow-soft p-6 sm:p-8">
       <button type="button" onClick={onDismiss} aria-label="Hide for a week" className="absolute right-2 top-2 rounded-lg p-1 text-subtle hover:text-ink cursor-pointer">
         <X className="h-4 w-4" />
       </button>

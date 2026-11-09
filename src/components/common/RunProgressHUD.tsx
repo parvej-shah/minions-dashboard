@@ -159,7 +159,7 @@ export default function RunProgressHUD<J extends RunJob>({ job, config, onDismis
 
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-ink tracking-wide font-mono uppercase">
+              <span className="text-xs font-bold text-ink">
                 {isCompleted ? config.headings.done : hasFailed ? config.headings.failed : config.headings.running}
               </span>
               <span

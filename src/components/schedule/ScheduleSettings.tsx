@@ -326,7 +326,7 @@ export default function ScheduleSettings() {
 
       <ContentPlanCard key={planKey} onMessage={toast.show} />
 
-      {toast.message && <div role="status" className="fixed bottom-6 right-6 z-50 max-w-sm rounded-xl border border-line bg-surface-2 px-4 py-3 text-sm font-semibold text-ink shadow-2xl">{toast.message}</div>}
+      {toast.message && <div role="status" className="fixed bottom-6 right-6 z-50 max-w-sm rounded-xl border border-line bg-surface-2 px-4 py-3 text-sm font-semibold text-ink shadow-soft">{toast.message}</div>}
     </div>
   );
 }

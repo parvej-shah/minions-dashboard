@@ -27,5 +27,5 @@
 | 23 | Posts library (/posts) | CLAUDE | DONE (local) | tasks/23.md |
 | 24 | Review screen (Studio rebuilt) | CLAUDE | DONE (local) | tasks/24.md |
 | 25 | Ideas | CLAUDE | DONE (local) | tasks/25.md |
-| 26 | Remaining screens calm pass | CLAUDE | TODO | tasks/26.md |
-| 27 | Sweep + browser pass, then ask to push | CLAUDE | TODO | tasks/27.md |
+| 26 | Remaining screens calm pass | CLAUDE | DONE (local) | tasks/26.md |
+| 27 | Sweep + browser pass, then ask to push | CLAUDE | IN PROGRESS | tasks/27.md |

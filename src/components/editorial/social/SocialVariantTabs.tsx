@@ -140,7 +140,7 @@ export default function SocialVariantTabs({
 
   return (
     <section aria-labelledby="channel-preview-title" className="overflow-hidden rounded-[28px] bg-surface shadow-soft">
-      <div className="flex flex-col gap-4 border-b-2 border-line bg-gradient-to-br from-brand/10 via-surface to-surface p-4 sm:p-5">
+      <div className="flex flex-col gap-4 border-b border-line bg-gradient-to-br from-brand/10 via-surface to-surface p-4 sm:p-5">
         <div className="flex items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-brand/30 bg-brand/10 text-brand">
             <Share2 className="h-5 w-5" aria-hidden="true" />
@@ -173,7 +173,7 @@ export default function SocialVariantTabs({
         {isShown("LINKEDIN") && (
           <ChannelPanel
             {...forChannel("LINKEDIN")}
-            panelClass="space-y-4 rounded-2xl border border-line bg-canvas p-4 font-sans sm:p-5 sm:shadow-lg"
+            panelClass="space-y-4 rounded-2xl border border-line bg-canvas p-4 font-sans sm:p-5 sm:shadow-soft"
             previewClass="whitespace-pre-line break-words rounded-none border-0 bg-transparent p-0 font-sans text-[14px] leading-[1.65] text-ink select-text sm:rounded-xl sm:border sm:border-line/60 sm:bg-surface-2 sm:p-4.5 sm:text-xs sm:leading-relaxed"
             identity={
               <div className="flex items-center gap-3 min-w-0">
@@ -260,7 +260,7 @@ export default function SocialVariantTabs({
         {isShown("FACEBOOK") && (
           <ChannelPanel
             {...forChannel("FACEBOOK")}
-            panelClass="bg-canvas rounded-2xl border border-line p-5 space-y-4 font-sans shadow-lg"
+            panelClass="bg-canvas rounded-2xl border border-line p-5 space-y-4 font-sans shadow-soft"
             previewClass="text-xs text-ink leading-relaxed whitespace-pre-line bg-surface-2 p-4.5 rounded-xl border border-line/60 font-sans select-text"
             identity={
               <div className="flex items-center gap-3">
@@ -316,7 +316,7 @@ export default function SocialVariantTabs({
         {isShown("TWITTER") && (
           <ChannelPanel
             {...forChannel("TWITTER")}
-            panelClass="bg-canvas rounded-2xl border border-line p-5 space-y-4 font-sans shadow-lg"
+            panelClass="bg-canvas rounded-2xl border border-line p-5 space-y-4 font-sans shadow-soft"
             previewClass="text-xs text-ink leading-relaxed whitespace-pre-line bg-surface-2 p-4.5 rounded-xl border border-line/60 font-sans select-text"
             identity={
               <div className="flex items-center gap-3">

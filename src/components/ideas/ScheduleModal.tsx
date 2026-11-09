@@ -116,7 +116,7 @@ export default function ScheduleModal({
 
           {/* Quick Presets */}
           <div className="space-y-2">
-            <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-subtle">
+            <label className="text-[11px] font-bold text-subtle">
               Quick Presets
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -160,7 +160,7 @@ export default function ScheduleModal({
 
           {/* Custom Date & Time Picker */}
           <div className="space-y-2">
-            <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-subtle">
+            <label className="text-[11px] font-bold text-subtle">
               Custom Date & Time
             </label>
             <div className="relative">
@@ -168,7 +168,7 @@ export default function ScheduleModal({
                 type="datetime-local"
                 value={selectedDateTime}
                 onChange={(e) => setSelectedDateTime(e.target.value)}
-                className="w-full bg-canvas border border-line focus:border-brand rounded-xl px-4 py-3 text-xs sm:text-sm text-ink font-mono outline-none transition-colors cursor-pointer"
+                className="w-full bg-canvas border border-line focus:border-brand rounded-xl px-4 py-3 text-xs sm:text-sm text-ink outline-none transition-colors cursor-pointer"
               />
             </div>
             <p className="text-[11px] text-subtle">

@@ -25,7 +25,7 @@ export default function BrandLoading() {
         <div key={item} className="space-y-4">
           <Skeleton className="h-8 w-56" />
           <div className="grid gap-4 md:grid-cols-2">
-            {[0, 1].map((card) => <div key={card} className="space-y-4 rounded-2xl border-2 border-line bg-surface p-5"><Skeleton className="h-5 w-40" /><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-4/5" /><Skeleton className="h-10 w-32" /></div>)}
+            {[0, 1].map((card) => <div key={card} className="space-y-4 rounded-2xl border border-line bg-surface p-5"><Skeleton className="h-5 w-40" /><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-4/5" /><Skeleton className="h-10 w-32" /></div>)}
           </div>
         </div>
       ))}

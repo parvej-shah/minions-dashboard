@@ -20,7 +20,7 @@ export function WizardSkeleton() {
           <Skeleton className="h-10 w-44" />
         </div>
       </div>
-      <div className="border-t-2 border-line">
+      <div className="border-t border-line">
         <div className="mx-auto flex w-full max-w-2xl justify-end px-4 py-4 sm:px-6 sm:py-5">
           <Skeleton className="h-14 w-full rounded-2xl sm:w-48" />
         </div>

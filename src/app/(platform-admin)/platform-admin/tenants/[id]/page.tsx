@@ -38,7 +38,7 @@ interface TenantDetail {
 function Section({ title, count, children }: { title: string; count: number; children: React.ReactNode }) {
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-mono font-bold uppercase text-muted tracking-wider">
+      <h2 className="text-sm font-bold text-muted">
         {title} ({count})
       </h2>
       {children}
@@ -252,7 +252,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
       </Section>
 
       {toast.message && (
-        <div className="fixed bottom-6 right-6 z-50 bg-ink text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold">
+        <div className="fixed bottom-6 right-6 z-50 bg-ink text-white px-4 py-3 rounded-xl shadow-soft text-xs font-semibold">
           {toast.message}
         </div>
       )}

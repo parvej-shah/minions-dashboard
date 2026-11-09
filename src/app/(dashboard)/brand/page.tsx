@@ -15,6 +15,8 @@ import SourcesTab from "@/components/brand/SourcesTab";
 import ExperienceTab from "@/components/brand/ExperienceTab";
 import CompletenessCard from "@/components/brand/CompletenessCard";
 import { useApiResource } from "@/hooks/useApiResource";
+import { PageHeader } from "@/components/ui/Text";
+import { segment } from "@/components/ui/segment";
 
 const BRAND_SECTIONS: { tab: BrandTab; label: string; icon: typeof Sparkles }[] = [
   { tab: "overview", label: "Brand basics", icon: Sparkles },
@@ -87,24 +89,25 @@ function BrandStudio() {
   
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 pb-16">
-      <div className="space-y-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div className="min-w-0">
-            <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">Your brand</h1>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">What Minions knows about you, so every post sounds like you.</p>
-          </div>
+    <div className="mx-auto max-w-[1040px] space-y-8">
+      <div className="space-y-8">
+        <PageHeader
+          title="Your brand"
+          action={
           <div className="shrink-0">
             <Button variant="soft" icon={<FileUp className="h-4 w-4" />} onClick={() => setImporting(true)} className="w-full sm:w-auto">
               Fill from LinkedIn
             </Button>
-            <p className="mt-1 text-[11px] text-subtle sm:text-right">Adds what it finds. You check it first.</p>
+            <p className="mt-1.5 text-sm text-muted sm:text-right">Adds what it finds. You check it first.</p>
           </div>
-        </div>
+          }
+        >
+          What Minions knows about you, so every post sounds like you.
+        </PageHeader>
 
-        <nav aria-label="Brand settings" className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+        <nav aria-label="Brand settings" className={segment.track}>
           {BRAND_SECTIONS.map(({ tab, label, icon: Icon }) => (
-            <button key={tab} type="button" onClick={() => goToSection(tab)} aria-current={activeTab === tab ? "page" : undefined} className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 px-3 text-center text-xs font-semibold transition-colors last:col-span-2 sm:justify-start sm:px-4 sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${activeTab === tab ? "border-brand bg-brand text-canvas" : "border-line bg-surface text-muted hover:border-brand/50 hover:text-ink"}`}><Icon className="h-4 w-4" aria-hidden="true" />{label}</button>
+            <button key={tab} type="button" onClick={() => goToSection(tab)} aria-current={activeTab === tab ? "page" : undefined} className={`inline-flex min-h-9 cursor-pointer items-center gap-2 px-4 text-[15px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${activeTab === tab ? segment.on : segment.off}`}><Icon className="h-4 w-4" aria-hidden="true" />{label}</button>
           ))}
         </nav>
       </div>

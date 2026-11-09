@@ -17,7 +17,7 @@ export default function LinkedInModal({ isOpen, onClose }: { isOpen: boolean; on
       title={
         <div>
           <h2 className="flex items-center gap-2 text-xl font-bold text-ink">
-            <span className="text-base font-black text-[#0A66C2]" aria-hidden="true">in</span> LinkedIn
+            <span className="text-base font-semibold text-[#0A66C2]" aria-hidden="true">in</span> LinkedIn
           </h2>
           <p className="mt-1 text-sm text-muted">Connect your profile or page. Approved posts go there while it&apos;s on.</p>
         </div>

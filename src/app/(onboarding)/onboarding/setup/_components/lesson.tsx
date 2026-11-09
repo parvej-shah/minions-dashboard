@@ -41,16 +41,16 @@ export function Question({ title, hint }: { title: React.ReactNode; hint?: React
   return (
     <div>
       <div className="flex items-end gap-3">
-        <span className="animate-pop-in flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border-2 border-b-4 border-line bg-surface sm:h-16 sm:w-16">
+        <span className="animate-pop-in flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-line bg-surface sm:h-16 sm:w-16">
           <Image src="/icon.svg" alt="" width={40} height={40} className="h-9 w-9 sm:h-10 sm:w-10" />
         </span>
-        <div className="relative mb-1 flex-1 rounded-2xl border-2 border-line bg-surface px-4 py-3">
+        <div className="relative mb-1 flex-1 rounded-2xl border border-line bg-surface px-4 py-3">
           {/* Bubble tail pointing at the mascot */}
           <span
             aria-hidden="true"
-            className="absolute -left-[9px] bottom-4 h-4 w-4 rotate-45 border-b-2 border-l-2 border-line bg-surface"
+            className="absolute -left-[9px] bottom-4 h-4 w-4 rotate-45 border-b border-l border-line bg-surface"
           />
-          <h1 className="relative text-lg font-extrabold leading-snug text-balance text-ink sm:text-2xl">{title}</h1>
+          <h1 className="relative text-lg font-bold leading-snug text-balance text-ink sm:text-2xl">{title}</h1>
         </div>
       </div>
       {hint && <p className="mt-4 text-sm leading-relaxed text-muted sm:text-base">{hint}</p>}
@@ -59,7 +59,7 @@ export function Question({ title, hint }: { title: React.ReactNode; hint?: React
 }
 
 export const lessonInput =
-  "w-full rounded-2xl border-2 border-line bg-surface px-4 py-3.5 text-base leading-relaxed text-ink placeholder:text-muted " +
+  "w-full rounded-2xl border border-line bg-surface px-4 py-3.5 text-base leading-relaxed text-ink placeholder:text-muted " +
   "transition-colors focus:border-brand focus:outline-none sm:text-lg";
 
 /** A tap-to-fill example, like a word bank tile. */
@@ -69,7 +69,7 @@ export function ExampleChip({ children, selected, onClick }: { children: React.R
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`rounded-xl border-2 border-b-4 px-3 py-2 text-sm font-bold transition-[transform,border-width] duration-75 cursor-pointer active:translate-y-0.5 active:border-b-2 ${
+      className={`rounded-xl border px-3 py-2 text-sm font-bold transition-[transform,border-width] duration-75 cursor-pointer active:translate-y-0.5 active:border-b ${
         selected ? "border-brand border-b-brand-edge bg-brand/10 text-brand" : "border-line bg-surface text-ink hover:border-line-strong hover:bg-surface-2"
       }`}
     >
@@ -130,7 +130,7 @@ export function OptionList<T extends string>({
             role="radio"
             aria-checked={selected}
             onClick={() => onChange(option.id)}
-            className={`group relative flex items-start gap-3 rounded-2xl border-2 border-b-4 p-4 text-left transition-[transform,border-width,background-color,border-color] duration-75 cursor-pointer active:translate-y-0.5 active:border-b-2 ${
+            className={`group relative flex items-start gap-3 rounded-2xl border p-4 text-left transition-[transform,border-width,background-color,border-color] duration-75 cursor-pointer active:translate-y-0.5 active:border-b ${
               selected
                 ? gold
                   ? "border-gold border-b-gold-edge bg-gold/10"
@@ -147,9 +147,9 @@ export function OptionList<T extends string>({
             </span>
             <span className="min-w-0 flex-1">
               <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span className={`text-base font-extrabold ${selected ? (gold ? "text-gold" : "text-brand") : "text-ink"}`}>{option.title}</span>
+                <span className={`text-base font-semibold ${selected ? (gold ? "text-gold" : "text-brand") : "text-ink"}`}>{option.title}</span>
                 {option.badge && (
-                  <span className="rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-brand">{option.badge}</span>
+                  <span className="rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-semibold text-brand">{option.badge}</span>
                 )}
               </span>
               <span className="mt-0.5 block text-sm leading-snug text-muted">{option.body}</span>
@@ -157,7 +157,7 @@ export function OptionList<T extends string>({
             </span>
             <span
               aria-hidden="true"
-              className={`hidden h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 text-xs font-extrabold sm:flex ${
+              className={`hidden h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-xs font-semibold sm:flex ${
                 selected ? (gold ? "border-gold text-gold" : "border-brand text-brand") : "border-line text-subtle"
               }`}
             >
@@ -194,7 +194,7 @@ export function LessonFooter({
 }) {
   const tone = error ? "border-danger/40 bg-danger/5" : praise ? "border-brand/30 bg-success/5" : "border-line bg-canvas";
   return (
-    <footer className={`sticky bottom-0 z-10 border-t-2 transition-colors duration-200 ${tone}`}>
+    <footer className={`sticky bottom-0 z-10 border-t transition-colors duration-200 ${tone}`}>
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
         <div className="min-h-0 sm:min-h-11 sm:flex sm:items-center" aria-live="polite">
           {error ? (
@@ -205,7 +205,7 @@ export function LessonFooter({
               <span className="pt-1.5">{error}</span>
             </p>
           ) : praise ? (
-            <p key={praise} className="flex items-center gap-2.5 text-sm font-extrabold leading-snug text-brand sm:text-base">
+            <p key={praise} className="flex items-center gap-2.5 text-sm font-semibold leading-snug text-brand sm:text-base">
               <span className="animate-pop-in flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-brand-ink">
                 <Check className="h-5 w-5" strokeWidth={3.5} />
               </span>

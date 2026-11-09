@@ -120,7 +120,7 @@ export default function WeeklyPulseCard() {
   if (!pulse) return null;
 
   const tzBanner = browserTz && (
-    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-line bg-surface-2 px-4 py-3 text-xs text-muted">
+    <div className="flex flex-wrap items-center gap-3 rounded-[28px] bg-surface-2 px-6 py-4 text-[15px] text-muted">
       <Clock className="h-4 w-4 text-brand" />
       <span className="flex-1 min-w-[200px]">
         This workspace runs on <b className="text-ink">{pulse.settings.timezone}</b>. Your browser says{" "}
@@ -139,7 +139,7 @@ export default function WeeklyPulseCard() {
     return (
       <div className="space-y-3">
         {tzBanner}
-        <div className="flex items-start gap-3 rounded-2xl border border-brand/30 bg-brand/5 p-4 text-sm text-ink">
+        <div className="flex items-start gap-3 rounded-[28px] bg-brand/5 p-6 text-[15px] text-ink">
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
           <span className="flex-1">{done}</span>
           <Link href="/brand?tab=experience" className="text-xs text-brand hover:underline">
@@ -171,8 +171,8 @@ export default function WeeklyPulseCard() {
     return (
       <div className="space-y-3">
         {tzBanner}
-        <section className="space-y-2 rounded-2xl border border-coral/30 bg-surface px-4 py-3">
-          <p className="flex items-start gap-2 text-sm text-ink">
+        <section className="space-y-3 rounded-[28px] bg-surface shadow-soft p-6 sm:p-8">
+          <p className="flex items-start gap-2 text-[17px] text-ink">
             <MessageSquareText className="mt-0.5 h-4 w-4 shrink-0 text-coral" aria-hidden="true" />
             <span>
               <span className="font-semibold text-coral">This week: </span>
@@ -226,7 +226,7 @@ export default function WeeklyPulseCard() {
   return (
     <div className="space-y-3">
       {tzBanner}
-      <section className="rounded-2xl border border-coral/30 bg-surface p-4 space-y-3">
+      <section className="space-y-4 rounded-[28px] bg-surface shadow-soft p-6 sm:p-8">
         <div className="flex items-start gap-2">
           <MessageSquareText className="mt-0.5 h-4 w-4 shrink-0 text-coral" aria-hidden="true" />
           <p className="text-sm text-ink">

@@ -109,7 +109,7 @@ export function InstallPrompt() {
       aria-label="Install Minions"
       className="fixed bottom-[max(6rem,calc(env(safe-area-inset-bottom)+5rem))] left-3 right-3 z-50 mx-auto max-w-md animate-in fade-in slide-in-from-bottom-3 duration-300 md:bottom-6 md:left-auto md:right-6"
     >
-      <div className="relative flex flex-col gap-3 rounded-2xl border border-line bg-surface/95 p-4 shadow-2xl shadow-black/70 backdrop-blur-xl">
+      <div className="relative flex flex-col gap-3 rounded-2xl border border-line bg-surface/95 p-4 shadow-float backdrop-blur-xl">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-surface-2">
@@ -151,7 +151,7 @@ export function InstallPrompt() {
             <button
               type="button"
               onClick={handleInstallClick}
-              className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand to-brand px-4 text-sm font-semibold text-canvas shadow-lg shadow-brand/15"
+              className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand to-brand px-4 text-sm font-semibold text-canvas shadow-float"
             >
               <Download className="h-4 w-4 shrink-0" aria-hidden="true" />
               {isIOS ? "How to install" : "Install app"}

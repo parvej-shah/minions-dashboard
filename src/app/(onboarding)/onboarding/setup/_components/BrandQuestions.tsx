@@ -22,7 +22,7 @@ export function FocusQuestion({ wizard }: { wizard: OnboardingWizardState }) {
         aria-label="What you want to be known for"
         className={`${lessonInput} mt-6`}
       />
-      <p className="mt-5 text-sm font-extrabold text-muted">Or tap one to start</p>
+      <p className="mt-5 text-sm font-semibold text-muted">Or tap one to start</p>
       <div className="mt-2.5 flex flex-wrap gap-2">
         {FOCUS_EXAMPLES.map((example) => (
           <ExampleChip key={example} selected={wizard.contentFocus === example} onClick={() => wizard.setContentFocus(example)}>
@@ -47,7 +47,7 @@ export function AudienceQuestion({ wizard }: { wizard: OnboardingWizardState }) 
         aria-label="Who your posts should reach"
         className={`${lessonInput} mt-6 resize-none`}
       />
-      <p className="mt-5 text-sm font-extrabold text-muted">Or tap one to start</p>
+      <p className="mt-5 text-sm font-semibold text-muted">Or tap one to start</p>
       <div className="mt-2.5 flex flex-wrap gap-2">
         {AUDIENCE_EXAMPLES.map((example) => (
           <ExampleChip key={example} selected={wizard.audienceDescription === example} onClick={() => wizard.setAudienceDescription(example)}>

@@ -109,7 +109,7 @@ export function BrandImportSheet({ onClose, onApplied }: { onClose: () => void; 
     case "drop":
       body = (
         <div className="mx-auto w-full max-w-2xl px-4 pt-6 pb-10 sm:px-6">
-          <h1 className="text-2xl font-extrabold text-ink sm:text-3xl">Fill your brand from LinkedIn</h1>
+          <h1 className="text-2xl font-bold text-ink sm:text-3xl">Fill your brand from LinkedIn</h1>
           <p className="mt-2 text-muted">Minions reads your profile and site and adds what your brand is missing. You check everything first, and nothing you set is replaced.</p>
           <div className="mt-6">
             <ImportDrop profile={profile} onProfile={setProfile} websiteUrl={websiteUrl} onWebsiteUrl={setWebsiteUrl} />
@@ -129,7 +129,7 @@ export function BrandImportSheet({ onClose, onApplied }: { onClose: () => void; 
     case "review":
       body = (
         <div className="mx-auto w-full max-w-2xl px-4 pt-6 pb-10 sm:px-6">
-          <h1 className="text-2xl font-extrabold text-ink sm:text-3xl">New for your brand</h1>
+          <h1 className="text-2xl font-bold text-ink sm:text-3xl">New for your brand</h1>
           <p className="mt-2 text-muted">Only things your brand doesn’t have yet. Drop anything that’s off; it’s added when you save.</p>
           <div className="mt-6">
             <ImportReview
@@ -154,7 +154,7 @@ export function BrandImportSheet({ onClose, onApplied }: { onClose: () => void; 
             <PartyPopper className="h-11 w-11" strokeWidth={2.25} />
             <Confetti burst="big" />
           </span>
-          <h1 className="mt-8 text-2xl font-extrabold text-ink sm:text-3xl">{parts.length ? "Your brand just got richer" : "Nothing needed saving"}</h1>
+          <h1 className="mt-8 text-2xl font-bold text-ink sm:text-3xl">{parts.length ? "Your brand just got richer" : "Nothing needed saving"}</h1>
           <p className="mt-2 max-w-md text-muted">{parts.length ? `Added ${parts.join(", ")}. Your next ideas and drafts use it.` : "Everything was already in your brand."}</p>
         </div>
       );
@@ -168,7 +168,7 @@ export function BrandImportSheet({ onClose, onApplied }: { onClose: () => void; 
   // Rendered into <body> so the page's layout (e.g. a space-y parent's margin) can't shift the overlay.
   return createPortal(
     <div role="dialog" aria-modal="true" aria-label="Fill your brand from LinkedIn" className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-canvas text-ink">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b-2 border-line bg-canvas px-4 py-3 sm:px-6">
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-canvas px-4 py-3 sm:px-6">
         {back ? (
           <button type="button" onClick={back} aria-label="Back" className="rounded-xl p-1.5 text-subtle transition-colors hover:bg-surface-2 hover:text-ink cursor-pointer">
             <ArrowLeft className="h-6 w-6" strokeWidth={2.5} />
@@ -181,7 +181,7 @@ export function BrandImportSheet({ onClose, onApplied }: { onClose: () => void; 
         </button>
       </header>
       <main className="flex flex-1 flex-col">{body}</main>
-      <footer className="sticky bottom-0 border-t-2 border-line bg-canvas">
+      <footer className="sticky bottom-0 border-t border-line bg-canvas">
         <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p role={error || run.status === "error" ? "alert" : undefined} className={`text-sm font-bold ${error || run.status === "error" ? "text-danger" : "text-muted"}`}>
             {message}

@@ -221,7 +221,7 @@ export default function CarouselCard({
                     aria-pressed={carousel.active === active}
                     disabled={busy !== null || carousel.active === active}
                     onClick={() => void send("PATCH", { active }, "toggle")}
-                    className={`flex min-h-20 items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all cursor-pointer active:translate-y-1 active:border-b-2 disabled:cursor-default ${carousel.active === active ? "border-brand bg-brand/15 text-ink" : "border-line bg-surface text-muted hover:border-brand/50 hover:text-ink"}`}
+                    className={`flex min-h-20 items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all cursor-pointer active:translate-y-1 active:border-b disabled:cursor-default ${carousel.active === active ? "border-brand bg-brand/15 text-ink" : "border-line bg-surface text-muted hover:border-brand/50 hover:text-ink"}`}
                   >
                     <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
                     <span className="flex-1"><span className="block text-sm font-semibold">{label}</span><span className="block text-xs">{detail}</span></span>

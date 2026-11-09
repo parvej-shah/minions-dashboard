@@ -6,15 +6,13 @@ import { Sparkles, FileText, Globe } from "lucide-react";
 import { DistributionControlPanel } from "@/components/distribution/DistributionControlPanel";
 
 import { buttonStyles } from "@/components/ui/Button";
+import { PageHeader } from "@/components/ui/Text";
 export const dynamic = "force-dynamic";
 
 export default function FleetPage() {
   return (
-    <div className="space-y-6 sm:space-y-8 max-w-7xl mx-auto pb-16">
-      <div className="border-b border-line pb-5 sm:pb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">Channels</h1>
-        <p className="text-sm text-muted mt-2 max-w-3xl leading-relaxed">Connect the places where your approved posts should appear.</p>
-      </div>
+    <div className="mx-auto max-w-[1040px] space-y-10">
+      <PageHeader title="Channels">Where your approved posts go.</PageHeader>
 
       <DistributionControlPanel />
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { Users, UserPlus, Mail, Trash2, Clock, RefreshCw, Shield, Check } from "lucide-react";
+import { UserPlus, Mail, Trash2, Clock, RefreshCw, Shield, Check } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { LoadingState } from "@/components/ui/EmptyState";
 import ConfirmModal from "@/components/ui/ConfirmModal";
@@ -11,6 +11,7 @@ import { apiClient, toErrorMessage } from "@/lib/api-client";
 import type { TeamMember } from "@/types";
 
 import { buttonStyles } from "@/components/ui/Button";
+import { PageHeader } from "@/components/ui/Text";
 const ROLE_LABELS: Record<TeamMember["role"], string> = {
   OWNER: "Owner",
   MARKETING_DIRECTOR: "Marketing Director",
@@ -84,17 +85,8 @@ export default function TeamPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto pb-16">
-      <div className="border-b border-line pb-6">
-        <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-brand uppercase mb-1">
-          <Users className="w-3.5 h-3.5" />
-          Workspace Team
-        </div>
-        <h1 className="text-3xl font-bold tracking-tight text-ink">Team &amp; Access Control</h1>
-        <p className="text-sm text-muted mt-1">
-          Manage authorized workspace operators, invite colleagues, and configure role-based permissions.
-        </p>
-      </div>
+    <div className="mx-auto max-w-[840px] space-y-10">
+      <PageHeader title="Team">Invite people who can review and approve posts with you.</PageHeader>
 
       {canManage && (
         <div className="p-6 rounded-2xl bg-surface border border-line space-y-4 shadow-sm">
@@ -103,7 +95,7 @@ export default function TeamPage() {
               <UserPlus className="w-4 h-4 text-brand" />
               Invite Teammate
             </h3>
-            <span className="text-[11px] font-mono text-subtle">
+            <span className="text-[11px] text-subtle">
               Google SSO Compatible
             </span>
           </div>
@@ -184,23 +176,23 @@ export default function TeamPage() {
                           {m.name || m.email}
                         </span>
                         {isCurrentUser && (
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-brand/10 text-brand border border-brand/30">
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-brand/10 text-brand border border-brand/30">
                             You
                           </span>
                         )}
                         {m.status === "PENDING" ? (
-                          <span className="flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-gold/10 text-gold border border-gold/30">
+                          <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-gold/10 text-gold border border-gold/30">
                             <Clock className="w-2.5 h-2.5" />
                             Pending Invite
                           </span>
                         ) : (
-                          <span className="flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-success/10 text-success border border-success/20">
+                          <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-success/10 text-success border border-success/20">
                             <Check className="w-2.5 h-2.5" />
                             Active
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-subtle truncate font-mono mt-0.5">{m.email}</p>
+                      <p className="text-xs text-subtle truncate mt-0.5">{m.email}</p>
                     </div>
                   </div>
 
@@ -219,7 +211,7 @@ export default function TeamPage() {
                         ))}
                       </select>
                     ) : (
-                      <span className="text-[11px] font-mono px-2.5 py-1 rounded bg-surface-2 text-muted border border-line">
+                      <span className="text-[11px] px-2.5 py-1 rounded bg-surface-2 text-muted border border-line">
                         {ROLE_LABELS[m.role] || m.role}
                       </span>
                     )}
@@ -242,7 +234,7 @@ export default function TeamPage() {
       </div>
 
       {toast.message && (
-        <div className="fixed bottom-6 right-6 z-50 bg-surface-2 border border-line text-ink px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold animate-in fade-in">
+        <div className="fixed bottom-6 right-6 z-50 bg-surface-2 border border-line text-ink px-4 py-3 rounded-xl shadow-soft text-xs font-semibold animate-in fade-in">
           {toast.message}
         </div>
       )}

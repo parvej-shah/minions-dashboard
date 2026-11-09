@@ -87,7 +87,7 @@ export default function AdminAuthModal({
             <button
               onClick={handleGoogleOAuth}
               disabled={isProcessing}
-              className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-ink font-bold py-3 px-4 rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50 text-xs sm:text-sm"
+              className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-ink font-bold py-3 px-4 rounded-xl shadow-soft transition-all cursor-pointer disabled:opacity-50 text-xs sm:text-sm"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path

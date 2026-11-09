@@ -50,14 +50,14 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section className={`rounded-2xl border-2 border-b-4 bg-surface p-4 sm:p-5 ${attention ? "border-gold/50 border-b-gold/70" : "border-line"}`}>
+    <section className={`rounded-2xl border bg-surface p-4 sm:p-5 ${attention ? "border-gold/50 border-b-gold/70" : "border-line"}`}>
       <div className="flex items-center gap-3">
         <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${attention ? "bg-gold/15 text-gold" : "bg-brand/15 text-brand"}`}>{icon}</span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-base font-extrabold leading-tight text-ink">{title}</h2>
+          <h2 className="text-base font-semibold leading-tight text-ink">{title}</h2>
           {hint && <p className="mt-0.5 text-sm leading-snug text-muted">{hint}</p>}
         </div>
-        {badge && <span className="shrink-0 whitespace-nowrap rounded-full bg-surface-2 px-2.5 py-1 text-xs font-extrabold text-muted tabular-nums">{badge}</span>}
+        {badge && <span className="shrink-0 whitespace-nowrap rounded-full bg-surface-2 px-2.5 py-1 text-xs font-semibold text-muted tabular-nums">{badge}</span>}
       </div>
       <div className="mt-3">{children}</div>
     </section>
@@ -71,7 +71,7 @@ function MoreToggle({ open, onToggle, closedLabel }: { open: boolean; onToggle: 
       type="button"
       onClick={onToggle}
       aria-expanded={open}
-      className="mt-2 -ml-2 inline-flex min-h-10 items-center gap-1.5 rounded-xl px-2 text-sm font-extrabold text-brand transition-colors hover:bg-brand/10 cursor-pointer"
+      className="mt-2 -ml-2 inline-flex min-h-10 items-center gap-1.5 rounded-xl px-2 text-sm font-semibold text-brand transition-colors hover:bg-brand/10 cursor-pointer"
     >
       {open ? "Show less" : closedLabel}
       <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={3} />
@@ -91,7 +91,7 @@ function EditableText({ value, onChange, label, big }: { value: string; onChange
         onChange={(e) => onChange(e.target.value)}
         onBlur={() => setEditing(false)}
         aria-label={label}
-        className="w-full resize-none rounded-xl border-2 border-brand bg-surface-2 px-3 py-2 text-base leading-relaxed text-ink focus:outline-none"
+        className="w-full resize-none rounded-xl border border-brand bg-surface-2 px-3 py-2 text-base leading-relaxed text-ink focus:outline-none"
       />
     );
   }
@@ -164,7 +164,7 @@ export function ImportReview({
             <div className="mt-4 space-y-4">
               {icpLists.map(({ key, label }) => (
                 <div key={key}>
-                  <p className="mb-1.5 text-xs font-extrabold text-muted">{label}</p>
+                  <p className="mb-1.5 text-xs font-semibold text-muted">{label}</p>
                   <ul className="flex flex-wrap gap-1.5">
                     {icp[key].map((item) => (
                       <RemovableChip key={item} onRemove={() => setIcp({ [key]: icp[key].filter((x) => x !== item) })}>
@@ -192,7 +192,7 @@ export function ImportReview({
             {result.proofs.map((proof) => {
               const on = approvedProofs.includes(proof.id);
               return (
-                <li key={proof.id} className={`rounded-xl border-2 transition-colors ${on ? "border-brand bg-brand/10" : "border-line bg-surface-2 hover:border-line-strong"}`}>
+                <li key={proof.id} className={`rounded-xl border transition-colors ${on ? "border-brand bg-brand/10" : "border-line bg-surface-2 hover:border-line-strong"}`}>
                   <button
                     type="button"
                     role="checkbox"
@@ -200,7 +200,7 @@ export function ImportReview({
                     onClick={() => onToggleProof(proof.id)}
                     className="flex w-full items-start gap-3 p-3 pb-1 text-left cursor-pointer"
                   >
-                    <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 ${on ? "border-brand bg-brand text-brand-ink" : "border-line-strong"}`}>
+                    <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border ${on ? "border-brand bg-brand text-brand-ink" : "border-line-strong"}`}>
                       {on && <Check className="h-4 w-4 animate-pop-in" strokeWidth={3.5} />}
                     </span>
                     <span className="min-w-0 flex-1">

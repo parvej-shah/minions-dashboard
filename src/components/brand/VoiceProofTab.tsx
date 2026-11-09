@@ -242,7 +242,7 @@ function VoiceProofEditor({ initialData, loadError }: { initialData: BrandVoiceP
       {/* Shown only with something to save, as a small floating bar instead of a full-width one. */}
       {(isDirty || saving || saved) && (
         <div className="pointer-events-none sticky bottom-4 flex justify-end">
-          <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-line bg-surface/95 p-2 pl-4 shadow-2xl backdrop-blur">
+          <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-line bg-surface/95 p-2 pl-4 shadow-soft backdrop-blur">
             {saved && !isDirty ? (
               <span role="status" className="inline-flex items-center gap-1 pr-2 text-xs text-success"><Check className="h-3.5 w-3.5" /> Saved. New drafts use it.</span>
             ) : (

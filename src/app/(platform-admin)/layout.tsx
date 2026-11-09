@@ -23,9 +23,9 @@ export default async function PlatformAdminLayout({ children }: { children: Reac
       <header className="border-b border-line bg-surface px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Link href="/platform-admin" className="flex items-baseline">
-            <span className="font-extrabold text-lg tracking-tight text-ink">Minions</span>
+            <span className="font-semibold text-lg tracking-tight text-ink">Minions</span>
             <span className="text-coral font-bold text-lg ml-0.5">.AI</span>
-            <span className="text-brand text-xs ml-2 font-mono font-semibold uppercase tracking-wider">
+            <span className="text-brand text-xs ml-2 font-semibold">
               Platform Admin
             </span>
           </Link>

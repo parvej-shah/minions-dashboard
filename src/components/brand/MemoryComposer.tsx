@@ -173,7 +173,7 @@ export default function Composer({
             <ul className="space-y-1">
               {check.issues.map((issue) => (
                 <li key={issue.text} className="text-xs text-muted">
-                  <span className="rounded bg-line px-1 py-0.5 font-mono text-ink">{issue.text}</span> {issue.reason}
+                  <span className="rounded bg-line px-1 py-0.5 text-ink">{issue.text}</span> {issue.reason}
                 </li>
               ))}
             </ul>
@@ -183,7 +183,7 @@ export default function Composer({
           )}
           {check.generalized && (
             <div className="rounded-lg border border-line bg-canvas px-3 py-2">
-              <p className="mb-1 text-[11px] font-mono uppercase tracking-wider text-subtle">Without the specifics</p>
+              <p className="mb-1 text-[11px] text-subtle">Without the specifics</p>
               <p className="text-sm text-ink">{check.generalized}</p>
             </div>
           )}

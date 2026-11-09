@@ -135,7 +135,7 @@ export function ChannelCredentialForm({
           value={externalId}
           onChange={(e) => setExternalId(e.target.value)}
           placeholder="Page / org ID (e.g. Facebook Page ID)"
-          className="w-full rounded-lg bg-canvas border border-line px-3 py-1.5 text-[11px] font-mono text-ink placeholder:text-subtle focus:outline-none focus:border-brand"
+          className="w-full rounded-lg bg-canvas border border-line px-3 py-1.5 text-[11px] text-ink placeholder:text-subtle focus:outline-none focus:border-brand"
         />
       )}
       <input
@@ -143,7 +143,7 @@ export function ChannelCredentialForm({
         value={token}
         onChange={(e) => setToken(e.target.value)}
         placeholder={isBlog ? "https://yoursite.com/webhook/..." : "Access token"}
-        className="w-full rounded-lg bg-canvas border border-line px-3 py-1.5 text-[11px] font-mono text-ink placeholder:text-subtle focus:outline-none focus:border-brand"
+        className="w-full rounded-lg bg-canvas border border-line px-3 py-1.5 text-[11px] text-ink placeholder:text-subtle focus:outline-none focus:border-brand"
       />
       {error && <p className="text-[11px] text-coral">{error}</p>}
       <div className="flex items-center gap-2">

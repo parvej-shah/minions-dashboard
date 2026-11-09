@@ -7,7 +7,7 @@ export default function NoteCard({ note, solo, onChange }: { note: Note; solo: b
   const issues = note.check?.issues ?? [];
   const setPrivacy = (disclosure: MemoryDisclosure) => onChange({ ...note, disclosure });
   return (
-    <div className={`rounded-2xl border-2 bg-surface-2 p-3 transition-opacity ${note.keep ? "border-brand/40" : "border-line opacity-50"}`}>
+    <div className={`rounded-2xl border bg-surface-2 p-3 transition-opacity ${note.keep ? "border-brand/40" : "border-line opacity-50"}`}>
       <textarea
         value={note.content}
         maxLength={MEMORY_MAX_CHARS}
@@ -37,7 +37,7 @@ export default function NoteCard({ note, solo, onChange }: { note: Note; solo: b
         </ul>
       )}
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        <div className="inline-flex rounded-xl border-2 border-line p-0.5 text-xs font-bold">
+        <div className="inline-flex rounded-xl border border-line p-0.5 text-xs font-bold">
           {(
             [
               ["PUBLIC", "Names OK"],
@@ -60,7 +60,7 @@ export default function NoteCard({ note, solo, onChange }: { note: Note; solo: b
             type="button"
             aria-pressed={note.keep}
             onClick={() => onChange({ ...note, keep: !note.keep })}
-            className="ml-auto text-xs font-extrabold uppercase tracking-wider text-muted hover:text-ink cursor-pointer"
+            className="ml-auto text-xs font-semibold text-muted hover:text-ink cursor-pointer"
           >
             {note.keep ? "Drop" : "Keep"}
           </button>

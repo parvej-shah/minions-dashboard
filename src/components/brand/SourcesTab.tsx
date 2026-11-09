@@ -143,7 +143,7 @@ export default function SourcesTab() {
                   <span className="truncate text-sm font-semibold text-ink">
                     {source.label}
                   </span>
-                  <span className="shrink-0 rounded bg-line px-1.5 py-0.5 font-mono text-[10px] text-muted">
+                  <span className="shrink-0 rounded bg-line px-1.5 py-0.5 text-[10px] text-muted">
                     {IDEA_SOURCE_KINDS.find((k) => k.id === source.kind)?.label || source.kind}
                   </span>
                 </div>

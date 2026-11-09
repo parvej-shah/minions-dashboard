@@ -70,7 +70,7 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
 
       {picks.length > 0 && (
         <div className="mt-6">
-          <p className="text-sm font-extrabold text-muted">Pick one from your profile</p>
+          <p className="text-sm font-semibold text-muted">Pick one from your profile</p>
           <ul className="mt-2.5 space-y-2">
             {picks.map((item) => {
               const picked = wizard.storyText.trim() === item.content;
@@ -83,7 +83,7 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
                       wizard.setStoryText(item.content);
                       wizard.setStoryKind(item.kind);
                     }}
-                    className={`w-full rounded-2xl border-2 border-b-4 px-4 py-3 text-left text-sm leading-snug transition-[transform,border-width] duration-75 cursor-pointer active:translate-y-0.5 active:border-b-2 ${
+                    className={`w-full rounded-2xl border px-4 py-3 text-left text-sm leading-snug transition-[transform,border-width] duration-75 cursor-pointer active:translate-y-0.5 active:border-b ${
                       picked ? "border-brand border-b-brand-edge bg-brand/10 text-ink" : "border-line bg-surface text-muted hover:border-line-strong hover:bg-surface-2"
                     }`}
                   >
@@ -93,7 +93,7 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
               );
             })}
           </ul>
-          <p className="mt-5 text-sm font-extrabold text-muted">Then add a detail only you know, or write your own</p>
+          <p className="mt-5 text-sm font-semibold text-muted">Then add a detail only you know, or write your own</p>
         </div>
       )}
 
@@ -107,7 +107,7 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
               role="radio"
               aria-checked={selected}
               onClick={() => wizard.setStoryKind(k.id)}
-              className={`flex flex-col items-center gap-1.5 rounded-2xl border-2 border-b-4 px-2 py-3 text-center text-xs font-extrabold leading-tight transition-[transform,border-width] duration-75 cursor-pointer active:translate-y-0.5 active:border-b-2 sm:text-sm ${
+              className={`flex flex-col items-center gap-1.5 rounded-2xl border px-2 py-3 text-center text-xs font-semibold leading-tight transition-[transform,border-width] duration-75 cursor-pointer active:translate-y-0.5 active:border-b sm:text-sm ${
                 selected ? "border-brand border-b-brand-edge bg-brand/10 text-brand" : "border-line bg-surface text-muted hover:border-line-strong hover:bg-surface-2"
               }`}
             >
@@ -138,7 +138,7 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
               style={{ width: `${Math.max(meter * 100, 4)}%` }}
             />
           </div>
-          <span className={`text-xs font-extrabold ${meter >= 1 ? "text-gold" : "text-subtle"}`}>
+          <span className={`text-xs font-semibold ${meter >= 1 ? "text-gold" : "text-subtle"}`}>
             {meter >= 1 ? "Great detail" : length >= MEMORY_MIN_CHARS ? "Good" : "Keep going"}
           </span>
         </div>
@@ -147,7 +147,7 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
       {/* Starters are for a blank page; once they're writing they only add noise. */}
       {length === 0 && (
         <>
-          <p className="mt-5 text-sm font-extrabold text-muted">Stuck? Start with</p>
+          <p className="mt-5 text-sm font-semibold text-muted">Stuck? Start with</p>
           <div className="mt-2.5 flex flex-wrap gap-2">
             {kind.starters.map((starter) => (
               <ExampleChip key={starter} onClick={() => addStarter(starter)}>

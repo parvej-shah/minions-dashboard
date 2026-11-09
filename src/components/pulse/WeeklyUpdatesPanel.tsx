@@ -118,14 +118,14 @@ export default function WeeklyUpdatesPanel() {
       <ul className="space-y-3">
         {(history ?? []).map((h) => (
           <li key={h.week_start} className="rounded-xl border border-line bg-surface-2 p-3 space-y-2">
-            <div className="flex items-center justify-between text-[11px] font-mono text-subtle">
+            <div className="flex items-center justify-between text-[11px] text-subtle">
               <span>Week of {h.week_start}</span>
               <span>{h.status === "SKIPPED" ? "Skipped" : `${h.memories.length} note${h.memories.length === 1 ? "" : "s"} kept`}</span>
             </div>
             {h.answer && <p className="text-xs text-muted whitespace-pre-line">{h.answer}</p>}
             {h.memories.map((m) => (
               <p key={m.id} className={`text-xs text-ink ${m.is_active ? "" : "line-through opacity-50"}`}>
-                <span className="mr-1.5 rounded bg-line px-1.5 py-0.5 font-mono text-[10px] text-muted">
+                <span className="mr-1.5 rounded bg-line px-1.5 py-0.5 text-[10px] text-muted">
                   {MEMORY_KIND_META[m.kind as MemoryKind]?.label ?? m.kind}
                 </span>
                 {m.content}

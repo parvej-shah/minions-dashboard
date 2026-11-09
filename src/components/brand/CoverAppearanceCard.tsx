@@ -132,7 +132,7 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
         {!isEditing && (
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs text-muted">Your saved colors, photo, and illustration style.</p>
-            <button type="button" onClick={openEdit} className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-xl border-2 border-line bg-surface-2 px-3 text-xs font-semibold text-ink transition-colors hover:border-brand/50 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">
+            <button type="button" onClick={openEdit} className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 text-xs font-semibold text-ink transition-colors hover:border-brand/50 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">
               <Pencil className="h-3.5 w-3.5" aria-hidden="true" /> Edit cover appearance
             </button>
           </div>
@@ -147,7 +147,7 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
                 value={lookDraft.primary_logo_url}
                 onChange={(e) => setLookDraft({ ...lookDraft, primary_logo_url: e.target.value })}
                 placeholder="https://… (PNG or JPEG)"
-                className="flex-1 min-w-0 bg-surface-2 border border-line rounded-lg px-3 py-1.5 text-xs text-ink font-mono focus:outline-none focus:border-brand"
+                className="flex-1 min-w-0 bg-surface-2 border border-line rounded-lg px-3 py-1.5 text-xs text-ink focus:outline-none focus:border-brand"
               />
               <label className={`shrink-0 px-3 py-1.5 rounded-lg bg-surface-2 border border-line text-xs text-brand hover:border-brand cursor-pointer inline-flex items-center gap-1.5 ${uploadingPhoto ? "opacity-50 pointer-events-none" : ""}`}>
                 {uploadingPhoto ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
@@ -261,7 +261,7 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
               />
             ))}
           {profile?.primary_logo_url && (
-            <span className="text-[11px] text-muted font-mono ml-2 truncate max-w-[240px]">
+            <span className="text-[11px] text-muted ml-2 truncate max-w-[240px]">
               {profile.primary_logo_url}
             </span>
           )}

@@ -151,7 +151,7 @@ export default function PlatformAdminPage() {
       </div>
 
       {toast.message && (
-        <div className="fixed bottom-6 right-6 z-50 bg-danger/90 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold">
+        <div className="fixed bottom-6 right-6 z-50 bg-danger/90 text-white px-4 py-3 rounded-xl shadow-soft text-xs font-semibold">
           {toast.message}
         </div>
       )}

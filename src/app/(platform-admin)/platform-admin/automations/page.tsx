@@ -86,7 +86,7 @@ export default function AutomationsPage() {
 
       <div className="rounded-2xl border border-line overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-surface text-[11px] font-mono text-muted uppercase">
+          <thead className="bg-surface text-[11px] text-muted">
             <tr>
               <th className="text-left px-4 py-3">Job</th>
               <th className="text-left px-4 py-3">State</th>
@@ -119,7 +119,7 @@ export default function AutomationsPage() {
         <h2 className="text-sm font-bold">Workspaces</h2>
         <div className="rounded-2xl border border-line overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-surface text-[11px] font-mono text-muted uppercase">
+            <thead className="bg-surface text-[11px] text-muted">
               <tr>
                 <th className="text-left px-4 py-3">Workspace</th>
                 <th className="text-left px-4 py-3">Automatic drafting</th>

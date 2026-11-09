@@ -86,7 +86,7 @@ export default function LexiconTab({
             {words.map((directive) => (
               <span
                 key={directive.id}
-                className="inline-flex items-center gap-1.5 bg-danger/10 border border-danger/20 text-danger text-xs font-mono px-3 py-1.5 rounded-xl"
+                className="inline-flex items-center gap-1.5 bg-danger/10 border border-danger/20 text-danger text-xs px-3 py-1.5 rounded-xl"
               >
                 <span>&quot;{directive.content}&quot;</span>
                 <button

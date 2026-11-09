@@ -64,17 +64,17 @@ export default function LoginScreen() {
   return (
     <div className="flex min-h-dvh flex-col bg-canvas text-ink">
       <header className="mx-auto flex w-full max-w-5xl items-center px-5 py-5">
-        <span className="text-2xl font-extrabold tracking-tight">
+        <span className="text-2xl font-bold tracking-tight">
           Minions<span className="text-brand">.AI</span>
         </span>
       </header>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-5 pb-10">
-        <div className="animate-pop-in mx-auto flex h-24 w-24 items-center justify-center rounded-[28px] border-2 border-b-[6px] border-line bg-surface">
+        <div className="animate-pop-in mx-auto flex h-24 w-24 items-center justify-center rounded-[28px] border border-line bg-surface">
           <Image src="/icon.svg" alt="" width={64} height={64} priority className="h-16 w-16" />
         </div>
 
-        <h1 className="animate-rise-in mt-7 text-center text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
+        <h1 className="animate-rise-in mt-7 text-center text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
           Your expertise,
           <br />
           posted every week.
@@ -85,18 +85,18 @@ export default function LoginScreen() {
 
         <ol className="animate-rise-in mt-7 grid grid-cols-3 gap-2 [animation-delay:120ms]">
           {STEPS.map(({ icon: Icon, title, text, tint }) => (
-            <li key={title} className="flex flex-col items-center rounded-2xl border-2 border-line bg-surface px-2 py-3 text-center">
+            <li key={title} className="flex flex-col items-center rounded-2xl border border-line bg-surface px-2 py-3 text-center">
               <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${tint}`}>
                 <Icon className="h-5 w-5" aria-hidden="true" />
               </span>
-              <span className="mt-2 text-sm font-extrabold">{title}</span>
+              <span className="mt-2 text-sm font-semibold">{title}</span>
               <span className="mt-0.5 text-xs leading-snug text-subtle">{text}</span>
             </li>
           ))}
         </ol>
 
         {errorMessage && (
-          <div role="alert" className="story-shake mt-6 flex items-start gap-2 rounded-2xl border-2 border-danger/40 bg-danger/10 p-3 text-sm text-danger">
+          <div role="alert" className="story-shake mt-6 flex items-start gap-2 rounded-2xl border border-danger/40 bg-danger/10 p-3 text-sm text-danger">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-danger" aria-hidden="true" />
             <span className="flex-1">{errorMessage}</span>
             <button

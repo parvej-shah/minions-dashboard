@@ -212,7 +212,7 @@ function Writing({ startedAt, story }: { startedAt: string | null; story: string
       <span className="story-pop relative flex h-24 w-24 items-center justify-center rounded-full border-b-8 border-brand-edge bg-brand text-brand-ink">
         <PenLine className="h-11 w-11 animate-pulse" strokeWidth={2.25} />
       </span>
-      <h1 className="mt-8 text-2xl font-extrabold sm:text-3xl">Writing your first post…</h1>
+      <h1 className="mt-8 text-2xl font-bold sm:text-3xl">Writing your first post…</h1>
       <p className="mt-2 max-w-sm text-sm text-muted">About a minute. Every claim gets checked against what you told us.</p>
 
       <div className="mt-6 h-3 w-full max-w-xs overflow-hidden rounded-full bg-line" aria-hidden="true">
@@ -225,7 +225,7 @@ function Writing({ startedAt, story }: { startedAt: string | null; story: string
           return (
             <li key={step.label} className={`flex items-center gap-3 text-base font-bold ${state === "todo" ? "text-subtle" : "text-ink"}`}>
               <span
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 ${
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${
                   state === "done" ? "border-brand bg-brand text-brand-ink" : state === "active" ? "border-brand text-brand" : "border-line"
                 }`}
               >
@@ -250,8 +250,8 @@ function Writing({ startedAt, story }: { startedAt: string | null; story: string
 /** What the post is built from, so the link between input and output is visible. */
 function StoryCard({ story, className = "" }: { story: string; className?: string }) {
   return (
-    <figure className={`w-full rounded-2xl border-2 border-line bg-surface p-4 text-left ${className}`}>
-      <figcaption className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-subtle">
+    <figure className={`w-full rounded-2xl border border-line bg-surface p-4 text-left ${className}`}>
+      <figcaption className="flex items-center gap-2 text-xs font-semibold text-subtle">
         <Quote className="h-3.5 w-3.5" aria-hidden="true" />
         Built from what you told us
       </figcaption>
@@ -263,10 +263,10 @@ function StoryCard({ story, className = "" }: { story: string; className?: strin
 /** Setup's last question: how the cover signs off. */
 function SignoffCard({ value, disabled, onChange }: { value: Signoff; disabled: boolean; onChange: (edit: Partial<Signoff>) => void }) {
   return (
-    <section className="animate-rise-in mt-6 rounded-2xl border-2 border-line bg-surface p-4 text-left sm:p-5">
-      <h2 className="text-lg font-extrabold">One last thing: how should your covers sign off?</h2>
+    <section className="animate-rise-in mt-6 rounded-2xl border border-line bg-surface p-4 text-left sm:p-5">
+      <h2 className="text-lg font-semibold">One last thing: how should your covers sign off?</h2>
       <p className="mt-1 text-sm text-muted">This goes at the bottom of every cover. Change it any time in Brand.</p>
-      <label className="mt-4 block text-xs font-extrabold uppercase tracking-widest text-subtle" htmlFor="signoff-name">
+      <label className="mt-4 block text-xs font-semibold text-subtle" htmlFor="signoff-name">
         Your name
       </label>
       <input
@@ -279,7 +279,7 @@ function SignoffCard({ value, disabled, onChange }: { value: Signoff; disabled: 
         placeholder="e.g. Jordan Lee"
         className={`${lessonInput} mt-2`}
       />
-      <label className="mt-4 block text-xs font-extrabold uppercase tracking-widest text-subtle" htmlFor="signoff-role">
+      <label className="mt-4 block text-xs font-semibold text-subtle" htmlFor="signoff-role">
         Under your name <span className="font-bold normal-case tracking-normal">(optional)</span>
       </label>
       <input
@@ -304,11 +304,11 @@ function Ready({ asset, author, story, children }: { asset: AssetItem; author: {
         <div className="flex flex-col items-center text-center">
           <div className="relative">
             <Confetti />
-            <span className="story-pop relative flex h-16 w-16 items-center justify-center rounded-full border-b-[6px] border-gold-edge bg-gold text-white">
+            <span className="story-pop relative flex h-16 w-16 items-center justify-center rounded-full border-gold-edge bg-gold text-white">
               <Sparkles className="h-8 w-8" strokeWidth={2.25} />
             </span>
           </div>
-          <h1 className="mt-5 text-2xl font-extrabold text-gold sm:text-3xl">Your first post is ready!</h1>
+          <h1 className="mt-5 text-2xl font-bold text-gold sm:text-3xl">Your first post is ready!</h1>
           <p className="mt-1.5 text-sm text-muted">This is how people will see it on LinkedIn. Nothing goes out until you approve it.</p>
         </div>
 
@@ -342,15 +342,15 @@ function Scheduled({ asset }: { asset: AssetItem }) {
           <CalendarCheck className="h-11 w-11" strokeWidth={2.25} />
         </span>
       </div>
-      <h1 className="mt-8 text-3xl font-extrabold">You’re on the calendar!</h1>
+      <h1 className="mt-8 text-3xl font-bold">You’re on the calendar!</h1>
       <p className="mt-2 max-w-sm text-base text-muted">
         {when ? `Your first post goes out ${when}.` : "Your first post is scheduled."} You can change it any time in Editorial Studio.
       </p>
 
       <div className="mt-8 w-full max-w-sm space-y-3">
         {linkedIn === false && (
-          <div className="animate-rise-in rounded-2xl border-2 border-gold/40 bg-gold/5 p-4 text-left">
-            <p className="text-base font-extrabold text-gold">One last step: connect LinkedIn</p>
+          <div className="animate-rise-in rounded-2xl border border-gold/40 bg-gold/5 p-4 text-left">
+            <p className="text-base font-semibold text-gold">One last step: connect LinkedIn</p>
             <p className="mt-1 text-sm text-muted">So your post can actually go out. It takes ten seconds.</p>
             <Link
               href="/api/auth/linkedin/connect?return_to=/onboarding/first-post"
@@ -375,7 +375,7 @@ function Stuck({ title, detail, story }: { title: string; detail: string; story?
       <span className="story-shake flex h-20 w-20 items-center justify-center rounded-full border-b-8 border-coral-edge bg-coral text-white">
         <RotateCcw className="h-9 w-9" strokeWidth={2.5} />
       </span>
-      <h1 className="mt-6 text-2xl font-extrabold">{title}</h1>
+      <h1 className="mt-6 text-2xl font-bold">{title}</h1>
       <p className="mt-2 max-w-sm text-sm text-muted">{detail}</p>
       {story && <StoryCard story={story} className="mt-8 max-w-lg" />}
     </main>

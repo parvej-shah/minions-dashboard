@@ -194,7 +194,7 @@ export default function ContentPlanCard({ onMessage }: { onMessage: (m: string) 
                   return (
                     <div key={s.slot_at} className="rounded-xl border border-line bg-canvas p-3 space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-xs font-mono font-bold text-ink">
+                        <span className="text-xs font-bold text-ink">
                           {formatPostTime(s.slot_at, tz).split(", ").slice(-1)[0]}
                         </span>
                         {s.fill_method && (

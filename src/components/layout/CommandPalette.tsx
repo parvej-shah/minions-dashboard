@@ -58,7 +58,7 @@ export default function CommandPalette({
         <button
           type="button"
           onClick={onClose}
-          className="text-[10px] font-mono text-muted hover:text-ink px-2 py-1 rounded bg-surface-2 border border-line cursor-pointer"
+          className="text-[10px] text-muted hover:text-ink px-2 py-1 rounded bg-surface-2 border border-line cursor-pointer"
         >
           ESC
         </button>
@@ -66,7 +66,7 @@ export default function CommandPalette({
 
       <div className="p-3 max-h-[400px] overflow-y-auto space-y-1">
         {results.length === 0 ? (
-          <div className="px-3 py-6 text-center text-xs text-subtle font-mono">
+          <div className="px-3 py-6 text-center text-xs text-subtle">
             No sections match “{searchQuery}”.
           </div>
         ) : (
@@ -84,7 +84,7 @@ export default function CommandPalette({
                   <span className="font-semibold text-ink">{item.name}</span>
                 </div>
                 {item.badge && (
-                  <span className="text-[10px] font-mono text-subtle group-hover:text-brand">
+                  <span className="text-[10px] text-subtle group-hover:text-brand">
                     {item.badge}
                   </span>
                 )}

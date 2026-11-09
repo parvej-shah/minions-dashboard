@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { CheckCircle2, Flame, X } from "lucide-react";
+import { CheckCircle2, X } from "lucide-react";
+import { buttonStyles } from "@/components/ui/Button";
 import { apiClient } from "@/lib/api-client";
 import { FULL_AT, SESSION_SIZE } from "@/lib/storyBank";
 import type { StoryBankDTO } from "@/services/storyBank";
 import StorySession from "./StorySession";
 import PasteCard from "./PasteCard";
 import type { SessionResult } from "./types";
-import { chunky } from "./chunky";
 
 const DISMISS_KEY = "minions-story-bank-hidden-until";
 /** The X hides the card for a week: a reminder, never a nag. */
@@ -67,7 +67,7 @@ export default function StoryBankCard() {
 
   if (result) {
     return (
-      <div className="flex items-start gap-3 rounded-2xl border border-brand/30 bg-brand/5 p-4 text-sm text-ink">
+      <div className="flex items-start gap-3 rounded-[28px] bg-brand/5 p-6 text-[15px] text-ink">
         <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
         <span className="flex-1">
           Saved {result.saved} new {result.saved === 1 ? "story" : "stories"}.{" "}
@@ -86,24 +86,17 @@ export default function StoryBankCard() {
   const left = bank.unused;
   return (
     <>
-      <section className="relative overflow-hidden rounded-2xl border-2 border-line bg-surface p-5">
+      <section className="relative rounded-[28px] bg-surface shadow-soft p-6 sm:p-8">
         <button type="button" onClick={dismiss} aria-label="Hide for a week" className="absolute right-3 top-3 rounded-lg p-1 text-subtle hover:text-ink cursor-pointer">
           <X className="h-4 w-4" />
         </button>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="min-w-0 flex-1 pr-6">
-            <div className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest">
-              <span className="text-gold">Story bank low</span>
-              {bank.streak_weeks > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-coral/10 px-2 py-0.5 text-coral">
-                  <Flame className="h-3 w-3 fill-coral" /> {bank.streak_weeks}-week streak
-                </span>
-              )}
-            </div>
-            <h2 className="mt-1 text-lg font-extrabold text-ink">
+            <p className="text-sm font-semibold text-gold">● Running low on your stories</p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-ink">
               {left === 0 ? "Every story you gave has been used" : `${left} unused ${left === 1 ? "story" : "stories"} left`}
             </h2>
-            <p className="mt-0.5 text-sm text-muted">
+            <p className="mt-2 text-[17px] leading-relaxed text-muted">
               {left === 0
                 ? "New ideas will start retelling old ones."
                 : "About one more round of ideas before they start retelling old ones."}{" "}
@@ -112,11 +105,11 @@ export default function StoryBankCard() {
             {/* One segment per story; a full bank lasts about three harvests. */}
             <div className="mt-3 flex gap-1" aria-label={`${left} of ${FULL_AT} stories`}>
               {Array.from({ length: FULL_AT }, (_, i) => (
-                <span key={i} className={`h-2.5 flex-1 rounded-full ${i < left ? "bg-gold" : "bg-line"}`} />
+                <span key={i} className={`h-1.5 flex-1 rounded-full ${i < left ? "bg-gold" : "bg-surface-3"}`} />
               ))}
             </div>
           </div>
-          <button type="button" onClick={() => setOpen(true)} className={`${chunky.primary} w-full sm:w-auto`}>
+          <button type="button" onClick={() => setOpen(true)} className={buttonStyles({ size: "lg", className: "w-full sm:w-auto" })}>
             Add stories · 2 min
           </button>
         </div>

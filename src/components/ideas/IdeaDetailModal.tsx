@@ -38,7 +38,7 @@ const AUDIENCE_TEXT: Record<string, string> = {
   BRIDGE: "Investors and partners",
 };
 
-const sectionLabel = "text-[11px] font-bold uppercase tracking-wider text-muted";
+const sectionLabel = "text-[11px] font-bold text-muted";
 
 /** Read-only detail drawer for a single idea, in the words a poster uses. */
 export default function IdeaDetailModal({
@@ -99,7 +99,7 @@ export default function IdeaDetailModal({
 
         {/* Modal Body: Scrollable Content */}
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-5 text-ink sm:p-6">
-          <h2 className="text-xl sm:text-2xl font-extrabold leading-snug text-ink break-words">{title}</h2>
+          <h2 className="text-xl sm:text-2xl font-bold leading-snug text-ink break-words">{title}</h2>
 
           {point && (
             <section className="space-y-2">

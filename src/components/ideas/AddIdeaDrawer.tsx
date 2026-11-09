@@ -60,7 +60,7 @@ export default function AddIdeaDrawer({ onClose, onCreated, onFailed }: Props) {
       busy={isSubmitting}
       header={
         <div>
-          <span className="mb-1 inline-block rounded border border-brand/20 bg-brand/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase text-brand">
+          <span className="mb-1 inline-block rounded border border-brand/20 bg-brand/10 px-2 py-0.5 text-[10px] font-bold text-brand">
             Add an idea
           </span>
           <h2 className="text-lg font-bold text-ink">Add your idea</h2>
@@ -124,7 +124,7 @@ export default function AddIdeaDrawer({ onClose, onCreated, onFailed }: Props) {
             placeholder="https://news.ycombinator.com/... or https://techcrunch.com/..."
             value={sourceUrl}
             onChange={(e) => setSourceUrl(e.target.value)}
-            className={`${fieldClass} font-mono`}
+            className={`${fieldClass}`}
           />
         </div>
 

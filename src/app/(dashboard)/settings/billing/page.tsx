@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import {
-  CreditCard,
   ExternalLink,
   FileText,
   Lock,
@@ -20,6 +19,7 @@ import type { BillingPayload } from "@/types";
 
 import { buttonStyles } from "@/components/ui/Button";
 import { formatDate } from "@/utils/date";
+import { PageHeader } from "@/components/ui/Text";
 const EMPTY_PAYLOAD: BillingPayload = {
   clientStatus: "TRIAL",
   subscription: null,
@@ -75,17 +75,8 @@ export default function BillingPage() {
   const pct = quota.limit > 0 ? Math.min(100, Math.round((quota.used / quota.limit) * 100)) : 0;
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto pb-16">
-      <div className="border-b border-line pb-6">
-        <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-brand uppercase mb-1">
-          <CreditCard className="w-3.5 h-3.5" />
-          Billing &amp; Usage
-        </div>
-        <h1 className="text-3xl font-bold tracking-tight text-ink">Subscription</h1>
-        <p className="text-sm text-muted mt-1">
-          Your current plan, this month&apos;s usage, and account status.
-        </p>
-      </div>
+    <div className="mx-auto max-w-[840px] space-y-10">
+      <PageHeader title="Billing">Your plan and what you&apos;ve used this month.</PageHeader>
 
       {/* FREE TRIAL BANNER — every tenant gets Starter free for 2 months until billing is live */}
       {trialEndsAt && (
@@ -109,7 +100,7 @@ export default function BillingPage() {
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-bold text-ink">{plan.name} Plan</h2>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-brand/10 text-brand border border-brand/30 uppercase">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand/10 text-brand border border-brand/30">
                 {subscription ? subscription.status : trialEndsAt ? "FREE TRIAL" : clientStatus}
               </span>
             </div>
@@ -117,12 +108,12 @@ export default function BillingPage() {
           </div>
 
           <div className="text-right shrink-0">
-            <div className="text-[11px] font-mono text-subtle">
+            <div className="text-[11px] text-subtle">
               {plan.limits.ideasPerWeek} ideas/wk · {plan.limits.assetsPerMonth} posts/mo ·{" "}
               {plan.limits.channels} channel{plan.limits.channels > 1 ? "s" : ""}
             </div>
             {subscription?.currentPeriodEnd && (
-              <div className="text-[11px] font-mono text-subtle mt-0.5">
+              <div className="text-[11px] text-subtle mt-0.5">
                 {subscription.cancelAtPeriodEnd ? "Cancels" : "Renews"} {formatDate(subscription.currentPeriodEnd)}
               </div>
             )}
@@ -131,7 +122,7 @@ export default function BillingPage() {
 
         {/* USAGE METER */}
         <div className="space-y-1.5 pt-4 border-t border-line/60">
-          <div className="flex items-center justify-between text-xs font-mono">
+          <div className="flex items-center justify-between text-xs">
             <span className="text-muted">Posts used this month</span>
             <span className="font-bold text-ink">
               {quota.used} / {quota.limit}
@@ -176,7 +167,7 @@ export default function BillingPage() {
                 <Lock className="w-3.5 h-3.5" />
                 <span>Manage Subscription</span>
               </button>
-              <span className="text-[11px] font-mono text-subtle">
+              <span className="text-[11px] text-subtle">
                 Stripe billing portal — coming soon
               </span>
             </div>
@@ -202,7 +193,7 @@ export default function BillingPage() {
                   {isCurrent && <CheckCircle2 className="w-4 h-4 text-brand" />}
                 </div>
                 <p className="text-[11px] text-muted leading-relaxed">{p.description}</p>
-                <div className="text-[11px] font-mono text-subtle">
+                <div className="text-[11px] text-subtle">
                   {p.limits.ideasPerWeek} ideas/wk · {p.limits.assetsPerMonth} posts/mo ·{" "}
                   {p.limits.channels} channel{p.limits.channels > 1 ? "s" : ""}
                 </div>
@@ -243,7 +234,7 @@ export default function BillingPage() {
       </div>
 
       {toast.message && (
-        <div className="fixed bottom-6 right-6 z-50 bg-danger/90 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold">
+        <div className="fixed bottom-6 right-6 z-50 bg-danger/90 text-white px-4 py-3 rounded-xl shadow-soft text-xs font-semibold">
           {toast.message}
         </div>
       )}

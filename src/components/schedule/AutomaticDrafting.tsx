@@ -136,7 +136,7 @@ export default function AutomaticDrafting({ onChanged, onMessage, onEnableWithSa
           aria-busy={saving}
           disabled={saving || !canSaveSchedule}
           onClick={() => void saveAndEnable()}
-          className="inline-flex min-h-11 w-full shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-xl border-b-4 border-brand-edge bg-brand px-4 text-sm font-extrabold text-white transition-colors hover:bg-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:border-line disabled:bg-line disabled:text-subtle sm:w-auto"
+          className="inline-flex min-h-11 w-full shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-xl border-brand-edge bg-brand px-4 text-sm font-semibold text-white transition-colors hover:bg-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:border-line disabled:bg-line disabled:text-subtle sm:w-auto"
         >
           {saving && <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />}
           {saving ? "Saving & turning on…" : "Save & turn on"}

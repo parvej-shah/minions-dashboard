@@ -65,7 +65,7 @@ export default function TelemetryPage() {
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-brand uppercase mb-1">
+          <div className="flex items-center gap-2 text-xs text-brand mb-1">
             <span className="w-2 h-2 rounded-full bg-brand animate-pulse" />
             Content activity
           </div>
@@ -100,7 +100,7 @@ export default function TelemetryPage() {
       {/* KPI TILES — content value a tenant actually cares about, not internal infra measurements. */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="p-5 rounded-2xl bg-surface border border-line space-y-2 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-mono text-muted">
+          <div className="flex items-center justify-between text-xs text-muted">
             <span>WORDS GENERATED</span>
             <Type className="w-4 h-4 text-brand" />
           </div>
@@ -113,7 +113,7 @@ export default function TelemetryPage() {
         </div>
 
         <div className="p-5 rounded-2xl bg-surface border border-line space-y-2 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-mono text-muted">
+          <div className="flex items-center justify-between text-xs text-muted">
             <span>CLAIMS VERIFIED</span>
             <ShieldCheck className="w-4 h-4 text-brand" />
           </div>
@@ -132,7 +132,7 @@ export default function TelemetryPage() {
         </div>
 
         <div className="p-5 rounded-2xl bg-surface border border-line space-y-2 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-mono text-muted">
+          <div className="flex items-center justify-between text-xs text-muted">
             <span>PUBLISHING VELOCITY</span>
             <Zap className="w-4 h-4 text-gold" />
           </div>
@@ -162,7 +162,7 @@ export default function TelemetryPage() {
               Select a post to open it in the Editorial Studio.
             </p>
           </div>
-          <span className="text-xs font-mono text-subtle self-start sm:self-auto bg-surface-2 px-2.5 py-1 rounded-lg border border-line">
+          <span className="text-xs text-subtle self-start sm:self-auto bg-surface-2 px-2.5 py-1 rounded-lg border border-line">
             {isLoading ? "…" : `${ledgerData.length} Posts`}
           </span>
         </div>
@@ -188,7 +188,7 @@ export default function TelemetryPage() {
         <div className="hidden overflow-x-auto sm:block">
           <table className="w-full text-left text-xs min-w-[480px]">
             <thead>
-              <tr className="border-b border-line text-muted font-mono text-[11px]">
+              <tr className="border-b border-line text-muted text-[11px]">
                 <th className="pb-3 font-semibold">ASSET ID</th>
                 <th className="pb-3 font-semibold">TITLE</th>
                 <th className="pb-3 font-semibold">AUDIENCE</th>
@@ -198,7 +198,7 @@ export default function TelemetryPage() {
             <tbody className="divide-y divide-line/60">
               {ledgerData.map((row) => (
                 <tr key={row.asset_id} className="hover:bg-surface-2/70 transition-colors group">
-                  <td className="py-4 font-mono font-bold text-brand">
+                  <td className="py-4 font-bold text-brand">
                     <Link href={`/drafts/${row.asset_id}`} className="hover:underline">
                       {row.asset_id}
                     </Link>
@@ -211,14 +211,14 @@ export default function TelemetryPage() {
                     >
                       {row.title}
                     </Link>
-                    <div className="text-[10px] text-subtle font-mono mt-0.5">
+                    <div className="text-[10px] text-subtle mt-0.5">
                       {formatTimestamp(row.created_at)}
                     </div>
                   </td>
 
                   <td className="py-4">
                     <span
-                      className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
                         row.audience === "ICP"
                           ? "bg-brand/10 text-brand border-brand/30"
                           : row.audience === "PEER"

@@ -217,7 +217,7 @@ export default function StorySession({
             <div className="mx-2 mt-[3px] h-[4px] rounded-full bg-white/30" />
           </div>
         </div>
-        <div className="flex items-center gap-1 text-sm font-extrabold text-coral" title={`${newStreak}-week streak`}>
+        <div className="flex items-center gap-1 text-sm font-semibold text-coral" title={`${newStreak}-week streak`}>
           <Flame className={`h-5 w-5 ${newStreak > 0 ? "fill-coral" : "text-subtle"}`} />
           <span key={newStreak} className={newStreak > streak ? "story-pop" : ""}>
             {newStreak}
@@ -232,14 +232,14 @@ export default function StorySession({
           {/* The question */}
           <main className="flex-1 overflow-y-auto">
             <div key={step} className="story-step-in mx-auto w-full max-w-2xl px-4 pt-6 pb-40 sm:px-6 sm:pt-10">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-brand">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-[11px] font-semibold text-brand">
                 <Icon className="h-3.5 w-3.5" strokeWidth={2.5} />
                 {MEMORY_KIND_META[prompt.kind].label}
                 <span className="text-brand/60">
                   · {step + 1} of {prompts.length}
                 </span>
               </div>
-              <h2 className="mt-4 text-2xl font-extrabold leading-tight text-balance sm:text-3xl">{prompt.question}</h2>
+              <h2 className="mt-4 text-2xl font-bold leading-tight text-balance sm:text-3xl">{prompt.question}</h2>
               <p className="mt-2 flex items-start gap-1.5 text-sm text-muted">
                 <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
                 {prompt.hint}
@@ -255,7 +255,7 @@ export default function StorySession({
                   rows={5}
                   placeholder={prompt.placeholder}
                   aria-label="Your answer"
-                  className="mt-6 w-full resize-none rounded-2xl border-2 border-line bg-surface px-4 py-3.5 text-base leading-relaxed text-ink placeholder:text-muted focus:border-brand focus:outline-none disabled:opacity-70 sm:text-lg"
+                  className="mt-6 w-full resize-none rounded-2xl border border-line bg-surface px-4 py-3.5 text-base leading-relaxed text-ink placeholder:text-muted focus:border-brand focus:outline-none disabled:opacity-70 sm:text-lg"
                 />
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -280,7 +280,7 @@ export default function StorySession({
 
           {/* Footer: skip and check */}
           {(phase === "answer" || phase === "checking" || (phase === "saving" && !notes.length)) && (
-            <footer className="border-t-2 border-line bg-surface-2">
+            <footer className="border-t border-line bg-surface-2">
               <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5">
                 <button type="button" disabled={phase !== "answer"} onClick={() => void next(saved)} className={chunky.ghost}>
                   Skip
@@ -313,14 +313,14 @@ export default function StorySession({
             />
           )}
           {phase === "empty" && (
-            <section className="story-sheet-up fixed inset-x-0 bottom-0 z-10 border-t-2 border-gold/30 bg-gold/5">
+            <section className="story-sheet-up fixed inset-x-0 bottom-0 z-10 border-t border-gold/30 bg-gold/5">
               <div className="mx-auto w-full max-w-2xl px-4 py-5 sm:px-6">
                 <div className="flex items-start gap-3">
                   <span className="story-pop flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold text-white">
                     <Lightbulb className="h-5 w-5" strokeWidth={2.5} />
                   </span>
                   <div>
-                    <h3 className="text-lg font-extrabold text-gold">Add a little more detail</h3>
+                    <h3 className="text-lg font-semibold text-gold">Add a little more detail</h3>
                     <p className="text-sm text-gold">Say what happened, who it was for, or what changed. One specific moment beats a general summary.</p>
                   </div>
                 </div>
@@ -335,9 +335,9 @@ export default function StorySession({
 
       {quitting && (
         <div className="fixed inset-0 z-20 flex items-end bg-black/30" onClick={() => setQuitting(false)}>
-          <section className="story-sheet-up w-full border-t-2 border-line bg-surface" onClick={(e) => e.stopPropagation()}>
+          <section className="story-sheet-up w-full border-t border-line bg-surface" onClick={(e) => e.stopPropagation()}>
             <div className="mx-auto w-full max-w-2xl px-4 py-6 text-center sm:px-6">
-              <h3 className="text-xl font-extrabold">Leave the session?</h3>
+              <h3 className="text-xl font-semibold">Leave the session?</h3>
               <p className="mt-1 text-sm text-muted">
                 {saved > 0
                   ? `Your ${saved} saved stor${saved === 1 ? "y is" : "ies are"} kept, and ideas from ${saved === 1 ? "it" : "them"} start now.`
@@ -347,7 +347,7 @@ export default function StorySession({
                 <button type="button" autoFocus onClick={() => setQuitting(false)} className={`${chunky.primary} w-full`}>
                   Keep going
                 </button>
-                <button type="button" onClick={() => void leave()} className="py-2 text-sm font-extrabold uppercase tracking-wider text-danger hover:text-danger cursor-pointer">
+                <button type="button" onClick={() => void leave()} className="py-2 text-sm font-semibold text-danger hover:text-danger cursor-pointer">
                   End session
                 </button>
               </div>

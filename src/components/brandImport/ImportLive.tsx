@@ -69,7 +69,7 @@ function Ring({ value, done }: { value: number; done: boolean }) {
           className={`transition-[stroke-dashoffset] duration-700 ease-out ${done ? "stroke-gold" : "stroke-brand"}`}
         />
       </svg>
-      <span className={`text-sm font-extrabold ${done ? "text-gold" : "text-ink"}`}>{Math.round(value * 100)}%</span>
+      <span className={`text-sm font-semibold ${done ? "text-gold" : "text-ink"}`}>{Math.round(value * 100)}%</span>
       {done && <Confetti burst="big" />}
     </span>
   );
@@ -85,7 +85,7 @@ function StepPill({ label, step }: { label: string; step: StepState }) {
           ? "border-line bg-surface text-subtle line-through decoration-subtle/60"
           : "border-line bg-surface text-subtle";
   return (
-    <li className={`flex items-center gap-1.5 rounded-full border-2 px-3 py-1 text-xs font-extrabold transition-colors ${tone}`} title={step.detail}>
+    <li className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${tone}`} title={step.detail}>
       {step.state === "done" ? (
         <Check className="h-3.5 w-3.5 animate-pop-in" strokeWidth={3.5} />
       ) : step.state === "active" ? (
@@ -99,8 +99,8 @@ function StepPill({ label, step }: { label: string; step: StepState }) {
 
 function BuildCard({ icon, title, ready, waiting, children }: { icon: ReactNode; title: string; ready: boolean; waiting: boolean; children: ReactNode }) {
   return (
-    <section className={`rounded-2xl border-2 border-line bg-surface p-4 ${ready ? "import-landed" : ""}`}>
-      <h2 className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-subtle">
+    <section className={`rounded-2xl border border-line bg-surface p-4 ${ready ? "import-landed" : ""}`}>
+      <h2 className="flex items-center gap-2 text-xs font-semibold text-subtle">
         <span className={ready ? "text-brand" : undefined}>{icon}</span>
         {title}
         {ready && <Check className="ml-auto h-4 w-4 animate-pop-in text-brand" strokeWidth={3} />}
@@ -147,8 +147,8 @@ const VOICE_WORDS = {
 function ReadingFeed({ run, reading }: { run: BrandImportRun; reading: boolean }) {
   const lines = run.feed;
   return (
-    <section className="relative overflow-hidden rounded-2xl border-2 border-line bg-surface">
-      <h2 className="flex items-center gap-2 border-b-2 border-line px-4 py-3 text-xs font-extrabold uppercase tracking-widest text-subtle">
+    <section className="relative overflow-hidden rounded-2xl border border-line bg-surface">
+      <h2 className="flex items-center gap-2 border-b border-line px-4 py-3 text-xs font-semibold text-subtle">
         <ScanText className="h-4 w-4 text-brand" />
         {reading ? "Reading" : "Read"}
       </h2>
@@ -161,7 +161,7 @@ function ReadingFeed({ run, reading }: { run: BrandImportRun; reading: boolean }
           const latest = i === lines.length - 1;
           return (
             <li key={line.id} className={`animate-rise-in rounded-xl px-3 py-2 text-sm leading-snug transition-colors ${latest && reading ? "bg-brand/10 text-ink" : "text-muted"}`}>
-              <span className="mb-0.5 block text-[10px] font-extrabold uppercase tracking-wider text-subtle">{line.from}</span>“{line.text}”
+              <span className="mb-0.5 block text-[10px] font-semibold text-subtle">{line.from}</span>“{line.text}”
             </li>
           );
         })}
@@ -182,11 +182,11 @@ export function ImportLive({ run, hadWebsite }: { run: BrandImportRun; hadWebsit
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pt-4 pb-10 sm:px-6 sm:pt-8">
       <div className="flex items-center gap-4">
-        <span className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border-2 border-b-4 border-line bg-surface">
+        <span className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-line bg-surface">
           <Image src="/icon.svg" alt="" width={36} height={36} className={`h-9 w-9 ${reading ? "animate-pulse" : ""}`} />
         </span>
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-extrabold text-balance text-ink sm:text-3xl">
+          <h1 className="text-xl font-bold text-balance text-ink sm:text-3xl">
             {done ? (name ? `Here's your brand, ${name}.` : "Here's your brand.") : name ? `Hi ${name}. Building your brand…` : "Building your brand…"}
           </h1>
           <p className="mt-1 text-sm text-muted">
@@ -209,11 +209,11 @@ export function ImportLive({ run, hadWebsite }: { run: BrandImportRun; hadWebsit
           <BuildCard icon={<UserRound className="h-4 w-4" />} title="You" ready={Boolean(result.identity)} waiting={waiting("voice")}>
             {result.identity && (
               <div className="flex items-center gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand text-lg font-extrabold text-brand-ink">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand text-lg font-semibold text-brand-ink">
                   {result.identity.name.charAt(0)}
                 </span>
                 <span className="min-w-0">
-                  <span className="block font-extrabold text-ink">{result.identity.name}</span>
+                  <span className="block font-semibold text-ink">{result.identity.name}</span>
                   <span className="block text-sm text-muted">{result.identity.headline}</span>
                 </span>
               </div>
@@ -243,7 +243,7 @@ export function ImportLive({ run, hadWebsite }: { run: BrandImportRun; hadWebsit
                 </p>
                 {result.icp.pains.length > 0 && (
                   <div className="mt-3">
-                    <p className="mb-1.5 text-[11px] font-extrabold uppercase tracking-wider text-subtle">What keeps them up</p>
+                    <p className="mb-1.5 text-[11px] font-semibold text-subtle">What keeps them up</p>
                     <Chips items={result.icp.pains.slice(0, 5)} />
                   </div>
                 )}
@@ -292,7 +292,7 @@ export function ImportLive({ run, hadWebsite }: { run: BrandImportRun; hadWebsit
               waiting={hadWebsite && waiting("proof")}
             >
               <p className="text-sm text-ink">
-                <b className="text-2xl font-extrabold text-gold">{result.proofs.length}</b> claim{result.proofs.length === 1 ? "" : "s"} found
+                <b className="text-2xl font-bold text-gold">{result.proofs.length}</b> claim{result.proofs.length === 1 ? "" : "s"} found
               </p>
               <p className="mt-1 text-xs text-muted">You’ll tick the ones that are true before Minions uses them.</p>
             </BuildCard>

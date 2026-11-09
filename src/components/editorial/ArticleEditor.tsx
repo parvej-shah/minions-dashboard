@@ -274,7 +274,7 @@ export default function ArticleEditor({
                     {edited.title}
                   </h1>
                   {(edited.hook || activeAsset.hook) && (
-                    <p className="text-xs sm:text-sm font-medium text-muted italic border-l-2 border-brand pl-3 py-0.5 break-words [overflow-wrap:anywhere] font-sans">
+                    <p className="text-xs sm:text-sm font-medium text-muted italic border-l border-brand pl-3 py-0.5 break-words [overflow-wrap:anywhere] font-sans">
                       {edited.hook || activeAsset.hook}
                     </p>
                   )}

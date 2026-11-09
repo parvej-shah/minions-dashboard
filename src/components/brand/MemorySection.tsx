@@ -69,7 +69,7 @@ export default function MemorySection({ onChange }: { onChange: () => void }) {
         <h3 className="text-base font-bold text-ink flex items-center gap-2">
           <BookOpen className="w-4 h-4 text-brand" />
           Experience &amp; activity
-          <span className="rounded bg-line px-1.5 py-0.5 font-mono text-[10px] text-muted">{items.length}</span>
+          <span className="rounded bg-line px-1.5 py-0.5 text-[10px] text-muted">{items.length}</span>
         </h3>
         <p className="text-xs text-muted mt-0.5">
           What you have built, learned and seen. Minions only proposes ideas it can back with something here, so
@@ -89,7 +89,7 @@ export default function MemorySection({ onChange }: { onChange: () => void }) {
         <div className="space-y-5 border-t border-line/60 pt-4">
           {grouped.map(({ kind, rows }) => (
             <div key={kind} className="space-y-2">
-              <h4 className="text-[11px] font-mono uppercase tracking-wider text-subtle">{MEMORY_KIND_META[kind].label}</h4>
+              <h4 className="text-[11px] text-subtle">{MEMORY_KIND_META[kind].label}</h4>
               {rows.map((item) => (
                 <div
                   key={item.id}

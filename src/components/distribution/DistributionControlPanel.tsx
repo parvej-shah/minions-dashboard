@@ -74,11 +74,11 @@ export function DistributionControlPanel({
       case "BLOG":
         return <Globe className="w-4 h-4 text-brand" />;
       case "FACEBOOK":
-        return <span className="text-sm font-black text-[#1877F2]">f</span>;
+        return <span className="text-sm font-semibold text-[#1877F2]">f</span>;
       case "LINKEDIN":
-        return <span className="text-xs font-black text-[#0A66C2]">in</span>;
+        return <span className="text-xs font-semibold text-[#0A66C2]">in</span>;
       case "TWITTER":
-        return <span className="text-xs font-black text-ink">𝕏</span>;
+        return <span className="text-xs font-semibold text-ink">𝕏</span>;
       default:
         return <Share2 className="w-4 h-4 text-muted" />;
     }
@@ -100,7 +100,7 @@ export function DistributionControlPanel({
     return (
       <div className="space-y-2">
         {notification && (
-          <div className="text-[11px] font-mono px-3 py-1.5 rounded-lg bg-brand/15 border border-brand/30 text-brand flex items-center gap-2 animate-in fade-in">
+          <div className="text-[11px] px-3 py-1.5 rounded-lg bg-brand/15 border border-brand/30 text-brand flex items-center gap-2 animate-in fade-in">
             <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
             <span>{notification}</span>
           </div>
@@ -137,7 +137,7 @@ export function DistributionControlPanel({
                     <div className="w-2.5 h-2.5 rounded-full bg-white shadow-xs" />
                   </div>
                 </div>
-                <div className="flex items-center gap-1 text-[10px] font-mono">
+                <div className="flex items-center gap-1 text-[10px]">
                   <span
                     className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                       isActive ? "bg-brand" : "bg-subtle"
@@ -174,12 +174,12 @@ export function DistributionControlPanel({
       )}
 
       {notification && (
-        <div className="text-xs font-mono px-4 py-2 rounded-xl bg-brand/15 border border-brand/30 text-brand flex items-center justify-between gap-3 animate-in fade-in duration-150">
+        <div className="text-xs px-4 py-2 rounded-xl bg-brand/15 border border-brand/30 text-brand flex items-center justify-between gap-3 animate-in fade-in duration-150">
           <div className="flex min-w-0 items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-brand shrink-0" />
             <span>{notification}</span>
           </div>
-          <span className="shrink-0 whitespace-nowrap text-[10px] text-brand/70 font-mono">Changes saved</span>
+          <span className="shrink-0 whitespace-nowrap text-[10px] text-brand/70">Changes saved</span>
         </div>
       )}
 
@@ -207,7 +207,7 @@ export function DistributionControlPanel({
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-bold text-ink truncate">{ch.name}</span>
                       {ch.badge && (
-                        <span className="shrink-0 whitespace-nowrap text-[10px] font-mono px-1.5 py-0.5 rounded bg-canvas text-muted border border-line">
+                        <span className="shrink-0 whitespace-nowrap text-[10px] px-1.5 py-0.5 rounded bg-canvas text-muted border border-line">
                           {ch.badge}
                         </span>
                       )}
