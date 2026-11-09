@@ -249,6 +249,11 @@ export default function EditorialStudio({
     return true;
   };
 
+  const handleMarkPosted = async () => {
+    const message = await draft.markPosted();
+    if (message) toast.show(message);
+  };
+
   const handleUnschedule = async () => {
     const message = await draft.unschedulePost();
     if (message) toast.show(message);
@@ -439,6 +444,7 @@ export default function EditorialStudio({
               onPublish={handlePublish}
               onSchedule={handleSchedule}
               onUnschedule={handleUnschedule}
+              onMarkPosted={handleMarkPosted}
               workspaceChannels={channels}
               onSetChannels={(c) => void draft.setPostChannels(c).then((m) => m && toast.show(m))}
               onMessage={toast.show}

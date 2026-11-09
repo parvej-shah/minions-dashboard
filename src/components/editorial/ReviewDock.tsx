@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import {
   CalendarClock,
   CheckCircle2,
+  ClipboardCheck,
   AlertTriangle,
   ArrowRight,
   ExternalLink,
@@ -31,6 +32,8 @@ export interface ReviewDockProps {
   /** Approve the draft for a local date and time; resolves true when it was scheduled. */
   onSchedule: (date: string, time: string) => Promise<boolean>;
   onUnschedule: () => void;
+  /** The reviewer copied the post to LinkedIn themselves: record it as out. Sends nothing. */
+  onMarkPosted: () => void;
   /** The workspace's channel switches, for choosing where this post goes (D18). */
   workspaceChannels: Record<DistributionChannelKey, boolean> | null;
   onSetChannels: (channels: string[] | null) => void;
@@ -60,6 +63,7 @@ export default function ReviewDock({
   onPublish,
   onSchedule,
   onUnschedule,
+  onMarkPosted,
   workspaceChannels,
   onSetChannels,
   onMessage,
@@ -346,6 +350,23 @@ export default function ReviewDock({
                     <span>Approve & schedule for later</span>
                   </button>
                 ))}
+
+              {/* For people who copy the post to LinkedIn themselves. Sends nothing. */}
+              {!alreadyLive && (
+                <div className="space-y-1">
+                  <button
+                    onClick={onMarkPosted}
+                    disabled={publishState === "pending"}
+                    className="w-full bg-surface-2 hover:bg-surface-3 border border-line text-ink text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
+                  >
+                    <ClipboardCheck className="w-3.5 h-3.5 text-brand" />
+                    <span>Mark as posted</span>
+                  </button>
+                  <p className="text-[11px] leading-relaxed text-subtle">
+                    Already pasted it into LinkedIn yourself? Use Copy above, post it, then click this. Nothing is sent from here.
+                  </p>
+                </div>
+              )}
 
               {deleteLink("Delete draft")}
             </div>

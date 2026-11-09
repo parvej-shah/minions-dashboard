@@ -46,6 +46,8 @@ export interface EditorialDraftState {
   schedulePost: (date: string, time: string) => Promise<string>;
   /** Send a scheduled post back to review. */
   unschedulePost: () => Promise<string>;
+  /** The reviewer posted it to LinkedIn by hand: record it as out. Sends nothing. */
+  markPosted: () => Promise<string>;
   /** D18: where this post goes; null returns it to the workspace's channels. */
   setPostChannels: (channels: string[] | null) => Promise<string>;
 
@@ -346,6 +348,26 @@ export function useEditorialDraft(
     }
   }, [activeAsset, publishState, patchActive, isDirty, persistEdits]);
 
+  const markPosted = useCallback(async (): Promise<string> => {
+    if (!activeAsset || publishState === "pending") return "";
+    setPublishState("pending");
+    setPublishError(null);
+    try {
+      // The text they copied is the text on record: unsaved edits are saved first.
+      if (isDirty) await persistEdits();
+      const res = await apiClient.post<{ published_at: string; linkedin_went_as: "CAROUSEL" | "COVER" | null }>(`/api/assets/${activeAsset.id}/mark-posted`, {});
+      patchActive({ status: "PUBLISHED", claims_ok: "Y", published_at: res.published_at, linkedin_published_at: res.published_at, linkedin_went_as: res.linkedin_went_as });
+      setPublishState("success");
+      window.dispatchEvent(new Event("minions-counts-updated"));
+      return "Marked as posted on LinkedIn.";
+    } catch (err) {
+      const message = toErrorMessage(err, "Could not mark the post as posted");
+      setPublishState("error");
+      setPublishError(message);
+      return message;
+    }
+  }, [activeAsset, publishState, patchActive, isDirty, persistEdits]);
+
   const setPostChannels = useCallback(async (channels: string[] | null): Promise<string> => {
     if (!activeAsset) return "";
     const previous = activeAsset.channels;
@@ -528,6 +550,7 @@ export function useEditorialDraft(
     approveAndPublish,
     schedulePost,
     unschedulePost,
+    markPosted,
     setPostChannels,
 
     isTogglingLive,

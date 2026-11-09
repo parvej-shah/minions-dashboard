@@ -551,3 +551,12 @@ question (reverses D16; still a separate call).
 **Why:** Unused ideas piled up to 28 in workspaces nobody drafted from, because a run could add several ideas past the old limit of 15. Seven workspaces had none of their own material, so their drafts came from news in a generic voice. The Reddit study found that people's voice comes from what they already wrote, and pasting old posts is less work than answering questions.
 **Alternatives considered:** keeping 15; asking those workspaces more questions (the story bank already did, and they didn't answer).
 **Status:** active
+
+## 2026-11-09 — Reviewers who post by hand can mark a draft as posted
+
+Some people copy the post into LinkedIn themselves instead of letting Minions
+publish it. The review panel now has a "Mark as posted" button beside Approve
+& publish and Schedule. It records the draft as out on LinkedIn (it moves to
+Published and counts as posted) and sends nothing anywhere. It is not offered
+for a scheduled draft; cancel the schedule first. Rejected: making these users
+press Approve & publish, which would post a duplicate on LinkedIn.
