@@ -105,6 +105,7 @@ function toCoverDTO(raw: unknown, draft: { content: string | null; linkedinVaria
     punch: shape?.punch ?? null,
     shape_read: Boolean(shape),
     photo_ok: a?.photo_ok === true,
+    cutout_ok: typeof a?.cutout_ok === "boolean" ? a.cutout_ok : null,
     quote_ok: Boolean(pickQuote(quoteSource({ body: bodyOf(draft.content ?? ""), post: draft.linkedinVariant }))),
   };
 }

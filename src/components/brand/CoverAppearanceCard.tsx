@@ -23,7 +23,7 @@ const LOOK_COLOR_FIELDS: { key: "primary_ink" | "brand_teal" | "brand_coral" | "
 type LookDraft = Pick<
   BrandProfileInput,
   "primary_logo_url" | "primary_ink" | "brand_teal" | "brand_coral" | "brand_cream" | "accent_blue"
-> & { cover_byline: string; cover_art: string };
+> & { cover_byline: string; cover_art: string; cover_cutout_url: string };
 
 interface Props {
   profile: BrandSettings | null;
@@ -44,6 +44,7 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
       primary_logo_url: profile.primary_logo_url,
       cover_byline: profile.cover_byline,
       cover_art: profile.cover_art,
+      cover_cutout_url: profile.cover_cutout_url,
       primary_ink: profile.primary_ink,
       brand_teal: profile.brand_teal,
       brand_coral: profile.brand_coral,
@@ -95,6 +96,31 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
     }
   };
 
+  const [uploadingCutout, setUploadingCutout] = useState(false);
+  const [cutoutError, setCutoutError] = useState<string | null>(null);
+
+  /** Uploads a cut-out of the author for the Cut-out cover, after checking it really has a see-through background. */
+  const uploadCutout = async (file: File | undefined) => {
+    if (!file || !lookDraft) return;
+    setCutoutError(null);
+    if (file.type !== "image/png") return setCutoutError("Use a PNG with a transparent background.");
+    if (file.size > 5 * 1024 * 1024) return setCutoutError("Use an image under 5 MB.");
+    if (!(await hasClearCorners(file))) return setCutoutError("This photo has a background. Remove it first (any background remover works), then upload the PNG.");
+    setUploadingCutout(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/media/upload", { method: "POST", body: form });
+      const body = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !body.url) throw new Error(body.error || `Upload failed (HTTP ${res.status})`);
+      setLookDraft((d) => (d ? { ...d, cover_cutout_url: body.url! } : d));
+    } catch (e) {
+      setCutoutError(toErrorMessage(e, "Upload failed"));
+    } finally {
+      setUploadingCutout(false);
+    }
+  };
+
   return (
     <details className="group rounded-2xl border border-line bg-surface shadow-sm md:col-span-2">
       <summary className="flex min-h-16 cursor-pointer list-none items-center gap-3 rounded-2xl px-4 py-3 transition-colors hover:bg-surface-2 sm:px-5 [&::-webkit-details-marker]:hidden">
@@ -130,6 +156,28 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
               </label>
             </div>
             {photoError && <p className="text-[11px] text-[#F87171] mt-1">{photoError}</p>}
+          </div>
+          <div>
+            <label className="text-[11px] font-medium text-muted block mb-1">Cut-out photo for the Cut-out cover (a PNG of you with the background removed)</label>
+            <div className="flex items-center gap-2">
+              {lookDraft.cover_cutout_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={lookDraft.cover_cutout_url} alt="Your cut-out photo" className="h-14 w-14 shrink-0 rounded-lg border border-line object-contain bg-[repeating-conic-gradient(#8883_0_25%,transparent_0_50%)] bg-[length:12px_12px]" />
+              ) : (
+                <span className="text-[11px] text-subtle">None yet: the Cut-out cover is off until you add one.</span>
+              )}
+              <label className={`shrink-0 px-3 py-1.5 rounded-lg bg-surface-2 border border-line text-xs text-brand hover:border-brand cursor-pointer inline-flex items-center gap-1.5 ${uploadingCutout ? "opacity-50 pointer-events-none" : ""}`}>
+                {uploadingCutout ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                {lookDraft.cover_cutout_url ? "Replace" : "Upload"}
+                <input type="file" accept="image/png" className="hidden" onChange={(e) => void uploadCutout(e.target.files?.[0])} />
+              </label>
+              {lookDraft.cover_cutout_url && (
+                <button type="button" onClick={() => setLookDraft({ ...lookDraft, cover_cutout_url: "" })} className="px-2 py-1.5 rounded-lg text-xs text-muted hover:bg-surface-2">
+                  Remove
+                </button>
+              )}
+            </div>
+            {cutoutError && <p className="text-[11px] text-[#F87171] mt-1">{cutoutError}</p>}
           </div>
           <div>
             <label className="text-[11px] font-medium text-muted block mb-1">Byline under your name (empty: the first sentence of your positioning)</label>
@@ -226,4 +274,22 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
       </div>
     </details>
   );
+}
+
+/** Whether a PNG's top corners are see-through, i.e. the person was cut out of their background. */
+async function hasClearCorners(file: File): Promise<boolean> {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const canvas = document.createElement("canvas");
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return true;
+    ctx.drawImage(bitmap, 0, 0, 64, 64);
+    const alpha = (x: number) => ctx.getImageData(x, 0, 1, 1).data[3];
+    return alpha(0) <= 32 && alpha(63) <= 32;
+  } catch {
+    // The server checks again when it draws; don't block the upload on a browser quirk.
+    return true;
+  }
 }

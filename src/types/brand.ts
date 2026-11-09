@@ -70,6 +70,8 @@ export interface BrandSettings {
   cover_byline: string;
   /** The illustration above a cover's headline: SHAPES, DOODLES, ICONS or NONE. */
   cover_art: string;
+  /** The author's cut-out photo (PNG, transparent background) for the Cut-out cover; empty when none. */
+  cover_cutout_url: string;
   primary_ink: string;
   brand_teal: string;
   brand_coral: string;
@@ -104,6 +106,8 @@ export interface BrandProfileInput {
   cover_byline?: string;
   /** Omitted: left as it is. */
   cover_art?: string;
+  /** Omitted: left as it is. Empty removes it. */
+  cover_cutout_url?: string;
   primary_ink: string;
   brand_teal: string;
   brand_coral: string;

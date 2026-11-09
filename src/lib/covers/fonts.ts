@@ -10,9 +10,11 @@ import { readMetrics, type FontMetrics } from "./metrics";
  * kicker and author line. Both SIL Open Font License, see fonts/OFL-*.txt.
  * They are static instances cut from the Google Fonts variable files, since
  * Satori and the width metrics need static TTFs. "serifItalic" is an upright
- * semi-bold: Bricolage has no italic.
+ * semi-bold: Bricolage has no italic. "italic" is a real one, Instrument
+ * Serif Italic (OFL), for the one emphasised word or phrase on the modern
+ * banner types (covers/modern.tsx, 2026-11-09).
  */
-export type Face = "serif" | "serifItalic" | "sans" | "sansSemi" | "sansBold";
+export type Face = "serif" | "serifItalic" | "sans" | "sansSemi" | "sansBold" | "italic";
 
 const FILES: Record<Face, { file: string; name: string; weight: 400 | 500 | 600 | 800; style: "normal" | "italic" }> = {
   serif: { file: "bricolage-800-normal.ttf", name: "Bricolage Grotesque", weight: 800, style: "normal" },
@@ -20,6 +22,7 @@ const FILES: Record<Face, { file: string; name: string; weight: 400 | 500 | 600 
   sans: { file: "jakarta-400-normal.ttf", name: "Plus Jakarta Sans", weight: 400, style: "normal" },
   sansSemi: { file: "jakarta-600-normal.ttf", name: "Plus Jakarta Sans", weight: 600, style: "normal" },
   sansBold: { file: "jakarta-800-normal.ttf", name: "Plus Jakarta Sans", weight: 800, style: "normal" },
+  italic: { file: "instrument-serif-400-italic.ttf", name: "Instrument Serif", weight: 400, style: "italic" },
 };
 
 /** CSS for a face, to spread into a Satori style. */

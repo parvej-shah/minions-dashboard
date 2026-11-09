@@ -13,6 +13,10 @@ export interface LayoutFacts {
   number: { value: string; unit?: string } | null;
   photo_ok: boolean;
   quote_ok: boolean;
+  /** The subtitle the Torn banner reveals. */
+  kicker?: string | null;
+  /** The brand has a usable cut-out photo. Unknown (an older cover) counts as maybe: the redraw says if not. */
+  cutout_ok?: boolean | null;
 }
 
 const NEEDS_POINTS: Partial<Record<CoverLayout, { has: (f: LayoutFacts) => boolean; missing: string }>> = {
@@ -31,5 +35,7 @@ export function layoutUnavailable(layout: CoverLayout, facts: LayoutFacts, opts:
   if (layout === "NUMBER" && !facts.number) return "This draft states no figure a Number cover could use";
   if (layout === "PHOTO" && !facts.photo_ok) return "Needs an opaque headshot (at least 600 px) on the Brand page";
   if (layout === "QUOTE" && !facts.quote_ok) return "No sentence in the post works as a pull quote";
+  if (layout === "TORN" && !facts.kicker?.trim()) return "Needs a subtitle for the torn strip to reveal";
+  if (layout === "CUTOUT" && facts.cutout_ok === false) return "Needs a cut-out photo (PNG with a transparent background) on the Brand page";
   return null;
 }

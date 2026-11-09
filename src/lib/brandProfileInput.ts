@@ -8,6 +8,7 @@ export function toProfileInput(settings: BrandSettings): BrandProfileInput {
     primary_logo_url: settings.primary_logo_url,
     cover_byline: settings.cover_byline,
     cover_art: settings.cover_art,
+    cover_cutout_url: settings.cover_cutout_url,
     primary_ink: settings.primary_ink,
     brand_teal: settings.brand_teal,
     brand_coral: settings.brand_coral,

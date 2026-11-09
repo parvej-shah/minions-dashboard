@@ -14,7 +14,8 @@ import { FIRST_POST_TAG } from "@/constants/firstPost";
 import { renderPosterShape } from "@/lib/prompts/posterShape";
 import { editShape, parseShape, shapeJson, type PosterShape, type ShapeEdit } from "@/lib/covers/shape";
 import { eligibleTypes, fallbackOrder, pickPosterType } from "@/lib/covers/posterType";
-import { dataUrlFitsPoster } from "@/lib/covers/photo";
+import { dataUrlFitsPoster, prepareCutout } from "@/lib/covers/photo";
+import { isBanner } from "@/lib/covers/bannerTypes";
 
 /**
  * Draws an asset's cover in code and attaches it (phase 5 of
@@ -43,7 +44,7 @@ export interface CoverEdit extends ShapeEdit {
 
 /** The stored record: the spec without the embedded photo, plus how the copy was chosen. */
 export type StoredCoverSpec = Omit<CoverSpec, "author"> & {
-  author: { name: string; role?: string; has_photo: boolean; photo_ok?: boolean };
+  author: { name: string; role?: string; has_photo: boolean; photo_ok?: boolean; cutout_ok?: boolean };
   card: CoverCard;
   /** The illustration style this cover was drawn with, NONE included, so a re-draw keeps it. */
   art_style: CoverArtStyle;
@@ -118,6 +119,18 @@ async function coverPhoto(profile: { id: string; clientId: string | null; primar
   }
   const img = await fetchImage(hosted);
   return img ? asDataUrl(img) : undefined;
+}
+
+/**
+ * The brand's cut-out photo (Brand page, kept in visualAssets), trimmed and
+ * ready for the Cut-out banner. Undefined when there is none, it is not on
+ * our storage, or it is not really cut out.
+ */
+async function coverCutout(profile: { visualAssets: unknown }): Promise<CoverSpec["cutout"]> {
+  const url = (profile.visualAssets as { cover_cutout_url?: unknown } | null)?.cover_cutout_url;
+  if (typeof url !== "string" || !onOurStorage(url)) return undefined;
+  const img = await fetchImage(url);
+  return img ? prepareCutout(img.data) : undefined;
 }
 
 /**
@@ -374,6 +387,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     photo: await coverPhoto(profile),
   };
   const photoOk = dataUrlFitsPoster(author.photo);
+  const cutout = await coverCutout(profile);
 
   // The poster type (posterType.ts): what the post holds decides which types
   // fit, and the one this workspace used least recently wins. A figure or
@@ -382,6 +396,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     shape: card.shape,
     judged: { number: copy.layout === "NUMBER", quote: copy.layout === "QUOTE" },
     photoOk,
+    cutoutOk: Boolean(cutout),
     recent: copyInput.recentLayouts,
     firstPost,
   };
@@ -401,6 +416,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
       // Only Headline and Statement have room for an illustration.
       art: layout === "HEADLINE" || layout === "STATEMENT" ? art : undefined,
       ...posterParts(card.shape),
+      cutout,
     };
   };
 
@@ -409,7 +425,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   const kept = input.edit && previous?.layout && previous.headline ? previous : null;
   // No audience label: the illustration and the headline open the cover (user decision, 2026-09-25).
   let spec: CoverSpec = kept
-    ? { layout: kept.layout!, headline: kept.headline!, emphasis: kept.emphasis, kicker: kept.kicker, quote: kept.quote, number: kept.number, author, brand, art, ...posterParts(card.shape) }
+    ? { layout: kept.layout!, headline: kept.headline!, emphasis: kept.emphasis, kicker: kept.kicker, quote: kept.quote, number: kept.number, author, brand, art, ...posterParts(card.shape), cutout }
     : input.edit
       ? { ...specFor(copy.layout), art }
       : specFor(order[0]);
@@ -455,6 +471,8 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
       if (edit.layout === "PHOTO" && !photoOk) {
         return { ok: false, error: author.photo ? "The brand photo can't fill a Photo cover: it needs an opaque headshot at least 600 px wide (a logo with a transparent background won't do)." : "Add a headshot on the Brand page to use the Photo cover." };
       }
+      if (edit.layout === "CUTOUT" && !cutout) return { ok: false, error: "Add a cut-out photo (a PNG with a transparent background) on the Brand page to use the Cut-out cover." };
+      if (edit.layout === "TORN" && !spec.kicker) return { ok: false, error: "A Torn cover needs a subtitle for the strip to reveal. Add one first." };
       if (edit.layout === "NUMBER" && !spec.number) return { ok: false, error: "This draft has no verified figure for a NUMBER cover." };
       if (edit.layout === "QUOTE") {
         const quote = pickQuote(quoteSource({ body, post: asset.linkedinVariant }));
@@ -472,7 +490,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   const sameType = (s: CoverSpec) => attempts(s, title).filter((a) => a.layout === s.layout && !a.looseHeadline);
   const tries = !input.edit
     ? order.flatMap((l, i) => (i === order.length - 1 ? attempts(specFor(l), title) : sameType(specFor(l))))
-    : NEEDS_SHAPE[spec.layout] || spec.layout === "PHOTO"
+    : NEEDS_SHAPE[spec.layout] || spec.layout === "PHOTO" || isBanner(spec.layout)
       ? sameType(spec)
       : attempts(spec, title);
   let png: Buffer | null = null;
@@ -492,7 +510,9 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   const { url } = await uploadToR2(`covers/${asset.clientId}/${asset.id}-${Date.now()}.png`, png, "image/png");
   const stored: StoredCoverSpec = {
     ...used,
-    author: { name: author.name, role: author.role, has_photo: Boolean(author.photo), photo_ok: photoOk },
+    // The cut-out is the brand's, read again on every draw: never copied into the row.
+    cutout: undefined,
+    author: { name: author.name, role: author.role, has_photo: Boolean(author.photo), photo_ok: photoOk, cutout_ok: Boolean(cutout) },
     // The chosen art is kept even when this layout or fit dropped it, so switching back restores it.
     art: used.art ?? spec.art ?? art,
     art_style: artStyle,

@@ -1,14 +1,15 @@
 /**
- * Experimental banner designs from the 2026-11-09 Pinterest research
- * (docs/research/carousel-design-2026-11-09.md, tasks/9.md). Each adds one
- * hand-made touch to plain type: a torn strip that reveals the punchline, a
- * design-tool selection box, sticker tags, a notebook sheet, a notes card, a
- * post card, a hand-circled word.
+ * The modern banner types from the 2026-11-09 Pinterest research
+ * (docs/research/carousel-design-2026-11-09.md, tasks/9.md and 10.md). Each
+ * adds one hand-made touch to plain type: a torn strip that reveals the
+ * punchline, a design-tool selection box, sticker tags, a notebook sheet, a
+ * notes card, a post card, a hand-circled word, the author's cut-out in
+ * front of a giant word. They are cover layouts (layouts.tsx draws them
+ * through bannerElement).
  *
- * Local samples only for now: no CoverLayout, picker or Studio option uses
- * them. Same rules as layouts.tsx: brand colours, every size and line break
- * set by fit.ts, copy that cannot fit rejected, never cut. No invented
- * figures: the post card shows no like or view counts.
+ * Same rules as layouts.tsx: brand colours, every size and line break set by
+ * fit.ts, copy that cannot fit rejected, never cut. No invented figures: the
+ * post card shows no like or view counts.
  */
 import type { ReactNode } from "react";
 import { faceStyle, metricsFor, type Face } from "./fonts";
@@ -16,10 +17,11 @@ import { balance, fit, type Fitted, type TextBox } from "./fit";
 import { textWidth } from "./metrics";
 import { contrast } from "./brand";
 import { backgroundSrc, blockColour, mix } from "./backgrounds";
-import { COVER_SIZE, CoverFitError, INNER, Lines, PAD, initials, rgba, type CoverAuthor, type CoverBrand } from "./layouts";
+import { CoverFitError, INNER, Lines, PAD, initials, rgba, type CoverAuthor, type CoverBrand } from "./layouts";
 
-export const BANNER_DESIGNS = ["TORN", "SELECT", "STICKER", "NOTEBOOK", "NOTES", "POSTCARD", "CIRCLED"] as const;
-export type BannerDesign = (typeof BANNER_DESIGNS)[number];
+import type { BannerDesign } from "./bannerTypes";
+
+export { BANNER_DESIGNS, type BannerDesign } from "./bannerTypes";
 
 export interface BannerSpec {
   design: BannerDesign;
@@ -32,12 +34,15 @@ export interface BannerSpec {
   label?: string;
   /** The post's number in the author's series, for designs that show one. */
   seriesNo?: number;
+  /** CUTOUT: the author's photo with a transparent background, trimmed to the person. */
+  cutout?: { src: string; width: number; height: number };
   author: CoverAuthor;
   brand: CoverBrand;
 }
 
-const W = COVER_SIZE.width;
-const H = COVER_SIZE.height;
+// The cover size (layouts.tsx COVER_SIZE), literal: layouts.tsx imports this module.
+const W = 1080;
+const H = 1350;
 const svg = (s: string) => `data:image/svg+xml;base64,${Buffer.from(s).toString("base64")}`;
 const wordKey = (w: string) => w.toLowerCase().replace(/[^a-z0-9']/g, "");
 const onColour = (b: CoverBrand, bg: string) => (contrast(b.ink, bg) >= contrast(b.paper, bg) ? b.ink : b.paper);
@@ -139,7 +144,7 @@ function Torn(spec: BannerSpec) {
   const field = blockColour(brand);
   const text = onColour(brand, field);
   const headline = fitBox(spec.headline, 72, 132, { face: "serif", maxWidth: INNER, maxLines: 4, maxHeight: 560, lineHeight: 1.02 }, "headline");
-  const kicker = fitBox(spec.kicker, 42, 60, { face: "serifItalic", maxWidth: INNER - 40, maxLines: 3 }, "kicker");
+  const kicker = fitBox(spec.kicker, 48, 68, { face: "italic", maxWidth: INNER - 40, maxLines: 3 }, "kicker");
   const stripHeight = kicker.lines.length * kicker.size * 1.2 + 150;
   // A jagged edge, top and bottom, from a fixed pattern so a redraw looks the same.
   const teeth = (y: number, dir: number) => Array.from({ length: 41 }, (_, i) => `${i * 30},${y + dir * (i % 3 === 0 ? 14 : i % 2 ? 4 : 22)}`).join(" ");
@@ -154,7 +159,7 @@ function Torn(spec: BannerSpec) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={paper} width={1200} height={stripHeight} style={{ position: "absolute", left: 0, top: 0 }} alt="" />
         <div style={{ display: "flex", position: "absolute", left: PAD + 60 + 20, top: 75 }}>
-          <Lines fitted={kicker} face="serifItalic" lineHeight={1.2} color={brand.ink} />
+          <Lines fitted={kicker} face="italic" lineHeight={1.2} color={brand.ink} />
         </div>
       </div>
       <div style={{ flex: 1, display: "flex" }} />
@@ -222,7 +227,7 @@ function StickerBanner(spec: BannerSpec) {
       <img src={backgroundSrc("GRID", brand)} width={W} height={H} style={{ position: "absolute", left: 0, top: 0 }} alt="" />
       <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
         {label ? <div style={{ display: "flex", marginBottom: 48 }}><Sticker text={label} bg={brand.accent} fg={onColour(brand, brand.accent)} angle={-5} /></div> : null}
-        <Lines fitted={headline} face="serif" lineHeight={1.04} color={brand.ink} emphasis={spec.emphasis} accent={brand.accent} />
+        <Lines fitted={headline} face="serif" lineHeight={1.04} color={brand.ink} emphasis={spec.emphasis} accent={brand.accent} emphasisFace="italic" />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 56 }}>
           {kicker ? <Lines fitted={kicker} face="sans" lineHeight={1.35} color={rgba(brand.ink, 0.72)} /> : <div style={{ display: "flex" }} />}
           {spec.seriesNo ? <Sticker text={`No. ${String(spec.seriesNo).padStart(2, "0")}`} bg={brand.secondary} fg={onColour(brand, brand.secondary)} angle={6} /> : null}
@@ -249,10 +254,10 @@ function Notebook(spec: BannerSpec) {
       <div style={{ position: "absolute", left: PAD - 10, top: 130, width: sheetW, height: sheetH, display: "flex", flexDirection: "column", padding: "130px 60px 50px 130px", transform: "rotate(-1deg)" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={ruled} width={sheetW} height={sheetH} style={{ position: "absolute", left: 0, top: 0 }} alt="" />
-        <Lines fitted={headline} face="serif" lineHeight={1.06} color={brand.ink} emphasis={spec.emphasis} accent={brand.accent} />
+        <Lines fitted={headline} face="serif" lineHeight={1.06} color={brand.ink} emphasis={spec.emphasis} accent={brand.accent} emphasisFace="italic" />
         {kicker ? <div style={{ display: "flex", marginTop: 40 }}><Lines fitted={kicker} face="sans" lineHeight={1.4} color={rgba(brand.ink, 0.7)} /></div> : null}
         <div style={{ flex: 1, display: "flex" }} />
-        {spec.seriesNo ? <div style={{ display: "flex", alignSelf: "flex-end", ...faceStyle("serifItalic"), fontSize: 44, color: brand.accent }}>{`no. ${String(spec.seriesNo).padStart(2, "0")}`}</div> : null}
+        {spec.seriesNo ? <div style={{ display: "flex", alignSelf: "flex-end", ...faceStyle("italic"), fontSize: 52, color: brand.accent }}>{`no. ${String(spec.seriesNo).padStart(2, "0")}`}</div> : null}
       </div>
       <div style={{ flex: 1, display: "flex" }} />
       <Byline author={spec.author} brand={brand} color={onColour(brand, field)} muted={rgba(onColour(brand, field), 0.75)} ring={onColour(brand, field)} />
@@ -289,7 +294,7 @@ function Notes(spec: BannerSpec) {
             <img src={more} width={40} height={40} alt="" />
           </div>
         </div>
-        <Lines fitted={headline} face="sansBold" tracking={-0.02} lineHeight={1.1} color={brand.ink} emphasis={spec.emphasis} accent={brand.accent} />
+        <Lines fitted={headline} face="sansBold" tracking={-0.02} lineHeight={1.1} color={brand.ink} emphasis={spec.emphasis} accent={brand.accent} emphasisFace="italic" />
         {kicker ? <div style={{ display: "flex", marginTop: 36 }}><Lines fitted={kicker} face="sans" lineHeight={1.45} color={rgba(brand.ink, 0.75)} /></div> : null}
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 64, paddingTop: 28, borderTop: `2px solid ${rgba(brand.ink, 0.08)}` }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -333,7 +338,7 @@ function Postcard(spec: BannerSpec) {
           {role ? <Lines fitted={role} face="sans" lineHeight={1.3} color={rgba(ink, 0.6)} /> : null}
         </div>
       </div>
-      <Lines fitted={headline} face="sans" tracking={-0.02} lineHeight={1.18} color={ink} emphasis={spec.emphasis} accent={brand.accentOnInk} />
+      <Lines fitted={headline} face="sans" tracking={-0.02} lineHeight={1.18} color={ink} emphasis={spec.emphasis} accent={brand.accentOnInk} emphasisFace="italic" />
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 96, paddingRight: 40 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {icons.map((s, i) => <img key={i} src={s} width={44} height={44} alt="" />)}
@@ -347,7 +352,7 @@ function Circled(spec: BannerSpec) {
   const { brand } = spec;
   // Narrower than the page, and loose line spacing, so the loop has room around its word.
   const headline = fitBox(spec.headline, 72, 132, { face: "serif", maxWidth: INNER - 100, maxLines: 4, maxHeight: 700, lineHeight: 1.2 }, "headline");
-  const kicker = spec.kicker ? fit(spec.kicker, 40, 54, { face: "serifItalic", maxWidth: INNER - 160, maxLines: 3 }) : null;
+  const kicker = spec.kicker ? fit(spec.kicker, 44, 60, { face: "italic", maxWidth: INNER - 160, maxLines: 3 }) : null;
   const deco = (w: number, h: number) => {
     const bw = Math.round(w * 1.1 + 60);
     const bh = Math.round(h * 1.5);
@@ -370,11 +375,60 @@ function Circled(spec: BannerSpec) {
           <div style={{ display: "flex", alignItems: "flex-start", marginTop: 40 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={arrow} width={120} height={120} style={{ marginRight: 24 }} alt="" />
-            <div style={{ display: "flex", marginTop: 70 }}><Lines fitted={kicker} face="serifItalic" lineHeight={1.2} color={rgba(brand.ink, 0.8)} /></div>
+            <div style={{ display: "flex", marginTop: 70 }}><Lines fitted={kicker} face="italic" lineHeight={1.2} color={rgba(brand.ink, 0.85)} /></div>
           </div>
         ) : null}
       </div>
       <Byline author={spec.author} brand={brand} color={brand.ink} muted={rgba(brand.ink, 0.62)} />
+    </div>
+  );
+}
+
+/** The word set giant behind the author: the emphasis when it is one word, else the headline's longest word. */
+export function giantWord(headline: string, emphasis?: string): string {
+  const clean = (w: string) => w.replace(/[^\p{L}\p{N}'’-]/gu, "");
+  if (emphasis && !/\s/.test(emphasis.trim()) && clean(emphasis)) return clean(emphasis).toLowerCase();
+  const words = headline.split(/\s+/).map(clean).filter(Boolean);
+  return words.reduce((a, b) => (b.length > a.length ? b : a), "").toLowerCase();
+}
+
+/** CUTOUT: the author's cut-out photo standing in front of one giant italic word, the headline above, on a dark glow. */
+function Cutout(spec: BannerSpec) {
+  const { brand } = spec;
+  if (!spec.cutout) throw new CoverFitError("A cut-out banner needs a cut-out photo of the author.");
+  const ink = brand.paper;
+  const accent = brand.accentOnInk;
+  const headline = fitBox(spec.headline, 60, 100, { face: "serif", maxWidth: INNER, maxLines: 3, maxHeight: 330, lineHeight: 1.04 }, "headline");
+  const word = giantWord(spec.headline, spec.emphasis);
+  const giant = fitBox(word, 150, 420, { face: "italic", maxWidth: W - 60, maxLines: 1 }, "giant word");
+  // The person stands on the bottom edge, as tall as the page below the headline allows.
+  const maxH = 800;
+  const scale = Math.min(maxH / spec.cutout.height, 980 / spec.cutout.width);
+  const cw = Math.round(spec.cutout.width * scale);
+  const ch = Math.round(spec.cutout.height * scale);
+  const name = fitBox(spec.author.name, 30, 36, { face: "sansSemi", maxWidth: 520, maxLines: 1 }, "name");
+  const role = spec.author.role ? fit(spec.author.role, 22, 26, { face: "sans", maxWidth: 520, maxLines: 1 }) : null;
+  // High enough that the head covers only the word's lower half, so it stays
+  // readable above it; never into the headline (the line box has the ascent's air on top).
+  const labelRow = spec.label ? 28 * 1.2 + 32 : 0;
+  const giantTop = Math.max(340, Math.round(PAD + labelRow + headline.lines.length * headline.size * 1.04 - giant.size * 0.12));
+  return (
+    <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", padding: PAD, position: "relative", overflow: "hidden" }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={backgroundSrc("AURORA", brand)} width={W} height={H} style={{ position: "absolute", left: 0, top: 0 }} alt="" />
+      <div style={{ position: "absolute", left: 0, top: giantTop, width: W, display: "flex", justifyContent: "center" }}>
+        <Lines fitted={giant} face="italic" lineHeight={1} color={accent} />
+      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={spec.cutout.src} width={cw} height={ch} style={{ position: "absolute", left: Math.round((W - cw) / 2), top: H - ch }} alt="" />
+      {spec.label ? <div style={{ display: "flex", ...faceStyle("sansSemi"), fontSize: 28, letterSpacing: 0.12 * 28, color: rgba(ink, 0.7), marginBottom: 32 }}>{spec.label.toUpperCase()}</div> : null}
+      {/* No emphasis in the headline: the giant word already carries it. */}
+      <Lines fitted={headline} face="serif" lineHeight={1.04} color={ink} />
+      <div style={{ flex: 1, display: "flex" }} />
+      <div style={{ display: "flex", flexDirection: "column", alignSelf: "flex-start", padding: "20px 32px", borderRadius: 28, background: rgba(brand.ink, 0.78), border: `2px solid ${rgba(ink, 0.14)}` }}>
+        <Lines fitted={name} face="sansSemi" lineHeight={1.2} color={ink} />
+        {role ? <Lines fitted={role} face="sans" lineHeight={1.3} color={rgba(ink, 0.7)} /> : null}
+      </div>
     </div>
   );
 }
@@ -389,5 +443,6 @@ export function bannerElement(spec: BannerSpec) {
     case "NOTES": return Notes(spec);
     case "POSTCARD": return Postcard(spec);
     case "CIRCLED": return Circled(spec);
+    case "CUTOUT": return Cutout(spec);
   }
 }

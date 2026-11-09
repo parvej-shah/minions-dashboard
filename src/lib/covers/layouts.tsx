@@ -16,6 +16,8 @@ import { balance, fit, type Fitted, type TextBox } from "./fit";
 import { textWidth } from "./metrics";
 import { drawArt, type ArtChoice } from "./art";
 import { ICONS, type IconName } from "./icons";
+import { BANNER_DESIGNS, isBanner } from "./bannerTypes";
+import { bannerElement } from "./modern";
 import { BACKGROUND_FOR, BLOCK_TOP, DARK_BACKGROUNDS, backgroundSrc, brandOn } from "./backgrounds";
 
 export const COVER_SIZE = { width: 1080, height: 1350 } as const;
@@ -35,7 +37,7 @@ const CHIP_HEIGHT = 56;
 /** BLOCK: the band rises above the divider on the right, so the centre ends this much higher. */
 const BLOCK_RESERVE = 1100 - BLOCK_TOP.right + 24;
 
-export const COVER_LAYOUTS = ["HEADLINE", "STATEMENT", "QUOTE", "NUMBER", "LIST", "GRID", "PUNCH", "PHOTO"] as const;
+export const COVER_LAYOUTS = ["HEADLINE", "STATEMENT", "QUOTE", "NUMBER", "LIST", "GRID", "PUNCH", "PHOTO", ...BANNER_DESIGNS] as const;
 export type CoverLayout = (typeof COVER_LAYOUTS)[number];
 
 export interface CoverBrand {
@@ -78,6 +80,8 @@ export interface CoverSpec {
   grid?: { label: string; icon: IconName }[];
   /** PUNCH: 3-4 short lines, then 3-4 checks. */
   punch?: { lines: string[]; checks: string[] };
+  /** CUTOUT: the author's photo with a transparent background, trimmed to the person, as a data URL. */
+  cutout?: { src: string; width: number; height: number };
   /** Set by coverElement: the brand the background is drawn in, before the accent was tuned to read on it. */
   backdropBrand?: CoverBrand;
   /**
@@ -164,7 +168,13 @@ const wordKey = (w: string) => w.toLowerCase().replace(/[^a-z0-9']/g, "");
  * spaced by the font's real space width, so one can carry the accent colour;
  * nowrap stops Satori breaking a hyphenated word inside its item.
  */
-export function Lines({ fitted, face, tracking = 0, lineHeight, color, emphasis, accent }: { fitted: Fitted; face: Face; tracking?: number; lineHeight: number; color: string; emphasis?: string; accent?: string }) {
+/**
+ * Lines as fit.ts broke them; the emphasis word in the accent, and in
+ * `emphasisFace` when given. That face must be no wider than `face` (the
+ * Instrument italic is far narrower than the bold faces), since the lines
+ * were measured in `face`.
+ */
+export function Lines({ fitted, face, tracking = 0, lineHeight, color, emphasis, accent, emphasisFace }: { fitted: Fitted; face: Face; tracking?: number; lineHeight: number; color: string; emphasis?: string; accent?: string; emphasisFace?: Face }) {
   const { size, lines } = fitted;
   const spacing = tracking * size;
   const space = textWidth(metricsFor(face), " ", size, spacing);
@@ -174,7 +184,7 @@ export function Lines({ fitted, face, tracking = 0, lineHeight, color, emphasis,
       {lines.map((line, i) => (
         <div key={i} style={{ display: "flex", flexShrink: 0 }}>
           {line.split(" ").map((w, j) => (
-            <div key={j} style={{ display: "flex", flexShrink: 0, whiteSpace: "nowrap", marginRight: space, color: target && accent && wordKey(w) === target ? accent : color }}>
+            <div key={j} style={{ display: "flex", flexShrink: 0, whiteSpace: "nowrap", marginRight: space, color: target && accent && wordKey(w) === target ? accent : color, ...(target && emphasisFace && wordKey(w) === target ? { ...faceStyle(emphasisFace), letterSpacing: 0 } : {}) }}>
               {w}
             </div>
           ))}
@@ -538,6 +548,10 @@ export const isDark = (layout: CoverLayout) => DARK_BACKGROUNDS.includes(BACKGRO
 
 /** The cover as a Satori element. Throws CoverFitError when any text cannot fit. */
 export function coverElement(spec: CoverSpec) {
+  // The modern banner types (modern.tsx) draw their own ground; the accent is tuned to it here.
+  if (isBanner(spec.layout)) {
+    return bannerElement({ design: spec.layout, headline: spec.headline, emphasis: spec.emphasis, kicker: spec.kicker, label: spec.label, author: spec.author, brand: brandOn(BACKGROUND_FOR[spec.layout], spec.brand), cutout: spec.cutout });
+  }
   const dark = isDark(spec.layout);
   // The accent may need deepening to read on this background's most tinted spot.
   spec = { ...spec, backdropBrand: spec.brand, brand: brandOn(BACKGROUND_FOR[spec.layout], spec.brand) };

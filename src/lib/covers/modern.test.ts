@@ -1,7 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_COVER_BRAND } from "./brand";
 import { CoverFitError } from "./layouts";
-import { BANNER_DESIGNS, bannerElement, type BannerSpec } from "./modern";
+import { BANNER_DESIGNS, bannerElement, giantWord, type BannerSpec } from "./modern";
+import { prepareCutout } from "./photo";
+import sharp from "sharp";
+
+// A person-shaped opaque block on a see-through page.
+async function cutoutPng(opaqueBackground = false): Promise<Buffer> {
+  const person = await sharp({ create: { width: 500, height: 800, channels: 4, background: { r: 40, g: 60, b: 80, alpha: 1 } } }).png().toBuffer();
+  return sharp({ create: { width: 700, height: 1000, channels: 4, background: { r: 255, g: 255, b: 255, alpha: opaqueBackground ? 1 : 0 } } })
+    .composite([{ input: person, left: 100, top: 200 }])
+    .png()
+    .toBuffer();
+}
 
 const base: Omit<BannerSpec, "design"> = {
   headline: "Your voice agent books showings your calendar never sees",
@@ -9,6 +20,7 @@ const base: Omit<BannerSpec, "design"> = {
   kicker: "The booking only counts once it lands in the calendar.",
   label: "For real estate teams",
   seriesNo: 5,
+  cutout: { src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", width: 600, height: 900 },
   author: { name: "Parvej Shah", role: "Builds AI voice agents" },
   brand: DEFAULT_COVER_BRAND,
 };
@@ -25,5 +37,22 @@ describe("modern banner designs", () => {
 
   it("needs a kicker for the torn strip to reveal", () => {
     expect(() => bannerElement({ ...base, design: "TORN", kicker: undefined })).toThrow(CoverFitError);
+  });
+
+  it("needs a cut-out photo for the cut-out banner", () => {
+    expect(() => bannerElement({ ...base, design: "CUTOUT", cutout: undefined })).toThrow(CoverFitError);
+  });
+
+  it("sets the emphasis giant behind the author, else the longest word", () => {
+    expect(giantWord("Your voice agent books showings", "Showings")).toBe("showings");
+    expect(giantWord("Your voice agent books showings", "two words")).toBe("showings");
+    expect(giantWord("Why calendars fail", undefined)).toBe("calendars");
+  });
+
+  it("takes a real cut-out, trimmed to the person, and refuses a photo with a background", async () => {
+    const ready = await prepareCutout(await cutoutPng());
+    expect(ready).toMatchObject({ width: 500, height: 800 });
+    expect(ready?.src).toMatch(/^data:image\/png;base64,/);
+    expect(await prepareCutout(await cutoutPng(true))).toBeUndefined();
   });
 });

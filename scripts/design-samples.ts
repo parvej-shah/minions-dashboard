@@ -10,16 +10,16 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import sharp from "sharp";
-import { ImageResponse } from "next/og";
 import { prisma } from "@/lib/prisma";
 import { coverBrand } from "@/lib/covers/brand";
-import { satoriFonts } from "@/lib/covers/fonts";
 import type { CoverSpec } from "@/lib/covers/layouts";
 import type { PosterShape } from "@/lib/covers/shape";
 import { parsePlan, toDeck, type CarouselPlan } from "@/lib/carousel/plan";
 import { renderSlidePng } from "@/lib/carousel/render";
 import type { Deck, Slide } from "@/lib/carousel/slides";
-import { BANNER_DESIGNS, bannerElement, type BannerSpec } from "@/lib/covers/modern";
+import { BANNER_DESIGNS } from "@/lib/covers/modern";
+import { renderCoverPng } from "@/lib/covers/render";
+import { prepareCutout } from "@/lib/covers/photo";
 import { hostedCoverPhoto, defaultByline } from "@/services/cover";
 
 const CLIENT = "cmtvi4a7r000104l5kn6bi71o";
@@ -130,16 +130,24 @@ async function grid(pngs: Buffer[], file: string, cols = 4) {
       return { headline: c.headline || a.title, emphasis: c.emphasis, kicker: c.kicker || a.hook || undefined };
     })
     .filter((h) => h.headline);
+  // A stand-in cut-out for the sample: the headshot in an arch, see-through around it (a real one is uploaded on the Brand page).
+  let cutout: CoverSpec["cutout"];
+  if (author.photo) {
+    const head = Buffer.from(author.photo.split(",")[1], "base64");
+    const arch = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="700" height="1000"><path d="M0 1000 V350 A350 350 0 0 1 700 350 V1000 Z" fill="#fff"/></svg>`);
+    const shaped = await sharp(head).resize(700, 1000, { fit: "cover" }).composite([{ input: arch, blend: "dest-in" }]).png().toBuffer();
+    cutout = await prepareCutout(await sharp({ create: { width: 800, height: 1100, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } }).composite([{ input: shaped, left: 50, top: 100 }]).png().toBuffer());
+  }
   const bdir = join(OUT, "banners");
   mkdirSync(bdir, { recursive: true });
   const banners: Buffer[] = [];
   for (const [i, design] of BANNER_DESIGNS.entries()) {
     // Two headlines per design, so each is seen with different copy.
     for (const h of [heads[i % heads.length], heads[(i + 5) % heads.length]]) {
-      const spec: BannerSpec = { design, headline: h.headline, emphasis: h.emphasis, kicker: h.kicker, author, brand, label: "For real estate brokerages", seriesNo: i + 3 };
+      // Through the production path: a cover spec in the banner's layout, as the cover service draws it.
+      const spec: CoverSpec = { layout: design, headline: h.headline, emphasis: h.emphasis, kicker: h.kicker, author, brand, cutout };
       try {
-        const res = new ImageResponse(bannerElement(spec), { width: 1080, height: 1350, fonts: satoriFonts() });
-        const png = Buffer.from(await res.arrayBuffer());
+        const png = await renderCoverPng(spec);
         banners.push(png);
         writeFileSync(join(bdir, `${String(banners.length).padStart(2, "0")}-${design}.png`), png);
       } catch (e) {

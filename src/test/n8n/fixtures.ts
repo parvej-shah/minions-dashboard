@@ -22,6 +22,7 @@ export const brandSettings: BrandSettings = {
   primary_logo_url: "https://cdn.example/logo.svg",
   cover_byline: "",
   cover_art: "SHAPES",
+  cover_cutout_url: "",
   primary_ink: "#12242A",
   brand_teal: "#0E5C63",
   brand_coral: "#FF6B4A",

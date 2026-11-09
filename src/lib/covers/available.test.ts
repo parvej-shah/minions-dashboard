@@ -33,6 +33,15 @@ describe("layoutUnavailable", () => {
     expect(layoutUnavailable("PUNCH", none)).toMatch(/punch/);
   });
 
+  it("disables Torn without a subtitle and Cut-out without a cut-out photo", () => {
+    expect(layoutUnavailable("TORN", { ...read, kicker: "The booking only counts in the calendar." })).toBeNull();
+    expect(layoutUnavailable("TORN", { ...read, kicker: null })).toMatch(/subtitle/);
+    expect(layoutUnavailable("CUTOUT", { ...read, cutout_ok: false })).toMatch(/cut-out/);
+    // An older cover doesn't know: offered, and the redraw says if the photo is missing.
+    expect(layoutUnavailable("CUTOUT", { ...read, cutout_ok: null })).toBeNull();
+    for (const l of ["SELECT", "STICKER", "NOTEBOOK", "NOTES", "POSTCARD", "CIRCLED"] as const) expect(layoutUnavailable(l, read)).toBeNull();
+  });
+
   it("disables Quote, Photo and Number when the post or brand can't supply them", () => {
     expect(layoutUnavailable("QUOTE", { ...read, quote_ok: false })).toMatch(/quote/i);
     expect(layoutUnavailable("PHOTO", { ...read, photo_ok: false })).toMatch(/headshot/);

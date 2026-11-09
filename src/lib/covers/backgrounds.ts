@@ -23,6 +23,15 @@ export const BACKGROUND_FOR: Record<CoverLayout, Background> = {
   NUMBER: "FOLDED",
   GRID: "FOLDED",
   PUNCH: "BLOCK",
+  // The banner types draw their own ground; this is the one it is closest to, for tuning the accent.
+  TORN: "MESH",
+  SELECT: "MESH",
+  STICKER: "GRID",
+  NOTEBOOK: "MESH",
+  NOTES: "MESH",
+  POSTCARD: "AURORA",
+  CIRCLED: "FOLDED",
+  CUTOUT: "AURORA",
 };
 
 /** Dark backgrounds put paper-coloured text on the ink. */

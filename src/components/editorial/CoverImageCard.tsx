@@ -29,6 +29,14 @@ const LAYOUTS: { id: Layout; label: string; hint: string }[] = [
   { id: "PHOTO", label: "Photo", hint: "Your headshot large, the headline below" },
   { id: "QUOTE", label: "Quote", hint: "A line taken word for word from the post" },
   { id: "NUMBER", label: "Number", hint: "A figure the draft states, set large" },
+  { id: "TORN", label: "Torn", hint: "The headline on a colour field, a torn paper strip revealing the subtitle" },
+  { id: "SELECT", label: "Selected", hint: "The key word in a design tool's selection box, your cursor beside it" },
+  { id: "STICKER", label: "Sticker", hint: "Tag stickers slapped on the headline, on grid paper" },
+  { id: "NOTEBOOK", label: "Notebook", hint: "The headline on a ruled notebook sheet over coloured sheets" },
+  { id: "NOTES", label: "Notes", hint: "The headline written in a phone notes card" },
+  { id: "POSTCARD", label: "Post card", hint: "The headline as a post by you, on a dark glow (no made-up counts)" },
+  { id: "CIRCLED", label: "Circled", hint: "The key word circled by hand, an arrow to the subtitle" },
+  { id: "CUTOUT", label: "Cut-out", hint: "Your cut-out photo in front of one giant word" },
 ];
 
 const hasArt = (layout: Layout) => layout === "HEADLINE" || layout === "STATEMENT";

@@ -34,10 +34,18 @@ export function parseBrandProfileInput(body: JsonObject): BrandProfileInput {
     primary_logo_url: asString(body.primary_logo_url),
     ...(typeof body.cover_byline === "string" ? { cover_byline: body.cover_byline.trim().slice(0, MAX_BYLINE_LENGTH) } : {}),
     ...(coverArt ? { cover_art: coverArt } : {}),
+    ...(typeof body.cover_cutout_url === "string" ? { cover_cutout_url: parseCutoutUrl(body.cover_cutout_url) } : {}),
     ...colors,
     tone_formality: (body.tone_formality as string) || "Technical & Direct",
     tone_cadence: asString(body.tone_cadence),
     allowed_proof_claims: Array.isArray(body.allowed_proof_claims) ? body.allowed_proof_claims.map((claim) => String(claim).trim()).filter(Boolean) : [],
     writer_expertise: resolveWriterExpertise(body.writer_expertise),
   };
+}
+
+/** An uploaded cut-out's https address, or empty to remove it. */
+function parseCutoutUrl(value: string): string {
+  const url = value.trim();
+  if (url && !/^https:\/\/\S+$/.test(url)) throw badRequest("cover_cutout_url must be an https address");
+  return url.slice(0, 1000);
 }

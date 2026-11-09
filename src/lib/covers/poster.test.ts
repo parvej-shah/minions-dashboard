@@ -4,7 +4,8 @@ import { BACKGROUND_FOR, BACKGROUNDS, blockColour, brandOn, contrastOf, DARK_BAC
 import { COVER_LAYOUTS, CoverFitError, type CoverSpec } from "./layouts";
 import { renderCoverPng } from "./render";
 import { editShape, parseShape, shapeJson, type PosterShape } from "./shape";
-import { eligibleTypes, fallbackOrder, pickPosterType } from "./posterType";
+import { HEADLINE_TYPES, eligibleTypes, fallbackOrder, pickPosterType } from "./posterType";
+import { BANNER_DESIGNS } from "./bannerTypes";
 import { imageInfo, photoFitsPoster } from "./photo";
 
 const BODY = `We lost three deals last month because callbacks took 10 minutes. API endpoints, authentication logic,
@@ -89,9 +90,32 @@ describe("pickPosterType", () => {
     expect(eligibleTypes({ shape, photoOk: true, recent: ["LIST", "GRID", "PUNCH", "PHOTO"] })).toContain("PHOTO");
   });
 
-  it("falls back to the headline types when the post has no structure", () => {
-    expect(["STATEMENT", "HEADLINE"]).toContain(pickPosterType({ shape: prose, photoOk: false, recent: [] }));
-    expect(pickPosterType({ photoOk: false, recent: ["STATEMENT"] })).toBe("HEADLINE");
+  it("falls back to the headline and banner types when the post has no structure", () => {
+    expect(HEADLINE_TYPES).toContain(pickPosterType({ shape: prose, photoOk: false, recent: [] }));
+    expect(pickPosterType({ photoOk: false, recent: ["STATEMENT"] })).not.toBe("STATEMENT");
+  });
+
+  it("rotates through every banner type on prose posts, and Cut-out only with a cut-out", () => {
+    const run = (cutoutOk: boolean) => {
+      const recent: string[] = [];
+      for (let i = 0; i < 20; i++) recent.unshift(pickPosterType({ shape: prose, photoOk: false, cutoutOk, recent }));
+      return recent;
+    };
+    const without = run(false);
+    for (const b of BANNER_DESIGNS.filter((d) => d !== "CUTOUT")) expect(without).toContain(b);
+    expect(without).not.toContain("CUTOUT");
+    expect(run(true)).toContain("CUTOUT");
+  });
+
+  it("counts Cut-out as a face poster: never within 3 of a Photo or another Cut-out", () => {
+    expect(eligibleTypes({ shape, photoOk: true, cutoutOk: true, recent: [] })).toContain("CUTOUT");
+    expect(eligibleTypes({ shape, photoOk: true, cutoutOk: true, recent: ["LIST", "PHOTO"] })).not.toContain("CUTOUT");
+    expect(eligibleTypes({ shape, photoOk: true, cutoutOk: true, recent: ["CUTOUT"] })).not.toContain("PHOTO");
+  });
+
+  it("alternates: after a structured type, a headline or banner type", () => {
+    expect(HEADLINE_TYPES).toContain(pickPosterType({ shape, photoOk: false, recent: ["LIST"] }));
+    expect(HEADLINE_TYPES).not.toContain(pickPosterType({ shape, photoOk: false, recent: ["NOTES"] }));
   });
 
   it("makes the first post the photo poster when there is a photo, else Statement", () => {
@@ -174,6 +198,8 @@ describe("every poster type renders", () => {
           label: "For real estate brokerages",
           headline: "Your 10-minute callback is racing the wrong competitor",
           emphasis: "competitor",
+          kicker: "Buyers call the next agent while you wait.",
+          cutout: { src: photo, width: 600, height: 900 },
           quote: "A booking is only real when the calendar and CRM prove it exists.",
           number: { value: "10", unit: "minutes" },
           list: shape.list?.items,

@@ -33,7 +33,7 @@ export interface SocialVariants {
 
 /** How a code-drawn cover was made (phase 5), for the cover editor. */
 export interface CoverSpecDTO {
-  layout: "HEADLINE" | "STATEMENT" | "QUOTE" | "NUMBER" | "LIST" | "GRID" | "PUNCH" | "PHOTO";
+  layout: import("@/lib/covers/layouts").CoverLayout;
   label: string | null;
   headline: string;
   emphasis: string | null;
@@ -59,6 +59,8 @@ export interface CoverSpecDTO {
   photo_ok: boolean;
   /** Whether the post has a sentence a Quote cover can use. */
   quote_ok: boolean;
+  /** Whether the brand had a usable cut-out photo when this cover was drawn; null on covers drawn before cut-outs. */
+  cutout_ok: boolean | null;
 }
 
 /**

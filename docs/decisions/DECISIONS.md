@@ -36,6 +36,14 @@ and link to it here.
 **Status:** active. Supersedes the Newsreader and Inter part of the fixed type system decided 2026-09-24 in [authority-flywheel-plan.md](../product/authority-flywheel-plan.md) (phase 5); one shared type system for every tenant stands.
 
 ---
+## 2026-11-09 — Eight modern banner types join the cover types
+
+**Decision:** Covers get eight more types, next to the existing eight. Each adds one hand-made touch to the brand's type: Torn (a torn paper strip reveals the subtitle), Selected (the key word in a design tool's selection box with the author's cursor), Sticker, Notebook, Notes (a phone notes card), Post card (the headline as the author's post, with no like or view counts), Circled (the key word circled by hand) and Cut-out (the author's cut-out photo in front of one giant word). On these types the emphasised word is set in a real italic (Instrument Serif Italic). They join the automatic rotation with Statement and Headline, and a structured type (List, Grid, Punch, Number, Quote, Photo) is now followed by one of these headline types, so the feed alternates. Cut-out counts as a face poster, like Photo: at most one face poster in four covers. Torn needs a subtitle. Cut-out needs a cut-out photo (a PNG with a transparent background) uploaded on the Brand page.
+**Why:** The user reviewed samples of every design on real headlines and wanted them in production for a more premium, modern feel (2026-11-09).
+**Alternatives considered:** Keeping the banners as samples until the carousel redesign (rejected: the banners were ready and the carousel needs more work). The torn-paper idea is a general paper motif from the Pinterest research, not a copy of one designer's edge, which stays rejected (see the entry below).
+**Status:** active. Changes the rotation in "Five poster types, each with its own background" below: headline types now alternate with structured types.
+
+
 ## 2026-11-09 — Five poster types, each with its own background
 
 **Decision:** Covers and carousel pages come in five poster types, and each type always has its own background: a two-tone hook on a soft gradient, a problem with a numbered list on a grain grid, an icon grid on folded paper, short punch lines with a checklist on a colour block, and a photo-led poster (the author's photo, large) on a dark glow. Every background is drawn only from the workspace's brand colours, and every poster uses the one shared type system (see the fonts entry above). The cut-paper waves background is kept as a spare. Reviewers can't change a type's background, but they can switch any cover to another type the post supports and edit its text (headline, list points, tile labels, punch lines), held to the same checks as generated text. All posters share the author line; carousel pages also carry a slide number.

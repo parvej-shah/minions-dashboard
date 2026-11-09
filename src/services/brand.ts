@@ -52,6 +52,7 @@ export async function getBrandSettings(clientId: string): Promise<BrandSettings>
         primary_logo_url: "",
         cover_byline: "",
         cover_art: DEFAULT_COVER_ART_STYLE,
+        cover_cutout_url: "",
         primary_ink: "#0B0F14",
         brand_teal: "#00D4AA",
         brand_coral: "#FF6B4A",
@@ -132,6 +133,15 @@ export async function updateBrandSettings(
     ...(input.writer_expertise ? { writerExpertise: input.writer_expertise } : {}),
     ...(input.visual_assets ? { visualAssets: input.visual_assets as import("@prisma/client").Prisma.InputJsonValue } : {}),
   };
+
+  // The cut-out photo lives in the visualAssets JSON beside the other assets there.
+  if (input.cover_cutout_url !== undefined) {
+    const current = input.visual_assets ?? ((await prisma.brandProfile.findUnique({ where: { clientId }, select: { visualAssets: true } }))?.visualAssets as Record<string, unknown> | null) ?? {};
+    const next: Record<string, unknown> = { ...(current as Record<string, unknown>) };
+    if (input.cover_cutout_url) next.cover_cutout_url = input.cover_cutout_url;
+    else delete next.cover_cutout_url;
+    Object.assign(data, { visualAssets: next as import("@prisma/client").Prisma.InputJsonValue });
+  }
 
   const profile = await prisma.brandProfile.upsert({
     where: { clientId },

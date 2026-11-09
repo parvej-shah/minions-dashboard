@@ -7,12 +7,13 @@
  * changing; the last cover's type is never repeated when another fits.
  */
 import type { CoverLayout } from "./layouts";
+import { BANNER_DESIGNS } from "./bannerTypes";
 import type { PosterShape } from "./shape";
 
 /** Most preferred first: a type that shows the post's own structure beats a plain headline. */
-export const TYPE_PREFERENCE: CoverLayout[] = ["PHOTO", "NUMBER", "QUOTE", "LIST", "GRID", "PUNCH", "STATEMENT", "HEADLINE"];
+export const TYPE_PREFERENCE: CoverLayout[] = ["PHOTO", "NUMBER", "QUOTE", "LIST", "GRID", "PUNCH", "CUTOUT", "STATEMENT", "TORN", "SELECT", "STICKER", "NOTEBOOK", "NOTES", "POSTCARD", "CIRCLED", "HEADLINE"];
 
-/** A face on every cover reads as vanity: at most one photo poster in this many. */
+/** A face on every cover reads as vanity: at most one face poster (Photo or Cut-out) in this many. */
 export const PHOTO_EVERY = 4;
 
 export interface PosterTypeInput {
@@ -21,6 +22,8 @@ export interface PosterTypeInput {
   judged?: { number?: boolean; quote?: boolean };
   /** The author's photo is large enough to fill a poster. */
   photoOk: boolean;
+  /** The brand has a cut-out photo (transparent background) for the Cut-out banner. */
+  cutoutOk?: boolean;
   /** Layouts of this workspace's recent covers, newest first. */
   recent: string[];
   firstPost?: boolean;
@@ -29,9 +32,9 @@ export interface PosterTypeInput {
 /** Every type this post could be drawn as, most preferred first. */
 export function eligibleTypes(input: PosterTypeInput): CoverLayout[] {
   const s = input.shape;
-  const photoRecently = input.recent.slice(0, PHOTO_EVERY - 1).includes("PHOTO");
+  const faceRecently = input.recent.slice(0, PHOTO_EVERY - 1).some((t) => t === "PHOTO" || t === "CUTOUT");
   const ok: Record<CoverLayout, boolean> = {
-    PHOTO: input.photoOk && Boolean(s?.own_story) && !photoRecently,
+    PHOTO: input.photoOk && Boolean(s?.own_story) && !faceRecently,
     NUMBER: Boolean(input.judged?.number),
     QUOTE: Boolean(input.judged?.quote),
     LIST: Boolean(s?.list),
@@ -39,6 +42,16 @@ export function eligibleTypes(input: PosterTypeInput): CoverLayout[] {
     PUNCH: Boolean(s?.punch),
     STATEMENT: true,
     HEADLINE: true,
+    // The banner types carry the headline, so every post can fill them (Torn
+    // falls through when there is no subtitle to reveal).
+    TORN: true,
+    SELECT: true,
+    STICKER: true,
+    NOTEBOOK: true,
+    NOTES: true,
+    POSTCARD: true,
+    CIRCLED: true,
+    CUTOUT: Boolean(input.cutoutOk) && !faceRecently,
   };
   return TYPE_PREFERENCE.filter((t) => ok[t]);
 }
@@ -51,14 +64,17 @@ export function pickPosterType(input: PosterTypeInput): CoverLayout {
   if (input.firstPost) return input.photoOk ? "PHOTO" : "STATEMENT";
   const eligible = eligibleTypes(input);
   // A type that shows the post's own structure leads, unless one of the last
-  // CONTENT_GAP covers used it; otherwise the headline carries the cover.
+  // CONTENT_GAP covers used it or the last cover was already one: then a
+  // headline or banner type carries the cover, so the feed alternates.
+  const lastWasContent = Boolean(input.recent[0]) && !HEADLINE_TYPES.includes(input.recent[0] as CoverLayout);
   const content = eligible.filter((t) => !HEADLINE_TYPES.includes(t) && !input.recent.slice(0, CONTENT_GAP).includes(t));
-  if (content.length) return leastRecent(content, input.recent);
-  return leastRecent(HEADLINE_TYPES, input.recent);
+  if (content.length && !lastWasContent) return leastRecent(content, input.recent);
+  const headline = eligible.filter((t) => HEADLINE_TYPES.includes(t));
+  return leastRecent(headline, input.recent);
 }
 
-/** The two types every post can fill: the dark Statement and the light Headline. */
-const HEADLINE_TYPES: CoverLayout[] = ["STATEMENT", "HEADLINE"];
+/** The types that carry the headline alone, so any post can fill them: Statement, Headline and the banners. */
+export const HEADLINE_TYPES: CoverLayout[] = ["STATEMENT", "HEADLINE", ...BANNER_DESIGNS];
 /** A structured type waits this many covers before it comes back. */
 export const CONTENT_GAP = 2;
 

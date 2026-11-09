@@ -14,6 +14,7 @@ export function toBrandSettingsDTO(
     primary_logo_url: row.primaryLogoUrl,
     cover_byline: row.coverByline ?? "",
     cover_art: row.coverArt,
+    cover_cutout_url: cutoutUrl(row.visualAssets),
     primary_ink: row.primaryInk,
     brand_teal: row.brandTeal,
     brand_coral: row.brandCoral,
@@ -37,4 +38,10 @@ export function toBrandSettingsDTO(
     writer_expertise: resolveWriterExpertise(row.writerExpertise),
     updated_at: row.updatedAt.toISOString(),
   };
+}
+
+/** The cut-out photo's address, kept in the visualAssets JSON (no column of its own). */
+function cutoutUrl(visualAssets: unknown): string {
+  const url = (visualAssets as { cover_cutout_url?: unknown } | null)?.cover_cutout_url;
+  return typeof url === "string" ? url : "";
 }

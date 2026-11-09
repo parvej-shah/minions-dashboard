@@ -51,3 +51,31 @@ export function dataUrlFitsPoster(dataUrl: string | undefined): boolean {
   const m = dataUrl?.match(/^data:image\/(?:png|jpeg);base64,(.+)$/);
   return Boolean(m) && photoFitsPoster(imageInfo(Buffer.from(m![1], "base64")));
 }
+
+/** The shortest side a cut-out needs once trimmed to the person. */
+export const CUTOUT_MIN_SIDE = 400;
+
+/**
+ * The brand's cut-out photo made ready for the Cut-out banner: a PNG whose
+ * top corners are see-through (so it really is cut out, not a photo with a
+ * background), trimmed to the person and scaled to at most 1100 px high.
+ * Undefined when the image is not a usable cut-out.
+ */
+export async function prepareCutout(data: Buffer): Promise<{ src: string; width: number; height: number } | undefined> {
+  const { default: sharp } = await import("sharp");
+  try {
+    const meta = await sharp(data).metadata();
+    if (!meta.hasAlpha) return undefined;
+    const probe = await sharp(data).ensureAlpha().resize(64, 64, { fit: "fill" }).raw().toBuffer({ resolveWithObject: true });
+    const alphaAt = (x: number, y: number) => probe.data[(y * probe.info.width + x) * probe.info.channels + 3];
+    if (alphaAt(0, 0) > 32 || alphaAt(63, 0) > 32) return undefined;
+    const trimmed = await sharp(data).trim().png().toBuffer({ resolveWithObject: true });
+    if (Math.min(trimmed.info.width, trimmed.info.height) < CUTOUT_MIN_SIDE) return undefined;
+    const out = trimmed.info.height > 1100
+      ? await sharp(trimmed.data).resize({ height: 1100 }).png().toBuffer({ resolveWithObject: true })
+      : trimmed;
+    return { src: `data:image/png;base64,${out.data.toString("base64")}`, width: out.info.width, height: out.info.height };
+  } catch {
+    return undefined;
+  }
+}
