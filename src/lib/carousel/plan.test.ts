@@ -37,7 +37,7 @@ describe("carousel plan gates", () => {
   it("keeps the model's design, and gives a plan stored without one the original design", () => {
     expect(plan({ style: "bold" }).style).toBe("BOLD");
     expect(plan().style).toBe("EDITORIAL");
-    expect(parsePlan(JSON.stringify({ ...good, style: "NEON" })).errors).toContain("style must be one of EDITORIAL, BOLD, MINIMAL.");
+    expect(parsePlan(JSON.stringify({ ...good, style: "NEON" })).errors).toContain("style must be one of EDITORIAL, BOLD, MINIMAL, POSTER.");
   });
 
   it("keeps known icons, and drops unknown, repeated or misplaced ones without failing the plan", () => {
@@ -51,6 +51,25 @@ describe("carousel plan gates", () => {
     const { plan: p, errors } = parsePlan(JSON.stringify({ ...good, slides }));
     expect(errors).toEqual([]);
     expect(p!.slides.map((x) => ("icon" in x ? x.icon : undefined))).toEqual(["PHONE_CALL", undefined, undefined, "CLOCK", undefined]);
+  });
+
+  it("reads GRID and PUNCH slides, dropping unknown tile icons to a default", () => {
+    const slides = [
+      good.slides[0],
+      { layout: "GRID", title: "What to test", items: [{ label: "Latency", icon: "clock" }, { label: "Noise", icon: "nope" }, { label: "Booking", icon: "CALENDAR_BLANK" }] },
+      { layout: "PUNCH", lines: ["Demo: quiet room.", "Live: a car.", "Buyer: gone."], checks: ["Call from a real phone"] },
+      good.slides[4],
+    ];
+    const { plan: p, errors } = parsePlan(JSON.stringify({ ...good, slides }));
+    expect(errors).toEqual([]);
+    expect(p!.slides[1]).toEqual({ layout: "GRID", title: "What to test", items: [{ label: "Latency", icon: "CLOCK" }, { label: "Noise", icon: "LIGHTBULB" }, { label: "Booking", icon: "CALENDAR_BLANK" }] });
+    expect(p!.slides[2]).toEqual({ layout: "PUNCH", lines: ["Demo: quiet room.", "Live: a car.", "Buyer: gone."], checks: ["Call from a real phone"] });
+  });
+
+  it("opens with the post's own cover when one is given", () => {
+    const cover = { layout: "STATEMENT" as const, headline: "Test voice agents on live calls", author, brand: DEFAULT_COVER_BRAND };
+    expect(toDeck(plan(), { author, brand: DEFAULT_COVER_BRAND, cover }).deck.cover.layout).toBe("STATEMENT");
+    expect(toDeck(plan(), { author, brand: DEFAULT_COVER_BRAND }).deck.cover.layout).toBe("HEADLINE");
   });
 
   it("reads a stored plan sent back by the review screen", () => {

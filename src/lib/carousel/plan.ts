@@ -29,6 +29,8 @@ export const WORD_CAPS: Record<SlideLayout, Record<string, number>> = {
   NUMBER: { caption: 14 },
   QUOTE: { quote: 28, attribution: 6 },
   CLOSE: { takeaway: 14, saveLine: 10 },
+  GRID: { title: 10, item: 4 },
+  PUNCH: { line: 6, item: 7 },
 };
 
 export interface CarouselPlan {
@@ -143,6 +145,9 @@ export function parsePlan(raw: string): { plan: CarouselPlan | null; errors: str
       case "NUMBER": slides.push({ layout, value: s(r.value), unit: opt(r.unit), caption: s(r.caption) }); break;
       case "QUOTE": slides.push({ layout, quote: s(r.quote), attribution: opt(r.attribution) }); break;
       case "CLOSE": slides.push({ layout, takeaway: s(r.takeaway), saveLine: opt(r.save_line ?? r.saveLine) }); break;
+      // A tile always has a drawing: an unknown icon name gets the neutral bulb, not an empty tile.
+      case "GRID": slides.push({ layout, title: s(r.title), items: (Array.isArray(r.items) ? r.items : []).map((x) => (x ?? {}) as Record<string, unknown>).filter((x) => s(x.label)).map((x) => ({ label: s(x.label), icon: iconOf(x.icon) ?? "LIGHTBULB" })) }); break;
+      case "PUNCH": slides.push({ layout, lines: (Array.isArray(r.lines) ? r.lines : []).map(s).filter(Boolean), checks: (Array.isArray(r.checks) ? r.checks : []).map(s).filter(Boolean) }); break;
     }
   }
   // The same drawing twice reads as filler: a repeat is dropped, the first kept.
@@ -171,7 +176,7 @@ function fieldsOf(slide: Slide): [string, string][] {
   const out: [string, string][] = [];
   for (const [k, v] of Object.entries(rest)) {
     if (k === "emphasis" || k === "unit" || k === "value" || k === "icon") continue;
-    if (Array.isArray(v)) v.forEach((x) => out.push(["item", String(x)]));
+    if (Array.isArray(v)) v.forEach((x) => out.push([k === "lines" ? "line" : "item", typeof x === "object" && x ? String((x as { label: unknown }).label) : String(x)]));
     else if (typeof v === "string" && v) out.push([k, v]);
   }
   return out;
@@ -188,6 +193,8 @@ function mainLine(slide: Slide): string {
     case "NUMBER": return slide.caption;
     case "QUOTE": return slide.quote;
     case "CLOSE": return slide.takeaway;
+    case "GRID": return slide.title;
+    case "PUNCH": return slide.lines.join(" ");
   }
 }
 
@@ -230,6 +237,9 @@ export function checkPlan(plan: CarouselPlan, sources: PlanSources): string[] {
     }
     if (!mainLine(slide)) errors.push(`${at}: the main text is empty.`);
     if (slide.layout === "CHECKLIST" && (slide.items.length < 2 || slide.items.length > 5)) errors.push(`${at}: 2 to 5 items, not ${slide.items.length}.`);
+    if (slide.layout === "GRID" && (slide.items.length < 3 || slide.items.length > 6)) errors.push(`${at}: 3 to 6 tiles, not ${slide.items.length}.`);
+    if (slide.layout === "PUNCH" && (slide.lines.length < 3 || slide.lines.length > 4)) errors.push(`${at}: 3 or 4 lines, not ${slide.lines.length}.`);
+    if (slide.layout === "PUNCH" && slide.checks.length > 4) errors.push(`${at}: at most 4 checks.`);
     if (slide.layout === "NUMBER") {
       const known = numbersIn(sources.texts.join(" "));
       const stated = numbersIn(slide.value);
@@ -285,7 +295,7 @@ export function repairPlan(plan: CarouselPlan, sources: PlanSources): CarouselPl
     for (const [k, v] of Object.entries(slide)) {
       if (k === "layout" || k === "icon") continue;
       if (typeof v === "string") out[k] = clean(v);
-      else if (Array.isArray(v)) out[k] = v.map((x) => clean(String(x)));
+      else if (Array.isArray(v)) out[k] = v.map((x) => (typeof x === "object" && x ? { ...x, label: clean(String((x as { label: unknown }).label)) } : clean(String(x))));
     }
     return out as Slide;
   };
@@ -328,8 +338,9 @@ export function repairPlan(plan: CarouselPlan, sources: PlanSources): CarouselPl
 }
 
 /** Builds the deck, and checks that every page fits. */
-export function toDeck(plan: CarouselPlan, base: { author: CoverSpec["author"]; brand: CoverSpec["brand"]; art?: CoverSpec["art"] }): { deck: Deck; errors: string[] } {
-  const cover: CoverSpec = { layout: "HEADLINE", headline: plan.cover.headline, emphasis: plan.cover.emphasis, kicker: plan.cover.kicker, author: base.author, brand: base.brand, art: base.art };
+export function toDeck(plan: CarouselPlan, base: { author: CoverSpec["author"]; brand: CoverSpec["brand"]; art?: CoverSpec["art"]; cover?: CoverSpec }): { deck: Deck; errors: string[] } {
+  // The post's own cover, as the reviewer left it, when there is one: the feed shows page 1, so the two must match.
+  const cover: CoverSpec = base.cover ?? { layout: "HEADLINE", headline: plan.cover.headline, emphasis: plan.cover.emphasis, kicker: plan.cover.kicker, author: base.author, brand: base.brand, art: base.art };
   const deck: Deck = { cover, slides: plan.slides, label: plan.label, author: base.author, brand: base.brand, style: plan.style };
   const errors: string[] = [];
   try {

@@ -9,4 +9,5 @@
 | 5 | Paste 2–3 posts when a workspace has no own material | CLAUDE | DONE | deployed; not checked in a browser |
 | 6 | Tab title in plain words | CLAUDE | DONE | deployed, verified live |
 | 7 | Five poster types with their own backgrounds | CLAUDE | DONE | pushed de6e385 |
-| 8 | Unusable cover layouts disabled, not refused on click | CLAUDE | DONE (uncommitted) | tasks/8.md |
+| 8 | Unusable cover layouts disabled, not refused on click | CLAUDE | DONE | pushed 6c7a431 |
+| 9 | Poster-style carousel + modern banner samples (local) | CLAUDE | IN PROGRESS (built, awaiting review of samples) | tasks/9.md |

@@ -27,10 +27,13 @@ const FIELDS: Record<Slide["layout"], { key: string; label: string; long?: boole
   NUMBER: [{ key: "value", label: "Figure" }, { key: "unit", label: "Unit" }, { key: "caption", label: "Caption", long: true }],
   QUOTE: [{ key: "quote", label: "Quote", long: true }, { key: "attribution", label: "Attribution" }],
   CLOSE: [{ key: "takeaway", label: "Takeaway", long: true }, { key: "saveLine", label: "Save line" }],
+  // The tiles keep their icons, so only the title is edited here.
+  GRID: [{ key: "title", label: "Title" }],
+  PUNCH: [{ key: "lines", label: "Lines, one per line", long: true }, { key: "checks", label: "Checks, one per line", long: true }],
 };
 
 const LAYOUT_NAMES: Record<Slide["layout"], string> = {
-  STAKES: "Why it matters", POINT: "Point", STEP: "Step", CONTRAST: "Assumption vs practice", CHECKLIST: "Checklist", NUMBER: "Figure", QUOTE: "Quote", CLOSE: "Close",
+  STAKES: "Why it matters", POINT: "Point", STEP: "Step", CONTRAST: "Assumption vs practice", CHECKLIST: "Checklist", NUMBER: "Figure", QUOTE: "Quote", CLOSE: "Close", GRID: "Tiles", PUNCH: "Punch lines",
 };
 
 const input = "w-full bg-surface-2 border border-line rounded-lg px-3 py-1.5 text-sm text-ink focus:outline-none focus:border-brand resize-none";
@@ -134,7 +137,7 @@ export default function CarouselCard({
   const setSlide = (i: number, key: string, value: string) =>
     setDraft((d) => {
       if (!d) return d;
-      const slides = d.slides.map((s, j) => (j === i ? ({ ...s, [key]: key === "items" ? value.split("\n") : value } as Slide) : s));
+      const slides = d.slides.map((s, j) => (j === i ? ({ ...s, [key]: key === "items" || key === "lines" || key === "checks" ? value.split("\n") : value } as Slide) : s));
       return { ...d, slides };
     });
 

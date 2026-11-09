@@ -27,6 +27,8 @@ const EVERY_LAYOUT: Slide[] = [
   { layout: "CHECKLIST", title: "Before you switch it on", items: ["Test ten bookings", "Watch the calendar", "Keep a human fallback"] },
   { layout: "NUMBER", value: "3", unit: "seconds", caption: "A silent timeout lost the booking." },
   { layout: "QUOTE", quote: "The model was fine. The calendar write failed." },
+  { layout: "GRID", title: "What the agent must touch", items: [{ label: "Calendar", icon: "CALENDAR_BLANK" }, { label: "CRM record", icon: "DATABASE" }, { label: "Lead score", icon: "TARGET" }, { label: "Follow-up", icon: "CLOCK" }] },
+  { layout: "PUNCH", lines: ["Voice sounds human.", "Booking says yes.", "Calendar stays empty."], checks: ["Write before you confirm", "Alert a human on failure"] },
   { layout: "CLOSE", takeaway: "Judge a voice agent by the calendar.", saveLine: "Save this for your next demo." },
 ];
 
@@ -68,6 +70,29 @@ describe("slide layouts", () => {
     const long = Array(80).fill("booking").join(" ");
     expect(() => slideElement(deck([{ layout: "POINT", title: long }]), 1)).toThrow(CoverFitError);
     expect(() => slideElement(deck([{ layout: "CLOSE", takeaway: long }]), 1)).toThrow(CoverFitError);
+  });
+
+  it("takes 3 to 6 grid tiles and 3 or 4 punch lines", () => {
+    const grid = (n: number) => deck([{ layout: "GRID", title: "Parts", items: Array.from({ length: n }, (_, i) => ({ label: `Part ${i + 1}`, icon: "GEAR" as const })) }]);
+    expect(() => slideElement(grid(2), 1)).toThrow(CoverFitError);
+    expect(() => slideElement(grid(6), 1)).not.toThrow();
+    expect(() => slideElement(grid(7), 1)).toThrow(CoverFitError);
+    const punch = (n: number) => deck([{ layout: "PUNCH", lines: Array.from({ length: n }, (_, i) => `Line ${i + 1}.`), checks: ["One check"] }]);
+    expect(() => slideElement(punch(2), 1)).toThrow(CoverFitError);
+    expect(() => slideElement(punch(4), 1)).not.toThrow();
+    expect(() => slideElement(punch(5), 1)).toThrow(CoverFitError);
+  });
+
+  it("POSTER pages take turns dark and light, and the ribbon runs across them", () => {
+    const d: Deck = { ...deck(EVERY_LAYOUT), style: "POSTER" };
+    const bg = (i: number) => (slideElement(d, i).props as { style: { background: string } }).style.background;
+    expect(bg(1)).toBe(brand.ink);
+    expect(bg(2)).toBe(brand.paper);
+    expect(bg(3)).toBe(brand.ink);
+    // Each page shows its own slice of one wide drawing.
+    const slice = (i: number) => JSON.stringify(slideElement(d, i)).match(/"data-slice":"(\d+)"/)?.[1];
+    expect(slice(1)).toBe("1080");
+    expect(slice(2)).toBe("2160");
   });
 
   it("takes 2 to 5 checklist items", () => {
