@@ -5,11 +5,13 @@ import Link from "next/link";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useChannelSummary } from "@/hooks/useChannelSummary";
 import { DEFAULT_TIMEZONE } from "@/constants/config";
-import { countFor, defaultShow, postsFor, statusLine, type PostShow, type Tone } from "@/lib/posts/library";
+import { countFor, defaultShow, postsFor, statusLine, type PostShow } from "@/lib/posts/library";
 import { liveLinks } from "@/lib/drafts/liveLinks";
 import { segment } from "@/components/ui/segment";
 import { buttonStyles } from "@/components/ui/Button";
 import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
+import { cardClass } from "@/components/ui/Card";
+import { PageHeader, StatusLabel } from "@/components/ui/Text";
 import PostThumb from "./PostThumb";
 import type { AssetItem } from "@/types";
 
@@ -19,13 +21,6 @@ const SHOWS: { key: PostShow; label: string }[] = [
   { key: "scheduled", label: "Scheduled" },
   { key: "posted", label: "Posted" },
 ];
-
-const TONE: Record<Tone, string> = {
-  coral: "text-coral",
-  success: "text-success",
-  muted: "text-muted",
-  brand: "text-brand",
-};
 
 const EMPTY: Record<PostShow, string> = {
   all: "No posts yet. Minions writes your first one from your ideas.",
@@ -57,12 +52,9 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-5">
-        <div className="space-y-2">
-          <h1 className="text-[40px] font-bold leading-[1.08] tracking-[-0.035em] text-ink sm:text-5xl">Posts</h1>
-          {show === "needs" && countFor(assets.data, "needs") > 0 && (
-            <p className="text-[17px] text-muted">Nothing goes out until you approve it.</p>
-          )}
-        </div>
+        <PageHeader title="Posts">
+          {show === "needs" && countFor(assets.data, "needs") > 0 ? "Nothing goes out until you approve it." : null}
+        </PageHeader>
         <div className="flex flex-wrap items-center gap-3">
           <div role="group" aria-label="Show" className={segment.track}>
             {SHOWS.map((s) => {
@@ -105,12 +97,12 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
           ))}
         </SkeletonGroup>
       ) : assets.error ? (
-        <div className="rounded-[28px] bg-surface p-10 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.04)]">
+        <div className={cardClass({ pad: "lg", className: "text-center" })}>
           <p className="text-[17px] text-ink">{assets.error}</p>
           <button type="button" onClick={() => void assets.reload()} className={buttonStyles({ className: "mt-5" })}>Try again</button>
         </div>
       ) : list.length === 0 ? (
-        <div className="rounded-[28px] bg-surface-2 px-6 py-16 text-center">
+        <div className={cardClass({ tone: "well", pad: "none", className: "px-6 py-16 text-center" })}>
           <p className="text-[17px] text-muted">{q ? `No posts match “${query}”.` : EMPTY[show]}</p>
           {!q && show !== "all" && (
             <button type="button" onClick={() => pick("all")} className="mt-3 cursor-pointer text-[17px] text-brand hover:underline">
@@ -127,7 +119,7 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
               <li key={post.id} className="mb-7 break-inside-avoid">
                 <Link href={`/editorial?id=${encodeURIComponent(post.id)}`} className="group block">
                   <PostThumb post={post} className="transition-opacity group-hover:opacity-90" />
-                  <p className={`mt-3 px-0.5 text-[13px] font-semibold ${TONE[status.tone]}`}>● {status.text}</p>
+                  <StatusLabel tone={status.tone} className="mt-3 px-0.5 text-[13px]">{status.text}</StatusLabel>
                   <p className="mt-0.5 line-clamp-2 px-0.5 text-[15px] font-medium leading-snug text-ink">{post.title}</p>
                 </Link>
                 {live && (

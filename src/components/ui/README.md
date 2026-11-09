@@ -34,8 +34,13 @@ reduced motion.
   CONTINUE. `loading` keeps the button's width, shows a spinner and blocks
   double clicks.
   Put at most one `primary` on each screen.
-- **`Card`**: the tones are `default`, `raised` (it has the
-  button's bottom edge, for tappable cards), `brand`, `coral` and `gold`.
+- **`Card` / `cardClass()`**: the design's surface: `rounded-[28px]`, white,
+  `shadow-soft`, no border. Tones `default`, `well` (grey, for empty states),
+  `brand`, `coral`, `gold`; padding `none`, `md`, `lg` (hero cards).
+- **`Text.tsx`**: `PageHeader` (date line + big title), `SectionHeader`
+  (title + "All posts ›" link), `CardTitle` (the hero card's heading) and
+  `StatusLabel` ("● Needs you" in coral/success/muted/brand). Use these
+  instead of copying the type sizes.
 - **`Skeleton`, `SkeletonText`, `SkeletonCard`, `SkeletonGroup`,
   `PageSkeleton`**: placeholders shaped like the content that is on its way.
   Wrap a group in `SkeletonGroup` so screen readers hear a single "Loading".

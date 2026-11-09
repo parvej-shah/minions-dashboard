@@ -2,6 +2,9 @@
  * The Posts library (task 23): one place for every post, in four plain views.
  */
 import { slotLabel } from "@/lib/today";
+import type { StatusTone as Tone } from "@/components/ui/Text";
+
+export type { Tone };
 
 export type PostGroup = "needs" | "scheduled" | "posted" | "other";
 export type PostShow = "all" | "needs" | "scheduled" | "posted";
@@ -53,7 +56,6 @@ export function countFor(posts: Post[], show: PostShow): number {
   return show === "all" ? posts.length : posts.filter((p) => groupOf(p.status) === show).length;
 }
 
-export type Tone = "coral" | "success" | "muted" | "brand";
 
 export function statusLine(post: Post, timeZone: string): { text: string; tone: Tone } {
   const day = (iso: string) =>

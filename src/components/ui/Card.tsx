@@ -1,28 +1,37 @@
 import React from "react";
 
 /**
- * Surfaces: white with a soft shadow, no borders. Tones are kept for old
- * callers; brand/coral/gold become a quiet tinted well.
+ * The design's surfaces (tasks/20): a white card with a soft shadow and no
+ * border, or a quiet grey well for empty states. `cardClass()` gives the same
+ * look to a Link or any other element.
  */
-export type CardTone = "default" | "raised" | "brand" | "coral" | "gold";
+export type CardTone = "default" | "well" | "brand" | "coral" | "gold";
+export type CardPad = "none" | "md" | "lg";
 
 const tones: Record<CardTone, string> = {
-  default: "bg-surface shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.04)]",
-  raised: "bg-surface shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.05)]",
+  default: "bg-surface shadow-soft",
+  well: "bg-surface-2",
   brand: "bg-brand/5",
   coral: "bg-coral/5",
   gold: "bg-gold/5",
 };
 
-function cardStyles(tone: CardTone = "default", className = "") {
-  return `rounded-3xl p-6 sm:p-8 ${tones[tone]} ${className}`;
+const pads: Record<CardPad, string> = {
+  none: "",
+  md: "p-6 sm:p-8",
+  lg: "p-7 sm:p-10",
+};
+
+export function cardClass({ tone = "default", pad = "md", className = "" }: { tone?: CardTone; pad?: CardPad; className?: string } = {}) {
+  return `rounded-[28px] ${tones[tone]} ${pads[pad]} ${className}`.trim();
 }
 
 export interface CardProps extends React.HTMLAttributes<HTMLElement> {
   tone?: CardTone;
+  pad?: CardPad;
   as?: "div" | "section" | "article";
 }
 
-export function Card({ tone = "default", as: Tag = "div", className = "", ...rest }: CardProps) {
-  return <Tag className={cardStyles(tone, className)} {...rest} />;
+export function Card({ tone, pad, as: Tag = "div", className, ...rest }: CardProps) {
+  return <Tag className={cardClass({ tone, pad, className })} {...rest} />;
 }
