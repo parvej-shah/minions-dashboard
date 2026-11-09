@@ -200,6 +200,7 @@ export default function EditorialStudio({
   const [isEditingSocial, setIsEditingSocial] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [toggleLiveConfirmOpen, setToggleLiveConfirmOpen] = useState(false);
+  const [unpublishLinkedInConfirmOpen, setUnpublishLinkedInConfirmOpen] = useState(false);
 
   const { activeAsset, assets, edited } = draft;
 
@@ -262,6 +263,12 @@ export default function EditorialStudio({
   const handleToggleLive = async () => {
     const message = await draft.toggleLiveStatus();
     setToggleLiveConfirmOpen(false);
+    if (message) toast.show(message);
+  };
+
+  const handleUnpublishLinkedIn = async () => {
+    const message = await draft.unpublishFromLinkedIn();
+    setUnpublishLinkedInConfirmOpen(false);
     if (message) toast.show(message);
   };
 
@@ -450,6 +457,7 @@ export default function EditorialStudio({
               onMessage={toast.show}
               setToggleLiveConfirmOpen={setToggleLiveConfirmOpen}
               setDeleteConfirmOpen={setDeleteConfirmOpen}
+              setUnpublishLinkedInConfirmOpen={setUnpublishLinkedInConfirmOpen}
               blogEnabled={blogEnabled}
               onPostAgain={() => void draft.postAgain().then((m) => m && toast.show(m))}
               nextToReview={nextToReview}
@@ -482,7 +490,7 @@ export default function EditorialStudio({
         title={isPublished || activeAsset.status === "UNPUBLISHED" ? "Remove this post from Minions?" : "Delete this draft?"}
         description={
           `“${activeAsset.title}” and its checks will be deleted for good.` +
-          (wentToLinkedIn ? " The post stays on LinkedIn; delete it there if you want it gone." : "") +
+          (wentToLinkedIn ? ` The post stays on LinkedIn; ${activeAsset.linkedin_removable ? "use Unpublish from LinkedIn first" : "delete it there"} if you want it gone.` : "") +
           (blogEnabled && isPublished ? ` It also comes off ${studioBlogHost}.` : "")
         }
         confirmLabel={isPublished || activeAsset.status === "UNPUBLISHED" ? "Remove" : "Delete draft"}
@@ -491,6 +499,22 @@ export default function EditorialStudio({
         isLoading={draft.isDeleting}
         onConfirm={handleDelete}
         onClose={() => setDeleteConfirmOpen(false)}
+      />
+
+      <ConfirmModal
+        isOpen={unpublishLinkedInConfirmOpen}
+        title="Unpublish from LinkedIn?"
+        description={
+          `“${activeAsset.title}” is deleted from LinkedIn, with its likes and comments, and LinkedIn can't bring it back.` +
+          (blogEnabled && activeAsset.live_blog_url ? ` It also comes off ${studioBlogHost}.` : "") +
+          " The draft goes back to your review queue, so you can edit it and publish again."
+        }
+        confirmLabel="Unpublish"
+        cancelLabel="Cancel"
+        variant="danger"
+        isLoading={draft.isUnpublishingLinkedIn}
+        onConfirm={handleUnpublishLinkedIn}
+        onClose={() => setUnpublishLinkedInConfirmOpen(false)}
       />
 
       <ConfirmModal

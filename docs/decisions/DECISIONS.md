@@ -28,6 +28,12 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-09 — Unpublish from LinkedIn in the Studio
+
+**Decision:** A published post that Minions sent to LinkedIn shows "Unpublish from LinkedIn". After a confirm, Minions deletes the post on LinkedIn, takes it off the blog, and returns the draft to the review queue with its content kept. A post copied to LinkedIn by hand, or one that also went to Facebook, still can't be unpublished from Minions. Supersedes 2026-10-24.
+**Why:** The user wants posts pulled back from the Studio. Minions can delete LinkedIn posts it created with the workspace's own connection, so the 2026-10-24 reason no longer holds.
+**Status:** active
+
 ## 2026-11-09 — A workspace markets Minions Ghostwriter itself
 
 **Decision:** The parvejshalabib007s-workspace now markets Minions Ghostwriter (this product) to founders and consultants who run small B2B service businesses and should post on LinkedIn but don't. Its posts come from our own build story and data (the decisions in this log), lead with the outcome, and never claim customers or results we don't have. The user posts them by hand. Tenant zero stays the voice AI brand.
@@ -104,7 +110,7 @@ and link to it here.
 
 **Decision:** A published post that went only to LinkedIn no longer offers Unpublish. Only a post on the workspace's blog can be taken down from the Studio ("Take down from blog"), and that dialog says the LinkedIn post stays up. Removing a post from Minions says the same. A published post's panel shows "View on LinkedIn" and drops the pre-publish checks.
 **Why:** Minions can't take a LinkedIn post down. Unpublish only marked it offline in Minions while it stayed live on LinkedIn, so the button promised something that didn't happen.
-**Status:** active
+**Status:** superseded by 2026-11-09 (Unpublish from LinkedIn in the Studio)
 
 ## 2026-10-23 — Drop Mission Control; Editorial Studio is home
 

@@ -81,3 +81,28 @@ export async function fetchRecentPostTexts(token: string, externalId: string, co
   const elements: { text?: { text?: string }; commentary?: string }[] = (await response.json()).elements ?? [];
   return elements.map((item) => item.text?.text || item.commentary).filter((text): text is string => !!text && text.length > 30).map((text) => text.trim());
 }
+
+// Same version the publisher (n8n 03) posts with.
+const LINKEDIN_VERSION = "202607";
+
+export type DeletePostResult = { ok: true; alreadyGone?: true } | { ok: false; status: number };
+
+/**
+ * Deletes a post the member's token created (w_member_social). LinkedIn answers
+ * 204; a 404 or 410 means the post is already gone, which is what was wanted.
+ */
+export async function deleteLinkedInPost(token: string, postUrn: string): Promise<DeletePostResult> {
+  const response = await fetch(`https://api.linkedin.com/rest/posts/${encodeURIComponent(postUrn)}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "LinkedIn-Version": LINKEDIN_VERSION,
+      "X-Restli-Protocol-Version": "2.0.0",
+      "X-RestLi-Method": "DELETE",
+    },
+  });
+  if (response.ok) return { ok: true };
+  if (response.status === 404 || response.status === 410) return { ok: true, alreadyGone: true };
+  console.error("[linkedin] post delete failed:", response.status, await response.text().catch(() => ""));
+  return { ok: false, status: response.status };
+}

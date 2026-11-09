@@ -57,6 +57,10 @@ export interface EditorialDraftState {
   isDeleting: boolean;
   permanentlyDelete: () => Promise<string>;
 
+  /** Deletes the post on LinkedIn, takes it off the blog and returns the draft to review. */
+  isUnpublishingLinkedIn: boolean;
+  unpublishFromLinkedIn: () => Promise<string>;
+
   toggleClaim: (claimId: string) => Promise<void>;
 
   /** Re-draws the active draft's cover in code, optionally with a reviewer's edit. Returns a toast message. */
@@ -115,6 +119,7 @@ export function useEditorialDraft(
   const [publishError, setPublishError] = useState<string | null>(null);
   const [isTogglingLive, setIsTogglingLive] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUnpublishingLinkedIn, setIsUnpublishingLinkedIn] = useState(false);
   const [isRenderingCover, setIsRenderingCover] = useState(false);
 
   const activeAsset = useMemo(
@@ -424,6 +429,22 @@ export function useEditorialDraft(
     }
   }, [activeAsset, patchActive, blogHost]);
 
+  const unpublishFromLinkedIn = useCallback(async (): Promise<string> => {
+    if (!activeAsset) return "";
+    setIsUnpublishingLinkedIn(true);
+    try {
+      const { asset } = await apiClient.post<{ asset: AssetItem }>(`/api/assets/${activeAsset.id}/unpublish-linkedin`, {});
+      patchActive(asset);
+      setPublishState("idle");
+      window.dispatchEvent(new Event("minions-counts-updated"));
+      return "Deleted from LinkedIn. The draft is back in your review queue.";
+    } catch (err) {
+      return toErrorMessage(err, "Could not unpublish from LinkedIn");
+    } finally {
+      setIsUnpublishingLinkedIn(false);
+    }
+  }, [activeAsset, patchActive]);
+
   const permanentlyDelete = useCallback(async (): Promise<string> => {
     if (!activeAsset) return "";
     setIsDeleting(true);
@@ -571,6 +592,9 @@ export function useEditorialDraft(
 
     isDeleting,
     permanentlyDelete,
+
+    isUnpublishingLinkedIn,
+    unpublishFromLinkedIn,
 
     toggleClaim,
 

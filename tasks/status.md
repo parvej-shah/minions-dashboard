@@ -20,3 +20,4 @@
 | 16 | Outcome-first posts for business-owner buyers (ICP buyer switch) | CLAUDE | DONE (SQL applied, pushed e7cced4) | tasks/16.md |
 | 17 | No product names in outcome-first posts; bsse1610 crew names removed | CLAUDE | DONE (data applied; pushed 3b4ebd7) | tasks/17.md |
 | 18 | Ghostwriter brand for parvejshalabib007s-workspace | CLAUDE | DONE (applied in prod; pushed c53476a) | tasks/18.md |
+| 19 | Unpublish from LinkedIn in the Studio (deletes the LinkedIn post, back to review) | CLAUDE | DONE (local; not pushed) | tasks/19.md |

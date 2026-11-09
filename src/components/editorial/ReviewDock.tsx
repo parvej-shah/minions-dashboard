@@ -40,6 +40,8 @@ export interface ReviewDockProps {
   onMessage: (m: string) => void;
   setToggleLiveConfirmOpen: (v: boolean) => void;
   setDeleteConfirmOpen: (v: boolean) => void;
+  /** Opens the confirm for deleting the post on LinkedIn; only offered when Minions holds its LinkedIn id. */
+  setUnpublishLinkedInConfirmOpen?: (v: boolean) => void;
   /** Whether this tenant has the blog channel switched on. Undefined means
    *  "not loaded yet" — default to true so the panel doesn't flash blog copy
    *  and then swap to generic copy once the real channel summary lands. */
@@ -69,6 +71,7 @@ export default function ReviewDock({
   onMessage,
   setToggleLiveConfirmOpen,
   setDeleteConfirmOpen,
+  setUnpublishLinkedInConfirmOpen,
   blogEnabled = true,
   onPostAgain,
   isPostingAgain,
@@ -94,9 +97,11 @@ export default function ReviewDock({
   const isPublished = activeAsset.status === "PUBLISHED";
   const links = liveLinks(activeAsset, blogEnabled);
   const wentToLinkedIn = Boolean(activeAsset.linkedin_url || activeAsset.linkedin_went_as);
-  // Only the blog can be taken down from here. A LinkedIn post stays up whatever
-  // Minions marks it, so a LinkedIn-only post offers no Unpublish at all.
-  const canTakeDown = blogEnabled && Boolean(activeAsset.live_blog_url || activeAsset.doc_url);
+  // Minions can delete a LinkedIn post only when it posted it and kept the id;
+  // a post copied there by hand has none, so it offers no LinkedIn unpublish.
+  const canUnpublishLinkedIn = Boolean(activeAsset.linkedin_removable && setUnpublishLinkedInConfirmOpen);
+  // Unpublishing from LinkedIn also takes the blog copy down, so the blog-only option steps aside.
+  const canTakeDown = !canUnpublishLinkedIn && blogEnabled && Boolean(activeAsset.live_blog_url || activeAsset.doc_url);
   const heading = isPublished
     ? wentToLinkedIn ? "Posted on LinkedIn" : "Published"
     : activeAsset.status === "SCHEDULED"
@@ -177,6 +182,16 @@ export default function ReviewDock({
               )}
 
               <div className="flex flex-wrap items-center justify-center gap-x-2 border-t border-line/60 pt-2">
+                {canUnpublishLinkedIn && (
+                  <button
+                    type="button"
+                    onClick={() => setUnpublishLinkedInConfirmOpen?.(true)}
+                    className="flex min-h-9 cursor-pointer items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-subtle transition-colors hover:text-gold"
+                  >
+                    <EyeOff className="w-3.5 h-3.5" />
+                    <span>Unpublish from LinkedIn</span>
+                  </button>
+                )}
                 {canTakeDown && (
                   <button
                     type="button"

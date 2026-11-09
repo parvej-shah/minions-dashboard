@@ -153,6 +153,7 @@ export function toAssetDTO(
     linkedin_went_as: linkedinWentAs(asset),
     linkedin_url: toChannelUrls(parsePublishedUrls(asset.publishedUrls)).linkedin ?? linkedinPostUrl(asset.linkedinPostId),
     linkedin_published_at: asset.linkedinPublishedAt ? asset.linkedinPublishedAt.toISOString() : null,
+    linkedin_removable: Boolean(asset.linkedinPostId),
     follow_up_of: asset.followUpOf,
     follow_up_format: (asset.followUpFormat as FollowUpFormat | null) ?? null,
     created_at: asset.createdAt.toISOString(),
