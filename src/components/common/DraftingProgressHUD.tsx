@@ -13,15 +13,15 @@ export interface DraftingJob extends RunJob {
 
 /**
  * The stages of `02_idea_to_asset`, in the order n8n runs them. Nothing reports
- * stage progress mid-run, so the durations are apportioned from the one measured
- * total (cover generation was ~43s of a ~98s run) and relative LLM-call size.
+ * stage progress mid-run, so the durations are rough shares of a measured run
+ * (about 77s on 2026-11-09). The cover is drawn in code and takes about a second.
  */
 const STAGES: RunStage[] = [
   { id: "strategist", name: "Strategist Minion", icon: Brain, typicalMs: 8000, description: "Formulating the thesis angle and defending it" },
-  { id: "writer", name: "Writer Minion", icon: PenTool, typicalMs: 25000, description: "Authoring the 800–1,200 word deep dive" },
+  { id: "writer", name: "Writer Minion", icon: PenTool, typicalMs: 45000, description: "Authoring the 800–1,200 word deep dive" },
   { id: "editor", name: "Editor / Critic Minion", icon: ShieldCheck, typicalMs: 15000, description: "Extracting and classifying every factual claim" },
   { id: "variants", name: "Distribution Minion", icon: Share2, typicalMs: 12000, description: "Writing the LinkedIn, Facebook and X variants" },
-  { id: "artist", name: "Visual Artist Minion", icon: Palette, typicalMs: 40000, description: "Synthesizing the 16:9 1280×720 cover illustration" },
+  { id: "artist", name: "Cover Minion", icon: Palette, typicalMs: 2000, description: "Drawing the cover in your brand's colours and type" },
 ];
 
 const CONFIG: RunHudConfig<DraftingJob> = {
