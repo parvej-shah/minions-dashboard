@@ -1,10 +1,9 @@
 import React from "react";
 import EditorialStudio from "@/components/editorial/EditorialStudio";
-import WeeklyPulseCard from "@/components/pulse/WeeklyPulseCard";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Studio",
+  title: "Review",
 };
 
 interface EditorialPageProps {
@@ -15,12 +14,6 @@ interface EditorialPageProps {
 export default async function EditorialPage({ searchParams }: EditorialPageProps) {
   const { id, schedule, linkedin } = await searchParams;
   return (
-    <>
-      {/* The weekly question shows only on the weeks it is open; Studio is the home page. */}
-      <div className="mx-auto mb-6 max-w-[1400px] empty:hidden">
-        <WeeklyPulseCard />
-      </div>
-      <EditorialStudio initialDraftId={id} isStandaloneRoute={false} openSchedule={schedule === "1"} openLinkedIn={linkedin === "1"} />
-    </>
+    <EditorialStudio initialDraftId={id} isStandaloneRoute={false} openSchedule={schedule === "1"} openLinkedIn={linkedin === "1"} />
   );
 }
