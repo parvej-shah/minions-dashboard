@@ -126,15 +126,52 @@ const MANUAL_TOKEN_CHANNELS = ["facebook", "linkedin", "x", "blog"];
 
 // A pasted token stands in for OAuth until the Facebook and LinkedIn developer apps are verified.
 // For "blog" the token is a webhook URL: 03_review_publisher posts the asset there instead of writing to our hosted blogs table.
-export async function connectManualChannel(clientId: string, body: JsonObject) {
+/**
+ * People often paste their user token from Graph API Explorer instead of the Page's.
+ * A user token lists its Pages with each Page's own token, so swap it for the right one;
+ * a long-lived user token yields a Page token that never expires. A Page token can't
+ * list accounts, so it errors here and is kept as pasted.
+ */
+async function pageTokenFor(token: string, externalId: string | null, graph: GraphCall) {
+  let pages: { id: string; name?: string; access_token?: string }[];
+  try {
+    const res = await graph("me/accounts", { fields: "id,name,access_token", limit: "100", access_token: token }, "GET");
+    pages = Array.isArray(res.data) ? (res.data as typeof pages) : [];
+  } catch {
+    return { token, externalId };
+  }
+  let page = externalId ? pages.find((p) => p.id === externalId) : pages.length === 1 ? pages[0] : undefined;
+  // Pages in a business portfolio can be missing from me/accounts yet still hand over their token.
+  let metaSaid = "";
+  if (!page && externalId) {
+    const direct = await graph(externalId, { fields: "id,name,access_token", access_token: token }, "GET").catch((err: unknown) => {
+      metaSaid = err instanceof Error ? err.message : String(err);
+      return null;
+    });
+    if (typeof direct?.access_token === "string") page = { id: String(direct.id ?? externalId), access_token: direct.access_token };
+    else if (direct && !metaSaid) metaSaid = "Facebook gave no Page token. Your account needs full control of this Page.";
+  }
+  if (!page?.access_token) {
+    const names = pages.map((p) => p.name).filter(Boolean).join(", ") || "none";
+    throw badRequest(
+      externalId
+        ? `This token can't reach Page ${externalId}. Pages it can reach: ${names}.${metaSaid ? ` Facebook said: ${metaSaid}` : ""}`
+        : `This token reaches several Pages (${names}). Enter your Page ID too.`
+    );
+  }
+  return { token: page.access_token, externalId: page.id };
+}
+
+export async function connectManualChannel(clientId: string, body: JsonObject, deps: { graph?: GraphCall } = {}) {
   const channel = asString(body.channel);
-  const token = asString(body.token);
+  let token = asString(body.token);
   let externalId = asString(body.external_id) || null;
   if (channel === "linkedin" && externalId && !externalId.startsWith("urn:li:")) externalId = `urn:li:person:${externalId}`;
 
   if (!MANUAL_TOKEN_CHANNELS.includes(channel)) throw badRequest(`channel must be one of: ${MANUAL_TOKEN_CHANNELS.join(", ")}`);
   if (!token) throw badRequest(channel === "blog" ? "webhook URL is required" : "token is required");
   if (channel === "blog" && !/^https:\/\/.+/.test(token)) throw badRequest("webhook URL must start with https://");
+  if (channel === "facebook") ({ token, externalId } = await pageTokenFor(token, externalId, deps.graph ?? metaGraph));
 
   await storeChannelCredential(clientId, channel, token, externalId);
   return { success: true, channel };
