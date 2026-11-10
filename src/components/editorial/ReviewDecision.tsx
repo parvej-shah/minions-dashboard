@@ -173,6 +173,7 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
           </p>
         </Field>
         {nextButton}
+        {afterApprove}
         {links.length > 0 && (
           <div className="flex flex-col gap-3">
             {links.map((link, i) => (

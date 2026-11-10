@@ -187,6 +187,7 @@ export default function EditorialStudio({
   const handlePublish = async () => {
     const message = await draft.approveAndPublish();
     if (message) toast.show(message);
+    if (message.startsWith("Published live")) setAskFor(activeAsset?.id ?? null);
   };
 
   const handleSchedule = async (date: string, time: string): Promise<boolean> => {
