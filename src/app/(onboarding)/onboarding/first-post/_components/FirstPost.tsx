@@ -3,14 +3,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CalendarCheck, Check, Loader2, PenLine, Quote, RotateCcw, Sparkles } from "lucide-react";
 import type { AssetItem } from "@/types";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { plainReviewNotes } from "@/lib/drafts/plainNotes";
 import { buttonStyles } from "@/components/ui/Button";
 import LinkedInPostPreview from "@/components/editorial/LinkedInPostPreview";
 import DraftChecks from "@/components/editorial/DraftChecks";
-import { LessonFooter, LessonHeader, lessonInput } from "../../setup/_components/lesson";
+import { StepFooter, StepHeader, StepTitle, ThinBar, stepInput } from "@/components/ui/Steps";
 import { WaitingSkeleton } from "./FirstPostSkeleton";
 
 interface FirstPostStatus {
@@ -135,32 +134,31 @@ export default function FirstPost({ author }: { author: { name: string; image: s
     router.push(`/editorial?id=${encodeURIComponent(status.asset.id)}`);
   };
 
+
   if (!status || !phase) {
-    return error ? <Stuck title="We couldn't load your post" detail={error} /> : <WaitingSkeleton />;
+    return error ? (
+      <Frame>
+        <Stuck title="We couldn't load your post." detail={error} />
+      </Frame>
+    ) : (
+      <WaitingSkeleton />
+    );
   }
 
-  const progress = phase === "scheduled" ? 1 : phase === "ready" ? 0.95 : 0.78;
-
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas text-ink">
-      <LessonHeader progress={progress} />
-
-      {phase === "writing" && <Writing startedAt={status.run?.started_at ?? null} story={status.story} />}
-      {phase === "missing" && <Stuck title="Your first post didn't start" detail="Add an idea from the Ideas page and we'll write it from there." />}
+    <Frame>
+      {phase === "writing" && <Writing startedAt={status.run?.started_at ?? null} />}
+      {phase === "missing" && <Stuck title="Your first post didn't start." detail="Add an idea from the Ideas page and it will be written from there." />}
       {phase === "stuck" && (
         <>
-          <Stuck
-            title="Writing hit a snag"
-            detail="This happens now and then. Your story is saved, so trying again picks up from it."
-            story={status.story}
-          />
-          <LessonFooter
+          <Stuck title="Writing hit a snag." detail="This happens now and then. Your story is saved, so trying again picks up from it." />
+          <StepFooter
             label="Try again"
             onContinue={() => void retry()}
             loading={busy === "retry"}
             error={error}
             secondary={
-              <Link href="/" className={buttonStyles({ variant: "ghost", size: "lg", block: true, className: "sm:w-auto" })}>
+              <Link href="/" className="text-[15px] text-brand underline-offset-4 hover:underline">
                 Go to my dashboard
               </Link>
             }
@@ -170,16 +168,12 @@ export default function FirstPost({ author }: { author: { name: string; image: s
 
       {phase === "ready" && status.asset && (
         <>
-          <Ready asset={status.asset} author={author} story={status.story}>
+          <Ready asset={status.asset} author={author}>
             {status.signoff && (
-              <SignoffCard
-                value={signoff}
-                disabled={busy !== null}
-                onChange={(edit) => setSignoffEdits((prev) => ({ ...prev, ...edit }))}
-              />
+              <SignoffFields value={signoff} disabled={busy !== null} onChange={(edit) => setSignoffEdits((prev) => ({ ...prev, ...edit }))} />
             )}
           </Ready>
-          <LessonFooter
+          <StepFooter
             label={busy === "review" && signoffChanged ? "Updating your cover…" : "Review my post"}
             onContinue={() => void review()}
             loading={busy === "review"}
@@ -190,11 +184,29 @@ export default function FirstPost({ author }: { author: { name: string; image: s
       )}
 
       {phase === "scheduled" && status.asset && <Scheduled asset={status.asset} />}
+    </Frame>
+  );
+}
+
+function Frame({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-dvh flex-col bg-canvas text-ink">
+      <StepHeader />
+      {children}
     </div>
   );
 }
 
-function Writing({ startedAt, story }: { startedAt: string | null; story: string | null }) {
+/** A centered screen: title, line, then whatever comes under it. */
+function Centered({ children }: { children: React.ReactNode }) {
+  return (
+    <main className="flex flex-1 flex-col items-center justify-center px-4 py-12 text-center">
+      <div className="animate-rise-in flex w-full max-w-xl flex-col items-center">{children}</div>
+    </main>
+  );
+}
+
+function Writing({ startedAt }: { startedAt: string | null }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
@@ -207,113 +219,72 @@ function Writing({ startedAt, story }: { startedAt: string | null; story: string
   const share = Math.min(0.95, 1 - Math.exp(-elapsed / (EXPECTED_SECONDS / 2.2)));
 
   return (
-    <main className="flex flex-1 flex-col items-center px-4 pt-8 pb-16 text-center sm:pt-12">
-      <span className="story-pop relative flex h-20 w-20 items-center justify-center rounded-full bg-brand/10 text-brand">
-        <PenLine className="h-11 w-11 animate-pulse" strokeWidth={2.25} />
-      </span>
-      <h1 className="mt-8 text-2xl font-bold sm:text-3xl">Writing your first post…</h1>
-      <p className="mt-2 max-w-sm text-sm text-muted">About a minute. Every claim gets checked against what you told us.</p>
-
-      <div className="mt-6 h-3 w-full max-w-xs overflow-hidden rounded-full bg-line" aria-hidden="true">
-        <div className="h-full rounded-full bg-brand transition-[width] duration-1000 ease-linear" style={{ width: `${share * 100}%` }} />
+    <Centered>
+      <StepTitle center title="Writing your first post." line="About a minute. Every line is checked against what you told us." />
+      <div className="mt-9">
+        <ThinBar value={share} label="Writing your first post" />
       </div>
-
-      <ol className="mt-8 w-full max-w-xs space-y-3 text-left" aria-live="polite">
-        {WRITING_STEPS.map((step, i) => {
-          const state = i < active ? "done" : i === active ? "active" : "todo";
-          return (
-            <li key={step.label} className={`flex items-center gap-3 text-base font-bold ${state === "todo" ? "text-subtle" : "text-ink"}`}>
-              <span
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${
-                  state === "done" ? "border-brand bg-brand text-brand-ink" : state === "active" ? "border-brand text-brand" : "border-line"
-                }`}
-              >
-                {state === "done" ? <Check className="h-4 w-4 animate-pop-in" strokeWidth={3.5} /> : state === "active" ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={3} /> : null}
-              </span>
-              {step.label}
-            </li>
-          );
-        })}
-      </ol>
-
-      {story && <StoryCard story={story} className="mt-10 max-w-lg" />}
-
-      <Link href="/" className={`${buttonStyles({ variant: "ghost", size: "md" })} mt-6`}>
-        Look around while I wait
+      <p className="mt-3.5 text-[15px] text-subtle" aria-live="polite">
+        {WRITING_STEPS[active].label}
+      </p>
+      <Link href="/" className="mt-12 text-[15px] text-brand underline-offset-4 hover:underline">
+        Look around while you wait
       </Link>
-      <p className="mt-1 text-xs text-subtle">Your post will be waiting in Editorial Studio.</p>
-    </main>
-  );
-}
-
-/** What the post is built from, so the link between input and output is visible. */
-function StoryCard({ story, className = "" }: { story: string; className?: string }) {
-  return (
-    <figure className={`w-full rounded-2xl border border-line bg-surface p-4 text-left ${className}`}>
-      <figcaption className="flex items-center gap-2 text-xs font-semibold text-subtle">
-        <Quote className="h-3.5 w-3.5" aria-hidden="true" />
-        Built from what you told us
-      </figcaption>
-      <blockquote className="mt-2 line-clamp-4 text-sm leading-relaxed text-ink">{story}</blockquote>
-    </figure>
+    </Centered>
   );
 }
 
 /** Setup's last question: how the cover signs off. */
-function SignoffCard({ value, disabled, onChange }: { value: Signoff; disabled: boolean; onChange: (edit: Partial<Signoff>) => void }) {
+function SignoffFields({ value, disabled, onChange }: { value: Signoff; disabled: boolean; onChange: (edit: Partial<Signoff>) => void }) {
   return (
-    <section className="animate-rise-in mt-6 rounded-2xl border border-line bg-surface p-4 text-left sm:p-5">
-      <h2 className="text-lg font-semibold">One last thing: how should your covers sign off?</h2>
-      <p className="mt-1 text-sm text-muted">This goes at the bottom of every cover. Change it any time in Brand.</p>
-      <label className="mt-4 block text-xs font-semibold text-subtle" htmlFor="signoff-name">
-        Your name
-      </label>
-      <input
-        id="signoff-name"
-        type="text"
-        value={value.name}
-        maxLength={60}
-        disabled={disabled}
-        onChange={(e) => onChange({ name: e.target.value })}
-        placeholder="e.g. Jordan Lee"
-        className={`${lessonInput} mt-2`}
-      />
-      <label className="mt-4 block text-xs font-semibold text-subtle" htmlFor="signoff-role">
-        Under your name <span className="font-bold normal-case tracking-normal">(optional)</span>
-      </label>
-      <input
-        id="signoff-role"
-        type="text"
-        value={value.role}
-        maxLength={90}
-        disabled={disabled}
-        onChange={(e) => onChange({ role: e.target.value })}
-        placeholder="e.g. Founder at Acme"
-        className={`${lessonInput} mt-2`}
-      />
+    <section className="mt-12">
+      <h2 className="text-[21px] font-semibold text-ink">How should your covers sign off?</h2>
+      <p className="mt-1.5 text-[15px] text-muted">At the bottom of every cover. Change it any time in Brand.</p>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div>
+          <label className="block text-[15px] font-medium text-ink" htmlFor="signoff-name">
+            Name
+          </label>
+          <input
+            id="signoff-name"
+            type="text"
+            value={value.name}
+            maxLength={60}
+            disabled={disabled}
+            onChange={(e) => onChange({ name: e.target.value })}
+            placeholder="e.g. Jordan Lee"
+            className={`${stepInput} mt-2`}
+          />
+        </div>
+        <div>
+          <label className="block text-[15px] font-medium text-ink" htmlFor="signoff-role">
+            Line under it <span className="font-normal text-subtle">(optional)</span>
+          </label>
+          <input
+            id="signoff-role"
+            type="text"
+            value={value.role}
+            maxLength={90}
+            disabled={disabled}
+            onChange={(e) => onChange({ role: e.target.value })}
+            placeholder="e.g. Founder at Acme"
+            className={`${stepInput} mt-2`}
+          />
+        </div>
+      </div>
     </section>
   );
 }
 
-function Ready({ asset, author, story, children }: { asset: AssetItem; author: { name: string; image: string | null }; story: string | null; children?: React.ReactNode }) {
+function Ready({ asset, author, children }: { asset: AssetItem; author: { name: string; image: string | null }; children?: React.ReactNode }) {
   const notes = useMemo(() => plainReviewNotes(asset), [asset]);
   return (
     <main className="flex-1">
-      <div className="story-step-in mx-auto w-full max-w-xl px-4 pt-4 pb-10 sm:px-6 sm:pt-8">
-        <div className="flex flex-col items-center text-center">
-          <div className="relative">
-            <span className="story-pop relative flex h-16 w-16 items-center justify-center rounded-full bg-gold/10 text-gold">
-              <Sparkles className="h-8 w-8" strokeWidth={2.25} />
-            </span>
-          </div>
-          <h1 className="mt-5 text-2xl font-bold text-gold sm:text-3xl">Your first post is ready!</h1>
-          <p className="mt-1.5 text-sm text-muted">This is how people will see it on LinkedIn. Nothing goes out until you approve it.</p>
-        </div>
-
-        <LinkedInPostPreview author={author} text={postText(asset)} imageUrl={asset.hero_image_url} className="animate-rise-in mt-6" />
+      <div className="animate-rise-in mx-auto w-full max-w-xl px-4 pt-6 pb-12 sm:px-6 sm:pt-10">
+        <StepTitle title="Here's your first post." line="As it will look on LinkedIn. Nothing goes out until you approve it." />
+        <LinkedInPostPreview author={author} text={postText(asset)} imageUrl={asset.hero_image_url} className="mt-9" />
         {children}
-        <DraftChecks notes={notes} className="mt-4" />
-        {story && <StoryCard story={story} className="mt-4" />}
+        <DraftChecks notes={notes} className="mt-8" />
       </div>
     </main>
   );
@@ -331,50 +302,43 @@ function Scheduled({ asset }: { asset: AssetItem }) {
   const when = asset.scheduled_for
     ? new Date(asset.scheduled_for).toLocaleString(undefined, { weekday: "long", hour: "numeric", minute: "2-digit" })
     : null;
+  const needsLinkedIn = linkedIn === false;
 
   return (
-    <main className="flex flex-1 flex-col items-center px-4 pt-10 pb-16 text-center">
-      <div className="relative">
-        <span className="story-pop relative flex h-20 w-20 items-center justify-center rounded-full bg-brand/10 text-brand">
-          <CalendarCheck className="h-11 w-11" strokeWidth={2.25} />
-        </span>
-      </div>
-      <h1 className="mt-8 text-3xl font-bold">You’re on the calendar!</h1>
-      <p className="mt-2 max-w-sm text-base text-muted">
-        {when ? `Your first post goes out ${when}.` : "Your first post is scheduled."} You can change it any time in Editorial Studio.
-      </p>
-
-      <div className="mt-8 w-full max-w-sm space-y-3">
-        {linkedIn === false && (
-          <div className="animate-rise-in rounded-2xl border border-gold/40 bg-gold/5 p-4 text-left">
-            <p className="text-base font-semibold text-gold">One last step: connect LinkedIn</p>
-            <p className="mt-1 text-sm text-muted">So your post can actually go out. It takes ten seconds.</p>
-            <Link
-              href="/api/auth/linkedin/connect?return_to=/onboarding/first-post"
-              prefetch={false}
-              className={buttonStyles({ variant: "gold", size: "lg", block: true, shout: true, className: "mt-4" })}
-            >
-              Connect LinkedIn
-            </Link>
-          </div>
+    <Centered>
+      <StepTitle
+        center
+        title="You're on the calendar."
+        line={`${when ? `Your first post goes out ${when}.` : "Your first post is scheduled."} ${needsLinkedIn ? "Connect LinkedIn so it can go out." : "Change it any time."}`}
+      />
+      <div className="mt-9 flex w-full max-w-xs flex-col items-center gap-4">
+        {needsLinkedIn && (
+          <Link
+            href="/api/auth/linkedin/connect?return_to=/onboarding/first-post"
+            prefetch={false}
+            className={buttonStyles({ variant: "primary", size: "lg", block: true })}
+          >
+            Connect LinkedIn
+          </Link>
         )}
-        <Link href="/" className={buttonStyles({ variant: linkedIn === false ? "ghost" : "primary", size: "lg", block: true, shout: linkedIn !== false })}>
-          {linkedIn === false ? "Later, take me to my dashboard" : "Go to my dashboard"}
-        </Link>
+        {needsLinkedIn ? (
+          <Link href="/" className="text-[15px] text-brand underline-offset-4 hover:underline">
+            Later, go to my dashboard
+          </Link>
+        ) : (
+          <Link href="/" className={buttonStyles({ variant: "primary", size: "lg", block: true })}>
+            Go to my dashboard
+          </Link>
+        )}
       </div>
-    </main>
+    </Centered>
   );
 }
 
-function Stuck({ title, detail, story }: { title: string; detail: string; story?: string | null }) {
+function Stuck({ title, detail }: { title: string; detail: string }) {
   return (
-    <main className="flex flex-1 flex-col items-center px-4 pt-12 pb-10 text-center">
-      <span className="story-shake flex h-20 w-20 items-center justify-center rounded-full bg-coral/10 text-coral">
-        <RotateCcw className="h-9 w-9" strokeWidth={2.5} />
-      </span>
-      <h1 className="mt-6 text-2xl font-bold">{title}</h1>
-      <p className="mt-2 max-w-sm text-sm text-muted">{detail}</p>
-      {story && <StoryCard story={story} className="mt-8 max-w-lg" />}
-    </main>
+    <Centered>
+      <StepTitle center title={title} line={detail} />
+    </Centered>
   );
 }

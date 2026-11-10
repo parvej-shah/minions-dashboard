@@ -1,17 +1,14 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { BadgeCheck, Briefcase, Check, ChevronDown, ExternalLink, Mic2, Pencil, Target, Users2, X } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 import type { BrandImport, ImportedIcp } from "@/lib/brandImport/types";
 
 /**
  * One screen to check what the import found before any of it is saved. It
- * reads like a summary, not a form: tap × to drop something, the pencil to
- * fix it, and tick the website claims that are true. Unticked proof is never
- * saved, because drafts cite proof as verified.
- *
- * Long lists start folded behind a count so the screen scans in a few
- * seconds; what needs a decision (proof) sits near the top.
+ * reads like a list, not a form: click a line to change it. Website claims
+ * get their own question, and unticked proof is never saved, because drafts
+ * cite proof as verified.
  */
 
 const LIST_LABELS: { key: Exclude<keyof ImportedIcp, "who" | "role" | "company_type">; label: string; noun: string }[] = [
@@ -19,98 +16,68 @@ const LIST_LABELS: { key: Exclude<keyof ImportedIcp, "who" | "role" | "company_t
   { key: "questions", label: "Questions they ask", noun: "questions" },
   { key: "decisions", label: "Decisions they weigh", noun: "decisions" },
   { key: "buying_triggers", label: "What makes them buy now", noun: "buying triggers" },
-  { key: "vocabulary", label: "Words they use", noun: "words they use" },
+  { key: "vocabulary", label: "Words they use", noun: "words" },
 ];
 
-/** Experience shown before "Show more". */
-const EXPERIENCE_SHOWN = 3;
-
 const VOICE_TEXT = {
-  formality: { casual: "casual", balanced: "balanced", formal: "formal" },
+  formality: { casual: "Casual", balanced: "Balanced", formal: "Formal" },
   sentence_length: { short: "short sentences", mixed: "a mix of short and long sentences", long: "longer sentences" },
   humor: { none: "no jokes", light: "a little humor", frequent: "plenty of humor" },
   emoji_use: { never: "no emoji", sometimes: "the odd emoji", often: "emoji" },
 } as const;
 
-function Section({
-  icon,
-  title,
-  hint,
-  badge,
-  attention,
-  children,
-}: {
-  icon: ReactNode;
-  title: string;
-  hint?: string;
-  /** Short status on the right, e.g. "2 of 4 ticked". */
-  badge?: ReactNode;
-  /** Gold edge: this section needs a decision before continuing. */
-  attention?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <section className={`rounded-2xl border bg-surface p-4 sm:p-5 ${attention ? "border-gold/50 border-b-gold/70" : "border-line"}`}>
-      <div className="flex items-center gap-3">
-        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${attention ? "bg-gold/15 text-gold" : "bg-brand/15 text-brand"}`}>{icon}</span>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-base font-semibold leading-tight text-ink">{title}</h2>
-          {hint && <p className="mt-0.5 text-sm leading-snug text-muted">{hint}</p>}
-        </div>
-        {badge && <span className="shrink-0 whitespace-nowrap rounded-full bg-surface-2 px-2.5 py-1 text-xs font-semibold text-muted tabular-nums">{badge}</span>}
-      </div>
-      <div className="mt-3">{children}</div>
-    </section>
-  );
-}
+const card = "rounded-[28px] bg-surface px-5 shadow-soft sm:px-6";
+const row = "border-b border-line py-4 last:border-b-0 sm:py-5";
 
-/** A "Show 12 more" style toggle under a folded list. */
-function MoreToggle({ open, onToggle, closedLabel }: { open: boolean; onToggle: () => void; closedLabel: string }) {
+/** A line of the list: the label, the value, and a › that opens it. */
+function RowButton({ label, value, open, onClick }: { label: string; value: ReactNode; open?: boolean; onClick: () => void }) {
   return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-expanded={open}
-      className="mt-2 -ml-2 inline-flex min-h-10 items-center gap-1.5 rounded-xl px-2 text-sm font-semibold text-brand transition-colors hover:bg-brand/10 cursor-pointer"
-    >
-      {open ? "Show less" : closedLabel}
-      <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={3} />
+    <button type="button" onClick={onClick} aria-expanded={open} className="group flex w-full items-center gap-4 text-left cursor-pointer">
+      <span className="min-w-0 flex-1">
+        <span className="block text-[13px] text-subtle">{label}</span>
+        <span className="mt-1 block text-[17px] leading-snug text-ink">{value}</span>
+      </span>
+      <ChevronRight
+        className={`h-5 w-5 shrink-0 text-subtle transition-transform group-hover:text-ink ${open ? "rotate-90" : ""}`}
+        aria-hidden="true"
+      />
     </button>
   );
 }
 
-/** Text that reads as plain text until the pencil turns it into a box. */
-function EditableText({ value, onChange, label, big }: { value: string; onChange: (v: string) => void; label: string; big?: boolean }) {
+/** A line that turns into a text box when clicked. */
+function EditableRow({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   const [editing, setEditing] = useState(false);
   if (editing) {
     return (
-      <textarea
-        autoFocus
-        rows={3}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onBlur={() => setEditing(false)}
-        aria-label={label}
-        className="w-full resize-none rounded-xl border border-brand bg-surface-2 px-3 py-2 text-base leading-relaxed text-ink focus:outline-none"
-      />
+      <div>
+        <label className="block text-[13px] text-subtle">
+          {label}
+          <textarea
+            autoFocus
+            rows={2}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={() => setEditing(false)}
+            className="mt-1.5 block w-full resize-none rounded-[14px] border border-brand bg-surface px-3.5 py-2.5 text-[17px] leading-snug text-ink focus:outline-none focus:ring-4 focus:ring-brand/10"
+          />
+        </label>
+      </div>
     );
   }
-  return (
-    <button type="button" onClick={() => setEditing(true)} className="group flex w-full items-start gap-2 text-left cursor-pointer" aria-label={`Edit ${label}`}>
-      <span className={`flex-1 leading-snug text-ink ${big ? "text-lg font-bold" : "text-base"}`}>{value || <span className="text-subtle">Tap to add</span>}</span>
-      <Pencil className="mt-1 h-4 w-4 shrink-0 text-subtle transition-colors group-hover:text-brand" />
-    </button>
-  );
+  return <RowButton label={label} value={value || <span className="text-subtle">Click to add</span>} onClick={() => setEditing(true)} />;
 }
 
-function RemovableChip({ children, onRemove }: { children: ReactNode; onRemove: () => void }) {
+function RemoveButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
-    <li className="flex items-center gap-1 rounded-lg bg-surface-2 py-1 pr-1 pl-2.5 text-sm text-ink">
-      {children}
-      <button type="button" onClick={onRemove} aria-label="Remove" className="rounded-md p-0.5 text-subtle transition-colors hover:bg-surface-3 hover:text-ink cursor-pointer">
-        <X className="h-3.5 w-3.5" />
-      </button>
-    </li>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="shrink-0 rounded-full p-1.5 text-subtle transition-colors hover:bg-surface-2 hover:text-ink cursor-pointer"
+    >
+      <X className="h-4 w-4" />
+    </button>
   );
 }
 
@@ -139,134 +106,124 @@ export function ImportReview({
   const [experienceOpen, setExperienceOpen] = useState(false);
 
   const icpLists = icp ? LIST_LABELS.filter(({ key }) => icp[key].length > 0) : [];
-  const icpCount = icp ? icpLists.reduce((n, { key }) => n + icp[key].length, 0) : 0;
-  const ticked = result.proofs.filter((p) => approvedProofs.includes(p.id)).length;
-  const experience = experienceOpen ? result.experience : result.experience.slice(0, EXPERIENCE_SHOWN);
-  const hiddenExperience = result.experience.length - EXPERIENCE_SHOWN;
+  const experienceCount = result.experience.length;
 
   return (
-    <div className="space-y-3 sm:space-y-4">
-      {showFocus && result.focus && (
-        <Section icon={<Target className="h-4 w-4" />} title="Known for">
-          <EditableText big label="what you want to be known for" value={result.focus.focus} onChange={(focus) => onChange({ ...result, focus: { ...result.focus!, focus } })} />
-        </Section>
-      )}
+    <div>
+      <ul className={card}>
+        {showFocus && result.focus && (
+          <li className={row}>
+            <EditableRow label="Known for" value={result.focus.focus} onChange={(focus) => onChange({ ...result, focus: { ...result.focus!, focus } })} />
+          </li>
+        )}
 
-      {icp && (
-        <Section icon={<Users2 className="h-4 w-4" />} title="Who you write for">
-          {(icp.who || showFocus) && <EditableText label="who you write for" value={icp.who} onChange={(who) => setIcp({ who })} />}
-          {icpCount > 0 && !icpOpen && (
-            <p className="mt-3 text-sm leading-relaxed text-muted">
-              Also found {icpLists.map(({ key, noun }) => `${icp[key].length} ${noun}`).join(" · ")}.
-            </p>
-          )}
-          {icpOpen && (
-            <div className="mt-4 space-y-4">
-              {icpLists.map(({ key, label }) => (
-                <div key={key}>
-                  <p className="mb-1.5 text-xs font-semibold text-muted">{label}</p>
-                  <ul className="flex flex-wrap gap-1.5">
-                    {icp[key].map((item) => (
-                      <RemovableChip key={item} onRemove={() => setIcp({ [key]: icp[key].filter((x) => x !== item) })}>
-                        {item}
-                      </RemovableChip>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          )}
-          {icpCount > 0 && <MoreToggle open={icpOpen} onToggle={() => setIcpOpen((o) => !o)} closedLabel="See and edit them" />}
-        </Section>
-      )}
+        {icp && (icp.who || showFocus) && (
+          <li className={row}>
+            <EditableRow label="Who you write for" value={icp.who} onChange={(who) => setIcp({ who })} />
+          </li>
+        )}
+
+        {icp && icpLists.length > 0 && (
+          <li className={row}>
+            <RowButton
+              label="What they care about"
+              value={icpLists.map(({ key, noun }) => `${icp[key].length} ${noun}`).join(", ")}
+              open={icpOpen}
+              onClick={() => setIcpOpen((o) => !o)}
+            />
+            {icpOpen && (
+              <div className="animate-rise-in mt-4 space-y-4">
+                {icpLists.map(({ key, label }) => (
+                  <div key={key}>
+                    <p className="text-[13px] text-subtle">{label}</p>
+                    <ul className="mt-1.5 flex flex-wrap gap-1.5">
+                      {icp[key].map((item) => (
+                        <li key={item} className="flex min-w-0 items-center gap-0.5 rounded-full bg-surface-2 py-0.5 pr-0.5 pl-3 text-[15px] text-ink">
+                          <span className="min-w-0 break-words">{item}</span>
+                          <RemoveButton label={`Remove ${item}`} onClick={() => setIcp({ [key]: icp[key].filter((x) => x !== item) })} />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+          </li>
+        )}
+
+        {voice && (
+          <li className={row}>
+            <label className="flex w-full items-center gap-4 cursor-pointer">
+              <span className="min-w-0 flex-1">
+                <span className="block text-[13px] text-subtle">Your voice</span>
+                <span className="mt-1 block text-[17px] leading-snug text-ink">
+                  {VOICE_TEXT.formality[voice.formality]}, {VOICE_TEXT.sentence_length[voice.sentence_length]}, {VOICE_TEXT.humor[voice.humor]},{" "}
+                  {VOICE_TEXT.emoji_use[voice.emoji_use]}
+                </span>
+              </span>
+              <span className="shrink-0 text-[15px] text-muted">Use it</span>
+              <input type="checkbox" checked={keepVoice} onChange={(e) => onKeepVoice(e.target.checked)} className="h-5 w-5 shrink-0 accent-[var(--color-brand)]" />
+            </label>
+          </li>
+        )}
+
+        {experienceCount > 0 && (
+          <li className={row}>
+            <RowButton
+              label="Your experience"
+              value={`${experienceCount} thing${experienceCount === 1 ? "" : "s"} from your work`}
+              open={experienceOpen}
+              onClick={() => setExperienceOpen((o) => !o)}
+            />
+            {experienceOpen && (
+              <ul className="animate-rise-in mt-3 space-y-1">
+                {result.experience.map((item) => (
+                  <li key={item.id} className="flex items-start gap-2 rounded-[14px] bg-surface-2 py-2 pr-1.5 pl-3.5">
+                    <textarea
+                      rows={2}
+                      value={item.content}
+                      aria-label="This experience"
+                      onChange={(e) => onChange({ ...result, experience: result.experience.map((x) => (x.id === item.id ? { ...x, content: e.target.value } : x)) })}
+                      className="min-w-0 flex-1 resize-none bg-transparent py-0.5 text-[15px] leading-snug text-ink focus:outline-none"
+                    />
+                    <RemoveButton label="Remove this experience" onClick={() => onChange({ ...result, experience: result.experience.filter((x) => x.id !== item.id) })} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        )}
+      </ul>
 
       {result.proofs.length > 0 && (
-        <Section
-          icon={<BadgeCheck className="h-4 w-4" />}
-          title="Proof from your site"
-          hint="Posts may cite these as fact. Tick only what's true today."
-          badge={`${ticked} of ${result.proofs.length} ticked`}
-          attention={ticked === 0}
-        >
-          <ul className="space-y-2">
-            {result.proofs.map((proof) => {
-              const on = approvedProofs.includes(proof.id);
-              return (
-                <li key={proof.id} className={`rounded-xl border transition-colors ${on ? "border-brand bg-brand/10" : "border-line bg-surface-2 hover:border-line-strong"}`}>
-                  <button
-                    type="button"
-                    role="checkbox"
-                    aria-checked={on}
-                    onClick={() => onToggleProof(proof.id)}
-                    className="flex w-full items-start gap-3 p-3 pb-1 text-left cursor-pointer"
-                  >
-                    <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border ${on ? "border-brand bg-brand text-brand-ink" : "border-line-strong"}`}>
-                      {on && <Check className="h-4 w-4 animate-pop-in" strokeWidth={3.5} />}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block font-bold text-ink">{proof.claim}</span>
-                      <span className="mt-1 block text-sm italic text-muted">“{proof.quote}”</span>
-                    </span>
-                  </button>
-                  <a
-                    href={proof.source_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mb-2.5 ml-12 inline-flex items-center gap-1 text-xs font-bold text-subtle hover:text-brand"
-                  >
-                    {proof.source_title || proof.source_url}
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        </Section>
-      )}
-      {result.experience.length > 0 && (
-        <Section icon={<Briefcase className="h-4 w-4" />} title="Your experience" hint="Facts from your profile that posts can draw on." badge={result.experience.length}>
-          <ul className="space-y-2">
-            {experience.map((item) => (
-              <li key={item.id} className="flex items-start gap-2 rounded-xl bg-surface-2 px-3 py-2.5">
-                <div className="min-w-0 flex-1">
-                  <EditableText
-                    label="this experience"
-                    value={item.content}
-                    onChange={(content) => onChange({ ...result, experience: result.experience.map((e) => (e.id === item.id ? { ...e, content } : e)) })}
+        <section className="mt-10">
+          <h2 className="text-[21px] font-semibold text-ink">Which of these are true today?</h2>
+          <p className="mt-1.5 text-[15px] text-muted">From your website. Posts only use the ones you tick.</p>
+          <ul className={`${card} mt-4`}>
+            {result.proofs.map((proof) => (
+              <li key={proof.id} className={row}>
+                <label className="flex items-start gap-3.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={approvedProofs.includes(proof.id)}
+                    onChange={() => onToggleProof(proof.id)}
+                    className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--color-brand)]"
                   />
-                  <span className="mt-1 block text-[11px] font-bold text-subtle">from {item.from}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onChange({ ...result, experience: result.experience.filter((e) => e.id !== item.id) })}
-                  aria-label="Remove this experience"
-                  className="rounded-lg p-1 text-subtle transition-colors hover:bg-surface-3 hover:text-ink cursor-pointer"
+                  <span className="min-w-0 flex-1 text-[17px] leading-snug text-ink">{proof.claim}</span>
+                </label>
+                <a
+                  href={proof.source_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 ml-[34px] block truncate text-[13px] text-subtle hover:text-brand"
                 >
-                  <X className="h-4 w-4" />
-                </button>
+                  {proof.source_title || proof.source_url}
+                </a>
               </li>
             ))}
           </ul>
-          {hiddenExperience > 0 && (
-            <MoreToggle open={experienceOpen} onToggle={() => setExperienceOpen((o) => !o)} closedLabel={`Show ${hiddenExperience} more`} />
-          )}
-        </Section>
+        </section>
       )}
-
-      {voice && (
-        <Section icon={<Mic2 className="h-4 w-4" />} title="Your voice">
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input type="checkbox" checked={keepVoice} onChange={(e) => onKeepVoice(e.target.checked)} className="mt-1 h-5 w-5 accent-[var(--color-brand)]" />
-            <span className="text-base leading-snug text-ink">
-              You write {VOICE_TEXT.formality[voice.formality]}, with {VOICE_TEXT.sentence_length[voice.sentence_length]}, {VOICE_TEXT.humor[voice.humor]} and{" "}
-              {VOICE_TEXT.emoji_use[voice.emoji_use]}.
-              {voice.signature_phrases.length > 0 && <span className="block text-sm text-muted">Phrases you use: “{voice.signature_phrases.join("”, “")}”</span>}
-              {result.voice?.about && <span className="mt-1 block text-sm text-muted">Your About section is kept as a sample of your writing.</span>}
-            </span>
-          </label>
-        </Section>
-      )}
-
     </div>
   );
 }

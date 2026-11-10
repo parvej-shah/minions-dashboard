@@ -29,3 +29,4 @@
 | 25 | Ideas | CLAUDE | DONE (pushed 2026-11-10) | tasks/25.md |
 | 26 | Remaining screens calm pass | CLAUDE | DONE (pushed 2026-11-10) | tasks/26.md |
 | 27 | Sweep + browser pass, then ask to push | CLAUDE | DONE (pushed 2026-11-10) | tasks/27.md |
+| 28 | Calm welcome + setup flow (board, then build) | CLAUDE | DONE | built locally 2026-11-10; push awaits OK |

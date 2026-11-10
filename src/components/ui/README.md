@@ -58,6 +58,10 @@ under reduced motion. No confetti, streaks or 3D edges.
 - **`LoadingState`** (in `EmptyState.tsx`): skeleton rows with one loading
   announcement.
 - **`ProgressBar`**: a thin rounded bar; value 0 to 1.
+- **`Steps.tsx`**: the frame for guided flows (setup, first post). `StepHeader`
+  (wordmark + segmented bar + "n of 4"), `StepTitle`, `StepBody`, `StepFooter`
+  (one quiet link left, one pill right), `StepLabel`, `stepInput`, `ThinBar`
+  and `useEnterToContinue`. One title, one line, one card per screen.
 - **`Modal`** (`center` and `sheet`), **`Drawer`**, **`ConfirmModal`**,
   **`Toast`**, **`EmptyState`**, **`ErrorLine`**.
 - **`fieldStyles`**: `inputClass`, `sectionClass` and `sectionCardClass` for

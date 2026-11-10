@@ -1,48 +1,15 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { Flame, Hammer, Lightbulb } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { OnboardingWizardState } from "@/hooks/useOnboardingWizard";
-import type { StoryKind } from "@/lib/onboardingDraft";
-import { MEMORY_MIN_CHARS } from "@/constants/contentLanes";
-import { ExampleChip, Question, lessonInput } from "./lesson";
+import { composeStory, restoreStory, type StoryPick } from "@/lib/onboardingStory";
+import { StepLabel, StepTitle, stepInput } from "@/components/ui/Steps";
 
-/** Past this, the answer usually has the specifics a strong post needs. */
-export const RICH_STORY = 120;
-
-const KINDS: { id: StoryKind; label: string; icon: React.ReactNode; placeholder: string; starters: string[] }[] = [
-  {
-    id: "LESSON",
-    label: "Something I learned",
-    icon: <Lightbulb className="h-5 w-5" strokeWidth={2.5} />,
-    placeholder: "e.g. We cut our onboarding from 14 steps to 3. Signups didn't move, but activation doubled, because…",
-    starters: ["The mistake I see most often is", "Last month we tried", "What surprised me was"],
-  },
-  {
-    id: "OPINION",
-    label: "An opinion I hold",
-    icon: <Flame className="h-5 w-5" strokeWidth={2.5} />,
-    placeholder: "e.g. Most teams don't need an AI strategy. They need one boring workflow that works, because…",
-    starters: ["Unpopular opinion:", "Most people in my field get this wrong:", "I stopped believing that"],
-  },
-  {
-    id: "CURRENT_WORK",
-    label: "What I'm building",
-    icon: <Hammer className="h-5 w-5" strokeWidth={2.5} />,
-    placeholder: "e.g. This week I'm rebuilding our pricing page. The hardest part is deciding what to leave out…",
-    starters: ["This week I'm working on", "The hardest part right now is", "We just shipped"],
-  },
-];
-
-/** Footer praise for the answer: any real answer is good, a detailed one is better. */
-export function storyPraise(length: number): string | null {
-  if (length >= RICH_STORY) return "Specific details make the best posts. Love it!";
-  if (length >= MEMORY_MIN_CHARS) return "That's real. Add a detail or two if you can.";
-  return null;
-}
+/** How many things from the profile are offered to post about. */
+const PICKS = 2;
 
 export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
-  const { prepareBrief } = wizard;
+  const { prepareBrief, setStoryText, setStoryKind } = wizard;
   // The brief doesn't depend on the story, so it is written while the user picks one. Once per visit.
   const askedForBrief = useRef(false);
   useEffect(() => {
@@ -50,113 +17,95 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
     askedForBrief.current = true;
     prepareBrief();
   }, [prepareBrief]);
-  const kind = KINDS.find((k) => k.id === wizard.storyKind) ?? KINDS[0];
-  const length = wizard.storyText.trim().length;
-  const meter = Math.min(length / RICH_STORY, 1);
-  // Current work first: what someone is doing now makes the liveliest first post.
-  const picks = [...(wizard.brandImport?.experience ?? [])].sort((a, b) => (a.kind === b.kind ? 0 : a.kind === "CURRENT_WORK" ? -1 : 1)).slice(0, 3);
 
-  const addStarter = (starter: string) => {
-    const text = wizard.storyText.trim();
-    wizard.setStoryText(text ? `${text} ${starter} ` : `${starter} `);
+  // Current work first: what someone is doing now makes the liveliest first post.
+  const experience = wizard.brandImport?.experience;
+  const picks: StoryPick[] = useMemo(
+    () =>
+      [...(experience ?? [])]
+        .sort((a, b) => (a.kind === b.kind ? 0 : a.kind === "CURRENT_WORK" ? -1 : 1))
+        .slice(0, PICKS)
+        .map(({ id, kind, content }) => ({ id, kind, content })),
+    [experience]
+  );
+
+  const [initial] = useState(() => restoreStory(wizard.storyText, picks));
+  const [pickId, setPickId] = useState<string | null>(initial.pickId);
+  const [detail, setDetail] = useState(initial.detail);
+  const pick = picks.find((p) => p.id === pickId) ?? null;
+
+  // The story the writer gets: the pick plus any detail, or what they wrote.
+  // Written from the handlers, since the wizard's setters change every render.
+  const write = (nextPick: StoryPick | null, nextDetail: string) => {
+    const { storyText, storyKind } = composeStory(nextPick, nextDetail);
+    setStoryText(storyText);
+    setStoryKind(storyKind);
   };
+  const choose = (id: string | null) => {
+    setPickId(id);
+    write(picks.find((p) => p.id === id) ?? null, detail);
+  };
+  const type = (text: string) => {
+    setDetail(text);
+    write(pick, text);
+  };
+  // A fresh visit starts on the first pick, so the story is set before anything is clicked.
+  const synced = useRef(false);
+  useEffect(() => {
+    if (synced.current) return;
+    synced.current = true;
+    if (pick && !wizard.storyText.trim()) write(pick, "");
+  });
+
+  const ownWords = !pick;
 
   return (
     <>
-      <Question
-        title="Tell me one thing from your work."
-        hint="Your first post is written from this, in your words. Nothing gets invented."
+      <StepTitle
+        title="What should your first post be about?"
+        line={picks.length ? "Pick one from your work, or write your own. Nothing gets invented." : "One thing from your work. Your first post is written from it, in your words."}
       />
 
       {picks.length > 0 && (
-        <div className="mt-6">
-          <p className="text-sm font-semibold text-muted">Pick one from your profile</p>
-          <ul className="mt-2.5 space-y-2">
-            {picks.map((item) => {
-              const picked = wizard.storyText.trim() === item.content;
-              return (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    aria-pressed={picked}
-                    onClick={() => {
-                      wizard.setStoryText(item.content);
-                      wizard.setStoryKind(item.kind);
-                    }}
-                    className={`w-full rounded-2xl border px-4 py-3 text-left text-sm leading-snug transition-[transform,border-width] duration-75 cursor-pointer active:translate-y-0.5 active:border-b ${
-                      picked ? "border-brand bg-brand/10 text-ink" : "border-line bg-surface text-muted hover:border-line-strong hover:bg-surface-2"
-                    }`}
-                  >
-                    {item.content}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-          <p className="mt-5 text-sm font-semibold text-muted">Then add a detail only you know, or write your own</p>
+        <div role="radiogroup" aria-label="What to post about" className="mt-9 rounded-[28px] bg-surface px-5 shadow-soft sm:px-6">
+          {[...picks, null].map((option) => {
+            const id = option?.id ?? null;
+            const checked = pickId === id;
+            return (
+              <label key={id ?? "own"} className="flex items-start gap-3.5 border-b border-line py-4 text-[17px] leading-snug text-ink last:border-b-0 cursor-pointer sm:py-5">
+                <input
+                  type="radio"
+                  name="story-pick"
+                  checked={checked}
+                  onChange={() => choose(id)}
+                  className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--color-brand)]"
+                />
+                <span className="min-w-0 flex-1">{option ? option.content : "Something else"}</span>
+              </label>
+            );
+          })}
         </div>
       )}
 
-      <div role="radiogroup" aria-label="What kind of thing" className={`${picks.length ? "mt-3" : "mt-6"} grid grid-cols-3 gap-2`}>
-        {KINDS.map((k) => {
-          const selected = k.id === wizard.storyKind;
-          return (
-            <button
-              key={k.id}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              onClick={() => wizard.setStoryKind(k.id)}
-              className={`flex flex-col items-center gap-1.5 rounded-2xl border px-2 py-3 text-center text-xs font-semibold leading-tight transition-[transform,border-width] duration-75 cursor-pointer active:translate-y-0.5 active:border-b sm:text-sm ${
-                selected ? "border-brand bg-brand/10 text-brand" : "border-line bg-surface text-muted hover:border-line-strong hover:bg-surface-2"
-              }`}
-            >
-              {k.icon}
-              {k.label}
-            </button>
-          );
-        })}
+      <div className={picks.length ? "mt-8" : "mt-9"}>
+        <StepLabel htmlFor="setup-story" note={ownWords ? undefined : "optional"}>
+          {ownWords ? "What happened?" : "Add a detail only you know"}
+        </StepLabel>
+        <textarea
+          id="setup-story"
+          autoFocus={picks.length === 0}
+          rows={4}
+          value={detail}
+          onChange={(e) => type(e.target.value)}
+          placeholder={
+            ownWords
+              ? "Something you learned, an opinion you hold, or what you're working on now…"
+              : "What happened, what surprised you, what you'd tell a friend…"
+          }
+          maxLength={1000}
+          className={`${stepInput} mt-2 resize-none`}
+        />
       </div>
-
-      <textarea
-        autoFocus={picks.length === 0}
-        rows={5}
-        value={wizard.storyText}
-        onChange={(e) => wizard.setStoryText(e.target.value)}
-        placeholder={kind.placeholder}
-        aria-label={kind.label}
-        maxLength={1000}
-        className={`${lessonInput} mt-4 resize-none`}
-      />
-
-      {/* How much detail there is: fills toward a "rich" answer, gold once it gets there. */}
-      {length > 0 && (
-        <div className="mt-2.5 flex items-center gap-3" aria-hidden="true">
-          <div className="h-2 flex-1 overflow-hidden rounded-full bg-line">
-            <div
-              className={`h-full rounded-full transition-[width,background-color] duration-300 ${meter >= 1 ? "bg-gold" : "bg-brand"}`}
-              style={{ width: `${Math.max(meter * 100, 4)}%` }}
-            />
-          </div>
-          <span className={`text-xs font-semibold ${meter >= 1 ? "text-gold" : "text-subtle"}`}>
-            {meter >= 1 ? "Great detail" : length >= MEMORY_MIN_CHARS ? "Good" : "Keep going"}
-          </span>
-        </div>
-      )}
-
-      {/* Starters are for a blank page; once they're writing they only add noise. */}
-      {length === 0 && (
-        <>
-          <p className="mt-5 text-sm font-semibold text-muted">Stuck? Start with</p>
-          <div className="mt-2.5 flex flex-wrap gap-2">
-            {kind.starters.map((starter) => (
-              <ExampleChip key={starter} onClick={() => addStarter(starter)}>
-                {starter}…
-              </ExampleChip>
-            ))}
-          </div>
-        </>
-      )}
     </>
   );
 }

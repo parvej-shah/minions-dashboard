@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { PlayCircle } from "lucide-react";
 import { useOnboardingWizard, type OnboardingWizardState } from "@/hooks/useOnboardingWizard";
 import { useBrandImport } from "@/hooks/useBrandImport";
 import { MEMORY_MIN_CHARS } from "@/constants/contentLanes";
@@ -9,9 +8,10 @@ import { ImportDrop, type DroppedProfile } from "@/components/brandImport/Import
 import { ImportLive } from "@/components/brandImport/ImportLive";
 import { ImportReview } from "@/components/brandImport/ImportReview";
 import { fieldsWithImport } from "@/lib/onboardingSubmit";
-import { LessonFooter, LessonHeader, Question, useEnterToContinue } from "./lesson";
+import { SETUP_STEPS, setupStep } from "@/lib/onboardingStory";
+import { StepBody, StepFooter, StepHeader, StepLink, StepTitle, useEnterToContinue } from "@/components/ui/Steps";
 import { AudienceQuestion, FocusQuestion, MIN_ANSWER } from "./BrandQuestions";
-import { StoryQuestion, storyPraise } from "./StoryQuestion";
+import { StoryQuestion } from "./StoryQuestion";
 import { BriefBuilding } from "./BriefBuilding";
 import { WizardSkeleton } from "./WizardSkeleton";
 
@@ -19,19 +19,14 @@ import { WizardSkeleton } from "./WizardSkeleton";
  * Setup ends in the user's first post. It starts by reading their LinkedIn
  * PDF and website (decision 2026-10-12): they watch their brand assemble,
  * check it on one screen, then pick something from their work to post about.
+ * Every screen has the same shape: a title, one line, one card, one button.
  * "I'd rather type it" keeps the older path: what they want to be known for
  * and who reads them, typed. Everything else starts from a default and is
  * changed later in Brand and Schedule.
  */
 type Screen = "import" | "reading" | "review" | "focus" | "audience" | "story";
 
-// The first post's screen is the real finish line, so setup fills the bar only partway.
-const SETUP_SHARE = 0.75;
-const PROGRESS: Record<Screen, number> = { import: 0, reading: 1, review: 2, focus: 1, audience: 2, story: 3 };
-const SCREENS = 4;
 const IMPORT_ENDPOINT = "/api/onboarding/brand-import";
-// The whole setup, from saving the LinkedIn PDF to the first published post.
-const TUTORIAL_URL = "https://youtu.be/V1yrBqnExAE";
 
 export default function OnboardingWizard({ userId }: { userId: string }) {
   const wizard = useOnboardingWizard(userId);
@@ -67,8 +62,7 @@ function Lesson({ wizard }: { wizard: OnboardingWizardState }) {
 
   const focusOk = wizard.contentFocus.trim().length >= MIN_ANSWER;
   const audienceOk = wizard.audienceDescription.trim().length >= MIN_ANSWER;
-  const storyLength = wizard.storyText.trim().length;
-  const storyOk = storyLength >= MEMORY_MIN_CHARS;
+  const storyOk = wizard.storyText.trim().length >= MEMORY_MIN_CHARS;
   const canRead = Boolean(profile) || wizard.websiteUrl.trim().length > 3;
 
   const building = wizard.isGeneratingDirectives || wizard.saving;
@@ -100,45 +94,30 @@ function Lesson({ wizard }: { wizard: OnboardingWizardState }) {
     if (screen === "reading") run.reset();
     go(BACK[screen] ?? "import");
   };
-
-  const secondaryLink = (label: string, onClick: () => void) => (
-    <button type="button" onClick={onClick} className="text-sm font-bold text-muted underline-offset-4 hover:text-ink hover:underline cursor-pointer">
-      {label}
-    </button>
-  );
+  const backLink = <StepLink onClick={back}>Back</StepLink>;
 
   let body: React.ReactNode;
-  let footer: { label: string; onContinue: () => void; disabled?: boolean; loading?: boolean; praise?: string | null; error?: string | null; secondary?: React.ReactNode };
+  let footer: { label: string; onContinue: () => void; disabled?: boolean; loading?: boolean; error?: string | null; secondary?: React.ReactNode };
   let wide = false;
 
   switch (screen) {
     case "import":
       body = (
         <>
-          <Question
-            title="Let's skip the forms. Show me your LinkedIn."
-            hint="Minions reads your profile and website and sets up your brand while you watch. You check it before anything is saved."
+          <StepTitle
+            title="Start with your LinkedIn profile."
+            line="We read it and your website, then set up your brand. You check everything before it's saved."
           />
-          <div className="mt-6">
+          <div className="mt-9">
             <ImportDrop profile={profile} onProfile={setProfile} websiteUrl={wizard.websiteUrl} onWebsiteUrl={wizard.setWebsiteUrl} />
           </div>
-          <a
-            href={TUTORIAL_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-muted underline-offset-4 hover:text-ink hover:underline"
-          >
-            <PlayCircle className="h-4 w-4 text-brand" />
-            Not sure what to do? Watch the 3-minute walkthrough
-          </a>
         </>
       );
       footer = {
         label: "Read my profile",
         onContinue: startReading,
         disabled: !canRead,
-        praise: profile ? "Got it. This takes about 20 seconds." : null,
-        secondary: secondaryLink("I'd rather type it", typeInstead),
+        secondary: <StepLink onClick={typeInstead}>I&apos;d rather type it</StepLink>,
       };
       break;
     case "reading":
@@ -146,23 +125,22 @@ function Lesson({ wizard }: { wizard: OnboardingWizardState }) {
       body = <ImportLive run={run} hadWebsite={Boolean(wizard.websiteUrl.trim())} />;
       footer =
         run.status === "error"
-          ? { label: "Try again", onContinue: startReading, error: run.error, secondary: secondaryLink("Type it instead", typeInstead) }
+          ? { label: "Try again", onContinue: startReading, error: run.error, secondary: <StepLink onClick={typeInstead}>Type it instead</StepLink> }
           : {
-              label: run.status === "done" ? "Check it over" : "Reading…",
+              label: "Check it over",
               onContinue: () => {
                 wizard.setBrandImport(run.result);
                 go("review");
               },
               disabled: run.status !== "done",
-              loading: run.status === "reading",
-              praise: run.status === "done" ? "That's you. No typing needed." : null,
+              secondary: backLink,
             };
       break;
     case "review":
       body = (
         <>
-          <Question title="Here's what I found. Look right?" hint="Tap the pencil to fix anything, × to drop it. Nothing is saved until you continue." />
-          <div className="mt-6">
+          <StepTitle title="Does this look like you?" line="Click any line to change it. Nothing is saved until you continue." />
+          <div className="mt-9">
             {wizard.brandImport && (
               <ImportReview
                 result={wizard.brandImport}
@@ -177,15 +155,15 @@ function Lesson({ wizard }: { wizard: OnboardingWizardState }) {
           </div>
         </>
       );
-      footer = { label: "Looks right", onContinue: () => go(nextQuestion(wizard)), secondary: secondaryLink("Read it again", () => go("import")) };
+      footer = { label: "Looks right", onContinue: () => go(nextQuestion(wizard)), secondary: <StepLink onClick={() => go("import")}>Read it again</StepLink> };
       break;
     case "focus":
       body = <FocusQuestion wizard={wizard} />;
-      footer = { label: "Continue", onContinue: () => go(nextQuestion(wizard)), disabled: !focusOk, praise: focusOk ? "Clear territory. Nice!" : null };
+      footer = { label: "Continue", onContinue: () => go(nextQuestion(wizard)), disabled: !focusOk, secondary: backLink };
       break;
     case "audience":
       body = <AudienceQuestion wizard={wizard} />;
-      footer = { label: "Continue", onContinue: () => go(nextQuestion(wizard)), disabled: !audienceOk, praise: audienceOk ? "Now we know who's listening." : null };
+      footer = { label: "Continue", onContinue: () => go(nextQuestion(wizard)), disabled: !audienceOk, secondary: backLink };
       break;
     default:
       body = <StoryQuestion wizard={wizard} />;
@@ -194,7 +172,7 @@ function Lesson({ wizard }: { wizard: OnboardingWizardState }) {
         // A draft saved before this check existed can still be missing an answer.
         onContinue: () => (nextQuestion(wizard) === "story" ? void wizard.writeFirstPost() : go(nextQuestion(wizard))),
         disabled: !storyOk,
-        praise: storyPraise(storyLength),
+        secondary: backLink,
       };
   }
 
@@ -203,21 +181,13 @@ function Lesson({ wizard }: { wizard: OnboardingWizardState }) {
 
   return (
     <div className="flex min-h-dvh flex-col bg-canvas text-ink">
-      <LessonHeader progress={building ? SETUP_SHARE : (PROGRESS[screen] / SCREENS) * SETUP_SHARE} onBack={screen !== "import" && !building ? back : undefined} />
+      <StepHeader step={building ? undefined : setupStep(screen)} total={SETUP_STEPS} />
       {building ? (
         <BriefBuilding />
       ) : (
         <>
-          <main className="flex-1">
-            {wide ? (
-              body
-            ) : (
-              <div key={screen} className="story-step-in mx-auto w-full max-w-2xl px-4 pt-4 pb-10 sm:px-6 sm:pt-8">
-                {body}
-              </div>
-            )}
-          </main>
-          <LessonFooter {...footer} error={footer.error ?? wizard.error} />
+          {wide ? <main className="flex-1">{body}</main> : <StepBody key={screen}>{body}</StepBody>}
+          <StepFooter {...footer} error={footer.error ?? wizard.error} />
         </>
       )}
     </div>

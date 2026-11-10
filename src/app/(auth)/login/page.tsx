@@ -8,17 +8,18 @@ import LoginScreen from "./_components/LoginScreen";
 /** Same outline as LoginScreen, so nothing jumps when it hydrates. */
 function LoginSkeleton() {
   return (
-    <SkeletonGroup label="Loading sign-in" className="flex min-h-dvh flex-col items-center justify-center bg-canvas px-5">
-      <div className="w-full max-w-md space-y-6">
-        <Skeleton className="mx-auto h-24 w-24 rounded-[28px]" />
-        <Skeleton className="mx-auto h-9 w-64" />
-        <Skeleton className="mx-auto h-4 w-72 max-w-full" />
-        <div className="grid grid-cols-3 gap-2">
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} className="h-28 rounded-2xl" />
-          ))}
+    <SkeletonGroup label="Loading sign-in" className="flex min-h-dvh flex-col bg-canvas">
+      <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6">
+        <Skeleton className="h-6 w-24" />
+      </div>
+      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center gap-8 px-4 pb-10 sm:px-6 md:flex-row md:items-center md:gap-14">
+        <Skeleton className="mx-auto aspect-[4/3] w-full max-w-[300px] rounded-[28px] md:max-w-[480px] md:flex-1" />
+        <div className="w-full space-y-4 md:max-w-[460px] md:flex-1">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-4/5" />
+          <Skeleton className="h-5 w-3/4" />
+          <Skeleton className="mt-8 h-14 w-full rounded-full" />
         </div>
-        <Skeleton className="h-14 rounded-2xl" />
       </div>
     </SkeletonGroup>
   );

@@ -28,6 +28,13 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-10 — The welcome page speaks to the ICP; setup is four calm steps
+
+**Decision:** The sign-in page is the landing: a line drawing, "You're good at what you do. LinkedIn just doesn't know it yet.", one line ("One post a week from your real work. Nothing goes out until you say yes."), one "Continue with Google" and "Free for 14 days." Nothing else. Setup is four steps (profile, reading, check it, one story), one question per screen. The story-kind selector is gone: a picked item keeps its kind, typed text counts as a lesson.
+**Why:** The ICP is B2B service founders who should post and don't. The headline names that feeling, and minimalism is the core value on every screen (user, 2026-11-10). Mascot bubbles, praise banners, meters and kind pickers added choices without adding outcomes.
+**Alternatives considered:** A Clio-style page with sign-in links, footer and trust lines (trimmed at the user's request: "does our landing page is minimal??").
+**Status:** active
+
 ## 2026-11-09 — Approving a post puts it in the next free posting time
 
 **Decision:** On the review screen the main button for a waiting post reads "Post on <day time>" and schedules it into the next posting time no other post holds. Posting right away, another time, marking it posted by hand and deleting are quieter options under it.

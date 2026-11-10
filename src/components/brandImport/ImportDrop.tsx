@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Check, ChevronDown, FileUp, Globe, Loader2, X } from "lucide-react";
+import { Check, FileUp, Loader2, X } from "lucide-react";
 import { PdfReadError, readPdfText } from "@/lib/brandImport/readPdf";
 
 export interface DroppedProfile {
@@ -45,21 +45,21 @@ export function ImportDrop({
   const words = profile ? profile.text.split(/\s+/).length : 0;
 
   return (
-    <div className="space-y-4">
+    <div>
       {profile ? (
-        <div className="animate-pop-in flex items-center gap-3 rounded-2xl border border-brand bg-brand/10 p-4">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand text-brand-ink">
-            <Check className="h-6 w-6" strokeWidth={3} />
+        <div className="animate-pop-in flex items-center gap-4 rounded-[28px] bg-surface p-5 shadow-soft sm:p-6">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-success/10 text-success">
+            <Check className="h-5 w-5" strokeWidth={2.5} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block truncate font-semibold text-ink">{profile.fileName}</span>
-            <span className="block text-sm text-muted">{words.toLocaleString()} words ready to read</span>
+            <span className="block truncate text-[17px] font-medium text-ink">{profile.fileName}</span>
+            <span className="block text-[15px] text-muted">{words.toLocaleString()} words, ready to read</span>
           </span>
           <button
             type="button"
             onClick={() => onProfile(null)}
             aria-label="Remove this PDF"
-            className="rounded-lg p-2 text-subtle transition-colors hover:bg-surface-2 hover:text-ink cursor-pointer"
+            className="rounded-full p-2 text-subtle transition-colors hover:bg-surface-2 hover:text-ink cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
@@ -78,52 +78,43 @@ export function ImportDrop({
             setDragging(false);
             void take(e.dataTransfer.files[0]);
           }}
-          className={`group flex w-full flex-col items-center gap-3 rounded-3xl border border-dashed px-6 py-10 text-center transition-colors cursor-pointer ${
-            dragging ? "border-brand bg-brand/10" : "border-line-strong bg-surface hover:border-brand/60 hover:bg-surface-2"
+          className={`flex w-full flex-col items-center gap-2.5 rounded-[28px] px-6 py-10 text-center shadow-soft transition-colors cursor-pointer sm:py-12 ${
+            dragging ? "bg-brand/5 ring-2 ring-brand" : "bg-surface hover:bg-surface-2"
           }`}
         >
-          <span
-            className={`flex h-16 w-16 items-center justify-center rounded-2xl transition-transform group-hover:-translate-y-0.5 ${
-              dragging ? "border-brand bg-brand text-brand-ink" : "border-line bg-surface-2 text-brand"
-            }`}
-          >
-            {reading ? <Loader2 className="h-8 w-8 animate-spin" /> : <FileUp className="h-8 w-8" strokeWidth={2.25} />}
-          </span>
-          <span className="text-lg font-semibold text-ink">{reading ? "Opening your PDF…" : "Drop your LinkedIn PDF here"}</span>
-          <span className="text-sm text-muted">or tap to choose it. A résumé works too. It stays on your device; only the text is read.</span>
+          {reading ? <Loader2 className="h-9 w-9 animate-spin text-brand" aria-hidden="true" /> : <FileUp className="h-9 w-9 text-brand" strokeWidth={1.6} aria-hidden="true" />}
+          <span className="text-[19px] font-semibold text-ink">{reading ? "Opening your PDF…" : "Drop your LinkedIn PDF"}</span>
+          <span className="text-[15px] text-muted">or click to choose it. A résumé works too.</span>
         </button>
       )}
       <input ref={input} type="file" accept="application/pdf,.pdf" className="hidden" onChange={(e) => void take(e.target.files?.[0])} />
-      {error && <p role="alert" className="text-sm font-bold text-danger">{error}</p>}
+      {error && (
+        <p role="alert" className="mt-3 text-[15px] text-danger">
+          {error}
+        </p>
+      )}
 
-      <details className="group rounded-2xl border border-line bg-surface px-4 py-3 text-sm text-muted">
-        <summary className="flex cursor-pointer list-none items-center justify-between font-bold text-ink">
-          How do I get my LinkedIn PDF?
-          <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
-        </summary>
-        <ol className="mt-3 list-decimal space-y-1 pl-5">
-          <li>Open your profile on linkedin.com (on a computer).</li>
-          <li>
-            Click <b className="text-ink">Resources</b> (or <b className="text-ink">More</b>) under your name.
-          </li>
-          <li>
-            Choose <b className="text-ink">Save to PDF</b>, then drop the file here.
-          </li>
+      <details className="group mt-3 text-[15px]">
+        <summary className="inline-flex min-h-11 cursor-pointer list-none items-center text-brand underline-offset-4 hover:underline">How do I get my LinkedIn PDF?</summary>
+        <ol className="mt-1 list-decimal space-y-1 pl-5 text-muted">
+          <li>Open your profile on linkedin.com, on a computer.</li>
+          <li>Click Resources (or More) under your name.</li>
+          <li>Choose Save to PDF, then drop the file above.</li>
         </ol>
       </details>
 
-      <label className="flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3.5 transition-colors focus-within:border-brand">
-        <Globe className="h-5 w-5 shrink-0 text-subtle" />
-        <input
-          type="url"
-          inputMode="url"
-          value={websiteUrl}
-          onChange={(e) => onWebsiteUrl(e.target.value)}
-          placeholder="yourcompany.com (optional, but it helps a lot)"
-          aria-label="Your website"
-          className="w-full bg-transparent text-base text-ink placeholder:text-subtle focus:outline-none sm:text-lg"
-        />
+      <label htmlFor="import-website" className="mt-7 block text-[15px] font-medium text-ink">
+        Your website <span className="font-normal text-subtle">(optional, helps a lot)</span>
       </label>
+      <input
+        id="import-website"
+        type="url"
+        inputMode="url"
+        value={websiteUrl}
+        onChange={(e) => onWebsiteUrl(e.target.value)}
+        placeholder="yourcompany.com"
+        className="mt-2 w-full rounded-[14px] border border-line-strong bg-surface px-4 py-3.5 text-[17px] text-ink placeholder:text-subtle transition-colors focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10"
+      />
     </div>
   );
 }
