@@ -1,4 +1,6 @@
 import { generateBrandDirectivesWithLLM, generateBrandSuggestionsWithLLM } from "@/lib/ai/brandCopilot";
+import { generateSetupHints } from "@/lib/ai/setupHints";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { templateDirectives } from "@/lib/ai/directiveTemplates";
 import { fetchWebsiteContext } from "@/lib/ai/websiteContext";
 import { writerExpertisePromptGuidance } from "@/constants/writerExpertise";
@@ -65,4 +67,16 @@ export async function generateSuggestions(body: JsonObject) {
   // Name and industry were typed by the user, so unlike the LinkedIn path this input is genuinely personal; a fetched site leads the label.
   const groundedIn = website ? `${website.domain} · ${businessName} · ${industry}` : `${businessName} · ${industry}`;
   return { success: true, aiSuggestions: suggestions ? { ...suggestions, groundedIn } : null };
+}
+
+const HINTS_PER_MINUTE = 20;
+
+/** The grey example for the next setup box, from the answers so far. Over the limit it is simply null: the fixed example stays. */
+export async function suggestSetupHint(clientId: string, body: JsonObject) {
+  const field = asString(body.field);
+  if (field !== "audience" && field !== "story") throw badRequest("field must be audience or story");
+  const { allowed } = await checkRateLimit(`setup-hint:${clientId}`, HINTS_PER_MINUTE, 60);
+  if (!allowed) return { hint: null };
+  const hint = await generateSetupHints({ field, contentFocus: asString(body.contentFocus), audienceDescription: asString(body.audienceDescription) });
+  return { hint };
 }

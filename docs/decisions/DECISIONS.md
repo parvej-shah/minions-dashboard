@@ -28,6 +28,13 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-10 — Setup examples follow the user's own answers
+
+**Decision:** The grey example in "Who should your posts reach?" is written from what the user wants to be known for, and the story box's example from both answers (a dentist-tax adviser sees "Dentists who own their practice"). Placeholder only: no tap-to-use chips, never saved or sent to the writer. If the model is slow or down, the fixed example stays.
+**Why:** A generic example ("Brokerage owners…") makes a dentist do the translation; their own field shows what a good answer looks like (user, 2026-11-10).
+**Alternatives considered:** Tap-to-use suggestion chips (more on screen, against minimalism; and a tapped example is no longer their words).
+**Status:** active
+
 ## 2026-11-10 — The welcome page speaks to the ICP; setup is four calm steps
 
 **Decision:** The sign-in page is the landing: a line drawing, "You're good at what you do. LinkedIn just doesn't know it yet.", one line ("One post a week from your real work. Nothing goes out until you say yes."), one "Continue with Google" and "Free for 14 days." Nothing else. Setup is four steps (profile, reading, check it, one story), one question per screen. The story-kind selector is gone: a picked item keeps its kind, typed text counts as a lesson.

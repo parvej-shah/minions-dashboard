@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { OnboardingWizardState } from "@/hooks/useOnboardingWizard";
 import { composeStory, restoreStory, type StoryPick } from "@/lib/onboardingStory";
 import { StepLabel, StepTitle, stepInput } from "@/components/ui/Steps";
+import { useSetupHint } from "@/hooks/useSetupHint";
+import { fieldsWithImport } from "@/lib/onboardingSubmit";
 
 /** How many things from the profile are offered to post about. */
 const PICKS = 2;
@@ -58,6 +60,8 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
   });
 
   const ownWords = !pick;
+  // The example follows what they want to be known for and who reads them.
+  const ownExample = useSetupHint("story", fieldsWithImport(wizard), "Something you learned, an opinion you hold, or what you're working on now…");
 
   return (
     <>
@@ -99,7 +103,7 @@ export function StoryQuestion({ wizard }: { wizard: OnboardingWizardState }) {
           onChange={(e) => type(e.target.value)}
           placeholder={
             ownWords
-              ? "Something you learned, an opinion you hold, or what you're working on now…"
+              ? ownExample
               : "What happened, what surprised you, what you'd tell a friend…"
           }
           maxLength={1000}
