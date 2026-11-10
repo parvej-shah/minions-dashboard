@@ -32,7 +32,7 @@ interface Props {
   setProfile: (profile: BrandSettings) => void;
 }
 
-/** Photo, colours and illustration style of the generated covers. An Advanced page: it changes rarely. */
+/** Photo, colours and illustration style of the generated covers. The full editor behind the cover card on Your brand. */
 export default function CoverAppearanceCard({ profile, setProfile }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [lookDraft, setLookDraft] = useState<LookDraft | null>(null);
@@ -188,7 +188,8 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
             </div>
           </div>
           <div className="space-y-2">
-            <p className={brandText.label}>Colours</p>
+            <p className={brandText.label}>Your own colours</p>
+            <p className={brandText.note}>Only if you need exact brand colours. The themes on Your brand are tuned to read well on a phone.</p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {LOOK_COLOR_FIELDS.map(({ key, label }) => (
                 <label key={key} className="block cursor-pointer space-y-1.5">

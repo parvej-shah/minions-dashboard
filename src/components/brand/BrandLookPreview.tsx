@@ -17,6 +17,8 @@ interface BrandLookPreviewProps {
   logoUrl?: string;
   /** SHAPES, DOODLES, ICONS or NONE. */
   art?: string;
+  /** No caption above it: the card around it already says what it is. */
+  bare?: boolean;
 }
 
 /**
@@ -26,7 +28,7 @@ interface BrandLookPreviewProps {
  * shows what a mock could not: a colour deepened for contrast, a photo that
  * cannot load.
  */
-export default function BrandLookPreview({ colors, brandName, byline, logoUrl, art }: BrandLookPreviewProps) {
+export default function BrandLookPreview({ colors, brandName, byline, logoUrl, art, bare }: BrandLookPreviewProps) {
   const [src, setSrc] = useState<string | null>(null);
   const [notes, setNotes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,8 +77,8 @@ export default function BrandLookPreview({ colors, brandName, byline, logoUrl, a
 
   return (
     <div className="space-y-1.5">
-      <label className="text-[11px] font-medium text-muted block">Cover preview (how every post&apos;s cover is drawn)</label>
-      <div className="relative w-full max-w-[240px] aspect-[4/5] rounded-lg border border-line overflow-hidden bg-canvas">
+      {!bare && <p className="block text-sm text-muted">A sample cover in this look</p>}
+      <div className="relative w-full max-w-[240px] aspect-[4/5] overflow-hidden rounded-2xl bg-canvas ring-1 ring-line">
         {src && (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={src} alt="Sample cover in this look" className={`w-full h-full object-cover transition-opacity ${loading ? "opacity-50" : ""}`} />
@@ -91,7 +93,7 @@ export default function BrandLookPreview({ colors, brandName, byline, logoUrl, a
         )}
       </div>
       {notes.length > 0 && (
-        <ul className="text-[11px] text-gold space-y-0.5 max-w-sm">
+        <ul className="max-w-sm space-y-0.5 text-sm text-gold">
           {notes.map((n, i) => (
             <li key={i}>{n}</li>
           ))}

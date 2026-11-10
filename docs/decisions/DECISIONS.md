@@ -650,3 +650,11 @@ publish it. The review panel now has a "Mark as posted" button beside Approve
 Published and counts as posted) and sends nothing anywhere. It is not offered
 for a scheduled draft; cancel the schedule first. Rejected: making these users
 press Approve & publish, which would post a duplicate on LinkedIn.
+
+## 2026-11-10 — Cover look is a basic, with five ready-made themes
+
+**Decision:** Cover look moves out of Advanced onto the Brand basics as a sample cover and five one-tap themes (Graphite, Ivory, Midnight, Forest, Classic). New workspaces start on Graphite: quiet grey, one blue accent. Photo, cut-out, byline, illustration and custom colours stay on a "Photo and more" page. The reader's role and company now sit on the "Who you write for" card.
+**Why:** Every post carries a cover, so how it looks is something every user sees on day one, not an optional extra. Themes are tuned to read on a phone, so a user never picks colours that fail. Role and company are how a reader recognises themselves, and they are two short fields.
+**Alternatives considered:** Keeping the old teal and coral as the default (looks dated next to the redesign).
+**Status:** active
+

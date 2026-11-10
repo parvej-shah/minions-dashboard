@@ -69,7 +69,8 @@ function ListEditor({ label, placeholder, items, onChange }: { label: string; pl
 
 /**
  * The one reader every post is written for. `fields="who"` is the basic card:
- * one sentence. `fields="details"` is the Advanced page with everything else.
+ * one sentence, their role and their company. `fields="details"` is the
+ * Advanced page with everything else. Both save the whole profile.
  * Both save the whole profile, so neither can drop what the other holds.
  */
 export default function IcpEditor({ onChange, fields = "details", onMore }: { onChange: () => void; fields?: "who" | "details"; onMore?: () => void }) {
@@ -116,8 +117,8 @@ export default function IcpEditor({ onChange, fields = "details", onMore }: { on
   }
 
   const basic = fields === "who";
-  const title = basic ? "Who you write for" : "Your reader";
-  const line = "One reader. Every post is written for this person.";
+  const title = basic ? "Who you write for" : "What your reader faces";
+  const line = basic ? "One reader. Every post is written for this person." : "Who they are is on Your brand. This is what goes on in their head.";
   if (!icp) return <BrandCard title={title} line={line}>{error ? <ErrorLine text={error} /> : <LoadingState rows={1} />}</BrandCard>;
 
   const footer = (dirty || isSaving || justSaved) && (
@@ -145,11 +146,26 @@ export default function IcpEditor({ onChange, fields = "details", onMore }: { on
     />
   );
 
+  // Role and company sit with the one sentence: they are how a reader recognises themselves.
+  const roleAndCompany = (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="space-y-2">
+        <label className={brandText.label} htmlFor="icp-role">Their role</label>
+        <input id="icp-role" value={icp.role} onChange={(e) => setIcp({ ...icp, role: e.target.value })} placeholder="e.g. Founder or managing partner" className={inputClass} />
+      </div>
+      <div className="space-y-2">
+        <label className={brandText.label} htmlFor="icp-company">Their company</label>
+        <input id="icp-company" value={icp.company_type} onChange={(e) => setIcp({ ...icp, company_type: e.target.value })} placeholder="e.g. Agencies with 5 to 20 people" className={inputClass} />
+      </div>
+    </div>
+  );
+
   if (basic) {
     return (
       <BrandCard title={title} line={line} action={onMore && <button type="button" onClick={onMore} className={brandText.link}>More detail</button>}>
         {error && <ErrorLine text={error} />}
         {who}
+        {roleAndCompany}
         {footer}
       </BrandCard>
     );
@@ -158,17 +174,6 @@ export default function IcpEditor({ onChange, fields = "details", onMore }: { on
   return (
     <BrandCard title={title} line={line}>
       {error && <ErrorLine text={error} />}
-      {who}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <label className={brandText.label} htmlFor="icp-role">Their role</label>
-          <input id="icp-role" value={icp.role} onChange={(e) => setIcp({ ...icp, role: e.target.value })} placeholder="Their job title or role" className={inputClass} />
-        </div>
-        <div className="space-y-2">
-          <label className={brandText.label} htmlFor="icp-company">Their company</label>
-          <input id="icp-company" value={icp.company_type} onChange={(e) => setIcp({ ...icp, company_type: e.target.value })} placeholder="The kind and size of company" className={inputClass} />
-        </div>
-      </div>
       <fieldset className="space-y-2">
         <legend className={brandText.label}>What they buy</legend>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">

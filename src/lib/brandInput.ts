@@ -1,16 +1,17 @@
 import type { BrandProfileInput } from "@/types";
 import { resolveWriterExpertise } from "@/constants/writerExpertise";
 import { parseArtStyle } from "@/lib/covers/artStyles";
+import { DEFAULT_COVER_THEME } from "@/lib/covers/themes";
 import { asString, type JsonObject } from "@/server/http/body";
 import { badRequest } from "@/server/http/errors";
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 const MAX_BYLINE_LENGTH = 120;
 const COLOR_DEFAULTS = {
-  primary_ink: "#0B0F14",
-  brand_teal: "#00D4AA",
-  brand_coral: "#FF6B4A",
-  brand_cream: "#F5F7FA",
+  primary_ink: DEFAULT_COVER_THEME.primary_ink,
+  brand_teal: DEFAULT_COVER_THEME.brand_teal,
+  brand_coral: DEFAULT_COVER_THEME.brand_coral,
+  brand_cream: DEFAULT_COVER_THEME.brand_cream,
   accent_blue: "#7C8CFF",
 } as const;
 

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { STATIC_BANNED_LEXICON } from "@/constants/brand";
+import { DEFAULT_COVER_THEME, themeColours } from "@/lib/covers/themes";
 import { toDirectiveDTO } from "@/lib/mappers/directive";
 import { toBrandSettingsDTO } from "@/lib/mappers/brandProfile";
 import { DEFAULT_COVER_ART_STYLE } from "@/lib/covers/artStyles";
@@ -53,10 +54,7 @@ export async function getBrandSettings(clientId: string): Promise<BrandSettings>
         cover_byline: "",
         cover_art: DEFAULT_COVER_ART_STYLE,
         cover_cutout_url: "",
-        primary_ink: "#0B0F14",
-        brand_teal: "#00D4AA",
-        brand_coral: "#FF6B4A",
-        brand_cream: "#F5F7FA",
+        ...themeColours(DEFAULT_COVER_THEME),
         accent_blue: "#7C8CFF",
         tone_guidelines: {
           formality: "Technical & Direct",

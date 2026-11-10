@@ -8,7 +8,7 @@ import { createDirective } from "@/lib/directivesClient";
 import { useDirectiveActions } from "@/hooks/useDirectiveActions";
 import { useApiResource } from "@/hooks/useApiResource";
 import { apiClient } from "@/lib/api-client";
-import { ADVANCED_SECTIONS, resolveBrandSection, type BrandSection } from "@/lib/brandSections";
+import { ADVANCED_SECTIONS, SECTION_PAGES, resolveBrandSection, type BrandSection } from "@/lib/brandSections";
 import type { BrandCompleteness, BrandDirectiveItem, BrandSettings, IcpProfileItem } from "@/types";
 import { BrandImportSheet } from "@/components/brandImport/BrandImportSheet";
 import { Button } from "@/components/ui/Button";
@@ -16,6 +16,7 @@ import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/Text";
 import { BrandCard } from "@/components/brand/parts";
 import CoverAppearanceCard from "@/components/brand/CoverAppearanceCard";
+import CoverThemeCard from "@/components/brand/CoverThemeCard";
 import IcpEditor from "@/components/brand/IcpEditor";
 import LexiconTab from "@/components/brand/LexiconTab";
 import MemorySection from "@/components/brand/MemorySection";
@@ -39,7 +40,8 @@ export default function BrandPage() {
 }
 
 /**
- * Basics first: the four things a post cannot be written without. Everything
+ * Basics first: the four things a post cannot be written without, and the
+ * cover look every post carries. Everything
  * else is one row under Advanced and opens as its own page (src/lib/brandSections.ts).
  */
 function Brand() {
@@ -83,11 +85,11 @@ function Brand() {
   };
 
   if (section !== "basics") {
-    const meta = ADVANCED_SECTIONS.find((s) => s.id === section)!;
+    const meta = SECTION_PAGES.find((s) => s.id === section)!;
     return (
       <div className="mx-auto max-w-[760px] space-y-8">
         <div className="space-y-4">
-          <Link href={`/brand?tab=${ADVANCED_OPEN}`} className="inline-flex min-h-9 items-center gap-1 text-[15px] text-brand hover:underline">
+          <Link href={meta.advanced ? `/brand?tab=${ADVANCED_OPEN}` : "/brand"} className="inline-flex min-h-9 items-center gap-1 text-[15px] text-brand hover:underline">
             <span aria-hidden="true">‹</span> Your brand
           </Link>
           <PageHeader title={meta.title}>{meta.line}</PageHeader>
@@ -164,6 +166,7 @@ function Brand() {
           <TagList category="TOPICS" items={active("TOPICS")} onAdd={directiveActions.add} onRemove={directiveActions.remove} placeholder="Add a topic, e.g. Hiring your first salesperson" />
         </BrandCard>
         <MemorySection compact onChange={bumpProfile} onSeeAll={() => open("experience")} />
+        <CoverThemeCard profile={profile} setProfile={setProfile} onEdit={() => open("cover")} />
       </div>
 
       <Advanced startOpen={tab === ADVANCED_OPEN} onOpen={open} />
