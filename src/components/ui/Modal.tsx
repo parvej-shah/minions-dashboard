@@ -62,10 +62,10 @@ export default function Modal({
       <div
         role="dialog"
         aria-modal="true"
-        className={`relative w-full ${maxWidthClass} bg-surface border-line shadow-[0_24px_64px_rgba(0,0,0,0.18)] overflow-hidden ${
+        className={`relative w-full ${maxWidthClass} bg-surface border-line shadow-[0_24px_64px_rgba(0,0,0,0.18)] overflow-hidden ease-[cubic-bezier(0.16,1,0.3,1)] ${
           isSheet
-            ? "flex h-[100dvh] flex-col sm:h-auto sm:max-h-[90vh] sm:rounded-3xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150"
-            : "rounded-3xl animate-in zoom-in-95 duration-150"
+            ? "flex h-[100dvh] flex-col sm:h-auto sm:max-h-[90vh] sm:rounded-3xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-240"
+            : "rounded-3xl animate-in zoom-in-95 duration-200"
         }`}
         onClick={(e) => e.stopPropagation()}
       >

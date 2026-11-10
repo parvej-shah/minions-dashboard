@@ -100,11 +100,13 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
   const [picking, setPicking] = useState(false);
   const [editingWhere, setEditingWhere] = useState(false);
   const [shownFor, setShownFor] = useState<string | null>(null);
+  const [openDetails, setOpenDetails] = useState(detailsOpen ?? false);
   // Fold the pickers away when the reviewer moves to another post.
   if (shownFor !== activeAsset.id) {
     setShownFor(activeAsset.id);
     setPicking(false);
     setEditingWhere(false);
+    setOpenDetails(detailsOpen ?? false);
   }
 
   const timezone = useWorkspaceTimezone();
@@ -144,13 +146,22 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
   );
 
   const detailsBlock = details && (
-    <details open={detailsOpen} className="group border-t border-line pt-4">
-      <summary className="cursor-pointer list-none text-[15px] font-medium text-ink [&::-webkit-details-marker]:hidden">
-        <span className="mr-1.5 inline-block text-subtle transition-transform group-open:rotate-90">›</span>
+    <div className="border-t border-line pt-4">
+      <button
+        type="button"
+        onClick={() => setOpenDetails((v) => !v)}
+        aria-expanded={openDetails}
+        className="group flex w-full cursor-pointer items-center text-left text-[15px] font-medium text-ink"
+      >
+        <span className={`mr-1.5 inline-block text-subtle transition-transform duration-200 ${openDetails ? "rotate-90" : ""}`}>›</span>
         {detailsSummary ?? "Details"}
-      </summary>
-      <div className="mt-4 space-y-5">{details}</div>
-    </details>
+      </button>
+      <div className={`accordion-grid ${openDetails ? "expanded" : ""}`}>
+        <div className="accordion-inner">
+          <div className="mt-4 space-y-5">{details}</div>
+        </div>
+      </div>
+    </div>
   );
 
   const unsaved = isDirty && <p className="text-sm font-medium text-gold">You have unsaved edits. They go out once saved.</p>;

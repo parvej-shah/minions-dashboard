@@ -5,6 +5,7 @@ import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { blogUrl, normalizeDomain } from "@/constants/config";
 import type { AssetItem, AssetStatus, CoverSpecDTO } from "@/types";
 import { queueFor, stepWithin, type QueueFilter } from "@/lib/drafts/queue";
+import { applyOptimisticSchedule } from "@/lib/drafts/optimisticSchedule";
 
 export type PublishState = "idle" | "pending" | "success" | "error";
 
@@ -341,6 +342,11 @@ export function useEditorialDraft(
     setPublishState("pending");
     setPublishError(null);
 
+    // Optimistically update the active draft immediately so the UI transitions instantly (0ms)
+    const snapshot = { ...activeAsset };
+    const optimistic = applyOptimisticSchedule(activeAsset, date, time);
+    patchActive({ status: optimistic.status, scheduled_for: optimistic.scheduled_for, claims_ok: "Y" });
+
     try {
       if (isDirty) await persistEdits();
       const res = await apiClient.post<{ status: AssetStatus; scheduled_for: string }>(
@@ -352,6 +358,8 @@ export function useEditorialDraft(
       window.dispatchEvent(new Event("minions-counts-updated"));
       return "Scheduled";
     } catch (err) {
+      // Roll back on network/server error
+      patchActive({ status: snapshot.status, scheduled_for: snapshot.scheduled_for, claims_ok: snapshot.claims_ok });
       const message = toErrorMessage(err, "Could not schedule the post");
       setPublishState("error");
       setPublishError(message);

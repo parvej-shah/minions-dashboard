@@ -11,7 +11,7 @@ export type ButtonSize = "sm" | "md" | "lg";
 
 const base =
   "inline-flex items-center justify-center gap-2 rounded-full font-medium select-none cursor-pointer " +
-  "transition-colors duration-150 " +
+  "transition-colors duration-150 transition-transform active:scale-[0.985] disabled:active:scale-100 " +
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand " +
   "disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none";
 

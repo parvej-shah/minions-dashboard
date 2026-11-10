@@ -35,7 +35,7 @@ export default function Drawer({ onClose, closeLabel, header, footer, busy = fal
         role="dialog"
         aria-modal="true"
         aria-label={closeLabel}
-        className="relative z-10 flex h-[100dvh] max-h-[100dvh] w-full max-w-lg flex-col overflow-hidden border-l border-line bg-surface shadow-float animate-in slide-in-from-right duration-200"
+        className="relative z-10 flex h-[100dvh] max-h-[100dvh] w-full max-w-lg flex-col overflow-hidden border-l border-line bg-surface shadow-float animate-in slide-in-from-right duration-260 ease-[cubic-bezier(0.16,1,0.3,1)]"
       >
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-line px-5 py-4 sm:px-6 sm:py-5">
           {header}
