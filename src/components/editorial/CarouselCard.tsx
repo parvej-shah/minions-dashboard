@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { AlertTriangle, GalleryHorizontal, Loader2 } from "lucide-react";
+import { AlertTriangle, GalleryHorizontal, Loader2, Sparkles } from "lucide-react";
 import type { AssetItem } from "@/types";
 import type { StoredCarousel } from "@/services/carousel";
 import type { CarouselPlan } from "@/lib/carousel/plan";
@@ -10,9 +10,14 @@ import ConfirmModal from "@/components/ui/ConfirmModal";
 import CarouselPdfPages from "./CarouselPdfPages";
 import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
 import { buttonStyles } from "@/components/ui/Button";
-import { ChoiceRow, GroupedList, ListRow } from "@/components/ui/List";
+import { GroupedList, ListRow } from "@/components/ui/List";
+import ThumbPicker from "@/components/ui/ThumbPicker";
+import Segmented from "@/components/ui/Segmented";
+import { carouselThumb } from "@/lib/covers/pickerThumbs";
 import { inputClass } from "@/components/ui/fieldStyles";
 import { STYLE_META, styleName } from "@/lib/carousel/styleNames";
+
+const WRITERS_CHOICE = "WRITER";
 
 interface State {
   carousel: StoredCarousel | null;
@@ -70,7 +75,9 @@ export default function CarouselCard({
   const [errors, setErrors] = useState<string[]>([]);
   const [draft, setDraft] = useState<CarouselPlan | null>(null);
   const [confirmRemake, setConfirmRemake] = useState(false);
-  const [openDesign, setOpenDesign] = useState(false);
+  // The design being drawn, and the one before the last pick (for Undo).
+  const [pendingStyle, setPendingStyle] = useState<SlideStyle | null>(null);
+  const [previousStyle, setPreviousStyle] = useState<SlideStyle | null>(null);
   const url = `/api/assets/${encodeURIComponent(activeAsset.id)}/carousel`;
 
   // The studio keys this card by draft, so a new draft starts from empty state.
@@ -98,7 +105,7 @@ export default function CarouselCard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [carouselOn]);
 
-  const send = async (method: "POST" | "PATCH", body: unknown, kind: "make" | "save" | "toggle" | "style") => {
+  const send = async (method: "POST" | "PATCH", body: unknown, kind: "make" | "save" | "toggle" | "style"): Promise<boolean> => {
     setBusy(kind);
     setErrors([]);
     try {
@@ -107,13 +114,17 @@ export default function CarouselCard({
       if (json.success) {
         setState((s) => (s ? { ...s, carousel: json.carousel } : s));
         setDraft(null);
+        if (kind !== "style") setPreviousStyle(null);
         onMessage(kind === "make" ? "Carousel ready. Check every page." : kind === "save" ? "Carousel redrawn." : kind === "style" ? `Carousel redrawn in ${styleName(json.carousel.plan.style)}.` : json.carousel.active ? "LinkedIn will post the carousel." : "LinkedIn will post the cover image.");
+        return true;
       } else {
         setErrors(json.errors?.length ? json.errors : []);
         onMessage(json.error ?? "The carousel could not be updated.");
       }
+      return false;
     } catch {
       onMessage("The carousel could not be updated. Check your connection and try again.");
+      return false;
     } finally {
       setBusy(null);
     }
@@ -155,32 +166,41 @@ export default function CarouselCard({
   };
 
   const currentStyle = (carousel?.plan.style ?? "EDITORIAL") as SlideStyle;
-  const pickStyle = (k: SlideStyle) => {
-    setOpenDesign(false);
-    if (carousel) void send("PATCH", { plan: { ...carousel.plan, style: k } }, "style");
-    else setChosenStyle(k);
+  const pickStyle = async (k: SlideStyle, undo = false) => {
+    if (!carousel) return setChosenStyle(k);
+    const from = currentStyle;
+    setPendingStyle(k);
+    const ok = await send("PATCH", { plan: { ...carousel.plan, style: k } }, "style").finally(() => setPendingStyle(null));
+    if (ok) setPreviousStyle(undo ? null : from);
   };
+  const undoStyle = carousel && previousStyle && previousStyle !== currentStyle ? previousStyle : null;
 
-  // The Design row and the list it opens, used before and after the carousel is made.
-  const designRow = (
-    <ListRow
-      label="Design"
-      value={busy === "style" ? <span className="inline-flex items-center gap-1.5"><Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />Redrawing</span> : carousel ? styleName(currentStyle) : chosenStyle ? styleName(chosenStyle) : "Writer's choice"}
-      onClick={() => setOpenDesign((o) => !o)}
-      expanded={openDesign}
-      disabled={busy !== null}
-    />
+  // The designs as pictures, used before and after the carousel is made.
+  const designPicker = (
+    <div className="min-w-0 space-y-2">
+      <div className="flex items-baseline justify-between gap-3 px-1 text-[13px]">
+        <span className="text-muted">Design</span>
+        {undoStyle && (
+          <button type="button" disabled={busy !== null} onClick={() => void pickStyle(undoStyle, true)} className="text-brand hover:underline disabled:opacity-50">
+            Undo
+          </button>
+        )}
+      </div>
+      <ThumbPicker
+        label="Carousel design"
+        size="wide"
+        options={[
+          ...(carousel ? [] : [{ id: WRITERS_CHOICE, label: "Writer's choice", icon: <Sparkles className="h-6 w-6" aria-hidden="true" /> }]),
+          ...STYLES.map((k) => ({ id: k, label: STYLE_META[k].name, src: carouselThumb(k) })),
+        ]}
+        selected={pendingStyle ?? (carousel ? currentStyle : chosenStyle || WRITERS_CHOICE)}
+        busy={pendingStyle}
+        disabled={busy !== null}
+        onSelect={(id) => (id === WRITERS_CHOICE ? setChosenStyle("") : void pickStyle(id as SlideStyle))}
+      />
+      <p className="px-1 text-[13px] text-subtle">{carousel ? "Same words, redrawn at once." : chosenStyle ? STYLE_META[chosenStyle].hint : "The writer picks the design that suits the draft."}</p>
+    </div>
   );
-  const designChoices = openDesign ? (
-    <GroupedList role="radiogroup" aria-label="Carousel design" header="Choose a design" footer={carousel ? "Same words, redrawn at once." : undefined}>
-      {!carousel && (
-        <ChoiceRow label="Writer's choice" hint="Picked to suit the draft" selected={chosenStyle === ""} disabled={busy !== null} onSelect={() => { setChosenStyle(""); setOpenDesign(false); }} />
-      )}
-      {STYLES.map((k) => (
-        <ChoiceRow key={k} label={STYLE_META[k].name} hint={STYLE_META[k].hint} selected={carousel ? currentStyle === k : chosenStyle === k} disabled={busy !== null} onSelect={() => pickStyle(k)} />
-      ))}
-    </GroupedList>
-  ) : null;
 
   return (
     <div className="rounded-[28px] bg-surface shadow-soft p-6 sm:p-8 space-y-5">
@@ -203,8 +223,7 @@ export default function CarouselCard({
             <p className="text-[13px] text-subtle">This draft is published without a carousel.</p>
           ) : (
             <>
-              <GroupedList>{designRow}</GroupedList>
-              {designChoices}
+              {designPicker}
               <button type="button" disabled={busy !== null} onClick={() => void send("POST", chosenStyle ? { style: chosenStyle } : null, "make")} className={buttonStyles({ block: true })}>
                 {busy === "make" ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : null}
                 {busy === "make" ? "Writing the slides, about a minute" : "Make carousel"}
@@ -216,14 +235,19 @@ export default function CarouselCard({
         <>
           {/* A second post that exists to share the carousel has no choice to make. */}
           {!locked && activeAsset.follow_up_format !== "CAROUSEL" && (
-            <GroupedList
-              header={<><span>Publish on LinkedIn</span>{busy === "toggle" && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-label="Saving choice" />}</>}
-              role="radiogroup"
-              aria-label="LinkedIn image format"
-            >
-              <ChoiceRow label="Carousel" hint={`${pageCount} swipeable pages`} selected={carousel.active} disabled={busy !== null} onSelect={() => void send("PATCH", { active: true }, "toggle")} />
-              <ChoiceRow label="Cover image" hint="One image with your post" selected={!carousel.active} disabled={busy !== null} onSelect={() => void send("PATCH", { active: false }, "toggle")} />
-            </GroupedList>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span className="inline-flex items-center gap-2 text-[15px] text-ink">
+                Post on LinkedIn
+                {busy === "toggle" && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted" aria-label="Saving choice" />}
+              </span>
+              <Segmented
+                label="LinkedIn image format"
+                value={carousel.active ? "CAROUSEL" : "COVER"}
+                disabled={busy !== null}
+                onChange={(v) => void send("PATCH", { active: v === "CAROUSEL" }, "toggle")}
+                options={[{ id: "CAROUSEL", label: `Carousel · ${pageCount}` }, { id: "COVER", label: "Cover image" }]}
+              />
+            </div>
           )}
 
           {/* Swipe through the pages as LinkedIn shows them. */}
@@ -303,14 +327,14 @@ export default function CarouselCard({
             </div>
           ) : (
             <div className="space-y-5">
+              {!locked && designPicker}
               <GroupedList header="Post text with the carousel">
                 <p className="px-4 py-3 text-[15px] leading-relaxed text-ink whitespace-pre-line break-words">{carousel.caption}</p>
               </GroupedList>
               <GroupedList>
                 {!locked && (
                   <>
-                    {designRow}
-                    <ListRow label="Edit wording" onClick={() => { setOpenDesign(false); setDraft(structuredClone(carousel.plan)); }} disabled={busy !== null} />
+                    <ListRow label="Edit wording" onClick={() => setDraft(structuredClone(carousel.plan))} disabled={busy !== null} />
                     <ListRow
                       label={busy === "make" ? "Writing the slides…" : "Make again"}
                       hint="Writes new slides from the draft"
@@ -321,7 +345,6 @@ export default function CarouselCard({
                 )}
                 <ListRow label="Open PDF" href={carousel.pdf_url} />
               </GroupedList>
-              {!locked && designChoices}
             </div>
           )}
         </>

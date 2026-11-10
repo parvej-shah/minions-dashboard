@@ -6,10 +6,11 @@ import { AlertTriangle, Image as ImageIcon, Loader2, RefreshCw, Shuffle } from "
 import type { AssetItem, CoverSpecDTO } from "@/types";
 import type { CoverEditInput } from "@/hooks/useEditorialDraft";
 import { COVER_ART_STYLES, COVER_ART_STYLE_META, parseArtStyle } from "@/lib/covers/artStyles";
-import { layoutUnavailable } from "@/lib/covers/available";
+import { coverThumb, pickerLayouts } from "@/lib/covers/pickerThumbs";
 import { buttonStyles } from "@/components/ui/Button";
 import { ChoiceRow, GroupedList, ListRow } from "@/components/ui/List";
 import { inputClass } from "@/components/ui/fieldStyles";
+import ThumbPicker from "@/components/ui/ThumbPicker";
 
 export interface CoverImageCardProps {
   activeAsset: AssetItem;
@@ -22,39 +23,39 @@ export interface CoverImageCardProps {
 
 type Layout = CoverSpecDTO["layout"];
 
-const LAYOUTS: { id: Layout; label: string; hint: string }[] = [
-  { id: "HEADLINE", label: "Headline", hint: "The headline on a soft gradient" },
-  { id: "STATEMENT", label: "Statement", hint: "The headline on a dark glow" },
-  { id: "LIST", label: "List", hint: "The post's 3 or 4 points, numbered, on grid paper" },
-  { id: "GRID", label: "Grid", hint: "3 to 6 things the post names, as icon tiles on folded paper" },
-  { id: "PUNCH", label: "Punch", hint: "Short lines that land one after another, over a colour band" },
-  { id: "PHOTO", label: "Photo", hint: "Your headshot large, the headline below" },
-  { id: "QUOTE", label: "Quote", hint: "A line taken word for word from the post" },
-  { id: "NUMBER", label: "Number", hint: "A figure the draft states, set large" },
-  { id: "TORN", label: "Torn", hint: "The headline on a colour field, a torn paper strip revealing the subtitle" },
-  { id: "SELECT", label: "Selected", hint: "The key word in a design tool's selection box, your cursor beside it" },
-  { id: "STICKER", label: "Sticker", hint: "Tag stickers slapped on the headline, on grid paper" },
-  { id: "NOTEBOOK", label: "Notebook", hint: "The headline on a ruled notebook sheet over coloured sheets" },
-  { id: "NOTES", label: "Notes", hint: "The headline written in a phone notes card" },
-  { id: "POSTCARD", label: "Post card", hint: "The headline as a post by you, on a dark glow (no made-up counts)" },
-  { id: "CIRCLED", label: "Circled", hint: "The key word circled by hand, an arrow to the subtitle" },
-  { id: "CUTOUT", label: "Cut-out", hint: "Your cut-out photo in front of one giant word" },
-  { id: "HIGHLIGHT", label: "Highlight", hint: "Each line of the headline on its own colour bar, on a dark ground" },
-  { id: "SWISS", label: "Swiss", hint: "Editorial grid: a big colour circle, the headline set large at the foot" },
-  { id: "SIDEWAYS", label: "Sideways", hint: "The key word giant and turned up the right edge" },
-  { id: "ECHO", label: "Echo", hint: "The key word stacked four times, fading in from outline" },
-  { id: "BOLD", label: "Bold", hint: "Full-bleed brand colour, huge headline, a big cursor" },
-  { id: "SPLIT", label: "Split", hint: "A dark top with the key word giant, the headline below a slanted edge" },
-  { id: "MAGAZINE", label: "Magazine", hint: "A magazine cover with your name as the masthead (your cut-out in front if you have one)" },
-  { id: "BENTO", label: "Bento", hint: "The headline in a grid of rounded tiles" },
-  { id: "TAGGED", label: "Tagged", hint: "The key word selected, the post's points as tilted tags, on glowing grid paper" },
-  { id: "NEON", label: "Neon", hint: "A glowing frame and key word on a near-black ground" },
-];
+const LAYOUT_NAMES: Record<Layout, string> = {
+  HEADLINE: "Headline",
+  STATEMENT: "Statement",
+  LIST: "List",
+  GRID: "Grid",
+  PUNCH: "Punch",
+  PHOTO: "Photo",
+  QUOTE: "Quote",
+  NUMBER: "Number",
+  TORN: "Torn",
+  SELECT: "Selected",
+  STICKER: "Sticker",
+  NOTEBOOK: "Notebook",
+  NOTES: "Notes",
+  POSTCARD: "Post card",
+  CIRCLED: "Circled",
+  CUTOUT: "Cut-out",
+  HIGHLIGHT: "Highlight",
+  SWISS: "Swiss",
+  SIDEWAYS: "Sideways",
+  ECHO: "Echo",
+  BOLD: "Bold",
+  SPLIT: "Split",
+  MAGAZINE: "Magazine",
+  BENTO: "Bento",
+  TAGGED: "Tagged",
+  NEON: "Neon",
+};
 
 const hasArt = (layout: Layout) => layout === "HEADLINE" || layout === "STATEMENT";
 const lines = (text: string) => text.split("\n").map((l) => l.trim()).filter(Boolean);
 const same = (a: string[], b: string[] | undefined) => a.join("\n") === (b ?? []).join("\n");
-const layoutLabel = (layout: Layout) => LAYOUTS.find((l) => l.id === layout)?.label ?? layout;
+const layoutLabel = (layout: Layout) => LAYOUT_NAMES[layout] ?? layout;
 /** The points a List, Grid or Punch cover shows, for the Text row. */
 const shownItems = (cover: CoverSpecDTO) =>
   cover.layout === "LIST" ? cover.list : cover.layout === "GRID" ? cover.grid?.map((g) => g.label) : cover.layout === "PUNCH" ? cover.punch?.lines : null;
@@ -80,7 +81,12 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
 
   const [editing, setEditing] = useState(false);
   // Which row's choices are open below the list.
-  const [open, setOpen] = useState<"layout" | "art" | null>(null);
+  const [open, setOpen] = useState<"art" | null>(null);
+  // Every layout, or only the few that suit this post.
+  const [showAll, setShowAll] = useState(false);
+  // The layout being drawn, and the one before the last pick (for Undo), per draft.
+  const [pending, setPending] = useState<Layout | null>(null);
+  const [previous, setPrevious] = useState<{ id: string; layout: Layout } | null>(null);
   const [headline, setHeadline] = useState("");
   const [kicker, setKicker] = useState("");
   const [emphasis, setEmphasis] = useState("");
@@ -105,6 +111,16 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
     if (message) onMessage(message);
     return message;
   };
+
+  const pickLayout = async (layout: Layout, undo = false) => {
+    if (!cover) return;
+    const from = cover.layout;
+    setPending(layout);
+    const message = await run({ layout }).finally(() => setPending(null));
+    if (message.startsWith("Cover updated")) setPrevious(undo ? null : { id: activeAsset.id, layout: from });
+  };
+  const undoLayout = previous?.id === activeAsset.id && previous.layout !== cover?.layout ? previous.layout : null;
+  const layouts = cover ? pickerLayouts(cover.layout, cover, { checking: checking === activeAsset.id }) : null;
 
   const startEditing = () => {
     setHeadline(cover?.headline ?? activeAsset.title);
@@ -185,13 +201,6 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
             <>
               <GroupedList>
                 <ListRow
-                  label="Layout"
-                  value={layoutLabel(cover.layout)}
-                  onClick={() => setOpen(open === "layout" ? null : "layout")}
-                  expanded={open === "layout"}
-                  disabled={isRendering}
-                />
-                <ListRow
                   label="Illustration"
                   value={hasArt(cover.layout) ? COVER_ART_STYLE_META[parseArtStyle(cover.art_style) ?? "NONE"].label : "None"}
                   hint={!hasArt(cover.layout) ? "Only on Headline and Statement covers" : cover.art_style && cover.art_style !== "NONE" && !cover.art_drawn ? "Left off: the headline needed the space. A shorter headline makes room." : undefined}
@@ -215,25 +224,6 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                   />
                 )}
               </GroupedList>
-
-              {open === "layout" && (
-                <GroupedList role="radiogroup" aria-label="Layout" className="[&>div:last-of-type]:max-h-[360px] [&>div:last-of-type]:overflow-y-auto" header="Choose a layout">
-                  {LAYOUTS.map((l) => {
-                    // The current layout is never disabled for a reason: it is already drawn.
-                    const why = cover.layout === l.id ? null : layoutUnavailable(l.id, cover, { checking: checking === activeAsset.id });
-                    return (
-                      <ChoiceRow
-                        key={l.id}
-                        label={l.label}
-                        hint={why ? `Not available: ${why}` : l.hint}
-                        selected={cover.layout === l.id}
-                        disabled={isRendering || Boolean(why)}
-                        onSelect={() => void run({ layout: l.id })}
-                      />
-                    );
-                  })}
-                </GroupedList>
-              )}
 
               {open === "art" && hasArt(cover.layout) && (
                 <GroupedList role="radiogroup" aria-label="Illustration" header="Choose an illustration">
@@ -338,6 +328,36 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
           )}
         </div>
       </div>
+
+      {!isLocked && cover && layouts && (
+        <div className="min-w-0 space-y-2">
+          <div className="flex items-baseline justify-between gap-3 px-1 text-[13px]">
+            <span className="text-muted">{showAll ? "All layouts" : "Layouts for this post"}</span>
+            <span className="flex items-baseline gap-4">
+              {undoLayout && (
+                <button type="button" disabled={isRendering} onClick={() => void pickLayout(undoLayout, true)} className="text-brand hover:underline disabled:opacity-50">
+                  Undo
+                </button>
+              )}
+              {layouts.rest.length > 0 && (
+                <button type="button" aria-expanded={showAll} onClick={() => setShowAll((v) => !v)} className="text-brand hover:underline">
+                  {showAll ? "Fewer" : `See all ${layouts.suggested.length + layouts.rest.length}`}
+                </button>
+              )}
+            </span>
+          </div>
+          <ThumbPicker
+            label="Layout"
+            options={(showAll ? [...layouts.suggested, ...layouts.rest] : layouts.suggested).map((l) => ({ id: l, label: layoutLabel(l), src: coverThumb(l) }))}
+            selected={pending ?? cover.layout}
+            busy={pending}
+            disabled={isRendering}
+            wrap={showAll}
+            onSelect={(id) => void pickLayout(id as Layout)}
+          />
+          {checking === activeAsset.id && <p className="px-1 text-[13px] text-subtle">Checking the post&apos;s points for more layouts…</p>}
+        </div>
+      )}
     </div>
   );
 }

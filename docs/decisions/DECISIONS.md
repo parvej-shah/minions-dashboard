@@ -703,3 +703,9 @@ as JPEGs, which cost far less than the PNGs did.
 **Why:** the user asked for a clear choice, kept for automated posts. Before this, Instagram silently followed the LinkedIn switch.
 **Partly supersedes:** 2026-11-10 "Instagram gets the whole carousel": now it's the default rather than the rule.
 **Status:** active. Carousels are still never made automatically (D19), so automated drafts without one get the single poster.
+
+## 2026-11-10 — Pick cover layouts and carousel designs by their picture
+
+**Decision:** Studio shows cover layouts and carousel designs as picture tiles, not lists of descriptions. Each tile is a sample drawn once with demo copy. Tapping one redraws the post, and Undo brings back the one before. Up to four layouts that suit the post come first, with "See all" for the rest. Layouts the cover can't be drawn in are hidden instead of greyed out. The Carousel / Single image choice for LinkedIn and Instagram is one segmented switch.
+**Why:** the user asked for pickers that work the way Apple's do. Busy founders choose by eye, and reading 26 descriptions was work. Samples instead of per-post previews keep the picker instant and cost nothing per draft (the user's call, 2026-11-10).
+**Status:** active.

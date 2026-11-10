@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import type { AssetItem } from "@/types";
-import { ChoiceRow, GroupedList } from "@/components/ui/List";
+import Segmented from "@/components/ui/Segmented";
 import type { InstagramFormat } from "@/lib/carousel/instagramFormat";
 import { SOCIAL_CHANNELS, channelFor, type SocialChannel, type SocialTab, type VariantField } from "./channels";
 import VariantActions from "./VariantActions";
@@ -350,10 +350,15 @@ export default function SocialVariantTabs({
             extras={
               <>
               {pages && onInstagramFormat && (
-                <GroupedList header={<span>Post on Instagram</span>} role="radiogroup" aria-label="Instagram format">
-                  <ChoiceRow label="Carousel" hint={`${pages.length} swipeable pages`} selected={instagramPick === "CAROUSEL"} onSelect={() => onInstagramFormat("CAROUSEL")} />
-                  <ChoiceRow label="Single poster" hint="One image with your caption" selected={instagramPick === "SINGLE"} onSelect={() => onInstagramFormat("SINGLE")} />
-                </GroupedList>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <span className="text-[15px] text-ink">Post on Instagram</span>
+                  <Segmented
+                    label="Instagram format"
+                    value={instagramPick}
+                    onChange={onInstagramFormat}
+                    options={[{ id: "CAROUSEL", label: `Carousel · ${pages.length}` }, { id: "SINGLE", label: "Single poster" }]}
+                  />
+                </div>
               )}
               {deck ? (
                 // The carousel's pages, cover first. Open one to save it full size.
