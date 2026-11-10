@@ -29,5 +29,5 @@
 | 25 | Ideas | CLAUDE | DONE (pushed 2026-11-10) | tasks/25.md |
 | 26 | Remaining screens calm pass | CLAUDE | DONE (pushed 2026-11-10) | tasks/26.md |
 | 27 | Sweep + browser pass, then ask to push | CLAUDE | DONE (pushed 2026-11-10) | tasks/27.md |
-| 29 | Setup examples follow the user's answers | CLAUDE | DONE (live walk open) | built 2026-11-10; screens not walked live, needs a fresh workspace |
+| 29 | Setup examples follow the user's answers | CLAUDE | DONE (live walk open) | built 2026-11-10 (a314bea), pushed 2026-11-10; screens not walked live, needs a fresh workspace |
 | 28 | Calm welcome + setup flow (board, then build) | CLAUDE | DONE (live walk open) | built 2026-11-10 (6165c07), pushed 2026-11-10; setup not walked live, needs a fresh workspace |
