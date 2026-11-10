@@ -64,6 +64,11 @@ under reduced motion. No confetti, streaks or 3D edges.
   and `useEnterToContinue`. One title, one line, one card per screen.
 - **`Modal`** (`center` and `sheet`), **`Drawer`**, **`ConfirmModal`**,
   **`Toast`**, **`EmptyState`**, **`ErrorLine`**.
+- **`List.tsx`**: iOS-style grouped lists. `GroupedList` (grey rounded group,
+  hairline rows, optional header and footer note), `ListRow` (label, second
+  line, grey value, a control or ›), `Switch` (on/off) and `ChoiceRow`
+  (pick-one row with a blue check; wrap in `GroupedList role="radiogroup"`).
+  Use these for settings-like controls instead of chip grids.
 - **`fieldStyles`**: `inputClass`, `sectionClass` and `sectionCardClass` for
   settings forms.
 - **`PostThumb`** (`components/posts`): a post cover that always stays inside

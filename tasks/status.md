@@ -35,3 +35,4 @@
 | 31 | Cover look + reader role/company as basics; themes | CLAUDE | DONE | tasks/31.md |
 | 32 | Weekly update ask at approval | CLAUDE | DONE | tasks/32.md |
 | 33 | Ten premium social poster designs | CLAUDE | DONE | tasks/33.md |
+| 34 | Review controls as grouped lists | CLAUDE | DONE (not walked live, not pushed) | tasks/34.md |
