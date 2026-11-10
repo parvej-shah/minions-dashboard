@@ -18,6 +18,7 @@ import CarouselCard from "./CarouselCard";
 import ArticleEditor, { type EditorMode } from "./ArticleEditor";
 import SocialVariantTabs, { type SocialTab } from "./social/SocialVariantTabs";
 import ReviewDecision from "./ReviewDecision";
+import ApprovalUpdateAsk from "@/components/pulse/ApprovalUpdateAsk";
 import { useWorkspaceTimezone } from "./SchedulePicker";
 import ClaimsGate from "./ClaimsGate";
 import MobileActionBar from "./MobileActionBar";
@@ -115,6 +116,7 @@ export default function EditorialStudio({
     </>
   );
 
+  const [askFor, setAskFor] = useState<string | null>(null);
   const [editorMode, setEditorMode] = useState<EditorMode>("preview");
   const [socialTab, setSocialTab] = useState<SocialTab>("LINKEDIN");
   // Whether LinkedIn gets this draft's carousel, as the carousel card last loaded or set it.
@@ -194,6 +196,7 @@ export default function EditorialStudio({
       return false;
     }
     toast.show("Scheduled. It goes out at the time you picked.");
+    setAskFor(activeAsset?.id ?? null);
     return true;
   };
 
@@ -403,6 +406,7 @@ export default function EditorialStudio({
             blogEnabled={blogEnabled}
             onPostAgain={() => void draft.postAgain().then((m) => m && toast.show(m))}
             nextToReview={nextToReview}
+            afterApprove={askFor === activeAsset.id ? <ApprovalUpdateAsk /> : undefined}
             isPostingAgain={draft.isPostingAgain}
             detailsSummary={checksSummary(reviewNotes, unchecked)}
             detailsOpen={seriousNotes + unchecked > 0}

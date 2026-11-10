@@ -43,6 +43,8 @@ export interface ReviewDecisionProps {
   isPostingAgain: boolean;
   /** Once this draft is out of the queue: how many still wait, and how to open the next. */
   nextToReview?: { left: number; open: () => void } | null;
+  /** Shown under a scheduled post, e.g. the weekly-update ask right after approval. */
+  afterApprove?: React.ReactNode;
   /** The checks and facts, folded under Details. */
   details?: React.ReactNode;
   detailsSummary?: string;
@@ -89,6 +91,7 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
     onPostAgain,
     isPostingAgain,
     nextToReview,
+    afterApprove,
     details,
     detailsSummary,
     detailsOpen,
@@ -247,6 +250,7 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
           </button>
         </div>
         <p className={note}>Edits you save before then go out with it.</p>
+        {afterApprove}
         {detailsBlock}
       </div>
     );

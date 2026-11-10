@@ -658,3 +658,10 @@ press Approve & publish, which would post a duplicate on LinkedIn.
 **Alternatives considered:** Keeping the old teal and coral as the default (looks dated next to the redesign).
 **Status:** active
 
+
+## 2026-11-10 — Ask for the weekly update when a post is approved
+
+**Decision:** Right after a reviewer schedules a post, one quiet line asks "Anything new since last week?". The answer becomes saved notes in one more tap, and the screen says they are being turned into new post ideas. "Not now" hides it without skipping the week. Still in-app and text-only (D16); no email.
+**Why:** The weekly question only helps people who open the app in the right week, and few do. Approving a post is the moment the user is already in the app and thinking about their work, so it is the cheapest time to keep their experience current. Saying what the note does ties the answer to a visible result.
+**Alternatives considered:** Email reminders (reach people who skip the app, but reverse D16 and need a sending service; left for later if this does not move answers). Day-and-time planning at setup (not built yet).
+**Status:** active
