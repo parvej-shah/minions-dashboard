@@ -34,3 +34,4 @@
 | 28 | Calm welcome + setup flow (board, then build) | CLAUDE | DONE (live walk open) | built 2026-11-10 (6165c07), pushed 2026-11-10; setup not walked live, needs a fresh workspace |
 | 31 | Cover look + reader role/company as basics; themes | CLAUDE | DONE | tasks/31.md |
 | 32 | Weekly update ask at approval | CLAUDE | DONE | tasks/32.md |
+| 33 | Ten premium social poster designs | CLAUDE | DONE | tasks/33.md |

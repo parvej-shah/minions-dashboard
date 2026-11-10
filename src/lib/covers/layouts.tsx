@@ -18,6 +18,7 @@ import { drawArt, type ArtChoice } from "./art";
 import { ICONS, type IconName } from "./icons";
 import { BANNER_DESIGNS, isBanner } from "./bannerTypes";
 import { bannerElement } from "./modern";
+import { tagsFor } from "./social";
 import { BACKGROUND_FOR, BLOCK_TOP, DARK_BACKGROUNDS, backgroundSrc, brandOn } from "./backgrounds";
 
 export const COVER_SIZE = { width: 1080, height: 1350 } as const;
@@ -550,7 +551,7 @@ export const isDark = (layout: CoverLayout) => DARK_BACKGROUNDS.includes(BACKGRO
 export function coverElement(spec: CoverSpec) {
   // The modern banner types (modern.tsx) draw their own ground; the accent is tuned to it here.
   if (isBanner(spec.layout)) {
-    return bannerElement({ design: spec.layout, headline: spec.headline, emphasis: spec.emphasis, kicker: spec.kicker, label: spec.label, author: spec.author, brand: brandOn(BACKGROUND_FOR[spec.layout], spec.brand), cutout: spec.cutout });
+    return bannerElement({ design: spec.layout, headline: spec.headline, emphasis: spec.emphasis, kicker: spec.kicker, label: spec.label, author: spec.author, brand: brandOn(BACKGROUND_FOR[spec.layout], spec.brand), cutout: spec.cutout, tags: tagsFor(spec.grid, spec.list) });
   }
   const dark = isDark(spec.layout);
   // The accent may need deepening to read on this background's most tinted spot.

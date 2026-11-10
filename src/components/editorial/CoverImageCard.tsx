@@ -37,6 +37,16 @@ const LAYOUTS: { id: Layout; label: string; hint: string }[] = [
   { id: "POSTCARD", label: "Post card", hint: "The headline as a post by you, on a dark glow (no made-up counts)" },
   { id: "CIRCLED", label: "Circled", hint: "The key word circled by hand, an arrow to the subtitle" },
   { id: "CUTOUT", label: "Cut-out", hint: "Your cut-out photo in front of one giant word" },
+  { id: "HIGHLIGHT", label: "Highlight", hint: "Each line of the headline on its own colour bar, on a dark ground" },
+  { id: "SWISS", label: "Swiss", hint: "Editorial grid: a big colour circle, the headline set large at the foot" },
+  { id: "SIDEWAYS", label: "Sideways", hint: "The key word giant and turned up the right edge" },
+  { id: "ECHO", label: "Echo", hint: "The key word stacked four times, fading in from outline" },
+  { id: "BOLD", label: "Bold", hint: "Full-bleed brand colour, huge headline, a big cursor" },
+  { id: "SPLIT", label: "Split", hint: "A dark top with the key word giant, the headline below a slanted edge" },
+  { id: "MAGAZINE", label: "Magazine", hint: "A magazine cover with your name as the masthead (your cut-out in front if you have one)" },
+  { id: "BENTO", label: "Bento", hint: "The headline in a grid of rounded tiles" },
+  { id: "TAGGED", label: "Tagged", hint: "The key word selected, the post's points as tilted tags, on glowing grid paper" },
+  { id: "NEON", label: "Neon", hint: "A glowing frame and key word on a near-black ground" },
 ];
 
 const hasArt = (layout: Layout) => layout === "HEADLINE" || layout === "STATEMENT";

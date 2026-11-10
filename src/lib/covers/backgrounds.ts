@@ -32,6 +32,16 @@ export const BACKGROUND_FOR: Record<CoverLayout, Background> = {
   POSTCARD: "AURORA",
   CIRCLED: "FOLDED",
   CUTOUT: "AURORA",
+  HIGHLIGHT: "AURORA",
+  SWISS: "MESH",
+  SIDEWAYS: "AURORA",
+  ECHO: "AURORA",
+  BOLD: "BLOCK",
+  SPLIT: "MESH",
+  MAGAZINE: "AURORA",
+  BENTO: "MESH",
+  TAGGED: "GRID",
+  NEON: "AURORA",
 };
 
 /** Dark backgrounds put paper-coloured text on the ink. */

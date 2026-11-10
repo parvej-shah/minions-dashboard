@@ -19,7 +19,8 @@ import { contrast } from "./brand";
 import { backgroundSrc, blockColour, mix } from "./backgrounds";
 import { CoverFitError, INNER, Lines, PAD, initials, rgba, type CoverAuthor, type CoverBrand } from "./layouts";
 
-import type { BannerDesign } from "./bannerTypes";
+import { isSocial, type BannerDesign } from "./bannerTypes";
+import { socialElement } from "./social";
 
 export { BANNER_DESIGNS, type BannerDesign } from "./bannerTypes";
 
@@ -36,6 +37,8 @@ export interface BannerSpec {
   seriesNo?: number;
   /** CUTOUT: the author's photo with a transparent background, trimmed to the person. */
   cutout?: { src: string; width: number; height: number };
+  /** TAGGED: up to three short tags, taken from the post's own points (social.tsx tagsFor). */
+  tags?: string[];
   author: CoverAuthor;
   brand: CoverBrand;
 }
@@ -43,18 +46,18 @@ export interface BannerSpec {
 // The cover size (layouts.tsx COVER_SIZE), literal: layouts.tsx imports this module.
 const W = 1080;
 const H = 1350;
-const svg = (s: string) => `data:image/svg+xml;base64,${Buffer.from(s).toString("base64")}`;
-const wordKey = (w: string) => w.toLowerCase().replace(/[^a-z0-9']/g, "");
-const onColour = (b: CoverBrand, bg: string) => (contrast(b.ink, bg) >= contrast(b.paper, bg) ? b.ink : b.paper);
+export const svg = (s: string) => `data:image/svg+xml;base64,${Buffer.from(s).toString("base64")}`;
+export const wordKey = (w: string) => w.toLowerCase().replace(/[^a-z0-9']/g, "");
+export const onColour = (b: CoverBrand, bg: string) => (contrast(b.ink, bg) >= contrast(b.paper, bg) ? b.ink : b.paper);
 
-function fitBox(text: string, min: number, max: number, box: TextBox, what: string): Fitted {
+export function fitBox(text: string, min: number, max: number, box: TextBox, what: string): Fitted {
   const f = fit(text, min, max, box);
   if (!f) throw new CoverFitError(`The ${what} is too long for this banner: "${text.slice(0, 80)}"`);
   return balance(f, box);
 }
 
 /** The words that carry the mark: the emphasis phrase where one line holds it, else its first word of 3+ letters. */
-function markedWords(lines: string[], emphasis?: string): Set<string> {
+export function markedWords(lines: string[], emphasis?: string): Set<string> {
   const target = (emphasis ?? "").split(/\s+/).map(wordKey).filter(Boolean);
   const out = new Set<string>();
   if (!target.length) return out;
@@ -117,7 +120,7 @@ function DecoLines({ fitted, face, tracking = 0, lineHeight, color, emphasis, ma
 
 const AVATAR = 96;
 
-function Byline({ author, brand, color, muted, ring }: { author: CoverAuthor; brand: CoverBrand; color: string; muted: string; ring?: string }) {
+export function Byline({ author, brand, color, muted, ring }: { author: CoverAuthor; brand: CoverBrand; color: string; muted: string; ring?: string }) {
   const name = fitBox(author.name, 34, 40, { face: "sansSemi", maxWidth: INNER - AVATAR - 28, maxLines: 1 }, "name");
   const role = author.role ? fit(author.role, 26, 30, { face: "sans", maxWidth: INNER - AVATAR - 28, maxLines: 1 }) : null;
   const border = ring ? { border: `4px solid ${ring}` } : {};
@@ -435,6 +438,7 @@ function Cutout(spec: BannerSpec) {
 
 /** The banner as a Satori element. Throws CoverFitError when its copy cannot fit. */
 export function bannerElement(spec: BannerSpec) {
+  if (isSocial(spec.design)) return socialElement({ ...spec, design: spec.design });
   switch (spec.design) {
     case "TORN": return Torn(spec);
     case "SELECT": return Select(spec);

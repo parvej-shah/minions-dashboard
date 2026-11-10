@@ -665,3 +665,11 @@ press Approve & publish, which would post a duplicate on LinkedIn.
 **Why:** The weekly question only helps people who open the app in the right week, and few do. Approving a post is the moment the user is already in the app and thinking about their work, so it is the cheapest time to keep their experience current. Saying what the note does ties the answer to a visible result.
 **Alternatives considered:** Email reminders (reach people who skip the app, but reverse D16 and need a sending service; left for later if this does not move answers). Day-and-time planning at setup (not built yet).
 **Status:** active
+
+
+## 2026-11-10 — Ten image-led poster designs for social
+
+**Decision:** Covers gain ten image-led designs: Highlight, Swiss, Sideways, Echo, Bold, Split, Magazine, Bento, Tagged and Neon. Each one is built around one big word or shape and a short headline, not a block of text. They join the normal cover rotation and the Studio picker. Because one cover is shared, they appear on LinkedIn as well as Facebook (and Instagram later). They use only the workspace's own colours, fonts, name and post copy. Tagged's stickers come only from the post's own short grid or list items, never invented.
+**Why:** Facebook and Instagram reward posts that stop the scroll with an image, and the old designs read as text cards. More distinct designs also keep a feed from looking repetitive.
+**Alternatives considered:** Separate covers per channel (doubles render and review work for one post; can revisit when Instagram publishing exists).
+**Status:** active

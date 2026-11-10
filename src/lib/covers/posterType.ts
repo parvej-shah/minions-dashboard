@@ -11,7 +11,7 @@ import { BANNER_DESIGNS } from "./bannerTypes";
 import type { PosterShape } from "./shape";
 
 /** Most preferred first: a type that shows the post's own structure beats a plain headline. */
-export const TYPE_PREFERENCE: CoverLayout[] = ["PHOTO", "NUMBER", "QUOTE", "LIST", "GRID", "PUNCH", "CUTOUT", "STATEMENT", "TORN", "SELECT", "STICKER", "NOTEBOOK", "NOTES", "POSTCARD", "CIRCLED", "HEADLINE"];
+export const TYPE_PREFERENCE: CoverLayout[] = ["PHOTO", "NUMBER", "QUOTE", "LIST", "GRID", "PUNCH", "CUTOUT", "STATEMENT", "HIGHLIGHT", "SWISS", "SIDEWAYS", "ECHO", "BOLD", "SPLIT", "MAGAZINE", "BENTO", "TAGGED", "NEON", "TORN", "SELECT", "STICKER", "NOTEBOOK", "NOTES", "POSTCARD", "CIRCLED", "HEADLINE"];
 
 /** A face on every cover reads as vanity: at most one face poster (Photo or Cut-out) in this many. */
 export const PHOTO_EVERY = 4;
@@ -52,6 +52,16 @@ export function eligibleTypes(input: PosterTypeInput): CoverLayout[] {
     POSTCARD: true,
     CIRCLED: true,
     CUTOUT: Boolean(input.cutoutOk) && !faceRecently,
+    HIGHLIGHT: true,
+    SWISS: true,
+    SIDEWAYS: true,
+    ECHO: true,
+    BOLD: true,
+    SPLIT: true,
+    MAGAZINE: true,
+    BENTO: true,
+    TAGGED: true,
+    NEON: true,
   };
   return TYPE_PREFERENCE.filter((t) => ok[t]);
 }
