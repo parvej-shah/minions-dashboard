@@ -4,6 +4,7 @@ Budget: 120 lines max. Newest entries at top of each section.
 RULE: every entry below is EXACTLY ONE LINE. No multi-line entries, no sub-bullets, no wrapped continuation lines. Compress until it fits.
 
 ## Active issues
+[PUSH-ORDER] main holds e504cad (task 34, UI only) under 5a22f19 (task 35): don't push past 5a22f19 until the instagram_variant SQL column is applied, then n8n 02/03, then code (user OK needed for each).
 [PHASE7-EXIT] Tenant zero drafts Mon/Wed/Fri 09:00 Asia/Dhaka with review ON; exit = two weeks with every slot filled, clock starts Wed 2026-09-30 (the Mon 09-28 slot was dropped by the timezone move).
 [PHASE6-EXIT] Waiting on the user: two answered Weekly Pulse weeks (only 1, week of 2026-09-21, is ANSWERED so far — checked 2026-09-28).
 
