@@ -154,6 +154,15 @@ describe("toAssetDTO", () => {
     );
   });
 
+  it("gives the carousel's page images only when the carousel is on", () => {
+    const pages = ["https://cdn/carousels/c1/a1-1/01.jpg", "https://cdn/carousels/c1/a1-1/02.jpg"];
+    const spec = { active: true, pdf_url: "https://cdn/carousels/c1/a1-1/carousel.pdf", pages };
+    expect(toAssetDTO(makeAsset({ carouselSpec: spec })).carousel_pages).toEqual(pages);
+    expect(toAssetDTO(makeAsset({ carouselSpec: { ...spec, active: false } })).carousel_pages).toBeNull();
+    expect(toAssetDTO(makeAsset({ carouselSpec: { ...spec, pages: undefined } })).carousel_pages).toBeNull();
+    expect(toAssetDTO(makeAsset()).carousel_pages).toBeNull();
+  });
+
   it("says whether the post has a line a Quote cover can use", () => {
     const coverSpec = { layout: "HEADLINE", headline: "A headline" };
     const quotable = "The cheapest call is not the shortest one. It is the one that books the visit.";

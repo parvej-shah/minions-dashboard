@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { PDFDocument } from "pdf-lib";
+import sharp from "sharp";
 import { satoriFonts } from "@/lib/covers/fonts";
 import { SLIDE_SIZE, slideElement, type Deck } from "./slides";
 
@@ -8,6 +9,11 @@ export async function renderSlidePng(deck: Deck, i: number): Promise<Buffer> {
   const element = slideElement(deck, i);
   const res = new ImageResponse(element, { ...SLIDE_SIZE, fonts: satoriFonts() });
   return Buffer.from(await res.arrayBuffer());
+}
+
+/** A slide PNG as a JPEG, the only image type Instagram's API takes. Same size. */
+export async function slideJpeg(png: Buffer): Promise<Buffer> {
+  return sharp(png).flatten({ background: "#ffffff" }).jpeg({ quality: 90, mozjpeg: true }).toBuffer();
 }
 
 /**

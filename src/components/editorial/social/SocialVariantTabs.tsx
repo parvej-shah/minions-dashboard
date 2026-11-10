@@ -121,6 +121,8 @@ export default function SocialVariantTabs({
   showCoverLink = true,
 }: SocialVariantTabsProps) {
   const author = activeAsset.cover?.author ?? null;
+  // Instagram posts the whole carousel when it is on (task 37), else the cover.
+  const deck = activeAsset.carousel_pages?.length ? activeAsset.carousel_pages : null;
   const visibleChannels = SOCIAL_CHANNELS.filter((channel) => enabledTabs?.[channel.tab] ?? true);
   const setters: Record<VariantField, (v: string) => void> = {
     linkedin: setEditedLinkedin,
@@ -329,12 +331,24 @@ export default function SocialVariantTabs({
                 </div>
                 <div className="min-w-0">
                   <span className="block text-xs font-bold text-ink truncate">{author?.name ?? "Editorial Author"}</span>
-                  <span className="block text-[11px] text-muted">Copy the caption and post it with the cover image.</span>
+                  <span className="block text-[11px] text-muted">
+                    {deck ? `Copy the caption and post these ${deck.length} pages as a carousel.` : "Copy the caption and post it with the cover image."}
+                  </span>
                 </div>
               </div>
             }
             extras={
-              activeAsset.hero_image_url && activeAsset.hero_status === "READY" ? (
+              deck ? (
+                // The carousel's pages, cover first. Open one to save it full size.
+                <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1">
+                  {deck.map((page, i) => (
+                    <a key={page} href={page} target="_blank" rel="noopener noreferrer" className="snap-start shrink-0 w-[70%] sm:w-[220px]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={page} alt={`Page ${i + 1} of ${deck.length}`} className="aspect-[4/5] w-full rounded-lg border border-line object-cover" />
+                    </a>
+                  ))}
+                </div>
+              ) : activeAsset.hero_image_url && activeAsset.hero_status === "READY" ? (
                 <div className="relative mx-auto aspect-[4/5] w-full max-w-[420px] overflow-hidden rounded-xl border border-line bg-surface-2">
                   <Image src={activeAsset.hero_image_url} alt={activeAsset.title} fill unoptimized sizes="420px" className="object-cover" />
                 </div>

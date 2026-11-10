@@ -112,6 +112,8 @@ export interface AssetItem {
   claims: ClaimCheckItem[];
   /** What LinkedIn got with this draft, its carousel or its cover; null until it went to LinkedIn. */
   linkedin_went_as: "CAROUSEL" | "COVER" | null;
+  /** The carousel's page images, cover first, when it is switched on (task 37); else null. */
+  carousel_pages?: string[] | null;
   /** The live LinkedIn post, from a recorded URL or the post id the publisher stores; null until it went out. */
   linkedin_url: string | null;
   linkedin_published_at: string | null;

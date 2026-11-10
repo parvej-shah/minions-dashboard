@@ -9,7 +9,7 @@ import type { AssetItem, AssetStatus, ClaimCheckItem, CoverSpecDTO } from "@/typ
 import type { PosterShape } from "@/lib/covers/shape";
 import { bodyOf, pickQuote, quoteSource } from "@/lib/covers/copy";
 import type { AudienceLane } from "@/types";
-import { linkedinWentAs, type FollowUpFormat } from "@/lib/followUp";
+import { carouselOf, linkedinWentAs, type FollowUpFormat } from "@/lib/followUp";
 import { linkedinPostUrl, toChannelUrls } from "@/lib/channels";
 
 export const assetDTOSelect = {
@@ -152,6 +152,7 @@ export function toAssetDTO(
     },
     claims: asset.claims.map(toClaimDTO),
     linkedin_went_as: linkedinWentAs(asset),
+    carousel_pages: carouselPages(asset.carouselSpec),
     linkedin_url: toChannelUrls(parsePublishedUrls(asset.publishedUrls)).linkedin ?? linkedinPostUrl(asset.linkedinPostId),
     linkedin_published_at: asset.linkedinPublishedAt ? asset.linkedinPublishedAt.toISOString() : null,
     linkedin_removable: Boolean(asset.linkedinPostId),
@@ -160,4 +161,11 @@ export function toAssetDTO(
     created_at: asset.createdAt.toISOString(),
     updated_at: asset.updatedAt.toISOString(),
   };
+}
+
+/** The switched-on carousel's page images, cover first, for Instagram and Facebook; else null. */
+function carouselPages(spec: unknown): string[] | null {
+  const c = carouselOf(spec) as { active?: boolean; pages?: unknown } | null;
+  const pages = c?.active && Array.isArray(c.pages) ? c.pages.filter((p): p is string => typeof p === "string" && p.length > 0) : [];
+  return pages.length ? pages : null;
 }

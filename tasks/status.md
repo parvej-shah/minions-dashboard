@@ -38,3 +38,5 @@
 | 34 | Review controls as grouped lists | CLAUDE | DONE (walked 390px, pushed e504cad) | tasks/34.md |
 | 35 | Image-led FB caption, Instagram caption, plain link comment | CLAUDE | DONE (not live: SQL + n8n 02/03 + push need OK) | tasks/35.md |
 | 36 | LinkedIn carousel card as grouped lists | CLAUDE | DONE (walked 390px, not pushed) | tasks/36.md |
+| 37 | Apple-grade interaction feel (spring physics, fluid disclosure, optimistic scheduling) | ANTIGRAVITY | IN PROGRESS | tasks/37.md |
+| 38 | Carousel pages kept as JPEGs; Instagram tab shows the deck | CLAUDE | DONE (not pushed) | tasks/38.md |

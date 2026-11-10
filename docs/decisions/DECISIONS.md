@@ -678,3 +678,14 @@ press Approve & publish, which would post a duplicate on LinkedIn.
 - **Facebook:** the caption under the cover opens on the post's hook and stays under 110 words; the image carries the idea. The link comment is one plain line ("Read the full article: <url>") instead of the old stock "👉 … operational field guide" line.
 - **Instagram:** every new draft gets its own caption (topic words in the first 125 characters, no link, 3 to 5 specific hashtags). Studio shows it as an Instagram tab next to Facebook, to copy and post by hand with the cover, until Instagram publishing exists. A caption that breaks those rules is a warning, never a reason to hold a draft.
 - **Why:** the user wants Facebook and Instagram posts "image heavy, not text heavy"; see docs/research/facebook-instagram-posts-2026-11-10.md.
+
+## 2026-11-10 — Instagram gets the whole carousel; every carousel keeps its pages as images
+
+**Decision:** each carousel render stores every page as a JPEG next to the
+LinkedIn PDF. When the carousel is on, the Studio's Instagram tab shows the
+whole deck (cover first) to post by hand, instead of the single cover.
+**Why:** carousels suit text-led B2B posts on Instagram best (swipes, saves and
+sends), and Instagram and Facebook post images, not PDFs. The files are also
+what a later Facebook multi-photo or Instagram publisher needs.
+**Partly supersedes:** 2026-09-29 "store only the PDF". Pages are stored again,
+as JPEGs, which cost far less than the PNGs did.

@@ -19,7 +19,7 @@ vi.mock("@/lib/r2", () => ({
 }));
 
 const { generateCarousel, editCarousel, setCarouselActive, CAROUSEL_LOCKED } = await import("./carousel");
-const { deleteFromR2 } = await import("@/lib/r2");
+const { deleteFromR2, uploadToR2 } = await import("@/lib/r2");
 
 const body = "Demos run in controlled environments. On a live call, two seconds of silence and the buyer hangs up. Test latency on live calls before you buy.";
 const asset = {
@@ -55,17 +55,23 @@ beforeEach(() => {
 });
 
 describe("making a carousel", () => {
-  it("draws a passing plan, uploads only the PDF, and switches it on", async () => {
+  it("draws a passing plan, uploads the PDF and a JPEG per page, and switches it on", async () => {
     const chat = vi.fn().mockResolvedValue(reply(plan));
     const result = await generateCarousel("a1", { chat });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(chat).toHaveBeenCalledTimes(1);
     expect(result.carousel.active).toBe(true);
-    expect(result.carousel.pages).toBeUndefined();
     expect(result.carousel.pdf_url).toMatch(/carousel\.pdf$/);
-    expect(uploads).toHaveLength(1);
+    // The cover, then one page per slide, in the render's own folder.
+    const pageCount = plan.slides.length + 1;
+    expect(uploads).toHaveLength(pageCount + 1);
     expect(uploads[0]).toMatch(/^carousels\/c1\/a1-\d+\/carousel\.pdf$/);
+    const folder = uploads[0].replace("/carousel.pdf", "");
+    expect(uploads.slice(1)).toEqual(Array.from({ length: pageCount }, (_, i) => `${folder}/${String(i + 1).padStart(2, "0")}.jpg`));
+    expect(result.carousel.pages).toEqual(uploads.slice(1).map((k) => `https://cdn/${k}`));
+    const types = vi.mocked(uploadToR2).mock.calls.map((c) => c[2]);
+    expect(types).toEqual(["application/pdf", ...Array(pageCount).fill("image/jpeg")]);
     expect(db.asset.update).toHaveBeenCalledTimes(1);
   }, 60_000);
 

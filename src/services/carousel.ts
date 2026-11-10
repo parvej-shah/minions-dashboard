@@ -7,7 +7,7 @@ import { coverBrand } from "@/lib/covers/brand";
 import type { CoverSpec } from "@/lib/covers/layouts";
 import { evidenceRules, manualIdeaNote } from "@/lib/drafts/authorContext";
 import { COVER_HEADLINE_WORDS, checkPlan, namesIn, parsePlan, repairPlan, suggestCarousel, toDeck, type CarouselPlan, type PlanSources } from "@/lib/carousel/plan";
-import { renderCarouselPdf, renderSlidePng } from "@/lib/carousel/render";
+import { renderCarouselPdf, renderSlidePng, slideJpeg } from "@/lib/carousel/render";
 import type { Deck, SlideStyle } from "@/lib/carousel/slides";
 import { renderCarousel, type CarouselInput } from "@/lib/prompts/carousel";
 import { bodyOf, defaultByline, hostedCoverPhoto, isPublished } from "./cover";
@@ -25,9 +25,12 @@ export interface StoredCarousel {
   /** LinkedIn gets the carousel instead of the cover. */
   active: boolean;
   plan: CarouselPlan;
-  /** The only file stored: LinkedIn's document, and the review preview. */
+  /** LinkedIn's document. */
   pdf_url: string;
-  /** Each page as a PNG, cover first. Only carousels drawn before 2026-09-29 have them. */
+  /**
+   * Each page as an image, cover first: JPEG from 2026-11-10 (for Instagram and
+   * Facebook, and the review preview), PNG before 2026-09-29, none in between.
+   */
   pages?: string[];
   /** Copied from the plan for 03, which reads the row as it is. */
   caption: string;
@@ -148,7 +151,7 @@ function gate(ctx: Context, plan: CarouselPlan): { deck: Deck | null; errors: st
   return built.errors.length ? { deck: null, errors: built.errors } : { deck: built.deck, errors: [] };
 }
 
-/** Draws every page into the PDF, uploads it under a fresh folder, and saves the row. */
+/** Draws every page into the PDF and as JPEGs, uploads them under a fresh folder, and saves the row. */
 async function renderAndStore(ctx: Context, plan: CarouselPlan, deck: Deck, meta: { active: boolean; model: string | null; attempts: number }, costUsd = 0): Promise<StoredCarousel> {
   const pngs: Buffer[] = [];
   for (let i = 0; i <= deck.slides.length; i++) pngs.push(await renderSlidePng(deck, i));
@@ -156,10 +159,17 @@ async function renderAndStore(ctx: Context, plan: CarouselPlan, deck: Deck, meta
   // A new folder per render, so no CDN or browser serves an old PDF.
   const folder = `carousels/${ctx.clientId}/${ctx.assetId}-${Date.now()}`;
   const pdfUpload = await uploadToR2(`${folder}/carousel.pdf`, pdf, "application/pdf");
+  // Each page as a JPEG too: Instagram and Facebook post images, not a PDF.
+  const pages: string[] = [];
+  for (let i = 0; i < pngs.length; i++) {
+    const upload = await uploadToR2(`${folder}/${String(i + 1).padStart(2, "0")}.jpg`, await slideJpeg(pngs[i]), "image/jpeg");
+    pages.push(upload.url);
+  }
   const carousel: StoredCarousel = {
     active: meta.active,
     plan,
     pdf_url: pdfUpload.url,
+    pages,
     caption: plan.caption,
     document_title: plan.documentTitle,
     model: meta.model,
