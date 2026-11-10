@@ -1,3 +1,4 @@
+import type { BrandSection } from "@/lib/brandSections";
 import type { MemoryDisclosure, MemoryKind } from "@/constants/contentLanes";
 
 /** The one ICP a workspace writes for, as the Brand page edits it. */
@@ -52,10 +53,12 @@ export interface CompletenessPrompt {
   id: string;
   text: string;
   /** Where on the Brand page the user can act on it. */
-  tab: "experience" | "voice-proof" | "overview";
+  tab: BrandSection;
 }
 
 export interface BrandCompleteness {
   score: number;
   prompts: CompletenessPrompt[];
+  /** The first basic still missing, or null once a post can be written well. */
+  next: CompletenessPrompt | null;
 }

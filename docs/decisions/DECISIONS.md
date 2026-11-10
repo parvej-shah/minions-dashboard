@@ -28,6 +28,13 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-10 — Brand opens on four basics; the rest is Advanced
+
+**Decision:** The Brand page shows only what a post can't be written without: what you do, who you write for, what you post about, and what you've done. Writing voice, reader details, all experience, facts and what sets you apart, words to avoid, idea sources and cover look sit in one closed "Advanced" list, each its own page. The profile score and its three nudges are gone; one quiet line appears only while a basic is missing.
+**Why:** These four are what the engine depends on (positioning, the ICP line, topics, and experience the authority gate requires); everything else has a working default and only makes posts sound more like the author. A busy founder happy with the basics never has to read the rest (user, 2026-11-10). Same data and engine; tasks/30.md maps each setting to where the engine reads it.
+**Alternatives considered:** Five equal tabs (the old page: every setting looked required); a completeness score (nagged about optional extras).
+**Status:** active
+
 ## 2026-11-10 — Setup examples follow the user's own answers
 
 **Decision:** The grey example in "Who should your posts reach?" is written from what the user wants to be known for, and the story box's example from both answers (a dentist-tax adviser sees "Dentists who own their practice"). Placeholder only: no tap-to-use chips, never saved or sent to the writer. If the model is slow or down, the fixed example stays.

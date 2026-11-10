@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BookOpen, Eye, EyeOff, Pencil, Trash2 } from "lucide-react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import {
   MEMORY_DISCLOSURE_META,
@@ -12,9 +11,17 @@ import type { MemoryItem } from "@/types";
 import Composer, { EMPTY_DRAFT, type MemoryDraft } from "@/components/brand/MemoryComposer";
 import ErrorLine from "@/components/ui/ErrorLine";
 import { LoadingState } from "@/components/ui/EmptyState";
-import { sectionClass } from "@/components/ui/fieldStyles";
+import Menu from "@/components/ui/Menu";
+import { BrandCard, brandText } from "@/components/brand/parts";
 
-export default function MemorySection({ onChange }: { onChange: () => void }) {
+/** How many items the basic card shows before "See all". */
+const COMPACT_ROWS = 3;
+
+/**
+ * What the author has lived. `compact` is the basic card: one box to add, the
+ * latest few, and a link to the full list, where items are grouped and edited.
+ */
+export default function MemorySection({ onChange, compact = false, onSeeAll }: { onChange: () => void; compact?: boolean; onSeeAll?: () => void }) {
   const [items, setItems] = useState<MemoryItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState<MemoryDraft>(EMPTY_DRAFT);
@@ -59,102 +66,65 @@ export default function MemorySection({ onChange }: { onChange: () => void }) {
     }
   }
 
-  if (!items) return error ? <ErrorLine text={error} /> : <LoadingState />;
+  const title = compact ? "What you\u2019ve done" : "Your experience";
+  const line = compact ? "Posts are only written from what\u2019s here. Add anything real." : "What you have built, learned and seen. Never add anything confidential.";
+  if (!items) return <BrandCard title={title} line={line}>{error ? <ErrorLine text={error} /> : <LoadingState rows={2} />}</BrandCard>;
+
+  const row = (item: MemoryItem) => (
+    <li key={item.id} className={`${brandText.row} ${item.is_active ? "" : "opacity-50"}`}>
+      <p className={`whitespace-pre-wrap text-[15px] leading-relaxed text-ink ${compact ? "line-clamp-2" : ""}`}>{item.content}</p>
+      {!compact && (
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-subtle">
+          <span>{item.used_in_ideas === 0 ? "Not used yet" : `Used in ${item.used_in_ideas} idea${item.used_in_ideas === 1 ? "" : "s"}`}</span>
+          {item.disclosure !== "PUBLIC" && <span title={MEMORY_DISCLOSURE_META[item.disclosure].hint}>· Kept general</span>}
+          {!item.is_active && <span>· Not in use</span>}
+          <span className="flex-1" />
+          <Menu
+            label="More"
+            items={[
+              { label: "Edit", onSelect: () => setDraft({ id: item.id, kind: item.kind, content: item.content, disclosure: item.disclosure }) },
+              { label: item.disclosure === "PUBLIC" ? "Keep it general" : "Allow specifics", onSelect: () => patch(item, { disclosure: item.disclosure === "PUBLIC" ? "GENERALIZE" : "PUBLIC" }) },
+              { label: item.is_active ? "Stop using this" : "Use this again", onSelect: () => patch(item, { is_active: !item.is_active }) },
+              { label: "Delete", onSelect: () => remove(item), danger: true },
+            ]}
+          />
+        </div>
+      )}
+    </li>
+  );
+
+  if (compact) {
+    return (
+      <BrandCard
+        title={title}
+        line={line}
+        action={items.length > 0 && onSeeAll && <button type="button" onClick={onSeeAll} className={brandText.link}>See all {items.length}</button>}
+      >
+        {error && <ErrorLine text={error} />}
+        <Composer simple draft={draft} setDraft={setDraft} onSaved={(item) => { upsert(item); setDraft(EMPTY_DRAFT); }} />
+        {items.length > 0 && <ul className="space-y-2">{items.slice(0, COMPACT_ROWS).map(row)}</ul>}
+      </BrandCard>
+    );
+  }
 
   const grouped = MEMORY_KINDS.map((kind) => ({ kind, rows: items.filter((i) => i.kind === kind) })).filter((g) => g.rows.length);
 
   return (
-    <div className={sectionClass}>
-      <div>
-        <h3 className="text-base font-bold text-ink flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-brand" />
-          Experience &amp; activity
-          <span className="rounded bg-line px-1.5 py-0.5 text-[10px] text-muted">{items.length}</span>
-        </h3>
-        <p className="text-xs text-muted mt-0.5">
-          What you have built, learned and seen. Minions only proposes ideas it can back with something here, so
-          anything you add makes your posts more yours. Never add anything confidential.
-        </p>
-      </div>
-
+    <BrandCard title={title} line={line}>
       {error && <ErrorLine text={error} />}
-
       <Composer draft={draft} setDraft={setDraft} onSaved={(item) => { upsert(item); setDraft(EMPTY_DRAFT); }} />
-
       {items.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-line px-3 py-6 text-center text-xs text-subtle">
-          Nothing yet. Start with one lesson from a project that did not go to plan.
-        </p>
+        <p className={`${brandText.row} ${brandText.line}`}>Nothing yet. Start with one lesson from a project that did not go to plan.</p>
       ) : (
-        <div className="space-y-5 border-t border-line/60 pt-4">
+        <div className="space-y-6">
           {grouped.map(({ kind, rows }) => (
             <div key={kind} className="space-y-2">
-              <h4 className="text-[11px] text-subtle">{MEMORY_KIND_META[kind].label}</h4>
-              {rows.map((item) => (
-                <div
-                  key={item.id}
-                  className={`group rounded-lg border border-line bg-canvas px-3 py-2.5 ${item.is_active ? "" : "opacity-50"}`}
-                >
-                  <p className="whitespace-pre-wrap text-sm text-ink">{item.content}</p>
-                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
-                    {/* Public is the default, so only a generalized item carries a tag; the switch sits with the other controls. */}
-                    {item.disclosure !== "PUBLIC" && (
-                      <span title={MEMORY_DISCLOSURE_META[item.disclosure].hint} className="rounded border border-line px-1.5 py-0.5 text-muted">
-                        Kept general
-                      </span>
-                    )}
-                    <span className="text-subtle">
-                      {item.used_in_ideas === 0 ? "Not used yet" : `Used in ${item.used_in_ideas} idea${item.used_in_ideas === 1 ? "" : "s"}`}
-                    </span>
-                    <span className="flex-1" />
-                    <span className="flex items-center gap-1 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
-                    <button
-                      type="button"
-                      onClick={() => patch(item, { disclosure: item.disclosure === "PUBLIC" ? "GENERALIZE" : "PUBLIC" })}
-                      title={item.disclosure === "PUBLIC" ? MEMORY_DISCLOSURE_META.GENERALIZE.hint : MEMORY_DISCLOSURE_META.PUBLIC.hint}
-                      className="rounded px-1.5 py-0.5 text-subtle hover:text-ink cursor-pointer"
-                    >
-                      {item.disclosure === "PUBLIC" ? "Keep it general" : "Allow specifics"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => patch(item, { is_active: !item.is_active })}
-                      aria-label={item.is_active ? "Stop using this" : "Use this again"}
-                      title={item.is_active ? "Stop using this" : "Use this again"}
-                      className="rounded p-1 text-subtle hover:text-ink cursor-pointer"
-                    >
-                      {item.is_active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDraft({ id: item.id, kind: item.kind, content: item.content, disclosure: item.disclosure })}
-                      aria-label="Edit"
-                      className="rounded p-1 text-subtle hover:text-ink cursor-pointer"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => remove(item)}
-                      aria-label="Delete"
-                      className="rounded p-1 text-subtle hover:bg-danger/10 hover:text-danger cursor-pointer"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                    </span>
-                  </div>
-                </div>
-              ))}
+              <h3 className="text-[15px] font-medium text-muted">{MEMORY_KIND_META[kind].label}</h3>
+              <ul className="space-y-2">{rows.map(row)}</ul>
             </div>
           ))}
         </div>
       )}
-    </div>
+    </BrandCard>
   );
 }
-
-/**
- * Add or edit one item. Saving runs the generalization check first: contact
- * details, secrets and anything confidential block the save; names, places
- * and figures are shown with a rewrite that removes them.
- */

@@ -148,4 +148,4 @@ export interface BrandVoiceProofSettings {
   proofs: BrandProofItem[];
 }
 
-export type BrandTab = "overview" | "experience" | "voice-proof" | "lexicon" | "sources";
+

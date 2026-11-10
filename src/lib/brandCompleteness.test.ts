@@ -22,12 +22,26 @@ describe("brand completeness", () => {
       approvedProofs: 1,
     });
     expect(kinds.length).toBe(MEMORY_TARGET);
-    expect(r).toEqual({ score: 100, prompts: [] });
+    expect(r).toEqual({ score: 100, prompts: [], next: null });
   });
 
   it("counts toward the memory target and says how many there are", () => {
     const r = computeCompleteness({ ...empty, icp: { who: "Owners of roofing firms with 5 to 30 staff", pains: ["x"], decisions: ["y"], questions: [] }, memoryKinds: ["LESSON", "CURRENT_WORK", "STORY"], toneExamples: 1 });
     const ten = r.prompts.find((p) => p.id === "memory-ten");
     expect(ten?.text).toContain("You have 3");
+  });
+
+  it("names the first missing basic, and nothing once the basics are in", () => {
+    expect(computeCompleteness(empty).next?.id).toBe("icp-who");
+    const withReader = { ...empty, icp: { ...empty.icp, who: "Owners of roofing firms with 5 to 30 staff" } };
+    expect(computeCompleteness(withReader).next?.id).toBe("memory-first");
+    const withWork = { ...withReader, memoryKinds: ["LESSON", "CURRENT_WORK", "STORY"] as MemoryKind[] };
+    expect(computeCompleteness(withWork).next?.id).toBe("positioning");
+    // Advanced gaps (pains, samples, proof) never show as the next step.
+    expect(computeCompleteness({ ...withWork, hasPositioning: true }).next).toBeNull();
+  });
+
+  it("points every prompt at a section of the Brand page", () => {
+    for (const p of computeCompleteness(empty).prompts) expect(["basics", "experience", "reader", "voice", "proof"]).toContain(p.tab);
   });
 });

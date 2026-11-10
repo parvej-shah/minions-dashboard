@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Rss, Plus, Trash2, AlertTriangle, Loader2 } from "lucide-react";
+import { X } from "lucide-react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { LoadingState } from "@/components/ui/EmptyState";
 import {
@@ -12,7 +12,9 @@ import {
   type IdeaSourceKind,
 } from "@/constants/ideaSources";
 
-import { buttonStyles } from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
+import ErrorLine from "@/components/ui/ErrorLine";
+import { BrandCard, brandText } from "@/components/brand/parts";
 import { inputClass } from "@/components/ui/fieldStyles";
 
 /**
@@ -96,136 +98,70 @@ export default function SourcesTab() {
     }
   }
 
-  if (isLoading) return <LoadingState />;
+  const title = "Where ideas come from";
+  const line = "Minions reads these for things worth posting about. More varied feeds mean less repetitive ideas.";
+  if (isLoading) return <BrandCard title={title} line={line}><LoadingState rows={2} /></BrandCard>;
 
   return (
-    <div className="space-y-6">
-      <div className="p-6 rounded-2xl bg-surface border border-line space-y-4 shadow-sm">
-        <div>
-          <h3 className="text-base font-bold text-ink flex items-center gap-2">
-            <Rss className="w-4 h-4 text-brand" />
-            Where ideas come from
-          </h3>
-          <p className="text-xs text-muted mt-0.5">
-            Minions reads these feeds for things worth posting about. More varied feeds mean less
-            repetitive ideas.
-          </p>
-        </div>
+    <BrandCard title={title} line={line}>
+      {error && <ErrorLine text={error} />}
 
-        {error && (
-          <div className="flex items-start gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
-            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <div className="space-y-2">
-          {sources.length === 0 && (
-            <p className="rounded-lg border border-dashed border-line px-3 py-6 text-center text-xs text-subtle">
-              No feeds yet. Until you add one, Minions reads a general technology feed.
-            </p>
-          )}
-
+      {sources.length === 0 ? (
+        <p className={`${brandText.row} ${brandText.line}`}>No feeds yet. Until you add one, Minions reads a general technology feed.</p>
+      ) : (
+        <ul className="space-y-2">
           {sources.map((source) => (
-            <div
-              key={source.id}
-              className="flex items-center gap-3 rounded-lg border border-line bg-canvas px-3 py-2.5"
-            >
-              <input
-                type="checkbox"
-                checked={source.is_active}
-                onChange={() => handleToggle(source)}
-                aria-label={`Use ${source.label}`}
-                className="h-4 w-4 shrink-0 accent-brand cursor-pointer"
-              />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="truncate text-sm font-semibold text-ink">
-                    {source.label}
-                  </span>
-                  <span className="shrink-0 rounded bg-line px-1.5 py-0.5 text-[10px] text-muted">
-                    {IDEA_SOURCE_KINDS.find((k) => k.id === source.kind)?.label || source.kind}
-                  </span>
-                </div>
-                <p className="truncate text-[11px] text-subtle">{source.query || source.url}</p>
-                {source.last_error && (
-                  <p className="mt-0.5 flex items-center gap-1 text-[11px] text-danger">
-                    <AlertTriangle className="h-3 w-3 shrink-0" />
-                    Last fetch failed: {source.last_error}
-                  </p>
-                )}
+            <li key={source.id} className={`${brandText.row} flex items-center gap-3 py-2 pr-2`}>
+              <input type="checkbox" checked={source.is_active} onChange={() => handleToggle(source)} aria-label={`Use ${source.label}`} className="h-5 w-5 shrink-0 cursor-pointer accent-[var(--color-brand)]" />
+              <div className="min-w-0 flex-1 py-1.5">
+                <p className="truncate text-[15px] font-medium text-ink">{source.label}</p>
+                <p className="truncate text-sm text-subtle">
+                  {IDEA_SOURCE_KINDS.find((k) => k.id === source.kind)?.label || source.kind} · {source.query || source.url}
+                </p>
+                {source.last_error && <p className="mt-0.5 text-sm text-danger">Last read failed: {source.last_error}</p>}
               </div>
-              <button
-                type="button"
-                onClick={() => handleDelete(source.id)}
-                aria-label={`Remove ${source.label}`}
-                className="shrink-0 rounded-lg p-1.5 text-subtle transition-colors hover:bg-danger/10 hover:text-danger cursor-pointer"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
+              <button type="button" onClick={() => handleDelete(source.id)} aria-label={`Remove ${source.label}`} className={brandText.iconButton}>
+                <X className="h-4 w-4" aria-hidden="true" />
               </button>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
+      )}
 
-        {sources.length < MAX_SOURCES_PER_TENANT ? (
-          <div className="space-y-2 border-t border-line/60 pt-4">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <label className="space-y-1.5 text-xs font-semibold text-muted">Source type
-              <select
-                value={kind}
-                onChange={(e) => setKind(e.target.value as IdeaSourceKind)}
-                className={`${inputClass} cursor-pointer`}
-              >
+      {sources.length < MAX_SOURCES_PER_TENANT ? (
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <label className="space-y-2">
+              <span className={brandText.label}>Type</span>
+              <select value={kind} onChange={(e) => setKind(e.target.value as IdeaSourceKind)} className={`${inputClass} cursor-pointer`}>
                 {IDEA_SOURCE_KINDS.map((k) => (
                   <option key={k.id} value={k.id}>
                     {k.label}
                   </option>
                 ))}
               </select>
-              </label>
-              <label className="space-y-1.5 text-xs font-semibold text-muted">Name
-              <input
-                type="text"
-                value={label}
-                onChange={(e) => setLabel(e.target.value)}
-                placeholder="Name, e.g. Trade Weekly"
-                className={inputClass}
-              />
-              </label>
-              <label className="space-y-1.5 text-xs font-semibold text-muted">{kindDef.usesQuery ? "Search topic" : "Feed URL"}
-              <input
-                type="text"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                placeholder={kindDef.usesQuery ? "Topic" : "Feed URL"}
-                className={inputClass}
-              />
-              </label>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs text-muted">{kindDef.hint}</p>
-              <button
-                type="button"
-                onClick={handleAdd}
-                disabled={isSaving || !label.trim() || !value.trim()}
-                className={buttonStyles({ size: "md", className: "w-full sm:w-auto" })}
-              >
-                {isSaving ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Plus className="h-3.5 w-3.5" />
-                )}
-                Add source
-              </button>
-            </div>
+            </label>
+            <label className="space-y-2">
+              <span className={brandText.label}>Name</span>
+              <input type="text" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. Trade Weekly" className={inputClass} />
+            </label>
+            <label className="space-y-2">
+              <span className={brandText.label}>{kindDef.usesQuery ? "Search topic" : "Feed URL"}</span>
+              <input type="text" value={value} onChange={(e) => setValue(e.target.value)} placeholder={kindDef.usesQuery ? "Topic" : "https://…"} className={inputClass} />
+            </label>
           </div>
-        ) : (
-          <p className="border-t border-line/60 pt-4 text-xs text-subtle">
-            You&apos;ve reached the limit of {MAX_SOURCES_PER_TENANT} sources. Remove one to add
-            another. Minions takes up to {MAX_ITEMS_PER_SOURCE} items from each feed when it looks for ideas.
-          </p>
-        )}
-      </div>
-    </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className={brandText.note}>{kindDef.hint}</p>
+            <Button variant="secondary" onClick={handleAdd} loading={isSaving} disabled={!label.trim() || !value.trim()} className="shrink-0">
+              Add source
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <p className={brandText.note}>
+          You&apos;ve reached the limit of {MAX_SOURCES_PER_TENANT} sources. Remove one to add another. Minions takes up to {MAX_ITEMS_PER_SOURCE} items from each feed.
+        </p>
+      )}
+    </BrandCard>
   );
 }
