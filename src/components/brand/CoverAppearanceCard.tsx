@@ -34,39 +34,25 @@ interface Props {
 
 /** Photo, colours and illustration style of the generated covers. The full editor behind the cover card on Your brand. */
 export default function CoverAppearanceCard({ profile, setProfile }: Props) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [lookDraft, setLookDraft] = useState<LookDraft | null>(null);
+  // null means "no unsaved changes": the fields show the saved profile and are always editable.
+  const [changes, setChanges] = useState<LookDraft | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const openEdit = () => {
-    if (!profile) return;
-    setError(null);
-    setLookDraft({
-      primary_logo_url: profile.primary_logo_url,
-      cover_byline: profile.cover_byline,
-      cover_art: profile.cover_art,
-      cover_cutout_url: profile.cover_cutout_url,
-      primary_ink: profile.primary_ink,
-      brand_teal: profile.brand_teal,
-      brand_coral: profile.brand_coral,
-      brand_cream: profile.brand_cream,
-      accent_blue: profile.accent_blue,
-    });
-    setIsEditing(true);
-  };
+  const lookDraft = changes ?? (profile ? fromProfile(profile) : null);
+  const setLookDraft = (d: LookDraft) => setChanges(d);
+  const dirty = changes !== null;
 
   const save = async () => {
-    if (!profile || !lookDraft) return;
+    if (!profile || !changes) return;
     setIsSaving(true);
     setError(null);
     try {
       const updated = await apiClient.post<BrandSettings>("/api/brand", {
         ...toProfileInput(profile),
-        ...lookDraft,
+        ...changes,
       });
       setProfile(updated);
-      setIsEditing(false);
+      setChanges(null);
     } catch (err) {
       setError(toErrorMessage(err, "Could not save your cover appearance."));
     } finally {
@@ -79,7 +65,7 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
 
   /** Uploads a headshot or logo to our storage; covers use it from the next draft on. */
   const uploadPhoto = async (file: File | undefined) => {
-    if (!file || !lookDraft) return;
+    if (!file || !profile) return;
     setPhotoError(null);
     if (!["image/png", "image/jpeg"].includes(file.type)) return setPhotoError("Use a PNG or JPEG image.");
     if (file.size > 5 * 1024 * 1024) return setPhotoError("Use an image under 5 MB.");
@@ -90,7 +76,7 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
       const res = await fetch("/api/media/upload", { method: "POST", body: form });
       const body = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
       if (!res.ok || !body.url) throw new Error(body.error || `Upload failed (HTTP ${res.status})`);
-      setLookDraft((d) => (d ? { ...d, primary_logo_url: body.url! } : d));
+      setChanges((d) => ({ ...(d ?? fromProfile(profile)), primary_logo_url: body.url! }));
     } catch (e) {
       setPhotoError(toErrorMessage(e, "Upload failed"));
     } finally {
@@ -103,7 +89,7 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
 
   /** Uploads a cut-out of the author for the Cut-out cover, after checking it really has a see-through background. */
   const uploadCutout = async (file: File | undefined) => {
-    if (!file || !lookDraft) return;
+    if (!file || !profile) return;
     setCutoutError(null);
     if (file.type !== "image/png") return setCutoutError("Use a PNG with a transparent background.");
     if (file.size > 5 * 1024 * 1024) return setCutoutError("Use an image under 5 MB.");
@@ -115,7 +101,7 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
       const res = await fetch("/api/media/upload", { method: "POST", body: form });
       const body = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
       if (!res.ok || !body.url) throw new Error(body.error || `Upload failed (HTTP ${res.status})`);
-      setLookDraft((d) => (d ? { ...d, cover_cutout_url: body.url! } : d));
+      setChanges((d) => ({ ...(d ?? fromProfile(profile)), cover_cutout_url: body.url! }));
     } catch (e) {
       setCutoutError(toErrorMessage(e, "Upload failed"));
     } finally {
@@ -129,9 +115,8 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
     <BrandCard
       title="Cover look"
       line="Your photo, colours and illustration style on new covers."
-      action={!isEditing && profile && <button type="button" onClick={openEdit} className={brandText.link}>Edit</button>}
     >
-      {isEditing && lookDraft ? (
+      {lookDraft ? (
         <div className="space-y-5">
           <div className="space-y-2">
             <label htmlFor="cover-photo" className={brandText.label}>Photo or logo</label>
@@ -188,8 +173,8 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
             </div>
           </div>
           <div className="space-y-2">
-            <p className={brandText.label}>Your own colours</p>
-            <p className={brandText.note}>Only if you need exact brand colours. The themes on Your brand are tuned to read well on a phone.</p>
+            <p className={brandText.label}>Custom colours</p>
+            <p className={brandText.note}>Tap a colour to change it. Or pick a ready theme on Your brand.</p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {LOOK_COLOR_FIELDS.map(({ key, label }) => (
                 <label key={key} className="block cursor-pointer space-y-1.5">
@@ -203,26 +188,30 @@ export default function CoverAppearanceCard({ profile, setProfile }: Props) {
           </div>
           <BrandLookPreview colors={lookDraft} brandName={profile?.brand_name} byline={lookDraft.cover_byline} logoUrl={lookDraft.primary_logo_url} art={lookDraft.cover_art} />
           {error && <p role="alert" className="text-sm text-danger">{error}</p>}
-          <div className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
-            <Button onClick={save} loading={isSaving}>Save</Button>
-          </div>
-        </div>
-      ) : (
-        profile && (
-          <div className="space-y-4">
-            <BrandLookPreview colors={profile} brandName={profile.brand_name} byline={profile.cover_byline} logoUrl={profile.primary_logo_url} art={profile.cover_art} />
-            <div className="flex flex-wrap items-center gap-2">
-              {LOOK_COLOR_FIELDS.map(({ key, label }) => (
-                <span key={key} className="h-8 w-8 rounded-full ring-1 ring-line" style={{ backgroundColor: profile[key] }} title={label} />
-              ))}
-              {!profile.primary_logo_url && <span className={`${brandText.note} ml-2`}>No photo or logo yet: covers show your initials.</span>}
+          {dirty && (
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => { setChanges(null); setError(null); }}>Cancel</Button>
+              <Button onClick={save} loading={isSaving}>Save</Button>
             </div>
-          </div>
-        )
-      )}
+          )}
+        </div>
+      ) : null}
     </BrandCard>
   );
+}
+
+function fromProfile(p: BrandSettings): LookDraft {
+  return {
+    primary_logo_url: p.primary_logo_url,
+    cover_byline: p.cover_byline,
+    cover_art: p.cover_art,
+    cover_cutout_url: p.cover_cutout_url,
+    primary_ink: p.primary_ink,
+    brand_teal: p.brand_teal,
+    brand_coral: p.brand_coral,
+    brand_cream: p.brand_cream,
+    accent_blue: p.accent_blue,
+  };
 }
 
 /** Whether a PNG's top corners are see-through, i.e. the person was cut out of their background. */
