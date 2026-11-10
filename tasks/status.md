@@ -30,5 +30,5 @@
 | 26 | Remaining screens calm pass | CLAUDE | DONE (pushed 2026-11-10) | tasks/26.md |
 | 27 | Sweep + browser pass, then ask to push | CLAUDE | DONE (pushed 2026-11-10) | tasks/27.md |
 | 29 | Setup examples follow the user's answers | CLAUDE | DONE (live walk open) | built 2026-11-10 (a314bea), pushed 2026-11-10; screens not walked live, needs a fresh workspace |
-| 30 | Brand: basics first, the rest under Advanced | CLAUDE | DONE (not pushed) | tasks/30.md |
+| 30 | Brand: basics first, the rest under Advanced | CLAUDE | DONE (pushed 29d4e89) | tasks/30.md |
 | 28 | Calm welcome + setup flow (board, then build) | CLAUDE | DONE (live walk open) | built 2026-11-10 (6165c07), pushed 2026-11-10; setup not walked live, needs a fresh workspace |
