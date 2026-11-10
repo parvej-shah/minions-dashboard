@@ -36,3 +36,4 @@
 | 32 | Weekly update ask at approval | CLAUDE | DONE | tasks/32.md |
 | 33 | Ten premium social poster designs | CLAUDE | DONE | tasks/33.md |
 | 34 | Review controls as grouped lists | CLAUDE | DONE (not walked live, not pushed) | tasks/34.md |
+| 35 | Image-led FB caption, Instagram caption, plain link comment | CLAUDE | DONE (not live: SQL + n8n 02/03 + push need OK) | tasks/35.md |

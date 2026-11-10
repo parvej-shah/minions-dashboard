@@ -73,9 +73,11 @@ function assetUpdateData(body: JsonObject, channels: string[] | undefined): Pris
     ...(has("linkedin_variant") && { linkedinVariant: body.linkedin_variant as string }),
     ...(has("facebook_variant") && { facebookVariant: body.facebook_variant as string }),
     ...(has("x_variant") && { xVariant: body.x_variant as string }),
+    ...(has("instagram_variant") && { instagramVariant: body.instagram_variant as string }),
     ...(variants.linkedin !== undefined && { linkedinVariant: variants.linkedin }),
     ...(variants.facebook !== undefined && { facebookVariant: variants.facebook }),
     ...(variants.twitter !== undefined && { xVariant: variants.twitter }),
+    ...(variants.instagram !== undefined && { instagramVariant: variants.instagram }),
     updatedAt: new Date(),
   };
 }

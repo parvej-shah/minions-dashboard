@@ -71,6 +71,7 @@ function makeAsset(overrides: Partial<Asset> = {}): Asset & { claims: Claim[] } 
     linkedinVariant: "LI copy",
     facebookVariant: null,
     xVariant: null,
+    instagramVariant: "IG copy",
     version: 1,
     generationCost: null,
     publishedAt: null,
@@ -162,7 +163,7 @@ describe("toAssetDTO", () => {
 
   it("exposes social bodies under variants, not three loose *_variant keys", () => {
     const dto = toAssetDTO(makeAsset());
-    expect(dto.variants).toEqual({ linkedin: "LI copy", facebook: "", twitter: "" });
+    expect(dto.variants).toEqual({ linkedin: "LI copy", facebook: "", twitter: "", instagram: "IG copy" });
     expect(dto).not.toHaveProperty("linkedin_variant");
     expect(dto).not.toHaveProperty("social_variants");
   });
@@ -251,7 +252,7 @@ describe("toPublishedDTO", () => {
     // No asset means no id and no cost to report — neither is invented.
     expect(dto.asset_id).toBeNull();
     expect(dto.cost_usd).toBeNull();
-    expect(dto.variants).toEqual({ linkedin: "", facebook: "", twitter: "" });
+    expect(dto.variants).toEqual({ linkedin: "", facebook: "", twitter: "", instagram: "" });
   });
 
   it("links a LinkedIn post from the id the publisher stores", () => {

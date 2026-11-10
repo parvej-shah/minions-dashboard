@@ -36,6 +36,7 @@ const strategyData = $('Parse Strategy JSON').first().json?.strategy || {};
 let liVariant = '';
 let fbVariant = '';
 let xVariant = '';
+let igVariant = '';
 
 if (rawInput.choices && rawInput.choices[0] && rawInput.choices[0].message) {
   let content = rawInput.choices[0].message.content || '';
@@ -45,6 +46,7 @@ if (rawInput.choices && rawInput.choices[0] && rawInput.choices[0].message) {
     liVariant = parsed.li_variant || '';
     fbVariant = parsed.fb_variant || '';
     xVariant = parsed.x_variant || '';
+    igVariant = parsed.ig_variant || '';
   } catch (e) {}
 }
 
@@ -71,6 +73,8 @@ const cleanedFb = cleanText(fbVariant);
 const cleanedLi = cleanText(liVariant);
 
 const cleanedX = cleanText(xVariant);
+
+const cleanedIg = cleanText(igVariant);
 
 const nowIso = new Date().toISOString();
 const docTitle = `[${gateData.audience}] ${cleanedTitle} (${gateData.asset_id})`;
@@ -116,6 +120,7 @@ return [{
     li_variant: cleanedLi,
     fb_variant: cleanedFb,
     x_variant: cleanedX,
+    ig_variant: cleanedIg,
     edited_body: fullBodyText,
     now_iso: nowIso,
     supabase_payload: supabasePayload

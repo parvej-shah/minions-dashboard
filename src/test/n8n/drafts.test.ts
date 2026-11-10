@@ -154,3 +154,50 @@ describe("banned words are reworded before the gate, which still blocks what is 
     expect(row.content).toBe("Checks run against a deterministic schema.");
   });
 });
+
+describe("02 writes an Instagram caption next to the other three", () => {
+  const variantsReply = (parsed: Json) => ({ choices: [{ message: { content: JSON.stringify(parsed) } }] });
+  const parse = (parsed: Json) =>
+    runCodeNode(D, "Parse Variants and Prepare Rows", {
+      input: [variantsReply(parsed)],
+      nodes: {
+        "Parse Claims and Gate": [{ title: "T", hook: "Hook", edited_body: "Body", audience: "ICP", asset_id: "a1", claims: [] }],
+        "Parse Strategy JSON": [{ strategy: {} }],
+      },
+    });
+  const validate = (data: Json) =>
+    runCodeNode(D, "Validate Social Variants", {
+      input: [data],
+      nodes: { "Assemble Brand Context": [{ company_name: "Acme" }], "Read Brand": [] },
+    });
+  const three = { li_variant: "li #One #Two", fb_variant: "fb", x_variant: "x" };
+
+  it("Parse Variants reads and cleans ig_variant", async () => {
+    const [out] = await parse({ ...three, ig_variant: "**Missed calls** cost tours.\n\n#A #B #C" });
+    expect(out.ig_variant).toBe("Missed calls cost tours.\n\n#A #B #C");
+  });
+
+  it("an Instagram caption that breaks a rule is a warning, never a block", async () => {
+    const [bad] = await validate({ ...three, ig_variant: "See https://x.co #A" });
+    expect(bad.variants_ok).toBe("Y");
+    expect(bad.variants_warnings).toEqual(expect.arrayContaining(["Instagram caption has a link; links in captions do not click.", "Instagram caption has 1 hashtags; use 3 to 5."]));
+    const [missing] = await validate(three);
+    expect(missing.variants_ok).toBe("Y");
+    expect(missing.variants_warnings).toContain("Instagram caption is empty.");
+  });
+
+  it("the caption is scrubbed, scanned for banned words, and saved as instagram_variant", async () => {
+    expect(String(node("Scrub Banned Words").parameters.jsonBody)).toContain("ig_variant: p.ig_variant || ''");
+    expect(String(node("Sync Asset to DB").parameters.jsonBody)).toContain("instagram_variant: row.ig_variant || null");
+    const [row] = await runCodeNode(D, "Prepare Asset Row", {
+      nodes: {
+        "Parse Variants and Prepare Rows": [{ asset_id: "a1", slug: "s", title: "T", edited_body: "Body", ...three, ig_variant: "Uses a deterministic word.", supabase_payload: { hook: "Hook" } }],
+        "Parse Claims and Gate": [{ claims_ok: "Y", review_notes: [] }],
+        "Generate run_id": [{ client_id: "c1" }],
+        "Read Brand": [{ category: "FORBIDDEN", content: "Deterministic" }],
+        "Scrub Banned Words": [{ texts: { ig_variant: "Uses a fixed word." }, rewritten: [], remaining: [] }],
+      },
+    });
+    expect(row).toMatchObject({ ig_variant: "Uses a fixed word.", banned_word_hits: [] });
+  });
+});

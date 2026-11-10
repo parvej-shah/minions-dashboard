@@ -122,6 +122,7 @@ export async function createFollowUp(clientId: string, idOrSlug: string, { write
         linkedinVariant: format === "COVER" ? text : original.linkedinVariant,
         facebookVariant: original.facebookVariant,
         xVariant: original.xVariant,
+        instagramVariant: original.instagramVariant,
         channels: ["linkedin"],
         generationCost: costUsd,
       },

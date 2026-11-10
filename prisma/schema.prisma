@@ -307,6 +307,8 @@ model Asset {
   linkedinVariant     String?   @map("linkedin_variant") @db.Text
   facebookVariant     String?   @map("facebook_variant") @db.Text
   xVariant            String?   @map("x_variant") @db.Text
+  // Task 35: the Instagram caption, posted by hand until Instagram publishing exists.
+  instagramVariant    String?   @map("instagram_variant") @db.Text
   version             Int       @default(1)
   generationCost      Decimal   @default(0.038) @map("generation_cost") @db.Decimal(10, 4)
   // D18: where this post goes (blog | linkedin | facebook), overriding the

@@ -26,6 +26,7 @@ export interface EditorialDraftState {
     linkedin: string;
     facebook: string;
     twitter: string;
+    instagram: string;
   };
   setEditedTitle: (v: string) => void;
   setEditedHook: (v: string) => void;
@@ -33,6 +34,7 @@ export interface EditorialDraftState {
   setEditedLinkedin: (v: string) => void;
   setEditedFacebook: (v: string) => void;
   setEditedTwitter: (v: string) => void;
+  setEditedInstagram: (v: string) => void;
   isDirty: boolean;
 
   isSaving: boolean;
@@ -91,7 +93,7 @@ function withCoverUrl(body: string, url: string): string {
   return /^!\[[^\]]*\]\([^)]*\)/.test(body) ? body.replace(/^(!\[[^\]]*\]\()[^)]*(\))/, `$1${url}$2`) : body;
 }
 
-const EMPTY_EDITS = { title: "", hook: "", body: "", linkedin: "", facebook: "", twitter: "" };
+const EMPTY_EDITS = { title: "", hook: "", body: "", linkedin: "", facebook: "", twitter: "", instagram: "" };
 
 /**
  * All Editorial Studio data and mutation logic, out of the view layer.
@@ -202,6 +204,7 @@ export function useEditorialDraft(
             linkedin: activeAsset.variants.linkedin,
             facebook: activeAsset.variants.facebook,
             twitter: activeAsset.variants.twitter,
+            instagram: activeAsset.variants.instagram ?? "",
           }
         : EMPTY_EDITS
     );
@@ -222,7 +225,8 @@ export function useEditorialDraft(
         edited.body !== activeAsset.body_content ||
         edited.linkedin !== activeAsset.variants.linkedin ||
         edited.facebook !== activeAsset.variants.facebook ||
-        edited.twitter !== activeAsset.variants.twitter)
+        edited.twitter !== activeAsset.variants.twitter ||
+        edited.instagram !== (activeAsset.variants.instagram ?? ""))
   );
 
   const patchActive = useCallback(
@@ -258,6 +262,7 @@ export function useEditorialDraft(
         linkedin: edited.linkedin,
         facebook: edited.facebook,
         twitter: edited.twitter,
+        instagram: edited.instagram,
       },
     };
 
@@ -573,6 +578,7 @@ export function useEditorialDraft(
     setEditedLinkedin: (v) => setEdited((p) => ({ ...p, linkedin: v })),
     setEditedFacebook: (v) => setEdited((p) => ({ ...p, facebook: v })),
     setEditedTwitter: (v) => setEdited((p) => ({ ...p, twitter: v })),
+    setEditedInstagram: (v) => setEdited((p) => ({ ...p, instagram: v })),
     isDirty,
 
     isSaving,

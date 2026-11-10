@@ -689,7 +689,7 @@
           "parameters": [
             {
               "name": "message",
-              "value": "=👉 Read the full breakdown and operational field guide: {{ $('Blog_Result').item.json.blog_url }}"
+              "value": "=Read the full article: {{ $('Blog_Result').item.json.blog_url }}"
             },
             {
               "name": "access_token",

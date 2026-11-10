@@ -2,6 +2,21 @@ const data = $input.first().json || {};
 const fbVariant = (data.fb_variant || '').trim();
 const liVariant = (data.li_variant || '').trim();
 const xVariant = (data.x_variant || '').trim();
+const igVariant = (data.ig_variant || '').trim();
+
+// Mirrors instagramIssues in src/lib/socialCopy.ts; keep in sync. Instagram is
+// posted by hand, so these are warnings, never a block.
+function instagramIssues(caption) {
+  const URL_PATTERN = /https?:\/\/|www\.|\b[a-z0-9-]+\.(com|ai|io|co|net|org)\b/i;
+  const text = (caption || '').trim();
+  if (!text) return ['Instagram caption is empty.'];
+  const issues = [];
+  if (URL_PATTERN.test(text)) issues.push('Instagram caption has a link; links in captions do not click.');
+  const tags = (text.match(/#\w+/g) || []).length;
+  if (tags < 3 || tags > 5) issues.push(`Instagram caption has ${tags} hashtags; use 3 to 5.`);
+  if (text.split('\n')[0].trim().length > 125) issues.push('Instagram caption\'s first line runs past the 125 characters shown before "more".');
+  return issues;
+}
 
 const brandCtx = $('Assemble Brand Context').first().json || {};
 const companyName = brandCtx.company_name || '';
@@ -19,6 +34,8 @@ if (!xVariant) errors.push('X variant is empty.');
 if (!isMinionsBrand && fbVariant && brandLeakPattern.test(fbVariant)) errors.push('Facebook variant leaks the Minions brand.');
 if (!isMinionsBrand && liVariant && brandLeakPattern.test(liVariant)) errors.push('LinkedIn variant leaks the Minions brand.');
 if (!isMinionsBrand && xVariant && brandLeakPattern.test(xVariant)) errors.push('X variant leaks the Minions brand.');
+if (!isMinionsBrand && igVariant && brandLeakPattern.test(igVariant)) warnings.push('Instagram caption leaks the Minions brand.');
+warnings.push(...instagramIssues(igVariant));
 
 if (xVariant.length > 280) errors.push(`X variant is ${xVariant.length} characters, over 280.`);
 const xHashtagCount = (xVariant.match(/#\w+/g) || []).length;
@@ -28,7 +45,7 @@ const liHashtagCount = (liVariant.match(/#\w+/g) || []).length;
 if (liHashtagCount > 3) errors.push(`LinkedIn variant has ${liHashtagCount} hashtags, over the 3 maximum.`);
 else if (liHashtagCount < 2) warnings.push(`LinkedIn variant has ${liHashtagCount} hashtags; it should end with 2 to 3.`);
 
-for (const [platform, text] of [['LinkedIn', liVariant], ['Facebook', fbVariant], ['X', xVariant]]) {
+for (const [platform, text] of [['LinkedIn', liVariant], ['Facebook', fbVariant], ['X', xVariant], ['Instagram', igVariant]]) {
   if (fabricatedStoryPattern.test(text)) errors.push(`${platform} variant contains an unverified client-story pattern.`);
   if (genericHookPattern.test(text)) warnings.push(`${platform} variant starts with a generic engagement hook.`);
 }

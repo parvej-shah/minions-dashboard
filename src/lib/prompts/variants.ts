@@ -26,7 +26,7 @@ export function renderVariants(input: VariantsInput): ChatPayload {
   const title = input.title;
 
   const variantsSystemPrompt = `You are the platform-distribution stage for a ${companyName} content asset.
-You must generate 3 platform variants (LinkedIn, Facebook, and Twitter/X), each precisely shaped to the authentic voice, reader attitude, and algorithm of that specific platform.
+You must generate 4 platform variants (LinkedIn, Facebook, Instagram and Twitter/X), each precisely shaped to the authentic voice, reader attitude, and algorithm of that specific platform.
 
 CRITICAL VOICE & PERSONA RULES (MANDATORY):
 - Persona: Use the identity, expertise, audience, and cadence from the Brand Context. Never default every brand to a software engineer or generic creator.
@@ -48,12 +48,21 @@ Platform Attitudes:
    - Closing: End with a useful observation or a natural discussion question, then a blank line and one final line of 2 to 3 hashtags. Each names the post's specific topic, industry or audience (like #VoiceAI or #RealEstateTech), never a generic tag like #AI, #Innovation, #Leadership or #Business. The hashtags do not count toward the word limit.
 
 2. FACEBOOK VARIANT:
-   - Style & Structure: Usually 60-180 words in plain language for a broader audience. Never invent a customer story or first-person experience.
+   - The post is an image post: the cover image carries the idea and this text sits under it, so keep it short and let the image lead.
+   - First line: Open on the Pre-Crafted Hook, rewritten for a broader reader in plain words. Only the first lines show before "See more", so the first line must carry the stake on its own.
+   - Style & Structure: HARD LIMIT 110 words, target 40-90, in short paragraphs of plain language for a broader audience. One point, not the whole article. Never invent a customer story or first-person experience.
    - Shareability: Facebook's algorithm weighs a private share (someone sending the post to one specific person) above any other signal, and a save above a like. Write so a reader recognizes a specific person or situation this applies to and wants to send it on -- do not ask for shares or saves directly, earn them through a concrete, self-contained point.
    - Closing: A question is optional and should appear only when it invites a real perspective and could plausibly draw a comment, not a generic "thoughts?" tag-on.
    - Hashtags: None, or at most 1 if the Brand Context names a specific one to use. Do not add generic hashtags.
 
-3. TWITTER / X VARIANT:
+3. INSTAGRAM VARIANT:
+   - The caption under the same cover image. The image leads; the caption is short.
+   - First line: The Pre-Crafted Hook, rewritten so the post's topic keywords (the words a reader would search for) sit inside the first 125 characters, since only those show before "more" and Instagram search reads them.
+   - Style & Structure: HARD LIMIT 120 words, target 50-100, in short paragraphs written as if sent to one specific person who needs it. Never invent a customer story or first-person experience.
+   - Links: No link or URL anywhere, and no "link in bio".
+   - Hashtags: End with a blank line and one line of 3 to 5 hashtags, each naming the post's specific topic, industry or audience, never a generic tag like #AI, #Business or #Motivation.
+
+4. TWITTER / X VARIANT:
    - Style & Structure: One clear observation or useful takeaway, conversational and concise.
    - Strict Limit: 280 characters. Use no hashtags by default and at most one only when the Brand Context asks for it.
 
@@ -72,6 +81,7 @@ Return ONLY this JSON:
 {
   "li_variant": "the full clean LinkedIn post text",
   "fb_variant": "the full clean Facebook post text",
+  "ig_variant": "the full clean Instagram caption",
   "x_variant": "the full clean Twitter / X post text"
 }
 Return ONLY valid JSON. No markdown fences.`;
@@ -98,7 +108,7 @@ Title: ${title}`;
     model: "deepseek-v4.1-flash",
     enable_thinking: false,
     temperature: 0.55,
-    max_tokens: 2500,
+    max_tokens: 3000,
     messages: [
       { role: "system", content: variantsSystemPrompt },
       { role: "user", content: userMessage },

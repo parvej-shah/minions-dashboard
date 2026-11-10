@@ -1,3 +1,4 @@
+import { linkComment } from "@/lib/socialCopy";
 import type { Asset, Blog } from "@prisma/client";
 import { blogUrl } from "@/constants/config";
 import { EMPTY_CHANNEL_URLS, linkedinPostUrl, toChannelUrls, type ChannelUrls } from "@/lib/channels";
@@ -46,11 +47,12 @@ export function toPublishedDTO(
       asset?.publishedAt ??
       new Date()
     ).toISOString(),
-    first_comment: postUrl ? `Read the full engineering deep dive: ${postUrl}` : "",
+    first_comment: postUrl ? linkComment(postUrl) : "",
     variants: {
       linkedin: asset?.linkedinVariant ?? "",
       facebook: asset?.facebookVariant ?? "",
       twitter: asset?.xVariant ?? "",
+      instagram: asset?.instagramVariant ?? "",
     },
     channel_urls: asset ? channelUrls(asset) : EMPTY_CHANNEL_URLS,
   };

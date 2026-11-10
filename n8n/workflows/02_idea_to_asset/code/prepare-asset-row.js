@@ -14,6 +14,7 @@ const draftBody = fromScrub('body', prep.edited_body || blog.content || '');
 const liVariant = fromScrub('li_variant', prep.li_variant || '');
 const fbVariant = fromScrub('fb_variant', prep.fb_variant || '');
 const xVariant = fromScrub('x_variant', prep.x_variant || '');
+const igVariant = fromScrub('ig_variant', prep.ig_variant || '');
 
 let idea = {};
 try { idea = $('Select Target').first().json || {}; } catch (e) {}
@@ -56,7 +57,7 @@ function textContainsPhrase(text, phrase) {
   return text.includes(phrase);
 }
 
-const scanTargets = [draftBody, liVariant, fbVariant, xVariant, fromScrub('hook', blog.hook || '')];
+const scanTargets = [draftBody, liVariant, fbVariant, xVariant, igVariant, fromScrub('hook', blog.hook || '')];
 const bannedWordHits = Array.from(new Set(
   bannedPhrases.filter(phrase => scanTargets.some(t => textContainsPhrase(t, phrase)))
 ));
@@ -155,6 +156,7 @@ return [{
     fb_variant: fbVariant,
     li_variant: liVariant,
     x_variant: xVariant,
+    ig_variant: igVariant,
     published_urls: autoPublish ? blogUrl : '',
     version: 1,
     claims_ok: claimsOk,

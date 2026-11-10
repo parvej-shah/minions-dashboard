@@ -131,7 +131,7 @@ const STAGE_DOCS: Record<PromptStage, StageDoc> = {
     node: "02_idea_to_asset › Parse Claims and Gate → Render Variants Prompt → Qwen Call 4 Variants",
     description: "Rewrites the article as LinkedIn, Facebook and X posts. LinkedIn must open with the strategist's hook; links are added as first comments at publish time.",
     input: "Hook, edited body, brand context, tone profile and examples, audience, title.",
-    output: '{"li_variant","fb_variant","x_variant"}, then markdown-stripped and validated.',
+    output: '{"li_variant","fb_variant","ig_variant","x_variant"}, then markdown-stripped and validated.',
     sample: {
       company_name: ph("company_name"),
       hook: ph("hook"),

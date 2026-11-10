@@ -1,5 +1,5 @@
-export type SocialTab = "LINKEDIN" | "FACEBOOK" | "TWITTER";
-export type VariantField = "linkedin" | "facebook" | "twitter";
+export type SocialTab = "LINKEDIN" | "FACEBOOK" | "INSTAGRAM" | "TWITTER";
+export type VariantField = "linkedin" | "facebook" | "instagram" | "twitter";
 
 export interface SocialChannel {
   tab: SocialTab;
@@ -36,6 +36,17 @@ export const SOCIAL_CHANNELS: SocialChannel[] = [
     placeholder: "Draft or polish your Facebook post copy here...",
     emptyMessage: "No Facebook variant was generated for this draft yet.",
     textareaMinHeight: 160,
+  },
+  {
+    tab: "INSTAGRAM",
+    field: "instagram",
+    label: "Instagram",
+    tabActiveClass: "bg-[#C13584] border-[#962A67] text-white shadow-md shadow-[#C13584]/20",
+    copyClass: "bg-[#C13584]/15 hover:bg-[#C13584]/25 text-[#C13584] border-[#C13584]/40",
+    placeholder: "Write the Instagram caption here...",
+    emptyMessage: "No Instagram caption yet. Drafts made from now on get one.",
+    textareaMinHeight: 140,
+    charLimit: 2200,
   },
   {
     tab: "TWITTER",

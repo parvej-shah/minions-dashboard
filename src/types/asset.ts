@@ -24,11 +24,13 @@ export interface ClaimCheckItem {
   notes: string;
 }
 
-/** The three social bodies carried alongside an asset. */
+/** The social bodies carried alongside an asset. */
 export interface SocialVariants {
   linkedin: string;
   facebook: string;
   twitter: string;
+  /** Posted by hand until Instagram publishing exists. */
+  instagram: string;
 }
 
 /** How a code-drawn cover was made (phase 5), for the cover editor. */

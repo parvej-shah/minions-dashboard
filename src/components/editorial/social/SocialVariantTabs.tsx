@@ -17,6 +17,7 @@ import type { AssetItem } from "@/types";
 import { SOCIAL_CHANNELS, channelFor, type SocialChannel, type SocialTab, type VariantField } from "./channels";
 import VariantActions from "./VariantActions";
 import VariantEditor from "./VariantEditor";
+import { linkComment } from "@/lib/socialCopy";
 
 export type { SocialTab };
 
@@ -31,10 +32,11 @@ export interface SocialVariantTabsProps {
   setEditedLinkedin: (v: string) => void;
   setEditedFacebook: (v: string) => void;
   setEditedTwitter: (v: string) => void;
+  setEditedInstagram: (v: string) => void;
   onSave: () => void;
   onCopy: (text: string, key: string) => void;
   copiedKey: string | null;
-  /** Which of the three tabs to show. */
+  /** Which tabs to show. */
   enabledTabs?: Record<SocialTab, boolean>;
   /** Blog channel off: there is no article to link, so no first-comment link. */
   blogEnabled?: boolean;
@@ -110,6 +112,7 @@ export default function SocialVariantTabs({
   setEditedLinkedin,
   setEditedFacebook,
   setEditedTwitter,
+  setEditedInstagram,
   onSave,
   onCopy,
   copiedKey,
@@ -123,6 +126,7 @@ export default function SocialVariantTabs({
     linkedin: setEditedLinkedin,
     facebook: setEditedFacebook,
     twitter: setEditedTwitter,
+    instagram: setEditedInstagram,
   };
   const panel = {
     isEditing: isEditingSocial,
@@ -288,7 +292,7 @@ export default function SocialVariantTabs({
                       First Comment (Pinned Link)
                     </span>
                     <p className="text-xs font-mono text-muted break-all">
-                      {`Full deep dive on our blog: ${activeAsset.doc_url}`}
+                      {linkComment(activeAsset.doc_url)}
                     </p>
                   </div>
                 )}
@@ -308,6 +312,40 @@ export default function SocialVariantTabs({
                   <Share2 className="w-3.5 h-3.5" />
                   <span>Share</span>
                 </div>
+              </div>
+            }
+          />
+        )}
+
+        {isShown("INSTAGRAM") && (
+          <ChannelPanel
+            {...forChannel("INSTAGRAM")}
+            panelClass="bg-canvas rounded-2xl border border-line p-5 space-y-4 font-sans shadow-soft"
+            previewClass="text-xs text-ink leading-relaxed whitespace-pre-line bg-surface-2 p-4.5 rounded-xl border border-line/60 font-sans select-text"
+            identity={
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-full bg-[#C13584]/15 border border-[#C13584]/40 flex items-center justify-center font-bold text-xs text-[#C13584] shrink-0">
+                  ig
+                </div>
+                <div className="min-w-0">
+                  <span className="block text-xs font-bold text-ink truncate">{author?.name ?? "Editorial Author"}</span>
+                  <span className="block text-[11px] text-muted">Copy the caption and post it with the cover image.</span>
+                </div>
+              </div>
+            }
+            extras={
+              activeAsset.hero_image_url && activeAsset.hero_status === "READY" ? (
+                <div className="relative mx-auto aspect-[4/5] w-full max-w-[420px] overflow-hidden rounded-xl border border-line bg-surface-2">
+                  <Image src={activeAsset.hero_image_url} alt={activeAsset.title} fill unoptimized sizes="420px" className="object-cover" />
+                </div>
+              ) : null
+            }
+            actionBar={
+              <div className="flex items-center gap-4 pt-3 border-t border-line/60 text-xs text-muted" aria-hidden="true">
+                <ThumbsUp className="w-3.5 h-3.5" />
+                <MessageCircle className="w-3.5 h-3.5" />
+                <Send className="w-3.5 h-3.5" />
+                <Bookmark className="ml-auto w-3.5 h-3.5" />
               </div>
             }
           />

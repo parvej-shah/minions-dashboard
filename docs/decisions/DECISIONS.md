@@ -673,3 +673,8 @@ press Approve & publish, which would post a duplicate on LinkedIn.
 **Why:** Facebook and Instagram reward posts that stop the scroll with an image, and the old designs read as text cards. More distinct designs also keep a feed from looking repetitive.
 **Alternatives considered:** Separate covers per channel (doubles render and review work for one post; can revisit when Instagram publishing exists).
 **Status:** active
+
+## 2026-11-10 — Short, image-led captions for Facebook, and an Instagram caption
+- **Facebook:** the caption under the cover opens on the post's hook and stays under 110 words; the image carries the idea. The link comment is one plain line ("Read the full article: <url>") instead of the old stock "👉 … operational field guide" line.
+- **Instagram:** every new draft gets its own caption (topic words in the first 125 characters, no link, 3 to 5 specific hashtags). Studio shows it as an Instagram tab next to Facebook, to copy and post by hand with the cover, until Instagram publishing exists. A caption that breaks those rules is a warning, never a reason to hold a draft.
+- **Why:** the user wants Facebook and Instagram posts "image heavy, not text heavy"; see docs/research/facebook-instagram-posts-2026-11-10.md.
