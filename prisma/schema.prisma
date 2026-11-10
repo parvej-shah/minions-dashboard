@@ -322,6 +322,9 @@ model Asset {
   facebookPublishedAt DateTime? @map("facebook_published_at")
   linkedinPostId      String?   @map("linkedin_post_id")
   linkedinPublishedAt DateTime? @map("linkedin_published_at")
+  // Task 39: the Instagram media id once n8n 03 has posted it there.
+  instagramPostId      String?   @map("instagram_post_id")
+  instagramPublishedAt DateTime? @map("instagram_published_at")
   // A second LinkedIn post of a published draft in the format it did not go
   // out in: the original's id, and CAROUSEL or COVER. Null on every other draft.
   followUpOf          String?   @map("follow_up_of")

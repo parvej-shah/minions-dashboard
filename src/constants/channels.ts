@@ -46,6 +46,17 @@ export const DISTRIBUTION_CHANNELS: readonly DistributionChannelDefinition[] = [
     badge: "",
   },
   {
+    id: "DIR-DIST-IG",
+    key: "instagram",
+    ruleKey: "auto_publish_instagram",
+    name: "Instagram",
+    platform: "INSTAGRAM",
+    description: "Posts the carousel, or the cover image, with the Instagram caption to the account linked to your Facebook Page.",
+    target_destination: "Not connected yet",
+    defaultActive: false,
+    badge: "",
+  },
+  {
     id: "DIR-DIST-LI",
     key: "linkedin",
     ruleKey: "auto_publish_linkedin",

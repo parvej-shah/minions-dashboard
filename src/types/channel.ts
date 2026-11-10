@@ -1,6 +1,6 @@
-export type DistributionChannelKey = "blog" | "facebook" | "linkedin" | "x";
+export type DistributionChannelKey = "blog" | "facebook" | "instagram" | "linkedin" | "x";
 
-export type DistributionPlatform = "BLOG" | "FACEBOOK" | "LINKEDIN" | "TWITTER";
+export type DistributionPlatform = "BLOG" | "FACEBOOK" | "INSTAGRAM" | "LINKEDIN" | "TWITTER";
 
 export interface DistributionChannelConfig {
   id: string;

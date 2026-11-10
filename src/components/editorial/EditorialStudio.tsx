@@ -126,8 +126,8 @@ export default function EditorialStudio({
   const enabledSocialTabs = {
     LINKEDIN: (channels?.linkedin ?? true) && goesTo("linkedin"),
     FACEBOOK: (channels?.facebook ?? true) && goesTo("facebook"),
-    // Posted by hand with the Facebook cover until Instagram publishing exists (task 35).
-    INSTAGRAM: (channels?.facebook ?? true) && goesTo("facebook"),
+    // Posted for you once Instagram is on (task 39); before that, copied by hand next to Facebook.
+    INSTAGRAM: ((channels?.instagram ?? false) && goesTo("instagram")) || ((channels?.facebook ?? true) && goesTo("facebook")),
     TWITTER: (channels?.x ?? true) && goesTo("x"),
   };
   const blogEnabled = (channels?.blog ?? true) && goesTo("blog");

@@ -689,3 +689,10 @@ sends), and Instagram and Facebook post images, not PDFs. The files are also
 what a later Facebook multi-photo or Instagram publisher needs.
 **Partly supersedes:** 2026-09-29 "store only the PDF". Pages are stored again,
 as JPEGs, which cost far less than the PNGs did.
+
+## 2026-11-10 — Minions posts to Instagram for you
+
+**Decision:** Instagram is a fifth channel, off by default. A workspace connects it with one button ("Use my Facebook Page"), which uses the Instagram professional account linked to its connected Facebook Page; there is nothing to paste. Once it is on, every approved post also goes to Instagram after the blog, LinkedIn and Facebook: the carousel when the post has one (up to 10 pages), otherwise the cover, with the Instagram caption and no link. A post can be kept off Instagram like any other channel. If Instagram fails, the post still goes out everywhere else and the alert says why.
+**Why:** the user asked for Instagram publishing; posting by hand from the Studio was a stopgap (2026-11-10 captions entry). Going through the Page avoids a second Meta sign-in.
+**Alternatives considered:** a personal Instagram profile (Meta allows API posting only to professional accounts linked to a Page); a separate Instagram sign-in (more steps, same Meta permissions).
+**Status:** active. Needs Meta's `instagram_content_publish` permission on the Page token; for workspaces other than the app's own admins, Meta app review.

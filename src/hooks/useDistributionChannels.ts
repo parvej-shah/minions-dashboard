@@ -7,7 +7,7 @@ import type { DistributionChannelsPayload } from "@/types";
 
 const EMPTY: DistributionChannelsPayload = {
   channels: [],
-  summary: { blog: false, facebook: false, linkedin: false, x: false },
+  summary: { blog: false, facebook: false, instagram: false, linkedin: false, x: false },
 };
 
 /** Distribution channel toggles. The channel list has one definition (src/constants/channels.ts), which the API serves. */

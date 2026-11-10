@@ -13,9 +13,9 @@ describe("03_review_publisher never posts an asset twice", () => {
   const slug = "03_review_publisher";
   const nodes = workflowNodes(slug);
   const conns = connections(slug);
-  // Anything that talks to a channel: blog, Facebook, LinkedIn.
+  // Anything that talks to a channel: blog, Facebook, LinkedIn, Instagram.
   const postsExternally = nodes
-    .filter((n) => n.type.endsWith(".httpRequest") && /graph\.facebook|api\.linkedin|\$json\.token|rest\/v1\/blogs/.test(String(n.parameters.url ?? "")))
+    .filter((n) => n.type.endsWith(".httpRequest") && /graph\.facebook|api\.linkedin|\$json\.token|rest\/v1\/blogs|api\/internal\/instagram/.test(String(n.parameters.url ?? "")))
     .map((n) => n.name);
 
   it("finds the publishing nodes it is guarding", () => {
@@ -80,3 +80,32 @@ describe("03_review_publisher sends a switched-on carousel as a LinkedIn documen
   });
 });
 
+
+describe("03_review_publisher posts to Instagram once the publish record is saved", () => {
+  const slug = "03_review_publisher";
+  const nodes = workflowNodes(slug);
+  const conns = connections(slug);
+  const ig = nodes.find((n) => n.name === "Publish_to_Instagram")!;
+
+  it("calls the dashboard's Instagram publisher with the asset id", () => {
+    expect(String(ig.parameters.url)).toBe("https://minions.getminions.ai/api/internal/instagram/publish");
+    expect(String(ig.parameters.method)).toBe("POST");
+    expect(String(ig.parameters.jsonBody)).toContain("$('Merge_Publish_Results').item.json.asset_id");
+  });
+
+  it("sits between Mark_Write_OK and the alert, and its failure never stops the run", () => {
+    expect(conns.Mark_Write_OK.main?.[0]?.map((t) => t.node)).toEqual(["Publish_to_Instagram"]);
+    expect(conns.Publish_to_Instagram.main?.[0]?.map((t) => t.node)).toEqual(["Prepare_Telegram_Alert"]);
+    expect((ig as { onError?: string }).onError).toBe("continueRegularOutput");
+  });
+
+  it("tells the alert whether Instagram went out", async () => {
+    const base = { Normalize_Facebook_Published: [{ asset_id: "a1", facebook_enabled: true }], Normalize_LinkedIn_Published: [{ linkedin_enabled: true }] };
+    const [posted] = await runCodeNode(slug, "Prepare_Telegram_Alert", { nodes: { ...base, Publish_to_Instagram: [{ ok: true, media_id: "m1" }] } });
+    expect(posted).toMatchObject({ asset_id: "a1", instagram_status: "Published" });
+    const [skipped] = await runCodeNode(slug, "Prepare_Telegram_Alert", { nodes: { ...base, Publish_to_Instagram: [{ ok: true, skipped: "not_connected" }] } });
+    expect(skipped).toMatchObject({ instagram_status: "Skipped (not_connected)" });
+    const [failed] = await runCodeNode(slug, "Prepare_Telegram_Alert", { nodes: { ...base, Publish_to_Instagram: [{ ok: false, error: "no permission" }] } });
+    expect(failed).toMatchObject({ instagram_status: "Failed: no permission" });
+  });
+});

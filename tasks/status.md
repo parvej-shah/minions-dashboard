@@ -40,3 +40,4 @@
 | 36 | LinkedIn carousel card as grouped lists | CLAUDE | DONE (walked 390px, not pushed) | tasks/36.md |
 | 37 | Apple-grade interaction feel (spring physics, fluid disclosure, optimistic scheduling) | ANTIGRAVITY | IN PROGRESS | tasks/37.md |
 | 38 | Carousel pages kept as JPEGs; Instagram tab shows the deck | CLAUDE | DONE (not pushed) | tasks/38.md |
+| 39 | Instagram publishing channel | CLAUDE | DONE (not live: SQL + n8n 03 + push need OK) | tasks/39.md |

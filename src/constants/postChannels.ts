@@ -4,10 +4,10 @@ import type { DistributionChannelKey } from "@/types/channel";
  * The channels one post can be sent to or kept off (plan decision D18). X has
  * no publisher yet, so it is not offered.
  */
-export const POST_CHANNELS = ["blog", "linkedin", "facebook"] as const satisfies readonly DistributionChannelKey[];
+export const POST_CHANNELS = ["blog", "linkedin", "facebook", "instagram"] as const satisfies readonly DistributionChannelKey[];
 export type PostChannel = (typeof POST_CHANNELS)[number];
 
-export const POST_CHANNEL_LABEL: Record<PostChannel, string> = { blog: "Blog", linkedin: "LinkedIn", facebook: "Facebook" };
+export const POST_CHANNEL_LABEL: Record<PostChannel, string> = { blog: "Blog", linkedin: "LinkedIn", facebook: "Facebook", instagram: "Instagram" };
 
 /**
  * Whether a post goes to a channel: an empty override means the workspace's

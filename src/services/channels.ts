@@ -7,6 +7,7 @@ import type { DistributionChannelConfig, DistributionChannelsPayload } from "@/t
 import type { JsonObject } from "@/server/http/body";
 import { asString } from "@/server/http/body";
 import { badRequest } from "@/server/http/errors";
+import { metaGraph, type GraphCall } from "@/lib/metaGraph";
 
 // The blog's webhook URL is vaulted, not stored in Postgres, so a connected blog has no readable destination.
 function targetDestinationFor(key: string, row: ClientChannel | undefined): string {
@@ -42,7 +43,7 @@ export async function getChannelSettings(clientId: string): Promise<Distribution
   const isActive = (key: string, fallback: boolean) => channels.find((channel) => channel.key === key)?.is_active ?? fallback;
   return {
     channels,
-    summary: { blog: isActive("blog", true), facebook: isActive("facebook", true), linkedin: isActive("linkedin", false), x: isActive("x", false) },
+    summary: { blog: isActive("blog", true), facebook: isActive("facebook", true), linkedin: isActive("linkedin", false), instagram: isActive("instagram", false), x: isActive("x", false) },
   };
 }
 
@@ -137,4 +138,28 @@ export async function connectManualChannel(clientId: string, body: JsonObject) {
 
   await storeChannelCredential(clientId, channel, token, externalId);
   return { success: true, channel };
+}
+
+/**
+ * Instagram posts through the Facebook Page's token: Meta lets a Page token publish to the
+ * Instagram professional account linked to that Page. So connecting Instagram copies the
+ * vaulted Page token into a vault secret of its own and records the linked account's id.
+ */
+export async function connectInstagram(clientId: string, deps: { graph?: GraphCall } = {}) {
+  const graph = deps.graph ?? metaGraph;
+  const fb = await prisma.clientChannel.findUnique({
+    where: { clientId_channelKey: { clientId, channelKey: "facebook" } },
+    select: { credentialRef: true, externalId: true },
+  });
+  const token = fb?.credentialRef && fb.externalId ? await readChannelToken(fb.credentialRef) : null;
+  if (!token || !fb?.externalId) throw badRequest("Connect your Facebook Page first. Instagram posts through it.");
+
+  const page = await graph(fb.externalId, { fields: "instagram_business_account{id,username}", access_token: token }, "GET");
+  const ig = page.instagram_business_account as { id?: string; username?: string } | undefined;
+  if (!ig?.id) {
+    throw badRequest("No Instagram professional account is linked to this Facebook Page. Switch Instagram to a professional account and link it to the Page, then try again.");
+  }
+
+  await storeChannelCredential(clientId, "instagram", token, ig.id);
+  return { success: true, channel: "instagram", username: ig.username ?? null };
 }

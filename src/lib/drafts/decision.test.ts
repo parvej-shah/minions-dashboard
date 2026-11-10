@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { postButtonLabel, shortWhen, whereText } from "./decision";
 
-const ALL = { blog: true, linkedin: true, facebook: false, x: false };
+const ALL = { blog: true, linkedin: true, facebook: false, instagram: false, x: false };
 
 describe("whereText", () => {
   it("names where the post goes, in plain words", () => {
     expect(whereText([], ALL)).toBe("LinkedIn and your blog");
     expect(whereText(["linkedin"], ALL)).toBe("LinkedIn");
     expect(whereText([], { ...ALL, facebook: true })).toBe("LinkedIn, Facebook and your blog");
-    expect(whereText([], { blog: false, linkedin: false, facebook: false, x: false })).toBe("Nowhere yet: switch on a channel");
+    expect(whereText([], { blog: false, linkedin: false, facebook: false, instagram: false, x: false })).toBe("Nowhere yet: switch on a channel");
   });
   it("waits for the workspace switches", () => {
     expect(whereText([], null)).toBeNull();

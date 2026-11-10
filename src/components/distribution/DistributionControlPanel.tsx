@@ -16,7 +16,7 @@ import { LoadingState } from "@/components/ui/EmptyState";
 interface DistributionControlPanelProps {
   compact?: boolean;
   onChannelChange?: (channels: DistributionChannelConfig[]) => void;
-  /** Only render channels whose key is in this list. Omit to show all four
+  /** Only render channels whose key is in this list. Omit to show all
    * (the default, unchanged behavior for existing callers e.g. Fleet). Used
    * by the onboarding done page to show only the channels the tenant picked
    * during setup, not the full catalogue including ones they never chose. */
@@ -75,6 +75,8 @@ export function DistributionControlPanel({
         return <Globe className="w-4 h-4 text-brand" />;
       case "FACEBOOK":
         return <span className="text-sm font-semibold text-[#1877F2]">f</span>;
+      case "INSTAGRAM":
+        return <span className="text-xs font-semibold text-[#C13584]">IG</span>;
       case "LINKEDIN":
         return <span className="text-xs font-semibold text-[#0A66C2]">in</span>;
       case "TWITTER":
@@ -86,8 +88,8 @@ export function DistributionControlPanel({
 
   if (isLoading) {
     return compact ? (
-      <SkeletonGroup label="Loading channels" className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {[0, 1, 2, 3].map((i) => (
+      <SkeletonGroup label="Loading channels" className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        {[0, 1, 2, 3, 4].map((i) => (
           <Skeleton key={i} className="h-16" />
         ))}
       </SkeletonGroup>
@@ -105,7 +107,7 @@ export function DistributionControlPanel({
             <span>{notification}</span>
           </div>
         )}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
           {channels.map((ch) => {
             const isActive = ch.is_active;
             const isBusy = updatingKey === ch.key;

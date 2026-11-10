@@ -212,7 +212,7 @@
         [
           {
             "index": 0,
-            "node": "Prepare_Telegram_Alert",
+            "node": "Publish_to_Instagram",
             "type": "main"
           }
         ]
@@ -455,6 +455,17 @@
           {
             "index": 0,
             "node": "Read_Approved_Assets_DB",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Publish_to_Instagram": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Prepare_Telegram_Alert",
             "type": "main"
           }
         ]
@@ -1449,7 +1460,7 @@
           "parse_mode": "HTML"
         },
         "chatId": "={{ $env.TELEGRAM_ALERT_CHAT_ID || '8224701322' }}",
-        "text": "=🚀 <b>Approved Asset Published Live</b>\n\n📌 <b>Asset:</b> {{ $json.asset_id }}\n📰 <b>Title:</b> {{ $json.title }}\n🌐 <b>Blog:</b> {{ $json.blog_url }}\n📢 <b>Facebook:</b> {{ $json.facebook_enabled ? 'Published' : 'Paused / Skipped' }}\n💼 <b>LinkedIn:</b> {{ $json.linkedin_enabled ? 'Published' : 'Paused / Skipped' }}"
+        "text": "=🚀 <b>Approved Asset Published Live</b>\n\n📌 <b>Asset:</b> {{ $json.asset_id }}\n📰 <b>Title:</b> {{ $json.title }}\n🌐 <b>Blog:</b> {{ $json.blog_url }}\n📢 <b>Facebook:</b> {{ $json.facebook_enabled ? 'Published' : 'Paused / Skipped' }}\n💼 <b>LinkedIn:</b> {{ $json.linkedin_enabled ? 'Published' : 'Paused / Skipped' }}\n📸 <b>Instagram:</b> {{ $json.instagram_status }}"
       },
       "position": [
         2100,
@@ -1593,6 +1604,37 @@
       "position": [
         70,
         0
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pePrDfuS5BrzrPCk",
+          "name": "Minions Cockpit API (webhook secret)"
+        }
+      },
+      "id": "73fcc0f9-cf04-447f-a575-5d0008dfd5a7",
+      "name": "Publish_to_Instagram",
+      "notes": "Task 39: the dashboard posts the carousel or cover to the workspace's Instagram, or skips when it is off or not connected. It runs after the publish record is saved, and a failure only shows in the alert.",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ asset_id: $('Merge_Publish_Results').item.json.asset_id }) }}",
+        "options": {
+          "timeout": 120000
+        },
+        "url": "https://minions.getminions.ai/api/internal/instagram/publish"
+      },
+      "position": [
+        2190,
+        360
       ],
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2

@@ -78,7 +78,51 @@ export function ChannelCredentialForm({
     }
   }
 
+  async function handleInstagram(e: React.MouseEvent) {
+    e.stopPropagation();
+    setSaving(true);
+    setError(null);
+    try {
+      await apiClient.post("/api/channels/instagram", {});
+      onSaved();
+    } catch (err) {
+      setError(toErrorMessage(err, "Failed to connect Instagram."));
+    } finally {
+      setSaving(false);
+    }
+  }
+
   if (!open) {
+    // Instagram posts through the Facebook Page's token, so there is nothing to paste (task 39).
+    if (channel.key === "instagram") {
+      return (
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleInstagram}
+              disabled={saving}
+              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap px-3 text-xs leading-none text-muted hover:text-brand transition-colors disabled:opacity-50"
+            >
+              <KeyRound className="w-3 h-3" />
+              {saving ? "Connecting…" : channel.has_credential ? "Reconnect" : "Use my Facebook Page"}
+            </button>
+            {channel.has_credential && (
+              <button
+                type="button"
+                onClick={handleDisconnect}
+                disabled={disconnecting}
+                className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap px-2 text-xs font-medium leading-none text-coral hover:underline disabled:opacity-50"
+              >
+                {disconnecting ? "Disconnecting…" : "Disconnect"}
+              </button>
+            )}
+          </div>
+          {error && <p role="alert" className="max-w-xs text-right text-[11px] text-coral">{error}</p>}
+        </div>
+      );
+    }
+
     if (channel.key === "linkedin") {
       return (
         <div className="flex flex-wrap items-center gap-2">

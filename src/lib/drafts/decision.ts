@@ -5,8 +5,8 @@ import { POST_CHANNELS, postGoesTo } from "@/constants/postChannels";
 import { slotLabel } from "@/lib/today";
 import type { DistributionChannelKey } from "@/types";
 
-const NAME: Record<(typeof POST_CHANNELS)[number], string> = { linkedin: "LinkedIn", facebook: "Facebook", blog: "your blog" };
-const ORDER = ["linkedin", "facebook", "blog"] as const;
+const NAME: Record<(typeof POST_CHANNELS)[number], string> = { linkedin: "LinkedIn", facebook: "Facebook", instagram: "Instagram", blog: "your blog" };
+const ORDER = ["linkedin", "facebook", "instagram", "blog"] as const;
 
 /** "LinkedIn and your blog": the channels this post goes to. Null while the switches load. */
 export function whereText(override: string[] | null | undefined, workspace: Record<DistributionChannelKey, boolean> | null): string | null {
