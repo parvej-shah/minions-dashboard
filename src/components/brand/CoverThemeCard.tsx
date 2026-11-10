@@ -6,6 +6,7 @@ import type { BrandSettings } from "@/types";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { toProfileInput } from "@/lib/brandProfileInput";
 import { COVER_THEMES, themeColours, themeOf, type CoverTheme } from "@/lib/covers/themes";
+import { Button } from "@/components/ui/Button";
 import ErrorLine from "@/components/ui/ErrorLine";
 import { LoadingState } from "@/components/ui/EmptyState";
 import { BrandCard, brandText } from "@/components/brand/parts";
@@ -25,14 +26,31 @@ interface Props {
 export default function CoverThemeCard({ profile, setProfile, onEdit }: Props) {
   const [saving, setSaving] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Colours | null>(null);
   const title = "Cover look";
   const line = "The image on top of every post. Pick a theme.";
 
   if (!profile) return <BrandCard title={title} line={line}><LoadingState rows={1} /></BrandCard>;
   const current = themeOf(profile);
+  const editing = draft !== null;
+
+  const saveColours = async () => {
+    if (!draft || saving) return;
+    setSaving("custom");
+    setError(null);
+    try {
+      setProfile(await apiClient.post<BrandSettings>("/api/brand", { ...toProfileInput(profile), ...draft }));
+      setDraft(null);
+    } catch (e) {
+      setError(toErrorMessage(e, "Couldn't save your colours."));
+    } finally {
+      setSaving(null);
+    }
+  };
 
   const pick = async (theme: CoverTheme) => {
     if (theme.id === current?.id || saving) return;
+    setDraft(null);
     setSaving(theme.id);
     setError(null);
     try {
@@ -48,7 +66,7 @@ export default function CoverThemeCard({ profile, setProfile, onEdit }: Props) {
     <BrandCard title={title} line={line} action={<button type="button" onClick={onEdit} className={brandText.link}>Photo and more</button>}>
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
         <div className="w-[200px] max-w-full shrink-0">
-          <BrandLookPreview bare colors={profile} brandName={profile.brand_name} byline={profile.cover_byline} logoUrl={profile.primary_logo_url} art={profile.cover_art} />
+          <BrandLookPreview bare colors={draft ? { ...profile, ...draft } : profile} brandName={profile.brand_name} byline={profile.cover_byline} logoUrl={profile.primary_logo_url} art={profile.cover_art} />
         </div>
         <div className="min-w-0 flex-1 space-y-3">
           <ul role="radiogroup" aria-label="Cover theme" className="grid grid-cols-3 gap-3">
@@ -73,13 +91,44 @@ export default function CoverThemeCard({ profile, setProfile, onEdit }: Props) {
               );
             })}
           </ul>
-          {!current && <p className={brandText.note}>You use your own colours. Pick a theme to replace them.</p>}
+          {editing ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {COLOUR_FIELDS.map(({ key, label }) => (
+                  <label key={key} className="block cursor-pointer space-y-1.5">
+                    <span className="relative block h-12 overflow-hidden rounded-2xl ring-1 ring-line" style={{ backgroundColor: draft[key] }}>
+                      <input type="color" value={draft[key]} onChange={(e) => setDraft({ ...draft, [key]: e.target.value.toUpperCase() })} className="absolute inset-0 h-full w-full cursor-pointer opacity-0" />
+                    </span>
+                    <span className="block text-center text-sm text-muted">{label}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="flex items-center gap-4">
+                <Button onClick={() => void saveColours()} loading={saving === "custom"}>Save</Button>
+                <button type="button" onClick={() => setDraft(null)} className={brandText.link}>Cancel</button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <button type="button" onClick={() => setDraft(pickColours(profile))} className={brandText.link}>{current ? "Custom colours" : "Edit your colours"}</button>
+              {!current && <span className={brandText.note}>You use your own colours.</span>}
+            </div>
+          )}
           {error && <ErrorLine text={error} />}
         </div>
       </div>
     </BrandCard>
   );
 }
+
+type Colours = ReturnType<typeof themeColours>;
+const COLOUR_FIELDS: { key: keyof Colours; label: string }[] = [
+  { key: "brand_cream", label: "Paper" },
+  { key: "primary_ink", label: "Text" },
+  { key: "brand_coral", label: "Accent word" },
+  { key: "brand_teal", label: "Number & initials" },
+];
+const pickColours = (p: BrandSettings): Colours => ({ primary_ink: p.primary_ink, brand_cream: p.brand_cream, brand_coral: p.brand_coral, brand_teal: p.brand_teal });
 
 /** A tiny cover in the theme's colours: paper, two lines of headline with one accent word, the initials dot. */
 function ThemeSwatch({ theme }: { theme: CoverTheme }) {
