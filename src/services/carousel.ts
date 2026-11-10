@@ -9,6 +9,7 @@ import { evidenceRules, manualIdeaNote } from "@/lib/drafts/authorContext";
 import { COVER_HEADLINE_WORDS, checkPlan, namesIn, parsePlan, repairPlan, suggestCarousel, toDeck, type CarouselPlan, type PlanSources } from "@/lib/carousel/plan";
 import { renderCarouselPdf, renderSlidePng, slideJpeg } from "@/lib/carousel/render";
 import type { Deck, SlideStyle } from "@/lib/carousel/slides";
+import type { InstagramFormat } from "@/lib/carousel/instagramFormat";
 import { renderCarousel, type CarouselInput } from "@/lib/prompts/carousel";
 import { bodyOf, defaultByline, hostedCoverPhoto, isPublished } from "./cover";
 import { tenantBannedPhrases } from "./bannedScrub";
@@ -32,6 +33,8 @@ export interface StoredCarousel {
    * Facebook, and the review preview), PNG before 2026-09-29, none in between.
    */
   pages?: string[];
+  /** The reviewer's Instagram pick for this draft (task 40); absent means the workspace's default. */
+  instagram_format?: InstagramFormat;
   /** Copied from the plan for 03, which reads the row as it is. */
   caption: string;
   document_title: string;
@@ -175,6 +178,8 @@ async function renderAndStore(ctx: Context, plan: CarouselPlan, deck: Deck, meta
     model: meta.model,
     attempts: meta.attempts,
     rendered_at: new Date().toISOString(),
+    // A redraw keeps the reviewer's Instagram pick.
+    ...(ctx.stored?.instagram_format ? { instagram_format: ctx.stored.instagram_format } : {}),
   };
   // The model calls that planned it count toward the post's generation cost.
   await prisma.asset.update({ where: { id: ctx.assetId }, data: { carouselSpec: carousel as unknown as Prisma.InputJsonValue, ...(costUsd ? { generationCost: { increment: costUsd } } : {}) } });

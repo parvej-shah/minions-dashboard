@@ -3,8 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const assetFindUnique = vi.fn();
 const assetUpdate = vi.fn();
 const resolveChannelCredential = vi.fn();
+const channelFind = vi.fn();
 
-vi.mock("@/lib/prisma", () => ({ prisma: { asset: { findUnique: assetFindUnique, update: assetUpdate } } }));
+vi.mock("@/lib/prisma", () => ({ prisma: { asset: { findUnique: assetFindUnique, update: assetUpdate }, clientChannel: { findUnique: channelFind } } }));
 vi.mock("@/services/channels", () => ({ resolveChannelCredential }));
 
 const { publishToInstagram, instagramCaption } = await import("./instagramPublish");
@@ -38,7 +39,10 @@ beforeEach(() => {
   assetFindUnique.mockResolvedValue(asset);
   assetUpdate.mockResolvedValue({});
   resolveChannelCredential.mockResolvedValue({ is_active: true, token: "page-tok", external_id: "ig-1" });
+  channelFind.mockResolvedValue({ config: null });
 });
+
+const created = () => calls.filter((c) => c.method === "POST" && c.path === "ig-1/media");
 
 describe("publishing a post to Instagram", () => {
   it("posts the carousel pages as one carousel and saves the media id", async () => {
@@ -52,8 +56,28 @@ describe("publishing a post to Instagram", () => {
     expect(coverJpeg).not.toHaveBeenCalled();
   });
 
-  it("posts the cover as a JPEG when the post has no carousel", async () => {
+  it("posts the carousel even when LinkedIn gets the cover", async () => {
     assetFindUnique.mockResolvedValue({ ...asset, carouselSpec: { active: false, pages: PAGES } });
+    await publishToInstagram("a1", deps);
+    expect(created().at(-1)?.params).toMatchObject({ media_type: "CAROUSEL" });
+  });
+
+  it("posts the single poster when the workspace last chose it", async () => {
+    channelFind.mockResolvedValue({ config: { format: "SINGLE" } });
+    await publishToInstagram("a1", deps);
+    expect(created()).toHaveLength(1);
+    expect(coverJpeg).toHaveBeenCalled();
+  });
+
+  it("lets the draft's own pick beat the workspace's", async () => {
+    channelFind.mockResolvedValue({ config: { format: "SINGLE" } });
+    assetFindUnique.mockResolvedValue({ ...asset, carouselSpec: { active: false, pages: PAGES, instagram_format: "CAROUSEL" } });
+    await publishToInstagram("a1", deps);
+    expect(created().at(-1)?.params).toMatchObject({ media_type: "CAROUSEL" });
+  });
+
+  it("posts the cover as a JPEG when the post has no carousel", async () => {
+    assetFindUnique.mockResolvedValue({ ...asset, carouselSpec: null });
     const r = await publishToInstagram("a1", deps);
     expect(r).toEqual({ ok: true, media_id: "ig-media-9" });
     expect(coverJpeg).toHaveBeenCalledWith(expect.objectContaining({ id: "a1", clientId: "c1" }));

@@ -696,3 +696,10 @@ as JPEGs, which cost far less than the PNGs did.
 **Why:** the user asked for Instagram publishing; posting by hand from the Studio was a stopgap (2026-11-10 captions entry). Going through the Page avoids a second Meta sign-in.
 **Alternatives considered:** a personal Instagram profile (Meta allows API posting only to professional accounts linked to a Page); a separate Instagram sign-in (more steps, same Meta permissions).
 **Status:** active. Needs Meta's `instagram_content_publish` permission on the Page token; for workspaces other than the app's own admins, Meta app review.
+
+## 2026-11-10 — Choose Carousel or Single poster for Instagram, and the last choice sticks
+
+**Decision:** when a draft has a carousel, the Instagram tab in Studio offers "Carousel" or "Single poster". The reviewer's pick holds for that draft and becomes the workspace's default, so drafts nobody opens (automated posts) go out the same way. With no pick yet, Instagram gets the carousel. With no carousel, it gets the single poster. The choice is separate from LinkedIn's carousel switch.
+**Why:** the user asked for a clear choice, kept for automated posts. Before this, Instagram silently followed the LinkedIn switch.
+**Partly supersedes:** 2026-11-10 "Instagram gets the whole carousel": now it's the default rather than the rule.
+**Status:** active. Carousels are still never made automatically (D19), so automated drafts without one get the single poster.

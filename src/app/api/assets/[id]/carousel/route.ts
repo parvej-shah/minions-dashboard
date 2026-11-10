@@ -6,6 +6,8 @@ import { carouselState, editCarousel, generateCarousel, setCarouselActive, type 
 import { readJsonOrEmpty } from "@/server/http/body";
 import { badRequest, notFound } from "@/server/http/errors";
 import { route } from "@/server/http/route";
+import { isInstagramFormat } from "@/lib/carousel/instagramFormat";
+import { setInstagramFormat } from "@/services/instagramFormat";
 
 export const maxDuration = 300;
 
@@ -31,11 +33,18 @@ export const POST = route<"tenant", Params>({ auth: "tenant", failure: "Failed t
   return reply(await generateCarousel(assetId, { style: style ? (style as SlideStyle) : undefined }));
 });
 
-// { active: boolean } switches LinkedIn between carousel and cover; { plan } is an edit in the model's JSON shape.
+// { active: boolean } switches LinkedIn between carousel and cover; { instagram: "CAROUSEL" | "SINGLE" }
+// picks what Instagram gets (and becomes the workspace's default); { plan } is an edit in the model's JSON shape.
 export const PATCH = route<"tenant", Params>({ auth: "tenant", failure: "Failed to update the carousel" }, async ({ clientId, params, request }) => {
   const assetId = await requireOwnedAssetId(clientId, params.id);
   const body = await readJsonOrEmpty(request);
   if (typeof body.active === "boolean") return reply(await setCarouselActive(assetId, body.active));
+  if (body.instagram !== undefined) {
+    if (!isInstagramFormat(body.instagram)) throw badRequest('instagram must be "CAROUSEL" or "SINGLE".');
+    const picked = await setInstagramFormat(clientId, assetId, body.instagram);
+    if (picked.ok) return { success: true, instagram_format: picked.format };
+    return NextResponse.json({ success: false, error: picked.error }, { status: picked.locked ? 409 : 422 });
+  }
   if (body.plan && typeof body.plan === "object") {
     const parsed = parsePlan(JSON.stringify(body.plan));
     if (!parsed.plan || parsed.errors.length) {

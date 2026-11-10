@@ -10,7 +10,9 @@ import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
 import { useEditorialDraft } from "@/hooks/useEditorialDraft";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useToast } from "@/hooks/useToast";
-import { useChannelSummary } from "@/hooks/useChannelSummary";
+import { useChannelPayload } from "@/hooks/useChannelSummary";
+import { apiClient, toErrorMessage } from "@/lib/api-client";
+import type { InstagramFormat } from "@/lib/carousel/instagramFormat";
 import { useBrandSettings } from "@/hooks/useBrandSettings";
 import { normalizeDomain } from "@/constants/config";
 import CoverImageCard from "./CoverImageCard";
@@ -71,7 +73,8 @@ export default function EditorialStudio({
   openSchedule = false,
   openLinkedIn = false,
 }: EditorialStudioProps) {
-  const channels = useChannelSummary();
+  const channelPayload = useChannelPayload();
+  const channels = channelPayload?.summary ?? null;
   const { brandSettings: studioBrand } = useBrandSettings();
   const draft = useEditorialDraft(
     initialDraftId,
@@ -121,6 +124,8 @@ export default function EditorialStudio({
   const [socialTab, setSocialTab] = useState<SocialTab>("LINKEDIN");
   // Whether LinkedIn gets this draft's carousel, as the carousel card last loaded or set it.
   const [carouselOn, setCarouselOn] = useState<{ id: string; on: boolean } | null>(null);
+  // The last Instagram pick made here: it holds for that draft and is now the workspace's default.
+  const [instagramPick, setInstagramPick] = useState<{ id: string; format: InstagramFormat } | null>(null);
   // A post limited to some channels (D18) previews only those.
   const goesTo = (key: string) => postGoesTo(draft.activeAsset?.channels, key);
   const enabledSocialTabs = {
@@ -150,6 +155,24 @@ export default function EditorialStudio({
   const [unpublishLinkedInConfirmOpen, setUnpublishLinkedInConfirmOpen] = useState(false);
 
   const { activeAsset, assets, edited } = draft;
+  const instagramFormat: InstagramFormat =
+    (instagramPick?.id === activeAsset?.id ? instagramPick?.format : null) ??
+    activeAsset?.instagram_format ??
+    instagramPick?.format ??
+    channelPayload?.instagram_format ??
+    "CAROUSEL";
+  const pickInstagramFormat = async (format: InstagramFormat) => {
+    if (!activeAsset) return;
+    const before = instagramPick;
+    setInstagramPick({ id: activeAsset.id, format });
+    try {
+      await apiClient.patch(`/api/assets/${encodeURIComponent(activeAsset.id)}/carousel`, { instagram: format });
+      toast.show(format === "CAROUSEL" ? "Instagram gets the carousel. New posts will too." : "Instagram gets the single poster. New posts will too.");
+    } catch (error) {
+      setInstagramPick(before);
+      toast.show(toErrorMessage(error, "Could not save the Instagram choice."));
+    }
+  };
 
   const pending = queueFor(assets, "PENDING_REVIEW");
   // [ and ] step through the waiting posts while on one, else through all of them.
@@ -314,6 +337,8 @@ export default function EditorialStudio({
       enabledTabs={previewTabs}
       blogEnabled={blogEnabled}
       showCoverLink={coverGoesOut}
+      instagramFormat={instagramFormat}
+      onInstagramFormat={(format) => void pickInstagramFormat(format)}
     />
   );
 

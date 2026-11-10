@@ -3,9 +3,9 @@ import { uploadToR2 } from "@/lib/r2";
 import { slideJpeg } from "@/lib/carousel/render";
 import { metaGraph, type GraphCall } from "@/lib/metaGraph";
 import { resolveChannelCredential } from "@/services/channels";
+import { instagramDeck, instagramFormatFor, workspaceInstagramFormat } from "@/lib/carousel/instagramFormat";
 
-/** Instagram's own limits: JPEG only, 2 to 10 carousel items, 2200 caption characters. */
-const MAX_ITEMS = 10;
+/** Instagram's own limits: JPEG only, 2 to 10 carousel items (instagramDeck), 2200 caption characters. */
 const MAX_CAPTION = 2200;
 const STATUS_TRIES = 10;
 
@@ -29,12 +29,6 @@ export function instagramCaption(instagram: string | null | undefined, facebook:
     .replace(/[ \t]+$/gm, "")
     .trim()
     .slice(0, MAX_CAPTION);
-}
-
-function carouselPages(spec: unknown): string[] {
-  const c = spec as { active?: boolean; pages?: unknown } | null;
-  if (!c?.active || !Array.isArray(c.pages)) return [];
-  return c.pages.filter((p): p is string => typeof p === "string" && p.length > 0).slice(0, MAX_ITEMS);
 }
 
 async function defaultCoverJpeg(asset: CoverAsset): Promise<string> {
@@ -85,7 +79,9 @@ export async function publishToInstagram(assetId: string, overrides: Partial<Ins
 
     const { token, external_id: igId } = cred;
     const caption = instagramCaption(asset.instagramVariant, asset.facebookVariant);
-    const pages = carouselPages(asset.carouselSpec);
+    // The draft's pick, else the workspace's last pick (so automated posts match), else the carousel.
+    const row = await prisma.clientChannel.findUnique({ where: { clientId_channelKey: { clientId, channelKey: "instagram" } }, select: { config: true } });
+    const pages = instagramFormatFor(asset.carouselSpec, workspaceInstagramFormat(row?.config)) === "CAROUSEL" ? instagramDeck(asset.carouselSpec) : [];
 
     let creationId: string;
     if (pages.length >= 2) {
@@ -95,7 +91,7 @@ export async function publishToInstagram(assetId: string, overrides: Partial<Ins
       }
       creationId = String((await deps.graph(`${igId}/media`, { media_type: "CAROUSEL", children: children.join(","), caption, access_token: token })).id);
     } else {
-      const image_url = pages[0] ?? (await deps.coverJpeg({ ...asset, clientId }));
+      const image_url = await deps.coverJpeg({ ...asset, clientId });
       creationId = String((await deps.graph(`${igId}/media`, { image_url, caption, access_token: token })).id);
     }
 

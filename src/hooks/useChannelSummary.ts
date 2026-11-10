@@ -16,14 +16,19 @@ import type { DistributionChannelsPayload, DistributionChannelKey } from "@/type
  * user already configured.
  */
 export function useChannelSummary(): Record<DistributionChannelKey, boolean> | null {
-  const [summary, setSummary] = useState<Record<DistributionChannelKey, boolean> | null>(null);
+  return useChannelPayload()?.summary ?? null;
+}
+
+/** The whole /api/channels payload: the summary plus workspace defaults such as the Instagram format. */
+export function useChannelPayload(): DistributionChannelsPayload | null {
+  const [payload, setPayload] = useState<DistributionChannelsPayload | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     apiClient
       .get<DistributionChannelsPayload>("/api/channels")
       .then((data) => {
-        if (!cancelled) setSummary(data.summary);
+        if (!cancelled) setPayload(data);
       })
       .catch(() => {
         // Leave null: callers assume every channel is active rather than
@@ -34,5 +39,5 @@ export function useChannelSummary(): Record<DistributionChannelKey, boolean> | n
     };
   }, []);
 
-  return summary;
+  return payload;
 }

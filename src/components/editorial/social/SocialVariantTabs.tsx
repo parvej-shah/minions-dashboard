@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import type { AssetItem } from "@/types";
+import { ChoiceRow, GroupedList } from "@/components/ui/List";
+import type { InstagramFormat } from "@/lib/carousel/instagramFormat";
 import { SOCIAL_CHANNELS, channelFor, type SocialChannel, type SocialTab, type VariantField } from "./channels";
 import VariantActions from "./VariantActions";
 import VariantEditor from "./VariantEditor";
@@ -42,6 +44,10 @@ export interface SocialVariantTabsProps {
   blogEnabled?: boolean;
   /** False when no channel posts the cover, so there is no thumbnail to choose. */
   showCoverLink?: boolean;
+  /** What Instagram gets for this draft: its pick, else the workspace's last pick, else the carousel. */
+  instagramFormat?: InstagramFormat;
+  /** Given, the Instagram tab lets the reviewer pick Carousel or Single poster. */
+  onInstagramFormat?: (format: InstagramFormat) => void;
 }
 
 interface PanelProps {
@@ -119,10 +125,14 @@ export default function SocialVariantTabs({
   enabledTabs,
   blogEnabled = true,
   showCoverLink = true,
+  instagramFormat,
+  onInstagramFormat,
 }: SocialVariantTabsProps) {
   const author = activeAsset.cover?.author ?? null;
-  // Instagram posts the whole carousel when it is on (task 37), else the cover.
-  const deck = activeAsset.carousel_pages?.length ? activeAsset.carousel_pages : null;
+  // Instagram posts the carousel or the single poster, as picked (task 40); no carousel, the poster.
+  const pages = activeAsset.carousel_pages?.length ? activeAsset.carousel_pages : null;
+  const instagramPick = instagramFormat ?? activeAsset.instagram_format ?? "CAROUSEL";
+  const deck = pages && instagramPick === "CAROUSEL" ? pages : null;
   const visibleChannels = SOCIAL_CHANNELS.filter((channel) => enabledTabs?.[channel.tab] ?? true);
   const setters: Record<VariantField, (v: string) => void> = {
     linkedin: setEditedLinkedin,
@@ -338,7 +348,14 @@ export default function SocialVariantTabs({
               </div>
             }
             extras={
-              deck ? (
+              <>
+              {pages && onInstagramFormat && (
+                <GroupedList header={<span>Post on Instagram</span>} role="radiogroup" aria-label="Instagram format">
+                  <ChoiceRow label="Carousel" hint={`${pages.length} swipeable pages`} selected={instagramPick === "CAROUSEL"} onSelect={() => onInstagramFormat("CAROUSEL")} />
+                  <ChoiceRow label="Single poster" hint="One image with your caption" selected={instagramPick === "SINGLE"} onSelect={() => onInstagramFormat("SINGLE")} />
+                </GroupedList>
+              )}
+              {deck ? (
                 // The carousel's pages, cover first. Open one to save it full size.
                 <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1">
                   {deck.map((page, i) => (
@@ -352,7 +369,8 @@ export default function SocialVariantTabs({
                 <div className="relative mx-auto aspect-[4/5] w-full max-w-[420px] overflow-hidden rounded-xl border border-line bg-surface-2">
                   <Image src={activeAsset.hero_image_url} alt={activeAsset.title} fill unoptimized sizes="420px" className="object-cover" />
                 </div>
-              ) : null
+              ) : null}
+              </>
             }
             actionBar={
               <div className="flex items-center gap-4 pt-3 border-t border-line/60 text-xs text-muted" aria-hidden="true">

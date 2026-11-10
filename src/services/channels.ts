@@ -8,6 +8,7 @@ import type { JsonObject } from "@/server/http/body";
 import { asString } from "@/server/http/body";
 import { badRequest } from "@/server/http/errors";
 import { metaGraph, type GraphCall } from "@/lib/metaGraph";
+import { workspaceInstagramFormat } from "@/lib/carousel/instagramFormat";
 
 // The blog's webhook URL is vaulted, not stored in Postgres, so a connected blog has no readable destination.
 function targetDestinationFor(key: string, row: ClientChannel | undefined): string {
@@ -44,6 +45,7 @@ export async function getChannelSettings(clientId: string): Promise<Distribution
   return {
     channels,
     summary: { blog: isActive("blog", true), facebook: isActive("facebook", true), linkedin: isActive("linkedin", false), instagram: isActive("instagram", false), x: isActive("x", false) },
+    instagram_format: workspaceInstagramFormat(rows.get("instagram")?.config),
   };
 }
 

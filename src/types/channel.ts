@@ -19,4 +19,6 @@ export interface DistributionChannelConfig {
 export interface DistributionChannelsPayload {
   channels: DistributionChannelConfig[];
   summary: Record<DistributionChannelKey, boolean>;
+  /** The workspace's last Instagram pick, the default for drafts without one; null before any pick (Carousel). */
+  instagram_format?: "CAROUSEL" | "SINGLE" | null;
 }

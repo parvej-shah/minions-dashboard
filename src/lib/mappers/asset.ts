@@ -11,6 +11,7 @@ import { bodyOf, pickQuote, quoteSource } from "@/lib/covers/copy";
 import type { AudienceLane } from "@/types";
 import { carouselOf, linkedinWentAs, type FollowUpFormat } from "@/lib/followUp";
 import { linkedinPostUrl, toChannelUrls } from "@/lib/channels";
+import { instagramDeck, isInstagramFormat, type InstagramFormat } from "@/lib/carousel/instagramFormat";
 
 export const assetDTOSelect = {
   id: true, title: true, slug: true, hook: true, coreArgument: true, content: true,
@@ -153,6 +154,7 @@ export function toAssetDTO(
     claims: asset.claims.map(toClaimDTO),
     linkedin_went_as: linkedinWentAs(asset),
     carousel_pages: carouselPages(asset.carouselSpec),
+    instagram_format: ownInstagramFormat(asset.carouselSpec),
     linkedin_url: toChannelUrls(parsePublishedUrls(asset.publishedUrls)).linkedin ?? linkedinPostUrl(asset.linkedinPostId),
     linkedin_published_at: asset.linkedinPublishedAt ? asset.linkedinPublishedAt.toISOString() : null,
     linkedin_removable: Boolean(asset.linkedinPostId),
@@ -165,7 +167,11 @@ export function toAssetDTO(
 
 /** The switched-on carousel's page images, cover first, for Instagram and Facebook; else null. */
 function carouselPages(spec: unknown): string[] | null {
-  const c = carouselOf(spec) as { active?: boolean; pages?: unknown } | null;
-  const pages = c?.active && Array.isArray(c.pages) ? c.pages.filter((p): p is string => typeof p === "string" && p.length > 0) : [];
+  const pages = instagramDeck(carouselOf(spec));
   return pages.length ? pages : null;
+}
+
+function ownInstagramFormat(spec: unknown): InstagramFormat | null {
+  const own = (carouselOf(spec) as { instagram_format?: unknown } | null)?.instagram_format;
+  return isInstagramFormat(own) ? own : null;
 }

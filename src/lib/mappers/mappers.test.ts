@@ -154,11 +154,13 @@ describe("toAssetDTO", () => {
     );
   });
 
-  it("gives the carousel's page images only when the carousel is on", () => {
+  it("gives the carousel's JPEG pages for Instagram, whatever LinkedIn gets, and the draft's own pick", () => {
     const pages = ["https://cdn/carousels/c1/a1-1/01.jpg", "https://cdn/carousels/c1/a1-1/02.jpg"];
     const spec = { active: true, pdf_url: "https://cdn/carousels/c1/a1-1/carousel.pdf", pages };
     expect(toAssetDTO(makeAsset({ carouselSpec: spec })).carousel_pages).toEqual(pages);
-    expect(toAssetDTO(makeAsset({ carouselSpec: { ...spec, active: false } })).carousel_pages).toBeNull();
+    expect(toAssetDTO(makeAsset({ carouselSpec: { ...spec, active: false } })).carousel_pages).toEqual(pages);
+    expect(toAssetDTO(makeAsset({ carouselSpec: spec })).instagram_format).toBeNull();
+    expect(toAssetDTO(makeAsset({ carouselSpec: { ...spec, instagram_format: "SINGLE" } })).instagram_format).toBe("SINGLE");
     expect(toAssetDTO(makeAsset({ carouselSpec: { ...spec, pages: undefined } })).carousel_pages).toBeNull();
     expect(toAssetDTO(makeAsset()).carousel_pages).toBeNull();
   });
