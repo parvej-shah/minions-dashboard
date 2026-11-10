@@ -31,3 +31,12 @@ describe("List kit", () => {
     expect(html).toContain("Only this post.");
   });
 });
+
+describe("ListRow link", () => {
+  it("renders a new-tab link when given href", () => {
+    const html = renderToStaticMarkup(h(ListRow, { label: "Open PDF", href: "/x.pdf" }));
+    expect(html).toContain('href="/x.pdf"');
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain('rel="noopener noreferrer"');
+  });
+});

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Check, ChevronRight } from "lucide-react";
+import { Check, ChevronRight, ExternalLink } from "lucide-react";
 
 /**
  * iOS-style grouped list: a grey rounded group of hairline-separated rows,
@@ -38,7 +38,8 @@ const rowBase = "flex min-h-11 w-full min-w-0 items-center gap-3 px-4 py-2.5 tex
 
 /**
  * One row: label (and an optional second line) on the left, a value or
- * control on the right. With `onClick` the whole row is a button with a ›.
+ * control on the right. With `onClick` the whole row is a button with a ›;
+ * with `href` it is a link that opens in a new tab.
  */
 export function ListRow({
   label,
@@ -46,6 +47,7 @@ export function ListRow({
   value,
   trailing,
   onClick,
+  href,
   disabled,
   expanded,
 }: {
@@ -56,6 +58,8 @@ export function ListRow({
   /** A control on the right (a Switch); replaces the chevron. */
   trailing?: React.ReactNode;
   onClick?: () => void;
+  /** Opens in a new tab, with an external-link mark on the right. */
+  href?: string;
   disabled?: boolean;
   /** For a row that opens choices below it. */
   expanded?: boolean;
@@ -68,6 +72,7 @@ export function ListRow({
       </span>
       {value != null && <span className="min-w-0 max-w-[55%] shrink truncate text-muted">{value}</span>}
       {trailing}
+      {href && !trailing && <ExternalLink aria-hidden="true" className="h-4 w-4 shrink-0 text-subtle" />}
       {onClick && !trailing && (
         <ChevronRight
           aria-hidden="true"
@@ -76,6 +81,8 @@ export function ListRow({
       )}
     </>
   );
+  const pressable = "cursor-pointer hover:bg-surface-3 focus-visible:bg-surface-3 focus-visible:outline-none";
+  if (href) return <a href={href} target="_blank" rel="noopener noreferrer" className={`${rowBase} ${pressable}`}>{body}</a>;
   if (!onClick) return <div className={rowBase}>{body}</div>;
   return (
     <button
@@ -83,7 +90,7 @@ export function ListRow({
       onClick={onClick}
       disabled={disabled}
       aria-expanded={expanded}
-      className={`${rowBase} cursor-pointer hover:bg-surface-3 focus-visible:bg-surface-3 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent`}
+      className={`${rowBase} ${pressable} disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent`}
     >
       {body}
     </button>

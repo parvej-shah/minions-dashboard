@@ -68,6 +68,7 @@ under reduced motion. No confetti, streaks or 3D edges.
   hairline rows, optional header and footer note), `ListRow` (label, second
   line, grey value, a control or ›), `Switch` (on/off) and `ChoiceRow`
   (pick-one row with a blue check; wrap in `GroupedList role="radiogroup"`).
+  `ListRow href` makes a new-tab link row.
   Use these for settings-like controls instead of chip grids.
 - **`fieldStyles`**: `inputClass`, `sectionClass` and `sectionCardClass` for
   settings forms.
