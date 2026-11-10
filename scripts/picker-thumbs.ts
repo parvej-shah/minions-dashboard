@@ -33,7 +33,6 @@ const mascot = readFileSync("public/images/mascots/rex.png");
     headline: "Clients buy clarity, not hours",
     emphasis: "clarity",
     kicker: "What changed when we stopped selling time",
-    label: "For service founders",
     quote: "Nobody ever bought a proposal because it was long.",
     number: { value: "3x", unit: "more replies" },
     list: ["Name the outcome", "Price the result", "Show one proof", "Ask for the call"],

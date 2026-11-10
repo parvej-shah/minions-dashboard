@@ -167,7 +167,7 @@ export default function SocialVariantTabs({
           </div>
         </div>
 
-        <div role="tablist" aria-label="Publishing channel" className="grid w-full grid-cols-1 gap-2 rounded-full bg-surface-3 p-1 sm:flex sm:w-auto sm:flex-wrap">
+        <div role="tablist" aria-label="Publishing channel" className="grid w-full grid-cols-3 gap-1 rounded-2xl bg-surface-3 p-1 sm:flex sm:w-auto sm:flex-wrap sm:gap-2 sm:rounded-full">
           {visibleChannels.map((channel) => (
             <button
               key={channel.tab}
@@ -175,7 +175,7 @@ export default function SocialVariantTabs({
               role="tab"
               aria-selected={socialTab === channel.tab}
               onClick={() => setSocialTab(channel.tab)}
-              className={`flex min-h-11 items-center justify-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all cursor-pointer active:translate-y-1 active:border-b-0 ${
+              className={`flex min-h-11 items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-sm font-semibold transition-all cursor-pointer sm:px-4 active:translate-y-1 active:border-b-0 ${
                 socialTab === channel.tab ? channel.tabActiveClass : "text-muted border-line hover:text-ink hover:bg-surface-2"
               }`}
             >

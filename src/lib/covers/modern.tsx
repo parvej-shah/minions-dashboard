@@ -218,12 +218,24 @@ function Sticker({ text, bg, fg, angle }: { text: string; bg: string; fg: string
   );
 }
 
+/** The two stickers: the label and series number when given, else the post's own tags (up to two). */
+export function stickerTexts(spec: Pick<BannerSpec, "label" | "seriesNo" | "tags">): { top: string | null; bottom: string | null } {
+  const tags = spec.tags ?? [];
+  return {
+    top: spec.label || tags[0] || null,
+    bottom: spec.seriesNo ? `No. ${String(spec.seriesNo).padStart(2, "0")}` : tags[1] ?? null,
+  };
+}
+
 /** STICKER: the headline with tag stickers slapped on above and below it, on engineering paper. */
 function StickerBanner(spec: BannerSpec) {
   const { brand } = spec;
   const headline = fitBox(spec.headline, 72, 136, { face: "serif", maxWidth: INNER, maxLines: 4, maxHeight: 640, lineHeight: 1.04 }, "headline");
   const kicker = spec.kicker ? fit(spec.kicker, 34, 42, { face: "sans", maxWidth: INNER - 120, maxLines: 2 }) : null;
-  const label = spec.label ? fitBox(spec.label, 26, 30, { face: "sansBold", maxWidth: INNER - 200, maxLines: 1 }, "label").lines[0] : null;
+  const stickers = stickerTexts(spec);
+  const stickerFit = (t: string | null) => (t ? fitBox(t, 26, 30, { face: "sansBold", maxWidth: INNER - 200, maxLines: 1 }, "label").lines[0] : null);
+  const label = stickerFit(stickers.top);
+  const second = stickerFit(stickers.bottom);
   return (
     <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", padding: PAD, position: "relative" }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -233,7 +245,7 @@ function StickerBanner(spec: BannerSpec) {
         <Lines fitted={headline} face="serif" lineHeight={1.04} color={brand.ink} emphasis={spec.emphasis} accent={brand.accent} emphasisFace="italic" />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 56 }}>
           {kicker ? <Lines fitted={kicker} face="sans" lineHeight={1.35} color={rgba(brand.ink, 0.72)} /> : <div style={{ display: "flex" }} />}
-          {spec.seriesNo ? <Sticker text={`No. ${String(spec.seriesNo).padStart(2, "0")}`} bg={brand.secondary} fg={onColour(brand, brand.secondary)} angle={6} /> : null}
+          {second ? <Sticker text={second} bg={brand.secondary} fg={onColour(brand, brand.secondary)} angle={6} /> : null}
         </div>
       </div>
       <Byline author={spec.author} brand={brand} color={brand.ink} muted={rgba(brand.ink, 0.62)} />

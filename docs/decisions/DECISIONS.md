@@ -709,3 +709,9 @@ as JPEGs, which cost far less than the PNGs did.
 **Decision:** Studio shows cover layouts and carousel designs as picture tiles, not lists of descriptions. Each tile is a sample drawn once with demo copy. Tapping one redraws the post, and Undo brings back the one before. Up to four layouts that suit the post come first, with "See all" for the rest. Layouts the cover can't be drawn in are hidden instead of greyed out. The Carousel / Single image choice for LinkedIn and Instagram is one segmented switch.
 **Why:** the user asked for pickers that work the way Apple's do. Busy founders choose by eye, and reading 26 descriptions was work. Samples instead of per-post previews keep the picker instant and cost nothing per draft (the user's call, 2026-11-10).
 **Status:** active.
+
+## 2026-11-10 — Sticker covers carry the post's own points as stickers
+
+**Decision:** the Sticker cover layout shows up to two sticker pills taken from the post's own points (grid labels, else list items). It never brings back an audience label (2026-09-25). The picker tile is drawn the same way, so what you pick is what you get.
+**Why:** a real Sticker cover had no stickers, so it looked like Headline and the picker tile promised more than the cover delivered.
+**Status:** active.

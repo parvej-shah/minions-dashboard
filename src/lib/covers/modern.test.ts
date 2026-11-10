@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_COVER_BRAND } from "./brand";
 import { CoverFitError } from "./layouts";
-import { BANNER_DESIGNS, bannerElement, giantWord, type BannerSpec } from "./modern";
+import { BANNER_DESIGNS, bannerElement, giantWord, stickerTexts, type BannerSpec } from "./modern";
 import { prepareCutout } from "./photo";
 import sharp from "sharp";
 
@@ -54,5 +54,15 @@ describe("modern banner designs", () => {
     expect(ready).toMatchObject({ width: 500, height: 800 });
     expect(ready?.src).toMatch(/^data:image\/png;base64,/);
     expect(await prepareCutout(await cutoutPng(true))).toBeUndefined();
+  });
+
+  it("puts the post's own tags on the stickers when it has no label or series number", () => {
+    expect(stickerTexts({ tags: ["Scope", "Price", "Proof"] })).toEqual({ top: "Scope", bottom: "Price" });
+    expect(stickerTexts({ tags: ["Scope"] })).toEqual({ top: "Scope", bottom: null });
+    expect(stickerTexts({})).toEqual({ top: null, bottom: null });
+  });
+
+  it("lets a label and a series number win over tags", () => {
+    expect(stickerTexts({ label: "For founders", seriesNo: 5, tags: ["Scope", "Price"] })).toEqual({ top: "For founders", bottom: "No. 05" });
   });
 });
