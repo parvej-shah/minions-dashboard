@@ -721,3 +721,9 @@ as JPEGs, which cost far less than the PNGs did.
 **Decision:** when a post goes out but a platform refuses it (LinkedIn token expired, Instagram or Facebook error), the dashboard shows "Partly posted · LinkedIn failed" in the list, on Today and on the post's own screen with the platform's reason. It no longer reads a plain "Posted". There is no Telegram alert any more; the dashboard is the one place failures show.
 **Why:** a post with an expired LinkedIn token showed "Posted" while only Facebook and Instagram had gone out, and nobody was told (the user, 2026-11-11: "if one platform failed to post we need to show that").
 **Status:** active.
+
+## 2026-11-11 — Poster titles are short and punchy
+
+**Decision:** a poster's title is the short cover line (3-6 words) whenever one says plainly what the post is about. It no longer has to beat the long post title, which always read as clear and so always won. The long title is only used when no short line works.
+**Why:** every poster carried the whole post title (11 words), which is too long to read in a feed (the user, 2026-11-11: "all our poster title is becoming lengthy that should be short but punchy").
+**Status:** active.

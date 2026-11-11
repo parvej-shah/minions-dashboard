@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { deleteFromR2, r2KeyFromUrl, uploadToR2 } from "@/lib/r2";
 import { coverBrand } from "@/lib/covers/brand";
-import { bodyOf, checkCoverLine, chooseCoverCopy, coverOptions, coverOutOfDate, scoreHeadline, pickQuote, quoteSource, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
+import { bodyOf, checkCoverLine, pickCoverLine, chooseCoverCopy, coverOptions, coverOutOfDate, scoreHeadline, pickQuote, quoteSource, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
 import { askJev } from "@/lib/ai/jev";
 import { chatWithFallback } from "@/lib/ai/modelChain";
 import { withCostMeter } from "@/lib/ai/cost";
@@ -230,9 +230,8 @@ function parseLines(raw: string): string[] {
 /**
  * A 3-6 word cover line written from the finished post: Qwen proposes five,
  * code drops any that break checkCoverLine, and Jev rates how plainly each
- * says what the post is about. A line is used only when Jev rates it clear and
- * clearer than the headline the cover would otherwise carry: a shorter line
- * that says less is worse than a longer one that says it. "" when none is,
+ * says what the post is about. The clearest line is used when Jev rates it clear,
+ * even if the long title also reads clearly: posters carry a short, punchy line. "" when none is,
  * undefined when Qwen or Jev did not answer (so the next draw tries again).
  */
 export async function writeCoverLine(draft: { title: string; post: string; body: string }, current: string, notes: string[]): Promise<string | undefined> {
@@ -256,12 +255,9 @@ export async function writeCoverLine(draft: { title: string; post: string; body:
   // Without Jev nothing says a line is clearer, so the headline stays for now.
   if (!answers) return undefined;
   const p = (i: number) => answers[`clear_${i}`]?.noul ?? 0;
-  const best = usable.map((l, i) => ({ l, p: p(i + 1) })).sort((a, b) => b.p - a.p)[0];
-  if (best.p < JEV_YES || best.p <= p(0)) {
-    notes.push(`No cover line used: "${best.l}" is not clearer than the headline (${best.p.toFixed(2)} vs ${p(0).toFixed(2)}).`);
-    return "";
-  }
-  return best.l;
+  const line = pickCoverLine(usable.map((l, i) => ({ l, p: p(i + 1) })), p(0), JEV_YES);
+  if (!line) notes.push("No cover line used: none of the short lines says plainly what the post is about.");
+  return line;
 }
 
 /** Read alongside the cover line, inside the same 60 s cover call. */

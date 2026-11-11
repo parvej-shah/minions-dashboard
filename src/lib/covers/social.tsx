@@ -240,7 +240,7 @@ function Magazine(spec: SocialSpec) {
   const accent = brand.accentOnInk;
   const ink = brand.paper;
   const mast = fitBox(spec.author.name.toUpperCase(), 110, 230, { face: "serif", maxWidth: W - 120, maxLines: 1, tracking: -0.05 }, "masthead");
-  const headline = fitBox(spec.headline, 58, 96, { face: "serif", maxWidth: INNER, maxLines: 3, maxHeight: 300, lineHeight: 1.0, tracking: -0.03 }, "headline");
+  const headline = fitBox(spec.headline, 58, 96, { face: "serif", maxWidth: INNER - 170, maxLines: 3, maxHeight: 300, lineHeight: 1.0, tracking: -0.03 }, "headline");
   const top = 70;
   let person = null;
   if (spec.cutout) {
@@ -269,7 +269,7 @@ function Magazine(spec: SocialSpec) {
       </div>
       <div style={{ position: "absolute", left: 0, top: H - 520, width: W, height: 520, display: "flex", backgroundImage: `linear-gradient(to bottom, ${rgba(brand.ink, 0)}, ${rgba(brand.ink, 0.92)} 55%)` }} />
       <div style={{ position: "absolute", left: 60, bottom: 70, width: W - 120, display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", width: INNER - 120 }}>
+        <div style={{ display: "flex", width: INNER - 170 }}>
           <Words fitted={headline} face="serif" tracking={-0.03} lineHeight={1.0} color={ink} emphasis={spec.emphasis} marked={{ color: accent }} />
         </div>
         <Img src={barcode(ink)} w={170} h={90} style={{ position: "relative" }} />

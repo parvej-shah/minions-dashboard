@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { metricsFor } from "./fonts";
 import { textWidth } from "./metrics";
 import { fit, wrap } from "./fit";
-import { audienceLabel, checkCoverLine, chooseCoverCopy, coverOutOfDate, pickLayout, pickQuote, scoreHeadline, type CoverCopyInput } from "./copy";
+import { audienceLabel, checkCoverLine, pickCoverLine, chooseCoverCopy, coverOutOfDate, pickLayout, pickQuote, scoreHeadline, type CoverCopyInput } from "./copy";
 import { contrast, coverBrand, DEFAULT_COVER_BRAND } from "./brand";
 import { coverElement, CoverFitError, type CoverSpec } from "./layouts";
 import { renderCoverPng } from "./render";
@@ -200,5 +200,18 @@ describe("the cover", () => {
   it("takes the byline from the positioning's first sentence when it is short", () => {
     expect(defaultByline("Founder of Minions.AI. I build voice agents.")).toBe("Founder of Minions.AI");
     expect(defaultByline("x".repeat(120))).toBeUndefined();
+  });
+});
+
+describe("pickCoverLine: posters carry a short, punchy line", () => {
+  const JEV_YES = 0.7;
+  it("uses the clearest short line even when the long title also reads clearly", () => {
+    expect(pickCoverLine([{ l: "Voicemail loses buyers", p: 0.82 }, { l: "Never call back", p: 0.75 }], 0.9, JEV_YES)).toBe("Voicemail loses buyers");
+  });
+  it("uses none when no short line is clear enough", () => {
+    expect(pickCoverLine([{ l: "Stuff happens", p: 0.4 }], 0.9, JEV_YES)).toBe("");
+  });
+  it("uses none when there are no lines", () => {
+    expect(pickCoverLine([], 0.9, JEV_YES)).toBe("");
   });
 });

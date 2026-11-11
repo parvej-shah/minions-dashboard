@@ -151,6 +151,17 @@ export function checkCoverLine(line: string, body: string): string | null {
   return null;
 }
 
+/**
+ * The cover line to use from Jev's ratings: the clearest one, when it is clear
+ * enough. It does not have to beat the long title: a poster carries a short,
+ * punchy line, and a long title always reads "clear" (user decision, 2026-11-11).
+ * "" when none is clear enough.
+ */
+export function pickCoverLine(rated: { l: string; p: number }[], _titleP: number, minClear: number): string {
+  const best = [...rated].sort((a, b) => b.p - a.p)[0];
+  return best && best.p >= minClear ? best.l : "";
+}
+
 /** "For real estate brokerages and teams": who the post is for, from the ICP. */
 export function audienceLabel(icp: CoverCopyInput["icp"]): string | undefined {
   const who = clean(icp.company_type) || clean(icp.role);
