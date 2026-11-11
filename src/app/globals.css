@@ -73,6 +73,7 @@
 }
 
 :root {
+  color-scheme: light;
   /* Legacy names kept for older CSS; they point at the light tokens. */
   --bg: var(--color-canvas);
   --surface: var(--color-surface);
@@ -116,24 +117,83 @@
   }
 }
 
-/* Quiet scrollbars */
+/* ==========================================================================
+   Quiet, Apple-grade scrollbars (Chrome, Firefox, Edge, Safari on Win/Linux/macOS)
+   Zero visible scrollbar gutters or thumbs on desktop window or inner views,
+   while preserving 100% native mousewheel, trackpad, touch, and keyboard scrolling.
+   ========================================================================== */
+
+/* Modern standard CSS scrollbars (Firefox, Chrome 121+, Safari 18.2+) */
+:root,
+html,
+body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* WebKit / Chromium legacy fallback */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-2);
-  border-radius: 9999px;
+  background: transparent;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-3);
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
 }
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Reusable Tailwind v4 scrollbar utilities */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
+@utility scrollbar-subtle {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--color-line-strong);
+    border-radius: 9999px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-subtle);
+  }
+  &::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
 
 .prose-reading {
   font-family: -apple-system, BlinkMacSystemFont, "Inter", "Georgia", serif;

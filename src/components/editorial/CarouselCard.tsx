@@ -251,7 +251,7 @@ export default function CarouselCard({
           )}
 
           {/* Swipe through the pages as LinkedIn shows them. */}
-          <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1">
+          <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1 scrollbar-none">
             {pages?.length ? (
               // Carousels drawn before the PDF became the only file keep their page images.
               pages.map((page, i) => (

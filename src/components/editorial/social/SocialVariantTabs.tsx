@@ -362,7 +362,7 @@ export default function SocialVariantTabs({
               )}
               {deck ? (
                 // The carousel's pages, cover first. Open one to save it full size.
-                <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1">
+                <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1 scrollbar-none">
                   {deck.map((page, i) => (
                     <a key={page} href={page} target="_blank" rel="noopener noreferrer" className="snap-start shrink-0 w-[70%] sm:w-[220px]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}

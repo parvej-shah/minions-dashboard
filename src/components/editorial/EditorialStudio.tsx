@@ -414,7 +414,7 @@ export default function EditorialStudio({
           id="editorial-publishing-options"
           tabIndex={-1}
           aria-label="Decision"
-          className="min-w-0 flex-[1_1_300px] scroll-mt-24 outline-none lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:pr-1 lg:[scrollbar-width:thin]"
+          className="min-w-0 flex-[1_1_300px] scroll-mt-24 outline-none lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:pr-1 scrollbar-none"
         >
           <ReviewDecision
             activeAsset={activeAsset}
