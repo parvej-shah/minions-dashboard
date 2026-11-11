@@ -25,7 +25,7 @@ export const SECTION_PAGES: SectionPage[] = [
   { id: "proof", title: "Facts and what sets you apart", line: "Things posts may state as fact, each with a source.", advanced: true },
   { id: "avoid", title: "Words to avoid", line: "Words and phrases you never want in a post.", advanced: true },
   { id: "sources", title: "Idea sources", line: "The feeds Minions reads for things worth posting about.", advanced: true },
-  { id: "cover", title: "Cover look", line: "Your photo, colours and illustration style.", advanced: false },
+  { id: "cover", title: "Custom colours", line: "Pick your own brand colours for post covers.", advanced: false },
 ];
 
 export const ADVANCED_SECTIONS = SECTION_PAGES.filter((s) => s.advanced);
