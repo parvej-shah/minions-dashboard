@@ -48,3 +48,4 @@ next-env.d.ts
 *.sql.gz
 .poster-mix-cache.json
 poster-samples/
+.agents/teamwork/

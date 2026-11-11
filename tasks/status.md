@@ -44,3 +44,4 @@
 | 40 | Instagram format choice (Carousel / Single poster, remembered) | CLAUDE | DONE (pushed c11ef19) | tasks/40.md |
 | 41 | Picture pickers for cover layouts and carousel designs | CLAUDE | DONE (walked desktop + 390px, pushed 071fccd) | tasks/41.md |
 | 42 | Show which platform failed to post; Telegram alert removed | CLAUDE | DONE locally (needs SQL 2026-11-11-publish-failures.sql, then n8n 03 push, then code push; each needs OK) | tasks/42.md |
+| 43 | Direct photo upload under cover preview on Brand page | ANTIGRAVITY | DONE | tasks/43.md |

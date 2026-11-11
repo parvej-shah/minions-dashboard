@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Loader2 } from "lucide-react";
+import { Camera, Check, Loader2 } from "lucide-react";
 import type { BrandSettings } from "@/types";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { toProfileInput } from "@/lib/brandProfileInput";
 import { COVER_THEMES, themeColours, themeOf, type CoverTheme } from "@/lib/covers/themes";
+import { buttonStyles } from "@/components/ui/Button";
+import { validateCoverPhoto, updatePhotoPayload } from "@/lib/brand/photoUpload";
 import ErrorLine from "@/components/ui/ErrorLine";
 import { LoadingState } from "@/components/ui/EmptyState";
 import { BrandCard, brandText } from "@/components/brand/parts";
@@ -25,6 +27,8 @@ interface Props {
 export default function CoverThemeCard({ profile, setProfile, onEdit }: Props) {
   const [saving, setSaving] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
   const title = "Cover look";
   const line = "The image on top of every post. Pick a theme.";
 
@@ -44,11 +48,88 @@ export default function CoverThemeCard({ profile, setProfile, onEdit }: Props) {
     }
   };
 
+  const uploadPhoto = async (file: File | undefined) => {
+    if (!file || !profile) return;
+    setPhotoError(null);
+    const err = validateCoverPhoto(file);
+    if (err) {
+      setPhotoError(err);
+      return;
+    }
+    setUploadingPhoto(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/media/upload", { method: "POST", body: form });
+      const body = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !body.url) {
+        throw new Error(body.error || `Upload failed (HTTP ${res.status})`);
+      }
+      const updated = await apiClient.post<BrandSettings>("/api/brand", updatePhotoPayload(profile, body.url));
+      setProfile(updated);
+    } catch (e) {
+      setPhotoError(toErrorMessage(e, "Upload failed."));
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const removePhoto = async () => {
+    if (!profile || !profile.primary_logo_url || uploadingPhoto) return;
+    setPhotoError(null);
+    setUploadingPhoto(true);
+    try {
+      const updated = await apiClient.post<BrandSettings>("/api/brand", updatePhotoPayload(profile, ""));
+      setProfile(updated);
+    } catch (e) {
+      setPhotoError(toErrorMessage(e, "Could not remove photo."));
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
   return (
     <BrandCard title={title} line={line} action={<button type="button" onClick={onEdit} className={brandText.link}>Photo and more</button>}>
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-        <div className="w-[200px] max-w-full shrink-0">
+        <div className="w-[200px] max-w-full shrink-0 space-y-2.5">
           <BrandLookPreview bare colors={profile} brandName={profile.brand_name} byline={profile.cover_byline} logoUrl={profile.primary_logo_url} art={profile.cover_art} />
+          <div className="space-y-1.5">
+            <label
+              className={`${buttonStyles({ variant: "secondary", size: "sm", block: true })} cursor-pointer ${uploadingPhoto ? "pointer-events-none opacity-60" : ""}`}
+            >
+              {uploadingPhoto ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-muted" aria-hidden="true" />
+                  <span>Uploading…</span>
+                </>
+              ) : (
+                <>
+                  <Camera className="h-3.5 w-3.5 text-muted" aria-hidden="true" />
+                  <span>{profile.primary_logo_url ? "Change photo" : "Upload photo"}</span>
+                </>
+              )}
+              <input
+                type="file"
+                accept="image/png,image/jpeg"
+                className="hidden"
+                disabled={uploadingPhoto}
+                onChange={(e) => {
+                  void uploadPhoto(e.target.files?.[0]);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+            {profile.primary_logo_url && !uploadingPhoto && (
+              <button
+                type="button"
+                onClick={() => void removePhoto()}
+                className="w-full text-center text-[13px] text-subtle hover:text-danger hover:underline cursor-pointer transition-colors"
+              >
+                Remove photo
+              </button>
+            )}
+            {photoError && <ErrorLine text={photoError} />}
+          </div>
         </div>
         <div className="min-w-0 flex-1 space-y-3">
           <ul role="radiogroup" aria-label="Cover theme" className="grid grid-cols-3 gap-3">
