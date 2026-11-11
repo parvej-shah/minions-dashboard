@@ -160,13 +160,13 @@ function Brand() {
 
       <div key={importVersion} className="space-y-6">
         <MissingBasic version={profileVersion} />
+        <CoverThemeCard profile={profile} setProfile={setProfile} onEdit={() => open("cover")} />
         <WhatYouDo profile={profile} setProfile={setProfile} onSaved={bumpProfile} version={profileVersion} />
         <IcpEditor fields="who" onChange={bumpProfile} onMore={() => open("reader")} />
         <BrandCard title="What you post about" line="Ideas stay on these topics.">
           <TagList category="TOPICS" items={active("TOPICS")} onAdd={directiveActions.add} onRemove={directiveActions.remove} placeholder="Add a topic, e.g. Hiring your first salesperson" />
         </BrandCard>
         <MemorySection compact onChange={bumpProfile} onSeeAll={() => open("experience")} />
-        <CoverThemeCard profile={profile} setProfile={setProfile} onEdit={() => open("cover")} />
       </div>
 
       <Advanced startOpen={tab === ADVANCED_OPEN} onOpen={open} />

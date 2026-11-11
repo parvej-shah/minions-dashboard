@@ -26,6 +26,21 @@ describe("ThumbPicker", () => {
     const html = renderToStaticMarkup(h(ThumbPicker, { label: "Layout", options, selected: "SWISS", busy: "SWISS", onSelect: () => {} }));
     expect(html).toContain('aria-busy="true"');
   });
+
+  it("renders scroll chevrons for horizontal scrolling when not wrapped", () => {
+    const html = renderToStaticMarkup(h(ThumbPicker, { label: "Layout", options, selected: "SWISS", onSelect: () => {} }));
+    expect(html).toContain('aria-label="Scroll left"');
+    expect(html).toContain('aria-label="Scroll right"');
+    expect(html).toContain("cursor-grab");
+    expect(html).toContain("overflow-x-auto");
+  });
+
+  it("renders as a grid and omits scroll chevrons when wrapped", () => {
+    const html = renderToStaticMarkup(h(ThumbPicker, { label: "Layout", options, selected: "SWISS", wrap: true, onSelect: () => {} }));
+    expect(html).toContain("grid");
+    expect(html).not.toContain('aria-label="Scroll left"');
+    expect(html).not.toContain('aria-label="Scroll right"');
+  });
 });
 
 describe("Segmented", () => {
