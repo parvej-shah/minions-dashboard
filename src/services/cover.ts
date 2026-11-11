@@ -126,7 +126,7 @@ async function coverPhoto(profile: { id: string; clientId: string | null; primar
  * ready for the Cut-out banner. Undefined when there is none, it is not on
  * our storage, or it is not really cut out.
  */
-async function coverCutout(profile: { visualAssets: unknown }): Promise<CoverSpec["cutout"]> {
+export async function coverCutout(profile: { visualAssets: unknown }): Promise<CoverSpec["cutout"]> {
   const url = (profile.visualAssets as { cover_cutout_url?: unknown } | null)?.cover_cutout_url;
   if (typeof url !== "string" || !onOurStorage(url)) return undefined;
   const img = await fetchImage(url);

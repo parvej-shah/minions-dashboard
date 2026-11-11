@@ -337,10 +337,36 @@ export function repairPlan(plan: CarouselPlan, sources: PlanSources): CarouselPl
   };
 }
 
+/** Row fields that are bookkeeping, not part of what a cover draws. */
+const COVER_BOOKKEEPING = ["card", "art_style", "art_drawn", "headline_source", "score", "notes", "rendered_at", "author", "brand", "cutout"];
+
+/**
+ * The post's own cover, rebuilt from its stored row so page 1 of the deck is
+ * that same cover. The row never holds the photo or colours: the workspace's
+ * current author, brand and cut-out are put back. Null when the row has no
+ * layout and headline to draw.
+ */
+export function postCoverSpec(stored: unknown, now: { author: CoverSpec["author"]; brand: CoverSpec["brand"]; cutout?: CoverSpec["cutout"] }): CoverSpec | null {
+  const row = (stored ?? null) as Record<string, unknown> | null;
+  if (!row || typeof row.layout !== "string" || typeof row.headline !== "string" || !row.headline.trim()) return null;
+  const rest = Object.fromEntries(Object.entries(row).filter(([k]) => !COVER_BOOKKEEPING.includes(k)));
+  return { ...rest, author: now.author, brand: now.brand, ...(now.cutout ? { cutout: now.cutout } : {}) } as unknown as CoverSpec;
+}
+
 /** Builds the deck, and checks that every page fits. */
 export function toDeck(plan: CarouselPlan, base: { author: CoverSpec["author"]; brand: CoverSpec["brand"]; art?: CoverSpec["art"]; cover?: CoverSpec }): { deck: Deck; errors: string[] } {
+  const headlinePage: CoverSpec = { layout: "HEADLINE", headline: plan.cover.headline, emphasis: plan.cover.emphasis, kicker: plan.cover.kicker, author: base.author, brand: base.brand, art: base.art };
   // The post's own cover, as the reviewer left it, when there is one: the feed shows page 1, so the two must match.
-  const cover: CoverSpec = base.cover ?? { layout: "HEADLINE", headline: plan.cover.headline, emphasis: plan.cover.emphasis, kicker: plan.cover.kicker, author: base.author, brand: base.brand, art: base.art };
+  // One that cannot be drawn here falls back to the headline page.
+  let cover: CoverSpec = base.cover ?? headlinePage;
+  if (base.cover) {
+    try {
+      coverElement(base.cover);
+    } catch (e) {
+      if (!(e instanceof CoverFitError)) throw e;
+      cover = headlinePage;
+    }
+  }
   const deck: Deck = { cover, slides: plan.slides, label: plan.label, author: base.author, brand: base.brand, style: plan.style };
   const errors: string[] = [];
   try {

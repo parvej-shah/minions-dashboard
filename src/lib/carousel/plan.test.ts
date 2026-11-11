@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_COVER_BRAND } from "@/lib/covers/brand";
 import { renderCarousel, type CarouselInput } from "@/lib/prompts/carousel";
-import { checkPlan, namesIn, parsePlan, quantities, repairPlan, suggestCarousel, toDeck, WORD_CAPS, type PlanSources } from "./plan";
+import { checkPlan, namesIn, parsePlan, postCoverSpec, quantities, repairPlan, suggestCarousel, toDeck, WORD_CAPS, type PlanSources } from "./plan";
 import { SLIDE_STYLES } from "./slides";
 
 const body = "Demos run in controlled environments. On a live call, two seconds of silence and the buyer hangs up. Test latency on live calls before you buy.";
@@ -71,6 +71,23 @@ describe("carousel plan gates", () => {
     const cover = { layout: "STATEMENT" as const, headline: "Test voice agents on live calls", author, brand: DEFAULT_COVER_BRAND };
     expect(toDeck(plan(), { author, brand: DEFAULT_COVER_BRAND, cover }).deck.cover.layout).toBe("STATEMENT");
     expect(toDeck(plan(), { author, brand: DEFAULT_COVER_BRAND }).deck.cover.layout).toBe("HEADLINE");
+  });
+
+  it("rebuilds the post's stored cover with the workspace's current author, colours and cut-out", () => {
+    const stored = { layout: "CUTOUT", headline: "Why international buyers who hit voicemail never call back, and what to do about it", emphasis: "never", kicker: "k", author: { name: "old", has_photo: true }, brand: { ink: "#000" }, card: { cover_line: "x" }, art_style: "NONE", art_drawn: false, headline_source: "title", score: {}, notes: ["n"], rendered_at: "t" };
+    const cutout = { data: "d" } as never;
+    const spec = postCoverSpec(stored, { author, brand: DEFAULT_COVER_BRAND, cutout })!;
+    expect(spec).toMatchObject({ layout: "CUTOUT", headline: stored.headline, emphasis: "never", kicker: "k", author, brand: DEFAULT_COVER_BRAND, cutout });
+    for (const k of ["card", "art_style", "art_drawn", "headline_source", "score", "notes", "rendered_at"]) expect(spec).not.toHaveProperty(k);
+    expect(postCoverSpec(null, { author, brand: DEFAULT_COVER_BRAND })).toBeNull();
+    expect(postCoverSpec({ layout: "CUTOUT" }, { author, brand: DEFAULT_COVER_BRAND })).toBeNull();
+  });
+
+  it("falls back to the headline page when the post's cover cannot be drawn", () => {
+    const cover = { layout: "HEADLINE" as const, headline: "word ".repeat(200).trim(), author, brand: DEFAULT_COVER_BRAND };
+    const built = toDeck(plan(), { author, brand: DEFAULT_COVER_BRAND, cover });
+    expect(built.errors).toEqual([]);
+    expect(built.deck.cover.headline).toBe(good.cover.headline);
   });
 
   it("reads a stored plan sent back by the review screen", () => {

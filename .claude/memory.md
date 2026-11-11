@@ -29,6 +29,7 @@ RULE: every entry below is EXACTLY ONE LINE. No multi-line entries, no sub-bulle
 [PERMISSION] Ask before any production action (DB writes, n8n --apply, go-live changes, pushes that deploy).
 
 ## Sessions
+2026-11-11 | carousel page 1 = post's real cover (task 49) | decision: deck cover is rebuilt from the stored coverSpec (layout, photo, cut-out, headline) via postCoverSpec; falls back to the HEADLINE page if it cannot fit | changed: carousel/plan.ts(+test), services/carousel.ts, services/cover.ts (export coverCutout) | docs: tasks/49.md | open: not pushed; already-stored carousels change only on Make again or a design switch
 2026-11-11 | task 48 shorter Instagram caption | decision: IG caption hard limit 60 words (target 25-45), hashtags stay 3-5, warning over 60 words | changed: prompts/variants.ts, socialCopy.ts, n8n 02 validate-social-variants.js, golden, tests | docs: tasks/48.md | open: none (code pushed 73add11, n8n 02 applied)
 2026-11-11 | eliminate native grey desktop scrollbars (task 47) | decision: scrollbar-width: none and WebKit display: none on :root/html/body and review aside; scrollbar-none utility | changed: globals.css, EditorialStudio, CarouselCard, SocialVariantTabs, scrollbar.test | docs: tasks/47.md | open: push
 2026-11-11 | brand avatar and name in account menu (task 46) | decision: AccountMenu avatar and display name prefer primary_logo_url and brand_name over Google OAuth | changed: AccountMenu.tsx, accountIdentity.ts(+test) | docs: tasks/46.md | open: push

@@ -6,12 +6,12 @@ import { deleteFromR2, r2KeyFromUrl, uploadToR2 } from "@/lib/r2";
 import { coverBrand } from "@/lib/covers/brand";
 import type { CoverSpec } from "@/lib/covers/layouts";
 import { evidenceRules, manualIdeaNote } from "@/lib/drafts/authorContext";
-import { COVER_HEADLINE_WORDS, checkPlan, namesIn, parsePlan, repairPlan, suggestCarousel, toDeck, type CarouselPlan, type PlanSources } from "@/lib/carousel/plan";
+import { COVER_HEADLINE_WORDS, checkPlan, namesIn, parsePlan, postCoverSpec, repairPlan, suggestCarousel, toDeck, type CarouselPlan, type PlanSources } from "@/lib/carousel/plan";
 import { renderCarouselPdf, renderSlidePng, slideJpeg } from "@/lib/carousel/render";
 import type { Deck, SlideStyle } from "@/lib/carousel/slides";
 import type { InstagramFormat } from "@/lib/carousel/instagramFormat";
 import { renderCarousel, type CarouselInput } from "@/lib/prompts/carousel";
-import { bodyOf, defaultByline, hostedCoverPhoto, isPublished } from "./cover";
+import { bodyOf, coverCutout, defaultByline, hostedCoverPhoto, isPublished } from "./cover";
 import { tenantBannedPhrases } from "./bannedScrub";
 
 /**
@@ -69,7 +69,7 @@ interface Context {
   stored: StoredCarousel | null;
   input: CarouselInput;
   sources: PlanSources;
-  base: { author: CoverSpec["author"]; brand: CoverSpec["brand"]; art?: CoverSpec["art"] };
+  base: { author: CoverSpec["author"]; brand: CoverSpec["brand"]; art?: CoverSpec["art"]; cover?: CoverSpec };
   /** The post's own cover headline: the carousel opens with the same title. */
   postCover: { headline: string; emphasis?: string } | null;
   body: string;
@@ -132,6 +132,9 @@ async function loadContext(assetId: string): Promise<Context | { error: string }
   const { brand } = coverBrand({ ink: profile.primaryInk, paper: profile.brandCream, accent: profile.brandCoral, secondary: profile.brandTeal });
   const author = { name: profile.brandName, role: profile.coverByline?.trim() || defaultByline(profile.positioning ?? ""), photo: await hostedCoverPhoto(profile) };
 
+  // Page 1 is the post's own cover (its layout, photo and headline), not a rebuilt headline page.
+  const postCover = postCoverSpec(asset.coverSpec, { author, brand, cutout: await coverCutout(profile) });
+
   return {
     assetId: asset.id,
     clientId,
@@ -140,7 +143,7 @@ async function loadContext(assetId: string): Promise<Context | { error: string }
     stored: (asset.carouselSpec ?? null) as StoredCarousel | null,
     input,
     sources,
-    base: { author, brand, art: cover?.art },
+    base: { author, brand, art: cover?.art, ...(postCover ? { cover: postCover } : {}) },
     postCover: cover?.headline?.trim() && words(cover.headline) >= COVER_HEADLINE_WORDS.min && words(cover.headline) <= COVER_HEADLINE_WORDS.max ? { headline: cover.headline.trim(), emphasis: cover.emphasis } : null,
     body,
   };
