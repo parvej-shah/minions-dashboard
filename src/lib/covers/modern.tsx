@@ -407,6 +407,25 @@ export function giantWord(headline: string, emphasis?: string): string {
   return words.reduce((a, b) => (b.length > a.length ? b : a), "").toLowerCase();
 }
 
+/**
+ * Where the Cut-out cover puts the person and the giant word: the person
+ * stands on the bottom edge and the word sits behind the head, so the head
+ * covers the word's lower part (the picker's picture). The word's top stays
+ * clear and readable, and it never rides into the headline. Short words
+ * (big) give a smaller person, long words (small) a taller one, so the
+ * overlap and the gap under the headline look the same on every post.
+ */
+export function cutoutLayout(i: { width: number; height: number; headlineBottom: number; giantSize: number }): { cw: number; ch: number; giantTop: number } {
+  const COVER = 0.74; // the head's top sits this far down the word's line box
+  const wanted = H - (i.headlineBottom + 90 + COVER * i.giantSize);
+  const chWanted = Math.min(900, Math.max(540, wanted));
+  const scale = Math.min(chWanted / i.height, 980 / i.width);
+  const cw = Math.round(i.width * scale);
+  const ch = Math.round(i.height * scale);
+  const giantTop = Math.max(Math.round(i.headlineBottom - i.giantSize * 0.12), Math.round(H - ch - COVER * i.giantSize));
+  return { cw, ch, giantTop };
+}
+
 /** CUTOUT: the author's cut-out photo standing in front of one giant italic word, the headline above, on a dark glow. */
 function Cutout(spec: BannerSpec) {
   const { brand } = spec;
@@ -416,17 +435,11 @@ function Cutout(spec: BannerSpec) {
   const headline = fitBox(spec.headline, 60, 100, { face: "serif", maxWidth: INNER, maxLines: 3, maxHeight: 330, lineHeight: 1.04 }, "headline");
   const word = giantWord(spec.headline, spec.emphasis);
   const giant = fitBox(word, 150, 420, { face: "italic", maxWidth: W - 60, maxLines: 1 }, "giant word");
-  // The person stands on the bottom edge, as tall as the page below the headline allows.
-  const maxH = 800;
-  const scale = Math.min(maxH / spec.cutout.height, 980 / spec.cutout.width);
-  const cw = Math.round(spec.cutout.width * scale);
-  const ch = Math.round(spec.cutout.height * scale);
+  const labelRow0 = spec.label ? 28 * 1.2 + 32 : 0;
+  const headlineBottom = PAD + labelRow0 + headline.lines.length * headline.size * 1.04;
+  const { cw, ch, giantTop } = cutoutLayout({ width: spec.cutout.width, height: spec.cutout.height, headlineBottom, giantSize: giant.size });
   const name = fitBox(spec.author.name, 30, 36, { face: "sansSemi", maxWidth: 520, maxLines: 1 }, "name");
   const role = spec.author.role ? fit(spec.author.role, 22, 26, { face: "sans", maxWidth: 520, maxLines: 1 }) : null;
-  // High enough that the head covers only the word's lower half, so it stays
-  // readable above it; never into the headline (the line box has the ascent's air on top).
-  const labelRow = spec.label ? 28 * 1.2 + 32 : 0;
-  const giantTop = Math.max(340, Math.round(PAD + labelRow + headline.lines.length * headline.size * 1.04 - giant.size * 0.12));
   return (
     <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", padding: PAD, position: "relative", overflow: "hidden" }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}

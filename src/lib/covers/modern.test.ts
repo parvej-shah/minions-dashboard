@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_COVER_BRAND } from "./brand";
 import { CoverFitError } from "./layouts";
-import { BANNER_DESIGNS, bannerElement, giantWord, stickerTexts, type BannerSpec } from "./modern";
+import { BANNER_DESIGNS, bannerElement, cutoutLayout, giantWord, stickerTexts, type BannerSpec } from "./modern";
 import { prepareCutout } from "./photo";
 import sharp from "sharp";
 
@@ -65,4 +65,26 @@ describe("modern banner designs", () => {
   it("lets a label and a series number win over tags", () => {
     expect(stickerTexts({ label: "For founders", seriesNo: 5, tags: ["Scope", "Price"] })).toEqual({ top: "For founders", bottom: "No. 05" });
   });
+});
+
+describe("cutoutLayout", () => {
+  // The picture the picker shows: the figure stands in front of the giant word, covering its lower part.
+  const person = { width: 900, height: 1000 };
+  const cases = [
+    { name: "a short word, two-line headline", headlineBottom: 260, giantSize: 400 },
+    { name: "a long word, three-line headline", headlineBottom: 310, giantSize: 150 },
+    { name: "a four-line headline", headlineBottom: 380, giantSize: 190 },
+  ];
+  for (const c of cases) {
+    it(`puts the head in front of the word's lower part: ${c.name}`, () => {
+      const l = cutoutLayout({ ...person, ...c });
+      const personTop = 1350 - l.ch;
+      expect(personTop).toBeGreaterThan(l.giantTop + c.giantSize * 0.3); // the word's top stays clear
+      expect(personTop).toBeLessThan(l.giantTop + c.giantSize * 0.9); // the head covers its lower part
+      expect(l.giantTop).toBeGreaterThanOrEqual(c.headlineBottom - c.giantSize * 0.12); // never into the headline
+      expect(l.cw).toBeLessThanOrEqual(980);
+      expect(l.ch).toBeLessThanOrEqual(900);
+      expect(l.ch).toBeGreaterThanOrEqual(540);
+    });
+  }
 });
