@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Session } from "next-auth";
 import { useBrandSettings } from "@/hooks/useBrandSettings";
+import { resolveAccountIdentity } from "@/lib/layout/accountIdentity";
 import type { NavCounts } from "@/types";
 import WorkspaceSwitcher from "./WorkspaceSwitcher";
 import QuotaMeter from "./QuotaMeter";
@@ -67,8 +68,7 @@ export default function AccountMenu({
   // A workspace without its own domain has no public blog of its own (same rule the old sidebar used).
   const blogUrl = domain ? (domain.startsWith("http") ? domain : `https://${domain}`) : null;
   const showBlog = blogEnabled && Boolean(blogUrl);
-  const name = session.user?.name || session.user?.email || "Account";
-  const initial = name[0]?.toUpperCase() ?? "A";
+  const { avatarUrl, displayName, initial } = resolveAccountIdentity(session.user, brandSettings);
   const close = () => setOpen(false);
 
   return (
@@ -80,8 +80,8 @@ export default function AccountMenu({
         aria-expanded={open}
         className="flex h-9 w-9 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-surface-3 text-sm font-semibold text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
       >
-        {session.user?.image ? (
-          <Image src={session.user.image} alt="" width={36} height={36} unoptimized referrerPolicy="no-referrer" className="h-9 w-9 object-cover" />
+        {avatarUrl ? (
+          <Image src={avatarUrl} alt="" width={36} height={36} unoptimized referrerPolicy="no-referrer" className="h-9 w-9 object-cover" />
         ) : (
           initial
         )}
@@ -94,7 +94,7 @@ export default function AccountMenu({
         >
           <div className="space-y-3 px-3 pb-3 pt-2">
             <div className="min-w-0">
-              <p className="truncate text-[15px] font-semibold text-ink">{session.user?.name || "Your account"}</p>
+              <p className="truncate text-[15px] font-semibold text-ink">{displayName}</p>
               <p className="truncate text-sm text-muted">{session.user?.email}</p>
             </div>
             <WorkspaceSwitcher />

@@ -47,3 +47,4 @@
 | 43 | Direct photo upload under cover preview on Brand page | ANTIGRAVITY | DONE | tasks/43.md |
 | 44 | Cut-out cover matches its picker picture | CLAUDE | DONE | tasks/44.md |
 | 45 | Dual photo uploads on Cover look card, pure Custom colours page | ANTIGRAVITY | DONE | tasks/45.md |
+| 46 | Prioritize Brand photo and name in Account Menu | ANTIGRAVITY | DONE | tasks/46.md |

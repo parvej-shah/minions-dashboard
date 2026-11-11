@@ -29,6 +29,7 @@ RULE: every entry below is EXACTLY ONE LINE. No multi-line entries, no sub-bulle
 [PERMISSION] Ask before any production action (DB writes, n8n --apply, go-live changes, pushes that deploy).
 
 ## Sessions
+2026-11-11 | brand avatar and name in account menu (task 46) | decision: AccountMenu avatar and display name prefer primary_logo_url and brand_name over Google OAuth | changed: AccountMenu.tsx, accountIdentity.ts(+test) | docs: tasks/46.md | open: push
 2026-11-11 | dual photo uploads + pure custom colours (task 45) | decision: Headshot + Cut-out cards parallel on desktop under themes; Custom colours card shows only 4 palette pickers with live preview | changed: CoverThemeCard, CoverAppearanceCard, brandSections, photoUpload(+test) | docs: tasks/45.md | open: push
 2026-11-11 | task 43 direct cover photo upload on Brand | decision: direct Apple-grade secondary pill button under preview; validates PNG/JPEG <=5MB, uploads to /api/media/upload, updates profile and redraws preview live | changed: src/components/brand/CoverThemeCard.tsx, src/lib/brand/photoUpload.ts(+test) | docs: tasks/43.md | open: push
 2026-11-11 | task 42 per-platform publish failures | decision: assets.publish_failures {channel: reason}; list/Today/Posted screen say "Partly posted · LinkedIn failed"; Telegram alert removed from n8n 03 | changed: publishFailures.ts, instagramPublish, mappers/asset, library, TodayView, ReviewDecision, n8n 03 | docs: DECISIONS.md, tasks/42.md | open: go-live order SQL → n8n 03 push → code push, needs OK; bsse1610 LinkedIn token expired (user reconnects)
