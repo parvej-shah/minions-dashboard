@@ -52,3 +52,4 @@
 | 48 | Cover look is the first section on Brand page | ANTIGRAVITY | IN PROGRESS | tasks/48.md |
 | 48 | Shorter, punchier Instagram caption (60 words) | CLAUDE | DONE (pushed 73add11; n8n 02 applied) | tasks/48.md |
 | 49 | Carousel page 1 is the post's real cover (not a rebuilt headline page) | CLAUDE | DONE (local; not pushed) | tasks/49.md |
+| 50 | Carousel in Channel preview: LinkedIn tab stays, Copy post text, Instagram Save all pages | CLAUDE | DONE (local; not pushed) | tasks/50.md |

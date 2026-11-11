@@ -17,6 +17,7 @@ import { useBrandSettings } from "@/hooks/useBrandSettings";
 import { normalizeDomain } from "@/constants/config";
 import CoverImageCard from "./CoverImageCard";
 import CarouselCard from "./CarouselCard";
+import { savePages } from "@/lib/carousel/savePages";
 import ArticleEditor, { type EditorMode } from "./ArticleEditor";
 import SocialVariantTabs, { type SocialTab } from "./social/SocialVariantTabs";
 import ReviewDecision from "./ReviewDecision";
@@ -123,7 +124,8 @@ export default function EditorialStudio({
   const [editorMode, setEditorMode] = useState<EditorMode>("preview");
   const [socialTab, setSocialTab] = useState<SocialTab>("LINKEDIN");
   // Whether LinkedIn gets this draft's carousel, as the carousel card last loaded or set it.
-  const [carouselOn, setCarouselOn] = useState<{ id: string; on: boolean } | null>(null);
+  const [carouselOn, setCarouselOn] = useState<{ id: string; on: boolean; caption: string; pages: string[] } | null>(null);
+  const [savingPages, setSavingPages] = useState(false);
   // The last Instagram pick made here: it holds for that draft and is now the workspace's default.
   const [instagramPick, setInstagramPick] = useState<{ id: string; format: InstagramFormat } | null>(null);
   // A post limited to some channels (D18) previews only those.
@@ -139,7 +141,8 @@ export default function EditorialStudio({
   // With the carousel on, LinkedIn posts the carousel and the text written for it
   // (both in the carousel card), never the LinkedIn text or the cover below.
   const linkedinGetsCarousel = enabledSocialTabs.LINKEDIN && carouselOn?.id === draft.activeAsset?.id && carouselOn?.on === true;
-  const previewTabs = { ...enabledSocialTabs, LINKEDIN: enabledSocialTabs.LINKEDIN && !linkedinGetsCarousel };
+  // The LinkedIn tab stays: with the carousel on it shows the carousel's text and pages.
+  const previewTabs = enabledSocialTabs;
   const anySocialChannelActive = previewTabs.LINKEDIN || previewTabs.FACEBOOK || previewTabs.TWITTER;
   const coverGoesOut = !linkedinGetsCarousel || blogEnabled || enabledSocialTabs.FACEBOOK || enabledSocialTabs.TWITTER;
 
@@ -161,6 +164,18 @@ export default function EditorialStudio({
     instagramPick?.format ??
     channelPayload?.instagram_format ??
     "CAROUSEL";
+  const saveCarouselPages = async () => {
+    if (!activeAsset?.carousel_pages?.length) return;
+    setSavingPages(true);
+    try {
+      const done = await savePages(activeAsset.id, activeAsset.carousel_pages.length);
+      if (done !== "cancelled") toast.show(done === "shared" ? "Pages ready to post." : "Pages saved to your downloads, in order.");
+    } catch (e) {
+      toast.show((e as Error).message || "The pages could not be saved. Try again.");
+    } finally {
+      setSavingPages(false);
+    }
+  };
   const pickInstagramFormat = async (format: InstagramFormat) => {
     if (!activeAsset) return;
     const before = instagramPick;
@@ -339,6 +354,9 @@ export default function EditorialStudio({
       showCoverLink={coverGoesOut}
       instagramFormat={instagramFormat}
       onInstagramFormat={(format) => void pickInstagramFormat(format)}
+      onSavePages={() => void saveCarouselPages()}
+      savingPages={savingPages}
+      linkedinCarousel={linkedinGetsCarousel && carouselOn ? { caption: carouselOn.caption, pages: carouselOn.pages } : null}
     />
   );
 
@@ -377,7 +395,9 @@ export default function EditorialStudio({
         <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-8">
           <div id="post-preview" className="scroll-mt-24">{socialVariants}</div>
           {enabledSocialTabs.LINKEDIN && activeAsset.follow_up_format !== "COVER" && (
-            <CarouselCard key={activeAsset.id} activeAsset={activeAsset} onMessage={toast.show} onCarouselOn={(on) => setCarouselOn({ id: activeAsset.id, on })} />
+            <div id="linkedin-carousel" className="scroll-mt-24">
+              <CarouselCard key={activeAsset.id} activeAsset={activeAsset} onMessage={toast.show} onCarouselOn={(on, info) => setCarouselOn({ id: activeAsset.id, on, ...info })} onCopy={copy} copiedKey={copiedKey} />
+            </div>
           )}
 
           {/* Hidden only when nothing posts it: LinkedIn gets the carousel and no other channel is on. */}

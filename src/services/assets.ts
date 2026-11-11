@@ -1,3 +1,4 @@
+import { instagramDeck } from "@/lib/carousel/instagramFormat";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { assetDTOSelect, toAssetDTO } from "@/lib/mappers/asset";
@@ -177,6 +178,12 @@ export async function removeAsset(clientId: string, idOrSlug: string, mode: Asse
     include: { claims: true },
   });
   return toAssetDTO(reverted, null, await getTenantBlogDomain(clientId));
+}
+
+/** The carousel's page JPEGs Instagram can post, cover first; empty when there are none. */
+export async function getCarouselPageUrls(clientId: string, idOrSlug: string): Promise<string[]> {
+  const asset = await prisma.asset.findFirst({ where: ownedAssetWhere(clientId, idOrSlug), select: { carouselSpec: true } });
+  return instagramDeck(asset?.carouselSpec);
 }
 
 export async function getCarouselPdfUrl(clientId: string, idOrSlug: string): Promise<string | undefined> {

@@ -33,7 +33,7 @@ describe("the Instagram tab", () => {
   it("shows every carousel page, cover first, when the carousel is on", () => {
     const pages = ["https://cdn/carousels/c1/a1-1/01.jpg", "https://cdn/carousels/c1/a1-1/02.jpg", "https://cdn/carousels/c1/a1-1/03.jpg"];
     const html = render({ ...asset, carousel_pages: pages });
-    expect(html).toContain("post these 3 pages as a carousel");
+    expect(html).toContain("Post these 3 pages as one Instagram carousel");
     expect(html.indexOf("01.jpg")).toBeLessThan(html.indexOf("03.jpg"));
     expect(html).toContain("Page 3 of 3");
     expect(html).not.toContain("covers/a1.png");

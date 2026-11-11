@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { AlertTriangle, GalleryHorizontal, Loader2, Sparkles } from "lucide-react";
+import { AlertTriangle, Check, Copy, GalleryHorizontal, Loader2, Sparkles } from "lucide-react";
 import type { AssetItem } from "@/types";
 import type { StoredCarousel } from "@/services/carousel";
 import type { CarouselPlan } from "@/lib/carousel/plan";
@@ -60,11 +60,16 @@ export default function CarouselCard({
   activeAsset,
   onMessage,
   onCarouselOn,
+  onCopy,
+  copiedKey,
 }: {
   activeAsset: AssetItem;
   onMessage: (message: string) => void;
   /** Told whether LinkedIn gets the carousel, on load and on every change, so the studio previews what goes out. */
-  onCarouselOn?: (on: boolean) => void;
+  onCarouselOn?: (on: boolean, info: { caption: string; pages: string[] }) => void;
+  /** One-tap copy of the post text, through the studio's clipboard. */
+  onCopy?: (text: string, key: string) => void;
+  copiedKey?: string | null;
 }) {
   const [state, setState] = useState<State | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -99,11 +104,13 @@ export default function CarouselCard({
   }, [url, loadAttempt]);
 
   const carouselOn = state ? Boolean(state.carousel?.active) : null;
+  const reportedCaption = state?.carousel?.caption ?? "";
+  const reportedPages = state?.carousel?.pages;
   useEffect(() => {
-    if (carouselOn !== null) onCarouselOn?.(carouselOn);
-    // Only a change of the choice is news; the callback is a new function each render.
+    if (carouselOn !== null) onCarouselOn?.(carouselOn, { caption: reportedCaption, pages: reportedPages ?? [] });
+    // Only a change of the choice, the text or the pages is news; the callback is a new function each render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [carouselOn]);
+  }, [carouselOn, reportedCaption, reportedPages]);
 
   const send = async (method: "POST" | "PATCH", body: unknown, kind: "make" | "save" | "toggle" | "style"): Promise<boolean> => {
     setBusy(kind);
@@ -330,6 +337,7 @@ export default function CarouselCard({
               {!locked && designPicker}
               <GroupedList header="Post text with the carousel">
                 <p className="px-4 py-3 text-[15px] leading-relaxed text-ink whitespace-pre-line break-words">{carousel.caption}</p>
+                {onCopy && <ListRow label={copiedKey === "carousel-caption" ? "Copied" : "Copy post text"} trailing={copiedKey === "carousel-caption" ? <Check className="h-4 w-4 text-brand" aria-hidden="true" /> : <Copy className="h-4 w-4 text-subtle" aria-hidden="true" />} onClick={() => onCopy(carousel.caption, "carousel-caption")} />}
               </GroupedList>
               <GroupedList>
                 {!locked && (
