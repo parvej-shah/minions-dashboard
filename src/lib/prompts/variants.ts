@@ -58,7 +58,7 @@ Platform Attitudes:
 3. INSTAGRAM VARIANT:
    - The caption under the same cover image. The image leads; the caption is short.
    - First line: The Pre-Crafted Hook, rewritten so the post's topic keywords (the words a reader would search for) sit inside the first 125 characters, since only those show before "more" and Instagram search reads them.
-   - Style & Structure: HARD LIMIT 120 words, target 50-100, in short paragraphs written as if sent to one specific person who needs it. Never invent a customer story or first-person experience.
+   - Style & Structure: HARD LIMIT 60 words, target 25-45 (hashtags not counted): the hook line, then one or two short lines, written as if sent to one specific person who needs it. No recap of the post; the image already carries it. Never invent a customer story or first-person experience.
    - Links: No link or URL anywhere, and no "link in bio".
    - Hashtags: End with a blank line and one line of 3 to 5 hashtags, each naming the post's specific topic, industry or audience, never a generic tag like #AI, #Business or #Motivation.
 

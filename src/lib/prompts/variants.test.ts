@@ -20,6 +20,12 @@ describe("the variants prompt", () => {
     expect(system).toMatch(/125 characters/);
   });
 
+  it("keeps the Instagram caption short and punchy, hashtags unchanged", () => {
+    const ig = system.slice(system.indexOf("INSTAGRAM VARIANT"), system.indexOf("TWITTER / X VARIANT"));
+    expect(ig).toMatch(/HARD LIMIT 60 words, target 25-45/);
+    expect(ig).toMatch(/3 to 5 hashtags/);
+  });
+
   it("keeps the Facebook caption short and opens it on the hook, since the image leads", () => {
     const fb = system.slice(system.indexOf("FACEBOOK VARIANT"), system.indexOf("TWITTER / X VARIANT"));
     expect(fb).toMatch(/HARD LIMIT 110 words/);

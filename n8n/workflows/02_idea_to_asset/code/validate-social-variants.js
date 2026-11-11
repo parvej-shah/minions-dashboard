@@ -14,6 +14,8 @@ function instagramIssues(caption) {
   if (URL_PATTERN.test(text)) issues.push('Instagram caption has a link; links in captions do not click.');
   const tags = (text.match(/#\w+/g) || []).length;
   if (tags < 3 || tags > 5) issues.push(`Instagram caption has ${tags} hashtags; use 3 to 5.`);
+  const words = text.split(/\s+/).filter((w) => !w.startsWith('#')).length;
+  if (words > 60) issues.push(`Instagram caption is ${words} words; keep it under 60.`);
   if (text.split('\n')[0].trim().length > 125) issues.push('Instagram caption\'s first line runs past the 125 characters shown before "more".');
   return issues;
 }

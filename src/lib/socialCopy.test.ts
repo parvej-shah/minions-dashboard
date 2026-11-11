@@ -41,9 +41,16 @@ describe("Instagram caption checks", () => {
     expect(instagramIssues(`${"word ".repeat(30)}\n\n#One #Two #Three`)).toContain("Instagram caption's first line runs past the 125 characters shown before \"more\".");
   });
 
+  it("flag a caption over 60 words, not counting the hashtag line", () => {
+    const body = (n: number) => `Hook line.\n\n${"word ".repeat(n - 2).trim()}\n\n#One #Two #Three`;
+    expect(instagramIssues(body(60))).toEqual([]);
+    expect(instagramIssues(body(61)).join(" ")).toContain("Instagram caption is 61 words; keep it under 60.");
+  });
+
   it("match the copy of these checks in n8n 02's Validate Social Variants", () => {
     const code = fs.readFileSync("n8n/workflows/02_idea_to_asset/code/validate-social-variants.js", "utf8");
     expect(code).toContain("function instagramIssues(");
+    expect(code).toContain("keep it under 60.");
     expect(code).toContain(instagramIssues.toString().match(/const URL_PATTERN = .*/)?.[0] ?? "missing");
   });
 });
