@@ -12,6 +12,13 @@ import type { AudienceLane } from "@/types";
 import { carouselOf, linkedinWentAs, type FollowUpFormat } from "@/lib/followUp";
 import { linkedinPostUrl, toChannelUrls } from "@/lib/channels";
 import { instagramDeck, isInstagramFormat, type InstagramFormat } from "@/lib/carousel/instagramFormat";
+import { failureList } from "@/lib/publishFailures";
+
+/** The stored failures as a plain { channel: reason } map, or null when none. */
+function publishFailureMap(raw: unknown): Record<string, string> | null {
+  const list = failureList(raw);
+  return list.length ? Object.fromEntries(list.map((f) => [f.channel, f.reason])) : null;
+}
 
 export const assetDTOSelect = {
   id: true, title: true, slug: true, hook: true, coreArgument: true, content: true,
@@ -21,7 +28,7 @@ export const assetDTOSelect = {
   linkedinVariant: true, facebookVariant: true, xVariant: true, instagramVariant: true, version: true,
   generationCost: true, channels: true, scheduledFor: true, publishedAt: true,
   publishedUrls: true, createdAt: true, updatedAt: true,
-  linkedinPublishedAt: true, linkedinPostId: true, carouselSpec: true, followUpOf: true, followUpFormat: true,
+  linkedinPublishedAt: true, linkedinPostId: true, publishFailures: true, carouselSpec: true, followUpOf: true, followUpFormat: true,
   claims: {
     select: {
       id: true, claimText: true, claimType: true, source: true, verified: true,
@@ -158,6 +165,7 @@ export function toAssetDTO(
     linkedin_url: toChannelUrls(parsePublishedUrls(asset.publishedUrls)).linkedin ?? linkedinPostUrl(asset.linkedinPostId),
     linkedin_published_at: asset.linkedinPublishedAt ? asset.linkedinPublishedAt.toISOString() : null,
     linkedin_removable: Boolean(asset.linkedinPostId),
+    publish_failures: publishFailureMap(asset.publishFailures),
     follow_up_of: asset.followUpOf,
     follow_up_format: (asset.followUpFormat as FollowUpFormat | null) ?? null,
     created_at: asset.createdAt.toISOString(),

@@ -1,5 +1,6 @@
 "use client";
 
+import { failureSummary } from "@/lib/publishFailures";
 import React, { useMemo } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -130,8 +131,8 @@ export default function TodayView() {
               <li key={post.id} className="border-b border-line">
                 <Link href={`/editorial?id=${encodeURIComponent(post.id)}`} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-4 hover:opacity-80">
                   <span className="min-w-0 text-[17px] text-ink">{post.title}</span>
-                  <span className="shrink-0 text-[15px] text-muted">
-                    {post.linkedin_url ? "LinkedIn" : post.live_blog_url ? "Blog" : "Posted"} · {dayText(post.published_at!, tz)}
+                  <span className={`shrink-0 text-[15px] ${failureSummary(post.publish_failures) ? "text-danger" : "text-muted"}`}>
+                    {failureSummary(post.publish_failures) ?? (post.linkedin_url ? "LinkedIn" : post.live_blog_url ? "Blog" : "Posted")} · {dayText(post.published_at!, tz)}
                   </span>
                 </Link>
               </li>

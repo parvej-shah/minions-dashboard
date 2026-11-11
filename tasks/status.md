@@ -40,4 +40,7 @@
 | 36 | LinkedIn carousel card as grouped lists | CLAUDE | DONE (walked 390px, not pushed) | tasks/36.md |
 | 37 | Apple-grade interaction feel (spring physics, fluid disclosure, optimistic scheduling) | ANTIGRAVITY | DONE | tasks/37.md |
 | 38 | Carousel pages kept as JPEGs; Instagram tab shows the deck | CLAUDE | DONE (not pushed) | tasks/38.md |
-| 39 | Instagram publishing channel | CLAUDE | DONE (SQL applied, pushed 9d2c528; n8n 03 push + Facebook token still pending) | tasks/39.md |
+| 39 | Instagram publishing channel | CLAUDE | DONE (SQL applied, pushed 9d2c528; n8n 03 live; bsse1610 connected to Minions.AI + @parvej.psl on localhost; token fix b1f8889 local, not pushed) | tasks/39.md |
+| 40 | Instagram format choice (Carousel / Single poster, remembered) | CLAUDE | DONE (pushed c11ef19) | tasks/40.md |
+| 41 | Picture pickers for cover layouts and carousel designs | CLAUDE | DONE (walked desktop + 390px, pushed 071fccd) | tasks/41.md |
+| 42 | Show which platform failed to post; Telegram alert removed | CLAUDE | DONE locally (needs SQL 2026-11-11-publish-failures.sql, then n8n 03 push, then code push; each needs OK) | tasks/42.md |

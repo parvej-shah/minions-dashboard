@@ -3,6 +3,7 @@ import { uploadToR2 } from "@/lib/r2";
 import { slideJpeg } from "@/lib/carousel/render";
 import { metaGraph, type GraphCall } from "@/lib/metaGraph";
 import { resolveChannelCredential } from "@/services/channels";
+import { failureList } from "@/lib/publishFailures";
 import { instagramDeck, instagramFormatFor, workspaceInstagramFormat } from "@/lib/carousel/instagramFormat";
 
 /** Instagram's own limits: JPEG only, 2 to 10 carousel items (instagramDeck), 2200 caption characters. */
@@ -57,6 +58,23 @@ async function waitUntilFinished(deps: InstagramDeps, containerId: string, token
   throw new Error("Instagram was still processing the media; try again later.");
 }
 
+/** The stored failures without one channel's; `changed` says whether that channel had one. */
+function failuresWithout(raw: unknown, channel: string): { map: Record<string, string>; changed: boolean } {
+  const map = Object.fromEntries(failureList(raw).filter((f) => f.channel !== channel).map((f) => [f.channel, f.reason]));
+  return { map, changed: failureList(raw).length !== Object.keys(map).length };
+}
+
+/** Keeps Instagram's refusal with the post so the dashboard can say so. Never throws. */
+async function recordFailure(assetId: string, error: string): Promise<void> {
+  try {
+    const row = await prisma.asset.findUnique({ where: { id: assetId }, select: { publishFailures: true } });
+    const { map } = failuresWithout(row?.publishFailures, "instagram");
+    await prisma.asset.update({ where: { id: assetId }, data: { publishFailures: { ...map, instagram: error } } });
+  } catch {
+    /* the failure is still returned to n8n */
+  }
+}
+
 /**
  * Posts an approved draft to the workspace's Instagram: its carousel when it has one,
  * otherwise its cover. Never throws, so a failure here never holds back the other channels.
@@ -66,7 +84,7 @@ export async function publishToInstagram(assetId: string, overrides: Partial<Ins
   try {
     const asset = await prisma.asset.findUnique({
       where: { id: assetId },
-      select: { id: true, clientId: true, instagramPostId: true, instagramVariant: true, facebookVariant: true, heroImageUrl: true, carouselSpec: true },
+      select: { id: true, clientId: true, instagramPostId: true, publishFailures: true, instagramVariant: true, facebookVariant: true, heroImageUrl: true, carouselSpec: true },
     });
     if (!asset?.clientId) return { ok: false, error: "Post not found." };
     if (asset.instagramPostId) return { ok: true, skipped: "already_posted" };
@@ -98,9 +116,15 @@ export async function publishToInstagram(assetId: string, overrides: Partial<Ins
     await waitUntilFinished(deps, creationId, token);
     const mediaId = String((await deps.graph(`${igId}/media_publish`, { creation_id: creationId, access_token: token })).id);
 
-    await prisma.asset.update({ where: { id: asset.id }, data: { instagramPostId: mediaId, instagramPublishedAt: new Date() } });
+    const others = failuresWithout(asset?.publishFailures, "instagram");
+    await prisma.asset.update({
+      where: { id: asset.id },
+      data: { instagramPostId: mediaId, instagramPublishedAt: new Date(), ...(others.changed ? { publishFailures: others.map } : {}) },
+    });
     return { ok: true, media_id: mediaId };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+    const error = err instanceof Error ? err.message : String(err);
+    await recordFailure(assetId, error);
+    return { ok: false, error };
   }
 }

@@ -119,6 +119,8 @@ export interface AssetItem {
   /** The live LinkedIn post, from a recorded URL or the post id the publisher stores; null until it went out. */
   linkedin_url: string | null;
   linkedin_published_at: string | null;
+  /** Platforms that refused this post when it went out, with their reasons; null when none did. */
+  publish_failures?: Record<string, string> | null;
   /** Minions holds the LinkedIn post id, so it can delete the post (Unpublish from LinkedIn). */
   linkedin_removable?: boolean;
   /** A second LinkedIn post: the original draft's id, and the format it shares. Null on every other draft. */

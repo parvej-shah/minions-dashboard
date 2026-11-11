@@ -1,5 +1,6 @@
 "use client";
 
+import { failureList, failureSummary } from "@/lib/publishFailures";
 import React, { useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 import SchedulePicker, { useWorkspaceTimezone } from "./SchedulePicker";
@@ -174,6 +175,7 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
   // ── Posted ────────────────────────────────────────────────────────────────
   if (isPublished) {
     const links = liveLinks(activeAsset, blogEnabled);
+    const failures = failureList(activeAsset.publish_failures);
     const canUnpublishLinkedIn = Boolean(activeAsset.linkedin_removable && setUnpublishLinkedInConfirmOpen);
     const canTakeDown = !canUnpublishLinkedIn && blogEnabled && Boolean(activeAsset.live_blog_url || activeAsset.doc_url);
     return (
@@ -183,6 +185,14 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
             {activeAsset.published_at && timezone ? slotLabel(activeAsset.published_at, timezone) : "Out"}
           </p>
         </Field>
+        {failures.length > 0 && (
+          <div role="alert" className="flex flex-col gap-1.5">
+            <p className="text-[17px] font-semibold text-danger">{failureSummary(activeAsset.publish_failures)}</p>
+            {failures.map((f) => (
+              <p key={f.channel} className="text-[15px] text-muted">{f.label}: {f.reason}</p>
+            ))}
+          </div>
+        )}
         {nextButton}
         {afterApprove}
         {links.length > 0 && (

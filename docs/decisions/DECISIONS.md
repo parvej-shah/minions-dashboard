@@ -715,3 +715,9 @@ as JPEGs, which cost far less than the PNGs did.
 **Decision:** the Sticker cover layout shows up to two sticker pills taken from the post's own points (grid labels, else list items). It never brings back an audience label (2026-09-25). The picker tile is drawn the same way, so what you pick is what you get.
 **Why:** a real Sticker cover had no stickers, so it looked like Headline and the picker tile promised more than the cover delivered.
 **Status:** active.
+
+## 2026-11-11 — A post that failed on one platform says so
+
+**Decision:** when a post goes out but a platform refuses it (LinkedIn token expired, Instagram or Facebook error), the dashboard shows "Partly posted · LinkedIn failed" in the list, on Today and on the post's own screen with the platform's reason. It no longer reads a plain "Posted". There is no Telegram alert any more; the dashboard is the one place failures show.
+**Why:** a post with an expired LinkedIn token showed "Posted" while only Facebook and Instagram had gone out, and nobody was told (the user, 2026-11-11: "if one platform failed to post we need to show that").
+**Status:** active.

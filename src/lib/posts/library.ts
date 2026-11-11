@@ -2,6 +2,7 @@
  * The Posts library (task 23): one place for every post, in four plain views.
  */
 import { slotLabel } from "@/lib/today";
+import { failureSummary } from "@/lib/publishFailures";
 import type { StatusTone as Tone } from "@/components/ui/Text";
 
 export type { Tone };
@@ -15,6 +16,7 @@ interface Post {
   created_at: string;
   scheduled_for: string | null;
   published_at: string | null;
+  publish_failures?: Record<string, string> | null;
 }
 
 export function groupOf(status: string): PostGroup {
@@ -69,8 +71,11 @@ export function statusLine(post: Post, timeZone: string): { text: string; tone: 
       return { text: post.scheduled_for ? `Scheduled · ${slotLabel(post.scheduled_for, timeZone)}` : "Scheduled", tone: "success" };
     case "APPROVED":
       return { text: "Approved, going out", tone: "success" };
-    case "PUBLISHED":
+    case "PUBLISHED": {
+      const failed = failureSummary(post.publish_failures);
+      if (failed) return { text: `Partly posted · ${failed}`, tone: "coral" };
       return { text: post.published_at ? `Posted · ${day(post.published_at)}` : "Posted", tone: "muted" };
+    }
     case "UNPUBLISHED":
       return { text: "Taken down", tone: "muted" };
     case "REJECTED":

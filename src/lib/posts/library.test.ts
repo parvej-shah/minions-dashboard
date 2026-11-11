@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { defaultShow, groupOf, postsFor, statusLine } from "./library";
 
-type P = { id: string; status: string; created_at: string; scheduled_for: string | null; published_at: string | null };
+type P = { id: string; status: string; created_at: string; scheduled_for: string | null; published_at: string | null; publish_failures?: Record<string, string> | null };
 const p = (id: string, status: string, extra: Partial<P> = {}): P => ({
   id,
   status,
@@ -54,6 +54,7 @@ describe("statusLine", () => {
     expect(statusLine(p("a", "BLOCKED"), tz)).toEqual({ text: "Needs a fix", tone: "coral" });
     expect(statusLine(p("a", "SCHEDULED", { scheduled_for: "2026-11-11T03:00:00Z" }), tz)).toEqual({ text: "Scheduled · Wed 11 Nov, 09:00", tone: "success" });
     expect(statusLine(p("a", "PUBLISHED", { published_at: "2026-11-06T03:00:00Z" }), tz)).toEqual({ text: "Posted · Fri 6 Nov", tone: "muted" });
+    expect(statusLine(p("a", "PUBLISHED", { published_at: "2026-11-06T03:00:00Z", publish_failures: { linkedin: "expired" } }), tz)).toEqual({ text: "Partly posted · LinkedIn failed", tone: "coral" });
     expect(statusLine(p("a", "UNPUBLISHED"), tz)).toEqual({ text: "Taken down", tone: "muted" });
     expect(statusLine(p("a", "DRAFT"), tz)).toEqual({ text: "Being written", tone: "brand" });
   });

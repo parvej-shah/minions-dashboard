@@ -325,6 +325,8 @@ model Asset {
   // Task 39: the Instagram media id once n8n 03 has posted it there.
   instagramPostId      String?   @map("instagram_post_id")
   instagramPublishedAt DateTime? @map("instagram_published_at")
+  // Task 42: platforms that refused a post that otherwise went out: { linkedin?: reason, facebook?: reason, instagram?: reason }.
+  publishFailures      Json?     @map("publish_failures")
   // A second LinkedIn post of a published draft in the format it did not go
   // out in: the original's id, and CAROUSEL or COVER. Null on every other draft.
   followUpOf          String?   @map("follow_up_of")

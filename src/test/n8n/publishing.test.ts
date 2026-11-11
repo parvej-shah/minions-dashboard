@@ -93,19 +93,32 @@ describe("03_review_publisher posts to Instagram once the publish record is save
     expect(String(ig.parameters.jsonBody)).toContain("$('Merge_Publish_Results').item.json.asset_id");
   });
 
-  it("sits between Mark_Write_OK and the alert, and its failure never stops the run", () => {
+  it("sits after Mark_Write_OK, ends the run, and its failure never stops it", () => {
     expect(conns.Mark_Write_OK.main?.[0]?.map((t) => t.node)).toEqual(["Publish_to_Instagram"]);
-    expect(conns.Publish_to_Instagram.main?.[0]?.map((t) => t.node)).toEqual(["Prepare_Telegram_Alert"]);
+    expect(conns.Publish_to_Instagram?.main?.[0] ?? []).toEqual([]);
     expect((ig as { onError?: string }).onError).toBe("continueRegularOutput");
   });
 
-  it("tells the alert whether Instagram went out", async () => {
-    const base = { Normalize_Facebook_Published: [{ asset_id: "a1", facebook_enabled: true }], Normalize_LinkedIn_Published: [{ linkedin_enabled: true }] };
-    const [posted] = await runCodeNode(slug, "Prepare_Telegram_Alert", { nodes: { ...base, Publish_to_Instagram: [{ ok: true, media_id: "m1" }] } });
-    expect(posted).toMatchObject({ asset_id: "a1", instagram_status: "Published" });
-    const [skipped] = await runCodeNode(slug, "Prepare_Telegram_Alert", { nodes: { ...base, Publish_to_Instagram: [{ ok: true, skipped: "not_connected" }] } });
-    expect(skipped).toMatchObject({ instagram_status: "Skipped (not_connected)" });
-    const [failed] = await runCodeNode(slug, "Prepare_Telegram_Alert", { nodes: { ...base, Publish_to_Instagram: [{ ok: false, error: "no permission" }] } });
-    expect(failed).toMatchObject({ instagram_status: "Failed: no permission" });
+  it("sends no Telegram alert (dashboard shows failures instead)", () => {
+    expect(nodes.some((n) => /telegram/i.test(n.name) || /telegram/i.test(String(n.type)))).toBe(false);
+  });
+
+  it("reports a Facebook or LinkedIn failure with its reason, and nothing when they worked", async () => {
+    const blog = { Blog_Result: [{ asset_id: "a1" }] };
+    const [fbOk] = await runCodeNode(slug, "Normalize_Facebook_Published", { nodes: { ...blog, Publish_to_Facebook_Photo: [{ post_id: "p1" }] } });
+    expect(fbOk).toMatchObject({ facebook_post_id: "p1", facebook_error: null });
+    const [fbBad] = await runCodeNode(slug, "Normalize_Facebook_Published", { nodes: { ...blog, Publish_to_Facebook_Photo: [{ error: { message: "Invalid OAuth access token" } }] } });
+    expect(fbBad).toMatchObject({ facebook_post_id: null, facebook_error: "Invalid OAuth access token" });
+    const [liOk] = await runCodeNode(slug, "Normalize_LinkedIn_Published", { nodes: { Publish_to_LinkedIn: [{ headers: { "x-restli-id": "urn:li:share:1" }, statusCode: 201 }] } });
+    expect(liOk).toMatchObject({ linkedin_post_id: "urn:li:share:1", linkedin_error: null });
+    const [liBad] = await runCodeNode(slug, "Normalize_LinkedIn_Published", { nodes: { Publish_to_LinkedIn: [{ statusCode: 401, body: { message: "The token used in the request has expired" } }] } });
+    expect(liBad).toMatchObject({ linkedin_post_id: null, linkedin_error: "The token used in the request has expired" });
+  });
+
+  it("writes the failures with the published record", () => {
+    const body = String(nodes.find((n) => n.name === "Mark_Asset_Published_DB")!.parameters.jsonBody);
+    expect(body).toContain("publish_failures");
+    expect(body).toContain("facebook_error");
+    expect(body).toContain("linkedin_error");
   });
 });

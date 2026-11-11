@@ -284,17 +284,6 @@
         ]
       ]
     },
-    "Prepare_Telegram_Alert": {
-      "main": [
-        [
-          {
-            "index": 0,
-            "node": "Send_Telegram_Alert",
-            "type": "main"
-          }
-        ]
-      ]
-    },
     "Publish_to_Blog": {
       "main": [
         [
@@ -455,17 +444,6 @@
           {
             "index": 0,
             "node": "Read_Approved_Assets_DB",
-            "type": "main"
-          }
-        ]
-      ]
-    },
-    "Publish_to_Instagram": {
-      "main": [
-        [
-          {
-            "index": 0,
-            "node": "Prepare_Telegram_Alert",
             "type": "main"
           }
         ]
@@ -965,7 +943,7 @@
             }
           ]
         },
-        "jsonBody": "={{ JSON.stringify({\n  status: 'PUBLISHED',\n  published_at: new Date().toISOString(),\n  published_urls: $json.blog_url,\n  facebook_post_id: $json.facebook_post_id,\n  facebook_published_at: $json.facebook_post_id ? new Date().toISOString() : null,\n  linkedin_post_id: $json.linkedin_post_id,\n  linkedin_published_at: $json.linkedin_post_id ? new Date().toISOString() : null,\n  updated_at: new Date().toISOString()\n}) }}",
+        "jsonBody": "={{ JSON.stringify({\n  status: 'PUBLISHED',\n  published_at: new Date().toISOString(),\n  published_urls: $json.blog_url,\n  facebook_post_id: $json.facebook_post_id,\n  facebook_published_at: $json.facebook_post_id ? new Date().toISOString() : null,\n  linkedin_post_id: $json.linkedin_post_id,\n  linkedin_published_at: $json.linkedin_post_id ? new Date().toISOString() : null,\n  publish_failures: Object.fromEntries([['facebook', $json.facebook_error], ['linkedin', $json.linkedin_error]].filter(([, reason]) => reason)),\n  updated_at: new Date().toISOString()\n}) }}",
         "method": "PATCH",
         "options": {
           "response": {
@@ -1079,19 +1057,6 @@
       "position": [
         1620,
         480
-      ],
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2
-    },
-    {
-      "id": "d4a3f5b7-9e6a-4c4d-8f9a-5b8c2d4e6f70",
-      "name": "Prepare_Telegram_Alert",
-      "parameters": {
-        "jsCode": "@file:code/prepare-telegram-alert.js"
-      },
-      "position": [
-        2280,
-        0
       ],
       "type": "n8n-nodes-base.code",
       "typeVersion": 2
@@ -1444,31 +1409,6 @@
       ],
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2
-    },
-    {
-      "credentials": {
-        "telegramApi": {
-          "id": "sQdF1b6damw4h5FH",
-          "name": "Telegram - Leadswave bot"
-        }
-      },
-      "id": "send-telegram",
-      "name": "Send_Telegram_Alert",
-      "onError": "continueRegularOutput",
-      "parameters": {
-        "additionalFields": {
-          "parse_mode": "HTML"
-        },
-        "chatId": "={{ $env.TELEGRAM_ALERT_CHAT_ID || '8224701322' }}",
-        "text": "=🚀 <b>Approved Asset Published Live</b>\n\n📌 <b>Asset:</b> {{ $json.asset_id }}\n📰 <b>Title:</b> {{ $json.title }}\n🌐 <b>Blog:</b> {{ $json.blog_url }}\n📢 <b>Facebook:</b> {{ $json.facebook_enabled ? 'Published' : 'Paused / Skipped' }}\n💼 <b>LinkedIn:</b> {{ $json.linkedin_enabled ? 'Published' : 'Paused / Skipped' }}\n📸 <b>Instagram:</b> {{ $json.instagram_status }}"
-      },
-      "position": [
-        2100,
-        0
-      ],
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "webhookId": "43425695-fc9c-4208-a232-a6fd34d9c5ba"
     },
     {
       "id": "06cdb185-34be-5cc8-a8c5-d5f22c7fd71b",

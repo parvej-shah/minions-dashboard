@@ -111,7 +111,7 @@ describe("publishing a post to Instagram", () => {
     const r = await publishToInstagram("a1", deps);
     expect(r.ok).toBe(false);
     expect(calls.some((c) => c.path.endsWith("/media_publish"))).toBe(false);
-    expect(assetUpdate).not.toHaveBeenCalled();
+    expect(assetUpdate).not.toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ instagramPostId: expect.anything() }) }));
   });
 
   it("reports a Graph error instead of throwing", async () => {
@@ -126,5 +126,25 @@ describe("the Instagram caption", () => {
     expect(instagramCaption("  ", "fb")).toBe("fb");
     expect(instagramCaption("x".repeat(2500), null)).toHaveLength(2200);
     expect(instagramCaption("Line one\n\nLine two", null)).toBe("Line one\n\nLine two");
+  });
+
+  it("stores Instagram's failure beside the other channels' failures", async () => {
+    assetFindUnique.mockResolvedValue({ ...asset, publishFailures: { linkedin: "expired" } });
+    statusCode = "ERROR";
+    const r = await publishToInstagram("a1", deps);
+    expect(r.ok).toBe(false);
+    expect(assetUpdate).toHaveBeenCalledWith({ where: { id: "a1" }, data: { publishFailures: { linkedin: "expired", instagram: "Instagram could not process the media (ERROR)." } } });
+  });
+
+  it("clears only Instagram's failure when a retry succeeds", async () => {
+    assetFindUnique.mockResolvedValue({ ...asset, publishFailures: { linkedin: "expired", instagram: "old" } });
+    await publishToInstagram("a1", deps);
+    expect(assetUpdate).toHaveBeenCalledWith({ where: { id: "a1" }, data: { instagramPostId: "ig-media-9", instagramPublishedAt: expect.any(Date), publishFailures: { linkedin: "expired" } } });
+  });
+
+  it("does not record a failure when Instagram is simply off or not connected", async () => {
+    resolveChannelCredential.mockResolvedValue({ is_active: false, token: "t", external_id: "ig-1" });
+    await publishToInstagram("a1", deps);
+    expect(assetUpdate).not.toHaveBeenCalled();
   });
 });
