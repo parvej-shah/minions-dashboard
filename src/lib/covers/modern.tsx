@@ -416,7 +416,7 @@ export function giantWord(headline: string, emphasis?: string): string {
  * overlap and the gap under the headline look the same on every post.
  */
 export function cutoutLayout(i: { width: number; height: number; headlineBottom: number; giantSize: number }): { cw: number; ch: number; giantTop: number } {
-  const COVER = 0.74; // the head's top sits this far down the word's line box
+  const COVER = 0.56; // the head's top sits this far down the word's line box (a word with no tall or low letters ends near 0.70, so the head covers its lower part)
   const wanted = H - (i.headlineBottom + 90 + COVER * i.giantSize);
   const chWanted = Math.min(900, Math.max(540, wanted));
   const scale = Math.min(chWanted / i.height, 980 / i.width);
