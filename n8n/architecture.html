@@ -285,7 +285,7 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-fa
 <tr><td><code>00c_pipeline_error_alert</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">error trigger</span></div></td><td class="num">6</td><td>—</td></tr>
 <tr><td><code>01_idea_harvester</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">manual</span> <span class="chip">webhook /test-harvester</span></div></td><td class="num">43</td><td>✓</td></tr>
 <tr><td><code>02_idea_to_asset</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">manual</span> <span class="chip">webhook /test-idea-to-asset</span></div></td><td class="num">55</td><td>✓</td></tr>
-<tr><td><code>03_review_publisher</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">every 5 min</span> <span class="chip">webhook /publish-approved-asset</span></div><div style="margin-top:4px">Every 5 min: safety-net poll for approved assets the webhook missed.</div></td><td class="num">40</td><td>✓</td></tr>
+<tr><td><code>03_review_publisher</code></td><td><span class="chip ok">active</span></td><td><div class="chips"><span class="chip">every 5 min</span> <span class="chip">webhook /publish-approved-asset</span></div><div style="margin-top:4px">Every 5 min: safety-net poll for approved assets the webhook missed.</div></td><td class="num">38</td><td>✓</td></tr>
 </tbody></table></div>
 </section>
 
@@ -749,7 +749,7 @@ Supplied Evidence:
   <div class="llm-top"><div><h4><span class="tag">LLM</span>Platform variants</h4><p>Rewrites the article as LinkedIn, Facebook and X posts. LinkedIn must open with the strategist's hook; links are added as first comments at publish time.</p><p class="mono" style="font-size:11.5px;color:var(--dim)">02_idea_to_asset › Parse Claims and Gate → Render Variants Prompt → Qwen Call 4 Variants</p></div>
   <div class="params"><span>model</span><b>deepseek-v4.1-flash</b><span>temperature</span><b>0.55</b><span>max tokens</span><b>3,000</b></div></div>
   <div class="io"><div><h5>Input</h5>Hook, edited body, brand context, tone profile and examples, audience, title.</div><div><h5>Output</h5>{&quot;li_variant&quot;,&quot;fb_variant&quot;,&quot;ig_variant&quot;,&quot;x_variant&quot;}, then markdown-stripped and validated.</div></div>
-  <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">1,266 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-variants-0">Copy</button></div><pre class="p" id="p-variants-0">You are the platform-distribution stage for a <span class="v">{{company_name}}</span> content asset.
+  <details class="prompt"><summary><span>Show full prompts (2)</span><span class="n">1,285 words</span></summary><div class="pbody"><div class="plabel"><span>System prompt</span><button class="copy" type="button" data-for="p-variants-0">Copy</button></div><pre class="p" id="p-variants-0">You are the platform-distribution stage for a <span class="v">{{company_name}}</span> content asset.
 You must generate 4 platform variants (LinkedIn, Facebook, Instagram and Twitter/X), each precisely shaped to the authentic voice, reader attitude, and algorithm of that specific platform.
 
 CRITICAL VOICE &amp; PERSONA RULES (MANDATORY):
@@ -837,7 +837,7 @@ Title: <span class="v">{{title}}</span></pre></div></details>
 
 <!-- ============ PUBLISH ============ -->
 <section id="publish">
-  <div class="sec-head"><h2>03 · Review publisher</h2><p><code>4GNbfvmveKtbJrVd</code> · 40 nodes No model calls. It publishes what a human approved.</p></div>
+  <div class="sec-head"><h2>03 · Review publisher</h2><p><code>4GNbfvmveKtbJrVd</code> · 38 nodes No model calls. It publishes what a human approved.</p></div>
   <div class="wfblock">
     <ol class="steps">
       <li class="io"><b>Read Approved Assets</b>: <code>claims_ok=Y · status=PUBLISHED · published_at is null</code>, oldest first, 3 at a time. The webhook and the 5-minute cron run the same query.</li>

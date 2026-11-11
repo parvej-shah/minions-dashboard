@@ -49,4 +49,4 @@
 | 45 | Dual photo uploads on Cover look card, pure Custom colours page | ANTIGRAVITY | DONE | tasks/45.md |
 | 46 | Prioritize Brand photo and name in Account Menu | ANTIGRAVITY | DONE | tasks/46.md |
 | 47 | Eliminate native grey scrollbars across desktop UI | ANTIGRAVITY | DONE | tasks/47.md |
-| 48 | Shorter, punchier Instagram caption (60 words) | CLAUDE | DONE (local; n8n 02 validator push + code push need OK) | tasks/48.md |
+| 48 | Shorter, punchier Instagram caption (60 words) | CLAUDE | DONE (pushed 73add11; n8n 02 applied) | tasks/48.md |
