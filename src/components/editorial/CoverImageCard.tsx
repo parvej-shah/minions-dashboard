@@ -6,7 +6,7 @@ import { AlertTriangle, Image as ImageIcon, Loader2, RefreshCw, Shuffle } from "
 import type { AssetItem, CoverSpecDTO } from "@/types";
 import type { CoverEditInput } from "@/hooks/useEditorialDraft";
 import { COVER_ART_STYLES, COVER_ART_STYLE_META, parseArtStyle } from "@/lib/covers/artStyles";
-import { coverPreviewUrl, coverThumb, pickerLayouts, previewVersion } from "@/lib/covers/pickerThumbs";
+import { coverPreviewUrl, coverThumb, pickerLayouts, previewVersion, shownCover } from "@/lib/covers/pickerThumbs";
 import { buttonStyles } from "@/components/ui/Button";
 import { ChoiceRow, GroupedList, ListRow } from "@/components/ui/List";
 import { inputClass } from "@/components/ui/fieldStyles";
@@ -87,6 +87,9 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
   // The layout being drawn, and the one before the last pick (for Undo), per draft.
   const [pending, setPending] = useState<Layout | null>(null);
   const [previous, setPrevious] = useState<{ id: string; layout: Layout } | null>(null);
+  // Tiles that have arrived (their address), and the tile shown as the cover while the real one is drawn.
+  const tilesRef = useRef(new Map<string, string>());
+  const [preview, setPreview] = useState<{ from: string | null; src: string } | null>(null);
   const [headline, setHeadline] = useState("");
   const [kicker, setKicker] = useState("");
   const [emphasis, setEmphasis] = useState("");
@@ -116,7 +119,13 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
     if (!cover) return;
     const from = cover.layout;
     setPending(layout);
-    const message = await run({ layout }).finally(() => setPending(null));
+    // The tile is already on screen: show it as the cover now, the real cover replaces it.
+    const tile = tilesRef.current.get(`${activeAsset.id}:${layout}`);
+    setPreview(tile?.endsWith(`&v=${previewVersion(cover)}`) ? { from: activeAsset.hero_image_url, src: tile } : null);
+    const message = await run({ layout }).finally(() => {
+      setPending(null);
+      setPreview(null);
+    });
     if (message.startsWith("Cover updated")) setPrevious(undo ? null : { id: activeAsset.id, layout: from });
   };
   const undoLayout = previous?.id === activeAsset.id && previous.layout !== cover?.layout ? previous.layout : null;
@@ -164,12 +173,12 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
         >
           {activeAsset.hero_image_url ? (
             <Image
-              src={activeAsset.hero_image_url}
+              src={shownCover(activeAsset.hero_image_url, preview)!}
               alt={cover?.headline ?? activeAsset.title}
               fill
               unoptimized
               sizes="(max-width: 640px) 100vw, 280px"
-              className={`object-contain transition-opacity ${isRendering ? "opacity-40" : ""}`}
+              className={`object-contain transition-opacity ${isRendering && !preview ? "opacity-40" : ""}`}
             />
           ) : isCoverPending ? (
             <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-2">
@@ -185,10 +194,16 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
               {activeAsset.hero_error_code && <span className="text-[13px] text-subtle">{activeAsset.hero_error_code}</span>}
             </div>
           )}
-          {isRendering && (
+          {isRendering && !preview && (
             <div className="absolute inset-0 flex items-center justify-center">
               <Loader2 className="w-8 h-8 text-brand animate-spin" />
             </div>
+          )}
+          {isRendering && preview && (
+            <span className="absolute bottom-2 right-2 flex items-center gap-1.5 rounded-full bg-surface/90 px-2.5 py-1 text-[12px] text-muted shadow-sm">
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-brand" aria-hidden="true" />
+              Sharpening
+            </span>
           )}
         </div>
 
@@ -353,6 +368,7 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
             busy={pending}
             disabled={isRendering}
             wrap={showAll}
+            onLive={(id, src) => tilesRef.current.set(`${activeAsset.id}:${id}`, src)}
             onSelect={(id) => void pickLayout(id as Layout)}
           />
           {checking === activeAsset.id && <p className="px-1 text-[13px] text-subtle">Checking the post&apos;s points for more layouts…</p>}

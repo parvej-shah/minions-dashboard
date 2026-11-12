@@ -31,6 +31,13 @@ describe("ThumbPicker", () => {
     expect(html).toMatch(/preview\?layout=BOLD[^>]*opacity-0|opacity-0[^>]*preview\?layout=BOLD/);
   });
 
+  it("lets the page know which picture a tile finally showed", () => {
+    // onLive is called from the tile's load event; rendering with it must not break the markup.
+    const live = [{ ...options[0], liveSrc: "/api/assets/a1/cover/preview?layout=BOLD&v=x" }, options[1]];
+    const html = renderToStaticMarkup(h(ThumbPicker, { label: "Layout", options: live, selected: "SWISS", onSelect: () => {}, onLive: () => {} }));
+    expect(html).toContain("layout=BOLD");
+  });
+
   it("says which tile is being drawn", () => {
     const html = renderToStaticMarkup(h(ThumbPicker, { label: "Layout", options, selected: "SWISS", busy: "SWISS", onSelect: () => {} }));
     expect(html).toContain('aria-busy="true"');

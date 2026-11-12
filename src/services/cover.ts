@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { background } from "@/lib/background";
 import { deleteFromR2, r2KeyFromUrl, uploadToR2 } from "@/lib/r2";
 import { coverBrand } from "@/lib/covers/brand";
 import { bodyOf, checkCoverLine, pickCoverLine, chooseCoverCopy, coverOptions, coverOutOfDate, scoreHeadline, quoteSource, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
@@ -78,7 +79,25 @@ function isPublicHttps(url: string): boolean {
   }
 }
 
-async function fetchImage(url: string): Promise<{ data: Buffer; type: string } | null> {
+// Brand images are fetched on every edit and every tile; the same few are read
+// again within seconds, so they are kept for a minute per instance.
+const IMAGE_TTL_MS = 60_000;
+const images = new Map<string, { at: number; image: Promise<{ data: Buffer; type: string } | null> }>();
+
+function fetchImage(url: string): Promise<{ data: Buffer; type: string } | null> {
+  const hit = images.get(url);
+  if (hit && Date.now() - hit.at < IMAGE_TTL_MS) return hit.image;
+  const image = fetchImageNow(url).then((img) => {
+    // A failure is not remembered: the next draw tries again.
+    if (!img && images.get(url)?.image === image) images.delete(url);
+    return img;
+  });
+  images.set(url, { at: Date.now(), image });
+  if (images.size > 12) images.delete(images.keys().next().value as string);
+  return image;
+}
+
+async function fetchImageNow(url: string): Promise<{ data: Buffer; type: string } | null> {
   if (!isPublicHttps(url)) return null;
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(8000), redirect: "error" });
@@ -488,7 +507,8 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
       updatedAt: new Date(),
     },
   });
-  await dropReplacedCover(asset.id, asset.heroImageUrl, url);
+  // The reviewer does not wait for the old file to be cleaned up.
+  background(() => dropReplacedCover(asset.id, asset.heroImageUrl, url));
   return { ok: true, url, spec: stored };
 }
 

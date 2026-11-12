@@ -31,7 +31,7 @@ const SIZES = {
 };
 
 /** The sample picture, with the post's own picture fading in over it when there is one. */
-function TileImage({ o, px, draggable }: { o: ThumbOption; px: { width: number; height: number }; draggable?: boolean }) {
+function TileImage({ o, px, draggable, onLive }: { o: ThumbOption; px: { width: number; height: number }; draggable?: boolean; onLive?: (id: string, src: string) => void }) {
   const [live, setLive] = useState<"loading" | "shown" | "failed">("loading");
   // A new picture (the post's words changed) starts over.
   const [seen, setSeen] = useState(o.liveSrc);
@@ -51,7 +51,10 @@ function TileImage({ o, px, draggable }: { o: ThumbOption; px: { width: number; 
           height={px.height}
           unoptimized
           draggable={draggable}
-          onLoad={() => setLive("shown")}
+          onLoad={() => {
+            setLive("shown");
+            onLive?.(o.id, o.liveSrc!);
+          }}
           onError={() => setLive("failed")}
           className={`absolute inset-0 h-full w-full object-cover pointer-events-none transition-opacity duration-300 ${live === "shown" ? "opacity-100" : "opacity-0"}`}
         />
@@ -79,6 +82,7 @@ export default function ThumbPicker({
   disabled,
   size = "portrait",
   wrap = false,
+  onLive,
 }: {
   label: string;
   options: ThumbOption[];
@@ -90,6 +94,8 @@ export default function ThumbPicker({
   size?: keyof typeof SIZES;
   /** Wrap into rows instead of one sideways row. */
   wrap?: boolean;
+  /** A tile's own picture arrived: its id and address (the page can show it at once when the tile is picked). */
+  onLive?: (id: string, src: string) => void;
 }) {
   const group = useRef<HTMLDivElement>(null);
   const s = SIZES[size];
@@ -275,7 +281,7 @@ export default function ThumbPicker({
                 } ${disabled && !on ? "opacity-50" : ""}`}
               >
                 {o.src ? (
-                  <TileImage o={o} px={s.px} />
+                  <TileImage o={o} px={s.px} onLive={onLive} />
                 ) : (
                   <span className="flex h-full w-full items-center justify-center text-brand">{o.icon}</span>
                 )}
@@ -359,7 +365,7 @@ export default function ThumbPicker({
                 } ${disabled && !on ? "opacity-50" : ""}`}
               >
                 {o.src ? (
-                  <TileImage o={o} px={s.px} draggable={false} />
+                  <TileImage o={o} px={s.px} draggable={false} onLive={onLive} />
                 ) : (
                   <span className="flex h-full w-full items-center justify-center text-brand pointer-events-none">{o.icon}</span>
                 )}

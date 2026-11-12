@@ -515,6 +515,8 @@ export function useEditorialDraft(
       setIsRenderingCover(true);
       try {
         const res = await apiClient.post<{ hero_image_url: string }>(`/api/assets/${activeAsset.id}/cover`, edit);
+        // The new picture shows now; the rest of the asset follows from the refresh below.
+        setAssets((prev) => prev.map((a) => (a.id === activeAsset.id ? { ...a, hero_image_url: res.hero_image_url } : a)));
         const fresh = await apiClient.get<AssetItem>(`/api/assets/${activeAsset.id}`);
         setAssets((prev) => prev.map((a) => (a.id === fresh.id ? fresh : a)));
         // Keep unsaved edits, but point their cover line at the new image, or

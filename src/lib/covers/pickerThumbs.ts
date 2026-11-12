@@ -58,3 +58,11 @@ export function previewVersion(cover: PreviewText): string {
 
 /** One live tile: this post's own words drawn in `layout` (GET, cacheable per version). */
 export const coverPreviewUrl = (assetId: string, layout: CoverLayout, version: string) => `/api/assets/${assetId}/cover/preview?layout=${layout}&v=${version}`;
+
+/**
+ * What the cover preview shows. Right after a layout is clicked it is the tile
+ * the reviewer already sees (`preview`), so the change is instant; once the
+ * cover file changes, the real, sharper cover takes over.
+ */
+export const shownCover = (hero: string | null, preview: { from: string | null; src: string } | null): string | null =>
+  preview && preview.from === hero ? preview.src : hero;

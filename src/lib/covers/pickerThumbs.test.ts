@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { COVER_LAYOUTS } from "./layouts";
 import { SLIDE_STYLES } from "@/lib/carousel/slides";
-import { carouselThumb, coverPreviewUrl, coverThumb, pickerLayouts, previewVersion, PICKER_THUMB_DIR } from "./pickerThumbs";
+import { carouselThumb, coverPreviewUrl, coverThumb, shownCover, pickerLayouts, previewVersion, PICKER_THUMB_DIR } from "./pickerThumbs";
 import type { LayoutFacts } from "./available";
 
 const bare: LayoutFacts = { shape_read: true, list: null, grid: null, punch: null, number: null, photo_ok: false, quote_ok: false, kicker: null, cutout_ok: false };
@@ -61,5 +61,13 @@ describe("live layout tiles", () => {
   it("changes the version when the post's wording changes", () => {
     expect(previewVersion({ ...cover, layout: "BOLD" })).not.toBe(previewVersion({ ...cover, layout: "BOLD", headline: "Why buyers stay" }));
     expect(previewVersion({ ...cover, layout: "BOLD" })).not.toBe(previewVersion({ ...cover, layout: "BOLD", list: ["a", "b", "c"] }));
+  });
+
+  it("shows the clicked tile in place of the cover until the new cover arrives", () => {
+    const preview = { from: "https://cdn/old.png", src: "/api/assets/a1/cover/preview?layout=BOLD&v=x" };
+    expect(shownCover("https://cdn/old.png", preview)).toBe(preview.src);
+    // The real cover replaced the old file: the tile has done its job.
+    expect(shownCover("https://cdn/new.png", preview)).toBe("https://cdn/new.png");
+    expect(shownCover("https://cdn/old.png", null)).toBe("https://cdn/old.png");
   });
 });
