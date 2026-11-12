@@ -28,6 +28,13 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-12 — Streamline Editorial Studio review for busy professionals
+
+**Decision:** The yellow compliance check warning ("X facts aren't checked yet") is removed from the primary decision sidebar; the Details accordion defaults to collapsed; ambiguous "Edit text" in the sidebar is removed in favor of localized card edits; internal AI self-justifications ("Why this wording") and subjective grammar lecturing are removed; and thick side-tab borders are replaced with refined subtle borders.
+**Why:** The core ICP consists of busy founders and executives who review content in 15- to 30-second fragments. Treating them like students grading AI homework or presenting 42 competing buttons causes cognitive fatigue, decision paralysis, and review backlogs. The review page must deliver an effortless, confident outcome.
+**Alternatives considered:** Keeping the claims warning only when facts are flagged (rejected: still creates hesitation and anxiety on drafted posts), placing a global edit modal in the sidebar (rejected: localized card edits provide clearer mental models).
+**Status:** active
+
 ## 2026-11-12 — Rename Studio card to 'Carousel'
 
 **Decision:** The card in Editorial Studio is titled "Carousel" (formerly "LinkedIn carousel"), and explanatory copy describes it neutrally as a swipeable series of slides rather than a LinkedIn-only PDF.

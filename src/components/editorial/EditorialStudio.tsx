@@ -346,9 +346,8 @@ export default function EditorialStudio({
 
   const status = statusLine(activeAsset, timezone);
   const waitingLabel =
-    pendingIndex >= 0 ? `Post ${pendingIndex + 1} of ${pending.length} waiting` : pending.length > 0 ? `${pending.length} waiting for you` : "";
+    pendingIndex >= 0 ? `Post ${pendingIndex + 1} of ${pending.length}` : pending.length > 0 ? `${pending.length} in queue` : "";
   const unchecked = activeAsset.claims.filter((c) => c.verified !== "Y").length;
-  const seriousNotes = reviewNotes.filter((n) => n.tone !== "tip").length;
   // "Edit text": the article when the blog is on, else the social post.
   const startEditing = () => {
     if (blogEnabled) setEditorMode("edit");
@@ -455,7 +454,7 @@ export default function EditorialStudio({
             onRetryChannel={(c) => void draft.retryChannel(c).then((m) => m && toast.show(m))}
             retryingChannel={draft.retryingChannel}
             detailsSummary={checksSummary(reviewNotes, unchecked)}
-            detailsOpen={seriousNotes + unchecked > 0}
+            detailsOpen={false}
             details={
               // The checks are for deciding to post; once it went out they are history.
               isPublished ? undefined : (

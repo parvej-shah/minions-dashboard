@@ -13,13 +13,15 @@ const TONE: Record<PlainNoteTone, { dot: string; label: string }> = {
  * nothing to report it says so, so a clean draft reads as a green light.
  */
 export default function DraftChecks({ notes, className = "" }: { notes: PlainNote[]; className?: string }) {
-  if (notes.length === 0) {
+  // Only surface actionable factual or safety checks; filter out subjective style/length tips
+  const actionableNotes = notes.filter((n) => n.tone !== "tip");
+  if (actionableNotes.length === 0) {
     return <p className={`text-[15px] text-success ${className}`}>✓ Nothing to fix. It only says what you told us.</p>;
   }
   return (
     <section aria-label="Before you post" className={className}>
       <ul className="space-y-2.5">
-        {notes.map((note, i) => {
+        {actionableNotes.map((note, i) => {
           const tone = TONE[note.tone];
           return (
             <li key={i} className="flex items-start gap-2.5 text-[15px] leading-snug text-ink">
@@ -36,6 +38,6 @@ export default function DraftChecks({ notes, className = "" }: { notes: PlainNot
 /** The one-line summary of the checks, for the Details fold. */
 export function checksSummary(notes: PlainNote[], unchecked: number): string {
   const serious = notes.filter((n) => n.tone !== "tip").length + unchecked;
-  if (serious === 0) return "Details: nothing to fix";
-  return serious === 1 ? "Details: one thing to look at" : `Details: ${serious} things to look at`;
+  if (serious === 0) return "Details: ready to post";
+  return serious === 1 ? "Details: 1 item to review" : `Details: ${serious} items to review`;
 }

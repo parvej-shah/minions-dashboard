@@ -26,8 +26,8 @@ export interface ReviewDecisionProps {
   onUnschedule: () => void;
   /** The reviewer copied the post to LinkedIn themselves: record it as out. Sends nothing. */
   onMarkPosted: () => void;
-  /** Opens the post's text for editing. */
-  onEdit: () => void;
+  /** Opens the post's text for editing (optional). */
+  onEdit?: () => void;
   /** Times other scheduled posts already hold, so the suggested slot is free. */
   takenTimes: string[];
   /** The workspace's channel switches, for choosing where this post goes (D18). */
@@ -83,7 +83,6 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
     onSchedule,
     onUnschedule,
     onMarkPosted,
-    onEdit,
     takenTimes,
     workspaceChannels,
     onSetChannels,
@@ -125,7 +124,6 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
   const isPublished = status === "PUBLISHED";
   const followUp = Boolean(activeAsset.follow_up_of);
   const alreadyLive = blogEnabled && Boolean(activeAsset.live_blog_url) && !isPublished;
-  const flaggedClaims = activeAsset.claims.filter((c) => c.verified !== "Y").length;
   const where = followUp ? "LinkedIn only" : whereText(activeAsset.channels, workspaceChannels);
   const goesToLinkedIn = followUp || Boolean(where?.includes("LinkedIn"));
 
@@ -331,24 +329,19 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
       {whereField}
       {unsaved}
 
-      {flaggedClaims > 0 && (
-        <p role="note" className="rounded-2xl bg-gold/5 p-4 text-[15px] leading-relaxed text-gold">
-          {flaggedClaims === 1 ? "One fact isn't checked yet." : `${flaggedClaims} facts aren't checked yet.`} Open Details below and mark {flaggedClaims === 1 ? "it" : "each"} checked, or edit the post.
-        </p>
-      )}
-
       <div className="flex flex-col gap-3">
         <button type="button" onClick={primary.run} disabled={busy || loadingSlot} className={buttonStyles({ size: "lg", block: true })}>
           {busy && <Loader2 className="h-4 w-4 animate-spin" />}
           {busy ? "Working…" : primary.label}
         </button>
-        <button type="button" onClick={onEdit} className={buttonStyles({ variant: "soft", size: "lg", block: true })}>
-          Edit text
-        </button>
         {!alreadyLive && !loadingSlot && primary.run !== onPublish && (
-          <button type="button" onClick={onPublish} disabled={busy} className={quietButton}>Post now instead</button>
+          <button type="button" onClick={onPublish} disabled={busy} className={buttonStyles({ variant: "soft", size: "lg", block: true })}>
+            Post now instead
+          </button>
         )}
-        <button type="button" onClick={() => setDeleteConfirmOpen(true)} className={quietButton}>Not this one, delete it</button>
+        <button type="button" onClick={() => setDeleteConfirmOpen(true)} className={quietButton}>
+          Not this one, delete it
+        </button>
       </div>
 
       <p className={note}>

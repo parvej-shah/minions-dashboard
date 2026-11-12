@@ -107,8 +107,8 @@ function MarkdownBlockView({
     case "rule":
       return (
         <div
-          className={`rounded-2xl border border-brand/30 bg-brand/5 border-l-4 border-l-brand ${
-            compact ? "my-3 p-3 rounded-xl" : "my-6 p-5 sm:p-6 shadow-sm"
+          className={`rounded-2xl border border-brand/20 bg-brand/5 ${
+            compact ? "my-3 p-3 rounded-xl" : "my-6 p-5 sm:p-6 shadow-soft"
           }`}
         >
           <span
@@ -208,8 +208,8 @@ function MarkdownBlockView({
         <blockquote
           className={
             compact
-              ? "border-l-2 border-coral pl-2 italic text-muted break-words [overflow-wrap:anywhere] text-xs"
-              : "border-l-2 border-coral bg-coral/5 p-3.5 rounded-r-xl text-sm sm:text-[15px] font-sans italic text-ink/90 my-3 break-words [overflow-wrap:anywhere]"
+              ? "border-l border-coral/60 pl-2.5 italic text-muted break-words [overflow-wrap:anywhere] text-xs"
+              : "border-l border-coral/60 bg-coral/5 p-3.5 rounded-r-xl text-sm sm:text-[15px] font-sans italic text-ink/90 my-3 break-words [overflow-wrap:anywhere]"
           }
         >
           {block.text}

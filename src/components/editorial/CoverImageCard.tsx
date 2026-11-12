@@ -215,14 +215,16 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
           ) : cover ? (
             <>
               <GroupedList>
-                <ListRow
-                  label="Illustration"
-                  value={hasArt(cover.layout) ? COVER_ART_STYLE_META[parseArtStyle(cover.art_style) ?? "NONE"].label : "None"}
-                  hint={!hasArt(cover.layout) ? "Only on Headline and Statement covers" : cover.art_style && cover.art_style !== "NONE" && !cover.art_drawn ? "Left off: the headline needed the space. A shorter headline makes room." : undefined}
-                  onClick={hasArt(cover.layout) ? () => setOpen(open === "art" ? null : "art") : undefined}
-                  expanded={open === "art"}
-                  disabled={isRendering}
-                />
+                {hasArt(cover.layout) && (
+                  <ListRow
+                    label="Illustration"
+                    value={COVER_ART_STYLE_META[parseArtStyle(cover.art_style) ?? "NONE"].label}
+                    hint={cover.art_style && cover.art_style !== "NONE" && !cover.art_drawn ? "Left off: the headline needed the space. A shorter headline makes room." : undefined}
+                    onClick={() => setOpen(open === "art" ? null : "art")}
+                    expanded={open === "art"}
+                    disabled={isRendering}
+                  />
+                )}
                 {!editing && (
                   <ListRow
                     label="Text"
@@ -304,19 +306,7 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
                 </div>
               )}
 
-              {cover.notes.length > 0 && !editing && (
-                <details className="group px-4 text-[13px] text-subtle">
-                  <summary className="cursor-pointer list-none hover:text-muted [&::-webkit-details-marker]:hidden">
-                    <span className="mr-1 inline-block transition-transform group-open:rotate-90">›</span>
-                    Why this wording ({cover.notes.length})
-                  </summary>
-                  <ul className="mt-1.5 list-disc space-y-1 pl-4">
-                    {cover.notes.map((n, i) => (
-                      <li key={i}>{n}</li>
-                    ))}
-                  </ul>
-                </details>
-              )}
+
             </>
           ) : (
             <p className="text-[15px] leading-relaxed text-muted">
