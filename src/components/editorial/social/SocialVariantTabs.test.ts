@@ -40,21 +40,44 @@ describe("the Instagram tab", () => {
   });
 
   const pages = ["https://cdn/carousels/c1/a1-1/01.jpg", "https://cdn/carousels/c1/a1-1/02.jpg"];
-  const ticked = (html: string, label: string) => new RegExp(`aria-checked="true"[^>]*>(?:(?!</button>).)*${label}`).test(html);
 
-  it("offers Carousel or Single poster when the draft has a carousel, ticking the one in force", () => {
-    const html = render({ ...asset, carousel_pages: pages }, { instagramFormat: "SINGLE", onInstagramFormat: noop });
-    expect(html).toContain("Carousel");
-    expect(html).toContain("Single poster");
-    expect(ticked(html, "Single poster")).toBe(true);
-    expect(ticked(html, "Carousel")).toBe(false);
-    // The preview follows the choice: the poster, not the pages.
+  it("shows single poster preview when instagramFormat is SINGLE", () => {
+    const html = render({ ...asset, carousel_pages: pages }, { instagramFormat: "SINGLE" });
+    // The preview follows the unified choice: the poster, not the pages.
     expect(html).not.toContain("Page 1 of");
     expect(html).toContain("covers/a1.png");
+    // Duplicate segmented picker is removed
+    expect(html).not.toContain("Post on Instagram");
   });
 
-  it("offers no choice without a carousel", () => {
-    const html = render(asset, { instagramFormat: "CAROUSEL", onInstagramFormat: noop });
-    expect(html).not.toContain("Single poster");
+  it("offers no duplicate format picker on the Instagram tab", () => {
+    const html = render({ ...asset, carousel_pages: pages }, { instagramFormat: "CAROUSEL" });
+    expect(html).not.toContain("Post on Instagram");
+  });
+});
+
+describe("the LinkedIn tab", () => {
+  it("shows Edit post button even when carousel is active", () => {
+    const html = renderToStaticMarkup(
+      h(SocialVariantTabs, {
+        activeAsset: asset,
+        socialTab: "LINKEDIN",
+        setSocialTab: noop,
+        isEditingSocial: false,
+        isSaving: false,
+        setIsEditingSocial: noop,
+        edited: { linkedin: "Post copy", facebook: "", twitter: "", instagram: "" } as never,
+        setEditedLinkedin: noop,
+        setEditedFacebook: noop,
+        setEditedTwitter: noop,
+        setEditedInstagram: noop,
+        onSave: noop,
+        onCopy: noop,
+        copiedKey: null,
+        enabledTabs: { LINKEDIN: true, FACEBOOK: false, INSTAGRAM: false, TWITTER: false },
+        linkedinCarousel: { caption: "Carousel caption", pages: ["https://cdn/01.jpg"] },
+      })
+    );
+    expect(html).toContain("Edit post");
   });
 });

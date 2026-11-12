@@ -49,3 +49,10 @@ next-env.d.ts
 .poster-mix-cache.json
 poster-samples/
 .agents/teamwork/
+.agents/skills/impeccable/
+.claude/skills/impeccable/
+.claude/agents/
+.codex/
+.github/agents/
+.github/hooks/
+.github/skills/

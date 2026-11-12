@@ -28,6 +28,13 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-12 — Unified carousel format decision across LinkedIn & Instagram
+
+**Decision:** The format decision between carousel and single poster is unified into a single "Post format" segmented control on the Carousel card. Choosing carousel sets both LinkedIn and Instagram to carousel format (with Instagram providing the swipeable page gallery and "Save all N pages" button for manual posting); choosing single poster sets both to the cover image. The duplicate "Post on Instagram" format selector on the Instagram tab is removed, and the "Edit post" button is restored on the LinkedIn tab.
+**Why:** Reviewers were forced to make the same formatting decision twice in two separate places (once on the Carousel card and once inside the Instagram tab). Unifying this eliminates decision fatigue and cognitive dissonance, while preserving the user's manual posting choice. Restoring the Edit post button ensures LinkedIn post captions can always be refined naturally before posting.
+**Alternatives considered:** Keeping two independent selectors (led to redundant clicks and format mismatches between platforms).
+**Status:** active
+
 ## 2026-11-10 — Brand opens on four basics; the rest is Advanced
 
 **Decision:** The Brand page shows only what a post can't be written without: what you do, who you write for, what you post about, and what you've done. Writing voice, reader details, all experience, facts and what sets you apart, words to avoid, idea sources and cover look sit in one closed "Advanced" list, each its own page. The profile score and its three nudges are gone; one quiet line appears only while a basic is missing.

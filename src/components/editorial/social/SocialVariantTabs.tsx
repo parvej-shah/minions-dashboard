@@ -1,22 +1,9 @@
 "use client";
 
 import React from "react";
-import {
-  BarChart2,
-  Bookmark,
-  Download,
-  Loader2,
-  Globe,
-  MessageCircle,
-  MessageSquare,
-  Repeat,
-  Send,
-  Share2,
-  ThumbsUp,
-} from "lucide-react";
+import { Download, Loader2, MessageSquare } from "lucide-react";
 import Image from "next/image";
 import type { AssetItem } from "@/types";
-import Segmented from "@/components/ui/Segmented";
 import type { InstagramFormat } from "@/lib/carousel/instagramFormat";
 import { SOCIAL_CHANNELS, channelFor, type SocialChannel, type SocialTab, type VariantField } from "./channels";
 import VariantActions from "./VariantActions";
@@ -44,12 +31,8 @@ export interface SocialVariantTabsProps {
   enabledTabs?: Record<SocialTab, boolean>;
   /** Blog channel off: there is no article to link, so no first-comment link. */
   blogEnabled?: boolean;
-  /** False when no channel posts the cover, so there is no thumbnail to choose. */
-  showCoverLink?: boolean;
   /** What Instagram gets for this draft: its pick, else the workspace's last pick, else the carousel. */
   instagramFormat?: InstagramFormat;
-  /** Given, the Instagram tab lets the reviewer pick Carousel or Single poster. */
-  onInstagramFormat?: (format: InstagramFormat) => void;
   /** Given, the Instagram tab can hand every carousel page to the person to post by hand. */
   onSavePages?: () => void;
   savingPages?: boolean;
@@ -69,22 +52,31 @@ interface PanelProps {
   copiedKey: string | null;
   /** Who the post is "from", drawn left of the actions. */
   identity: React.ReactNode;
-  panelClass: string;
-  previewClass: string;
-  /** Content between the post body and the mock action bar. */
+  /** Content between the post body and footer actions. */
   extras?: React.ReactNode;
-  /** The decorative like/comment/share bar. */
-  actionBar: React.ReactNode;
   /** False when the text is edited elsewhere. */
   canEdit?: boolean;
 }
 
-/** One channel's mock post: author line, edit and copy actions, the text, and the channel's trimmings. */
-function ChannelPanel({ channel, value, onChange, isEditing, isSaving, onToggleEdit, onSave, onCopy, copiedKey, identity, panelClass, previewClass, extras, actionBar, canEdit }: PanelProps) {
+/** One channel's clean post card: author line, edit and copy actions, and the text. */
+function ChannelPanel({
+  channel,
+  value,
+  onChange,
+  isEditing,
+  isSaving,
+  onToggleEdit,
+  onSave,
+  onCopy,
+  copiedKey,
+  identity,
+  extras,
+  canEdit,
+}: PanelProps) {
   const copyKey = `social-${channel.field}`;
   return (
-    <div className={panelClass}>
-      <div className="flex flex-col gap-3 border-b border-line/50 pb-3.5 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-4 font-sans">
+      <div className="flex flex-col gap-3 pb-1 sm:flex-row sm:items-center sm:justify-between">
         {identity}
         <VariantActions
           isEditing={isEditing}
@@ -108,11 +100,12 @@ function ChannelPanel({ channel, value, onChange, isEditing, isSaving, onToggleE
           onPreview={onToggleEdit}
         />
       ) : (
-        <div className={previewClass}>{value || <span className="text-subtle italic">{channel.emptyMessage}</span>}</div>
+        <div className="rounded-2xl bg-surface-2 p-5 text-[15px] leading-[1.65] text-ink whitespace-pre-line break-words select-text">
+          {value || <span className="text-subtle italic">{channel.emptyMessage}</span>}
+        </div>
       )}
 
       {extras}
-      {actionBar}
     </div>
   );
 }
@@ -134,9 +127,7 @@ export default function SocialVariantTabs({
   copiedKey,
   enabledTabs,
   blogEnabled = true,
-  showCoverLink = true,
   instagramFormat,
-  onInstagramFormat,
   onSavePages,
   savingPages = false,
   linkedinCarousel = null,
@@ -168,19 +159,14 @@ export default function SocialVariantTabs({
   const isShown = (tab: SocialTab) => socialTab === tab && visibleChannels.some((channel) => channel.tab === tab);
 
   return (
-    <section aria-labelledby="channel-preview-title" className="overflow-hidden rounded-[28px] bg-surface shadow-soft">
-      <div className="flex flex-col gap-4 border-b border-line bg-gradient-to-br from-brand/10 via-surface to-surface p-4 sm:p-5">
-        <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-brand/30 bg-brand/10 text-brand">
-            <Share2 className="h-5 w-5" aria-hidden="true" />
-          </span>
-          <div>
-            <h2 id="channel-preview-title" className="text-xl font-semibold text-ink">Channel preview</h2>
-            <p className="mt-1 text-sm leading-relaxed text-muted">Choose a channel to preview and edit its copy.{showCoverLink && <> <a href="#cover-image" className="font-semibold text-brand underline underline-offset-2 hover:text-ink focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">Choose the thumbnail style below ↓</a></>}</p>
-          </div>
+    <section aria-labelledby="channel-preview-title" className="rounded-[28px] bg-surface shadow-soft p-6 sm:p-8 space-y-6">
+      <div className="flex flex-col gap-4 pb-2 border-b border-line/60 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 id="channel-preview-title" className="text-[17px] font-semibold text-ink">Captions</h2>
+          <p className="text-[13px] text-muted">Post text for each connected channel.</p>
         </div>
 
-        <div role="tablist" aria-label="Publishing channel" className="grid w-full grid-cols-3 gap-1 rounded-2xl bg-surface-3 p-1 sm:flex sm:w-auto sm:flex-wrap sm:gap-2 sm:rounded-full">
+        <div role="tablist" aria-label="Publishing channel" className="grid grid-cols-3 gap-1 rounded-2xl bg-surface-3 p-1 sm:flex sm:w-auto sm:gap-1.5 sm:rounded-full">
           {visibleChannels.map((channel) => (
             <button
               key={channel.tab}
@@ -188,8 +174,8 @@ export default function SocialVariantTabs({
               role="tab"
               aria-selected={socialTab === channel.tab}
               onClick={() => setSocialTab(channel.tab)}
-              className={`flex min-h-11 items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-sm font-semibold transition-all cursor-pointer sm:px-4 active:translate-y-1 active:border-b-0 ${
-                socialTab === channel.tab ? channel.tabActiveClass : "text-muted border-line hover:text-ink hover:bg-surface-2"
+              className={`flex min-h-9 items-center justify-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer sm:px-3.5 ${
+                socialTab === channel.tab ? channel.tabActiveClass : "text-muted hover:text-ink hover:bg-surface-2"
               }`}
             >
               <span>{channel.label}</span>
@@ -198,46 +184,27 @@ export default function SocialVariantTabs({
         </div>
       </div>
 
-      <div className="p-3 sm:p-5">
+      <div>
         {isShown("LINKEDIN") && (
           <ChannelPanel
             {...forChannel("LINKEDIN")}
-            {...(linkedinCarousel ? { value: linkedinCarousel.caption, onChange: () => {}, isEditing: false, canEdit: false } : {})}
-            panelClass="space-y-4 rounded-2xl border border-line bg-canvas p-4 font-sans sm:p-5 sm:shadow-soft"
-            previewClass="whitespace-pre-line break-words rounded-none border-0 bg-transparent p-0 font-sans text-[14px] leading-[1.65] text-ink select-text sm:rounded-xl sm:border sm:border-line/60 sm:bg-surface-2 sm:p-4.5 sm:text-xs sm:leading-relaxed"
+            value={edited.linkedin || linkedinCarousel?.caption || activeAsset.variants.linkedin || ""}
             identity={
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-[#0077B5]/20 border border-[#0077B5]/40 flex items-center justify-center font-bold text-xs text-[#0077B5] shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#0077B5]/15 text-xs font-bold text-[#0077B5] shrink-0">
                   in
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-xs font-bold text-ink truncate">{author?.name ?? "Editorial Author"}</span>
-                    <span className="text-brand text-xs shrink-0 font-bold">✓</span>
-                    <span className="text-[10px] text-subtle shrink-0">• 1st</span>
-                  </div>
-                  <div className="text-[11px] text-muted truncate">
-                    {author ? author.role ?? "" : "Engineering & Enterprise Thought Leadership"}
-                  </div>
+                </span>
+                <div className="min-w-0 flex items-center gap-1.5 flex-wrap">
+                  <span className="text-sm font-semibold text-ink truncate">{author?.name ?? "Parvej Shah"}</span>
+                  {author?.role && <span className="text-xs text-muted truncate">· {author.role}</span>}
                 </div>
               </div>
             }
             extras={
               <>
                 {linkedinCarousel ? (
-                  <div className="space-y-2">
-                    {linkedinCarousel.pages.length > 0 && (
-                      <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1 scrollbar-none">
-                        {linkedinCarousel.pages.map((page, i) => (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img key={page} src={page} alt={`Page ${i + 1} of ${linkedinCarousel.pages.length}`} className="aspect-[4/5] w-[70%] shrink-0 snap-start rounded-lg border border-line object-cover sm:w-[220px]" />
-                        ))}
-                      </div>
-                    )}
-                    <p className="text-[13px] leading-snug text-muted">
-                      LinkedIn posts this carousel instead of the cover.{" "}
-                      <a href="#linkedin-carousel" className="font-semibold text-brand underline underline-offset-2">Edit its pages and text below ↓</a>
-                    </p>
+                  <div className="rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-xs text-muted">
+                    LinkedIn posts the carousel configured above.
                   </div>
                 ) : activeAsset.hero_image_url && activeAsset.hero_status === "READY" && (
                   <div
@@ -279,50 +246,18 @@ export default function SocialVariantTabs({
                 )}
               </>
             }
-            actionBar={
-              <div className="flex items-center justify-between pt-3 border-t border-line/60 text-xs text-muted" aria-hidden="true">
-                <div className="flex items-center gap-1.5">
-                  <ThumbsUp className="w-3.5 h-3.5" />
-                  <span>Like</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <MessageCircle className="w-3.5 h-3.5" />
-                  <span>Comment</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Repeat className="w-3.5 h-3.5" />
-                  <span>Repost</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Send</span>
-                </div>
-              </div>
-            }
           />
         )}
 
         {isShown("FACEBOOK") && (
           <ChannelPanel
             {...forChannel("FACEBOOK")}
-            panelClass="bg-canvas rounded-2xl border border-line p-5 space-y-4 font-sans shadow-soft"
-            previewClass="text-xs text-ink leading-relaxed whitespace-pre-line bg-surface-2 p-4.5 rounded-xl border border-line/60 font-sans select-text"
             identity={
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#1877F2]/20 border border-[#1877F2]/40 flex items-center justify-center font-bold text-xs text-[#1877F2] shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#1877F2]/15 text-xs font-bold text-[#1877F2] shrink-0">
                   f
-                </div>
-                <div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs font-bold text-ink">Editorial Author</span>
-                    <span className="text-[#1877F2] text-xs font-bold">●</span>
-                  </div>
-                  <div className="text-[10px] text-subtle flex items-center gap-1">
-                    <span>Just now</span>
-                    <span>•</span>
-                    <Globe className="w-2.5 h-2.5" />
-                  </div>
-                </div>
+                </span>
+                <span className="text-sm font-semibold text-ink truncate">{author?.name ?? "Parvej Shah"}</span>
               </div>
             }
             extras={
@@ -339,37 +274,19 @@ export default function SocialVariantTabs({
                 )}
               </>
             }
-            actionBar={
-              <div className="flex items-center justify-around pt-3 border-t border-line/60 text-xs text-muted" aria-hidden="true">
-                <div className="flex items-center gap-1.5">
-                  <ThumbsUp className="w-3.5 h-3.5" />
-                  <span>Like</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <MessageCircle className="w-3.5 h-3.5" />
-                  <span>Comment</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span>Share</span>
-                </div>
-              </div>
-            }
           />
         )}
 
         {isShown("INSTAGRAM") && (
           <ChannelPanel
             {...forChannel("INSTAGRAM")}
-            panelClass="bg-canvas rounded-2xl border border-line p-5 space-y-4 font-sans shadow-soft"
-            previewClass="text-xs text-ink leading-relaxed whitespace-pre-line bg-surface-2 p-4.5 rounded-xl border border-line/60 font-sans select-text"
             identity={
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-[#C13584]/15 border border-[#C13584]/40 flex items-center justify-center font-bold text-xs text-[#C13584] shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#C13584]/15 text-xs font-bold text-[#C13584] shrink-0">
                   ig
-                </div>
+                </span>
                 <div className="min-w-0">
-                  <span className="block text-xs font-bold text-ink truncate">{author?.name ?? "Editorial Author"}</span>
+                  <span className="block text-sm font-semibold text-ink truncate">{author?.name ?? "Parvej Shah"}</span>
                   <span className="block text-[11px] text-muted">
                     {deck ? `Post these ${deck.length} pages as one Instagram carousel.` : "Copy the caption and post it with the cover image."}
                   </span>
@@ -378,52 +295,33 @@ export default function SocialVariantTabs({
             }
             extras={
               <>
-              {pages && onInstagramFormat && (
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[15px] text-ink">Post on Instagram</span>
-                  <Segmented
-                    label="Instagram format"
-                    value={instagramPick}
-                    onChange={onInstagramFormat}
-                    options={[{ id: "CAROUSEL", label: `Carousel · ${pages.length}` }, { id: "SINGLE", label: "Single poster" }]}
-                  />
-                </div>
-              )}
-              {deck ? (
-                <>
-                {/* The carousel's pages, cover first. Open one to see it full size. */}
-                <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1 scrollbar-none">
-                  {deck.map((page, i) => (
-                    <a key={page} href={page} target="_blank" rel="noopener noreferrer" className="snap-start shrink-0 w-[70%] sm:w-[220px]">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={page} alt={`Page ${i + 1} of ${deck.length}`} className="aspect-[4/5] w-full rounded-lg border border-line object-cover" />
-                    </a>
-                  ))}
-                </div>
-                {onSavePages && (
-                  <div className="space-y-2">
-                    <button type="button" onClick={onSavePages} disabled={savingPages} className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-line bg-surface-2 px-4 text-sm font-semibold text-ink cursor-pointer hover:bg-surface-3 disabled:opacity-50">
-                      {savingPages ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Download className="h-4 w-4" aria-hidden="true" />}
-                      {`Save all ${deck.length} pages`}
-                    </button>
-                    <p className="text-[13px] leading-snug text-muted">Then in Instagram: New post, select the pages in order, paste the caption (Copy above).</p>
+                {deck ? (
+                  <div className="space-y-3 pt-1">
+                    {/* The carousel's pages, cover first. Open one to see it full size. */}
+                    <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1 scrollbar-none">
+                      {deck.map((page, i) => (
+                        <a key={page} href={page} target="_blank" rel="noopener noreferrer" className="snap-start shrink-0 w-[70%] sm:w-[220px]">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={page} alt={`Page ${i + 1} of ${deck.length}`} className="aspect-[4/5] w-full rounded-lg border border-line object-cover" />
+                        </a>
+                      ))}
+                    </div>
+                    {onSavePages && (
+                      <div className="space-y-1.5">
+                        <button type="button" onClick={onSavePages} disabled={savingPages} className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-line bg-surface-2 px-4 text-sm font-semibold text-ink cursor-pointer hover:bg-surface-3 disabled:opacity-50">
+                          {savingPages ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Download className="h-4 w-4" aria-hidden="true" />}
+                          {`Save all ${deck.length} pages`}
+                        </button>
+                        <p className="text-[13px] leading-snug text-muted">Then in Instagram: New post, select the pages in order, paste the caption (Copy above).</p>
+                      </div>
+                    )}
                   </div>
-                )}
-                </>
-              ) : activeAsset.hero_image_url && activeAsset.hero_status === "READY" ? (
-                <div className="relative mx-auto aspect-[4/5] w-full max-w-[420px] overflow-hidden rounded-xl border border-line bg-surface-2">
-                  <Image src={activeAsset.hero_image_url} alt={activeAsset.title} fill unoptimized sizes="420px" className="object-cover" />
-                </div>
-              ) : null}
+                ) : activeAsset.hero_image_url && activeAsset.hero_status === "READY" ? (
+                  <div className="relative mx-auto aspect-[4/5] w-full max-w-[420px] overflow-hidden rounded-xl border border-line bg-surface-2">
+                    <Image src={activeAsset.hero_image_url} alt={activeAsset.title} fill unoptimized sizes="420px" className="object-cover" />
+                  </div>
+                ) : null}
               </>
-            }
-            actionBar={
-              <div className="flex items-center gap-4 pt-3 border-t border-line/60 text-xs text-muted" aria-hidden="true">
-                <ThumbsUp className="w-3.5 h-3.5" />
-                <MessageCircle className="w-3.5 h-3.5" />
-                <Send className="w-3.5 h-3.5" />
-                <Bookmark className="ml-auto w-3.5 h-3.5" />
-              </div>
             }
           />
         )}
@@ -431,29 +329,12 @@ export default function SocialVariantTabs({
         {isShown("TWITTER") && (
           <ChannelPanel
             {...forChannel("TWITTER")}
-            panelClass="bg-canvas rounded-2xl border border-line p-5 space-y-4 font-sans shadow-soft"
-            previewClass="text-xs text-ink leading-relaxed whitespace-pre-line bg-surface-2 p-4.5 rounded-xl border border-line/60 font-sans select-text"
             identity={
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-surface-2 border border-line flex items-center justify-center font-bold text-xs text-ink shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-2 border border-line text-xs font-bold text-ink shrink-0">
                   𝕏
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-ink">Editorial Author</span>
-                    <span className="text-[11px] text-subtle">@author</span>
-                  </div>
-                  <div className="text-[10px] text-subtle">Enterprise Architecture & AI</div>
-                </div>
-              </div>
-            }
-            actionBar={
-              <div className="flex items-center justify-between pt-3 border-t border-line/60 text-xs text-subtle" aria-hidden="true">
-                <MessageCircle className="w-3.5 h-3.5" />
-                <Repeat className="w-3.5 h-3.5" />
-                <ThumbsUp className="w-3.5 h-3.5" />
-                <BarChart2 className="w-3.5 h-3.5" />
-                <Bookmark className="w-3.5 h-3.5" />
+                </span>
+                <span className="text-sm font-semibold text-ink truncate">{author?.name ?? "Editorial Author"}</span>
               </div>
             }
           />

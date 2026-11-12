@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { AlertTriangle, Check, Copy, GalleryHorizontal, Loader2, Sparkles } from "lucide-react";
+import { AlertTriangle, GalleryHorizontal, Loader2, Sparkles } from "lucide-react";
 import type { AssetItem } from "@/types";
 import type { StoredCarousel } from "@/services/carousel";
 import type { CarouselPlan } from "@/lib/carousel/plan";
@@ -60,16 +60,11 @@ export default function CarouselCard({
   activeAsset,
   onMessage,
   onCarouselOn,
-  onCopy,
-  copiedKey,
 }: {
   activeAsset: AssetItem;
   onMessage: (message: string) => void;
   /** Told whether LinkedIn gets the carousel, on load and on every change, so the studio previews what goes out. */
   onCarouselOn?: (on: boolean, info: { caption: string; pages: string[] }) => void;
-  /** One-tap copy of the post text, through the studio's clipboard. */
-  onCopy?: (text: string, key: string) => void;
-  copiedKey?: string | null;
 }) {
   const [state, setState] = useState<State | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -122,7 +117,17 @@ export default function CarouselCard({
         setState((s) => (s ? { ...s, carousel: json.carousel } : s));
         setDraft(null);
         if (kind !== "style") setPreviousStyle(null);
-        onMessage(kind === "make" ? "Carousel ready. Check every page." : kind === "save" ? "Carousel redrawn." : kind === "style" ? `Carousel redrawn in ${styleName(json.carousel.plan.style)}.` : json.carousel.active ? "LinkedIn will post the carousel." : "LinkedIn will post the cover image.");
+        onMessage(
+          kind === "make"
+            ? "Carousel ready. Check every page."
+            : kind === "save"
+            ? "Carousel redrawn."
+            : kind === "style"
+            ? `Carousel redrawn in ${styleName(json.carousel.plan.style)}.`
+            : json.carousel.active
+            ? "Posts will share the carousel."
+            : "Posts will share the cover poster."
+        );
         return true;
       } else {
         setErrors(json.errors?.length ? json.errors : []);
@@ -243,16 +248,25 @@ export default function CarouselCard({
           {/* A second post that exists to share the carousel has no choice to make. */}
           {!locked && activeAsset.follow_up_format !== "CAROUSEL" && (
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="inline-flex items-center gap-2 text-[15px] text-ink">
-                Post on LinkedIn
+              <span className="inline-flex items-center gap-2 text-[15px] font-medium text-ink">
+                Post format
                 {busy === "toggle" && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted" aria-label="Saving choice" />}
               </span>
               <Segmented
-                label="LinkedIn image format"
+                label="Post format"
                 value={carousel.active ? "CAROUSEL" : "COVER"}
                 disabled={busy !== null}
-                onChange={(v) => void send("PATCH", { active: v === "CAROUSEL" }, "toggle")}
-                options={[{ id: "CAROUSEL", label: `Carousel · ${pageCount}` }, { id: "COVER", label: "Cover image" }]}
+                onChange={(v) =>
+                  void send(
+                    "PATCH",
+                    { active: v === "CAROUSEL", instagram: v === "CAROUSEL" ? "CAROUSEL" : "SINGLE" },
+                    "toggle"
+                  )
+                }
+                options={[
+                  { id: "CAROUSEL", label: `Carousel · ${pageCount}` },
+                  { id: "COVER", label: "Single poster" },
+                ]}
               />
             </div>
           )}
@@ -335,10 +349,6 @@ export default function CarouselCard({
           ) : (
             <div className="space-y-5">
               {!locked && designPicker}
-              <GroupedList header="Post text with the carousel">
-                <p className="px-4 py-3 text-[15px] leading-relaxed text-ink whitespace-pre-line break-words">{carousel.caption}</p>
-                {onCopy && <ListRow label={copiedKey === "carousel-caption" ? "Copied" : "Copy post text"} trailing={copiedKey === "carousel-caption" ? <Check className="h-4 w-4 text-brand" aria-hidden="true" /> : <Copy className="h-4 w-4 text-subtle" aria-hidden="true" />} onClick={() => onCopy(carousel.caption, "carousel-caption")} />}
-              </GroupedList>
               <GroupedList>
                 {!locked && (
                   <>

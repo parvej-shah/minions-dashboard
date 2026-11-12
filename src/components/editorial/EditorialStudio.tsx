@@ -11,7 +11,6 @@ import { useEditorialDraft } from "@/hooks/useEditorialDraft";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useToast } from "@/hooks/useToast";
 import { useChannelPayload } from "@/hooks/useChannelSummary";
-import { apiClient, toErrorMessage } from "@/lib/api-client";
 import type { InstagramFormat } from "@/lib/carousel/instagramFormat";
 import { useBrandSettings } from "@/hooks/useBrandSettings";
 import { normalizeDomain } from "@/constants/config";
@@ -144,7 +143,6 @@ export default function EditorialStudio({
   // The LinkedIn tab stays: with the carousel on it shows the carousel's text and pages.
   const previewTabs = enabledSocialTabs;
   const anySocialChannelActive = previewTabs.LINKEDIN || previewTabs.FACEBOOK || previewTabs.TWITTER;
-  const coverGoesOut = !linkedinGetsCarousel || blogEnabled || enabledSocialTabs.FACEBOOK || enabledSocialTabs.TWITTER;
 
   // If the selected tab isn't one this tenant has connected (e.g. defaulted
   // to LinkedIn but only Facebook is on), display the first one that is,
@@ -174,18 +172,6 @@ export default function EditorialStudio({
       toast.show((e as Error).message || "The pages could not be saved. Try again.");
     } finally {
       setSavingPages(false);
-    }
-  };
-  const pickInstagramFormat = async (format: InstagramFormat) => {
-    if (!activeAsset) return;
-    const before = instagramPick;
-    setInstagramPick({ id: activeAsset.id, format });
-    try {
-      await apiClient.patch(`/api/assets/${encodeURIComponent(activeAsset.id)}/carousel`, { instagram: format });
-      toast.show(format === "CAROUSEL" ? "Instagram gets the carousel. New posts will too." : "Instagram gets the single poster. New posts will too.");
-    } catch (error) {
-      setInstagramPick(before);
-      toast.show(toErrorMessage(error, "Could not save the Instagram choice."));
     }
   };
 
@@ -351,9 +337,7 @@ export default function EditorialStudio({
       copiedKey={copiedKey}
       enabledTabs={previewTabs}
       blogEnabled={blogEnabled}
-      showCoverLink={coverGoesOut}
       instagramFormat={instagramFormat}
-      onInstagramFormat={(format) => void pickInstagramFormat(format)}
       onSavePages={() => void saveCarouselPages()}
       savingPages={savingPages}
       linkedinCarousel={linkedinGetsCarousel && carouselOn ? { caption: carouselOn.caption, pages: carouselOn.pages } : null}
@@ -393,17 +377,28 @@ export default function EditorialStudio({
 
       <div className="flex flex-wrap items-start gap-12">
         <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-8">
-          <div id="post-preview" className="scroll-mt-24">{socialVariants}</div>
+          {/* 1. Cover image */}
+          <div id="post-cover" className="scroll-mt-24">
+            <CoverImageCard activeAsset={activeAsset} isRendering={draft.isRenderingCover} onRerender={draft.rerenderCover} onCheckShape={draft.checkCoverShape} onMessage={toast.show} />
+          </div>
+
+          {/* 2. Carousel */}
           {enabledSocialTabs.LINKEDIN && activeAsset.follow_up_format !== "COVER" && (
-            <div id="linkedin-carousel" className="scroll-mt-24">
-              <CarouselCard key={activeAsset.id} activeAsset={activeAsset} onMessage={toast.show} onCarouselOn={(on, info) => setCarouselOn({ id: activeAsset.id, on, ...info })} onCopy={copy} copiedKey={copiedKey} />
+            <div id="post-carousel" className="scroll-mt-24">
+              <CarouselCard
+                key={activeAsset.id}
+                activeAsset={activeAsset}
+                onMessage={toast.show}
+                onCarouselOn={(on, info) => {
+                  setCarouselOn({ id: activeAsset.id, on, ...info });
+                  setInstagramPick({ id: activeAsset.id, format: on ? "CAROUSEL" : "SINGLE" });
+                }}
+              />
             </div>
           )}
 
-          {/* Hidden only when nothing posts it: LinkedIn gets the carousel and no other channel is on. */}
-          {coverGoesOut && (
-            <CoverImageCard activeAsset={activeAsset} isRendering={draft.isRenderingCover} onRerender={draft.rerenderCover} onCheckShape={draft.checkCoverShape} onMessage={toast.show} />
-          )}
+          {/* 3. Captions (Channel preview & copy) */}
+          <div id="post-preview" className="scroll-mt-24">{socialVariants}</div>
 
           {/* Blog off: the article is never published, so it is not shown for
               editing; it stays the source the cover and carousel are made from. */}

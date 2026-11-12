@@ -38,7 +38,14 @@ export const POST = route<"tenant", Params>({ auth: "tenant", failure: "Failed t
 export const PATCH = route<"tenant", Params>({ auth: "tenant", failure: "Failed to update the carousel" }, async ({ clientId, params, request }) => {
   const assetId = await requireOwnedAssetId(clientId, params.id);
   const body = await readJsonOrEmpty(request);
-  if (typeof body.active === "boolean") return reply(await setCarouselActive(assetId, body.active));
+  if (typeof body.active === "boolean") {
+    if (body.instagram !== undefined) {
+      if (!isInstagramFormat(body.instagram)) throw badRequest('instagram must be "CAROUSEL" or "SINGLE".');
+      const picked = await setInstagramFormat(clientId, assetId, body.instagram);
+      if (!picked.ok) return NextResponse.json({ success: false, error: picked.error }, { status: picked.locked ? 409 : 422 });
+    }
+    return reply(await setCarouselActive(assetId, body.active));
+  }
   if (body.instagram !== undefined) {
     if (!isInstagramFormat(body.instagram)) throw badRequest('instagram must be "CAROUSEL" or "SINGLE".');
     const picked = await setInstagramFormat(clientId, assetId, body.instagram);

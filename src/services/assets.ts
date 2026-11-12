@@ -54,10 +54,22 @@ function parseChannelsChange(body: JsonObject, owned: { status: string; publishe
   return parsed;
 }
 
-function assetUpdateData(body: JsonObject, channels: string[] | undefined): Prisma.AssetUncheckedUpdateInput {
+function assetUpdateData(
+  body: JsonObject,
+  channels: string[] | undefined,
+  owned?: { carouselSpec?: unknown }
+): Prisma.AssetUncheckedUpdateInput {
   const has = (key: string) => body[key] !== undefined;
   const variants = (body.variants ?? {}) as Record<string, string | undefined>;
   const content = body.content ?? body.body_content;
+  const newLinkedin = variants.linkedin ?? (body.linkedin_variant as string | undefined);
+  let carouselUpdate: Prisma.InputJsonValue | undefined = undefined;
+  if (newLinkedin !== undefined && owned?.carouselSpec && typeof owned.carouselSpec === "object") {
+    carouselUpdate = {
+      ...(owned.carouselSpec as Record<string, unknown>),
+      caption: newLinkedin,
+    } as Prisma.InputJsonValue;
+  }
   return {
     ...(channels !== undefined && { channels }),
     ...(has("title") && { title: body.title as string }),
@@ -79,6 +91,7 @@ function assetUpdateData(body: JsonObject, channels: string[] | undefined): Pris
     ...(variants.facebook !== undefined && { facebookVariant: variants.facebook }),
     ...(variants.twitter !== undefined && { xVariant: variants.twitter }),
     ...(variants.instagram !== undefined && { instagramVariant: variants.instagram }),
+    ...(carouselUpdate !== undefined && { carouselSpec: carouselUpdate }),
     updatedAt: new Date(),
   };
 }
@@ -142,7 +155,7 @@ export async function updateAsset(clientId: string, idOrSlug: string, body: Json
   if (goingOut) await refreshCoverIfStale(owned.id);
   let updated = await prisma.asset.update({
     where: { id: owned.id },
-    data: { ...assetUpdateData(body, parseChannelsChange(body, owned)), ...keepFirstDraft(owned, body) },
+    data: { ...assetUpdateData(body, parseChannelsChange(body, owned), owned), ...keepFirstDraft(owned, body) },
     include: { claims: true },
   });
   const variants = (body.variants ?? {}) as Record<string, unknown>;

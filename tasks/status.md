@@ -55,3 +55,8 @@
 | 49 | Carousel page 1 is the post's real cover (not a rebuilt headline page) | CLAUDE | DONE (local; not pushed) | tasks/49.md |
 | 50 | Carousel in Channel preview: LinkedIn tab stays, Copy post text, Instagram Save all pages | CLAUDE | DONE (local; not pushed) | tasks/50.md |
 | 51 | Retry a failed LinkedIn/Instagram post; Today alert for failed posts | CLAUDE | DONE (local; not pushed; not clicked live) | tasks/51.md |
+| 52 | Editorial Studio reorder: Title -> Cover -> Carousel -> Captions | ANTIGRAVITY | DONE | tasks/52.md |
+| 53 | Layout picker tiles show the post's own text (live, cached, read-only) | CLAUDE | DONE (local; not pushed; not viewed live) | tasks/53.md |
+| 54 | Minimal Captions UI: remove fake Like/Comment buttons & nested cards | ANTIGRAVITY | DONE | tasks/54.md |
+| 56 | Unified Carousel Format Decision & Restore LinkedIn Edit Button | ANTIGRAVITY | DONE | tasks/56.md |
+| 57 | Layout tiles fill in one by one, in order (smoother See all) | CLAUDE | DONE (local; not pushed; not viewed live) | tasks/57.md |
