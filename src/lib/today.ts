@@ -10,6 +10,7 @@ interface Post {
   scheduled_for: string | null;
   published_at: string | null;
   created_at: string;
+  publish_failures?: Record<string, string> | null;
 }
 
 export type DayItem =
@@ -88,6 +89,13 @@ export function recentlyPosted<T extends Post>(posts: T[], limit: number): T[] {
     .filter((p) => p.status === "PUBLISHED" && p.published_at)
     .sort((a, b) => (b.published_at ?? "").localeCompare(a.published_at ?? ""))
     .slice(0, limit);
+}
+
+/** Posts that went out but that a channel refused (LinkedIn's token expired, say), newest first. */
+export function failedPosts<T extends Post>(posts: T[]): T[] {
+  return posts
+    .filter((p) => p.status === "PUBLISHED" && Object.values(p.publish_failures ?? {}).some((r) => typeof r === "string" && r.trim()))
+    .sort((a, b) => (b.published_at ?? "").localeCompare(a.published_at ?? ""));
 }
 
 /** "Wed 11 Nov, 09:00" on the workspace clock. */

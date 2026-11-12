@@ -42,6 +42,9 @@ export interface ReviewDecisionProps {
   /** Drafts a second LinkedIn post of this published draft in the format it did not use. */
   onPostAgain: () => void;
   isPostingAgain: boolean;
+  /** Posts this published draft again to a channel that refused it. */
+  onRetryChannel?: (channel: "linkedin" | "instagram") => void;
+  retryingChannel?: string | null;
   /** Once this draft is out of the queue: how many still wait, and how to open the next. */
   nextToReview?: { left: number; open: () => void } | null;
   /** Shown under a scheduled post, e.g. the weekly-update ask right after approval. */
@@ -91,6 +94,8 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
     blogEnabled = true,
     onPostAgain,
     isPostingAgain,
+    onRetryChannel,
+    retryingChannel,
     nextToReview,
     afterApprove,
     details,
@@ -190,6 +195,11 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
             <p className="text-[17px] font-semibold text-danger">{failureSummary(activeAsset.publish_failures)}</p>
             {failures.map((f) => (
               <p key={f.channel} className="text-[15px] text-muted">{f.label}: {f.reason}</p>
+            ))}
+            {onRetryChannel && failures.filter((f) => f.channel !== "facebook").map((f) => (
+              <button key={f.channel} type="button" onClick={() => onRetryChannel(f.channel as "linkedin" | "instagram")} disabled={Boolean(retryingChannel)} className={linkButton}>
+                {retryingChannel === f.channel ? `Posting to ${f.label}…` : `Try ${f.label} again`}
+              </button>
             ))}
           </div>
         )}

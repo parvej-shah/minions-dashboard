@@ -457,6 +457,8 @@ export default function EditorialStudio({
             nextToReview={nextToReview}
             afterApprove={askFor === activeAsset.id ? <ApprovalUpdateAsk /> : undefined}
             isPostingAgain={draft.isPostingAgain}
+            onRetryChannel={(c) => void draft.retryChannel(c).then((m) => m && toast.show(m))}
+            retryingChannel={draft.retryingChannel}
             detailsSummary={checksSummary(reviewNotes, unchecked)}
             detailsOpen={seriousNotes + unchecked > 0}
             details={

@@ -75,6 +75,9 @@ export interface EditorialDraftState {
   /** Drafts a second LinkedIn post of the published draft in the format it did not use, and opens it. */
   isPostingAgain: boolean;
   postAgain: () => Promise<string>;
+  /** Posts this published draft again to a channel that refused it; resolves to a message. */
+  retryChannel: (channel: "linkedin" | "instagram") => Promise<string>;
+  retryingChannel: string | null;
 }
 
 export interface CoverEditInput {
@@ -569,6 +572,29 @@ export function useEditorialDraft(
     }
   }, [activeAsset, isPostingAgain]);
 
+  const [retryingChannel, setRetryingChannel] = useState<string | null>(null);
+  const retryChannel = useCallback(async (channel: "linkedin" | "instagram"): Promise<string> => {
+    if (!activeAsset || retryingChannel) return "";
+    setRetryingChannel(channel);
+    try {
+      const res = await apiClient.post<{ success: boolean; error?: string; skipped?: string | null }>(`/api/assets/${activeAsset.id}/retry-publish`, { channel });
+      const label = channel === "linkedin" ? "LinkedIn" : "Instagram";
+      if (!res.success) {
+        patchActive({ publish_failures: { ...activeAsset.publish_failures, [channel]: res.error ?? "Could not post." } });
+        return `${label} did not take it. ${res.error ?? ""}`.trim();
+      }
+      const rest = { ...(activeAsset.publish_failures ?? {}) };
+      delete rest[channel];
+      patchActive({ publish_failures: rest });
+      window.dispatchEvent(new Event("minions-counts-updated"));
+      return res.skipped === "already_posted" ? `Already on ${label}.` : res.skipped ? `${label} is not connected or is switched off in Settings.` : `Posted to ${label}.`;
+    } catch (err) {
+      return toErrorMessage(err, "Could not post again");
+    } finally {
+      setRetryingChannel(null);
+    }
+  }, [activeAsset, retryingChannel, patchActive]);
+
   return {
     assets,
     isLoading,
@@ -618,5 +644,7 @@ export function useEditorialDraft(
 
     isPostingAgain,
     postAgain,
+    retryChannel,
+    retryingChannel,
   };
 }

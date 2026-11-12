@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildWeek, greeting, recentlyPosted, waitingForYou } from "./today";
+import { buildWeek, failedPosts, greeting, recentlyPosted, waitingForYou } from "./today";
 
 const TZ = "Asia/Dhaka"; // UTC+6, no DST
 // Monday 9 Nov 2026, 08:30 in Dhaka
@@ -65,5 +65,20 @@ describe("waitingForYou / recentlyPosted", () => {
       5
     );
     expect(list.map((x) => x.id)).toEqual(["b", "a"]);
+  });
+});
+
+describe("failedPosts", () => {
+  const post = (id: string, status: string, publish_failures: Record<string, string> | null, published_at = "2026-11-11T15:00:00Z") =>
+    ({ id, title: id, status, scheduled_for: null, published_at, created_at: published_at, publish_failures });
+  it("lists published posts a channel refused, newest first", () => {
+    const list = failedPosts([
+      post("ok", "PUBLISHED", null),
+      post("old", "PUBLISHED", { linkedin: "expired" }, "2026-11-01T00:00:00Z"),
+      post("new", "PUBLISHED", { linkedin: "expired" }),
+      post("blank", "PUBLISHED", { linkedin: " " }),
+      post("draft", "PENDING_REVIEW", { linkedin: "x" }),
+    ]);
+    expect(list.map((p) => p.id)).toEqual(["new", "old"]);
   });
 });

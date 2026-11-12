@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { DEFAULT_TIMEZONE } from "@/constants/config";
-import { buildWeek, greeting, recentlyPosted, slotLabel, waitingForYou, type WeekDay } from "@/lib/today";
+import { buildWeek, greeting, failedPosts, recentlyPosted, slotLabel, waitingForYou, type WeekDay } from "@/lib/today";
 import { nextFreeSlot } from "@/lib/drafts/nextSlot";
 import { MIN_LEAD_MINUTES } from "@/lib/postTime";
 import { buttonStyles } from "@/components/ui/Button";
@@ -44,6 +44,7 @@ export default function TodayView() {
   const now = useMemo(() => new Date(), []);
   const waiting = waitingForYou(assets.data);
   const posted = recentlyPosted(assets.data, 3);
+  const failed = failedPosts(assets.data);
   const week = buildWeek(now, tz, assets.data, preview.data.slots);
   const taken = assets.data.filter((a) => a.status === "SCHEDULED" && a.scheduled_for).map((a) => a.scheduled_for!);
   const nextSlot = nextFreeSlot(preview.data.slots, taken, now.getTime(), MIN_LEAD_MINUTES);
@@ -108,6 +109,15 @@ export default function TodayView() {
             <Link href="/ideas" className={buttonStyles({ variant: "soft", size: "lg" })}>See your ideas</Link>
             {!nextSlot && <Link href="/editorial?schedule=1" className="text-[17px] text-brand hover:underline">Set a schedule</Link>}
           </div>
+        </Card>
+      )}
+
+      {failed.length > 0 && (
+        <Card as="section" pad="lg" role="alert" aria-labelledby="failed" className="flex flex-col gap-3">
+          <StatusLabel tone="coral">Didn&apos;t go out</StatusLabel>
+          <CardTitle id="failed">{failed.length === 1 ? "1 post didn't reach every channel." : `${failed.length} posts didn't reach every channel.`}</CardTitle>
+          <p className="text-[17px] text-muted">{failed[0].title}: {failureSummary(failed[0].publish_failures)}. Open it to try again.</p>
+          <Link href={`/editorial?id=${encodeURIComponent(failed[0].id)}`} className={buttonStyles({ size: "lg", className: "self-start" })}>Fix it</Link>
         </Card>
       )}
 

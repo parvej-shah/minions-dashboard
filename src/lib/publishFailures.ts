@@ -22,3 +22,10 @@ export function failureSummary(raw: unknown): string | null {
   const list = names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
   return `${list} failed`;
 }
+
+/** The stored failures with one channel's reason set (reason given) or removed (reason null). */
+export function withFailure(raw: unknown, channel: FailureChannel, reason: string | null): Record<string, string> {
+  const map: Record<string, string> = Object.fromEntries(failureList(raw).filter((f) => f.channel !== channel).map((f) => [f.channel, f.reason]));
+  if (reason) map[channel] = reason;
+  return map;
+}
