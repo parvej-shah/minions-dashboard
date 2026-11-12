@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { tilesToDraw } from "@/lib/covers/pickerThumbs";
 import {
   canScroll,
   calculateDragScroll,
@@ -31,7 +32,7 @@ const SIZES = {
 };
 
 /** The sample picture, with the post's own picture fading in over it when there is one. */
-function TileImage({ o, px, draggable, onLive }: { o: ThumbOption; px: { width: number; height: number }; draggable?: boolean; onLive?: (id: string, src: string) => void }) {
+function TileImage({ o, px, draggable, onLive, onSettled }: { o: ThumbOption; px: { width: number; height: number }; draggable?: boolean; onLive?: (id: string, src: string) => void; onSettled?: (src: string) => void }) {
   const [live, setLive] = useState<"loading" | "shown" | "failed">("loading");
   // A new picture (the post's words changed) starts over.
   const [seen, setSeen] = useState(o.liveSrc);
@@ -54,8 +55,12 @@ function TileImage({ o, px, draggable, onLive }: { o: ThumbOption; px: { width: 
           onLoad={() => {
             setLive("shown");
             onLive?.(o.id, o.liveSrc!);
+            onSettled?.(o.liveSrc!);
           }}
-          onError={() => setLive("failed")}
+          onError={() => {
+            setLive("failed");
+            onSettled?.(o.liveSrc!);
+          }}
           className={`absolute inset-0 h-full w-full object-cover pointer-events-none transition-opacity duration-300 ${live === "shown" ? "opacity-100" : "opacity-0"}`}
         />
       )}
@@ -99,6 +104,11 @@ export default function ThumbPicker({
 }) {
   const group = useRef<HTMLDivElement>(null);
   const s = SIZES[size];
+  // Live pictures are asked for in order, one at a time (the server draws one at a time).
+  const [settled, setSettled] = useState<ReadonlySet<string>>(() => new Set());
+  const markSettled = useCallback((src: string) => setSettled((prev) => (prev.has(src) ? prev : new Set(prev).add(src))), []);
+  const drawUpTo = tilesToDraw(options.map((o) => o.liveSrc), settled);
+  const gated = options.map((o, i) => (i < drawUpTo ? o : { ...o, liveSrc: undefined }));
   const current = options.some((o) => o.id === selected) ? selected : options[0]?.id;
 
   const [scrollState, setScrollState] = useState({ canScrollLeft: false, canScrollRight: false });
@@ -260,7 +270,7 @@ export default function ThumbPicker({
         onKeyDown={onKeyDown}
         className="grid grid-cols-[repeat(auto-fill,minmax(84px,1fr))] gap-x-3 gap-y-4 p-2 -m-2"
       >
-        {options.map((o) => {
+        {gated.map((o) => {
           const on = o.id === selected;
           const drawing = busy === o.id;
           return (
@@ -281,7 +291,7 @@ export default function ThumbPicker({
                 } ${disabled && !on ? "opacity-50" : ""}`}
               >
                 {o.src ? (
-                  <TileImage o={o} px={s.px} onLive={onLive} />
+                  <TileImage o={o} px={s.px} onLive={onLive} onSettled={markSettled} />
                 ) : (
                   <span className="flex h-full w-full items-center justify-center text-brand">{o.icon}</span>
                 )}
@@ -337,7 +347,7 @@ export default function ThumbPicker({
           isDragging ? "snap-none cursor-grabbing select-none" : "snap-x cursor-grab"
         }`}
       >
-        {options.map((o) => {
+        {gated.map((o) => {
           const on = o.id === selected;
           const drawing = busy === o.id;
           return (
@@ -365,7 +375,7 @@ export default function ThumbPicker({
                 } ${disabled && !on ? "opacity-50" : ""}`}
               >
                 {o.src ? (
-                  <TileImage o={o} px={s.px} draggable={false} onLive={onLive} />
+                  <TileImage o={o} px={s.px} draggable={false} onLive={onLive} onSettled={markSettled} />
                 ) : (
                   <span className="flex h-full w-full items-center justify-center text-brand pointer-events-none">{o.icon}</span>
                 )}

@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { COVER_LAYOUTS } from "./layouts";
 import { SLIDE_STYLES } from "@/lib/carousel/slides";
-import { carouselThumb, coverPreviewUrl, coverThumb, shownCover, pickerLayouts, previewVersion, PICKER_THUMB_DIR } from "./pickerThumbs";
+import { carouselThumb, coverPreviewUrl, coverThumb, shownCover, tilesToDraw, pickerLayouts, previewVersion, PICKER_THUMB_DIR } from "./pickerThumbs";
 import type { LayoutFacts } from "./available";
 
 const bare: LayoutFacts = { shape_read: true, list: null, grid: null, punch: null, number: null, photo_ok: false, quote_ok: false, kicker: null, cutout_ok: false };
@@ -69,5 +69,20 @@ describe("live layout tiles", () => {
     // The real cover replaced the old file: the tile has done its job.
     expect(shownCover("https://cdn/new.png", preview)).toBe("https://cdn/new.png");
     expect(shownCover("https://cdn/old.png", null)).toBe("https://cdn/old.png");
+  });
+
+  it("draws the tiles one after another, in order, so each fills in as soon as it is ready", () => {
+    const srcs = ["a", "b", "c", undefined, "d"];
+    // Nothing is back yet: only the first is asked for.
+    expect(tilesToDraw(srcs, new Set())).toBe(1);
+    // The first arrived: the second is next.
+    expect(tilesToDraw(srcs, new Set(["a"]))).toBe(2);
+    // A tile with no live picture never holds up the ones after it.
+    expect(tilesToDraw(srcs, new Set(["a", "b", "c"]))).toBe(5);
+    // A tile that came back out of turn does not skip the one before it.
+    expect(tilesToDraw(srcs, new Set(["b"]))).toBe(1);
+    // All back: all of them.
+    expect(tilesToDraw(srcs, new Set(["a", "b", "c", "d"]))).toBe(5);
+    expect(tilesToDraw([], new Set())).toBe(0);
   });
 });

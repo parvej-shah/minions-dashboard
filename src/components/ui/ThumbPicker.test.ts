@@ -69,4 +69,16 @@ describe("Segmented", () => {
     expect(html).toMatch(/aria-checked="true"[^>]*>(?:(?!<\/button>).)*Single poster/);
     expect(html.match(/aria-checked="true"/g)).toHaveLength(1);
   });
+
+  it("asks for the live pictures one at a time, so the first tile is not held up by the rest", () => {
+    const live = [
+      { ...options[0], liveSrc: "/api/assets/a1/cover/preview?layout=BOLD&v=x" },
+      { ...options[1], liveSrc: "/api/assets/a1/cover/preview?layout=SWISS&v=x" },
+    ];
+    const html = renderToStaticMarkup(h(ThumbPicker, { label: "Layout", options: live, selected: "BOLD", onSelect: () => {} }));
+    expect(html).toContain("layout=BOLD");
+    expect(html).not.toContain("layout=SWISS");
+    // The sample of the waiting tile is still there.
+    expect(html).toContain("cover-swiss.webp");
+  });
 });

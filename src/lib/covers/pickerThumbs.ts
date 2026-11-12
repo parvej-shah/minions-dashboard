@@ -66,3 +66,15 @@ export const coverPreviewUrl = (assetId: string, layout: CoverLayout, version: s
  */
 export const shownCover = (hero: string | null, preview: { from: string | null; src: string } | null): string | null =>
   preview && preview.from === hero ? preview.src : hero;
+
+/**
+ * How many tiles, counted from the first, may ask for their own picture now.
+ * The server draws one picture at a time, so asking for all at once makes every
+ * tile finish late; asking in order lets each fill in as soon as it is ready.
+ * A tile with no live picture, or whose picture already came back (or failed),
+ * does not hold up the next one.
+ */
+export const tilesToDraw = (liveSrcs: (string | undefined)[], settled: ReadonlySet<string>): number => {
+  const waiting = liveSrcs.findIndex((s) => s && !settled.has(s));
+  return waiting === -1 ? liveSrcs.length : waiting + 1;
+};
