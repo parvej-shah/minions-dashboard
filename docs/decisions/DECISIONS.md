@@ -28,6 +28,13 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-12 — Rename Studio card to 'Carousel'
+
+**Decision:** The card in Editorial Studio is titled "Carousel" (formerly "LinkedIn carousel"), and explanatory copy describes it neutrally as a swipeable series of slides rather than a LinkedIn-only PDF.
+**Why:** The carousel asset now serves both LinkedIn and Instagram (via multi-page JPEG saving and unified post format selection). Retaining the "LinkedIn" prefix gave users a false mental model that the asset was only for LinkedIn. Titling it "Carousel" also creates symmetric visual hierarchy with the "Cover" card directly preceding it.
+**Alternatives considered:** "Multi-slide post" (clunky; industry standard term is carousel across both platforms), "LinkedIn & Instagram carousel" (redundant and cluttered).
+**Status:** active
+
 ## 2026-11-12 — Unified carousel format decision across LinkedIn & Instagram
 
 **Decision:** The format decision between carousel and single poster is unified into a single "Post format" segmented control on the Carousel card. Choosing carousel sets both LinkedIn and Instagram to carousel format (with Instagram providing the swipeable page gallery and "Save all N pages" button for manual posting); choosing single poster sets both to the cover image. The duplicate "Post on Instagram" format selector on the Instagram tab is removed, and the "Edit post" button is restored on the LinkedIn tab.

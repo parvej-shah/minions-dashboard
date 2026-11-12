@@ -50,9 +50,9 @@ const pageClass = "snap-start shrink-0 w-[70%] sm:w-[220px] aspect-[4/5] rounded
 const fieldLabel = "mb-1 block text-[13px] text-muted";
 
 /**
- * The draft's LinkedIn carousel (phase 11, D19). Suggested, never automatic:
+ * The draft's carousel (phase 11, D19). Suggested, never automatic:
  * the reviewer makes one, checks every page, edits the words (redrawn with no
- * model call, through the same checks), and decides whether LinkedIn gets the
+ * model call, through the same checks), and decides whether the post shares the
  * carousel or the cover image. Once the draft is published it is shown as it
  * went out.
  */
@@ -144,12 +144,12 @@ export default function CarouselCard({
 
   if (!state && loadError) return (
     <div className="rounded-[28px] bg-surface shadow-soft p-6 sm:p-8">
-      <p className="font-semibold text-ink">Could not load the LinkedIn carousel</p>
+      <p className="font-semibold text-ink">Could not load the carousel</p>
       <button type="button" onClick={() => { setLoadError(false); setLoadAttempt((n) => n + 1); }} className="mt-3 inline-flex min-h-11 items-center rounded-xl border border-brand/40 px-4 text-sm font-bold text-brand cursor-pointer hover:bg-brand/10">Try again</button>
     </div>
   );
   if (!state) return (
-    <SkeletonGroup label="Loading LinkedIn carousel" className="space-y-4 rounded-[28px] bg-surface shadow-soft p-6 sm:p-8">
+    <SkeletonGroup label="Loading carousel" className="space-y-4 rounded-[28px] bg-surface shadow-soft p-6 sm:p-8">
       <div className="flex items-center justify-between border-b border-line pb-3"><Skeleton className="h-4 w-44" /><Skeleton className="h-3 w-16" /></div>
       <div className="space-y-3 rounded-2xl bg-surface-2 p-4">
         <Skeleton className="h-5 w-64 max-w-full" /><Skeleton className="h-4 w-72 max-w-full" />
@@ -219,7 +219,7 @@ export default function CarouselCard({
       <div className="flex items-center justify-between gap-2 pb-2 border-b border-line/60">
         <div className="flex items-center gap-2">
           <GalleryHorizontal className="w-4 h-4 text-brand" aria-hidden="true" />
-          <span className="text-[17px] font-semibold text-ink">LinkedIn carousel</span>
+          <span className="text-[17px] font-semibold text-ink">Carousel</span>
         </div>
         <span className="text-[13px] text-muted">
           {busy === "make" ? "Writing the slides…" : carousel ? `${pageCount} pages` : suggested.yes ? "Suggested" : "Optional"}
@@ -229,7 +229,7 @@ export default function CarouselCard({
       {!carousel ? (
         <div className="space-y-4">
           <p className="text-[15px] leading-relaxed text-muted">
-            {suggested.reason} A carousel is a swipeable PDF on LinkedIn, drawn in your brand. It says only what this draft says.
+            {suggested.reason} A carousel is a swipeable series of slides drawn in your brand. It says only what this draft says.
           </p>
           {locked ? (
             <p className="text-[13px] text-subtle">This draft is published without a carousel.</p>
@@ -287,7 +287,7 @@ export default function CarouselCard({
 
           {locked ? (
             <p className="text-[13px] leading-relaxed text-muted">
-              This draft is published, so its carousel stays exactly as it went out{carousel.active ? "" : " (LinkedIn got the cover image)"}.
+              This draft is published, so its carousel stays exactly as it went out{carousel.active ? "" : " (the cover poster went out)"}.
             </p>
           ) : null}
 
