@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import sharp from "sharp";
 import { prisma } from "@/lib/prisma";
 import { CoverFitError, type CoverLayout, type CoverSpec } from "@/lib/covers/layouts";
-import { renderCoverPng } from "@/lib/covers/render";
+import { needsFallbackGlyphs, renderCoverPng, renderCoverSvg } from "@/lib/covers/render";
 import { dataUrlFitsPoster } from "@/lib/covers/photo";
 import { editAttempts, posterParts, switchLayout } from "@/lib/covers/layoutSwitch";
 import type { PosterShape } from "@/lib/covers/shape";
@@ -19,41 +19,88 @@ import { coverCutout, hostedCoverPhoto } from "@/services/cover";
 /** 2.5x the 84 px tile, the same size as the static sample pictures. */
 const TILE = { width: 216, height: 270 };
 
-export type PreviewResult = { ok: true; webp: Buffer } | { ok: false; error: string; status: 404 | 422 };
+/**
+ * A tile is the cover's SVG, which the browser draws (tasks/58.md): laying a
+ * cover out takes 20-60 ms, rasterizing it took up to 2 s. Words our fonts
+ * lack take the old raster path, a small webp.
+ */
+export type TileType = "image/svg+xml" | "image/webp";
+export type PreviewResult = { ok: true; body: Buffer; type: TileType } | { ok: false; error: string; status: 404 | 422 };
 
 // Tiles already drawn by this instance, by what they were drawn from. A tile is
 // a few KB; the browser caches too, this covers a reload or a second reviewer.
 const MAX_TILES = 120;
-const tiles = new Map<string, Buffer>();
-const remember = (key: string, webp: Buffer) => {
-  tiles.set(key, webp);
+const tiles = new Map<string, { body: Buffer; type: TileType }>();
+const remember = (key: string, tile: { body: Buffer; type: TileType }) => {
+  tiles.set(key, tile);
   if (tiles.size > MAX_TILES) tiles.delete(tiles.keys().next().value as string);
 };
+
+/**
+ * A tile shows at 84 px wide, so twice the tile's own size is plenty for the
+ * headshot or cut-out it embeds; the full photo made every tile hundreds of KB.
+ * Only the picture inside the tile shrinks: the real cover keeps the full photo.
+ */
+const TILE_PHOTO_PX = 2 * TILE.width;
+async function shrinkDataUrl(dataUrl: string | undefined): Promise<string | undefined> {
+  const m = dataUrl?.match(/^data:([^;,]+);base64,(.*)$/);
+  if (!m) return dataUrl;
+  try {
+    const img = sharp(Buffer.from(m[2], "base64"));
+    const { width = 0, hasAlpha } = await img.metadata();
+    if (width <= TILE_PHOTO_PX) return dataUrl;
+    const resized = img.resize({ width: TILE_PHOTO_PX });
+    const out = hasAlpha ? await resized.png().toBuffer() : await resized.jpeg({ quality: 82 }).toBuffer();
+    return `data:image/${hasAlpha ? "png" : "jpeg"};base64,${out.toString("base64")}`;
+  } catch {
+    return dataUrl;
+  }
+}
 
 // The headshot as a data URL, read once a minute per photo rather than per tile.
 const PHOTO_TTL_MS = 60_000;
 const photos = new Map<string, { at: number; photo: Promise<string | undefined> }>();
+const tilePhotos = new Map<string, { at: number; photo: Promise<string | undefined> }>();
 function photoFor(clientId: string, profile: Parameters<typeof hostedCoverPhoto>[0]): Promise<string | undefined> {
   const key = `${clientId}:${profile.primaryLogoUrl}:${profile.coverPhotoUrl ?? ""}`;
   const hit = photos.get(key);
   if (hit && Date.now() - hit.at < PHOTO_TTL_MS) return hit.photo;
+  tilePhotos.delete(key);
   const photo = hostedCoverPhoto(profile).catch(() => undefined);
   photos.set(key, { at: Date.now(), photo });
   if (photos.size > 20) photos.delete(photos.keys().next().value as string);
   return photo;
 }
 
+/** The headshot shrunk for tiles, made once per photo read. */
+function tilePhotoFor(clientId: string, profile: Parameters<typeof hostedCoverPhoto>[0], full: Promise<string | undefined>): Promise<string | undefined> {
+  const key = `${clientId}:${profile.primaryLogoUrl}:${profile.coverPhotoUrl ?? ""}`;
+  const hit = tilePhotos.get(key);
+  if (hit && Date.now() - hit.at < PHOTO_TTL_MS) return hit.photo;
+  const photo = full.then(shrinkDataUrl);
+  tilePhotos.set(key, { at: Date.now(), photo });
+  if (tilePhotos.size > 20) tilePhotos.delete(tilePhotos.keys().next().value as string);
+  return photo;
+}
+
 export async function renderLayoutPreview(clientId: string, assetId: string, layout: CoverLayout): Promise<PreviewResult> {
-  const asset = await prisma.asset.findUnique({ where: { id: assetId }, select: { id: true, clientId: true, title: true, content: true, linkedinVariant: true, coverSpec: true } });
+  // One round trip: the brand row does not depend on the asset.
+  const [asset, profile] = await Promise.all([
+    prisma.asset.findUnique({ where: { id: assetId }, select: { id: true, clientId: true, title: true, content: true, linkedinVariant: true, coverSpec: true } }),
+    prisma.brandProfile.findUnique({ where: { clientId } }),
+  ]);
   if (!asset || asset.clientId !== clientId) return { ok: false, error: "Asset not found", status: 404 };
   const stored = asset.coverSpec as Partial<StoredCoverSpec> | null;
   if (!stored?.headline || !stored.layout || !stored.brand) return { ok: false, error: "This post has no cover yet", status: 404 };
 
-  const profile = await prisma.brandProfile.findUnique({ where: { clientId } });
-  const photo = profile ? await photoFor(clientId, profile) : undefined;
+  const fullPhoto = profile ? photoFor(clientId, profile) : Promise.resolve(undefined);
+  const photo = await fullPhoto;
   const shape = (stored.card as { shape?: PosterShape } | undefined)?.shape;
   const photoOk = dataUrlFitsPoster(photo);
-  const cutout = layout === "CUTOUT" && profile ? await coverCutout(profile) : undefined;
+  const fullCutout = layout === "CUTOUT" && profile ? await coverCutout(profile) : undefined;
+  const cutout = fullCutout && { ...fullCutout, src: (await shrinkDataUrl(fullCutout.src)) ?? fullCutout.src };
+  // Whether the photo can fill a Photo cover is judged on the full photo; the tile draws the small one.
+  const tilePhoto = profile && photo ? await tilePhotoFor(clientId, profile, fullPhoto) : undefined;
 
   const base: CoverSpec = {
     layout: stored.layout,
@@ -63,7 +110,7 @@ export async function renderLayoutPreview(clientId: string, assetId: string, lay
     kicker: stored.kicker,
     quote: stored.quote,
     number: stored.number,
-    author: { name: stored.author?.name ?? "", role: stored.author?.role, photo },
+    author: { name: stored.author?.name ?? "", role: stored.author?.role, photo: tilePhoto },
     brand: stored.brand,
     art: stored.art,
     ...posterParts(shape),
@@ -75,14 +122,16 @@ export async function renderLayoutPreview(clientId: string, assetId: string, lay
   // The photo and cut-out are the same for every tile of one brand, so they stay out of the key.
   const key = createHash("sha1").update(JSON.stringify({ ...spec, author: { ...spec.author, photo: Boolean(photo) }, cutout: Boolean(cutout) })).digest("hex");
   const cached = tiles.get(key);
-  if (cached) return { ok: true, webp: cached };
+  if (cached) return { ok: true, ...cached };
 
+  const raster = needsFallbackGlyphs(spec);
   for (const attempt of editAttempts(spec, asset.title ?? "")) {
     try {
-      const png = await renderCoverPng(attempt);
-      const webp = await sharp(png).resize(TILE.width, TILE.height).webp({ quality: 78 }).toBuffer();
-      remember(key, webp);
-      return { ok: true, webp };
+      const tile = raster
+        ? { body: await sharp(await renderCoverPng(attempt)).resize(TILE.width, TILE.height).webp({ quality: 78 }).toBuffer(), type: "image/webp" as const }
+        : { body: Buffer.from(await renderCoverSvg(attempt)), type: "image/svg+xml" as const };
+      remember(key, tile);
+      return { ok: true, ...tile };
     } catch (e) {
       if (!(e instanceof CoverFitError)) throw e;
     }

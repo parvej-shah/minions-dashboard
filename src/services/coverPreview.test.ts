@@ -8,10 +8,12 @@ const findProfile = vi.fn();
 const update = vi.fn();
 const upload = vi.fn();
 const render = vi.fn();
+const renderSvg = vi.fn();
+const photo = vi.fn(async (): Promise<string | undefined> => undefined);
 vi.mock("@/lib/prisma", () => ({ prisma: { asset: { findUnique: findAsset, update }, brandProfile: { findUnique: findProfile } } }));
 vi.mock("@/lib/r2", () => ({ uploadToR2: upload, deleteFromR2: vi.fn(), r2KeyFromUrl: vi.fn() }));
-vi.mock("@/lib/covers/render", () => ({ renderCoverPng: render }));
-vi.mock("@/services/cover", () => ({ hostedCoverPhoto: vi.fn(async () => undefined), coverCutout: vi.fn(async () => undefined) }));
+vi.mock("@/lib/covers/render", async (orig) => ({ ...(await orig<typeof import("@/lib/covers/render")>()), renderCoverPng: render, renderCoverSvg: renderSvg }));
+vi.mock("@/services/cover", () => ({ hostedCoverPhoto: photo, coverCutout: vi.fn(async () => undefined) }));
 
 const { renderLayoutPreview } = await import("./coverPreview");
 
@@ -34,6 +36,8 @@ beforeEach(async () => {
   vi.clearAllMocks();
   png = await sharp({ create: { width: 108, height: 135, channels: 3, background: "#123456" } }).png().toBuffer();
   render.mockResolvedValue(png);
+  renderSvg.mockResolvedValue('<svg width="1080" height="1350"></svg>');
+  photo.mockResolvedValue(undefined);
   // A new headline per test: tiles are remembered by their words.
   n += 1;
   findAsset.mockResolvedValue({ ...asset, coverSpec: { ...stored, headline: `${stored.headline} ${n}` } });
@@ -44,15 +48,36 @@ describe("renderLayoutPreview", () => {
   it("draws this post's own headline and subtitle in the asked layout", async () => {
     const r = await renderLayoutPreview("c1", "a1", "BOLD");
     expect(r.ok).toBe(true);
-    const spec = render.mock.calls[0][0];
+    const spec = renderSvg.mock.calls[0][0];
     expect(spec).toMatchObject({ layout: "BOLD", headline: `${stored.headline} ${n}`, kicker: stored.kicker });
   });
 
-  it("returns a small webp tile", async () => {
+  it("returns the tile as a vector picture the browser draws, without rasterizing on the server", async () => {
     const r = await renderLayoutPreview("c1", "a1", "HEADLINE");
     if (!r.ok) throw new Error(r.error);
-    const meta = await sharp(r.webp).metadata();
-    expect(meta).toMatchObject({ format: "webp", width: 216, height: 270 });
+    expect(r.type).toBe("image/svg+xml");
+    expect(r.body.toString()).toContain("<svg");
+    expect(render).not.toHaveBeenCalled();
+  });
+
+  it("falls back to a small webp when the words need letters our fonts lack", async () => {
+    findAsset.mockResolvedValue({ ...asset, coverSpec: { ...stored, headline: `দ্রুত উত্তর ${n}` } });
+    const r = await renderLayoutPreview("c1", "a1", "HEADLINE");
+    if (!r.ok) throw new Error(r.error);
+    expect(r.type).toBe("image/webp");
+    expect(await sharp(r.body).metadata()).toMatchObject({ format: "webp", width: 216, height: 270 });
+    expect(renderSvg).not.toHaveBeenCalled();
+  });
+
+  it("embeds a shrunk headshot in the tile, not the full photo", async () => {
+    const big = await sharp({ create: { width: 1600, height: 1600, channels: 3, background: "#884422" } }).jpeg().toBuffer();
+    photo.mockResolvedValue(`data:image/jpeg;base64,${big.toString("base64")}`);
+    findProfile.mockResolvedValue({ primaryLogoUrl: `https://cdn/p${n}.jpg`, coverPhotoUrl: null, coverPhotoSource: null, visualAssets: null });
+    const r = await renderLayoutPreview("c1", "a1", "BOLD");
+    expect(r.ok).toBe(true);
+    const sent = renderSvg.mock.calls[0][0].author.photo as string;
+    const meta = await sharp(Buffer.from(sent.split(",")[1], "base64")).metadata();
+    expect(meta.width).toBeLessThanOrEqual(480);
   });
 
   it("writes nothing: no upload, no row update", async () => {
@@ -65,7 +90,7 @@ describe("renderLayoutPreview", () => {
     findAsset.mockResolvedValue({ ...asset, coverSpec: { ...stored, headline: `x${n}`, card: {} } });
     const r = await renderLayoutPreview("c1", "a1", "GRID");
     expect(r).toMatchObject({ ok: false, status: 422 });
-    expect(render).not.toHaveBeenCalled();
+    expect(renderSvg).not.toHaveBeenCalled();
   });
 
   it("refuses another workspace's post", async () => {
@@ -79,21 +104,21 @@ describe("renderLayoutPreview", () => {
   });
 
   it("falls back through shorter copy when the first does not fit, but keeps the layout", async () => {
-    render.mockRejectedValueOnce(new CoverFitError("too long"));
+    renderSvg.mockRejectedValueOnce(new CoverFitError("too long"));
     const r = await renderLayoutPreview("c1", "a1", "BOLD");
     expect(r.ok).toBe(true);
-    expect(render.mock.calls.length).toBe(2);
-    expect(render.mock.calls[1][0].layout).toBe("BOLD");
+    expect(renderSvg.mock.calls.length).toBe(2);
+    expect(renderSvg.mock.calls[1][0].layout).toBe("BOLD");
   });
 
   it("reports a fit failure when nothing fits", async () => {
-    render.mockRejectedValue(new CoverFitError("too long"));
+    renderSvg.mockRejectedValue(new CoverFitError("too long"));
     expect(await renderLayoutPreview("c1", "a1", "BOLD")).toMatchObject({ ok: false, status: 422 });
   });
 
   it("reuses a tile it already drew for the same words", async () => {
     await renderLayoutPreview("c1", "a1", "SWISS");
     await renderLayoutPreview("c1", "a1", "SWISS");
-    expect(render).toHaveBeenCalledTimes(1);
+    expect(renderSvg).toHaveBeenCalledTimes(1);
   });
 });
