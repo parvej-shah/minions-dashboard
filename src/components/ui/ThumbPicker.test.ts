@@ -22,6 +22,15 @@ describe("ThumbPicker", () => {
     expect(html.match(/tabindex="0"/g)).toHaveLength(1);
   });
 
+  it("keeps the sample picture under a live one that starts hidden, so a failed load leaves the sample", () => {
+    const live = [{ ...options[0], liveSrc: "/api/assets/a1/cover/preview?layout=BOLD&v=x" }, options[1]];
+    const html = renderToStaticMarkup(h(ThumbPicker, { label: "Layout", options: live, selected: "SWISS", onSelect: () => {} }));
+    expect(html).toContain("cover-bold.webp");
+    expect(html).toContain("layout=BOLD");
+    expect(html.match(/preview\?layout=/g)).toHaveLength(1);
+    expect(html).toMatch(/preview\?layout=BOLD[^>]*opacity-0|opacity-0[^>]*preview\?layout=BOLD/);
+  });
+
   it("says which tile is being drawn", () => {
     const html = renderToStaticMarkup(h(ThumbPicker, { label: "Layout", options, selected: "SWISS", busy: "SWISS", onSelect: () => {} }));
     expect(html).toContain('aria-busy="true"');

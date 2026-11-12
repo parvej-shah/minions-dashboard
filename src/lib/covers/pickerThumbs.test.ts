@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { COVER_LAYOUTS } from "./layouts";
 import { SLIDE_STYLES } from "@/lib/carousel/slides";
-import { carouselThumb, coverThumb, pickerLayouts, PICKER_THUMB_DIR } from "./pickerThumbs";
+import { carouselThumb, coverPreviewUrl, coverThumb, pickerLayouts, previewVersion, PICKER_THUMB_DIR } from "./pickerThumbs";
 import type { LayoutFacts } from "./available";
 
 const bare: LayoutFacts = { shape_read: true, list: null, grid: null, punch: null, number: null, photo_ok: false, quote_ok: false, kicker: null, cutout_ok: false };
@@ -44,5 +44,22 @@ describe("pickerLayouts", () => {
 
   it("always keeps the current layout, even if it could no longer be drawn", () => {
     expect(pickerLayouts("NUMBER", bare).suggested[0]).toBe("NUMBER");
+  });
+});
+
+describe("live layout tiles", () => {
+  const cover = { headline: "Why buyers leave", emphasis: null, kicker: "Three fixes.", quote: null, number: null, list: null, grid: null, punch: null, art_style: "SHAPES", author: { name: "Ada", role: "Founder" } };
+
+  it("addresses one tile per layout, with the text version in the query", () => {
+    expect(coverPreviewUrl("a1", "BOLD", "abc")).toBe("/api/assets/a1/cover/preview?layout=BOLD&v=abc");
+  });
+
+  it("keeps the same version when only the chosen layout changes", () => {
+    expect(previewVersion({ ...cover, layout: "BOLD" })).toBe(previewVersion({ ...cover, layout: "HEADLINE" }));
+  });
+
+  it("changes the version when the post's wording changes", () => {
+    expect(previewVersion({ ...cover, layout: "BOLD" })).not.toBe(previewVersion({ ...cover, layout: "BOLD", headline: "Why buyers stay" }));
+    expect(previewVersion({ ...cover, layout: "BOLD" })).not.toBe(previewVersion({ ...cover, layout: "BOLD", list: ["a", "b", "c"] }));
   });
 });

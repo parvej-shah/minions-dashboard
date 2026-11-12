@@ -15,6 +15,11 @@ export interface ThumbOption {
   label: string;
   /** A sample picture of the choice. Without one, `icon` fills the tile. */
   src?: string;
+  /**
+   * This post's own picture of the choice. The sample shows at once and this
+   * fades in over it when it arrives; if it never does, the sample stays.
+   */
+  liveSrc?: string;
   icon?: React.ReactNode;
 }
 
@@ -24,6 +29,36 @@ const SIZES = {
   /** Two carousel pages side by side. */
   wide: { tile: "w-[156px]", frame: "aspect-[32/27]", px: { width: 320, height: 270 } },
 };
+
+/** The sample picture, with the post's own picture fading in over it when there is one. */
+function TileImage({ o, px, draggable }: { o: ThumbOption; px: { width: number; height: number }; draggable?: boolean }) {
+  const [live, setLive] = useState<"loading" | "shown" | "failed">("loading");
+  // A new picture (the post's words changed) starts over.
+  const [seen, setSeen] = useState(o.liveSrc);
+  if (seen !== o.liveSrc) {
+    setSeen(o.liveSrc);
+    setLive("loading");
+  }
+  return (
+    <>
+      <Image src={o.src!} alt="" width={px.width} height={px.height} unoptimized draggable={draggable} className="h-full w-full object-cover pointer-events-none" />
+      {o.liveSrc && live !== "failed" && (
+        <Image
+          key={o.liveSrc}
+          src={o.liveSrc}
+          alt=""
+          width={px.width}
+          height={px.height}
+          unoptimized
+          draggable={draggable}
+          onLoad={() => setLive("shown")}
+          onError={() => setLive("failed")}
+          className={`absolute inset-0 h-full w-full object-cover pointer-events-none transition-opacity duration-300 ${live === "shown" ? "opacity-100" : "opacity-0"}`}
+        />
+      )}
+    </>
+  );
+}
 
 /**
  * Pick one by its picture, like the Lock Screen or Photos filters: a row of
@@ -240,7 +275,7 @@ export default function ThumbPicker({
                 } ${disabled && !on ? "opacity-50" : ""}`}
               >
                 {o.src ? (
-                  <Image src={o.src} alt="" width={s.px.width} height={s.px.height} unoptimized className="h-full w-full object-cover" />
+                  <TileImage o={o} px={s.px} />
                 ) : (
                   <span className="flex h-full w-full items-center justify-center text-brand">{o.icon}</span>
                 )}
@@ -324,15 +359,7 @@ export default function ThumbPicker({
                 } ${disabled && !on ? "opacity-50" : ""}`}
               >
                 {o.src ? (
-                  <Image
-                    src={o.src}
-                    alt=""
-                    width={s.px.width}
-                    height={s.px.height}
-                    unoptimized
-                    draggable={false}
-                    className="h-full w-full object-cover pointer-events-none"
-                  />
+                  <TileImage o={o} px={s.px} draggable={false} />
                 ) : (
                   <span className="flex h-full w-full items-center justify-center text-brand pointer-events-none">{o.icon}</span>
                 )}

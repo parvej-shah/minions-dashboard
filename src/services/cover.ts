@@ -1,12 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { deleteFromR2, r2KeyFromUrl, uploadToR2 } from "@/lib/r2";
 import { coverBrand } from "@/lib/covers/brand";
-import { bodyOf, checkCoverLine, pickCoverLine, chooseCoverCopy, coverOptions, coverOutOfDate, scoreHeadline, pickQuote, quoteSource, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
+import { bodyOf, checkCoverLine, pickCoverLine, chooseCoverCopy, coverOptions, coverOutOfDate, scoreHeadline, quoteSource, type CoverCard, type CoverCopy } from "@/lib/covers/copy";
 import { askJev } from "@/lib/ai/jev";
 import { chatWithFallback } from "@/lib/ai/modelChain";
 import { withCostMeter } from "@/lib/ai/cost";
 import { renderCoverLine } from "@/lib/prompts/coverLine";
-import { COVER_LAYOUTS, CoverFitError, type CoverLayout, type CoverSpec } from "@/lib/covers/layouts";
+import { CoverFitError, type CoverLayout, type CoverSpec } from "@/lib/covers/layouts";
 import { renderCoverPng } from "@/lib/covers/render";
 import { chooseArt, parseArtStyle, DEFAULT_COVER_ART_STYLE, type CoverArtStyle } from "@/lib/covers/art";
 import { numbersIn } from "@/lib/harvest/text";
@@ -15,7 +15,7 @@ import { renderPosterShape } from "@/lib/prompts/posterShape";
 import { editShape, parseShape, shapeJson, type PosterShape, type ShapeEdit } from "@/lib/covers/shape";
 import { eligibleTypes, fallbackOrder, pickPosterType } from "@/lib/covers/posterType";
 import { dataUrlFitsPoster, prepareCutout } from "@/lib/covers/photo";
-import { isBanner } from "@/lib/covers/bannerTypes";
+import { NEEDS_SHAPE, attempts, editAttempts, posterParts, sameType, switchLayout } from "@/lib/covers/layoutSwitch";
 
 /**
  * Draws an asset's cover in code and attaches it (phase 5 of
@@ -161,27 +161,6 @@ export function withCoverLine(content: string, title: string, url: string): stri
   return `![${alt}](${url})\n\n${bodyOf(content)}`;
 }
 
-/**
- * Specs to try, best first. A spec throws CoverFitError when its copy cannot
- * fit; the next one drops the kicker, then uses the title, then the plain
- * HEADLINE layout, so a draft always gets a cover when any honest copy fits.
- */
-function attempts(spec: CoverSpec, title: string): CoverSpec[] {
-  // Each option is tried with the illustration first, then without it: the
-  // headline and subtitle carry the post, the picture does not.
-  return copyAttempts(spec, title).flatMap((s) => (s.art ? [s, { ...s, art: undefined }] : [s]));
-}
-
-function copyAttempts(spec: CoverSpec, title: string): CoverSpec[] {
-  const out = [spec];
-  if (spec.kicker) out.push({ ...spec, kicker: undefined });
-  if (title && title !== spec.headline) out.push({ ...spec, layout: spec.layout === "QUOTE" || spec.layout === "NUMBER" ? "HEADLINE" : spec.layout, headline: title, emphasis: undefined, kicker: undefined, quote: undefined, number: undefined });
-  const plain: CoverSpec = { ...spec, layout: "HEADLINE", headline: title || spec.headline, emphasis: undefined, kicker: undefined, quote: undefined, number: undefined, label: undefined };
-  // Last: one line over the limit, because a draft without a cover is worse than a long headline.
-  out.push(plain, { ...plain, looseHeadline: true });
-  return out;
-}
-
 /** A Jev yes above this counts. */
 const JEV_YES = 0.7;
 
@@ -276,16 +255,6 @@ export async function readPosterShape(draft: { title: string; post: string; body
   const raw = await Promise.race([call, timeout]).catch(() => null);
   return raw ? parseShape(raw, draft.body, notes) : undefined;
 }
-
-/** The poster's items from the shape; each layout draws only its own. */
-const posterParts = (shape?: PosterShape) => ({ list: shape?.list?.items, grid: shape?.grid?.items, punch: shape?.punch });
-
-/** Layouts that need a part of the shape, and what to say when the post lacks it. */
-const NEEDS_SHAPE: Partial<Record<CoverLayout, { part: "list" | "grid" | "punch"; missing: string }>> = {
-  LIST: { part: "list", missing: "This post does not name 3 or 4 separate points for a List cover." },
-  GRID: { part: "grid", missing: "This post does not name 3 to 6 parallel things for a Grid cover." },
-  PUNCH: { part: "punch", missing: "This post has no short punch lines for a Punch cover." },
-};
 
 export async function renderAssetCover(assetId: string, input: { card?: CoverCard; edit?: CoverEdit } = {}): Promise<CoverResult> {
   const asset = await prisma.asset.findUnique({
@@ -461,21 +430,9 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     }
     spec = { ...spec, ...posterParts(card.shape) };
     if (edit.layout) {
-      if (!COVER_LAYOUTS.includes(edit.layout)) return { ok: false, error: `Unknown layout ${edit.layout}` };
-      const need = NEEDS_SHAPE[edit.layout];
-      if (need && !card.shape?.[need.part]) return { ok: false, error: need.missing };
-      if (edit.layout === "PHOTO" && !photoOk) {
-        return { ok: false, error: author.photo ? "The brand photo can't fill a Photo cover: it needs an opaque headshot at least 600 px wide (a logo with a transparent background won't do)." : "Add a headshot on the Brand page to use the Photo cover." };
-      }
-      if (edit.layout === "CUTOUT" && !cutout) return { ok: false, error: "Add a cut-out photo (a PNG with a transparent background) on the Brand page to use the Cut-out cover." };
-      if (edit.layout === "TORN" && !spec.kicker) return { ok: false, error: "A Torn cover needs a subtitle for the strip to reveal. Add one first." };
-      if (edit.layout === "NUMBER" && !spec.number) return { ok: false, error: "This draft has no verified figure for a NUMBER cover." };
-      if (edit.layout === "QUOTE") {
-        const quote = pickQuote(quoteSource({ body, post: asset.linkedinVariant }));
-        if (!quote) return { ok: false, error: "No sentence in the post works as a pull quote." };
-        spec = { ...spec, quote };
-      }
-      spec = { ...spec, layout: edit.layout };
+      const switched = switchLayout(spec, edit.layout, { shape: card.shape, photo: { present: Boolean(author.photo), ok: photoOk }, cutout: Boolean(cutout), body, post: asset.linkedinVariant });
+      if (!switched.ok) return { ok: false, error: switched.error };
+      spec = switched.spec;
     }
   }
 
@@ -483,12 +440,9 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   // fallback down to the plain headline. An edit keeps the type it asked for;
   // only the four original types fall back to the plain headline.
   const title = asset.title ?? "";
-  const sameType = (s: CoverSpec) => attempts(s, title).filter((a) => a.layout === s.layout && !a.looseHeadline);
   const tries = !input.edit
-    ? order.flatMap((l, i) => (i === order.length - 1 ? attempts(specFor(l), title) : sameType(specFor(l))))
-    : NEEDS_SHAPE[spec.layout] || spec.layout === "PHOTO" || isBanner(spec.layout)
-      ? sameType(spec)
-      : attempts(spec, title);
+    ? order.flatMap((l, i) => (i === order.length - 1 ? attempts(specFor(l), title) : sameType(specFor(l), title)))
+    : editAttempts(spec, title);
   let png: Buffer | null = null;
   let used = spec;
   for (const attempt of tries) {

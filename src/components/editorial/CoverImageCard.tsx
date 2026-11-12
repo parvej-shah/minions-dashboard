@@ -6,7 +6,7 @@ import { AlertTriangle, Image as ImageIcon, Loader2, RefreshCw, Shuffle } from "
 import type { AssetItem, CoverSpecDTO } from "@/types";
 import type { CoverEditInput } from "@/hooks/useEditorialDraft";
 import { COVER_ART_STYLES, COVER_ART_STYLE_META, parseArtStyle } from "@/lib/covers/artStyles";
-import { coverThumb, pickerLayouts } from "@/lib/covers/pickerThumbs";
+import { coverPreviewUrl, coverThumb, pickerLayouts, previewVersion } from "@/lib/covers/pickerThumbs";
 import { buttonStyles } from "@/components/ui/Button";
 import { ChoiceRow, GroupedList, ListRow } from "@/components/ui/List";
 import { inputClass } from "@/components/ui/fieldStyles";
@@ -348,7 +348,7 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
           </div>
           <ThumbPicker
             label="Layout"
-            options={(showAll ? [...layouts.suggested, ...layouts.rest] : layouts.suggested).map((l) => ({ id: l, label: layoutLabel(l), src: coverThumb(l) }))}
+            options={(showAll ? [...layouts.suggested, ...layouts.rest] : layouts.suggested).map((l) => ({ id: l, label: layoutLabel(l), src: coverThumb(l), liveSrc: coverPreviewUrl(activeAsset.id, l, previewVersion(cover)) }))}
             selected={pending ?? cover.layout}
             busy={pending}
             disabled={isRendering}
