@@ -24,6 +24,8 @@ export interface CoverCard {
   headline?: string;
   /** A 3-6 word line written from the finished post (checkCoverLine); preferred over the headline. */
   cover_line?: string;
+  /** The word of cover_line the model said to set in the accent colour. */
+  cover_line_emphasis?: string;
   subtitle?: string;
   /** One word of the headline to set in the accent colour. */
   emphasis_word?: string;
@@ -170,10 +172,16 @@ export function audienceLabel(icp: CoverCopyInput["icp"]): string | undefined {
   return text.length <= 40 ? text : undefined;
 }
 
-function pickEmphasis(headline: string, proposed: string | undefined): string | undefined {
+/**
+ * The headline word set in the accent colour: the first model pick that is a
+ * word of this headline (the cover line's own, then the strategist's), else
+ * the longest content word (user, 2026-11-12: every new cover gets one).
+ */
+function pickEmphasis(headline: string, proposed: (string | undefined)[]): string | undefined {
   const key = (w: string) => w.toLowerCase().replace(/[^a-z0-9']/g, "");
   const ws = words(headline);
-  if (proposed && ws.some((w) => key(w) === key(proposed))) return proposed;
+  const named = proposed.find((p) => p && key(p) && ws.some((w) => key(w) === key(p)));
+  if (named) return named;
   // Otherwise the longest content word: usually the specific noun the claim turns on.
   const candidates = ws.filter((w) => contentWords(w).size > 0);
   return candidates.sort((a, b) => key(b).length - key(a).length)[0];
@@ -308,10 +316,10 @@ export function chooseCoverCopy(input: CoverCopyInput): CoverCopy {
   // The verified figure is kept whatever the layout, so a reviewer can switch to it.
   const base = { layout, label: audienceLabel(input.icp), headline_source: source, score, notes, ...(numbered ? { number: numbered.number } : {}) };
   if (layout === "NUMBER" && numbered) {
-    return { ...base, headline: numbered.caption, emphasis: pickEmphasis(numbered.caption, undefined) };
+    return { ...base, headline: numbered.caption, emphasis: pickEmphasis(numbered.caption, []) };
   }
   if (layout === "QUOTE" && quote) return { ...base, headline, quote };
-  return { ...base, headline, emphasis: pickEmphasis(headline, input.card.emphasis_word), kicker: kicker || undefined };
+  return { ...base, headline, emphasis: pickEmphasis(headline, [source === "cover_line" ? input.card.cover_line_emphasis : undefined, input.card.emphasis_word]), kicker: kicker || undefined };
 }
 
 const squash = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();

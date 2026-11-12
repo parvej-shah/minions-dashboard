@@ -6,7 +6,7 @@ import { bodyOf, checkCoverLine, pickCoverLine, chooseCoverCopy, coverOptions, c
 import { askJev } from "@/lib/ai/jev";
 import { chatWithFallback } from "@/lib/ai/modelChain";
 import { withCostMeter } from "@/lib/ai/cost";
-import { renderCoverLine } from "@/lib/prompts/coverLine";
+import { parseCoverLines, renderCoverLine, type ProposedCoverLine } from "@/lib/prompts/coverLine";
 import { CoverFitError, type CoverLayout, type CoverSpec } from "@/lib/covers/layouts";
 import { renderCoverPng } from "@/lib/covers/render";
 import { chooseArt, parseArtStyle, DEFAULT_COVER_ART_STYLE, type CoverArtStyle } from "@/lib/covers/art";
@@ -215,11 +215,9 @@ async function judgeOptions(options: ReturnType<typeof coverOptions>, headline: 
 /** The cover is drawn inside 02's 60 s cover call; the line is skipped rather than late. */
 const COVER_LINE_BUDGET_MS = 20_000;
 
-function parseLines(raw: string): string[] {
+function parseLines(raw: string): ProposedCoverLine[] {
   try {
-    const content = JSON.parse(raw)?.choices?.[0]?.message?.content ?? "";
-    const json = JSON.parse(String(content).replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, ""));
-    return Array.isArray(json?.lines) ? json.lines.filter((l: unknown): l is string => typeof l === "string") : [];
+    return parseCoverLines(String(JSON.parse(raw)?.choices?.[0]?.message?.content ?? ""));
   } catch {
     return [];
   }
@@ -231,20 +229,26 @@ function parseLines(raw: string): string[] {
  * says what the post is about. The clearest line is used when Jev rates it clear,
  * even if the long title also reads clearly: posters carry a short, punchy line. "" when none is,
  * undefined when Qwen or Jev did not answer (so the next draw tries again).
+ * The line comes with the word Qwen said to set in the accent colour.
  */
-export async function writeCoverLine(draft: { title: string; post: string; body: string }, current: string, notes: string[]): Promise<string | undefined> {
+export async function writeCoverLine(draft: { title: string; post: string; body: string }, current: string, notes: string[]): Promise<ProposedCoverLine | undefined> {
   const apiKey = process.env.DASHSCOPE_API_KEY;
   if (!apiKey) return undefined;
   const call = chatWithFallback(renderCoverLine({ title: draft.title, post: draft.post }), apiKey).then((res) => (res.status < 300 ? parseLines(res.body) : []));
-  const timeout = new Promise<string[]>((resolve) => setTimeout(() => resolve([]), COVER_LINE_BUDGET_MS));
-  const proposed = await Promise.race([call, timeout]).catch(() => [] as string[]);
-  const usable = [...new Set(proposed.map((l) => l.trim().replace(/[.]+$/, "").replace(/^\p{Ll}/u, (c) => c.toUpperCase())))].filter((l) => {
+  const timeout = new Promise<ProposedCoverLine[]>((resolve) => setTimeout(() => resolve([]), COVER_LINE_BUDGET_MS));
+  const proposed = await Promise.race([call, timeout]).catch(() => [] as ProposedCoverLine[]);
+  const accents = new Map<string, string | undefined>();
+  for (const p of proposed) {
+    const l = p.line.trim().replace(/[.]+$/, "").replace(/^\p{Ll}/u, (c) => c.toUpperCase());
+    if (!accents.has(l)) accents.set(l, p.accent);
+  }
+  const usable = [...accents.keys()].filter((l) => {
     const why = checkCoverLine(l, draft.body);
     if (why) notes.push(`Cover line "${l}" not used: ${why}.`);
     return !why;
   });
   if (!proposed.length) return undefined;
-  if (!usable.length) return "";
+  if (!usable.length) return { line: "" };
   const lines = [current, ...usable];
   const answers = await askJev(
     { title: draft.title, post: draft.post.slice(0, 3000), ...Object.fromEntries(lines.map((l, i) => [`line_${i}`, l])) },
@@ -255,7 +259,7 @@ export async function writeCoverLine(draft: { title: string; post: string; body:
   const p = (i: number) => answers[`clear_${i}`]?.noul ?? 0;
   const line = pickCoverLine(usable.map((l, i) => ({ l, p: p(i + 1) })), p(0), JEV_YES);
   if (!line) notes.push("No cover line used: none of the short lines says plainly what the post is about.");
-  return line;
+  return { line, accent: line ? accents.get(line) : undefined };
 }
 
 /** Read alongside the cover line, inside the same 60 s cover call. */
@@ -342,7 +346,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     needsShape ? withCostMeter(() => readPosterShape({ title: asset.title ?? "", post, body: shapeBody }, shapeNotes)) : null,
   ]);
   lineCostUsd = (lineRun?.costUsd ?? 0) + (shapeRun?.costUsd ?? 0);
-  if (lineRun?.value !== undefined && lineRun) card = { ...card, cover_line: lineRun.value };
+  if (lineRun?.value) card = { ...card, cover_line: lineRun.value.line, cover_line_emphasis: lineRun.value.accent };
   if (shapeRun?.value) card = { ...card, shape: shapeRun.value };
   copyInput.card = card;
   // Judged only when the layout is being chosen: an edit keeps the drawn one.

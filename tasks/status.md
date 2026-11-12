@@ -59,6 +59,7 @@
 | 53 | Layout picker tiles show the post's own text (live, cached, read-only) | CLAUDE | DONE (local; not pushed; not viewed live) | tasks/53.md |
 | 54 | Minimal Captions UI: remove fake Like/Comment buttons & nested cards | ANTIGRAVITY | DONE | tasks/54.md |
 | 56 | Unified Carousel Format Decision & Restore LinkedIn Edit Button | ANTIGRAVITY | DONE | tasks/56.md |
-| 57 | Layout tiles fill in one by one, in order (smoother See all) | CLAUDE | DONE (local; not pushed; not viewed live) | tasks/57.md |
-| 58 | Layout tiles as SVG: 15-38 ms per tile, same look; real cover unchanged | CLAUDE | DONE (local; not pushed; viewed on localhost) | tasks/58.md |
+| 57 | Layout tiles fill in one by one, in order (smoother See all) | CLAUDE | DONE (pushed) | tasks/57.md |
+| 58 | Layout tiles as SVG: 15-38 ms per tile, same look; real cover unchanged | CLAUDE | DONE (pushed; viewed on localhost) | tasks/58.md |
 | 59 | Rename 'LinkedIn carousel' to 'Carousel' | ANTIGRAVITY | DONE | tasks/59.md |
+| 60 | Every new cover gets the model's accent word for the line it shows | CLAUDE | DONE (local; not pushed; no live draft drawn) | tasks/60.md |

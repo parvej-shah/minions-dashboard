@@ -126,7 +126,7 @@ Return ONLY this JSON:
   "key_points": ["3-5 items, each a specific concrete point"],
   "thumbnail_card": {
     "headline": "5-10 words, sentence case: the post's title, naming what it is about, never a topic label",
-    "emphasis_word": "the one headline word it turns on",
+    "emphasis_word": "one word copied exactly from thumbnail_card.headline: the word the claim turns on (the specific thing, the result or the contrast), never a filler word",
     "subtitle": "one sentence under 90 characters, stating what the reader gets or what it costs them",
     "number": { "value": "a figure the idea states, or empty", "unit": "e.g. seconds, or empty", "caption": "4-10 words saying what was measured, or empty" },
     "visual_register": "PHYSICAL_TRADE or ABSTRACT_DATA",

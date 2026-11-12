@@ -203,6 +203,24 @@ describe("the cover", () => {
   });
 });
 
+describe("the accent word is the model's pick for the line the cover shows (task 60)", () => {
+  const line = (card: CoverCopyInput["card"]) => chooseCoverCopy({ ...input, card: { ...input.card, cover_line: "Your agent books into nowhere", ...card }, recentLayouts: [] });
+
+  it("uses the cover line's own accent word", () => {
+    // Ahead of the strategist's word and of the longest word ("nowhere").
+    expect(line({ cover_line_emphasis: "books", emphasis_word: "agent" }).emphasis).toBe("books");
+  });
+
+  it("uses the strategist's word when the line has none of its own and the word is in the line", () => {
+    expect(line({ emphasis_word: "agent" }).emphasis).toBe("agent");
+    expect(line({ cover_line_emphasis: "calendar", emphasis_word: "books" }).emphasis).toBe("books");
+  });
+
+  it("takes the longest word only when no model pick is in the line", () => {
+    expect(line({ cover_line_emphasis: undefined, emphasis_word: "calendar" }).emphasis).toBe("nowhere");
+  });
+});
+
 describe("pickCoverLine: posters carry a short, punchy line", () => {
   const JEV_YES = 0.7;
   it("uses the clearest short line even when the long title also reads clearly", () => {
