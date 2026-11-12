@@ -1,12 +1,12 @@
 "use client";
 
 import { failureSummary } from "@/lib/publishFailures";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { DEFAULT_TIMEZONE } from "@/constants/config";
-import { buildWeek, greeting, failedPosts, recentlyPosted, slotLabel, waitingForYou, type WeekDay } from "@/lib/today";
+import { buildWeek, greeting, failedPosts, recentlyPosted, slotLabel, waitingForYou, spotlightPost, todayHeadline, todaySchedulePayload, type WeekDay } from "@/lib/today";
 import { nextFreeSlot } from "@/lib/drafts/nextSlot";
 import { MIN_LEAD_MINUTES } from "@/lib/postTime";
 import { buttonStyles } from "@/components/ui/Button";
@@ -15,6 +15,10 @@ import { CardTitle, PageHeader, SectionHeader, StatusLabel } from "@/components/
 import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
 import WeeklyPulseCard from "@/components/pulse/WeeklyPulseCard";
 import PostThumb from "@/components/posts/PostThumb";
+import QuickDraftDrawer from "@/components/posts/QuickDraftDrawer";
+import Toast from "@/components/ui/Toast";
+import { useToast } from "@/hooks/useToast";
+import { apiClient } from "@/lib/api-client";
 import type { AssetItem } from "@/types";
 
 function TodaySkeleton() {
@@ -39,10 +43,17 @@ export default function TodayView() {
   const schedule = useApiResource<{ timezone?: string } | null>("/api/schedule", null);
   const preview = useApiResource<{ slots: string[] }>("/api/schedule/preview?count=14", { slots: [] });
 
+  const [spotlightIndex, setSpotlightIndex] = useState(0);
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [scheduledSlot, setScheduledSlot] = useState<string | null>(null);
+  const [isQuickDraftOpen, setIsQuickDraftOpen] = useState(false);
+  const toast = useToast(3500);
+
   const tz = schedule.data?.timezone || DEFAULT_TIMEZONE;
   // Read once per render; the page is short-lived and refetches on focus elsewhere.
   const now = useMemo(() => new Date(), []);
   const waiting = waitingForYou(assets.data);
+  const currentSpotlight = waiting.length > 0 ? (spotlightPost(waiting, spotlightIndex) ?? waiting[0]) : null;
   const posted = recentlyPosted(assets.data, 3);
   const failed = failedPosts(assets.data);
   const week = buildWeek(now, tz, assets.data, preview.data.slots);
@@ -50,6 +61,25 @@ export default function TodayView() {
   const nextSlot = nextFreeSlot(preview.data.slots, taken, now.getTime(), MIN_LEAD_MINUTES);
   const firstName = session?.user?.name?.split(" ")[0];
   const dateLine = new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "long", day: "numeric", month: "long" }).format(now);
+
+  const handleInlineSchedule = async () => {
+    if (!currentSpotlight || !nextSlot || isScheduling) return;
+    setIsScheduling(true);
+    const { date, time } = todaySchedulePayload(nextSlot, tz);
+    const slotText = slotLabel(nextSlot, tz);
+
+    try {
+      await apiClient.post(`/api/assets/${currentSpotlight.id}/schedule`, { date, time });
+      setScheduledSlot(slotText);
+      window.dispatchEvent(new Event("minions-counts-updated"));
+      toast.show(`Scheduled for ${slotText}`);
+      void assets.reload();
+    } catch {
+      toast.show("Could not schedule post. Please try again.");
+    } finally {
+      setIsScheduling(false);
+    }
+  };
 
   if (assets.isLoading) return <TodaySkeleton />;
 
@@ -65,35 +95,90 @@ export default function TodayView() {
             Try again
           </button>
         </Card>
-      ) : waiting.length > 0 ? (
-        <Card as="section" pad="lg" aria-labelledby="waiting" className="flex flex-wrap items-center gap-10 overflow-hidden">
-          <div className="flex min-w-0 flex-[1_1_360px] flex-col gap-4">
-            <StatusLabel tone="coral">Needs you</StatusLabel>
-            <CardTitle id="waiting">
-              {waiting.length === 1 ? "1 post is ready for your OK." : `${waiting.length} posts are ready for your OK.`}
-            </CardTitle>
-            <p className="text-[17px] leading-relaxed text-muted">
-              {nextSlot
-                ? `The first one can go out ${slotLabel(nextSlot, tz)} once you approve it. Takes about a minute.`
-                : "Nothing goes out until you approve it. Takes about a minute."}
-            </p>
-            <div className="flex flex-wrap items-center gap-4 pt-2">
-              <Link href={`/editorial?id=${encodeURIComponent(waiting[0].id)}`} className={buttonStyles({ size: "lg" })}>
-                Review now
-              </Link>
+      ) : scheduledSlot ? (
+        <Card as="section" pad="lg" className="space-y-4">
+          <StatusLabel tone="success">Scheduled</StatusLabel>
+          <CardTitle>Your post is scheduled for {scheduledSlot}.</CardTitle>
+          <p className="text-[17px] leading-relaxed text-muted">
+            {nextSlot
+              ? `Minions will prepare your next draft before ${slotLabel(nextSlot, tz)}.`
+              : "You're all caught up for today."}
+          </p>
+          <div className="flex flex-wrap items-center gap-4 pt-2">
+            <Link href="/posts" className={buttonStyles({ variant: "soft", size: "lg" })}>
+              View in Posts
+            </Link>
+          </div>
+        </Card>
+      ) : currentSpotlight ? (
+        <Card as="section" pad="lg" aria-labelledby="spotlight-title" className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 sm:gap-10 overflow-hidden">
+          <div className="flex min-w-0 flex-1 flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <StatusLabel tone="coral">Ready for your OK</StatusLabel>
               {waiting.length > 1 && (
-                <Link href="/posts?show=needs" className="text-[17px] text-brand hover:underline">
-                  See all {waiting.length}
-                </Link>
+                <span className="text-[13px] text-muted">
+                  Draft {((spotlightIndex % waiting.length) + 1)} of {waiting.length}
+                </span>
               )}
             </div>
+
+            <CardTitle id="spotlight-title">
+              {todayHeadline(nextSlot, tz)}
+            </CardTitle>
+
+            <h3 className="text-[19px] font-semibold tracking-tight text-ink leading-snug line-clamp-2">
+              {currentSpotlight.title}
+            </h3>
+
+            {currentSpotlight.hook && (
+              <p className="text-[16px] italic leading-relaxed text-muted line-clamp-2 border-l-2 border-line pl-3">
+                “{currentSpotlight.hook.replace(/^["']|["']$/g, "")}”
+              </p>
+            )}
+
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              {nextSlot ? (
+                <button
+                  type="button"
+                  onClick={() => void handleInlineSchedule()}
+                  disabled={isScheduling}
+                  className={buttonStyles({ size: "lg" })}
+                >
+                  {isScheduling ? "Scheduling..." : `Approve for ${slotLabel(nextSlot, tz)}`}
+                </button>
+              ) : (
+                <Link href={`/editorial?id=${encodeURIComponent(currentSpotlight.id)}`} className={buttonStyles({ size: "lg" })}>
+                  Review now
+                </Link>
+              )}
+
+              <Link
+                href={`/editorial?id=${encodeURIComponent(currentSpotlight.id)}`}
+                className={buttonStyles({ variant: "soft", size: "lg" })}
+              >
+                Edit in Studio
+              </Link>
+            </div>
+
+            {waiting.length > 1 && (
+              <div className="flex flex-wrap items-center gap-3 pt-1 text-[14px] text-muted">
+                <button
+                  type="button"
+                  onClick={() => setSpotlightIndex((prev) => (prev + 1) % waiting.length)}
+                  className="text-brand hover:underline cursor-pointer"
+                >
+                  Swap angle →
+                </button>
+                <span>·</span>
+                <Link href="/posts" className="hover:text-ink hover:underline">
+                  Browse all {waiting.length} in Posts
+                </Link>
+              </div>
+            )}
           </div>
-          {/* Covers: the second one sits a little lower, inside the card's padding. */}
-          <div className="flex min-w-0 flex-[0_1_320px] gap-3 pb-4" aria-hidden="true">
-            {waiting.slice(0, 2).map((post, i) => (
-              <PostThumb key={post.id} post={post} className={`flex-1 ${i === 1 ? "translate-y-4" : ""}`} />
-            ))}
-            {waiting.length === 1 && <div className="flex-1" />}
+
+          <div className="w-[180px] sm:w-[220px] shrink-0 self-center md:self-auto" aria-hidden="true">
+            <PostThumb post={currentSpotlight} className="shadow-md rounded-[18px] transition-transform hover:scale-[1.01]" />
           </div>
         </Card>
       ) : (
@@ -106,7 +191,14 @@ export default function TodayView() {
               : "Set a posting schedule and Minions will have drafts ready for you."}
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-4">
-            <Link href="/ideas" className={buttonStyles({ variant: "soft", size: "lg" })}>See your ideas</Link>
+            <Link href="/posts" className={buttonStyles({ variant: "soft", size: "lg" })}>Browse post library</Link>
+            <button
+              type="button"
+              onClick={() => setIsQuickDraftOpen(true)}
+              className={buttonStyles({ variant: "secondary", size: "lg", className: "min-h-11 cursor-pointer" })}
+            >
+              + Draft from a thought or link
+            </button>
             {!nextSlot && <Link href="/editorial?schedule=1" className="text-[17px] text-brand hover:underline">Set a schedule</Link>}
           </div>
         </Card>
@@ -150,6 +242,18 @@ export default function TodayView() {
           </ul>
         </section>
       )}
+
+      <Toast message={toast.message} position="lifted" />
+
+      <QuickDraftDrawer
+        isOpen={isQuickDraftOpen}
+        onClose={() => setIsQuickDraftOpen(false)}
+        onDraftStarted={() => {
+          toast.show("Draft started. It will appear here once ready.");
+          setTimeout(() => void assets.reload(), 3000);
+        }}
+        onFailed={(msg) => toast.show(msg, 5000)}
+      />
     </div>
   );
 }

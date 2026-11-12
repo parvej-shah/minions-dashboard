@@ -16,9 +16,11 @@ export interface TopNavProps {
 function Badge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span className="min-w-5 rounded-full bg-coral px-1.5 text-center text-xs font-semibold leading-5 text-white" aria-label={`${count} waiting for you`}>
-      {count}
-    </span>
+    <span
+      className="inline-block h-2 w-2 rounded-full bg-brand"
+      aria-label="New post ready"
+      title="New post ready"
+    />
   );
 }
 
@@ -80,9 +82,10 @@ export function BottomTabs({ navItems, navCounts, pathname }: Omit<TopNavProps, 
               <span className="relative">
                 <Icon className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
                 {count > 0 && (
-                  <span className="absolute -right-2.5 -top-1 min-w-4 rounded-full bg-coral px-1 text-center text-[11px] font-semibold leading-4 text-white">
-                    {count}
-                  </span>
+                  <span
+                    className="absolute -right-1 -top-0.5 h-2 w-2 rounded-full bg-brand"
+                    aria-label="New post ready"
+                  />
                 )}
               </span>
               {item.name}

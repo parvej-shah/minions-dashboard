@@ -40,9 +40,24 @@ function compare(a: Post, b: Post): number {
   const ga = groupOf(a.status);
   const gb = groupOf(b.status);
   if (ga !== gb) return RANK[ga] - RANK[gb];
-  if (ga === "needs") return a.created_at.localeCompare(b.created_at);
+  if (ga === "needs") return b.created_at.localeCompare(a.created_at);
   if (ga === "scheduled") return (a.scheduled_for ?? "").localeCompare(b.scheduled_for ?? "");
   return (b.published_at ?? b.created_at).localeCompare(a.published_at ?? a.created_at);
+}
+
+export function splitCuratedAndReserve<T>(posts: T[], count = 3): { curated: T[]; reserve: T[] } {
+  return {
+    curated: posts.slice(0, count),
+    reserve: posts.slice(count),
+  };
+}
+
+export function sortReservePosts<T extends Post>(posts: T[], order: "newest" | "oldest"): T[] {
+  return [...posts].sort((a, b) =>
+    order === "newest"
+      ? b.created_at.localeCompare(a.created_at)
+      : a.created_at.localeCompare(b.created_at)
+  );
 }
 
 export function postsFor<T extends Post>(posts: T[], show: PostShow): T[] {

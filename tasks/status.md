@@ -67,3 +67,12 @@
 | 62 | Remove 'Make again' button & UX pass for Carousel format toggle | ANTIGRAVITY | DONE | tasks/62.md |
 | 63 | Show media preview on Facebook & unify Carousel preview across channel tabs | ANTIGRAVITY | DONE | tasks/63.md |
 | 64 | Ideas Page UI/UX Executive Overhaul (Audit Fixes) | ANTIGRAVITY | DONE | tasks/64.md |
+| 65 | Meaningful Idea Cards & Smooth Draft Focus | ANTIGRAVITY | DONE | tasks/65.md |
+| 66 | Calm Today Tab: Spotlight Single Most Recent Post + 1-Tap Inline Scheduling | ANTIGRAVITY | DONE | tasks/66.md |
+| 67 | Posts Library Executive Redesign: Curated Top-3 Shelf, Interactive Hover Quick-Peek & 1-Tap Scheduling | ANTIGRAVITY | DONE | tasks/67.md |
+| 68 | Clean Outcome-Based Posts UX: Hover-Lift Details, Compact Schedule, Delete Action & Badge Calming | ANTIGRAVITY | DONE | tasks/68.md |
+| 69 | Collapsed Draft Reserve by Default & Impeccable Two-Button Hover UI | ANTIGRAVITY | DONE | tasks/69.md |
+| 70 | Impeccable Hover Button Pair: Schedule & Edit with Refined Hierarchy | ANTIGRAVITY | DONE | tasks/70.md |
+| 71 | Mobile View Overhaul: Horizontal Snap Shelf, 44px Touch Targets & Reserve Touch Actions | ANTIGRAVITY | DONE | tasks/71.md |
+| 72 | Autonomous Outcome Architecture: 3-Tab Nav & 5-Draft Buffer | ANTIGRAVITY | DONE | tasks/72.md |
+| 73 | Posts Header Layout Polish & Equal Width Tabs | ANTIGRAVITY | DONE | tasks/73.md |

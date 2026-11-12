@@ -9,21 +9,37 @@ export function Segmented<T extends string>({
   options,
   value,
   onChange,
+  equalWidth = false,
+  className = "",
 }: {
   label: string;
   options: { key: T; label: string; count?: number }[];
   value: T;
   onChange: (key: T) => void;
+  equalWidth?: boolean;
+  className?: string;
 }) {
   return (
-    <div role="group" aria-label={label} className={segment.track}>
+    <div
+      role="group"
+      aria-label={label}
+      className={
+        equalWidth
+          ? `grid grid-flow-col auto-cols-fr max-w-full rounded-full bg-surface-3 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${className}`
+          : `${segment.track} ${className}`
+      }
+    >
       {options.map((o) => (
         <button
           key={o.key}
           type="button"
           aria-pressed={value === o.key}
           onClick={() => onChange(o.key)}
-          className={`min-h-9 cursor-pointer px-4 text-[15px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand ${value === o.key ? segment.on : segment.off}`}
+          className={`min-h-9 cursor-pointer text-[13.5px] sm:text-[15px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand ${
+            equalWidth
+              ? "w-full min-w-[76px] sm:min-w-[96px] px-2 text-center inline-flex items-center justify-center"
+              : "px-4"
+          } ${value === o.key ? segment.on : segment.off}`}
         >
           {o.label}
           {o.count ? ` · ${o.count}` : ""}
@@ -34,9 +50,19 @@ export function Segmented<T extends string>({
 }
 
 /** The rounded grey search field. */
-export function SearchField({ label, value, onChange, className = "" }: { label: string; value: string; onChange: (v: string) => void; className?: string }) {
+export function SearchField({
+  label,
+  value,
+  onChange,
+  className = "flex-[1_1_220px] sm:flex-[0_1_260px]",
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  className?: string;
+}) {
   return (
-    <label className={`flex min-h-11 flex-[1_1_220px] items-center sm:flex-[0_1_260px] gap-2 rounded-full bg-surface-3 px-4 ${className}`}>
+    <label className={`flex min-h-11 items-center gap-2 rounded-full bg-surface-3 px-4 ${className}`}>
       <span className="sr-only">{label}</span>
       <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="shrink-0 text-muted">
         <circle cx="11" cy="11" r="7" />

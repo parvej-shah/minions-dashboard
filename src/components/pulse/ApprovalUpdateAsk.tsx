@@ -79,9 +79,9 @@ export default function ApprovalUpdateAsk() {
       <div className={shell} role="status">
         <p className="text-[17px] font-medium text-ink">Saved {saved} note{saved === 1 ? "" : "s"}.</p>
         <p className="text-sm leading-relaxed text-muted">
-          Minions is turning {saved === 1 ? "it" : "them"} into new post ideas. They land in your Idea Stream in about two minutes.
+          Minions is turning {saved === 1 ? "it" : "them"} into new post drafts. They land in your posts library for review.
         </p>
-        <Link href="/ideas" className="w-fit text-[15px] text-brand hover:underline">See your ideas</Link>
+        <Link href="/posts" className="w-fit text-[15px] text-brand hover:underline">See your posts</Link>
       </div>
     );
   }

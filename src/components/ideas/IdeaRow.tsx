@@ -27,10 +27,7 @@ export interface IdeaRowProps {
   onDelete: () => void;
 }
 
-const textButton =
-  "min-h-11 cursor-pointer rounded-full px-3.5 text-[15px] font-medium text-brand hover:bg-brand/5 disabled:cursor-default disabled:opacity-50 transition-colors";
-
-/** One idea in the list: its place, executive hook, angle insight, and 1-tap action. */
+/** One idea card: clear place/slot badges, executive hook, angle insight, and 1-tap action. */
 export default function IdeaRow(p: IdeaRowProps) {
   const { idea, view } = p;
   const rawTitle = idea.title || idea.raw_idea || "Untitled idea";
@@ -39,6 +36,7 @@ export default function IdeaRow(p: IdeaRowProps) {
   const source = sourceLine(idea);
   const published = (idea.status || "").toUpperCase() === "PUBLISHED";
   const isTop = view === "next" && p.place === 1;
+  const isHighPriority = (idea.priority || "").toUpperCase() === "HIGH";
 
   const items: MenuItem[] =
     view === "next"
@@ -59,18 +57,65 @@ export default function IdeaRow(p: IdeaRowProps) {
         : [{ label: "Delete idea", onSelect: p.onDelete, danger: true }];
 
   return (
-    <li className="flex flex-wrap items-start gap-x-5 gap-y-3 border-b border-line px-1 py-5 transition-colors hover:bg-surface-2/40 rounded-xl">
-      {view === "next" && (
-        <span
-          aria-hidden="true"
-          className={`mt-0.5 w-6 shrink-0 text-[15px] font-semibold ${
-            isTop ? "text-brand" : "text-muted"
-          }`}
-        >
-          {p.place}
-        </span>
-      )}
-      <div className="flex min-w-0 flex-[1_1_0] flex-col gap-1">
+    <li className="group relative rounded-2xl sm:rounded-[22px] bg-surface border border-line/60 p-5 sm:p-6 shadow-soft hover:shadow-md hover:border-line-strong transition-all duration-200">
+      {/* Top Meta Bar: Queue position, scheduled slot, and source badge */}
+      <div className="flex items-center justify-between gap-3 pb-3 border-b border-line/40">
+        <div className="flex flex-wrap items-center gap-2">
+          {view === "next" && (
+            <>
+              {isTop ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold bg-brand/10 text-brand border border-brand/20">
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+                  #1 Up next
+                </span>
+              ) : isHighPriority ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-brand/10 text-brand">
+                  <span className="font-semibold">#{p.place}</span>
+                  <span>·</span>
+                  <span>Priority</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-surface-2 text-muted">
+                  #{p.place}
+                </span>
+              )}
+
+              {p.slotAt && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-surface-2 text-ink">
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+                  Drafts {shortWhen(p.slotAt, p.timezone, p.now)}
+                </span>
+              )}
+              {idea.scheduled_for && !p.slotAt && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-surface-2 text-ink">
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+                  Drafts {shortWhen(idea.scheduled_for, p.timezone, p.now)}
+                </span>
+              )}
+            </>
+          )}
+
+          {source.href ? (
+            <a
+              href={source.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] text-muted hover:text-brand bg-surface-2/60 transition-colors"
+            >
+              {source.text} ↗
+            </a>
+          ) : source.text !== "Found by Minions" ? (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] text-muted bg-surface-2/60">
+              {source.text}
+            </span>
+          ) : null}
+        </div>
+
+        <Menu label={`More for “${rawTitle}”`} items={items} />
+      </div>
+
+      {/* Main Card Content */}
+      <div className="pt-3.5 pb-4 space-y-2">
         <h3 className="text-[17px] sm:text-[18px] font-semibold leading-snug tracking-[-0.015em] text-ink">
           <button
             type="button"
@@ -81,78 +126,86 @@ export default function IdeaRow(p: IdeaRowProps) {
             {hook}
           </button>
         </h3>
-        {detail && <p className="line-clamp-2 text-[14px] leading-relaxed text-muted">{detail}</p>}
-
-        <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13px] text-muted">
-          {view === "next" && p.slotAt && (
-            <span className="inline-flex items-center gap-1.5 font-medium text-ink">
-              <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-              {shortWhen(p.slotAt, p.timezone, p.now)}
-            </span>
-          )}
-          {view === "next" && idea.scheduled_for && !p.slotAt && (
-            <span className="inline-flex items-center gap-1.5 font-medium text-ink">
-              <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-              Set for {shortWhen(idea.scheduled_for, p.timezone, p.now)}
-            </span>
-          )}
-          {source.href ? (
-            <a
-              href={source.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-brand hover:underline"
-            >
-              {source.text} ↗
-            </a>
-          ) : source.text !== "Found by Minions" ? (
-            <span>{source.text}</span>
-          ) : null}
-        </div>
+        {detail && (
+          <p className="line-clamp-2 text-[14px] sm:text-[15px] leading-relaxed text-muted">
+            {detail}
+          </p>
+        )}
       </div>
 
-      {/* On mobile the actions sit under the text with 44px touch targets */}
-      <div
-        className={`flex basis-full items-center gap-1 sm:basis-auto sm:shrink-0 sm:pl-0 ${
-          view === "next" ? "pl-[34px]" : "-ml-2.5 sm:ml-0"
-        }`}
-      >
-        {view === "next" && (
-          <button
-            type="button"
-            onClick={p.onWrite}
-            disabled={p.starting}
-            className={
-              isTop
-                ? buttonStyles({ size: "sm", className: "min-h-11 px-4 cursor-pointer" })
-                : textButton
-            }
-          >
-            {p.starting ? "Starting…" : "Write now"}
-          </button>
-        )}
-        {view === "written" &&
-          (idea.draftAssetId ? (
-            <Link
-              href={`/editorial?id=${encodeURIComponent(idea.draftAssetId)}`}
-              className={`${textButton} inline-flex items-center`}
+      {/* Card Action Row */}
+      <div className="flex items-center justify-between gap-3 pt-3 border-t border-line/40">
+        <button
+          type="button"
+          onClick={p.onOpen}
+          className="cursor-pointer text-[13px] font-medium text-muted hover:text-ink transition-colors"
+        >
+          View angle details →
+        </button>
+
+        <div className="flex items-center gap-2">
+          {view === "next" && (
+            <button
+              type="button"
+              onClick={p.onWrite}
+              disabled={p.starting}
+              className={
+                isTop
+                  ? buttonStyles({
+                      variant: "primary",
+                      size: "sm",
+                      className: "min-h-11 px-5 cursor-pointer shadow-xs",
+                    })
+                  : buttonStyles({
+                      variant: "secondary",
+                      size: "sm",
+                      className: "min-h-11 px-4 cursor-pointer hover:bg-surface-2 text-ink",
+                    })
+              }
             >
-              {published ? "See post" : "Review post"}
-            </Link>
-          ) : (
+              {p.starting ? "Starting…" : "Write now"}
+            </button>
+          )}
+
+          {view === "written" && (
             <Link
-              href={published ? "/posts?show=posted" : "/posts"}
-              className={`${textButton} inline-flex items-center`}
+              href={
+                idea.draftAssetId
+                  ? `/editorial?id=${encodeURIComponent(idea.draftAssetId)}`
+                  : published
+                  ? "/posts?show=posted"
+                  : "/posts"
+              }
+              className={buttonStyles({
+                variant: "secondary",
+                size: "sm",
+                className: "min-h-11 px-4",
+              })}
             >
-              {published ? "Posted" : "See posts"}
+              {idea.draftAssetId
+                ? published
+                  ? "See post"
+                  : "Review post"
+                : published
+                ? "Posted"
+                : "See posts"}
             </Link>
-          ))}
-        {view === "aside" && (
-          <button type="button" onClick={p.onBringBack} className={textButton}>
-            Bring back
-          </button>
-        )}
-        <Menu label={`More for “${rawTitle}”`} items={items} />
+          )}
+
+          {view === "aside" && (
+            <button
+              type="button"
+              onClick={p.onBringBack}
+              className={buttonStyles({
+                variant: "secondary",
+                size: "sm",
+                className: "min-h-11 px-4 cursor-pointer",
+              })}
+            >
+              Bring back
+            </button>
+          )}
+        </div>
       </div>
     </li>
   );

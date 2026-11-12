@@ -1,4 +1,4 @@
-import { Home, Lightbulb, LayoutGrid, Palette, type LucideIcon } from "lucide-react";
+import { Home, LayoutGrid, Palette, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
   name: string;
@@ -10,11 +10,10 @@ export interface NavItem {
   badge?: "pendingReview";
 }
 
-/** The four places in the top menu (calm redesign, tasks/20-21). Everything else lives under the avatar. */
+/** The three places in the top menu (Today · Posts · Brand). Everything else lives under the avatar. */
 export function buildNavItems(): NavItem[] {
   return [
     { name: "Today", href: "/", icon: Home },
-    { name: "Ideas", href: "/ideas", icon: Lightbulb },
     { name: "Posts", href: "/posts", icon: LayoutGrid, also: ["/editorial", "/published", "/drafts"], badge: "pendingReview" },
     { name: "Brand", href: "/brand", icon: Palette },
   ];

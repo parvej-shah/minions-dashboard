@@ -3,6 +3,8 @@
  * Everything is computed on the workspace's clock, not the browser's.
  */
 
+import { utcToZoned } from "@/lib/postTime";
+
 interface Post {
   id: string;
   title: string;
@@ -11,6 +13,10 @@ interface Post {
   published_at: string | null;
   created_at: string;
   publish_failures?: Record<string, string> | null;
+  hook?: string;
+  channels?: string[];
+  hero_image_url?: string | null;
+  variants?: unknown;
 }
 
 export type DayItem =
@@ -79,9 +85,28 @@ export function buildWeek(now: Date, timeZone: string, posts: Post[], slots: str
   return days;
 }
 
-/** Drafts waiting for the reviewer, oldest first (the one Minions would post first). */
+/** Drafts waiting for the reviewer, newest first (freshest generation spotlighted first). */
 export function waitingForYou<T extends Post>(posts: T[]): T[] {
-  return posts.filter((p) => p.status === "PENDING_REVIEW").sort((a, b) => a.created_at.localeCompare(b.created_at));
+  return posts.filter((p) => p.status === "PENDING_REVIEW").sort((a, b) => b.created_at.localeCompare(a.created_at));
+}
+
+/** The single post spotlighted on Today: newest draft first, or cycled by index. */
+export function spotlightPost<T extends Post>(posts: T[], index = 0): T | null {
+  const waiting = waitingForYou(posts);
+  if (waiting.length === 0) return null;
+  if (index < 0 || index >= waiting.length) return null;
+  return waiting[index] ?? null;
+}
+
+/** Milestone-focused headline for Today, replacing volume counts. */
+export function todayHeadline(nextSlot: string | null, timeZone: string): string {
+  if (!nextSlot) return "Your post is ready for your OK.";
+  return `Your post for ${slotLabel(nextSlot, timeZone)} is ready.`;
+}
+
+/** Converts a slot ISO string to zoned { date, time } payload for 1-tap scheduling. */
+export function todaySchedulePayload(slotIso: string, timeZone: string): { date: string; time: string } {
+  return utcToZoned(new Date(slotIso), timeZone);
 }
 
 export function recentlyPosted<T extends Post>(posts: T[], limit: number): T[] {
@@ -103,4 +128,11 @@ export function slotLabel(iso: string, timeZone: string): string {
   const d = new Date(iso);
   const day = new Intl.DateTimeFormat("en-GB", { timeZone, weekday: "short", day: "numeric", month: "short" }).format(d);
   return `${day.replace(/,/g, "")}, ${parts(d, timeZone).time}`;
+}
+
+/** "Wed 09:00" on the workspace clock - compact and fits cleanly on buttons without wrapping. */
+export function compactSlotLabel(iso: string, timeZone: string): string {
+  const d = new Date(iso);
+  const weekday = new Intl.DateTimeFormat("en-GB", { timeZone, weekday: "short" }).format(d);
+  return `${weekday.replace(/,/g, "")} ${parts(d, timeZone).time}`;
 }

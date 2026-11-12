@@ -34,12 +34,12 @@ describe("postsFor", () => {
     p("down", "UNPUBLISHED"),
   ];
   it("orders each view the way you act on it", () => {
-    expect(postsFor(posts, "needs").map((x) => x.id)).toEqual(["n1", "n2"]);
+    expect(postsFor(posts, "needs").map((x) => x.id)).toEqual(["n2", "n1"]);
     expect(postsFor(posts, "scheduled").map((x) => x.id)).toEqual(["s1", "s2"]);
     expect(postsFor(posts, "posted").map((x) => x.id)).toEqual(["new", "old"]);
   });
   it("shows everything under All: waiting first, then scheduled, then the rest newest first", () => {
-    expect(postsFor(posts, "all").map((x) => x.id)).toEqual(["n1", "n2", "s1", "s2", "new", "old", "down"]);
+    expect(postsFor(posts, "all").map((x) => x.id)).toEqual(["n2", "n1", "s1", "s2", "new", "old", "down"]);
   });
   it("opens on Needs you when something waits, else All", () => {
     expect(defaultShow(posts)).toBe("needs");

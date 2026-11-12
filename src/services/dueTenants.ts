@@ -45,6 +45,13 @@ export async function findDueTenants(now: Date = new Date()) {
     const limit = monthlyAssetLimit(resolvePlan(client.subscription?.planKey), client.assetsPerMonthOverride);
     if ((await countAssetsThisMonth(client.id)) >= limit) continue;
 
+    // Autonomous outcome guard (task 72): cap unposted drafts awaiting review at 5 max
+    // to protect executive attention and prevent backlog guilt.
+    const unreviewedDrafts = await prisma.asset.count({
+      where: { clientId: client.id, status: "PENDING_REVIEW" },
+    });
+    if (unreviewedDrafts >= 5) continue;
+
     const fill = await fillDueSlot(client.id, slot, now);
     if (fill) due.push({ client_id: client.id, slug: client.slug, idea_id: fill.idea_id, slot_id: fill.slot_id, fill_method: fill.method });
   }

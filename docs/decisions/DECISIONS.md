@@ -28,6 +28,13 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-12 — Autonomous outcome architecture: 3-tab navigation & 5-draft buffer
+
+**Decision:** The Ideas page is removed from primary navigation, leaving three calm destinations: Today, Posts, and Brand; `/ideas` redirects to `/posts?show=needs`. Automatic drafting runs on schedule up to a maximum buffer of 5 unreviewed drafts (`PENDING_REVIEW`), pausing until the user reviews or posts. Spontaneous thoughts or links can be drafted immediately via a single-input "+ Quick draft" drawer available on Today and Posts.
+**Why:** Busy founders and brokers hire Minions for finished outcomes, not triage homework. An ideas backlog creates subtle guilt and feels like an unread email inbox. Minions acts as an autonomous ghostwriting agency that drafts posts ahead of schedule, respecting executive cognitive load.
+**Alternatives considered:** Keeping Ideas as an active tab (rejected: forces users into unnecessary idea gardening), unlimited automatic drafts (rejected: creates overwhelming post backlogs if a user steps away).
+**Status:** active
+
 ## 2026-11-12 — Streamline Editorial Studio review for busy professionals
 
 **Decision:** The yellow compliance check warning ("X facts aren't checked yet") is removed from the primary decision sidebar; the Details accordion defaults to collapsed; ambiguous "Edit text" in the sidebar is removed in favor of localized card edits; internal AI self-justifications ("Why this wording") and subjective grammar lecturing are removed; and thick side-tab borders are replaced with refined subtle borders.

@@ -46,13 +46,13 @@ describe("buildWeek", () => {
 });
 
 describe("waitingForYou / recentlyPosted", () => {
-  it("lists drafts waiting for review, oldest first", () => {
+  it("lists drafts waiting for review, newest first", () => {
     const list = waitingForYou([
       a({ id: "new", created_at: "2026-11-08T00:00:00Z" }),
       a({ id: "old", created_at: "2026-11-02T00:00:00Z" }),
       a({ id: "done", status: "PUBLISHED" }),
     ]);
-    expect(list.map((x) => x.id)).toEqual(["old", "new"]);
+    expect(list.map((x) => x.id)).toEqual(["new", "old"]);
   });
 
   it("lists the latest published posts first", () => {

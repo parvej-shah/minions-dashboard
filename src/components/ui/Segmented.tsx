@@ -23,7 +23,7 @@ export default function Segmented<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className="inline-flex w-fit max-w-full items-center gap-1 rounded-xl border border-line/60 bg-surface-2 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="inline-flex w-fit max-w-full items-center gap-1 rounded-xl border border-line/60 bg-surface-2 p-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {options.map((o) => {
         const on = o.id === value;
