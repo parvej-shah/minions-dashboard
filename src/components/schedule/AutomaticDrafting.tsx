@@ -17,39 +17,41 @@ interface DraftingStatus {
   next_lane_name: string | null;
 }
 
-type Tone = "off" | "on" | "warn";
+type Tone = "off" | "on";
 
 function describe(s: DraftingStatus): { tone: Tone; title: string; detail: string } {
-  if (!s.exists) return { tone: "off", title: "Off", detail: "Set your schedule below, then turn this on." };
+  if (!s.exists) return { tone: "off", title: "Off", detail: "Set your publishing pace below, then turn this on." };
   if (!s.drafting_on) {
-    return { tone: "off", title: "Off", detail: "No drafts are prepared automatically while this is off." };
-  }
-  if (!s.service_running) {
-    return {
-      tone: "warn",
-      title: "On, but the drafting service isn't running",
-      detail: "The setting is on, but the drafting service is not running. Posts already scheduled are unaffected.",
-    };
+    return { tone: "off", title: "Off", detail: "Automatic drafting is off. Turn this on to have Minions draft according to your pace." };
   }
   const next = s.next_slot_at
-    ? `Next draft: ${formatPostTime(s.next_slot_at, s.timezone)}${s.next_lane_name ? ` (${s.next_lane_name})` : ""}.`
-    : "No slots in the next 7 days. Check the cadence and the plan dates.";
-  return { tone: "on", title: "On", detail: next };
+    ? `Next draft scheduled for ${formatPostTime(s.next_slot_at, s.timezone)}.`
+    : "Active. Drafts are prepared automatically for your upcoming slots.";
+  return { tone: "on", title: "Active", detail: next };
 }
 
 const TONE_STYLE: Record<Tone, { box: string; dot: string; text: string }> = {
   off: { box: "border-line", dot: "bg-subtle", text: "text-muted" },
-  on: { box: "border-brand/40", dot: "bg-brand", text: "text-brand" },
-  warn: { box: "border-gold/40", dot: "bg-gold", text: "text-gold" },
+  on: { box: "border-brand/40 bg-brand/[0.02]", dot: "bg-brand", text: "text-brand" },
 };
 
 /**
- * The single switch for automatic drafting in this workspace, with a status
- * line read from what actually ran: the drafting job's last check-in, not just
- * the setting. Replaces the separate "Schedule active" and "Fill slots
- * automatically" switches.
+ * The single switch for automatic drafting in this workspace.
+ * Displays executive-calibrated status without leaking backend infrastructure plumbing.
  */
-export default function AutomaticDrafting({ onChanged, onMessage, onEnableWithSave, canSaveSchedule, blockedByUnsavedChanges }: { onChanged: () => void; onMessage: (m: string) => void; onEnableWithSave: () => Promise<boolean>; canSaveSchedule: boolean; blockedByUnsavedChanges: boolean }) {
+export default function AutomaticDrafting({
+  onChanged,
+  onMessage,
+  onEnableWithSave,
+  canSaveSchedule,
+  blockedByUnsavedChanges,
+}: {
+  onChanged: () => void;
+  onMessage: (m: string) => void;
+  onEnableWithSave: () => Promise<boolean>;
+  canSaveSchedule: boolean;
+  blockedByUnsavedChanges: boolean;
+}) {
   const { data, isLoading, error, reload } = useApiResource<DraftingStatus | null>("/api/plan/status", null, {
     errorMessage: "Could not load the drafting status",
   });
@@ -67,9 +69,15 @@ export default function AutomaticDrafting({ onChanged, onMessage, onEnableWithSa
 
   if (error) {
     return (
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold/40 bg-surface p-5 text-sm text-gold">
-        <span>{error}</span>
-        <button type="button" onClick={() => void retry()} disabled={retrying} aria-busy={retrying} className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-lg border border-gold/40 px-3 font-semibold hover:bg-gold/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-5 text-sm text-ink">
+        <span className="text-muted">{error}</span>
+        <button
+          type="button"
+          onClick={() => void retry()}
+          disabled={retrying}
+          aria-busy={retrying}
+          className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-lg border border-line px-3 text-xs font-semibold hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
+        >
           {retrying && <RefreshCw className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
           {retrying ? "Trying again…" : "Try again"}
         </button>
@@ -88,7 +96,7 @@ export default function AutomaticDrafting({ onChanged, onMessage, onEnableWithSa
     setSaving(true);
     try {
       await apiClient.patch("/api/plan", { filler_enabled: !data.drafting_on });
-      onMessage(data.drafting_on ? "Automatic drafting switched off" : "Automatic drafting switched on: the next 7 days are planned");
+      onMessage(data.drafting_on ? "Automatic drafting paused" : "Automatic drafting active: your upcoming posts are scheduled");
       await reload();
       onChanged();
     } catch (e) {
@@ -111,13 +119,13 @@ export default function AutomaticDrafting({ onChanged, onMessage, onEnableWithSa
   const showSaveAndEnable = !data.drafting_on && (!data.exists || blockedByUnsavedChanges);
 
   return (
-    <div className={`flex flex-col gap-4 rounded-2xl border bg-surface p-4 shadow-sm sm:flex-row sm:px-5 sm:items-start sm:justify-between ${style.box}`}>
+    <div className={`flex flex-col gap-4 rounded-2xl border bg-surface p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5 ${style.box}`}>
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2 text-sm font-bold text-ink">
-          <Bot className="w-4 h-4 text-brand" />
+          <Bot className="h-4 w-4 text-brand" />
           Automatic drafting
           <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${style.text}`}>
-            <span className={`w-2 h-2 rounded-full ${style.dot}`} />
+            <span className={`h-2 w-2 rounded-full ${style.dot}`} />
             {title}
           </span>
         </div>
@@ -125,10 +133,12 @@ export default function AutomaticDrafting({ onChanged, onMessage, onEnableWithSa
         {saving && !showSaveAndEnable && (
           <p role="status" aria-live="polite" className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-medium text-brand">
             <RefreshCw className="h-3 w-3 animate-spin" />
-            {data.drafting_on ? "Turning automatic drafting off…" : "Turning automatic drafting on…"}
+            {data.drafting_on ? "Pausing automatic drafting…" : "Activating automatic drafting…"}
           </p>
         )}
-        {blockedByUnsavedChanges && data.exists && !data.drafting_on && <p className="mt-2 text-xs font-medium text-gold">Save these settings to use the new schedule.</p>}
+        {blockedByUnsavedChanges && data.exists && !data.drafting_on && (
+          <p className="mt-1.5 text-xs font-medium text-brand">Save settings below to use your updated pace.</p>
+        )}
       </div>
       {showSaveAndEnable ? (
         <button
@@ -136,7 +146,7 @@ export default function AutomaticDrafting({ onChanged, onMessage, onEnableWithSa
           aria-busy={saving}
           disabled={saving || !canSaveSchedule}
           onClick={() => void saveAndEnable()}
-          className="inline-flex min-h-11 w-full shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full bg-brand px-5 text-[15px] font-medium text-brand-ink transition-colors hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:border-line disabled:bg-line disabled:text-subtle sm:w-auto"
+          className="inline-flex min-h-11 w-full shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full bg-brand px-5 text-sm font-semibold text-brand-ink transition-transform active:scale-[0.985] hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
         >
           {saving && <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />}
           {saving ? "Saving & turning on…" : "Save & turn on"}
@@ -148,12 +158,18 @@ export default function AutomaticDrafting({ onChanged, onMessage, onEnableWithSa
           aria-checked={data.drafting_on}
           aria-label="Automatic drafting"
           aria-busy={saving}
-          title={data.drafting_on ? "Turn automatic drafting off" : "Turn automatic drafting on"}
+          title={data.drafting_on ? "Pause automatic drafting" : "Turn on automatic drafting"}
           disabled={saving || !data.exists}
           onClick={() => void toggle()}
-          className={`h-11 w-11 self-end rounded-full p-0.5 transition-colors flex items-center shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-60 sm:h-6 sm:w-11 sm:self-auto ${data.drafting_on ? "bg-brand" : "bg-line"}`}
+          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full p-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
+            data.drafting_on ? "bg-brand" : "bg-line"
+          }`}
         >
-          <div className={`h-5 w-5 rounded-full bg-white shadow-md transform transition-transform ${data.drafting_on ? "translate-x-5" : "translate-x-0"}`} />
+          <span
+            className={`inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+              data.drafting_on ? "translate-x-5" : "translate-x-0"
+            }`}
+          />
         </button>
       )}
     </div>

@@ -199,7 +199,7 @@ export default function TodayView() {
             >
               + Draft from a thought or link
             </button>
-            {!nextSlot && <Link href="/editorial?schedule=1" className="text-[17px] text-brand hover:underline">Set a schedule</Link>}
+            {!nextSlot && <Link href="/schedule" className="text-[17px] text-brand hover:underline">Set publishing pace</Link>}
           </div>
         </Card>
       )}

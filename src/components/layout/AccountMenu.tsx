@@ -102,7 +102,7 @@ export default function AccountMenu({
           </div>
           <div className="h-px bg-line mx-2" />
           <div className="py-1">
-            <Link role="menuitem" href="/editorial?schedule=1" onClick={close} className={item}>Posting schedule</Link>
+            <Link role="menuitem" href="/schedule" onClick={close} className={item}>Publishing pace</Link>
             <Link role="menuitem" href="/fleet" onClick={close} className={item}>Channels</Link>
             <button
               type="button"
