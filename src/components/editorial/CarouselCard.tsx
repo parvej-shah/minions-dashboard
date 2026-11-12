@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { AlertTriangle, GalleryHorizontal, Loader2, Sparkles } from "lucide-react";
+import { AlertTriangle, GalleryHorizontal, Image as ImageIcon, Loader2, Sparkles } from "lucide-react";
 import type { AssetItem } from "@/types";
 import type { StoredCarousel } from "@/services/carousel";
 import type { CarouselPlan } from "@/lib/carousel/plan";
 import type { Slide, SlideStyle } from "@/lib/carousel/slides";
-import ConfirmModal from "@/components/ui/ConfirmModal";
 import CarouselPdfPages from "./CarouselPdfPages";
 import { Skeleton, SkeletonGroup } from "@/components/ui/Skeleton";
 import { buttonStyles } from "@/components/ui/Button";
@@ -74,7 +73,6 @@ export default function CarouselCard({
   const [chosenStyle, setChosenStyle] = useState<SlideStyle | "">("");
   const [errors, setErrors] = useState<string[]>([]);
   const [draft, setDraft] = useState<CarouselPlan | null>(null);
-  const [confirmRemake, setConfirmRemake] = useState(false);
   // The design being drawn, and the one before the last pick (for Undo).
   const [pendingStyle, setPendingStyle] = useState<SlideStyle | null>(null);
   const [previousStyle, setPreviousStyle] = useState<SlideStyle | null>(null);
@@ -248,7 +246,7 @@ export default function CarouselCard({
           {/* A second post that exists to share the carousel has no choice to make. */}
           {!locked && activeAsset.follow_up_format !== "CAROUSEL" && (
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="inline-flex items-center gap-2 text-[15px] font-medium text-ink">
+              <span className="inline-flex items-center gap-2 text-[14px] font-semibold text-ink">
                 Post format
                 {busy === "toggle" && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted" aria-label="Saving choice" />}
               </span>
@@ -264,10 +262,24 @@ export default function CarouselCard({
                   )
                 }
                 options={[
-                  { id: "CAROUSEL", label: `Carousel · ${pageCount}` },
-                  { id: "COVER", label: "Single poster" },
+                  {
+                    id: "CAROUSEL",
+                    label: `Carousel · ${pageCount}`,
+                    icon: <GalleryHorizontal className="w-3.5 h-3.5 text-brand" aria-hidden="true" />,
+                  },
+                  {
+                    id: "COVER",
+                    label: "Single poster",
+                    icon: <ImageIcon className="w-3.5 h-3.5 text-muted" aria-hidden="true" />,
+                  },
                 ]}
               />
+            </div>
+          )}
+
+          {!carousel.active && !locked && (
+            <div className="rounded-xl border border-line/60 bg-surface-2 px-3.5 py-2.5 text-[13px] text-muted">
+              <span>Single poster selected — your cover image will be published instead of this carousel.</span>
             </div>
           )}
 
@@ -277,11 +289,11 @@ export default function CarouselCard({
               // Carousels drawn before the PDF became the only file keep their page images.
               pages.map((page, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img key={page} src={page} alt={`Page ${i + 1} of ${pages.length}`} className={`${pageClass} ${busy ? "opacity-40" : ""}`} />
+                <img key={page} src={page} alt={`Page ${i + 1} of ${pages.length}`} className={`${pageClass} ${busy ? "opacity-40" : !carousel.active ? "opacity-50" : ""}`} />
               ))
             ) : (
               // The render time in the URL, so a redraw never shows the cached PDF.
-              <CarouselPdfPages src={`${url}/pdf?v=${encodeURIComponent(carousel.rendered_at)}`} pageClassName={`${pageClass} ${busy ? "opacity-40" : ""}`} />
+              <CarouselPdfPages src={`${url}/pdf?v=${encodeURIComponent(carousel.rendered_at)}`} pageClassName={`${pageClass} ${busy ? "opacity-40" : !carousel.active ? "opacity-50" : ""}`} />
             )}
           </div>
 
@@ -351,15 +363,7 @@ export default function CarouselCard({
               {!locked && designPicker}
               <GroupedList>
                 {!locked && (
-                  <>
-                    <ListRow label="Edit wording" onClick={() => setDraft(structuredClone(carousel.plan))} disabled={busy !== null} />
-                    <ListRow
-                      label={busy === "make" ? "Writing the slides…" : "Make again"}
-                      hint="Writes new slides from the draft"
-                      onClick={() => setConfirmRemake(true)}
-                      disabled={busy !== null}
-                    />
-                  </>
+                  <ListRow label="Edit wording" onClick={() => setDraft(structuredClone(carousel.plan))} disabled={busy !== null} />
                 )}
                 <ListRow label="Open PDF" href={carousel.pdf_url} />
               </GroupedList>
@@ -380,21 +384,6 @@ export default function CarouselCard({
           </ul>
         </div>
       )}
-
-      <ConfirmModal
-        isOpen={confirmRemake}
-        title="Make the carousel again?"
-        description="The slides are written again from the draft in the same design, and any edits you made to this carousel are replaced."
-        confirmLabel="Make again"
-        cancelLabel="Keep this one"
-        variant="warning"
-        isLoading={false}
-        onConfirm={() => {
-          setConfirmRemake(false);
-          void send("POST", carousel ? { style: carousel.plan.style } : null, "make");
-        }}
-        onClose={() => setConfirmRemake(false)}
-      />
     </div>
   );
 }

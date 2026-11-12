@@ -85,6 +85,21 @@ export default function IdeasPage() {
     }
   };
 
+  const makeNext = async (idea: IdeaItem) => {
+    try {
+      await apiClient.patch(`/api/ideas/${idea.id}`, { priority: "HIGH" });
+      setIdeas((prev) =>
+        prev.map((i) => ({
+          ...i,
+          priority: i.id === idea.id ? "HIGH" : i.priority === "HIGH" ? "NORMAL" : i.priority,
+        }))
+      );
+      toast.show("Moved to up next.");
+    } catch (e) {
+      toast.show(toErrorMessage(e, "Could not promote that idea."), 5000);
+    }
+  };
+
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     setIsDeleting(true);
@@ -112,7 +127,7 @@ export default function IdeasPage() {
       <PageHeader
         title="Ideas"
         action={
-          <button type="button" onClick={() => setIsAddOpen(true)} className={buttonStyles({ size: "lg" })}>
+          <button type="button" onClick={() => setIsAddOpen(true)} className={buttonStyles({ variant: "secondary", size: "md" })}>
             + Add an idea
           </button>
         }
@@ -197,6 +212,7 @@ export default function IdeasPage() {
               onWrite={() => void stream.startDraft(idea.id || idea.ideaId)}
               onEdit={() => setEditingIdea(idea)}
               onWriteForDay={() => setSchedulingIdea(idea)}
+              onMakeNext={() => void makeNext(idea)}
               onSetAside={() => void patchStatus(idea, "REJECTED", "Set aside. Find it under Set aside.")}
               onBringBack={() => void patchStatus(idea, "REFINED", "Back in Up next.")}
               onDelete={() => setDeleteTarget({ id: idea.id || idea.ideaId, title: titleOf(idea) })}

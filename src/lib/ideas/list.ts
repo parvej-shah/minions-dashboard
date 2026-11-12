@@ -54,10 +54,72 @@ export function ideasFor(ideas: IdeaItem[], view: IdeaView, plan: PlannedSlot[],
 
   return listed.sort((a, b) => {
     if (view !== "next") return time(b.idea.updated_at ?? b.idea.created_at) - time(a.idea.updated_at ?? a.idea.created_at);
+    const aPri = (a.idea.priority || "").toUpperCase() === "HIGH" ? 1 : 0;
+    const bPri = (b.idea.priority || "").toUpperCase() === "HIGH" ? 1 : 0;
+    if (aPri !== bPri) return bPri - aPri;
     if (a.slotAt && b.slotAt) return time(a.slotAt) - time(b.slotAt);
     if (a.slotAt || b.slotAt) return a.slotAt ? -1 : 1;
     return time(a.idea.created_at) - time(b.idea.created_at) || a.idea.id.localeCompare(b.idea.id);
   });
+}
+
+/**
+ * Distills raw harvester text into an executive hook (first punchy sentence)
+ * and supporting insight note, eliminating wall-of-text fatigue.
+ */
+export function distillIdea(titleOrRaw: string, noteOrAngle?: string): { hook: string; detail: string } {
+  const text = (titleOrRaw || "").trim();
+  const fallback = (noteOrAngle || "").trim();
+
+  // If text has multiple sentences, split at the first sentence boundary (.!?) followed by space
+  const match = text.match(/^(.+?[.!?])\s+([\s\S]+)$/);
+  if (match) {
+    const firstSentence = match[1].trim();
+    const rest = match[2].trim();
+    return {
+      hook: firstSentence,
+      detail: fallback ? `${rest} ${fallback}` : rest,
+    };
+  }
+
+  return {
+    hook: text || "Untitled idea",
+    detail: fallback,
+  };
+}
+
+/**
+ * Zero-friction payload generator from a single string or pasted link.
+ */
+export function createQuickIdeaPayload(input: string) {
+  const trimmed = input.trim();
+  const urlMatch = trimmed.match(/(https?:\/\/[^\s]+)/i);
+  const sourceUrl = urlMatch ? urlMatch[1] : null;
+  const cleanText = urlMatch ? trimmed.replace(urlMatch[1], "").trim() : trimmed;
+  let fallbackDomain = "";
+  if (sourceUrl) {
+    try {
+      fallbackDomain = new URL(sourceUrl).hostname.replace(/^www\./, "");
+    } catch {
+      fallbackDomain = "article";
+    }
+  }
+  const title = cleanText || (sourceUrl ? `Idea from ${fallbackDomain}` : "Untitled idea");
+
+  return {
+    title,
+    raw_idea: title,
+    excerpt: cleanText || title,
+    angle: cleanText || title,
+    audience: "ICP",
+    source: sourceUrl ? "MANUAL_REFERENCE" : "MANUAL",
+    source_url: sourceUrl,
+    source_title: null,
+    signals: sourceUrl
+      ? [{ title, url: sourceUrl, source: "Manual Reference", snippet: title, published_at: new Date().toISOString() }]
+      : [],
+    tags: ["Manual"],
+  };
 }
 
 export function countIdeas(ideas: IdeaItem[], group: IdeaGroup): number {

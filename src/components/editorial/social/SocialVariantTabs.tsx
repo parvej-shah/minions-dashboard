@@ -110,6 +110,87 @@ function ChannelPanel({
   );
 }
 
+interface ChannelMediaPreviewProps {
+  channelLabel: string;
+  isCarousel: boolean;
+  pages: string[] | null;
+  heroImageUrl: string | null;
+  title: string;
+  onSavePages?: () => void;
+  savingPages?: boolean;
+}
+
+/** Unified media preview for a channel card: swipeable carousel slides or single cover poster. */
+function ChannelMediaPreview({
+  channelLabel,
+  isCarousel,
+  pages,
+  heroImageUrl,
+  title,
+  onSavePages,
+  savingPages = false,
+}: ChannelMediaPreviewProps) {
+  if (isCarousel && pages && pages.length > 0) {
+    return (
+      <div className="space-y-3 pt-1">
+        <div className="flex items-center justify-between text-xs text-muted">
+          <span>{channelLabel} posts the {pages.length}-slide carousel configured above</span>
+          <span className="font-medium text-ink">{pages.length} slides</span>
+        </div>
+        <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1 scrollbar-none">
+          {pages.map((page, i) => (
+            <a
+              key={page}
+              href={page}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="snap-start shrink-0 w-[70%] sm:w-[220px]"
+              title={`View slide ${i + 1}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={page}
+                alt={`Page ${i + 1} of ${pages.length}`}
+                className="aspect-[4/5] w-full rounded-lg border border-line object-cover"
+              />
+            </a>
+          ))}
+        </div>
+        {onSavePages && (
+          <div className="space-y-1.5">
+            <button
+              type="button"
+              onClick={onSavePages}
+              disabled={savingPages}
+              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-line bg-surface-2 px-4 text-sm font-semibold text-ink cursor-pointer hover:bg-surface-3 disabled:opacity-50"
+            >
+              {savingPages ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <Download className="h-4 w-4" aria-hidden="true" />
+              )}
+              {`Save all ${pages.length} pages`}
+            </button>
+            <p className="text-[13px] leading-snug text-muted">
+              Then in {channelLabel}: New post, select the pages in order, paste the caption (Copy above).
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (heroImageUrl) {
+    return (
+      <div className="relative mx-auto aspect-[4/5] w-full max-w-[420px] overflow-hidden rounded-xl border border-line bg-surface-2">
+        <Image src={heroImageUrl} alt={title} fill unoptimized sizes="420px" className="object-cover" />
+      </div>
+    );
+  }
+
+  return null;
+}
+
 export default function SocialVariantTabs({
   activeAsset,
   socialTab,
@@ -133,10 +214,11 @@ export default function SocialVariantTabs({
   linkedinCarousel = null,
 }: SocialVariantTabsProps) {
   const author = activeAsset.cover?.author ?? null;
-  // Instagram posts the carousel or the single poster, as picked (task 40); no carousel, the poster.
-  const pages = activeAsset.carousel_pages?.length ? activeAsset.carousel_pages : null;
-  const instagramPick = instagramFormat ?? activeAsset.instagram_format ?? "CAROUSEL";
-  const deck = pages && instagramPick === "CAROUSEL" ? pages : null;
+  const effectiveFormat = instagramFormat ?? activeAsset.instagram_format ?? "CAROUSEL";
+  const isCarouselActive = Boolean(linkedinCarousel) || (Boolean(activeAsset.carousel_pages?.length) && effectiveFormat === "CAROUSEL");
+  const pages = activeAsset.carousel_pages?.length ? activeAsset.carousel_pages : (linkedinCarousel?.pages?.length ? linkedinCarousel.pages : null);
+  const carouselDeck = isCarouselActive && pages?.length ? pages : null;
+  const heroImage = activeAsset.hero_image_url && activeAsset.hero_status === "READY" ? activeAsset.hero_image_url : null;
   const visibleChannels = SOCIAL_CHANNELS.filter((channel) => enabledTabs?.[channel.tab] ?? true);
   const setters: Record<VariantField, (v: string) => void> = {
     linkedin: setEditedLinkedin,
@@ -202,19 +284,13 @@ export default function SocialVariantTabs({
             }
             extras={
               <>
-                {linkedinCarousel ? (
-                  <div className="rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-xs text-muted">
-                    LinkedIn posts the carousel configured above.
-                  </div>
-                ) : activeAsset.hero_image_url && activeAsset.hero_status === "READY" && (
-                  <div
-                    className={`relative w-full overflow-hidden rounded-xl border border-line bg-surface-2 ${
-                      activeAsset.hero_provider === "template" ? "aspect-[4/5] max-w-[420px] mx-auto" : "aspect-[16/9]"
-                    }`}
-                  >
-                    <Image src={activeAsset.hero_image_url} alt={activeAsset.title} fill unoptimized sizes="420px" className="object-cover" />
-                  </div>
-                )}
+                <ChannelMediaPreview
+                  channelLabel="LinkedIn"
+                  isCarousel={isCarouselActive}
+                  pages={carouselDeck}
+                  heroImageUrl={heroImage}
+                  title={activeAsset.title}
+                />
 
                 {/* First Comment Link Anchor */}
                 {blogEnabled && activeAsset.doc_url && (
@@ -262,6 +338,14 @@ export default function SocialVariantTabs({
             }
             extras={
               <>
+                <ChannelMediaPreview
+                  channelLabel="Facebook"
+                  isCarousel={isCarouselActive}
+                  pages={carouselDeck}
+                  heroImageUrl={heroImage}
+                  title={activeAsset.title}
+                />
+
                 {activeAsset.doc_url && (
                   <div className="bg-[#1877F2]/5 border border-[#1877F2]/20 rounded-xl p-3.5 space-y-1.5">
                     <span className="text-xs font-semibold text-[#1877F2] block">
@@ -288,40 +372,21 @@ export default function SocialVariantTabs({
                 <div className="min-w-0">
                   <span className="block text-sm font-semibold text-ink truncate">{author?.name ?? "Parvej Shah"}</span>
                   <span className="block text-[11px] text-muted">
-                    {deck ? `Post these ${deck.length} pages as one Instagram carousel.` : "Copy the caption and post it with the cover image."}
+                    {carouselDeck ? `Post these ${carouselDeck.length} pages as one Instagram carousel.` : "Copy the caption and post it with the cover image."}
                   </span>
                 </div>
               </div>
             }
             extras={
-              <>
-                {deck ? (
-                  <div className="space-y-3 pt-1">
-                    {/* The carousel's pages, cover first. Open one to see it full size. */}
-                    <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1 scrollbar-none">
-                      {deck.map((page, i) => (
-                        <a key={page} href={page} target="_blank" rel="noopener noreferrer" className="snap-start shrink-0 w-[70%] sm:w-[220px]">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={page} alt={`Page ${i + 1} of ${deck.length}`} className="aspect-[4/5] w-full rounded-lg border border-line object-cover" />
-                        </a>
-                      ))}
-                    </div>
-                    {onSavePages && (
-                      <div className="space-y-1.5">
-                        <button type="button" onClick={onSavePages} disabled={savingPages} className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-line bg-surface-2 px-4 text-sm font-semibold text-ink cursor-pointer hover:bg-surface-3 disabled:opacity-50">
-                          {savingPages ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Download className="h-4 w-4" aria-hidden="true" />}
-                          {`Save all ${deck.length} pages`}
-                        </button>
-                        <p className="text-[13px] leading-snug text-muted">Then in Instagram: New post, select the pages in order, paste the caption (Copy above).</p>
-                      </div>
-                    )}
-                  </div>
-                ) : activeAsset.hero_image_url && activeAsset.hero_status === "READY" ? (
-                  <div className="relative mx-auto aspect-[4/5] w-full max-w-[420px] overflow-hidden rounded-xl border border-line bg-surface-2">
-                    <Image src={activeAsset.hero_image_url} alt={activeAsset.title} fill unoptimized sizes="420px" className="object-cover" />
-                  </div>
-                ) : null}
-              </>
+              <ChannelMediaPreview
+                channelLabel="Instagram"
+                isCarousel={isCarouselActive}
+                pages={carouselDeck}
+                heroImageUrl={heroImage}
+                title={activeAsset.title}
+                onSavePages={onSavePages}
+                savingPages={savingPages}
+              />
             }
           />
         )}

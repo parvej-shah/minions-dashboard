@@ -1,15 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Link2 } from "lucide-react";
 import Drawer from "@/components/ui/Drawer";
 import { buttonStyles } from "@/components/ui/Button";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
+import { createQuickIdeaPayload } from "@/lib/ideas/list";
 import type { IdeaItem } from "@/types";
-
-const FALLBACK_NOTE = "An idea added by your team.";
-const fieldClass =
-  "w-full bg-surface-2 border border-line focus:border-brand rounded-xl px-3.5 py-2.5 text-xs text-ink placeholder:text-subtle outline-none transition-all";
 
 interface Props {
   onClose: () => void;
@@ -17,35 +14,42 @@ interface Props {
   onFailed: (message: string) => void;
 }
 
-function newIdeaPayload(title: string, note: string, sourceUrl: string) {
-  return {
-    title,
-    raw_idea: title,
-    excerpt: note || FALLBACK_NOTE,
-    angle: note || FALLBACK_NOTE,
-    audience: "ICP",
-    source: sourceUrl ? "MANUAL_REFERENCE" : "MANUAL",
-    source_url: sourceUrl || null,
-    source_title: null,
-    signals: sourceUrl
-      ? [{ title, url: sourceUrl, source: "Manual Reference", snippet: note || title, published_at: new Date().toISOString() }]
-      : [],
-    tags: ["Manual"],
-  };
-}
-
 export default function AddIdeaDrawer({ onClose, onCreated, onFailed }: Props) {
-  const [title, setTitle] = useState("");
-  const [note, setNote] = useState("");
+  const [thought, setThought] = useState("");
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [customTitle, setCustomTitle] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || isSubmitting) return;
+    const cleanThought = thought.trim();
+    if (!cleanThought || isSubmitting) return;
+
     setIsSubmitting(true);
     try {
-      const created = await apiClient.post<IdeaItem>("/api/ideas", newIdeaPayload(title.trim(), note.trim(), sourceUrl.trim()));
+      const base = createQuickIdeaPayload(cleanThought);
+      const payload = {
+        ...base,
+        ...(customTitle.trim() ? { title: customTitle.trim(), raw_idea: customTitle.trim() } : {}),
+        ...(sourceUrl.trim()
+          ? {
+              source: "MANUAL_REFERENCE",
+              source_url: sourceUrl.trim(),
+              signals: [
+                {
+                  title: customTitle.trim() || base.title,
+                  url: sourceUrl.trim(),
+                  source: "Manual Reference",
+                  snippet: cleanThought,
+                  published_at: new Date().toISOString(),
+                },
+              ],
+            }
+          : {}),
+      };
+
+      const created = await apiClient.post<IdeaItem>("/api/ideas", payload);
       onCreated(created);
     } catch (err) {
       onFailed(`Could not add idea: ${toErrorMessage(err, "network error")}`);
@@ -60,10 +64,10 @@ export default function AddIdeaDrawer({ onClose, onCreated, onFailed }: Props) {
       busy={isSubmitting}
       header={
         <div>
-          <span className="mb-1 inline-block rounded border border-brand/20 bg-brand/10 px-2 py-0.5 text-[10px] font-bold text-brand">
-            Add an idea
+          <span className="mb-1 inline-block rounded-full border border-brand/20 bg-brand/10 px-2.5 py-0.5 text-[11px] font-semibold text-brand">
+            Quick Capture
           </span>
-          <h2 className="text-lg font-bold text-ink">Add your idea</h2>
+          <h2 className="text-xl font-bold text-ink">Add an idea</h2>
         </div>
       }
       footer={
@@ -72,20 +76,20 @@ export default function AddIdeaDrawer({ onClose, onCreated, onFailed }: Props) {
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="w-full rounded-xl px-4 py-2.5 text-xs font-semibold text-muted transition-colors hover:bg-surface-2 hover:text-ink cursor-pointer sm:w-auto"
+            className="w-full rounded-full min-h-11 px-4 py-2.5 text-[15px] font-medium text-muted transition-colors hover:bg-surface-2 hover:text-ink cursor-pointer sm:w-auto"
           >
             Cancel
           </button>
           <button
             type="submit"
             form="add-idea-form"
-            disabled={isSubmitting || !title.trim()}
-            className={buttonStyles({ size: "sm", className: "w-full sm:w-auto" })}
+            disabled={isSubmitting || !thought.trim()}
+            className={buttonStyles({ size: "sm", className: "w-full sm:w-auto min-h-11 px-5" })}
           >
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Adding idea…
+                Adding…
               </>
             ) : (
               <>
@@ -99,45 +103,64 @@ export default function AddIdeaDrawer({ onClose, onCreated, onFailed }: Props) {
     >
       <form id="add-idea-form" onSubmit={submit} className="space-y-5">
         <div>
-          <label className="block text-xs font-semibold text-ink mb-1.5">
-            Idea title <span className="text-brand">*</span>
+          <label htmlFor="quick-thought" className="block text-[14px] font-semibold text-ink mb-2">
+            What&apos;s on your mind?
           </label>
-          <input
-            type="text"
+          <textarea
+            id="quick-thought"
             required
-            placeholder="e.g. The customer question our industry keeps answering badly"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className={`${fieldClass} font-medium`}
+            autoFocus
+            rows={5}
+            placeholder="Paste a client question, conversation snippet, link, or voice note transcript. Minions shapes the angle and hook for you."
+            value={thought}
+            onChange={(e) => setThought(e.target.value)}
+            className="w-full bg-surface-2 border border-line focus:border-brand rounded-2xl p-4 text-[15px] text-ink placeholder:text-muted outline-none transition-all resize-none leading-relaxed"
           />
-          <p className="text-[11px] text-subtle mt-1">
-            Name the specific problem, question, or decision this idea tackles for your ideal customer.
+          <p className="text-[12px] text-muted mt-2">
+            A single sentence or link is enough. You don&apos;t need to write an outline or angle.
           </p>
         </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-ink mb-1.5">
-            Source link <span className="text-subtle font-normal">(Optional)</span>
-          </label>
-          <input
-            type="url"
-            placeholder="https://news.ycombinator.com/... or https://techcrunch.com/..."
-            value={sourceUrl}
-            onChange={(e) => setSourceUrl(e.target.value)}
-            className={`${fieldClass}`}
-          />
-        </div>
+        {!showAdvanced ? (
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(true)}
+            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-brand hover:underline cursor-pointer"
+          >
+            <Link2 className="w-3.5 h-3.5" />
+            Add separate link or custom title
+          </button>
+        ) : (
+          <div className="space-y-4 rounded-2xl border border-line bg-surface-1 p-4">
+            <div>
+              <label htmlFor="custom-title" className="block text-xs font-semibold text-ink mb-1.5">
+                Custom title <span className="text-muted font-normal">(Optional)</span>
+              </label>
+              <input
+                id="custom-title"
+                type="text"
+                placeholder="Optional headline override"
+                value={customTitle}
+                onChange={(e) => setCustomTitle(e.target.value)}
+                className="w-full bg-surface-2 border border-line focus:border-brand rounded-xl px-3.5 py-2 text-xs text-ink placeholder:text-muted outline-none transition-all"
+              />
+            </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-ink mb-1.5">Angle or notes</label>
-          <textarea
-            rows={3}
-            placeholder="What might others be missing, and what experience or evidence gives you a useful perspective? An idea, rough angle, or source is enough; future implications are optional."
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            className={`${fieldClass} resize-none`}
-          />
-        </div>
+            <div>
+              <label htmlFor="source-url" className="block text-xs font-semibold text-ink mb-1.5">
+                Source link <span className="text-muted font-normal">(Optional)</span>
+              </label>
+              <input
+                id="source-url"
+                type="url"
+                placeholder="https://..."
+                value={sourceUrl}
+                onChange={(e) => setSourceUrl(e.target.value)}
+                className="w-full bg-surface-2 border border-line focus:border-brand rounded-xl px-3.5 py-2 text-xs text-ink placeholder:text-muted outline-none transition-all"
+              />
+            </div>
+          </div>
+        )}
       </form>
     </Drawer>
   );
