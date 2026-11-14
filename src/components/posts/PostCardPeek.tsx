@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { compactSlotLabel } from "@/lib/today";
-import { statusLine } from "@/lib/posts/library";
+import { isPostFailed, statusLine } from "@/lib/posts/library";
+import { failureList } from "@/lib/publishFailures";
 import { StatusLabel } from "@/components/ui/Text";
 import PostThumb from "./PostThumb";
 import type { AssetItem } from "@/types";
@@ -14,7 +15,9 @@ interface PostCardPeekProps {
   nextSlot: string | null;
   onSchedule?: (postId: string) => Promise<void>;
   onDelete?: (postId: string) => Promise<void>;
+  onRetry?: (postId: string, channel?: string) => Promise<void>;
   isScheduling?: boolean;
+  isRetrying?: boolean;
   liveLink?: { url: string; label: string };
 }
 
@@ -37,14 +40,21 @@ export default function PostCardPeek({
   nextSlot,
   onSchedule,
   onDelete,
+  onRetry,
   isScheduling,
+  isRetrying,
   liveLink,
 }: PostCardPeekProps) {
   const [isHovered, setIsHovered] = useState(false);
   const status = statusLine(post, timeZone);
   const channelsText = channelSummary(post);
   const isUnapproved = post.status === "PENDING_REVIEW";
+  const isFailed = isPostFailed(post);
+  const failures = failureList(post.publish_failures);
+  const primaryChannel = failures[0]?.channel ?? "linkedin";
+  const primaryLabel = failures[0]?.label ?? "post";
   const slotText = nextSlot ? compactSlotLabel(nextSlot, timeZone) : "";
+  const showHoverOverlay = isHovered && (isUnapproved || isFailed);
 
   return (
     <div
@@ -67,7 +77,7 @@ export default function PostCardPeek({
         </Link>
 
         {/* Desktop Quick-Peek Floating Overlay on Hover */}
-        {isHovered && isUnapproved && (
+        {showHoverOverlay && (
           <div className="pointer-events-auto absolute inset-0 z-20 flex flex-col justify-between bg-white/98 dark:bg-canvas/98 p-4 backdrop-blur-md shadow-xl border border-line/50 transition-opacity duration-150 animate-in fade-in">
             <div className="space-y-2.5 overflow-hidden">
               <div className="flex items-center justify-between gap-2">
@@ -103,16 +113,32 @@ export default function PostCardPeek({
                 {post.title}
               </h4>
 
-              {post.hook && (
+              {isFailed && failures.length > 0 ? (
+                <p className="border-l border-danger/40 pl-2.5 py-0.5 text-[12px] text-danger font-medium leading-relaxed line-clamp-3">
+                  {failures.map((f) => `${f.label}: ${f.reason}`).join(" · ")}
+                </p>
+              ) : post.hook ? (
                 <blockquote className="border-l border-brand/40 pl-2.5 py-0.5 text-[13px] text-ink/85 italic leading-relaxed line-clamp-3">
                   “{post.hook.replace(/^["']|["']$/g, "")}”
                 </blockquote>
-              )}
+              ) : null}
             </div>
 
-            {/* Exactly Two Buttons: High-attention Primary Schedule + Quiet Secondary Edit */}
+            {/* Exactly Two Buttons: High-attention Primary Action + Quiet Secondary Edit */}
             <div className="flex items-center gap-2 pt-2 border-t border-line/60">
-              {nextSlot && onSchedule ? (
+              {isFailed && onRetry ? (
+                <button
+                  type="button"
+                  onClick={() => void onRetry(post.id, primaryChannel)}
+                  disabled={isRetrying}
+                  className="group/btn flex-1 min-w-0 min-h-[38px] px-3 rounded-full bg-brand text-white text-[13px] font-medium shadow-sm hover:bg-brand/90 hover:shadow active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 transition-all flex items-center justify-center gap-1.5"
+                >
+                  <svg className={`w-3.5 h-3.5 ${isRetrying ? "animate-spin" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span className="truncate">{isRetrying ? "Retrying…" : `Retry · ${primaryLabel}`}</span>
+                </button>
+              ) : isUnapproved && nextSlot && onSchedule ? (
                 <button
                   type="button"
                   onClick={() => void onSchedule(post.id)}
@@ -159,7 +185,24 @@ export default function PostCardPeek({
         </Link>
 
         {/* Mobile Quick Action Strip */}
-        {isUnapproved && nextSlot && onSchedule && (
+        {isFailed && onRetry ? (
+          <div className="flex items-center gap-1.5 pt-2 sm:hidden">
+            <button
+              type="button"
+              onClick={() => void onRetry(post.id, primaryChannel)}
+              disabled={isRetrying}
+              className="flex-1 min-w-0 min-h-[36px] px-2.5 rounded-full bg-brand text-white text-[12px] font-medium flex items-center justify-center truncate active:scale-[0.985] shadow-sm gap-1"
+            >
+              <span>{isRetrying ? "..." : `Retry · ${primaryLabel}`}</span>
+            </button>
+            <Link
+              href={`/editorial?id=${encodeURIComponent(post.id)}`}
+              className="shrink-0 min-h-[36px] px-3 rounded-full bg-surface border border-line text-ink text-[12px] font-medium flex items-center justify-center active:scale-[0.985]"
+            >
+              Edit
+            </Link>
+          </div>
+        ) : isUnapproved && nextSlot && onSchedule ? (
           <div className="flex items-center gap-1.5 pt-2 sm:hidden">
             <button
               type="button"
@@ -175,6 +218,20 @@ export default function PostCardPeek({
             >
               Edit
             </Link>
+          </div>
+        ) : null}
+
+        {isFailed && onRetry && (
+          <div className="hidden sm:block pt-1">
+            <button
+              type="button"
+              onClick={() => void onRetry(post.id, primaryChannel)}
+              disabled={isRetrying}
+              className="cursor-pointer text-[12.5px] font-semibold text-brand hover:underline inline-flex items-center gap-1"
+            >
+              <span>↻</span>
+              <span>{isRetrying ? "Retrying…" : `Retry ${primaryLabel}`}</span>
+            </button>
           </div>
         )}
 

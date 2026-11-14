@@ -77,3 +77,6 @@
 | 72 | Autonomous Outcome Architecture: 3-Tab Nav & 5-Draft Buffer | ANTIGRAVITY | DONE | tasks/72.md |
 | 73 | Posts Header Layout Polish & Equal Width Tabs | ANTIGRAVITY | DONE | tasks/73.md |
 | 74 | Executive Publishing Pace & Schedule Redesign (8 Audit Fixes) | ANTIGRAVITY | DONE | tasks/74.md |
+| 75 | Quick Draft Top Picks Integration, Progress Banner & Dedicated Failed Posts Tab with Direct Retry | ANTIGRAVITY | DONE | tasks/75.md |
+| 76 | Today Post Cards Precision & Direct Edit-Mode Clickable Surface | ANTIGRAVITY | DONE | tasks/76.md |
+| 77 | Impeccable Today Spotlight Card: Clutter Elimination & Hero Poster Balance | ANTIGRAVITY | DONE | tasks/77.md |

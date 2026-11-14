@@ -18,8 +18,10 @@ describe("groupOf", () => {
     expect(groupOf("SCHEDULED")).toBe("scheduled");
     expect(groupOf("APPROVED")).toBe("scheduled");
     expect(groupOf("PUBLISHED")).toBe("posted");
+    expect(groupOf("FAILED")).toBe("failed");
     expect(groupOf("UNPUBLISHED")).toBe("other");
     expect(groupOf("DRAFT")).toBe("other");
+    expect(groupOf(p("fail", "PUBLISHED", { publish_failures: { linkedin: "bad token" } }))).toBe("failed");
   });
 });
 

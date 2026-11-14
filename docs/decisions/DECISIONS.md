@@ -28,6 +28,27 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-14 — Impeccable Today spotlight card: clutter elimination & hero poster balance
+
+**Decision:** The Today spotlight card is distilled into a calm, magazine-grade layout: the cover poster width is expanded from narrow 220px to a generous 320px–340px hero artwork that honors its 4:5 portrait aspect ratio. Clutter and competing actions are removed: the noisy uppercase eyebrow, redundant thesis paragraph, static button pill, and loud angle bubble toolbar are replaced by a unified status line (`Ready for your OK · [Format] · [Channels] · Draft X of Y`), a single prominent `Approve for [Slot]` button, a quiet `Edit in Studio ↗` affordance, and a minimal inline angle switcher.
+**Why:** Busy founders and brokers hire Minions for finished outcomes, not triage homework. Packing 10+ badges, secondary buttons, duplicate headings, and squeezed thumbnails turned the Today decision into visual noise. Giving the poster generous presence and stripping micro-actions down to one clear decision restores executive calm and focus.
+**Alternatives considered:** Keeping angle bubble chips (rejected: loud and distracting), shrinking card padding (rejected: whitespace is essential to the Apple-grade aesthetic).
+**Status:** active
+
+## 2026-11-14 — Today post cards precision & direct edit-mode clickable surface
+
+**Decision:** The post card on the Today tab is an interactive, clickable surface that navigates directly to edit mode (`/editorial?id=...`), with a clear hover affordance indicating "Click card to edit ↗". Inner buttons (such as 1-tap Approve, Angle Switcher chips, and schedule controls) stop propagation to preserve inline actions. The card displays executive precision metadata tailored for our ICP: target destination channels (LinkedIn, Instagram, Facebook), visual format label (Carousel slide count vs Cover poster), strategic topic/pillar tag, core thesis argument, and 1-tap angle switching.
+**Why:** Busy B2B service founders, agency executives, and brokers need to evaluate today's post in seconds. Previously, the card lacked channel clarity, format indicators, and thesis context, and forced users to hunt for small edit links. Making the entire card a tactile entrance to Studio with immediate angle comparisons and channel transparency aligns directly with executive decision-making.
+**Alternatives considered:** Opening a modal for quick edits (rejected: Editorial Studio is the dedicated place for draft edits and review), making only the headline a link (rejected: founders expect the entire card surface to be clickable on modern web dashboards).
+**Status:** active
+
+## 2026-11-14 — Quick draft top picks integration & dedicated Failed posts tab
+
+**Decision:** Quick drafts triggered via the "+ Quick draft" drawer now surface immediately in the "Top three picks for you" triage shelf as `#1 Up next · Generating draft…` alongside live progress and completion banners; posts with channel publish failures are moved into a dedicated "Failed" tab (`/posts?show=failed`) featuring 1-tap direct retry rather than hiding inside the "Posted" tab.
+**Why:** Users previously lacked visual feedback while Minions synthesized drafts in the background, making drafting feel detached from their primary review queue. When scheduled posts failed to publish to LinkedIn or Instagram, burying them in the "Posted" tab with ambiguous coral subtext caused confusion and prevented easy remediation. Surfacing failed posts in their own tab with 1-tap retry gives users immediate control.
+**Alternatives considered:** Modals during draft generation (rejected: blocks navigation for ~1 min), keeping failed posts inside Posted with a filter dropdown (rejected: failed posts require urgent action and shouldn't masquerade as published).
+**Status:** active
+
 ## 2026-11-12 — Autonomous outcome architecture: 3-tab navigation & 5-draft buffer
 
 **Decision:** The Ideas page is removed from primary navigation, leaving three calm destinations: Today, Posts, and Brand; `/ideas` redirects to `/posts?show=needs`. Automatic drafting runs on schedule up to a maximum buffer of 5 unreviewed drafts (`PENDING_REVIEW`), pausing until the user reviews or posts. Spontaneous thoughts or links can be drafted immediately via a single-input "+ Quick draft" drawer available on Today and Posts.

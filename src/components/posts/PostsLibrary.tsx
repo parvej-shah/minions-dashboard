@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useChannelSummary } from "@/hooks/useChannelSummary";
 import { useToast } from "@/hooks/useToast";
@@ -25,7 +27,7 @@ import { PageHeader } from "@/components/ui/Text";
 import Toast from "@/components/ui/Toast";
 import CuratedPostsTray from "./CuratedPostsTray";
 import PostCardPeek from "./PostCardPeek";
-import QuickDraftDrawer from "./QuickDraftDrawer";
+import QuickDraftDrawer, { type QuickDraftStartedPayload } from "./QuickDraftDrawer";
 import type { AssetItem } from "@/types";
 
 const SHOWS: { key: PostShow; label: string }[] = [
@@ -33,6 +35,7 @@ const SHOWS: { key: PostShow; label: string }[] = [
   { key: "needs", label: "Needs you" },
   { key: "scheduled", label: "Scheduled" },
   { key: "posted", label: "Posted" },
+  { key: "failed", label: "Failed" },
 ];
 
 const EMPTY: Record<PostShow, string> = {
@@ -40,6 +43,7 @@ const EMPTY: Record<PostShow, string> = {
   needs: "Nothing needs you right now.",
   scheduled: "Nothing is scheduled.",
   posted: "Nothing has gone out yet.",
+  failed: "No failed posts. Everything went out smoothly.",
 };
 
 /** The Posts library: calm executive triage shelf + searchable image-first grid. */
@@ -53,7 +57,23 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
   const [reserveSort, setReserveSort] = useState<"newest" | "oldest">("newest");
   const [isReserveExpanded, setIsReserveExpanded] = useState(false);
   const [schedulingId, setSchedulingId] = useState<string | null>(null);
+  const [retryingId, setRetryingId] = useState<string | null>(null);
   const [isQuickDraftOpen, setIsQuickDraftOpen] = useState(false);
+  const [generatingDraft, setGeneratingDraft] = useState<(QuickDraftStartedPayload & { startedAt: number }) | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = sessionStorage.getItem("minions_active_quick_draft");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Date.now() - parsed.startedAt < 180000) {
+          return parsed;
+        }
+        sessionStorage.removeItem("minions_active_quick_draft");
+      }
+    } catch {}
+    return null;
+  });
+  const [completedDraft, setCompletedDraft] = useState<{ title: string; assetId?: string } | null>(null);
   const toast = useToast(3500);
 
   const tz = schedule.data?.timezone || DEFAULT_TIMEZONE;
@@ -64,10 +84,48 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
   const nextSlot = nextFreeSlot(preview.data.slots, taken, now.getTime(), MIN_LEAD_MINUTES);
 
   const unapproved = postsFor(assets.data, "needs");
+  const failedPosts = postsFor(assets.data, "failed");
+  const failedCount = failedPosts.length;
+
   const { curated, reserve: unapprovedReserve } = splitCuratedAndReserve(unapproved, 3);
   const sortedReserve = sortReservePosts(unapprovedReserve, reserveSort);
 
   const list = postsFor(assets.data, show).filter((p) => !q || p.title.toLowerCase().includes(q));
+
+  // Poll for generating draft completion
+  useEffect(() => {
+    if (!generatingDraft) return;
+    const timer = setInterval(async () => {
+      try {
+        const run = await apiClient.get<{ status?: string; metadata?: Record<string, unknown> }>(
+          `/api/pipeline/runs/${generatingDraft.runId}`
+        );
+        if (run.status === "COMPLETED") {
+          const assetId = typeof run.metadata?.assetId === "string" ? run.metadata.assetId : undefined;
+          setCompletedDraft({
+            title: generatingDraft.title || generatingDraft.thought,
+            assetId,
+          });
+          setGeneratingDraft(null);
+          try {
+            sessionStorage.removeItem("minions_active_quick_draft");
+          } catch {}
+          toast.show("Draft generated and added to Top Picks!");
+          void assets.reload();
+          window.dispatchEvent(new Event("minions-counts-updated"));
+        } else if (run.status === "FAILED") {
+          setGeneratingDraft(null);
+          try {
+            sessionStorage.removeItem("minions_active_quick_draft");
+          } catch {}
+          toast.show("Draft generation stopped. Please try again.");
+        }
+      } catch {
+        // Keep polling on transient network failures
+      }
+    }, 3500);
+    return () => clearInterval(timer);
+  }, [generatingDraft, assets, toast]);
 
   const pick = (key: PostShow) => {
     setChosen(key);
@@ -105,11 +163,39 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
     }
   };
 
+  const handleRetryPost = async (postId: string, channel: string = "linkedin") => {
+    if (retryingId) return;
+    setRetryingId(postId);
+    try {
+      const res = await apiClient.post<{ success: boolean; error?: string }>(
+        `/api/assets/${postId}/retry-publish`,
+        { channel }
+      );
+      if (!res.success) {
+        toast.show(`Could not post: ${res.error || "error"}`);
+      } else {
+        toast.show("Posted successfully!");
+        window.dispatchEvent(new Event("minions-counts-updated"));
+        void assets.reload();
+      }
+    } catch {
+      toast.show("Could not retry post. Please try again.");
+    } finally {
+      setRetryingId(null);
+    }
+  };
+
+  const hasTopShelf = show === "needs" && !q && (curated.length > 0 || Boolean(generatingDraft));
+
   return (
     <div className="space-y-10">
       <div className="flex flex-wrap items-end justify-between gap-5">
         <PageHeader title="Posts">
-          {show === "needs" ? "Top three picks for you." : null}
+          {show === "needs"
+            ? "Top three picks for you."
+            : show === "failed"
+            ? "Posts that couldn't be published. Review reasons and retry."
+            : null}
         </PageHeader>
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:items-end">
           <Segmented
@@ -117,6 +203,7 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
             options={SHOWS.map((s) => ({
               key: s.key,
               label: s.label,
+              count: s.key === "failed" && failedCount > 0 ? failedCount : undefined,
             }))}
             value={show}
             onChange={pick}
@@ -139,6 +226,64 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
         </div>
       </div>
 
+      {/* Drafting Progress Banner */}
+      {generatingDraft && (
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-[20px] border border-brand/35 bg-brand/[0.04] p-4.5 text-ink shadow-sm animate-in fade-in">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
+              <Sparkles className="h-5 w-5 animate-spin" style={{ animationDuration: "3s" }} />
+            </span>
+            <div className="min-w-0 space-y-0.5">
+              <p className="text-[14.5px] font-semibold text-ink truncate">
+                Minions is drafting your post: “{generatingDraft.thought}”
+              </p>
+              <p className="text-[12.5px] text-muted">
+                Synthesizing thesis, angle, and visual cover in your voice (~1 min). It appears in your Top Picks below.
+              </p>
+            </div>
+          </div>
+          <span className="text-[12.5px] font-medium text-brand animate-pulse whitespace-nowrap pl-2">
+            Drafting in progress…
+          </span>
+        </div>
+      )}
+
+      {/* Draft Ready Celebration Banner */}
+      {completedDraft && (
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-[20px] border border-success/35 bg-success/[0.05] p-4.5 text-ink shadow-sm animate-in fade-in">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-success/10 text-success text-lg font-bold">
+              ✓
+            </span>
+            <div className="min-w-0 space-y-0.5">
+              <p className="text-[14.5px] font-semibold text-ink truncate">
+                Post generated! “{completedDraft.title}” is ready for review.
+              </p>
+              <p className="text-[12.5px] text-muted">
+                Your new draft has landed in your Top Three Picks below.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5">
+            {completedDraft.assetId && (
+              <Link
+                href={`/editorial?id=${encodeURIComponent(completedDraft.assetId)}`}
+                className={buttonStyles({ size: "sm", className: "cursor-pointer whitespace-nowrap min-h-[38px] px-4" })}
+              >
+                Review draft
+              </Link>
+            )}
+            <button
+              type="button"
+              onClick={() => setCompletedDraft(null)}
+              className="cursor-pointer px-3.5 py-1.5 text-[13px] font-medium text-muted hover:text-ink min-h-[38px] flex items-center justify-center rounded-full hover:bg-surface-2 transition-colors"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
       {assets.isLoading ? (
         <SkeletonGroup label="Loading posts" className="columns-2 gap-5 sm:columns-3 lg:columns-4">
           {Array.from({ length: 8 }, (_, i) => (
@@ -152,7 +297,7 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
             Try again
           </button>
         </div>
-      ) : list.length === 0 ? (
+      ) : list.length === 0 && !generatingDraft ? (
         <div className={cardClass({ tone: "well", pad: "none", className: "px-6 py-16 text-center" })}>
           <p className="text-[17px] text-muted">{q ? `No posts match “${query}”.` : EMPTY[show]}</p>
           {!q && show !== "all" && (
@@ -164,7 +309,7 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
       ) : (
         <div className="space-y-12">
           {/* Curated Top-3 Shelf: Shown when on 'needs' tab without query */}
-          {show === "needs" && !q && curated.length > 0 && (
+          {hasTopShelf && (
             <CuratedPostsTray
               posts={curated}
               nextSlot={nextSlot}
@@ -172,6 +317,8 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
               onSchedule={handleSchedulePost}
               onDelete={handleDeletePost}
               schedulingId={schedulingId}
+              generatingDraft={generatingDraft}
+              onOpenQuickDraft={() => setIsQuickDraftOpen(true)}
             />
           )}
 
@@ -232,7 +379,9 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
                         nextSlot={nextSlot}
                         onSchedule={handleSchedulePost}
                         onDelete={handleDeletePost}
+                        onRetry={handleRetryPost}
                         isScheduling={schedulingId === post.id}
+                        isRetrying={retryingId === post.id}
                         liveLink={live}
                       />
                     </li>
@@ -249,9 +398,14 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
       <QuickDraftDrawer
         isOpen={isQuickDraftOpen}
         onClose={() => setIsQuickDraftOpen(false)}
-        onDraftStarted={() => {
-          toast.show("Draft started. It will appear here shortly.");
-          setTimeout(() => void assets.reload(), 3000);
+        onDraftStarted={(job) => {
+          const draftJob = { ...job, startedAt: Date.now() };
+          setGeneratingDraft(draftJob);
+          setCompletedDraft(null);
+          try {
+            sessionStorage.setItem("minions_active_quick_draft", JSON.stringify(draftJob));
+          } catch {}
+          toast.show("Draft started. It will appear in your top picks shortly.");
         }}
         onFailed={(msg) => toast.show(msg, 5000)}
       />

@@ -4,7 +4,7 @@ import type { PostShow } from "@/lib/posts/library";
 
 export const metadata: Metadata = { title: "Posts" };
 
-const SHOWS: PostShow[] = ["all", "needs", "scheduled", "posted"];
+const SHOWS: PostShow[] = ["all", "needs", "scheduled", "posted", "failed"];
 
 interface PostsPageProps {
   searchParams: Promise<{ show?: string }>;

@@ -8,10 +8,17 @@ import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { createQuickIdeaPayload } from "@/lib/ideas/list";
 import type { IdeaItem } from "@/types";
 
+export interface QuickDraftStartedPayload {
+  runId: string;
+  ideaId: string;
+  title: string;
+  thought: string;
+}
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onDraftStarted: () => void;
+  onDraftStarted: (job: QuickDraftStartedPayload) => void;
   onFailed: (message: string) => void;
 }
 
@@ -32,14 +39,19 @@ export default function QuickDraftDrawer({ isOpen, onClose, onDraftStarted, onFa
       const payload = createQuickIdeaPayload(cleanThought);
       const created = await apiClient.post<IdeaItem>("/api/ideas", payload);
 
-      await apiClient.post("/api/pipeline/draft", {
+      const res = await apiClient.post<{ run_id: string }>("/api/pipeline/draft", {
         idea_id: created.id,
         title: created.title,
         audience: created.audience,
         target_trade: created.target_trade,
       });
 
-      onDraftStarted();
+      onDraftStarted({
+        runId: res.run_id,
+        ideaId: created.id,
+        title: created.title,
+        thought: cleanThought,
+      });
       onClose();
       setThought("");
     } catch (err) {

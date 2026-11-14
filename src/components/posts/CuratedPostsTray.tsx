@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import { compactSlotLabel } from "@/lib/today";
 import { StatusLabel } from "@/components/ui/Text";
 import PostThumb from "./PostThumb";
@@ -14,6 +15,12 @@ interface CuratedPostsTrayProps {
   onSchedule: (postId: string) => Promise<void>;
   onDelete?: (postId: string) => Promise<void>;
   schedulingId: string | null;
+  generatingDraft?: {
+    thought: string;
+    title?: string;
+    startedAt: number;
+  } | null;
+  onOpenQuickDraft?: () => void;
 }
 
 function channelFormatLabel(post: AssetItem): string {
@@ -37,17 +44,71 @@ export default function CuratedPostsTray({
   onSchedule,
   onDelete,
   schedulingId,
+  generatingDraft,
+  onOpenQuickDraft,
 }: CuratedPostsTrayProps) {
-  if (posts.length === 0) return null;
+  if (posts.length === 0 && !generatingDraft) return null;
+
+  const displayPosts = generatingDraft ? posts.slice(0, 2) : posts.slice(0, 3);
+  const totalCards = (generatingDraft ? 1 : 0) + displayPosts.length;
+  const showQuickDraftCard = Boolean(onOpenQuickDraft && totalCards < 3);
 
   return (
     <div className="space-y-3">
       {/* Mobile Swipeable Snap Shelf / Desktop 3-Column Grid */}
       <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-2 pt-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {posts.map((post, idx) => {
+        {/* Active Generating Quick Draft Card (#1 in Top Picks) */}
+        {generatingDraft && (
+          <div className="group relative flex flex-col justify-between w-[85vw] max-w-[330px] shrink-0 snap-center sm:w-auto sm:max-w-none overflow-hidden rounded-[22px] border border-brand/35 bg-surface p-3.5 transition-all duration-300 ease-out shadow-sm ring-1 ring-brand/20">
+            {/* Top Badge */}
+            <div className="flex items-center justify-between gap-2 px-0.5 pb-2.5">
+              <div className="flex items-center gap-2 truncate">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/10 border border-brand/20 px-2.5 py-0.5 text-[11px] font-semibold text-brand animate-pulse">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand" />
+                  #1 Up next · Generating draft…
+                </span>
+              </div>
+            </div>
+
+            {/* Poster Thumbnail / Generating Canvas */}
+            <div className="relative aspect-[4/5] max-h-[280px] sm:max-h-none w-full overflow-hidden rounded-[16px] bg-surface-2 border border-brand/15 flex flex-col justify-between p-5">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-brand">
+                  <Sparkles className="w-4 h-4 animate-spin" style={{ animationDuration: "3s" }} />
+                  <span className="text-[11px] font-bold uppercase tracking-wider">Writing in your voice</span>
+                </div>
+                <h4 className="text-[15px] font-semibold text-ink line-clamp-3 leading-snug">
+                  {generatingDraft.title || generatingDraft.thought}
+                </h4>
+                <blockquote className="border-l border-brand/40 pl-3 py-1 text-[12.5px] text-muted italic line-clamp-3 leading-relaxed">
+                  “{generatingDraft.thought}”
+                </blockquote>
+              </div>
+
+              <div className="space-y-2 pt-3 border-t border-line/50">
+                <div className="flex items-center justify-between text-[11.5px] text-muted">
+                  <span>Synthesizing post & cover…</span>
+                  <span className="font-mono text-brand font-medium">~1 min</span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-line">
+                  <div className="h-full w-2/3 rounded-full bg-brand animate-pulse" />
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile / Static Status Line */}
+            <div className="mt-3 flex items-center justify-between px-0.5 text-xs text-muted">
+              <span>Writing your post…</span>
+              <span className="text-brand font-medium">Ready shortly</span>
+            </div>
+          </div>
+        )}
+
+        {displayPosts.map((post, idx) => {
           const isBusy = schedulingId === post.id;
           const label = channelFormatLabel(post);
           const slotText = nextSlot ? compactSlotLabel(nextSlot, timeZone) : "";
+          const rankNumber = (generatingDraft ? 1 : 0) + idx + 1;
 
           return (
             <div
@@ -57,7 +118,7 @@ export default function CuratedPostsTray({
               {/* Top Badge & Delete */}
               <div className="flex items-center justify-between gap-2 px-0.5 pb-2.5">
                 <div className="flex items-center gap-2 truncate">
-                  <StatusLabel tone="coral">#{idx + 1} Up next</StatusLabel>
+                  <StatusLabel tone="coral">#{rankNumber} Up next</StatusLabel>
                   <span className="truncate text-[12px] font-medium text-muted">· {label}</span>
                 </div>
                 {onDelete && (
@@ -170,13 +231,32 @@ export default function CuratedPostsTray({
             </div>
           );
         })}
+
+        {/* Quick Draft card invitation when Top 3 shelf has room */}
+        {showQuickDraftCard && (
+          <button
+            type="button"
+            onClick={onOpenQuickDraft}
+            className="group relative flex flex-col justify-center items-center text-center w-[85vw] max-w-[330px] shrink-0 snap-center sm:w-auto sm:max-w-none overflow-hidden rounded-[22px] border-2 border-dashed border-line hover:border-brand/40 bg-surface/50 hover:bg-brand/[0.02] p-6 transition-all duration-300 ease-out min-h-[300px] sm:min-h-full cursor-pointer active:scale-[0.985]"
+          >
+            <div className="w-12 h-12 rounded-full bg-surface-2 group-hover:bg-brand/10 border border-line group-hover:border-brand/30 flex items-center justify-center text-muted group-hover:text-brand transition-colors mb-3">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <h4 className="text-[15px] font-semibold text-ink group-hover:text-brand transition-colors">
+              + Quick draft
+            </h4>
+            <p className="text-[13px] text-muted mt-1.5 max-w-[220px] leading-relaxed">
+              Turn a spontaneous thought or article link into an executive draft.
+            </p>
+          </button>
+        )}
       </div>
 
-      {/* Mobile 3-Dot Carousel Indicator */}
+      {/* Mobile Carousel Indicators */}
       <div className="flex items-center justify-center gap-1.5 pt-0.5 sm:hidden" aria-hidden="true">
-        {posts.map((p, i) => (
+        {Array.from({ length: totalCards + (showQuickDraftCard ? 1 : 0) }, (_, i) => (
           <span
-            key={p.id}
+            key={i}
             className={`h-1 rounded-full transition-all ${i === 0 ? "w-5 bg-brand" : "w-1.5 bg-line"}`}
           />
         ))}

@@ -17,7 +17,15 @@ interface Post {
   channels?: string[];
   hero_image_url?: string | null;
   variants?: unknown;
+  pillar?: string;
+  target_trade?: string;
+  core_argument?: string;
+  carousel_pages?: string[] | null;
+  linkedin_went_as?: "CAROUSEL" | "COVER" | null;
+  cover?: unknown;
 }
+
+export type TodayPostCardData = Post;
 
 export type DayItem =
   | { kind: "scheduled"; time: string; title: string; id: string }
@@ -135,4 +143,65 @@ export function compactSlotLabel(iso: string, timeZone: string): string {
   const d = new Date(iso);
   const weekday = new Intl.DateTimeFormat("en-GB", { timeZone, weekday: "short" }).format(d);
   return `${weekday.replace(/,/g, "")} ${parts(d, timeZone).time}`;
+}
+
+const CHANNEL_NAME_MAP: Record<string, string> = {
+  linkedin: "LinkedIn",
+  instagram: "Instagram",
+  facebook: "Facebook",
+  blog: "Blog",
+};
+
+/** Formats channel list cleanly for executive review (e.g. LinkedIn, Instagram). */
+export function postChannels(post: Post, defaultChannels: string[] = ["LinkedIn"]): string[] {
+  if (post.channels && post.channels.length > 0) {
+    return post.channels.map((c) => {
+      const lower = c.toLowerCase();
+      return CHANNEL_NAME_MAP[lower] ?? (c.charAt(0).toUpperCase() + c.slice(1).toLowerCase());
+    });
+  }
+  return defaultChannels;
+}
+
+/** Determines post format label for executive precision (e.g. Carousel · 5 slides vs Cover poster). */
+export function postFormatLabel(post: Post): string {
+  if (post.carousel_pages && post.carousel_pages.length > 0) {
+    return `Carousel · ${post.carousel_pages.length} slides`;
+  }
+  if (post.linkedin_went_as === "CAROUSEL") {
+    return "Carousel";
+  }
+  if (post.cover || post.hero_image_url) {
+    return "Cover poster";
+  }
+  return "Standard post";
+}
+
+/** Extracts the strategic topic / pillar for the post. */
+export function postTopicSnippet(post: Post): string | null {
+  if (post.pillar && post.pillar.trim()) {
+    return post.pillar.trim();
+  }
+  if (post.target_trade && post.target_trade.trim()) {
+    return post.target_trade.trim();
+  }
+  return null;
+}
+
+/** Extracts the core thesis / argument for fast executive assessment. */
+export function postThesisSnippet(post: Post): string | null {
+  if (post.core_argument && post.core_argument.trim()) {
+    return post.core_argument.trim();
+  }
+  return null;
+}
+
+/** Finds a post scheduled for today on the workspace clock. */
+export function scheduledForToday<T extends Post>(posts: T[], now: Date, timeZone: string): T | null {
+  const todayKey = parts(now, timeZone).key;
+  const matches = posts
+    .filter((p) => p.status === "SCHEDULED" && p.scheduled_for)
+    .filter((p) => parts(new Date(p.scheduled_for!), timeZone).key === todayKey)
+    .sort((a, b) => a.scheduled_for!.localeCompare(b.scheduled_for!));
+  return matches[0] ?? null;
 }
