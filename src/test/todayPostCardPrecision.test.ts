@@ -165,5 +165,13 @@ describe("Task 76: Today Post Cards Precision & ICP Helpers", () => {
       // No redundant Thesis: paragraph duplicating hook
       expect(src).not.toMatch(/<span[^>]*>Thesis:\s*<\/span>/);
     });
+
+    it("ensures top status/metadata row is removed from Today spotlight card for clean headline opening (Task 79)", () => {
+      const src = fs.readFileSync(todayViewPath, "utf-8");
+      // No 'Ready for your OK' status line on the card
+      expect(src).not.toMatch(/Ready for your OK/);
+      // No 'Draft X of Y' counter line at the top
+      expect(src).not.toMatch(/Draft\s*\{\(\(spotlightIndex/);
+    });
   });
 });

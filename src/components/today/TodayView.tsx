@@ -177,21 +177,6 @@ export default function TodayView() {
         >
           <div className="flex min-w-0 flex-1 flex-col justify-between gap-5">
             <div className="space-y-4">
-              {/* Calm, unified status line without pill bloat */}
-              <div className="flex flex-wrap items-center gap-2 text-[13px] text-muted">
-                <StatusLabel tone="coral">Ready for your OK</StatusLabel>
-                <span>·</span>
-                <span className="font-medium text-ink">{postFormatLabel(currentSpotlight)}</span>
-                <span>·</span>
-                <span>{postChannels(currentSpotlight).join(", ")}</span>
-                {waiting.length > 1 && (
-                  <>
-                    <span>·</span>
-                    <span>Draft {((spotlightIndex % waiting.length) + 1)} of {waiting.length}</span>
-                  </>
-                )}
-              </div>
-
               {/* Single confident post headline */}
               <h2 id="spotlight-title" className="text-[22px] sm:text-[26px] font-semibold tracking-tight text-ink leading-snug group-hover:text-brand transition-colors">
                 {currentSpotlight.title}

@@ -28,6 +28,13 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-14 — Remove status and metadata eyebrow row from Today spotlight card
+
+**Decision:** The metadata row (`● Ready for your OK · [Format] · [Channels] · Draft X of Y`) at the top of the Today spotlight card is removed. The card opens directly and boldly with the post headline, followed by the hook excerpt quote, the primary schedule CTA (`Approve for [Slot]`) + Studio edit link, the angle switcher row, and the hero cover artwork on the right.
+**Why:** The status line added unnecessary visual noise above the article headline. The post's readiness is already made obvious by the large "Approve for [Slot]" button, the format and styling are directly evident from the hero poster artwork, and the draft count is already contextualized in the angle switcher ("Browse all N in Posts"). Removing the metadata row gives the headline maximum punch and restores executive calm to the Today view.
+**Alternatives considered:** Moving the metadata row to a tooltip (rejected: extraneous interaction), styling as subtle chips (rejected: any row above the headline competes with the editorial lead).
+**Status:** active
+
 ## 2026-11-14 — Dynamic Failed tab in Posts filter bar
 
 **Decision:** The "Failed" tab in the Posts filter bar is hidden by default when there are zero failed posts (`failedCount === 0`), and dynamically appears (with its failed count badge) only when failed posts actually exist (`failedCount > 0`). If a user visits or stays on `?show=failed` when all failed posts are resolved or none exist, the view smoothly falls back to the default tab (`Needs you` or `All`).

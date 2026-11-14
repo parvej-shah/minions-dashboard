@@ -81,3 +81,4 @@
 | 76 | Today Post Cards Precision & Direct Edit-Mode Clickable Surface | ANTIGRAVITY | DONE | tasks/76.md |
 | 77 | Impeccable Today Spotlight Card: Clutter Elimination & Hero Poster Balance | ANTIGRAVITY | DONE | tasks/77.md |
 | 78 | Hide Failed Tab When Zero Failed Posts Exist | ANTIGRAVITY | DONE | tasks/78.md |
+| 79 | Remove Top Metadata Line from Today Spotlight Card | ANTIGRAVITY | DONE | tasks/79.md |
