@@ -29,6 +29,7 @@ RULE: every entry below is EXACTLY ONE LINE. No multi-line entries, no sub-bulle
 [PERMISSION] Ask before any production action (DB writes, n8n --apply, go-live changes, pushes that deploy).
 
 ## Sessions
+2026-11-14 | dynamic failed tab in posts filter (task 78) | decision: hide Failed tab when failedCount === 0; show only when failed posts exist | changed: PostsLibrary.tsx, library.ts, quickDraftAndFailedTab.test.ts | docs: tasks/78.md, DECISIONS.md | open: none
 2026-11-14 | Today card polish (76-77) & quick draft / failed tab (75), pushed 336e0db | decision: 340px hero poster; clickable edit surface; eliminated clutter; quick drafts in Top 3; failed posts tab with retry | changed: TodayView, library, CuratedPostsTray, PostCardPeek, PostsLibrary, tests | docs: tasks/75-77.md, DECISIONS.md | open: none
 2026-11-13 | executive publishing pace & schedule redesign (task 74) | decision: dedicated /schedule page; replaced inverted review switch with affirmative Review first/Autopilot; 3 rhythm presets; calm forecast | changed: schedule/page.tsx, ScheduleSettings, AutomaticDrafting, ContentPlanCard, DraftScheduleModal, AccountMenu, TodayView, tests | docs: tasks/74.md, docs/audits/drafting-schedule-ux-audit.md | open: none
 2026-11-12 | posts header layout polish & equal width tabs (task 73) | decision: isolated PageHeader from action controls; grouped Segmented (equal-width tabs) and SearchField + Quick draft into balanced right-side cluster | changed: Filters.tsx, PostsLibrary.tsx, tests | docs: tasks/73.md | open: none

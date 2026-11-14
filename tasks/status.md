@@ -80,3 +80,4 @@
 | 75 | Quick Draft Top Picks Integration, Progress Banner & Dedicated Failed Posts Tab with Direct Retry | ANTIGRAVITY | DONE | tasks/75.md |
 | 76 | Today Post Cards Precision & Direct Edit-Mode Clickable Surface | ANTIGRAVITY | DONE | tasks/76.md |
 | 77 | Impeccable Today Spotlight Card: Clutter Elimination & Hero Poster Balance | ANTIGRAVITY | DONE | tasks/77.md |
+| 78 | Hide Failed Tab When Zero Failed Posts Exist | ANTIGRAVITY | DONE | tasks/78.md |

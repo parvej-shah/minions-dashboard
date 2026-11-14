@@ -28,6 +28,13 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-14 — Dynamic Failed tab in Posts filter bar
+
+**Decision:** The "Failed" tab in the Posts filter bar is hidden by default when there are zero failed posts (`failedCount === 0`), and dynamically appears (with its failed count badge) only when failed posts actually exist (`failedCount > 0`). If a user visits or stays on `?show=failed` when all failed posts are resolved or none exist, the view smoothly falls back to the default tab (`Needs you` or `All`).
+**Why:** A persistent empty "Failed" tab introduces unnecessary visual clutter and prompts user anxiety about post delivery errors when everything is healthy. Showing the tab only when errors actually occur preserves a clean 4-tab filter bar (`All`, `Needs you`, `Scheduled`, `Posted`) for everyday triage while ensuring immediate prominence when attention is required.
+**Alternatives considered:** Keeping the "Failed" tab always visible with a zero count badge (rejected: clutters the Segmented control when there are no issues), showing an alert banner on all tabs instead of a tab (rejected: the dedicated tab organizes failed posts with 1-tap retry without pushing down the triage grid).
+**Status:** active
+
 ## 2026-11-14 — Impeccable Today spotlight card: clutter elimination & hero poster balance
 
 **Decision:** The Today spotlight card is distilled into a calm, magazine-grade layout: the cover poster width is expanded from narrow 220px to a generous 320px–340px hero artwork that honors its 4:5 portrait aspect ratio. Clutter and competing actions are removed: the noisy uppercase eyebrow, redundant thesis paragraph, static button pill, and loud angle bubble toolbar are replaced by a unified status line (`Ready for your OK · [Format] · [Channels] · Draft X of Y`), a single prominent `Approve for [Slot]` button, a quiet `Edit in Studio ↗` affordance, and a minimal inline angle switcher.

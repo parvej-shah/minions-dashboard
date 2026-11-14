@@ -86,6 +86,20 @@ export function countFor(posts: Post[], show: PostShow): number {
   return show === "all" ? posts.length : posts.filter((p) => groupOf(p) === show).length;
 }
 
+export function visiblePostShows(failedCount: number): PostShow[] {
+  if (failedCount > 0) {
+    return ["all", "needs", "scheduled", "posted", "failed"];
+  }
+  return ["all", "needs", "scheduled", "posted"];
+}
+
+export function resolveEffectiveShow(show: PostShow, failedCount: number, defaultFallback: PostShow): PostShow {
+  if (show === "failed" && failedCount === 0) {
+    return defaultFallback;
+  }
+  return show;
+}
+
 
 export function statusLine(post: Post, timeZone: string): { text: string; tone: Tone } {
   const day = (iso: string) =>

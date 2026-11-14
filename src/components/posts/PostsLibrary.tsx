@@ -16,6 +16,8 @@ import {
   postsFor,
   splitCuratedAndReserve,
   sortReservePosts,
+  visiblePostShows,
+  resolveEffectiveShow,
   type PostShow,
 } from "@/lib/posts/library";
 import { liveLinks } from "@/lib/drafts/liveLinks";
@@ -77,15 +79,18 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
   const toast = useToast(3500);
 
   const tz = schedule.data?.timezone || DEFAULT_TIMEZONE;
-  const show = chosen ?? defaultShow(assets.data);
+  const failedPosts = postsFor(assets.data, "failed");
+  const failedCount = failedPosts.length;
+  const fallback = defaultShow(assets.data);
+  const show = resolveEffectiveShow(chosen ?? fallback, failedCount, fallback);
   const q = query.trim().toLowerCase();
   const now = useMemo(() => new Date(), []);
   const taken = assets.data.filter((a) => a.status === "SCHEDULED" && a.scheduled_for).map((a) => a.scheduled_for!);
   const nextSlot = nextFreeSlot(preview.data.slots, taken, now.getTime(), MIN_LEAD_MINUTES);
 
   const unapproved = postsFor(assets.data, "needs");
-  const failedPosts = postsFor(assets.data, "failed");
-  const failedCount = failedPosts.length;
+  const visibleKeys = useMemo(() => new Set(visiblePostShows(failedCount)), [failedCount]);
+  const visibleShows = useMemo(() => SHOWS.filter((s) => visibleKeys.has(s.key)), [visibleKeys]);
 
   const { curated, reserve: unapprovedReserve } = splitCuratedAndReserve(unapproved, 3);
   const sortedReserve = sortReservePosts(unapprovedReserve, reserveSort);
@@ -200,7 +205,7 @@ export default function PostsLibrary({ initialShow }: { initialShow: PostShow | 
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:items-end">
           <Segmented
             label="Show"
-            options={SHOWS.map((s) => ({
+            options={visibleShows.map((s) => ({
               key: s.key,
               label: s.label,
               count: s.key === "failed" && failedCount > 0 ? failedCount : undefined,

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { groupOf, postsFor, statusLine, isPostFailed, type PostShow } from "@/lib/posts/library";
+import {
+  groupOf,
+  postsFor,
+  statusLine,
+  isPostFailed,
+  visiblePostShows,
+  resolveEffectiveShow,
+} from "@/lib/posts/library";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -97,5 +104,29 @@ describe("Posts UI Components contract for Quick Draft & Failed Tab", () => {
     const src = fs.readFileSync(postCardPeekPath, "utf-8");
     // Must have retry action or button for failed posts
     expect(src).toMatch(/retry|onRetry|Try again/i);
+  });
+
+  it("hides 'failed' tab when failedCount is 0, shows only when failedCount > 0", () => {
+    // 0 failed posts: only standard tabs, no 'failed'
+    expect(visiblePostShows(0)).toEqual(["all", "needs", "scheduled", "posted"]);
+    expect(visiblePostShows(0)).not.toContain("failed");
+
+    // >0 failed posts: 'failed' tab is present
+    expect(visiblePostShows(1)).toEqual(["all", "needs", "scheduled", "posted", "failed"]);
+    expect(visiblePostShows(3)).toContain("failed");
+  });
+
+  it("resolves effective show to fallback if 'failed' is selected with 0 failed posts", () => {
+    expect(resolveEffectiveShow("failed", 0, "needs")).toBe("needs");
+    expect(resolveEffectiveShow("failed", 0, "all")).toBe("all");
+    expect(resolveEffectiveShow("failed", 2, "needs")).toBe("failed");
+    expect(resolveEffectiveShow("needs", 0, "all")).toBe("needs");
+    expect(resolveEffectiveShow("scheduled", 0, "needs")).toBe("scheduled");
+  });
+
+  it("PostsLibrary filters Segmented tabs based on failed count", () => {
+    const src = fs.readFileSync(postsLibraryPath, "utf-8");
+    expect(src).toMatch(/visiblePostShows|visibleShows|failedCount > 0/);
+    expect(src).toMatch(/s\.key !== ["']failed["']|visibleKeys/);
   });
 });
