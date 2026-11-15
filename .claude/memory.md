@@ -29,6 +29,7 @@ RULE: every entry below is EXACTLY ONE LINE. No multi-line entries, no sub-bulle
 [PERMISSION] Ask before any production action (DB writes, n8n --apply, go-live changes, pushes that deploy).
 
 ## Sessions
+2026-11-15 | recently posted visual cards (task 81) | decision: replace Today plain text list with 3-col visual cards (PostThumb, metadata, live link) | changed: TodayView, tests | docs: tasks/81.md | open: none
 2026-11-15 | carousel caption in captions tab (task 80) | decision: show carousel caption in Captions LinkedIn tab when format is Carousel; sync on format toggle | changed: SocialVariantTabs, EditorialStudio, useEditorialDraft, mapper, types, tests | docs: tasks/80.md | open: none
 2026-11-14 | dynamic failed tab (78) & calm Today card (79), pushed 6206a3c | decision: hide Failed tab when failedCount=0; remove top status/format row from Today card | changed: PostsLibrary, TodayView, library, tests | docs: tasks/78-79.md, DECISIONS.md | open: none
 2026-11-14 | Today card polish (76-77) & quick draft / failed tab (75), pushed 336e0db | decision: 340px hero poster; clickable edit surface; eliminated clutter; quick drafts in Top 3; failed posts tab with retry | changed: TodayView, library, CuratedPostsTray, PostCardPeek, PostsLibrary, tests | docs: tasks/75-77.md, DECISIONS.md | open: none

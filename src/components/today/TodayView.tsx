@@ -5,6 +5,8 @@ import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { ExternalLink } from "lucide-react";
+import { liveLinks } from "@/lib/drafts/liveLinks";
 import { useApiResource } from "@/hooks/useApiResource";
 import { DEFAULT_TIMEZONE } from "@/constants/config";
 import {
@@ -395,20 +397,75 @@ export default function TodayView() {
       </div>
 
       {posted.length > 0 && (
-        <section aria-labelledby="recent" className="space-y-2">
-          <div className="mb-3"><SectionHeader id="recent" title="Recently posted" /></div>
-          <ul>
-            {posted.map((post) => (
-              <li key={post.id} className="border-b border-line">
-                <Link href={`/editorial?id=${encodeURIComponent(post.id)}`} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-4 hover:opacity-80">
-                  <span className="min-w-0 text-[17px] text-ink">{post.title}</span>
-                  <span className={`shrink-0 text-[15px] ${failureSummary(post.publish_failures) ? "text-danger" : "text-muted"}`}>
-                    {failureSummary(post.publish_failures) ?? (post.linkedin_url ? "LinkedIn" : post.live_blog_url ? "Blog" : "Posted")} · {dayText(post.published_at!, tz)}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+        <section aria-labelledby="recent" className="space-y-4">
+          <SectionHeader id="recent" title="Recently posted" href="/posts?show=posted" linkLabel="All posted" />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 sm:gap-5">
+            {posted.map((post) => {
+              const failure = failureSummary(post.publish_failures);
+              const live = liveLinks(post, true)[0];
+              const channelLabel = failure ?? (post.linkedin_url ? "LinkedIn" : post.live_blog_url ? "Blog" : "Posted");
+              return (
+                <div
+                  key={post.id}
+                  className="group relative flex flex-col justify-between overflow-hidden rounded-[22px] border border-line bg-surface p-3.5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lg focus-within:-translate-y-1.5 focus-within:shadow-lg"
+                >
+                  <div>
+                    {/* Top Metadata & Live Link */}
+                    <div className="flex items-center justify-between gap-2 px-0.5 pb-2.5 text-xs">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full shrink-0 ${failure ? "bg-danger" : "bg-success"}`}
+                          aria-hidden="true"
+                        />
+                        <span className={`truncate font-medium ${failure ? "text-danger" : "text-muted"}`}>
+                          {channelLabel}
+                        </span>
+                        <span className="text-muted/60">·</span>
+                        <span className="shrink-0 text-muted">{dayText(post.published_at!, tz)}</span>
+                      </div>
+
+                      {live && (
+                        <a
+                          href={live.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-muted hover:text-brand transition-colors shrink-0"
+                          title={`View live on ${live.label}`}
+                        >
+                          <span>Live</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
+                    </div>
+
+                    {/* Artwork / Poster Thumbnail */}
+                    <Link href={`/editorial?id=${encodeURIComponent(post.id)}`} className="block">
+                      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[16px] bg-surface-2">
+                        <PostThumb
+                          post={post}
+                          className="transition-transform duration-300 group-hover:scale-[1.02]"
+                        />
+                      </div>
+                    </Link>
+                  </div>
+
+                  {/* Title & Hook */}
+                  <div className="mt-3 space-y-1.5 px-0.5">
+                    <Link href={`/editorial?id=${encodeURIComponent(post.id)}`} className="block group/title">
+                      <h4 className="text-[14.5px] font-semibold text-ink line-clamp-2 leading-snug group-hover/title:text-brand transition-colors">
+                        {post.title}
+                      </h4>
+                    </Link>
+                    {post.hook && (
+                      <p className="text-[12.5px] text-muted line-clamp-2 italic leading-relaxed">
+                        “{post.hook}”
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </section>
       )}
 

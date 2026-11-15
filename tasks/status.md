@@ -83,3 +83,4 @@
 | 78 | Hide Failed Tab When Zero Failed Posts Exist | ANTIGRAVITY | DONE | tasks/78.md |
 | 79 | Remove Top Metadata Line from Today Spotlight Card | ANTIGRAVITY | DONE | tasks/79.md |
 | 80 | Show Carousel Caption When LinkedIn Post Format Is Carousel | ANTIGRAVITY | DONE | tasks/80.md |
+| 81 | Render Recently Posted as Visual Cards Instead of Plain Text List | ANTIGRAVITY | DONE | tasks/81.md |
