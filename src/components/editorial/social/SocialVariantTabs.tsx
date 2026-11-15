@@ -270,7 +270,13 @@ export default function SocialVariantTabs({
         {isShown("LINKEDIN") && (
           <ChannelPanel
             {...forChannel("LINKEDIN")}
-            value={edited.linkedin || linkedinCarousel?.caption || activeAsset.variants.linkedin || ""}
+            value={
+              linkedinCarousel
+                ? (edited.linkedin && edited.linkedin !== activeAsset.variants.linkedin
+                    ? edited.linkedin
+                    : (linkedinCarousel.caption || edited.linkedin))
+                : (edited.linkedin || activeAsset.variants.linkedin || "")
+            }
             identity={
               <div className="flex items-center gap-2.5 min-w-0">
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#0077B5]/15 text-xs font-bold text-[#0077B5] shrink-0">

@@ -205,7 +205,10 @@ export function useEditorialDraft(
             title: activeAsset.title,
             hook: activeAsset.hook,
             body: activeAsset.body_content,
-            linkedin: activeAsset.variants.linkedin,
+            linkedin:
+              activeAsset.carousel_active && activeAsset.carousel_caption
+                ? activeAsset.carousel_caption
+                : activeAsset.variants.linkedin,
             facebook: activeAsset.variants.facebook,
             twitter: activeAsset.variants.twitter,
             instagram: activeAsset.variants.instagram ?? "",
@@ -222,12 +225,17 @@ export function useEditorialDraft(
     bufferedAssetRef.current = bufferedAssetId;
   }, [bufferedAssetId]);
 
+  const activeLinkedinBaseline =
+    activeAsset?.carousel_active && activeAsset?.carousel_caption
+      ? activeAsset.carousel_caption
+      : activeAsset?.variants.linkedin;
+
   const isDirty = Boolean(
     activeAsset &&
       (edited.title !== activeAsset.title ||
         edited.hook !== activeAsset.hook ||
         edited.body !== activeAsset.body_content ||
-        edited.linkedin !== activeAsset.variants.linkedin ||
+        edited.linkedin !== activeLinkedinBaseline ||
         edited.facebook !== activeAsset.variants.facebook ||
         edited.twitter !== activeAsset.variants.twitter ||
         edited.instagram !== (activeAsset.variants.instagram ?? ""))

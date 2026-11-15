@@ -160,6 +160,8 @@ export function toAssetDTO(
     },
     claims: asset.claims.map(toClaimDTO),
     linkedin_went_as: linkedinWentAs(asset),
+    carousel_active: Boolean(carouselOf(asset.carouselSpec)?.active),
+    carousel_caption: carouselOf(asset.carouselSpec)?.caption || null,
     carousel_pages: carouselPages(asset.carouselSpec),
     instagram_format: ownInstagramFormat(asset.carouselSpec),
     linkedin_url: toChannelUrls(parsePublishedUrls(asset.publishedUrls)).linkedin ?? linkedinPostUrl(asset.linkedinPostId),

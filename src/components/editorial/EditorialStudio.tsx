@@ -391,6 +391,11 @@ export default function EditorialStudio({
                 onCarouselOn={(on, info) => {
                   setCarouselOn({ id: activeAsset.id, on, ...info });
                   setInstagramPick({ id: activeAsset.id, format: on ? "CAROUSEL" : "SINGLE" });
+                  if (on && info.caption) {
+                    draft.setEditedLinkedin(info.caption);
+                  } else if (!on && activeAsset.variants.linkedin) {
+                    draft.setEditedLinkedin(activeAsset.variants.linkedin);
+                  }
                 }}
               />
             </div>

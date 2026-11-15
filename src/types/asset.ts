@@ -112,6 +112,10 @@ export interface AssetItem {
   claims: ClaimCheckItem[];
   /** What LinkedIn got with this draft, its carousel or its cover; null until it went to LinkedIn. */
   linkedin_went_as: "CAROUSEL" | "COVER" | null;
+  /** Whether the carousel is switched on to go out on LinkedIn. */
+  carousel_active?: boolean;
+  /** The post text written specifically above the carousel document; else null. */
+  carousel_caption?: string | null;
   /** The carousel pages Instagram can post (2-10 JPEGs, cover first), whatever LinkedIn gets; else null. */
   carousel_pages?: string[] | null;
   /** This draft's own Instagram pick (task 40); null means the workspace's default. */
