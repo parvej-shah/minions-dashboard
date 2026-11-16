@@ -121,6 +121,17 @@ export default function AccountMenu({
             >
               Account
             </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent("minions:open-install-prompt"));
+                close();
+              }}
+              className={item}
+            >
+              Install app
+            </button>
             {session.user?.role === "SYSTEM_ADMIN" && (
               <Link role="menuitem" href="/platform-admin" onClick={close} className={item}>Platform admin</Link>
             )}

@@ -86,3 +86,4 @@
 | 81 | Render Recently Posted as Visual Cards Instead of Plain Text List | ANTIGRAVITY | DONE | tasks/81.md |
 | 82 | Remove Queue and Waiting Numbers from Post Review Page | ANTIGRAVITY | DONE | tasks/82.md |
 | 83 | Remove Find Ideas Action from Account Menu | ANTIGRAVITY | DONE | tasks/83.md |
+| 84 | Mobile Bottom Bar Polish (Prominent Center Posts Button) & PWA Install Reliability | ANTIGRAVITY | DONE | tasks/84.md |

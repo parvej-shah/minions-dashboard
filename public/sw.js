@@ -1,11 +1,11 @@
 // Minions.AI PWA service worker. The dashboard remains online-first;
 // only immutable app assets and a safe offline explanation are cached.
 const CACHE_PREFIX = "minions-pwa-";
-const CACHE_NAME = "minions-pwa-v2";
+const CACHE_NAME = "minions-pwa-v3";
 const OFFLINE_URL = "/offline.html";
 const PRECACHE_URLS = [
   OFFLINE_URL,
-  "/manifest.webmanifest",
+  "/manifest.json",
   "/icon.svg",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
