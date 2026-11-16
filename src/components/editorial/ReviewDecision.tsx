@@ -171,7 +171,7 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
   const unsaved = isDirty && <p className="text-sm font-medium text-gold">You have unsaved edits. They go out once saved.</p>;
   const nextButton = nextToReview && (
     <button type="button" onClick={nextToReview.open} className={buttonStyles({ size: "lg", block: true })}>
-      Next post ({nextToReview.left} waiting)
+      Next post
     </button>
   );
 

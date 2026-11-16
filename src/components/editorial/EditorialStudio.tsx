@@ -183,7 +183,6 @@ export default function EditorialStudio({
     () => assets.filter((a) => a.status === "SCHEDULED" && a.scheduled_for && a.id !== activeAsset?.id).map((a) => a.scheduled_for!),
     [assets, activeAsset?.id]
   );
-  const pendingIndex = activeAsset ? pending.findIndex((a) => a.id === activeAsset.id) : -1;
   const nextDraft = activeAsset ? nextPending(assets, activeAsset.id) : null;
   const nextToReview = nextDraft
     ? { left: pending.filter((a) => a.id !== activeAsset?.id).length, open: () => draft.selectAsset(nextDraft.id) }
@@ -345,8 +344,6 @@ export default function EditorialStudio({
   );
 
   const status = statusLine(activeAsset, timezone);
-  const waitingLabel =
-    pendingIndex >= 0 ? `Post ${pendingIndex + 1} of ${pending.length}` : pending.length > 0 ? `${pending.length} in queue` : "";
   const unchecked = activeAsset.claims.filter((c) => c.verified !== "Y").length;
   // "Edit text": the article when the blog is on, else the social post.
   const startEditing = () => {
@@ -359,7 +356,6 @@ export default function EditorialStudio({
     <div className="mx-auto max-w-[1040px] space-y-8 pb-32 lg:pb-16">
       <nav aria-label="Posts" className="flex flex-wrap items-center justify-between gap-3 text-[15px]">
         <Link href="/posts" className="text-brand hover:underline">‹ Posts</Link>
-        {waitingLabel && <p className="text-muted">{waitingLabel}</p>}
         {nextDraft ? (
           <button type="button" onClick={() => draft.selectAsset(nextDraft.id)} className="cursor-pointer text-brand hover:underline">
             Next ›

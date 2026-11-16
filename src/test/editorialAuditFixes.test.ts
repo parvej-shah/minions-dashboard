@@ -40,4 +40,17 @@ describe("Editorial Studio UX Audit Fixes (Task 61)", () => {
     expect(editorialStudio).not.toMatch(/detailsOpen=\{seriousNotes \+ unchecked > 0\}/);
     expect(editorialStudio).toMatch(/detailsOpen=\{false\}/);
   });
+
+  it("does not show backlog numbers in Next post button (Task 82)", () => {
+    // Button must be a calm 'Next post' without '(X waiting)'
+    expect(reviewDecision).not.toContain("waiting)");
+    expect(reviewDecision).not.toContain("nextToReview.left");
+    expect(reviewDecision).toMatch(/Next post\s*<\/button>/);
+  });
+
+  it("does not show queue or post count in top nav of EditorialStudio (Task 82)", () => {
+    // Nav must not show 'X in queue' or 'Post X of Y'
+    expect(editorialStudio).not.toContain("in queue");
+    expect(editorialStudio).not.toContain("waitingLabel");
+  });
 });
