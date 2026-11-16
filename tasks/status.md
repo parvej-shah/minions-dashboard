@@ -85,3 +85,4 @@
 | 80 | Show Carousel Caption When LinkedIn Post Format Is Carousel | ANTIGRAVITY | DONE | tasks/80.md |
 | 81 | Render Recently Posted as Visual Cards Instead of Plain Text List | ANTIGRAVITY | DONE | tasks/81.md |
 | 82 | Remove Queue and Waiting Numbers from Post Review Page | ANTIGRAVITY | DONE | tasks/82.md |
+| 83 | Remove Find Ideas Action from Account Menu | ANTIGRAVITY | DONE | tasks/83.md |

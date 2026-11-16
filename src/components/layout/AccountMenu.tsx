@@ -14,8 +14,6 @@ export interface AccountMenuProps {
   session: Session | null;
   navCounts: NavCounts | null;
   blogEnabled: boolean;
-  isHarvesting: boolean;
-  onHarvest: () => void;
   onOpenAccount: () => void;
   onSignIn: () => void;
   onSignOut: () => void;
@@ -26,14 +24,12 @@ const item =
 
 /**
  * Everything that is not one of the four places: workspace, usage, schedule,
- * channels, billing, team, the live blog, finding new ideas, admin, sign out.
+ * channels, billing, team, the live blog, admin, sign out.
  */
 export default function AccountMenu({
   session,
   navCounts,
   blogEnabled,
-  isHarvesting,
-  onHarvest,
   onOpenAccount,
   onSignIn,
   onSignOut,
@@ -104,18 +100,6 @@ export default function AccountMenu({
           <div className="py-1">
             <Link role="menuitem" href="/schedule" onClick={close} className={item}>Publishing pace</Link>
             <Link role="menuitem" href="/fleet" onClick={close} className={item}>Channels</Link>
-            <button
-              type="button"
-              role="menuitem"
-              disabled={isHarvesting}
-              onClick={() => {
-                onHarvest();
-                close();
-              }}
-              className={item}
-            >
-              {isHarvesting ? "Finding new ideas…" : "Find new ideas now"}
-            </button>
             {showBlog && blogUrl && (
               <a role="menuitem" href={blogUrl} target="_blank" rel="noopener noreferrer" onClick={close} className={item}>
                 Your blog ↗

@@ -13,10 +13,7 @@ import { useNavCounts } from "@/hooks/useNavCounts";
 import { useChannelSummary } from "@/hooks/useChannelSummary";
 import { useBrandSettings } from "@/hooks/useBrandSettings";
 import { useToast } from "@/hooks/useToast";
-import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { buildNavItems } from "@/constants/nav";
-import type { PipelineTriggerResult } from "@/types";
-import HarvestingProgressHUD, { HarvestingJob } from "@/components/common/HarvestingProgressHUD";
 import ImpersonationBanner from "./ImpersonationBanner";
 import { PageSkeleton } from "@/components/ui/Skeleton";
 
@@ -59,8 +56,6 @@ export default function DashboardShell({ children }: DashboardShellProps) {
     });
   }, [needsWorkspace, router]);
 
-  const [isHarvesting, setIsHarvesting] = useState(false);
-  const [activeHarvestJob, setActiveHarvestJob] = useState<HarvestingJob | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [showPalette, setShowPalette] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -71,24 +66,6 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   const { brandSettings, isLoading: brandLoading } = useBrandSettings();
   const blogEnabled = channels?.blog ?? true;
   const { message: notification, show: notify, clear: clearNotification } = useToast(6000);
-
-  const triggerHarvest = useCallback(async () => {
-    setIsHarvesting(true);
-    const startedAt = Date.now();
-
-    try {
-      const result = await apiClient.post<PipelineTriggerResult & { run_id: string }>("/api/pipeline/harvest");
-      if (!result.success) {
-        throw new Error(result.message || "Failed to start harvester");
-      }
-      setActiveHarvestJob({ startedAt, runId: result.run_id });
-    } catch (error) {
-      notify(`Could not look for new ideas: ${toErrorMessage(error, "Could not reach the harvester pipeline.")}`);
-      setActiveHarvestJob(null);
-    } finally {
-      setIsHarvesting(false);
-    }
-  }, [notify]);
 
   const quickNav = useCallback(
     (url: string) => {
@@ -165,8 +142,6 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             session={session}
             navCounts={navCounts}
             blogEnabled={blogEnabled}
-            isHarvesting={isHarvesting}
-            onHarvest={triggerHarvest}
             onOpenAccount={() => setAuthModalOpen(true)}
             onSignIn={handleSignIn}
             onSignOut={handleSignOut}
@@ -190,11 +165,6 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       </main>
 
       <BottomTabs navItems={navItems} navCounts={navCounts} pathname={pathname} />
-
-      <HarvestingProgressHUD 
-        job={activeHarvestJob} 
-        onDismiss={() => setActiveHarvestJob(null)} 
-      />
 
       <AdminAuthModal
         isOpen={authModalOpen}

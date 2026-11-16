@@ -29,6 +29,7 @@ RULE: every entry below is EXACTLY ONE LINE. No multi-line entries, no sub-bulle
 [PERMISSION] Ask before any production action (DB writes, n8n --apply, go-live changes, pushes that deploy).
 
 ## Sessions
+2026-11-16 | remove find ideas from account menu (task 83) | decision: removed manual Find new ideas now from AccountMenu & harvest triggers from DashboardShell | changed: AccountMenu, DashboardShell, tests | docs: tasks/83.md | open: none
 2026-11-16 | remove queue and waiting numbers from review (task 82) | decision: removed (X waiting) from Next button and X in queue / Post X of Y from Studio nav | changed: ReviewDecision, EditorialStudio, tests | docs: tasks/82.md | open: none
 2026-11-15 | recently posted visual cards (task 81) | decision: replace Today plain text list with 3-col visual cards (PostThumb, metadata, live link) | changed: TodayView, tests | docs: tasks/81.md | open: none
 2026-11-15 | carousel caption in captions tab (task 80) | decision: show carousel caption in Captions LinkedIn tab when format is Carousel; sync on format toggle | changed: SocialVariantTabs, EditorialStudio, useEditorialDraft, mapper, types, tests | docs: tasks/80.md | open: none
