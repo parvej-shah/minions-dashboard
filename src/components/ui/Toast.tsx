@@ -13,7 +13,7 @@ export interface ToastProps {
 const POSITIONS = {
   top: "top-6",
   bottom: "bottom-6",
-  lifted: "bottom-[calc(5rem+env(safe-area-inset-bottom))] sm:bottom-6",
+  lifted: "bottom-[calc(5.75rem+env(safe-area-inset-bottom))] sm:bottom-6",
 } as const;
 
 /**

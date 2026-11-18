@@ -19,11 +19,7 @@ describe("Task 84: Mobile Bottom Bar & PWA Install Reliability", () => {
     expect(topNavContent).not.toContain("grid-cols-4");
   });
 
-  it("ensures BottomTabs highlights the Posts button with elevated prominence", () => {
-    const topNavContent = fs.readFileSync(topNavPath, "utf-8");
-    // Posts tab must be distinctly styled (elevated container, distinct capsule/pill or larger touch frame)
-    expect(topNavContent).toMatch(/isCenter|item\.href === "\/posts"|isPosts/);
-  });
+  // The raised Posts tile from task 84 was replaced by the equal-tab floating dock (task 85, mobileDock.test.ts).
 
   it("ensures InstallPrompt has a swift, mobile-friendly reveal delay instead of 25s+", () => {
     const installPromptContent = fs.readFileSync(installPromptPath, "utf-8");

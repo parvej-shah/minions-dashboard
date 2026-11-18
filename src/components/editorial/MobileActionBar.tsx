@@ -25,7 +25,7 @@ export default function MobileActionBar({
   liveUrl,
 }: MobileActionBarProps) {
   return (
-  <div className="lg:hidden fixed max-md:bottom-[calc(67px+max(0.65rem,env(safe-area-inset-bottom)))] md:bottom-0 left-0 right-0 z-35 border-t border-line bg-surface/95 px-4 py-2.5 backdrop-blur-xl">
+  <div className="lg:hidden fixed max-md:bottom-[calc(4.5rem+max(0.75rem,env(safe-area-inset-bottom)))] md:bottom-0 left-0 right-0 z-35 border-t border-line bg-surface/95 px-4 py-2.5 backdrop-blur-xl">
     <div className="mx-auto flex max-w-lg items-center gap-2">
       <button
         onClick={onSave}
