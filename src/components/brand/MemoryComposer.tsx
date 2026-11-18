@@ -15,6 +15,7 @@ import {
 import type { MemoryCheckResult, MemoryItem } from "@/types";
 import { Button } from "@/components/ui/Button";
 import ErrorLine from "@/components/ui/ErrorLine";
+import DictationButton from "@/components/ui/DictationButton";
 import { inputClass } from "@/components/ui/fieldStyles";
 
 export interface MemoryDraft {
@@ -104,14 +105,17 @@ export default function Composer({
         </div>
       )}
 
-      <textarea
-        rows={simple ? 2 : 3}
-        value={draft.content}
-        onChange={(e) => update({ content: e.target.value })}
-        placeholder={simple ? "Something you built, learned or saw at work…" : "Be specific: what happened, what you did, what changed."}
-        aria-label="Experience"
-        className={`${inputClass} resize-y text-[17px]`}
-      />
+      <div className="relative">
+        <textarea
+          rows={simple ? 2 : 3}
+          value={draft.content}
+          onChange={(e) => update({ content: e.target.value })}
+          placeholder={simple ? "Something you built, learned or saw at work…" : "Be specific: what happened, what you did, what changed."}
+          aria-label="Experience"
+          className={`${inputClass} resize-y pr-14 text-[17px]`}
+        />
+        <DictationButton value={draft.content} onChange={(content) => update({ content })} disabled={busy !== null} className="absolute bottom-1.5 right-1.5" />
+      </div>
 
       {(!simple || length > 0) && (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">

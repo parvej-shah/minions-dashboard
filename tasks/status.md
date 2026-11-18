@@ -89,3 +89,4 @@
 | 84 | Mobile Bottom Bar Polish (Prominent Center Posts Button) & PWA Install Reliability | ANTIGRAVITY | DONE | tasks/84.md |
 | 85 | Premium Floating Mobile Dock (Equal Tabs, Sliding Indicator) | CLAUDE | DONE | tasks/85.md |
 | 86 | Premium Login Page (Split Editorial Panel, Google Mark) | CLAUDE | DONE | tasks/86.md |
+| 87 | Free Voice Dictation on Update Boxes | CLAUDE | DONE | tasks/87.md |

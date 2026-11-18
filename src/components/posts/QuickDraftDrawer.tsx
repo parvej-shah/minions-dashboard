@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Loader2, Sparkles } from "lucide-react";
 import Drawer from "@/components/ui/Drawer";
 import { buttonStyles } from "@/components/ui/Button";
+import DictationButton from "@/components/ui/DictationButton";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { createQuickIdeaPayload } from "@/lib/ideas/list";
 import type { IdeaItem } from "@/types";
@@ -110,16 +111,19 @@ export default function QuickDraftDrawer({ isOpen, onClose, onDraftStarted, onFa
           <label htmlFor="quick-draft-thought" className="block text-[14px] font-semibold text-ink mb-2">
             What should Minions write about?
           </label>
-          <textarea
-            id="quick-draft-thought"
-            rows={4}
-            value={thought}
-            onChange={(e) => setThought(e.target.value)}
-            placeholder="Type a single thought or paste an article link (e.g. Inbound voice response latency over 1.2s kills conversion, or paste https://...)"
-            className="w-full resize-none rounded-2xl border border-line bg-surface-2 p-4 text-[15px] text-ink placeholder:text-muted focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-            autoFocus
-            disabled={isSubmitting}
-          />
+          <div className="relative">
+            <textarea
+              id="quick-draft-thought"
+              rows={4}
+              value={thought}
+              onChange={(e) => setThought(e.target.value)}
+              placeholder="Type a single thought or paste an article link (e.g. Inbound voice response latency over 1.2s kills conversion, or paste https://...)"
+              className="w-full resize-none rounded-2xl border border-line bg-surface-2 p-4 pr-14 text-[15px] text-ink placeholder:text-muted focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+              autoFocus
+              disabled={isSubmitting}
+            />
+            <DictationButton value={thought} onChange={setThought} disabled={isSubmitting} className="absolute bottom-2 right-2" />
+          </div>
           <p className="mt-2 text-xs text-muted">
             Minions will write the draft directly into your post library for you to review.
           </p>

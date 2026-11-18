@@ -17,6 +17,7 @@ import type { CheckedCandidate, ConfirmResult, PulseDTO } from "@/services/pulse
 import StoryBankCard from "@/components/stories/StoryBankCard";
 
 import { buttonStyles } from "@/components/ui/Button";
+import DictationButton from "@/components/ui/DictationButton";
 const inputClass =
   "w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-sm text-ink placeholder:text-subtle focus:border-brand focus:outline-none";
 const MIN_CHARS = 20;
@@ -196,6 +197,7 @@ export default function WeeklyPulseCard() {
               className={`${inputClass} min-w-0 flex-1 basis-64 resize-none [field-sizing:content] max-h-40`}
             />
             <div className="flex items-center gap-1.5">
+              <DictationButton value={answer} onChange={setAnswer} disabled={!!busy} />
               <button type="button" disabled={!!busy || !longEnough} onClick={() => void submit()} className={buttonStyles({ size: "sm" })}>
                 {busy === "answer" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
                 {busy === "answer" ? "Reading…" : "Save"}

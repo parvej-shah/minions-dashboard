@@ -790,3 +790,9 @@ as JPEGs, which cost far less than the PNGs did.
 **Decision:** a poster's title is the short cover line (3-6 words) whenever one says plainly what the post is about. It no longer has to beat the long post title, which always read as clear and so always won. The long title is only used when no short line works.
 **Why:** every poster carried the whole post title (11 words), which is too long to read in a feed (the user, 2026-11-11: "all our poster title is becoming lengthy that should be short but punchy").
 **Status:** active.
+
+## 2026-11-18 — Talk instead of type on the update boxes
+
+**Decision:** the boxes where people give an update (Quick draft, the weekly question, "Anything new since last week?" after approving, and adding an experience on Brand) have one mic button. Tap, talk, and the words appear in the box live after anything already typed; tap again to stop, then edit and send as usual. It uses the browser's own free speech recognition in the browser's language, so it costs nothing and needs no setup. Where a browser has none (Firefox), the mic isn't shown.
+**Why:** the user asked for free voice dictation so people can give updates instantly; busy founders find speaking a one-line update easier than typing it, especially on a phone. A paid transcription service was not chosen because the browser one is free and good enough for short updates.
+**Status:** active.

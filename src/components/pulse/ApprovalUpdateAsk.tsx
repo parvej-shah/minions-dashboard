@@ -7,6 +7,7 @@ import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { notesNeedLook, shouldAsk } from "@/lib/pulse/quickAsk";
 import type { ConfirmResult, PulseDTO } from "@/services/pulse";
 import { buttonStyles } from "@/components/ui/Button";
+import DictationButton from "@/components/ui/DictationButton";
 
 const MIN_CHARS = 20;
 const inputClass = "w-full resize-none rounded-2xl border border-line bg-surface px-4 py-3 text-[15px] text-ink placeholder:text-subtle focus:border-brand focus:outline-none";
@@ -121,15 +122,18 @@ export default function ApprovalUpdateAsk() {
   return (
     <div className={shell}>
       <p className="text-[17px] font-medium text-ink">Anything new since last week?</p>
-      <textarea
-        rows={2}
-        value={answer}
-        maxLength={3000}
-        onChange={(e) => setAnswer(e.target.value)}
-        placeholder="One line is enough, e.g. A client asked the same question three times."
-        aria-label="What is new"
-        className={inputClass}
-      />
+      <div className="relative">
+        <textarea
+          rows={2}
+          value={answer}
+          maxLength={3000}
+          onChange={(e) => setAnswer(e.target.value)}
+          placeholder="One line is enough, e.g. A client asked the same question three times."
+          aria-label="What is new"
+          className={`${inputClass} pr-14`}
+        />
+        <DictationButton value={answer} onChange={setAnswer} disabled={busy} className="absolute bottom-1 right-1" />
+      </div>
       <button type="button" disabled={busy || !longEnough} onClick={() => void submit()} className={buttonStyles({ variant: "soft", size: "lg", block: true })}>
         {busy && <Loader2 className="h-4 w-4 animate-spin" />}
         {busy ? "Reading…" : "Add it"}
