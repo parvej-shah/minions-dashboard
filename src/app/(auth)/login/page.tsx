@@ -8,13 +8,13 @@ import LoginScreen from "./_components/LoginScreen";
 /** Same outline as LoginScreen, so nothing jumps when it hydrates. */
 function LoginSkeleton() {
   return (
-    <SkeletonGroup label="Loading sign-in" className="flex min-h-dvh flex-col bg-canvas">
-      <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6">
-        <Skeleton className="h-6 w-24" />
+    <SkeletonGroup label="Loading sign-in" className="min-h-dvh bg-canvas md:grid md:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
+      <div className="px-3 pt-3 md:h-dvh md:p-3">
+        <Skeleton className="h-[clamp(220px,36dvh,380px)] w-full rounded-[28px] md:h-full md:rounded-[32px]" />
       </div>
-      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center gap-8 px-4 pb-10 sm:px-6 md:flex-row md:items-center md:gap-14">
-        <Skeleton className="mx-auto aspect-[4/3] w-full max-w-[300px] rounded-[28px] md:max-w-[480px] md:flex-1" />
-        <div className="w-full space-y-4 md:max-w-[460px] md:flex-1">
+      <div className="flex flex-col px-6 sm:px-10 md:min-h-dvh md:px-14 lg:px-20">
+        <Skeleton className="mt-8 hidden h-6 w-24 md:block" />
+        <div className="flex flex-1 flex-col justify-center space-y-4 pt-7 md:max-w-[440px] md:py-12">
           <Skeleton className="h-12 w-full" />
           <Skeleton className="h-12 w-4/5" />
           <Skeleton className="h-5 w-3/4" />
