@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { PwaRegister } from "@/components/pwa/PwaRegister";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import GlobalDictation from "@/components/ui/GlobalDictation";
 
 export const viewport: Viewport = {
   themeColor: "#FBFBFD",
@@ -59,6 +60,7 @@ export default function RootLayout({
           {children}
           <PwaRegister />
           <InstallPrompt />
+          <GlobalDictation />
         </AuthProvider>
       </body>
     </html>

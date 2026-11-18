@@ -795,4 +795,10 @@ as JPEGs, which cost far less than the PNGs did.
 
 **Decision:** the boxes where people give an update (Quick draft, the weekly question, "Anything new since last week?" after approving, and adding an experience on Brand) have one mic button. Tap, talk, and the words appear in the box live after anything already typed; tap again to stop, then edit and send as usual. It uses the browser's own free speech recognition in the browser's language, so it costs nothing and needs no setup. Where a browser has none (Firefox), the mic isn't shown.
 **Why:** the user asked for free voice dictation so people can give updates instantly; busy founders find speaking a one-line update easier than typing it, especially on a phone. A paid transcription service was not chosen because the browser one is free and good enough for short updates.
+**Status:** extended 2026-11-18 (see "Talk instead of type in every text field").
+
+## 2026-11-18 — Talk instead of type in every text field
+
+**Decision:** the mic is no longer limited to the update boxes. Every free-text field in the app shows a mic inside it while it has focus; talking types into that field after what is already there. It never appears on password, email, link or number fields. The four update boxes keep their always-visible mic. While listening, the mic turns solid blue with moving sound bars and a soft pulse, so it is obvious it is on.
+**Why:** the user asked for voice everywhere people type, a clearer mic, and a simple animation while it listens.
 **Status:** active.

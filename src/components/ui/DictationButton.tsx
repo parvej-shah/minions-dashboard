@@ -1,7 +1,7 @@
 "use client";
 
-import { Mic, Square } from "lucide-react";
 import { useDictation } from "@/hooks/useDictation";
+import DictationMic from "./DictationMic";
 
 interface Props {
   value: string;
@@ -25,20 +25,7 @@ export default function DictationButton({ value, onChange, disabled, className =
           {error}
         </span>
       )}
-      <button
-        type="button"
-        onClick={toggle}
-        disabled={disabled && !listening}
-        aria-pressed={listening}
-        aria-label={listening ? "Stop talking" : "Talk instead of typing"}
-        title={listening ? "Stop talking" : "Talk instead of typing"}
-        className={`relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.96] ${
-          listening ? "bg-brand text-brand-ink" : "text-muted hover:bg-surface-2 hover:text-ink"
-        }`}
-      >
-        {listening && <span aria-hidden="true" className="absolute inset-0 animate-ping rounded-full bg-brand/30 motion-reduce:hidden" />}
-        {listening ? <Square className="relative h-3.5 w-3.5 fill-current" /> : <Mic className="h-[18px] w-[18px]" />}
-      </button>
+      <DictationMic listening={listening} onToggle={toggle} disabled={disabled} />
     </span>
   );
 }

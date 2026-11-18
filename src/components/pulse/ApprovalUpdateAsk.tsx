@@ -123,7 +123,7 @@ export default function ApprovalUpdateAsk() {
     <div className={shell}>
       <p className="text-[17px] font-medium text-ink">Anything new since last week?</p>
       <div className="relative">
-        <textarea
+        <textarea data-no-dictation
           rows={2}
           value={answer}
           maxLength={3000}

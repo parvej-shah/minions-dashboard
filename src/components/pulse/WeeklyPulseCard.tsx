@@ -181,7 +181,7 @@ export default function WeeklyPulseCard() {
             </span>
           </p>
           <div className="flex flex-wrap items-start gap-2">
-            <textarea
+            <textarea data-no-dictation
               rows={1}
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}

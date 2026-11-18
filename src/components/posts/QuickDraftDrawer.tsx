@@ -112,7 +112,7 @@ export default function QuickDraftDrawer({ isOpen, onClose, onDraftStarted, onFa
             What should Minions write about?
           </label>
           <div className="relative">
-            <textarea
+            <textarea data-no-dictation
               id="quick-draft-thought"
               rows={4}
               value={thought}

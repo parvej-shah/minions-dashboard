@@ -106,7 +106,7 @@ export default function Composer({
       )}
 
       <div className="relative">
-        <textarea
+        <textarea data-no-dictation
           rows={simple ? 2 : 3}
           value={draft.content}
           onChange={(e) => update({ content: e.target.value })}

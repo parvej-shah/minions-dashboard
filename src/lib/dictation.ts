@@ -67,3 +67,26 @@ export function dictationErrorMessage(code: string): string | null {
       return "Couldn't hear that. Try again.";
   }
 }
+
+const PROSE_INPUT_TYPES = new Set(["", "text", "search"]);
+
+/** Whether a field is free text someone might rather say than type. */
+export function isDictatable(f: { tag: string; type: string; readOnly: boolean; disabled: boolean; optedOut: boolean }): boolean {
+  if (f.readOnly || f.disabled || f.optedOut) return false;
+  if (f.tag === "TEXTAREA") return true;
+  return f.tag === "INPUT" && PROSE_INPUT_TYPES.has(f.type.toLowerCase());
+}
+
+/** Where the shared mic sits inside a field: bottom-right of a text box, middle-right of an input. */
+export function micPlacement(
+  rect: { top: number; left: number; width: number; height: number },
+  multiline: boolean,
+): { top: number; left: number; size: number } {
+  const inset = multiline ? 8 : 4;
+  const size = multiline ? 36 : Math.max(22, Math.min(36, rect.height - 8));
+  return {
+    size,
+    left: rect.left + rect.width - size - inset,
+    top: multiline ? rect.top + rect.height - size - inset : rect.top + (rect.height - size) / 2,
+  };
+}

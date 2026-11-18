@@ -32,6 +32,8 @@
   --animate-shimmer: shimmer 1.4s ease-in-out infinite;
   --animate-pop-in: pop-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-rise-in: rise-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-mic-halo: mic-halo 1.6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  --animate-mic-bar: mic-bar 0.9s ease-in-out infinite;
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring-snappy: cubic-bezier(0.2, 0.9, 0.3, 1);
 
@@ -51,6 +53,14 @@
     from { transform: translateY(8px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
   }
+  @keyframes mic-halo {
+    from { transform: scale(1); opacity: 0.35; }
+    to { transform: scale(1.7); opacity: 0; }
+  }
+  @keyframes mic-bar {
+    0%, 100% { transform: scaleY(0.35); }
+    50% { transform: scaleY(1); }
+  }
   @keyframes login-float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-8px); }
@@ -59,6 +69,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .animate-shimmer, .animate-pop-in, .animate-rise-in, [class*="animate-[indeterminate"], [class*="animate-[login-float"] { animation: none; }
+  .animate-mic-halo { display: none; }
+  .animate-mic-bar { animation: none; transform: scaleY(0.7); }
   .accordion-grid { transition: none; }
 }
 

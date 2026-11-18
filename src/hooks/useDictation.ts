@@ -16,7 +16,7 @@ const noop = () => () => {};
  * Talk into a text box. While listening, the box shows what has been heard so
  * far after whatever was typed before the mic was tapped.
  */
-export function useDictation(value: string, onChange: (next: string) => void) {
+export function useDictation(value: string | (() => string), onChange: (next: string) => void) {
   const supported = useSyncExternalStore(
     noop,
     () => getRecognitionCtor(window) !== null,
@@ -37,7 +37,7 @@ export function useDictation(value: string, onChange: (next: string) => void) {
   const start = () => {
     const Ctor = getRecognitionCtor(window);
     if (!Ctor || recRef.current) return;
-    const base = value;
+    const base = typeof value === "function" ? value() : value;
     const rec = new Ctor();
     rec.lang = dictationLanguage(navigator.language);
     rec.continuous = true;
@@ -58,5 +58,5 @@ export function useDictation(value: string, onChange: (next: string) => void) {
     }
   };
 
-  return { supported, listening, error, toggle: listening ? stop : start };
+  return { supported, listening, error, stop, toggle: listening ? stop : start };
 }
