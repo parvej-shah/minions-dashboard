@@ -1,3 +1,8 @@
+import { DEFAULT_TIMEZONE } from "@/constants/config";
+
+/** Every date the app shows is in Bangladesh time, whatever the viewer's device says. */
+const timeZone = DEFAULT_TIMEZONE;
+
 /** "just now" / "12m ago" / "3h ago" / "Aug 14" */
 export function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString).getTime();
@@ -10,7 +15,7 @@ export function formatRelativeTime(dateString: string): string {
   if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)}h ago`;
   if (diffSeconds < 2592000) return `${Math.floor(diffSeconds / 86400)}d ago`;
 
-  return new Date(dateString).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return new Date(dateString).toLocaleDateString("en-US", { timeZone, month: "short", day: "numeric" });
 }
 
 /** "Aug 14, 2026" */
@@ -20,19 +25,20 @@ export function formatDate(dateString: string | null | undefined): string {
   if (Number.isNaN(date.getTime())) return "—";
 
   return date.toLocaleDateString("en-US", {
+    timeZone,
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 }
 
-/** "14:05" in the viewer's locale. */
+/** "14:05" */
 export function formatTime(dateString: string | null | undefined): string {
   if (!dateString) return "—";
   const date = new Date(dateString);
   if (Number.isNaN(date.getTime())) return "—";
 
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleTimeString("en-GB", { timeZone, hour: "2-digit", minute: "2-digit" });
 }
 
 /** "Aug 14, 2026, 02:05 PM" */
@@ -42,6 +48,7 @@ export function formatDateTime(dateString: string | null | undefined): string {
   if (Number.isNaN(date.getTime())) return "—";
 
   return date.toLocaleString("en-US", {
+    timeZone,
     month: "short",
     day: "numeric",
     year: "numeric",

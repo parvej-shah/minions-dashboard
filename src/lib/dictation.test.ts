@@ -113,3 +113,12 @@ describe("every typing field offers dictation", () => {
     expect(src).toMatch(/<GlobalDictation\b/);
   });
 });
+
+describe("stop button while dictating", () => {
+  it("DictationMic shows a stop button beside the mic only while listening", () => {
+    const src = readFileSync(path.resolve(__dirname, "../components/ui/DictationMic.tsx"), "utf8");
+    expect(src).toMatch(/listening && \(\s*<button/);
+    expect(src).toMatch(/aria-label="Stop dictation"/);
+    expect(src).toMatch(/\bSquare\b/);
+  });
+});

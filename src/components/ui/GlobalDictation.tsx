@@ -90,7 +90,8 @@ export default function GlobalDictation() {
         const r = field.getBoundingClientRect();
         const s = micPlacement(r, multiline);
         setSpot({ field, ...s });
-        const need = s.size + (multiline ? 12 : 8);
+        // While talking, the stop button sits left of the mic, so leave room for both.
+        const need = (listening ? s.size * 2 + 6 : s.size) + (multiline ? 12 : 8);
         if (parseFloat(getComputedStyle(field).paddingRight) < need) field.style.paddingRight = `${need}px`;
       });
     };
@@ -110,12 +111,16 @@ export default function GlobalDictation() {
       window.visualViewport?.removeEventListener("scroll", place);
       field.style.paddingRight = prevPadding;
     };
-  }, [field]);
+  }, [field, listening]);
 
   if (!supported || !field || spot?.field !== field) return null;
 
   return createPortal(
-    <div className="fixed z-[110] animate-pop-in" style={{ top: spot.top, left: spot.left }}>
+    <div
+      className="fixed z-[110] animate-pop-in"
+      // Anchored by its right edge so the stop button grows to the left of the mic.
+      style={{ top: spot.top, right: document.documentElement.clientWidth - (spot.left + spot.size) }}
+    >
       <DictationMic listening={listening} onToggle={toggle} size={spot.size} keepFocus />
       {error && (
         <span role="status" className="absolute right-0 top-full mt-1 whitespace-nowrap rounded-lg bg-surface px-2 py-1 text-xs text-coral shadow-soft">

@@ -91,3 +91,4 @@
 | 86 | Premium Login Page (Split Editorial Panel, Google Mark) | CLAUDE | DONE | tasks/86.md |
 | 87 | Free Voice Dictation on Update Boxes | CLAUDE | DONE | tasks/87.md |
 | 88 | Voice on Every Typing Field, Clearer Mic, Listening Animation | CLAUDE | DONE | tasks/88.md |
+| 89 | Stop Button Beside Mic; Bangladesh Time Everywhere | CLAUDE | DONE | tasks/89.md |

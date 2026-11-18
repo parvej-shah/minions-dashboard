@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, Clock, Loader2, MessageSquareText, Sparkles, X } from "lucide-react";
+import { CheckCircle2, Loader2, MessageSquareText, Sparkles, X } from "lucide-react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import {
   MEMORY_DISCLOSURES,
@@ -39,10 +39,9 @@ export default function WeeklyPulseCard() {
   const [answer, setAnswer] = useState("");
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [editing, setEditing] = useState(false);
-  const [busy, setBusy] = useState<null | "answer" | "confirm" | "snooze" | "skip" | "tz">(null);
+  const [busy, setBusy] = useState<null | "answer" | "confirm" | "snooze" | "skip">(null);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
-  const [browserTz, setBrowserTz] = useState<string | null>(null);
 
   const apply = useCallback((p: PulseDTO) => {
     setPulse(p);
@@ -57,11 +56,8 @@ export default function WeeklyPulseCard() {
         const p = await apiClient.get<PulseDTO>("/api/pulse");
         if (cancelled) return;
         apply(p);
-        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        // Nothing to ask when the browser agrees with the workspace.
-        if (!p.settings.timezone_confirmed && tz === p.settings.timezone) {
-          void apiClient.patch("/api/pulse/settings", { timezone_confirmed: true }).catch(() => {});
-        } else if (!p.settings.timezone_confirmed) setBrowserTz(tz);
+        // Everyone works on the workspace's time (Bangladesh by default), whatever the browser says.
+        if (!p.settings.timezone_confirmed) void apiClient.patch("/api/pulse/settings", { timezone_confirmed: true }).catch(() => {});
       } catch {
         // No card is better than a broken one in the Studio.
       }
@@ -82,13 +78,6 @@ export default function WeeklyPulseCard() {
       setBusy(null);
     }
   };
-
-  const setTimezone = (tz: string | null) =>
-    act("tz", async () => {
-      apply(await apiClient.patch<PulseDTO>("/api/pulse/settings", tz ? { timezone: tz } : { timezone_confirmed: true }));
-      setBrowserTz(null);
-      counts();
-    });
 
   const longEnough = answer.trim().length >= MIN_CHARS;
   const submit = () =>
@@ -120,26 +109,9 @@ export default function WeeklyPulseCard() {
 
   if (!pulse) return null;
 
-  const tzBanner = browserTz && (
-    <div className="flex flex-wrap items-center gap-3 rounded-[28px] bg-surface-2 px-6 py-4 text-[15px] text-muted">
-      <Clock className="h-4 w-4 text-brand" />
-      <span className="flex-1 min-w-[200px]">
-        This workspace runs on <b className="text-ink">{pulse.settings.timezone}</b>. Your browser says{" "}
-        <b className="text-ink">{browserTz}</b>. The weekly question and posting times follow the workspace timezone.
-      </span>
-      <button type="button" disabled={busy === "tz"} onClick={() => void setTimezone(browserTz)} className={buttonStyles()}>
-        Use {browserTz}
-      </button>
-      <button type="button" disabled={busy === "tz"} onClick={() => void setTimezone(null)} className="rounded-lg border border-line px-3 py-1.5 text-ink disabled:opacity-50 cursor-pointer">
-        Keep {pulse.settings.timezone}
-      </button>
-    </div>
-  );
-
   if (done) {
     return (
       <div className="space-y-3">
-        {tzBanner}
         <div className="flex items-start gap-3 rounded-[28px] bg-brand/5 p-6 text-[15px] text-ink">
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
           <span className="flex-1">{done}</span>
@@ -156,7 +128,6 @@ export default function WeeklyPulseCard() {
   if (!open) {
     return (
       <div className="space-y-3 empty:hidden">
-        {tzBanner}
         <StoryBankCard />
       </div>
     );
@@ -171,7 +142,6 @@ export default function WeeklyPulseCard() {
     // The answer is typed straight into the strip: Enter turns it into notes.
     return (
       <div className="space-y-3">
-        {tzBanner}
         <section className="space-y-3 rounded-[28px] bg-surface shadow-soft p-6 sm:p-8">
           <p className="flex items-start gap-2 text-[17px] text-ink">
             <MessageSquareText className="mt-0.5 h-4 w-4 shrink-0 text-coral" aria-hidden="true" />
@@ -227,7 +197,6 @@ export default function WeeklyPulseCard() {
 
   return (
     <div className="space-y-3">
-      {tzBanner}
       <section className="space-y-4 rounded-[28px] bg-surface shadow-soft p-6 sm:p-8">
         <div className="flex items-start gap-2">
           <MessageSquareText className="mt-0.5 h-4 w-4 shrink-0 text-coral" aria-hidden="true" />

@@ -802,3 +802,10 @@ as JPEGs, which cost far less than the PNGs did.
 **Decision:** the mic is no longer limited to the update boxes. Every free-text field in the app shows a mic inside it while it has focus; talking types into that field after what is already there. It never appears on password, email, link or number fields. The four update boxes keep their always-visible mic. While listening, the mic turns solid blue with moving sound bars and a soft pulse, so it is obvious it is on.
 **Why:** the user asked for voice everywhere people type, a clearer mic, and a simple animation while it listens.
 **Status:** active.
+
+## 2026-11-18 — Bangladesh time for every user; stop button while dictating
+
+**Decision:** Every date and time the app shows is in Bangladesh time (Asia/Dhaka) or the workspace's own timezone (Asia/Dhaka by default), never the viewer's device clock. The Weekly Pulse card no longer offers "Use <your browser's timezone>". While dictating, a stop button sits beside the mic.
+**Why:** The team and tenant zero run on Dhaka time; a device on another zone showed different post times than the schedule used, and the pulse prompt invited switching away. A separate stop button makes it obvious how to end dictation.
+**Alternatives considered:** Following each viewer's device timezone (rejected for now: one shared clock is simpler while all users are on Bangladesh time).
+**Status:** active

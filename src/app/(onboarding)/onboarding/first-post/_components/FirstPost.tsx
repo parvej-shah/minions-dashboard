@@ -1,5 +1,6 @@
 "use client";
 
+import { DEFAULT_TIMEZONE } from "@/constants/config";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -300,7 +301,7 @@ function Scheduled({ asset }: { asset: AssetItem }) {
   }, []);
 
   const when = asset.scheduled_for
-    ? new Date(asset.scheduled_for).toLocaleString(undefined, { weekday: "long", hour: "numeric", minute: "2-digit" })
+    ? new Date(asset.scheduled_for).toLocaleString("en-US", { timeZone: DEFAULT_TIMEZONE, weekday: "long", hour: "numeric", minute: "2-digit" })
     : null;
   const needsLinkedIn = linkedIn === false;
 
