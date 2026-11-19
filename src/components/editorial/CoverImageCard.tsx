@@ -6,7 +6,8 @@ import { AlertTriangle, Image as ImageIcon, Loader2, RefreshCw, Shuffle } from "
 import type { AssetItem, CoverSpecDTO } from "@/types";
 import type { CoverEditInput } from "@/hooks/useEditorialDraft";
 import { COVER_ART_STYLES, COVER_ART_STYLE_META, parseArtStyle } from "@/lib/covers/artStyles";
-import { coverPreviewUrl, coverThumb, pickerLayouts, previewVersion, shownCover } from "@/lib/covers/pickerThumbs";
+import { coverPreviewUrl, coverThumb, designFromTile, designPreviewUrl, designTileId, orderDesigns, pickedTile, pickerLayouts, previewVersion, shownCover } from "@/lib/covers/pickerThumbs";
+import { apiClient } from "@/lib/api-client";
 import { buttonStyles } from "@/components/ui/Button";
 import { ChoiceRow, GroupedList, ListRow } from "@/components/ui/List";
 import { inputClass } from "@/components/ui/fieldStyles";
@@ -22,6 +23,12 @@ export interface CoverImageCardProps {
 }
 
 type Layout = CoverSpecDTO["layout"];
+/** One of the workspace's saved designs, as the Brand page lists it. */
+type SavedDesign = { id: string; name: string; version: number; preview_svg: string | null };
+
+const svgSrc = (svg: string) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+/** Shown until the live tile arrives when a design has no stored thumbnail. */
+const BLANK_TILE = svgSrc('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"/>');
 
 const LAYOUT_NAMES: Record<Layout, string> = {
   CUSTOM: "Your design",
@@ -86,8 +93,11 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
   // Every layout, or only the few that suit this post.
   const [showAll, setShowAll] = useState(false);
   // The layout being drawn, and the one before the last pick (for Undo), per draft.
-  const [pending, setPending] = useState<Layout | null>(null);
-  const [previous, setPrevious] = useState<{ id: string; layout: Layout } | null>(null);
+  // Tile ids: a layout name, or designTileId(id) for a saved design.
+  const [pending, setPending] = useState<string | null>(null);
+  const [previous, setPrevious] = useState<{ id: string; tile: string } | null>(null);
+  // The workspace's saved designs, offered in front of the built-in layouts (task 100).
+  const [designs, setDesigns] = useState<SavedDesign[]>([]);
   // Tiles that have arrived (their address), and the tile shown as the cover while the real one is drawn.
   const tilesRef = useRef(new Map<string, string>());
   const [preview, setPreview] = useState<{ from: string | null; src: string } | null>(null);
@@ -110,26 +120,40 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
     void onCheckShape(id).finally(() => setChecking((c) => (c === id ? null : c)));
   }, [activeAsset.id, needsCheck, onCheckShape]);
 
+  const canPick = Boolean(cover) && !isLocked;
+  useEffect(() => {
+    if (!canPick) return;
+    let live = true;
+    apiClient
+      .get<{ templates: SavedDesign[] }>("/api/cover-templates")
+      .then((r) => live && setDesigns(r.templates))
+      .catch(() => live && setDesigns([]));
+    return () => {
+      live = false;
+    };
+  }, [canPick]);
+
   const run = async (edit?: CoverEditInput) => {
     const message = await onRerender(edit);
     if (message) onMessage(message);
     return message;
   };
 
-  const pickLayout = async (layout: Layout, undo = false) => {
+  const pickLayout = async (tileId: string, undo = false) => {
     if (!cover) return;
-    const from = cover.layout;
-    setPending(layout);
+    const from = pickedTile(cover);
+    setPending(tileId);
     // The tile is already on screen: show it as the cover now, the real cover replaces it.
-    const tile = tilesRef.current.get(`${activeAsset.id}:${layout}`);
+    const tile = tilesRef.current.get(`${activeAsset.id}:${tileId}`);
     setPreview(tile?.endsWith(`&v=${previewVersion(cover)}`) ? { from: activeAsset.hero_image_url, src: tile } : null);
-    const message = await run({ layout }).finally(() => {
+    const design = designFromTile(tileId);
+    const message = await run(design ? { design } : { layout: tileId as Layout }).finally(() => {
       setPending(null);
       setPreview(null);
     });
-    if (message.startsWith("Cover updated")) setPrevious(undo ? null : { id: activeAsset.id, layout: from });
+    if (message.startsWith("Cover updated")) setPrevious(undo ? null : { id: activeAsset.id, tile: from });
   };
-  const undoLayout = previous?.id === activeAsset.id && previous.layout !== cover?.layout ? previous.layout : null;
+  const undoLayout = cover && previous?.id === activeAsset.id && previous.tile !== pickedTile(cover) ? previous.tile : null;
   const layouts = cover ? pickerLayouts(cover.layout, cover, { checking: checking === activeAsset.id }) : null;
 
   const startEditing = () => {
@@ -354,13 +378,16 @@ export default function CoverImageCard({ activeAsset, isRendering, onRerender, o
           </div>
           <ThumbPicker
             label="Layout"
-            options={(showAll ? [...layouts.suggested, ...layouts.rest] : layouts.suggested).map((l) => ({ id: l, label: layoutLabel(l), src: coverThumb(l), liveSrc: coverPreviewUrl(activeAsset.id, l, previewVersion(cover)) }))}
-            selected={pending ?? cover.layout}
+            options={[
+              ...orderDesigns(designs, cover.custom?.id).map((d) => ({ id: designTileId(d.id), label: d.name, src: d.preview_svg ? svgSrc(d.preview_svg) : BLANK_TILE, liveSrc: designPreviewUrl(activeAsset.id, d, previewVersion(cover)) })),
+              ...(showAll ? [...layouts.suggested, ...layouts.rest] : layouts.suggested).map((l) => ({ id: l, label: layoutLabel(l), src: coverThumb(l), liveSrc: coverPreviewUrl(activeAsset.id, l, previewVersion(cover)) })),
+            ]}
+            selected={pending ?? pickedTile(cover)}
             busy={pending}
             disabled={isRendering}
             wrap={showAll}
             onLive={(id, src) => tilesRef.current.set(`${activeAsset.id}:${id}`, src)}
-            onSelect={(id) => void pickLayout(id as Layout)}
+            onSelect={(id) => void pickLayout(id)}
           />
           {checking === activeAsset.id && <p className="px-1 text-[13px] text-subtle">Checking the post&apos;s points for more layouts…</p>}
         </div>

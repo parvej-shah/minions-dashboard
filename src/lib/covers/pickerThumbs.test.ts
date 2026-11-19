@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { COVER_LAYOUTS } from "./layouts";
 import { SLIDE_STYLES } from "@/lib/carousel/slides";
-import { carouselThumb, coverPreviewUrl, coverThumb, shownCover, tilesToDraw, pickerLayouts, previewVersion, PICKER_THUMB_DIR } from "./pickerThumbs";
+import { carouselThumb, coverPreviewUrl, coverThumb, designFromTile, designPreviewUrl, designTileId, orderDesigns, pickedTile, shownCover, tilesToDraw, pickerLayouts, previewVersion, PICKER_THUMB_DIR } from "./pickerThumbs";
 import type { LayoutFacts } from "./available";
 
 const bare: LayoutFacts = { shape_read: true, list: null, grid: null, punch: null, number: null, photo_ok: false, quote_ok: false, kicker: null, cutout_ok: false };
@@ -84,5 +84,38 @@ describe("live layout tiles", () => {
     // All back: all of them.
     expect(tilesToDraw(srcs, new Set(["a", "b", "c", "d"]))).toBe(5);
     expect(tilesToDraw([], new Set())).toBe(0);
+  });
+});
+
+describe("the workspace's own designs in the picker (task 100)", () => {
+  it("gives each design a tile id that reads back to the design, and no built-in layout reads as one", () => {
+    expect(designFromTile(designTileId("abc-123"))).toBe("abc-123");
+    expect(designFromTile("BOLD")).toBeNull();
+    expect(designFromTile("design:")).toBeNull();
+  });
+
+  it("never offers CUSTOM as a built-in tile, even when the cover is drawn in a design", () => {
+    const { suggested, rest } = pickerLayouts("CUSTOM", bare);
+    expect([...suggested, ...rest]).not.toContain("CUSTOM");
+    expect(suggested).toHaveLength(4);
+  });
+
+  it("puts the design the cover uses first", () => {
+    const ds = [{ id: "a", version: 1 }, { id: "b", version: 3 }];
+    expect(orderDesigns(ds, "b").map((d) => d.id)).toEqual(["b", "a"]);
+    expect(orderDesigns(ds, undefined).map((d) => d.id)).toEqual(["a", "b"]);
+  });
+
+  it("marks the current design's tile as picked, and a built-in layout as itself", () => {
+    expect(pickedTile({ layout: "CUSTOM", custom: { id: "a", version: 2 } })).toBe(designTileId("a"));
+    expect(pickedTile({ layout: "BOLD", custom: null })).toBe("BOLD");
+  });
+
+  it("names the design's version in the tile address, so a new version draws a new tile", () => {
+    const one = designPreviewUrl("as1", { id: "d1", version: 1 }, "v9");
+    const two = designPreviewUrl("as1", { id: "d1", version: 2 }, "v9");
+    expect(one).not.toBe(two);
+    expect(one).toBe("/api/assets/as1/cover/preview?design=d1&dv=1&v=v9");
+    expect(coverPreviewUrl("as1", "BOLD", "v9").endsWith("&v=v9")).toBe(true);
   });
 });

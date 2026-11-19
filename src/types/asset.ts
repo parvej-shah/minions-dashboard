@@ -63,6 +63,8 @@ export interface CoverSpecDTO {
   quote_ok: boolean;
   /** Whether the brand had a usable cut-out photo when this cover was drawn; null on covers drawn before cut-outs. */
   cutout_ok: boolean | null;
+  /** The saved design a CUSTOM cover is drawn in; null for a built-in layout. */
+  custom: { id: string; version: number } | null;
 }
 
 /**

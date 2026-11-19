@@ -24,5 +24,8 @@ export function pickCustomDesign(designs: DesignRef[], recent: RecentCover[], op
   return [...designs].sort((a, b) => lastUse(b) - lastUse(a))[0];
 }
 
+/** The design a reviewer picked, from the workspace's active designs only; null when it is archived or not theirs. */
+export const pickedDesign = (active: DesignRef[], id: string): DesignRef | null => active.find((d) => d.id === id) ?? null;
+
 /** The "Use only my designs" switch, kept in the brand's visual assets JSON beside the cut-out. */
 export const readOnlyMine = (visualAssets: unknown): boolean => (visualAssets as { cover_custom_only?: unknown } | null)?.cover_custom_only === true;

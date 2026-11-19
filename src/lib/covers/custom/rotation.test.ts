@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pickCustomDesign, readOnlyMine } from "./rotation";
+import { pickCustomDesign, pickedDesign, readOnlyMine } from "./rotation";
 
 const A = { id: "a", version: 1 };
 const B = { id: "b", version: 2 };
@@ -22,5 +22,13 @@ describe("pickCustomDesign", () => {
     expect(readOnlyMine({ cover_custom_only: true })).toBe(true);
     expect(readOnlyMine({ cover_custom_only: "true" })).toBe(false);
     expect(readOnlyMine(null)).toBe(false);
+  });
+});
+
+describe("pickedDesign (a reviewer picks one in the editor, task 100)", () => {
+  it("finds an active design by id, at its newest version", () => expect(pickedDesign([A, B], "b")).toEqual(B));
+  it("refuses one that is archived, unknown or another workspace's (not in this list)", () => {
+    expect(pickedDesign([A], "b")).toBeNull();
+    expect(pickedDesign([], "a")).toBeNull();
   });
 });

@@ -837,3 +837,10 @@ as JPEGs, which cost far less than the PNGs did.
 **Why:** the old preview drew a grey box where the person goes, so neither the user nor their design agent could judge the layout, and a box without a fit rule stretched the person on real covers.
 **Alternatives considered:** keeping the grey box (unjudgeable); fitting pictures automatically whatever the design says (hides the problem from the designer).
 **Status:** active.
+
+## 2026-11-19 — Reviewers can pick a saved design for one post in the editor
+
+**Decision:** The post editor's layout picker shows the workspace's saved designs as named tiles, drawn live with the post's own words, in front of the built-in layouts. Clicking one redraws that post's cover in the design. Only an active design of the same workspace can be picked, and a post that doesn't fit the design gets a plain reason instead of a broken cover. The automatic rotation is unchanged.
+**Why:** a design used only by the rotation could not be chosen for the post where it fits best, and a cover switched away from it could not be switched back.
+**Alternatives considered:** rotation only (no control per post); a separate "Your designs" row (two pickers for one choice).
+**Status:** active.

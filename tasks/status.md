@@ -102,3 +102,4 @@
 | 97 | Cover font choice per workspace (6 OFL fonts) | CLAUDE | DONE | tasks/97.md |
 | 98 | Custom designs take the theme colours | CLAUDE | DONE | tasks/98.md |
 | 99 | Photo and cut-out in custom designs | CLAUDE | DONE | tasks/99.md |
+| 100 | Pick your own design in the post editor | CLAUDE | DONE (local; not pushed; not clicked live) | tasks/100.md |

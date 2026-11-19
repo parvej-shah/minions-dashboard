@@ -25,7 +25,9 @@ const SUGGESTED = 4;
  */
 export function pickerLayouts(current: CoverLayout, facts: LayoutFacts, opts: { checking?: boolean } = {}): { suggested: CoverLayout[]; rest: CoverLayout[] } {
   const usable = TYPE_PREFERENCE.filter((l) => l === current || !layoutUnavailable(l, facts, opts));
-  const suggested = [current, ...usable.filter((l) => l !== current)].slice(0, SUGGESTED);
+  // A saved design has its own tile (designTileId), never a built-in one.
+  const head = current === "CUSTOM" ? [] : [current];
+  const suggested = [...head, ...usable.filter((l) => l !== current)].slice(0, SUGGESTED);
   return { suggested, rest: usable.filter((l) => !suggested.includes(l)) };
 }
 
@@ -58,6 +60,24 @@ export function previewVersion(cover: PreviewText): string {
 
 /** One live tile: this post's own words drawn in `layout` (GET, cacheable per version). */
 export const coverPreviewUrl = (assetId: string, layout: CoverLayout, version: string) => `/api/assets/${assetId}/cover/preview?layout=${layout}&v=${version}`;
+
+/** The workspace's own designs (task 100): a tile id per design, apart from the built-in layout names. */
+const DESIGN_TILE = "design:";
+export const designTileId = (id: string) => `${DESIGN_TILE}${id}`;
+export const designFromTile = (tile: string): string | null => (tile.startsWith(DESIGN_TILE) && tile.length > DESIGN_TILE.length ? tile.slice(DESIGN_TILE.length) : null);
+
+/** The design the cover uses first, then the rest as listed. */
+export function orderDesigns<T extends { id: string }>(designs: T[], currentId: string | undefined): T[] {
+  return [...designs.filter((d) => d.id === currentId), ...designs.filter((d) => d.id !== currentId)];
+}
+
+/** The tile that shows as picked for this cover. */
+export const pickedTile = (cover: { layout: CoverLayout; custom: { id: string; version: number } | null }): string =>
+  cover.layout === "CUSTOM" && cover.custom ? designTileId(cover.custom.id) : cover.layout;
+
+/** One live tile in a saved design; the version is in the address, so a new version draws a new tile. */
+export const designPreviewUrl = (assetId: string, design: { id: string; version: number }, version: string) =>
+  `/api/assets/${assetId}/cover/preview?design=${encodeURIComponent(design.id)}&dv=${design.version}&v=${version}`;
 
 /**
  * What the cover preview shows. Right after a layout is clicked it is the tile

@@ -23,11 +23,14 @@ export const POST = route<"tenant", { id: string }>({ auth: "tenant", failure: "
 
   const layout = COVER_LAYOUTS.find((candidate) => candidate === body.layout) as CoverLayout | undefined;
   if (body.layout !== undefined && !layout) throw badRequest(`layout must be one of ${COVER_LAYOUTS.join(", ")}`);
+  const design = body.design === undefined ? undefined : designId(body.design);
+  if (design && layout) throw badRequest("Send a layout or a design, not both.");
   const art = body.art === undefined ? undefined : parseArtStyle(body.art);
   if (art === null) throw badRequest(`art must be one of ${COVER_ART_STYLES.join(", ")}`);
 
   const edit: CoverEdit = {
     layout,
+    design,
     headline: asOptionalString(body.headline, 160),
     kicker: asOptionalString(body.kicker, 160),
     emphasis: asOptionalString(body.emphasis, 40),
@@ -42,6 +45,13 @@ export const POST = route<"tenant", { id: string }>({ auth: "tenant", failure: "
   if (!result.ok) throw new HttpError(result.locked ? 409 : 422, result.error);
   return { success: true, hero_image_url: result.url, cover: result.spec };
 });
+
+/** A saved design's id (a UUID); whether it is this workspace's and active is checked when drawing. */
+function designId(value: unknown): string {
+  if (typeof value !== "string" || !DESIGN_ID.test(value)) throw badRequest("design must be one of your saved designs");
+  return value;
+}
+const DESIGN_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function punchOf(value: unknown): { lines: string[]; checks: string[] } {
   const p = (value && typeof value === "object" ? value : {}) as { lines?: unknown; checks?: unknown };

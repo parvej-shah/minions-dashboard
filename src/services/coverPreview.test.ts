@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import sharp from "sharp";
 import { DEFAULT_COVER_BRAND } from "@/lib/covers/brand";
 import { CoverFitError } from "@/lib/covers/layouts";
+import { GOOD_TEMPLATE } from "@/lib/covers/custom/fixtures";
+import { parseTemplate } from "@/lib/covers/custom/parse";
 
 const findAsset = vi.fn();
 const findProfile = vi.fn();
@@ -13,7 +15,8 @@ const photo = vi.fn(async (): Promise<string | undefined> => undefined);
 vi.mock("@/lib/prisma", () => ({ prisma: { asset: { findUnique: findAsset, update }, brandProfile: { findUnique: findProfile } } }));
 vi.mock("@/lib/r2", () => ({ uploadToR2: upload, deleteFromR2: vi.fn(), r2KeyFromUrl: vi.fn() }));
 vi.mock("@/lib/covers/render", async (orig) => ({ ...(await orig<typeof import("@/lib/covers/render")>()), renderCoverPng: render, renderCoverSvg: renderSvg }));
-vi.mock("@/services/cover", () => ({ hostedCoverPhoto: photo, coverCutout: vi.fn(async () => undefined) }));
+const cutoutOf = vi.fn(async (): Promise<{ src: string } | undefined> => undefined);
+vi.mock("@/services/cover", () => ({ hostedCoverPhoto: photo, coverCutout: cutoutOf }));
 
 const { renderLayoutPreview } = await import("./coverPreview");
 
@@ -120,5 +123,38 @@ describe("renderLayoutPreview", () => {
     await renderLayoutPreview("c1", "a1", "SWISS");
     await renderLayoutPreview("c1", "a1", "SWISS");
     expect(renderSvg).toHaveBeenCalledTimes(1);
+  });
+
+  describe("in one of the workspace's own designs (task 100)", () => {
+    const parsed = parseTemplate(GOOD_TEMPLATE);
+    if (!parsed.ok) throw new Error(parsed.errors.join("; "));
+    const design = { id: "d1", version: 2, template: parsed.template };
+
+    it("draws the post's own words in that design", async () => {
+      const r = await renderLayoutPreview("c1", "a1", "CUSTOM", design);
+      expect(r.ok).toBe(true);
+      expect(renderSvg.mock.calls[0][0]).toMatchObject({ layout: "CUSTOM", custom: { id: "d1", version: 2 }, headline: `${stored.headline} ${n}`, kicker: stored.kicker });
+      expect(renderSvg.mock.calls[0][0].custom.template).toBe(parsed.template);
+    });
+
+    it("reads the cut-out only when the design uses it", async () => {
+      await renderLayoutPreview("c1", "a1", "CUSTOM", design);
+      expect(cutoutOf).not.toHaveBeenCalled();
+      const withCutout = parseTemplate(GOOD_TEMPLATE.replace('<svg width="64"', '<div data-if="cutout" style="display:flex"><img src="{{cutout}}" width="200" height="300" style="object-fit:contain" /></div><svg width="64"'));
+      if (!withCutout.ok) throw new Error(withCutout.errors.join("; "));
+      await renderLayoutPreview("c1", "a1", "CUSTOM", { ...design, template: withCutout.template });
+      expect(cutoutOf).toHaveBeenCalledTimes(1);
+    });
+
+    it("has nothing to draw without the design", async () => {
+      expect(await renderLayoutPreview("c1", "a1", "CUSTOM")).toMatchObject({ ok: false, status: 404 });
+      expect(renderSvg).not.toHaveBeenCalled();
+    });
+
+    it("draws each version of a design as its own tile", async () => {
+      await renderLayoutPreview("c1", "a1", "CUSTOM", design);
+      await renderLayoutPreview("c1", "a1", "CUSTOM", { ...design, version: 3 });
+      expect(renderSvg).toHaveBeenCalledTimes(2);
+    });
   });
 });

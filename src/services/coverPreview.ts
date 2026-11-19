@@ -6,6 +6,7 @@ import { needsFallbackGlyphs, renderCoverPng, renderCoverSvg } from "@/lib/cover
 import { dataUrlFitsPoster } from "@/lib/covers/photo";
 import { editAttempts, posterParts, switchLayout } from "@/lib/covers/layoutSwitch";
 import type { PosterShape } from "@/lib/covers/shape";
+import type { Template } from "@/lib/covers/custom/parse";
 import type { StoredCoverSpec } from "@/services/cover";
 import { coverCutout, hostedCoverPhoto } from "@/services/cover";
 
@@ -83,7 +84,9 @@ function tilePhotoFor(clientId: string, profile: Parameters<typeof hostedCoverPh
   return photo;
 }
 
-export async function renderLayoutPreview(clientId: string, assetId: string, layout: CoverLayout): Promise<PreviewResult> {
+/** design: the saved design a CUSTOM tile is drawn in, already read from the workspace's own rows. */
+export async function renderLayoutPreview(clientId: string, assetId: string, layout: CoverLayout, design?: { id: string; version: number; template: Template }): Promise<PreviewResult> {
+  if (layout === "CUSTOM" && !design) return { ok: false, error: "That design is no longer in your workspace.", status: 404 };
   // One round trip: the brand row does not depend on the asset.
   const [asset, profile] = await Promise.all([
     prisma.asset.findUnique({ where: { id: assetId }, select: { id: true, clientId: true, title: true, content: true, linkedinVariant: true, coverSpec: true } }),
@@ -97,7 +100,8 @@ export async function renderLayoutPreview(clientId: string, assetId: string, lay
   const photo = await fullPhoto;
   const shape = (stored.card as { shape?: PosterShape } | undefined)?.shape;
   const photoOk = dataUrlFitsPoster(photo);
-  const fullCutout = layout === "CUTOUT" && profile ? await coverCutout(profile) : undefined;
+  const wantsCutout = layout === "CUTOUT" || (layout === "CUSTOM" && Boolean(design?.template.slots.includes("cutout")));
+  const fullCutout = wantsCutout && profile ? await coverCutout(profile) : undefined;
   const cutout = fullCutout && { ...fullCutout, src: (await shrinkDataUrl(fullCutout.src)) ?? fullCutout.src };
   // Whether the photo can fill a Photo cover is judged on the full photo; the tile draws the small one.
   const tilePhoto = profile && photo ? await tilePhotoFor(clientId, profile, fullPhoto) : undefined;
@@ -115,12 +119,15 @@ export async function renderLayoutPreview(clientId: string, assetId: string, lay
     art: stored.art,
     ...posterParts(shape),
   };
-  const switched = switchLayout(base, layout, { shape, photo: { present: Boolean(photo), ok: photoOk }, cutout: Boolean(cutout), body: asset.content ?? "", post: asset.linkedinVariant });
+  const switched = design
+    ? ({ ok: true, spec: { ...base, layout: "CUSTOM", custom: design } } as const)
+    : switchLayout(base, layout, { shape, photo: { present: Boolean(photo), ok: photoOk }, cutout: Boolean(cutout), body: asset.content ?? "", post: asset.linkedinVariant });
   if (!switched.ok) return { ok: false, error: switched.error, status: 422 };
   const spec: CoverSpec = { ...switched.spec, cutout };
 
-  // The photo and cut-out are the same for every tile of one brand, so they stay out of the key.
-  const key = createHash("sha1").update(JSON.stringify({ ...spec, author: { ...spec.author, photo: Boolean(photo) }, cutout: Boolean(cutout) })).digest("hex");
+  // The photo and cut-out are the same for every tile of one brand, so they stay out of the key; a design is named by id and version.
+  const custom = spec.custom && { id: spec.custom.id, version: spec.custom.version };
+  const key = createHash("sha1").update(JSON.stringify({ ...spec, custom, author: { ...spec.author, photo: Boolean(photo) }, cutout: Boolean(cutout) })).digest("hex");
   const cached = tiles.get(key);
   if (cached) return { ok: true, ...cached };
 

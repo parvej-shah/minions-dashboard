@@ -16,7 +16,7 @@ import { renderPosterShape } from "@/lib/prompts/posterShape";
 import { editShape, parseShape, shapeJson, type PosterShape, type ShapeEdit } from "@/lib/covers/shape";
 import { eligibleTypes, fallbackOrder, pickPosterType } from "@/lib/covers/posterType";
 import { dataUrlFitsPoster, prepareCutout } from "@/lib/covers/photo";
-import { pickCustomDesign, readOnlyMine } from "@/lib/covers/custom/rotation";
+import { pickCustomDesign, pickedDesign, readOnlyMine } from "@/lib/covers/custom/rotation";
 import { isCoverFont, readCoverFont } from "@/lib/covers/coverFonts";
 import { activeCoverDesigns, loadCoverTemplate } from "@/services/coverTemplates";
 import { NEEDS_SHAPE, attempts, editAttempts, posterParts, sameType, switchLayout } from "@/lib/covers/layoutSwitch";
@@ -37,6 +37,8 @@ const COVER_PROVIDER = "template";
  */
 export interface CoverEdit extends ShapeEdit {
   layout?: CoverLayout;
+  /** One of the workspace's saved designs, by id (task 100); used instead of layout. */
+  design?: string;
   headline?: string;
   kicker?: string;
   emphasis?: string;
@@ -464,6 +466,12 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
       if (!switched.ok) return { ok: false, error: switched.error };
       spec = switched.spec;
     }
+    // A saved design: only an active one of this workspace. It keeps the post's words and may show its figure or quote.
+    if (edit.design) {
+      const picked = pickedDesign(await activeCoverDesigns(asset.clientId).catch(() => []), edit.design);
+      if (!picked) return { ok: false, error: "That design is no longer in your workspace. Add it again on the Brand page." };
+      spec = { ...spec, layout: "CUSTOM", custom: picked, quote: spec.quote ?? copy.quote, number: spec.number ?? copy.number };
+    }
   }
 
   // Generated: each type in order (its own copy only), the last with every
@@ -503,7 +511,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
       notes.push(e.message);
     }
   }
-  if (!png) return { ok: false, error: input.edit && spec.layout !== "HEADLINE" ? `That doesn't fit on a ${spec.layout.toLowerCase()} cover: ${notes.slice(-1)[0] ?? "unknown"}. Try shorter wording.` : `No cover copy fits: ${notes.slice(-1)[0] ?? "unknown"}` };
+  if (!png) return { ok: false, error: input.edit && spec.layout === "CUSTOM" ? `That doesn't fit your design: ${notes.slice(-1)[0] ?? "unknown"}. Try shorter wording.` : input.edit && spec.layout !== "HEADLINE" ? `That doesn't fit on a ${spec.layout.toLowerCase()} cover: ${notes.slice(-1)[0] ?? "unknown"}. Try shorter wording.` : `No cover copy fits: ${notes.slice(-1)[0] ?? "unknown"}` };
 
   const { url } = await uploadToR2(`covers/${asset.clientId}/${asset.id}-${Date.now()}.png`, png, "image/png");
   const stored: StoredCoverSpec = {

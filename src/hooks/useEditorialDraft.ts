@@ -82,6 +82,8 @@ export interface EditorialDraftState {
 
 export interface CoverEditInput {
   layout?: CoverSpecDTO["layout"];
+  /** One of the workspace's saved designs, by id. */
+  design?: string;
   headline?: string;
   kicker?: string;
   emphasis?: string;

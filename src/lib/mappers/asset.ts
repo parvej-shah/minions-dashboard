@@ -114,8 +114,15 @@ function toCoverDTO(raw: unknown, draft: { content: string | null; linkedinVaria
     shape_read: Boolean(shape),
     photo_ok: a?.photo_ok === true,
     cutout_ok: typeof a?.cutout_ok === "boolean" ? a.cutout_ok : null,
+    custom: customRef(c.custom),
     quote_ok: Boolean(pickQuote(quoteSource({ body: bodyOf(draft.content ?? ""), post: draft.linkedinVariant }))),
   };
+}
+
+/** Which saved design a CUSTOM cover uses: its id and version, nothing else. */
+function customRef(value: unknown): { id: string; version: number } | null {
+  const v = value as { id?: unknown; version?: unknown } | null | undefined;
+  return v && typeof v.id === "string" && typeof v.version === "number" ? { id: v.id, version: v.version } : null;
 }
 
 export function toAssetDTO(
