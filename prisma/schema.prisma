@@ -55,6 +55,7 @@ model Client {
   contentLanes    ContentLane[]
   scheduleSlots   ScheduleSlot[]
   weeklyPulses    WeeklyPulse[]
+  coverTemplates  CoverTemplate[]
 
   @@map("clients")
 }
@@ -669,4 +670,30 @@ model ContentLane {
 
   @@unique([clientId, name])
   @@map("content_lanes")
+}
+
+/// A cover design a workspace pasted in (src/lib/covers/custom). One row per
+/// saved version: edits add a version and never change an old one, so a post
+/// keeps the exact design it was approved with. Only workspace members reach
+/// their own rows (every query filters by client_id). source_html is untrusted
+/// text: it is re-validated on every load, never trusted because it was saved.
+model CoverTemplate {
+  id          String   @id @default(cuid())
+  clientId    String   @map("client_id")
+  /// Groups the versions of one design; this is the id the app shows.
+  templateKey String   @map("template_key")
+  version     Int
+  name        String
+  sourceHtml  String   @map("source_html") @db.Text
+  slots       String[] @default([])
+  status      String   @default("ACTIVE") // ACTIVE | ARCHIVED
+  previewSvg  String?  @map("preview_svg") @db.Text
+  createdBy   String?  @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([templateKey, version])
+  @@index([clientId, status], map: "cover_templates_client_status_idx")
+  @@map("cover_templates")
 }

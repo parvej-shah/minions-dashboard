@@ -16,6 +16,8 @@ import { renderPosterShape } from "@/lib/prompts/posterShape";
 import { editShape, parseShape, shapeJson, type PosterShape, type ShapeEdit } from "@/lib/covers/shape";
 import { eligibleTypes, fallbackOrder, pickPosterType } from "@/lib/covers/posterType";
 import { dataUrlFitsPoster, prepareCutout } from "@/lib/covers/photo";
+import { pickCustomDesign, readOnlyMine } from "@/lib/covers/custom/rotation";
+import { activeCoverDesigns, loadCoverTemplate } from "@/services/coverTemplates";
 import { NEEDS_SHAPE, attempts, editAttempts, posterParts, sameType, switchLayout } from "@/lib/covers/layoutSwitch";
 
 /**
@@ -397,7 +399,8 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
       headline: c.headline,
       emphasis: c.emphasis,
       kicker: c.kicker,
-      quote: c.quote,
+      // A custom design may show the figure or quote when the post has one (its slots are optional).
+      quote: layout === "CUSTOM" ? (c.quote ?? copy.quote) : c.quote,
       number: c.number ?? copy.number,
       author,
       brand,
@@ -413,7 +416,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   const kept = input.edit && previous?.layout && previous.headline ? previous : null;
   // No audience label: the illustration and the headline open the cover (user decision, 2026-09-25).
   let spec: CoverSpec = kept
-    ? { layout: kept.layout!, headline: kept.headline!, emphasis: kept.emphasis, kicker: kept.kicker, quote: kept.quote, number: kept.number, author, brand, art, ...posterParts(card.shape), cutout }
+    ? { layout: kept.layout!, headline: kept.headline!, emphasis: kept.emphasis, kicker: kept.kicker, quote: kept.quote, number: kept.number, author, brand, art, ...posterParts(card.shape), cutout, ...(kept.custom ? { custom: { id: kept.custom.id, version: kept.custom.version } } : {}) }
     : input.edit
       ? { ...specFor(copy.layout), art }
       : specFor(order[0]);
@@ -463,13 +466,31 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   // fallback down to the plain headline. An edit keeps the type it asked for;
   // only the four original types fall back to the plain headline.
   const title = asset.title ?? "";
-  const tries = !input.edit
+  // A workspace's own design leads when the rotation says so; the built-in types stay behind it as the fallback.
+  const design = input.edit
+    ? null
+    : pickCustomDesign(await activeCoverDesigns(asset.clientId).catch(() => []), recent.map((r) => r.coverSpec as { layout?: string; custom?: { id?: string } } | null), { onlyMine: readOnlyMine(profile.visualAssets), firstPost });
+  const customTries = design ? sameType({ ...specFor("CUSTOM"), custom: design }, title) : [];
+  const builtIn = !input.edit
     ? order.flatMap((l, i) => (i === order.length - 1 ? attempts(specFor(l), title) : sameType(specFor(l), title)))
     : editAttempts(spec, title);
+  const tries = [...customTries, ...builtIn];
+  const designs = new Map<string, Awaited<ReturnType<typeof loadCoverTemplate>>>();
   let png: Buffer | null = null;
   let used = spec;
-  for (const attempt of tries) {
+  for (let attempt of tries) {
     try {
+      if (attempt.layout === "CUSTOM" && attempt.custom) {
+        // Read again from this workspace's own rows, at the version the post was drawn with (an archived one still draws old posts).
+        const key = `${attempt.custom.id}@${attempt.custom.version}`;
+        if (!designs.has(key)) designs.set(key, await loadCoverTemplate(asset.clientId, attempt.custom.id, attempt.custom.version, { includeArchived: true }));
+        const loaded = designs.get(key);
+        if (!loaded) {
+          notes.push("Your design could not be loaded, so a built-in one was used.");
+          continue;
+        }
+        attempt = { ...attempt, custom: { ...attempt.custom, template: loaded.template } };
+      }
       png = await renderCoverPng(attempt);
       used = attempt;
       break;
@@ -485,6 +506,8 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     ...used,
     // The cut-out is the brand's, read again on every draw: never copied into the row.
     cutout: undefined,
+    // Which saved design and version only; the design itself is read from the workspace's rows.
+    custom: used.layout === "CUSTOM" && used.custom ? { id: used.custom.id, version: used.custom.version } : undefined,
     author: { name: author.name, role: author.role, has_photo: Boolean(author.photo), photo_ok: photoOk, cutout_ok: Boolean(cutout) },
     // The chosen art is kept even when this layout or fit dropped it, so switching back restores it.
     art: used.art ?? spec.art ?? art,

@@ -809,3 +809,10 @@ as JPEGs, which cost far less than the PNGs did.
 **Why:** The team and tenant zero run on Dhaka time; a device on another zone showed different post times than the schedule used, and the pulse prompt invited switching away. A separate stop button makes it obvious how to end dictation.
 **Alternatives considered:** Following each viewer's device timezone (rejected for now: one shared clock is simpler while all users are on Bangladesh time).
 **Status:** active
+
+## 2026-11-19 — Users can bring their own cover designs
+
+**Decision:** A workspace can paste its own cover design (HTML in a fixed, documented format). It is checked first and saved only if it fully matches the contract and is readable; otherwise nothing is saved and the user sees plain-word reasons. Designs belong to the workspace, up to 10. They alternate with the built-in designs, never two custom covers in a row; a "Use only my designs" switch turns the built-ins off. For carousels, the custom design is used on page 1 only.
+**Why:** users wanted covers that look like their own brand. Checking before saving keeps broken or unsafe pastes out of the product.
+**Alternatives considered:** a full browser renderer (rejected: slow, larger attack surface); per-login ownership (rejected: brand data is per workspace).
+**Status:** active

@@ -19,6 +19,8 @@ import { ICONS, type IconName } from "./icons";
 import { BANNER_DESIGNS, isBanner } from "./bannerTypes";
 import { bannerElement } from "./modern";
 import { tagsFor } from "./social";
+import type { Template } from "./custom/parse";
+import { customElement } from "./custom/spec";
 import { BACKGROUND_FOR, BLOCK_TOP, DARK_BACKGROUNDS, backgroundSrc, brandOn } from "./backgrounds";
 
 export const COVER_SIZE = { width: 1080, height: 1350 } as const;
@@ -38,8 +40,10 @@ const CHIP_HEIGHT = 56;
 /** BLOCK: the band rises above the divider on the right, so the centre ends this much higher. */
 const BLOCK_RESERVE = 1100 - BLOCK_TOP.right + 24;
 
+/** The built-in designs: what a reviewer can pick, and what the API accepts as a layout. */
 export const COVER_LAYOUTS = ["HEADLINE", "STATEMENT", "QUOTE", "NUMBER", "LIST", "GRID", "PUNCH", "PHOTO", ...BANNER_DESIGNS] as const;
-export type CoverLayout = (typeof COVER_LAYOUTS)[number];
+/** CUSTOM is a design the workspace pasted in (covers/custom). It is never picked from a request: the app attaches the saved design at draw time. */
+export type CoverLayout = (typeof COVER_LAYOUTS)[number] | "CUSTOM";
 
 export interface CoverBrand {
   ink: string;
@@ -90,6 +94,8 @@ export interface CoverSpec {
    * line, so the draft still gets a cover. Never set on a first attempt.
    */
   looseHeadline?: boolean;
+  /** CUSTOM: which saved design and version, and (only while drawing, never stored) the parsed design itself. */
+  custom?: { id: string; version: number; template?: Template };
 }
 
 export class CoverFitError extends Error {}
@@ -549,6 +555,7 @@ export const isDark = (layout: CoverLayout) => DARK_BACKGROUNDS.includes(BACKGRO
 
 /** The cover as a Satori element. Throws CoverFitError when any text cannot fit. */
 export function coverElement(spec: CoverSpec) {
+  if (spec.layout === "CUSTOM") return customElement(spec);
   // The modern banner types (modern.tsx) draw their own ground; the accent is tuned to it here.
   if (isBanner(spec.layout)) {
     return bannerElement({ design: spec.layout, headline: spec.headline, emphasis: spec.emphasis, kicker: spec.kicker, label: spec.label, author: spec.author, brand: brandOn(BACKGROUND_FOR[spec.layout], spec.brand), cutout: spec.cutout, tags: tagsFor(spec.grid, spec.list) });

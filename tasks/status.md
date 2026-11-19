@@ -92,3 +92,9 @@
 | 87 | Free Voice Dictation on Update Boxes | CLAUDE | DONE | tasks/87.md |
 | 88 | Voice on Every Typing Field, Clearer Mic, Listening Animation | CLAUDE | DONE | tasks/88.md |
 | 89 | Stop Button Beside Mic; Bangladesh Time Everywhere | CLAUDE | DONE | tasks/89.md |
+| 90 | Cover template contract (user-pasted designs): research + draft | CLAUDE | DONE | docs/research/cover-template-contract-2026-11-19.md; build 91-95 waits on owner decisions |
+| 91 | Cover contract + strict parser | CLAUDE | DONE | tasks/91.md |
+| 92 | Cover template check | CLAUDE | DONE | tasks/92.md |
+| 93 | Cover templates storage + API (SQL not applied) | CLAUDE | DONE | tasks/93.md |
+| 94 | Custom cover render path, rotation, carousel p1 | CLAUDE | DONE | tasks/94.md |
+| 95 | Brand 'Your designs' card | CLAUDE | DONE | tasks/95.md |

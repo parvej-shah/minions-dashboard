@@ -17,6 +17,7 @@ import { PageHeader } from "@/components/ui/Text";
 import { BrandCard } from "@/components/brand/parts";
 import CoverAppearanceCard from "@/components/brand/CoverAppearanceCard";
 import CoverThemeCard from "@/components/brand/CoverThemeCard";
+import YourDesignsCard from "@/components/brand/YourDesignsCard";
 import IcpEditor from "@/components/brand/IcpEditor";
 import LexiconTab from "@/components/brand/LexiconTab";
 import MemorySection from "@/components/brand/MemorySection";
@@ -161,6 +162,7 @@ function Brand() {
       <div key={importVersion} className="space-y-6">
         <MissingBasic version={profileVersion} />
         <CoverThemeCard profile={profile} setProfile={setProfile} onEdit={() => open("cover")} />
+        <YourDesignsCard />
         <WhatYouDo profile={profile} setProfile={setProfile} onSaved={bumpProfile} version={profileVersion} />
         <IcpEditor fields="who" onChange={bumpProfile} onMore={() => open("reader")} />
         <BrandCard title="What you post about" line="Ideas stay on these topics.">

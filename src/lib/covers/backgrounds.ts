@@ -15,6 +15,8 @@ export type Background = (typeof BACKGROUNDS)[number];
 
 /** Each type always has its own background (fixed per type, not chosen). */
 export const BACKGROUND_FOR: Record<CoverLayout, Background> = {
+  /** Unused: a custom design draws its own ground. */
+  CUSTOM: "MESH",
   HEADLINE: "MESH",
   QUOTE: "MESH",
   STATEMENT: "AURORA",

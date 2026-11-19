@@ -33,7 +33,7 @@ export type SwitchResult = { ok: true; spec: CoverSpec } | { ok: false; error: s
 
 /** `spec` drawn as `layout`, or why it cannot be. The copy is the post's own, never re-picked. */
 export function switchLayout(spec: CoverSpec, layout: CoverLayout, ctx: SwitchContext): SwitchResult {
-  if (!COVER_LAYOUTS.includes(layout)) return { ok: false, error: `Unknown layout ${layout}` };
+  if (!(COVER_LAYOUTS as readonly string[]).includes(layout)) return { ok: false, error: `Unknown layout ${layout}` };
   let next: CoverSpec = { ...spec, ...posterParts(ctx.shape) };
   const need = NEEDS_SHAPE[layout];
   if (need && !ctx.shape?.[need.part]) return { ok: false, error: need.missing };
@@ -80,4 +80,4 @@ export const sameType = (s: CoverSpec, title: string) => attempts(s, title).filt
  * type keeps its type (no fallback to a plain headline); the rest may fall back.
  */
 export const editAttempts = (spec: CoverSpec, title: string): CoverSpec[] =>
-  NEEDS_SHAPE[spec.layout] || spec.layout === "PHOTO" || isBanner(spec.layout) ? sameType(spec, title) : attempts(spec, title);
+  NEEDS_SHAPE[spec.layout] || spec.layout === "PHOTO" || spec.layout === "CUSTOM" || isBanner(spec.layout) ? sameType(spec, title) : attempts(spec, title);

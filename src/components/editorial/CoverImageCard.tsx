@@ -24,6 +24,7 @@ export interface CoverImageCardProps {
 type Layout = CoverSpecDTO["layout"];
 
 const LAYOUT_NAMES: Record<Layout, string> = {
+  CUSTOM: "Your design",
   HEADLINE: "Headline",
   STATEMENT: "Statement",
   LIST: "List",

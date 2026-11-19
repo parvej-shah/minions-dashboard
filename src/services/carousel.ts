@@ -6,6 +6,7 @@ import { deleteFromR2, r2KeyFromUrl, uploadToR2 } from "@/lib/r2";
 import { coverBrand } from "@/lib/covers/brand";
 import type { CoverSpec } from "@/lib/covers/layouts";
 import { evidenceRules, manualIdeaNote } from "@/lib/drafts/authorContext";
+import { loadCoverTemplate } from "@/services/coverTemplates";
 import { COVER_HEADLINE_WORDS, checkPlan, namesIn, parsePlan, postCoverSpec, repairPlan, suggestCarousel, toDeck, type CarouselPlan, type PlanSources } from "@/lib/carousel/plan";
 import { renderCarouselPdf, renderSlidePng, slideJpeg } from "@/lib/carousel/render";
 import type { Deck, SlideStyle } from "@/lib/carousel/slides";
@@ -133,7 +134,12 @@ async function loadContext(assetId: string): Promise<Context | { error: string }
   const author = { name: profile.brandName, role: profile.coverByline?.trim() || defaultByline(profile.positioning ?? ""), photo: await hostedCoverPhoto(profile) };
 
   // Page 1 is the post's own cover (its layout, photo and headline), not a rebuilt headline page.
-  const postCover = postCoverSpec(asset.coverSpec, { author, brand, cutout: await coverCutout(profile) });
+  let postCover = postCoverSpec(asset.coverSpec, { author, brand, cutout: await coverCutout(profile) });
+  // A custom design is read from this workspace's own rows at the version the post used; without it page 1 falls back to the headline page.
+  if (postCover?.layout === "CUSTOM" && postCover.custom) {
+    const loaded = await loadCoverTemplate(clientId, postCover.custom.id, postCover.custom.version, { includeArchived: true });
+    postCover = loaded ? { ...postCover, custom: { ...postCover.custom, template: loaded.template } } : null;
+  }
 
   return {
     assetId: asset.id,

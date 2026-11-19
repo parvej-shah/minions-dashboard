@@ -34,6 +34,8 @@ export function eligibleTypes(input: PosterTypeInput): CoverLayout[] {
   const s = input.shape;
   const faceRecently = input.recent.slice(0, PHOTO_EVERY - 1).some((t) => t === "PHOTO" || t === "CUTOUT");
   const ok: Record<CoverLayout, boolean> = {
+    // A workspace's own designs join the rotation separately (custom/rotation.ts).
+    CUSTOM: false,
     PHOTO: input.photoOk && Boolean(s?.own_story) && !faceRecently,
     NUMBER: Boolean(input.judged?.number),
     QUOTE: Boolean(input.judged?.quote),
