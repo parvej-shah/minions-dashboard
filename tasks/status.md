@@ -100,3 +100,4 @@
 | 95 | Brand 'Your designs' card | CLAUDE | DONE | tasks/95.md |
 | 96 | Add-a-design flow: instructions, import, preview | CLAUDE | DONE | tasks/96.md |
 | 97 | Cover font choice per workspace (6 OFL fonts) | CLAUDE | DONE | tasks/97.md |
+| 98 | Custom designs take the theme colours | CLAUDE | DONE | tasks/98.md |

@@ -133,7 +133,8 @@ export function contractPrompt(): string {
     `A fitted element needs a width in px, a font-family, no padding or border, data-min-size of at least ${MIN_SIZE.headline} for the headline and ${MIN_SIZE.other} for other text.`,
     `Wrap every optional slot's element in data-if="slot_name", e.g. <div data-if="kicker">...</div>, so nothing shows when it is empty.`,
     `Images only as <img src="{{photo}}" width="200" height="200"> (or {{cutout}}), inside a data-if. Inline <svg> shapes are fine.`,
-    `Colours: use var(--ink), var(--paper), var(--accent), var(--secondary) for brand colours. Fonts: ${FONTS.join(", ")} only.`,
+    `Colours come from the brand theme: var(--ink), var(--paper), var(--accent), var(--secondary). Every text colour, the cover's background and any background behind text must use these (gradients of them are fine). Only icons, lines and shapes may use their own colours.`,
+    `Fonts: ${FONTS.join(", ")} only.`,
     `Optional: data-emphasis-color="accent" on the headline element highlights the {{emphasis}} word.`,
     `Return only the HTML.`,
   ].join("\n");

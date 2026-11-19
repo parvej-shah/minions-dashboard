@@ -19,9 +19,15 @@ describe("checkTemplate", () => {
   });
 
   it("refuses text that is too low-contrast on the brand colours", async () => {
-    const r = await checkTemplate(GOOD_TEMPLATE.replace("color:var(--ink)", "color:var(--paper)").replace("background-color:var(--paper);overflow", "background-color:#ffffff;overflow"));
+    const r = await checkTemplate(GOOD_TEMPLATE.replace("color:var(--ink)", "color:var(--paper)"));
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.errors.join(" ")).toMatch(/needs at least 4.5:1/);
+  });
+
+  it("refuses a design whose text ignores the theme colours", async () => {
+    const r = await checkTemplate(GOOD_TEMPLATE.replace("line-height:1.05;color:var(--ink)", "line-height:1.05;color:#123456"));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors.join(" ")).toMatch(/must be a theme colour/);
   });
 
   it("refuses a headline box too narrow for the longest post", async () => {

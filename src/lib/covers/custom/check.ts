@@ -6,6 +6,7 @@ import { COVER_THEMES, themeColours } from "../themes";
 import { SAMPLE_POSTS, type ColourVar } from "./contract";
 import { templateElement, type TemplateValues } from "./element";
 import { parseTemplate, type TNode, type Template } from "./parse";
+import { themeColourProblems } from "./themeColours";
 
 /**
  * "Is my template good?": the gate every pasted design passes before it is
@@ -70,6 +71,8 @@ export async function checkTemplate(source: unknown, workspace?: { ink?: string 
   const parsed = parseTemplate(source);
   if (!parsed.ok) return parsed;
   const { template } = parsed;
+  const themed = themeColourProblems(template.root);
+  if (themed.length) return { ok: false, errors: themed };
 
   const mine = workspace ? coverBrand(workspace).brand : DEFAULT_COVER_BRAND;
   const brands = [mine, ...COVER_THEMES.filter((t) => t.id === "graphite" || t.id === "ivory").map((t) => {

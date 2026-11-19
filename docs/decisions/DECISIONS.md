@@ -823,3 +823,10 @@ as JPEGs, which cost far less than the PNGs did.
 **Why:** the user wanted modern display type like the paid fonts in a Pinterest reference (Trapvoid, Gothif, Neue Monique, After, Bletro, Newblack, Quinn), configurable per workspace. Those are commercial; these free fonts give the same range (condensed, wide, quirky, technical, editorial) with no licence cost.
 **Alternatives considered:** buying the reference fonts (licence cost and terms per workspace); letting users upload any font (licensing and safety risk; v2 at most).
 **Status:** active. Supersedes the shared-type-system part of "Covers use Bricolage Grotesque and Plus Jakarta Sans" (2026-11-09).
+
+## 2026-11-19 — Custom designs take the workspace's theme colours
+
+**Decision:** A pasted or imported cover design must take its colours from the workspace's theme: every text colour, the cover's background and every background behind text use the theme's ink, paper, accent and secondary colours (gradients of them are fine). Icons, lines and shapes may keep their own colours. A design that uses fixed colours there fails the check with a plain reason and is not saved. Designs saved before this rule keep working.
+**Why:** the user wants every cover to follow the brand theme, so changing the theme recolours custom designs too and the highlighted word always matches. A design tested with fixed blues kept its blues on an Ivory workspace and showed an orange highlight word, which looked broken.
+**Alternatives considered:** allowing fixed colours as long as text is readable (the old rule; designs drifted from the brand); recolouring fixed colours automatically (guesswork, unpredictable results).
+**Status:** active.
