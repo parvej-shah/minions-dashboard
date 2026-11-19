@@ -68,6 +68,12 @@ describe("themeColourProblems", () => {
     expect(problems(wrap(deco + headline("color:var(--ink)")))).toEqual([]);
   });
 
+  it("refuses fixed text in a fixed colour, accepts it in a theme colour", () => {
+    const fixed = (c: string) => `<div style="display:flex;font-family:'Plus Jakarta Sans';font-size:30px;color:${c}">Book now</div>`;
+    expect(problems(wrap(fixed("#ffffff") + headline("color:var(--ink)"))).join(" ")).toMatch(/The text "Book now" must use a theme colour/);
+    expect(problems(wrap(fixed("var(--accent)") + headline("color:var(--ink)")))).toEqual([]);
+  });
+
   it("the instructions tell designers the rule", () => {
     expect(contractPrompt()).toMatch(/Every text colour, the cover's background and any background behind text must use these/);
   });

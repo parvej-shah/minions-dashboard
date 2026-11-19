@@ -49,6 +49,13 @@ export function themeColourProblems(root: TNode): string[] {
       else if (!isThemed(own)) out.add(`The ${slot} colour must be a theme colour: ${RULE}.`);
       if (behind) out.add(`The background behind the ${slot} must use theme colours: ${RULE}.`);
     }
+    // Fixed text written into the design ("Book now") follows the same rule.
+    const fixed = node.children.map((c) => ("text" in c ? c.text.replace(/\s+/g, " ").trim() : "")).find(Boolean);
+    if (fixed && !node.svg) {
+      const what = `The text "${fixed.slice(0, 30)}"`;
+      if (own === undefined || !isThemed(own)) out.add(`${what} must use a theme colour: ${RULE}.`);
+      if (behind) out.add(`The background behind ${what.slice(4)} must use theme colours: ${RULE}.`);
+    }
     for (const c of node.children) if ("tag" in c && !c.svg) walk(c, own, behind);
   };
   walk(root, undefined, false);

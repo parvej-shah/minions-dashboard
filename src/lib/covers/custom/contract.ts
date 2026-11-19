@@ -119,23 +119,81 @@ export const SAMPLE_POSTS = {
   bare: { headline: "Ship the small thing today", author_name: "Alex Rahman" },
 } as const;
 
-/** The text we show users to paste into Claude, Canva or any designer. Built from the tables above. */
+/** A complete design that passes the check, shown at the end of the instructions (a test keeps it passing). */
+export const PROMPT_EXAMPLE = `<div data-cover-template="${CONTRACT_VERSION}" data-name="Clean Card" style="display:flex;flex-direction:column;justify-content:space-between;width:${TEMPLATE_SIZE.width}px;height:${TEMPLATE_SIZE.height}px;padding:88px;overflow:hidden;background-color:var(--paper)">
+  <div data-if="label" style="display:flex;align-self:flex-start;padding:10px 24px;border-radius:999px;background-color:var(--ink)">
+    <div data-fit data-max-lines="1" data-min-size="30" data-max-size="34" style="width:600px;font-family:'Plus Jakarta Sans';font-weight:600;color:var(--paper)">{{label}}</div>
+  </div>
+  <div style="display:flex;flex-direction:column">
+    <div data-fit data-max-lines="4" data-min-size="48" data-max-size="120" data-emphasis-color="accent" style="width:900px;font-family:'Bricolage Grotesque';font-weight:800;line-height:1.05;color:var(--ink)">{{headline}}</div>
+    <div data-if="kicker" style="display:flex;margin-top:32px">
+      <div data-fit data-max-lines="2" data-min-size="30" data-max-size="40" style="width:900px;font-family:'Plus Jakarta Sans';color:var(--secondary)">{{kicker}}</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center">
+    <div data-if="photo" style="display:flex;margin-right:24px"><img src="{{photo}}" width="120" height="120" style="border-radius:999px" /></div>
+    <div data-fit data-max-lines="1" data-min-size="30" data-max-size="40" style="width:700px;font-family:'Plus Jakarta Sans';font-weight:600;color:var(--ink)">{{author_name}}</div>
+    <svg width="64" height="64" viewBox="0 0 64 64" style="margin-left:auto"><circle cx="32" cy="32" r="28" fill="var(--accent)" /></svg>
+  </div>
+</div>`;
+
+/**
+ * The instructions we show users to paste into Claude, ChatGPT, Canva or any
+ * designer. Built from the tables above and states every rule the parser and
+ * the check enforce (check.test.ts keeps the two in step), so a design made
+ * from it passes on the first try.
+ */
 export function contractPrompt(): string {
-  const req = REQUIRED_SLOTS.map((s) => `{{${s}}}`).join(" and ");
-  const opt = SLOT_NAMES.filter((s) => !SLOTS[s].required && s !== "emphasis").map((s) => `{{${s}}}`).join(" ");
+  const W = TEMPLATE_SIZE.width;
+  const H = TEMPLATE_SIZE.height;
+  const optional = SLOT_NAMES.filter((s) => !SLOTS[s].required && SLOTS[s].kind === "text").map((s) => `  - {{${s}}}: ${SLOTS[s].about}`);
   return [
-    `Design a social cover as ONE HTML snippet, ${TEMPLATE_SIZE.width}x${TEMPLATE_SIZE.height}px, for the Satori renderer: a CSS subset.`,
-    `Flexbox only (every div uses display:flex). Inline style="" only: no <style>, classes, <script>, <link>, grid, calc(), z-index or external URLs.`,
-    `The root must be: <div data-cover-template="${CONTRACT_VERSION}" data-name="Short name" style="display:flex;width:${TEMPLATE_SIZE.width}px;height:${TEMPLATE_SIZE.height}px;overflow:hidden;...">.`,
-    `Allowed tags: ${[...TAGS].join(", ")}.`,
-    `Text comes only from slots. Required: ${req}. Optional: ${opt}.`,
-    `Put every text slot ALONE inside its own element, written as <div data-fit data-max-lines="3" data-min-size="${MIN_SIZE.headline}" data-max-size="120" style="width:900px;font-family:'Bricolage Grotesque';font-weight:800;color:var(--ink)">{{headline}}</div>.`,
-    `A fitted element needs a width in px, a font-family, no padding or border, data-min-size of at least ${MIN_SIZE.headline} for the headline and ${MIN_SIZE.other} for other text.`,
-    `Wrap every optional slot's element in data-if="slot_name", e.g. <div data-if="kicker">...</div>, so nothing shows when it is empty.`,
-    `Images only as <img src="{{photo}}" width="200" height="200"> (or {{cutout}}), inside a data-if. Inline <svg> shapes are fine.`,
-    `Colours come from the brand theme: var(--ink), var(--paper), var(--accent), var(--secondary). Every text colour, the cover's background and any background behind text must use these (gradients of them are fine). Only icons, lines and shapes may use their own colours.`,
-    `Fonts: ${FONTS.join(", ")} only.`,
-    `Optional: data-emphasis-color="accent" on the headline element highlights the {{emphasis}} word.`,
-    `Return only the HTML.`,
+    `Design a social media cover as ONE HTML snippet. It is drawn by the Satori renderer, which understands only a small part of HTML and CSS. Follow every rule below: a design that breaks any of them is refused and not saved.`,
+    ``,
+    `1. SIZE AND OUTER ELEMENT`,
+    `- The cover is exactly ${W} x ${H} px.`,
+    `- The outer element must be: <div data-cover-template="${CONTRACT_VERSION}" data-name="Short name" style="display:flex;position:relative;width:${W}px;height:${H}px;overflow:hidden;background-color:var(--paper)">`,
+    `- data-name is a plain name of at most ${LIMITS.nameChars} characters.`,
+    ``,
+    `2. HTML AND CSS`,
+    `- Use only these tags: ${[...TAGS].join(", ")}.`,
+    `- Style each element with an inline style="" only. No <style>, no class, no <script>, no <link>, no event attributes like onclick. id is allowed only on SVG gradients.`,
+    `- Every element uses display:flex (or display:none). No grid, block or inline layout.`,
+    `- position may be relative or absolute; overflow may be hidden or visible.`,
+    `- No calc(), no z-index, no animations or transitions, and no CSS variables other than the four colours in section 3.`,
+    `- Only these style properties: ${[...STYLE_PROPS].join(", ")}.`,
+    `- No web address anywhere: no http links, fonts or pictures from the internet.`,
+    `- Limits: each style="" at most ${LIMITS.styleChars} characters, at most ${LIMITS.nodes} elements, nested at most ${LIMITS.depth} deep, the whole snippet at most ${LIMITS.sourceBytes / 1024} KB.`,
+    ``,
+    `3. COLOURS: THE COVER FOLLOWS THE BRAND THEME`,
+    `- Use these four colours: var(--ink) for text, var(--paper) for the background, var(--accent) for highlights, var(--secondary) for a second colour. They change with the brand's theme.`,
+    `- Every text colour, the cover's background and any background behind text must use these four. Gradients made of them are fine, e.g. linear-gradient(160deg, var(--paper), var(--accent)). Fixed colours there (like #1561F0, rgb(), rgba() or white) are refused.`,
+    `- Only icons, lines and shapes that sit behind no text may use their own colours.`,
+    `- Text must contrast at least 4.5:1 with what is behind it, on every colour theme: dark text on var(--paper), or var(--paper) text on var(--ink).`,
+    ``,
+    `4. TEXT: ONLY FROM SLOTS`,
+    `- Required: {{headline}} (exactly once) and {{author_name}}.`,
+    `- Optional:`,
+    ...optional,
+    `- Put each slot ALONE in its own element marked data-fit, like: <div data-fit data-max-lines="3" data-min-size="${MIN_SIZE.headline}" data-max-size="120" style="width:900px;font-family:'Bricolage Grotesque';font-weight:800;color:var(--ink)">{{headline}}</div>`,
+    `- That element needs a width in px, a font-family and a theme colour. It must not have padding, a border, letter-spacing or text-transform; put padding and borders on a wrapper element around it.`,
+    `- data-max-lines is a whole number from 1 to ${MAX_LINES}. data-min-size and data-max-size are whole px up to ${MAX_SIZE}; data-min-size is at least ${MIN_SIZE.headline} for the headline and ${MIN_SIZE.other} for other text, and never bigger than data-max-size. line-height, if set, is a plain number from 0.8 to 2.`,
+    `- Text shrinks between the two sizes to fit. Make each box big enough for long text: the headline box must fit "${SAMPLE_POSTS.long.headline}" at data-min-size within data-max-lines.`,
+    `- Wrap every optional slot's element in a parent with data-if="slot_name", e.g. <div data-if="kicker" style="display:flex">...</div>, so nothing shows when it is empty.`,
+    `- To highlight one headline word, add data-emphasis-color="accent" (or ink, paper, secondary) to the headline element; data-emphasis-font="Instrument Serif" also sets that word in italic. Do not write {{emphasis}} yourself.`,
+    `- Fixed words written into the design (like "Book now") are allowed, at most ${LIMITS.textChars} characters per element. They appear on every cover and must use a theme colour too.`,
+    ``,
+    `5. PICTURES AND ICONS`,
+    `- The author's headshot: <img src="{{photo}}" width="200" height="200">. A transparent cut-out of the author: <img src="{{cutout}}" width="600" height="800">. Wrap each in a parent with data-if="photo" or data-if="cutout". width and height are whole px from 1 to 2000, and <img> holds nothing inside.`,
+    `- Any other picture must be an inline data:image/png, jpeg or webp, at most ${LIMITS.inlineImageBytes / 1024} KB for all of them together. In CSS, url() is allowed only in background-image with such an inline picture.`,
+    `- Inline <svg> icons and shapes are fine. SVG holds no text and no slots, and url() inside SVG may only point at a gradient in the same SVG, like url(#g1).`,
+    ``,
+    `6. FONTS`,
+    `- Only: ${FONTS.join(", ")}. Write them like font-family:'Space Grotesk'.`,
+    ``,
+    `7. EXAMPLE THAT PASSES`,
+    PROMPT_EXAMPLE,
+    ``,
+    `Return only the HTML, with no explanation.`,
   ].join("\n");
 }
