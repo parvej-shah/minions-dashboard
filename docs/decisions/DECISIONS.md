@@ -810,12 +810,19 @@ as JPEGs, which cost far less than the PNGs did.
 **Alternatives considered:** Following each viewer's device timezone (rejected for now: one shared clock is simpler while all users are on Bangladesh time).
 **Status:** active
 
+## 2026-11-19 — The launch is a series of three films
+
+**Decision:** Post Studio launches with three music-only films, one a week, each in its own style and with its own music: "Write" (the whole product: one thing from your work becomes a post in your words, with a cover, and nothing goes out until you say yes), "Covers" (the built-in layouts), and "Yours" (bring your own design). Each film comes in 16:9, 4:5 and 9:16. All three end on the same card (logo, "Post Studio", one button, minions.getminions.ai), a "Next: …" tag and one shared signature sound. Length varies with what a film has to explain. Lines on screen are real app copy, and no customer numbers or results are claimed. Scripts: minions-marketing/post-studio-launch/SCRIPTS.md.
+**Why:** The user wanted the series to open with what the product is, before its features. Explaining it clearly, the way Apple, Google and Stripe launch films do, matters more than a fixed length. A different style per film keeps a weekly series fresh, and the shared ending keeps it recognisable.
+**Alternatives considered:** Two films with covers first (superseded: viewers would see a feature before knowing the product); one style for all three (rejected: three weeks of the same look tires the feed).
+**Status:** active
+
 ## 2026-11-19 — The app launches as "Minions Post Studio", in two films
 
 **Decision:** The product is named Minions Post Studio in marketing, with minions.getminions.ai as the link for now. It launches with two short Apple-style films, music only: film 1 presents the built-in cover layouts as the new feature, and film 2 presents bringing your own design as the answer to users who want their own look.
 **Why:** Telling it as a sequence makes the custom designs read as listening to users, not as a fix for weak layouts.
 **Alternatives considered:** One film covering both features; it would have had to belittle the built-in layouts to make the custom designs land.
-**Status:** active
+**Status:** superseded 2026-11-19 by "The launch is a series of three films"
 
 ## 2026-11-19 — Users can bring their own cover designs
 

@@ -105,4 +105,6 @@
 | 100 | Pick your own design in the post editor | CLAUDE | DONE (pushed 6f784a8, clicked live) | tasks/100.md |
 | 101 | Cover font fallback | CLAUDE | DONE (pushed 8412f34, checked live) | tasks/101.md |
 | 102 | Launch film 1: "Covers" (Post Studio) | CLAUDE | DONE (first cut rendered 16:9 + 4:5; awaiting review) | tasks/102.md |
-| 103 | Launch film 2: "Yours" (bring your own design) | CLAUDE | TODO | tasks/103.md |
+| 103 | Launch film "Write" (the product; series film 1) | CLAUDE | TODO (script drafted in minions-marketing/post-studio-launch/SCRIPTS.md; awaiting OK) | tasks/103.md |
+| 104 | "Covers" 9:16 cut + "Next" tag + signature sound | CLAUDE | TODO | tasks/104.md |
+| 105 | Launch film "Yours" (bring your own design; series film 3) | CLAUDE | TODO (script drafted) | tasks/105.md |
