@@ -830,3 +830,10 @@ as JPEGs, which cost far less than the PNGs did.
 **Why:** the user wants every cover to follow the brand theme, so changing the theme recolours custom designs too and the highlighted word always matches. A design tested with fixed blues kept its blues on an Ivory workspace and showed an orange highlight word, which looked broken.
 **Alternatives considered:** allowing fixed colours as long as text is readable (the old rule; designs drifted from the brand); recolouring fixed colours automatically (guesswork, unpredictable results).
 **Status:** active.
+
+## 2026-11-19 — Custom design previews show the brand's own photo and cut-out
+
+**Decision:** When someone checks a custom design, the preview draws the brand's own headshot and cut-out from the Brand page. If the brand has none, a grey figure stands in, and one line says to add them. A design must say how each picture fits (object-fit:cover for the headshot, object-fit:contain for the cut-out), or it is refused with a plain reason. The instructions explain what each picture is and where it goes, and that the cover must look complete without them.
+**Why:** the old preview drew a grey box where the person goes, so neither the user nor their design agent could judge the layout, and a box without a fit rule stretched the person on real covers.
+**Alternatives considered:** keeping the grey box (unjudgeable); fitting pictures automatically whatever the design says (hides the problem from the designer).
+**Status:** active.

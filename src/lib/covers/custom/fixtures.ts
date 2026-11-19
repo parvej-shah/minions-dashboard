@@ -10,7 +10,7 @@ export const GOOD_TEMPLATE = `<div data-cover-template="1" data-name="Soft Blue"
     </div>
   </div>
   <div style="display:flex;align-items:center">
-    <div data-if="photo" style="display:flex;margin-right:24px"><img src="{{photo}}" width="120" height="120" style="border-radius:999px" /></div>
+    <div data-if="photo" style="display:flex;margin-right:24px"><img src="{{photo}}" width="120" height="120" style="object-fit:cover;border-radius:999px" /></div>
     <div style="display:flex;flex-direction:column">
       <div data-fit data-max-lines="1" data-min-size="30" data-max-size="40" style="width:700px;font-family:'Plus Jakarta Sans';font-weight:600;color:var(--ink)">{{author_name}}</div>
       <div data-if="author_role" style="display:flex">

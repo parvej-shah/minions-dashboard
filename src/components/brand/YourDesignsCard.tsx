@@ -24,7 +24,15 @@ interface Preview {
   name: "short" | "long" | "bare";
   svg: string;
 }
-type Checked = { ok: true; name: string; previews: Preview[] } | { ok: false; errors: string[] };
+type StandIn = "photo" | "cutout";
+type Checked = { ok: true; name: string; previews: Preview[]; stand_ins: StandIn[] } | { ok: false; errors: string[] };
+
+/** The one line under the preview when a grey figure stands in for a picture the brand has not added. */
+function standInNote(slots: StandIn[]): string | null {
+  if (!slots.length) return null;
+  const what = slots.length === 2 ? "your photo and cut-out" : slots[0] === "photo" ? "your photo" : "your cut-out";
+  return `A grey figure stands in for ${what}. Add ${slots.length === 2 ? "them" : "it"} on the Brand page to see your own.`;
+}
 
 /** The server draws a design as SVG; shown through <img>, so nothing in it can run in the page. */
 const svgSrc = (svg: string) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
@@ -137,7 +145,7 @@ function AddDesign({ isOpen, onClose, onSaved }: { isOpen: boolean; onClose: () 
   const [checking, setChecking] = useState(false);
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState<string[] | null>(null);
-  const [passed, setPassed] = useState<{ name: string; previews: Preview[] } | null>(null);
+  const [passed, setPassed] = useState<{ name: string; previews: Preview[]; standIns: StandIn[] } | null>(null);
   const [sample, setSample] = useState<Preview["name"]>("short");
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -179,7 +187,7 @@ function AddDesign({ isOpen, onClose, onSaved }: { isOpen: boolean; onClose: () 
     try {
       const r = await apiClient.post<Checked>("/api/cover-templates/check", { html });
       if (r.ok) {
-        setPassed({ name: r.name, previews: r.previews });
+        setPassed({ name: r.name, previews: r.previews, standIns: r.stand_ins ?? [] });
         setSample("short");
         setStep(2);
       } else setFailed(r.errors);
@@ -208,6 +216,7 @@ function AddDesign({ isOpen, onClose, onSaved }: { isOpen: boolean; onClose: () 
   };
 
   const shown = passed?.previews.find((p) => p.name === sample) ?? passed?.previews[0];
+  const note = passed && sample !== "bare" ? standInNote(passed.standIns) : null;
   const icon = "h-4 w-4";
 
   return (
@@ -303,6 +312,7 @@ function AddDesign({ isOpen, onClose, onSaved }: { isOpen: boolean; onClose: () 
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={svgSrc(shown.svg)} alt={`${passed.name} with a ${SAMPLE_LABELS[shown.name].toLowerCase()}`} className="h-full w-full object-cover" />
             </div>
+            {note && <p className={`${brandText.note} text-center`}>{note}</p>}
           </div>
         )}
 

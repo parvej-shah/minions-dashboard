@@ -5,6 +5,8 @@ import { LIMITS } from "@/lib/covers/custom/contract";
 import { parseTemplate, type Template } from "@/lib/covers/custom/parse";
 import { readOnlyMine } from "@/lib/covers/custom/rotation";
 import { HttpError } from "@/server/http/errors";
+import { coverCutout, hostedCoverPhoto } from "@/services/cover";
+import { shrinkDataUrl } from "@/services/coverPreview";
 
 /**
  * A workspace's own cover designs (docs/research/cover-template-contract-2026-11-19.md).
@@ -27,11 +29,26 @@ export interface TemplateSummary {
   created_at: string;
 }
 
-export type CheckOutcome = { ok: true; name: string; previews: Preview[] } | { ok: false; errors: string[] };
+export type CheckOutcome = { ok: true; name: string; previews: Preview[]; stand_ins: ("photo" | "cutout")[] } | { ok: false; errors: string[] };
 
 async function workspaceColours(clientId: string) {
   const p = await prisma.brandProfile.findUnique({ where: { clientId }, select: { primaryInk: true, brandCream: true, brandCoral: true, brandTeal: true } });
   return p ? { ink: p.primaryInk, paper: p.brandCream, accent: p.brandCoral, secondary: p.brandTeal } : undefined;
+}
+
+/** Wide enough for the 320 px preview at 2x, small enough to keep each preview light. */
+const PREVIEW_PICTURE_PX = 640;
+
+/**
+ * The workspace's own headshot and cut-out for the check's previews: read
+ * without copying or saving anything, and shrunk. Never used for the saved
+ * thumbnail, so no headshot is stored in a design row.
+ */
+async function workspacePictures(clientId: string): Promise<{ photo?: string; cutout?: string }> {
+  const p = await prisma.brandProfile.findUnique({ where: { clientId }, select: { primaryLogoUrl: true, coverPhotoUrl: true, coverPhotoSource: true, visualAssets: true } });
+  if (!p) return {};
+  const [photo, cutout] = await Promise.all([hostedCoverPhoto(p).catch(() => undefined), coverCutout(p).catch(() => undefined)]);
+  return { photo: await shrinkDataUrl(photo, PREVIEW_PICTURE_PX), cutout: cutout && (await shrinkDataUrl(cutout.src, PREVIEW_PICTURE_PX)) };
 }
 
 async function limited(key: string, limit: number) {
@@ -42,8 +59,8 @@ async function limited(key: string, limit: number) {
 /** The check alone: draws the previews, saves nothing. */
 export async function checkCoverTemplate(clientId: string, html: unknown): Promise<CheckOutcome> {
   await limited(`cover-template-check:${clientId}`, CHECKS_PER_MINUTE);
-  const result = await checkTemplate(html, await workspaceColours(clientId));
-  return result.ok ? { ok: true, name: result.template.name, previews: result.previews } : result;
+  const result = await checkTemplate(html, await workspaceColours(clientId), () => workspacePictures(clientId));
+  return result.ok ? { ok: true, name: result.template.name, previews: result.previews, stand_ins: result.standIns } : result;
 }
 
 /**

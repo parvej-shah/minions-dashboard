@@ -6,6 +6,7 @@ import { COVER_THEMES, themeColours } from "../themes";
 import { SAMPLE_POSTS, type ColourVar } from "./contract";
 import { templateElement, type TemplateValues } from "./element";
 import { parseTemplate, type TNode, type Template } from "./parse";
+import { pictureProblems, pictureSlots, STAND_IN } from "./pictures";
 import { themeColourProblems } from "./themeColours";
 
 /**
@@ -21,10 +22,11 @@ export interface Preview {
   /** The Satori SVG: text is drawn as shapes. Show it as an <img>, never inline in the page. */
   svg: string;
 }
-export type CheckResult = { ok: true; template: Template; previews: Preview[] } | { ok: false; errors: string[] };
+/** standIns: the picture slots the design uses that were drawn with a neutral figure because the workspace has none yet. */
+export type CheckResult = { ok: true; template: Template; previews: Preview[]; standIns: ("photo" | "cutout")[] } | { ok: false; errors: string[] };
 
-/** A 1x1 grey PNG so the picture slots are exercised without a real photo. */
-const SAMPLE_PIC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+/** The workspace's own headshot and cut-out as data URLs, read only when the design uses them. */
+export type PictureLoader = () => Promise<{ photo?: string; cutout?: string }>;
 
 const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 const TEXT_CONTRAST = 4.5;
@@ -63,16 +65,23 @@ async function draw(template: Template, values: TemplateValues, brand: CoverBran
   return satori(templateElement(template, values, brand) as never, { ...DRAW, fonts: satoriFonts(true) as never });
 }
 
-function withPictures(values: TemplateValues): TemplateValues {
-  return { ...values, photo: SAMPLE_PIC, cutout: SAMPLE_PIC };
-}
-
-export async function checkTemplate(source: unknown, workspace?: { ink?: string | null; paper?: string | null; accent?: string | null; secondary?: string | null }): Promise<CheckResult> {
+export async function checkTemplate(
+  source: unknown,
+  workspace?: { ink?: string | null; paper?: string | null; accent?: string | null; secondary?: string | null },
+  loadPictures?: PictureLoader,
+): Promise<CheckResult> {
   const parsed = parseTemplate(source);
   if (!parsed.ok) return parsed;
   const { template } = parsed;
-  const themed = themeColourProblems(template.root);
-  if (themed.length) return { ok: false, errors: themed };
+  const rules = [...themeColourProblems(template.root), ...pictureProblems(template.root)];
+  if (rules.length) return { ok: false, errors: rules };
+
+  // The previews show the workspace's own photo and cut-out; a neutral figure stands in for any it lacks.
+  const used = pictureSlots(template.slots);
+  const own = used.length && loadPictures ? await loadPictures().catch(() => ({})) : {};
+  const pics = Object.fromEntries(used.map((s) => [s, own[s as keyof typeof own] ?? STAND_IN[s]]));
+  const standIns = used.filter((s) => !own[s as keyof typeof own]);
+  const withPictures = (values: TemplateValues): TemplateValues => ({ ...values, ...pics });
 
   const mine = workspace ? coverBrand(workspace).brand : DEFAULT_COVER_BRAND;
   const brands = [mine, ...COVER_THEMES.filter((t) => t.id === "graphite" || t.id === "ivory").map((t) => {
@@ -108,5 +117,5 @@ export async function checkTemplate(source: unknown, workspace?: { ink?: string 
       return { ok: false, errors: ["The design could not be drawn on the other colour themes."] };
     }
   }
-  return { ok: true, template, previews };
+  return { ok: true, template, previews, standIns };
 }

@@ -42,14 +42,14 @@ const remember = (key: string, tile: { body: Buffer; type: TileType }) => {
  * Only the picture inside the tile shrinks: the real cover keeps the full photo.
  */
 const TILE_PHOTO_PX = 2 * TILE.width;
-async function shrinkDataUrl(dataUrl: string | undefined): Promise<string | undefined> {
+export async function shrinkDataUrl(dataUrl: string | undefined, px = TILE_PHOTO_PX): Promise<string | undefined> {
   const m = dataUrl?.match(/^data:([^;,]+);base64,(.*)$/);
   if (!m) return dataUrl;
   try {
     const img = sharp(Buffer.from(m[2], "base64"));
     const { width = 0, hasAlpha } = await img.metadata();
-    if (width <= TILE_PHOTO_PX) return dataUrl;
-    const resized = img.resize({ width: TILE_PHOTO_PX });
+    if (width <= px) return dataUrl;
+    const resized = img.resize({ width: px });
     const out = hasAlpha ? await resized.png().toBuffer() : await resized.jpeg({ quality: 82 }).toBuffer();
     return `data:image/${hasAlpha ? "png" : "jpeg"};base64,${out.toString("base64")}`;
   } catch {

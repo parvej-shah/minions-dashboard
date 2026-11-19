@@ -120,20 +120,22 @@ export const SAMPLE_POSTS = {
 } as const;
 
 /** A complete design that passes the check, shown at the end of the instructions (a test keeps it passing). */
-export const PROMPT_EXAMPLE = `<div data-cover-template="${CONTRACT_VERSION}" data-name="Clean Card" style="display:flex;flex-direction:column;justify-content:space-between;width:${TEMPLATE_SIZE.width}px;height:${TEMPLATE_SIZE.height}px;padding:88px;overflow:hidden;background-color:var(--paper)">
+export const PROMPT_EXAMPLE = `<div data-cover-template="${CONTRACT_VERSION}" data-name="Clean Card" style="display:flex;flex-direction:column;justify-content:space-between;position:relative;width:${TEMPLATE_SIZE.width}px;height:${TEMPLATE_SIZE.height}px;padding:88px;overflow:hidden;background-color:var(--paper)">
+  <div data-if="cutout" style="display:flex;position:absolute;right:0px;bottom:0px">
+    <img src="{{cutout}}" width="460" height="720" style="object-fit:contain;object-position:bottom" />
+  </div>
   <div data-if="label" style="display:flex;align-self:flex-start;padding:10px 24px;border-radius:999px;background-color:var(--ink)">
     <div data-fit data-max-lines="1" data-min-size="30" data-max-size="34" style="width:600px;font-family:'Plus Jakarta Sans';font-weight:600;color:var(--paper)">{{label}}</div>
   </div>
   <div style="display:flex;flex-direction:column">
-    <div data-fit data-max-lines="4" data-min-size="48" data-max-size="120" data-emphasis-color="accent" style="width:900px;font-family:'Bricolage Grotesque';font-weight:800;line-height:1.05;color:var(--ink)">{{headline}}</div>
+    <div data-fit data-max-lines="5" data-min-size="48" data-max-size="110" data-emphasis-color="accent" style="width:520px;font-family:'Bricolage Grotesque';font-weight:800;line-height:1.05;color:var(--ink)">{{headline}}</div>
     <div data-if="kicker" style="display:flex;margin-top:32px">
-      <div data-fit data-max-lines="2" data-min-size="30" data-max-size="40" style="width:900px;font-family:'Plus Jakarta Sans';color:var(--secondary)">{{kicker}}</div>
+      <div data-fit data-max-lines="3" data-min-size="30" data-max-size="38" style="width:540px;font-family:'Plus Jakarta Sans';color:var(--secondary)">{{kicker}}</div>
     </div>
   </div>
   <div style="display:flex;align-items:center">
-    <div data-if="photo" style="display:flex;margin-right:24px"><img src="{{photo}}" width="120" height="120" style="border-radius:999px" /></div>
-    <div data-fit data-max-lines="1" data-min-size="30" data-max-size="40" style="width:700px;font-family:'Plus Jakarta Sans';font-weight:600;color:var(--ink)">{{author_name}}</div>
-    <svg width="64" height="64" viewBox="0 0 64 64" style="margin-left:auto"><circle cx="32" cy="32" r="28" fill="var(--accent)" /></svg>
+    <div data-if="photo" style="display:flex;margin-right:24px"><img src="{{photo}}" width="96" height="96" style="object-fit:cover;border-radius:999px" /></div>
+    <div data-fit data-max-lines="2" data-min-size="30" data-max-size="38" style="width:400px;font-family:'Plus Jakarta Sans';font-weight:600;color:var(--ink)">{{author_name}}</div>
   </div>
 </div>`;
 
@@ -184,7 +186,12 @@ export function contractPrompt(): string {
     `- Fixed words written into the design (like "Book now") are allowed, at most ${LIMITS.textChars} characters per element. They appear on every cover and must use a theme colour too.`,
     ``,
     `5. PICTURES AND ICONS`,
-    `- The author's headshot: <img src="{{photo}}" width="200" height="200">. A transparent cut-out of the author: <img src="{{cutout}}" width="600" height="800">. Wrap each in a parent with data-if="photo" or data-if="cutout". width and height are whole px from 1 to 2000, and <img> holds nothing inside.`,
+    `- Two pictures of the author come from the brand's Brand page. Place each with an <img> whose src is the slot, and never draw the person yourself.`,
+    `- {{photo}} is the author's headshot: a photo of their face, usually square, with its own background. Use it small, like an avatar next to the name: <img src="{{photo}}" width="96" height="96" style="object-fit:cover;border-radius:999px">. object-fit:cover is required, so the face fills the box and is never stretched.`,
+    `- {{cutout}} is the author's cut-out: a PNG of the person with a transparent background, trimmed tight to the person, usually taller than wide (often about 3:4, up to 1100 px tall). Use it large, standing on the bottom edge of the cover: put it in an absolute wrapper like <div data-if="cutout" style="display:flex;position:absolute;right:0px;bottom:0px"> and give it <img src="{{cutout}}" width="460" height="720" style="object-fit:contain;object-position:bottom">. object-fit:contain is required, so the person is never stretched or cropped; object-position:bottom keeps their feet or shoulders on the edge.`,
+    `- Never put text over the person: leave the cut-out's box clear and make text boxes narrow enough to end before it. Do not put a fixed-colour panel behind the cut-out.`,
+    `- Both are optional: wrap each <img> in a parent with data-if="photo" or data-if="cutout". Many brands have no cut-out, and some no photo, so the cover must still look complete without them (the check draws it once without any picture).`,
+    `- width and height on <img> are whole px from 1 to 2000, and <img> holds nothing inside.`,
     `- Any other picture must be an inline data:image/png, jpeg or webp, at most ${LIMITS.inlineImageBytes / 1024} KB for all of them together. In CSS, url() is allowed only in background-image with such an inline picture.`,
     `- Inline <svg> icons and shapes are fine. SVG holds no text and no slots, and url() inside SVG may only point at a gradient in the same SVG, like url(#g1).`,
     ``,

@@ -36,6 +36,43 @@ describe("checkTemplate", () => {
     if (!r.ok) expect(r.errors.join(" ")).toMatch(/does not fit/);
   });
 
+  it("refuses a headshot that would be stretched", async () => {
+    const r = await checkTemplate(GOOD_TEMPLATE.replace("object-fit:cover;", ""));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors.join(" ")).toMatch(/headshot needs object-fit:cover/);
+  });
+
+  it("draws the workspace's own pictures when it has them", async () => {
+    const mine = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==";
+    const r = await checkTemplate(PROMPT_EXAMPLE, undefined, async () => ({ photo: mine, cutout: mine }));
+    expect(r.ok, r.ok ? "" : r.errors.join("; ")).toBe(true);
+    if (r.ok) {
+      expect(r.previews.find((p) => p.name === "long")!.svg).toContain(mine);
+      expect(r.standIns).toEqual([]);
+    }
+  });
+
+  it("draws stand-ins and names them when the workspace has no pictures", async () => {
+    const r = await checkTemplate(PROMPT_EXAMPLE, undefined, async () => ({}));
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.standIns.sort()).toEqual(["cutout", "photo"]);
+  });
+
+  it("does not read the workspace's pictures for a design that uses none", async () => {
+    let called = false;
+    const noPics = GOOD_TEMPLATE.replace(/<div data-if="photo"[^\n]*<\/div>\n/, "");
+    const r = await checkTemplate(noPics, undefined, async () => ((called = true), {}));
+    expect(r.ok, r.ok ? "" : r.errors.join("; ")).toBe(true);
+    expect(called).toBe(false);
+    if (r.ok) expect(r.standIns).toEqual([]);
+  });
+
+  it("the instructions explain the photo and the cut-out", () => {
+    const p = contractPrompt();
+    for (const rule of ["{{photo}}", "{{cutout}}", "object-fit:contain", "object-position:bottom", "object-fit:cover", "transparent background", "taller than", "bottom edge", "over the person", "without", "Brand page"]) expect(p, rule).toContain(rule);
+    expect(PROMPT_EXAMPLE).toContain("{{cutout}}");
+  });
+
   it("the example in the instructions passes the check", async () => {
     const r = await checkTemplate(PROMPT_EXAMPLE);
     expect(r.ok, r.ok ? "" : r.errors.join("; ")).toBe(true);
