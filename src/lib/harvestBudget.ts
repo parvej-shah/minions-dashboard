@@ -11,7 +11,7 @@ import { prisma } from "@/lib/prisma";
  * fan-out plus manual runs and onboarding, or a new tenant's first harvest is
  * refused after the nightly runs use the day.
  *
- * DRAFT is capped lower because it is the expensive half of the pipeline: two
+ * DRAFT is the expensive half of the pipeline (no working cap since 2026-11-20): two
  * writer calls, a claims-gate pass, social variants, and a hero image generated
  * in its own workflow. Harvesting only produces ideas; drafting is what turns
  * them into billable model time.
@@ -22,7 +22,8 @@ import { prisma } from "@/lib/prisma";
  * stay under their own limit while the system as a whole ran N times over.
  */
 export const DAILY_HARVEST_LIMIT = 50;
-export const DAILY_DRAFT_LIMIT = 20;
+// No working cap since 2026-11-20 (a new workspace drafts three posts at once); this only stops a runaway loop.
+export const DAILY_DRAFT_LIMIT = 1000;
 
 export type RunType = "HARVEST" | "DRAFT";
 

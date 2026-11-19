@@ -58,11 +58,10 @@ describe("budget window", () => {
 });
 
 describe("daily draft budget", () => {
-  it("caps drafting below harvesting", () => {
-    // Drafting is the expensive half: two writer calls, a claims gate, social
-    // variants and a hero image. Harvesting only produces ideas.
-    expect(DAILY_DRAFT_LIMIT).toBe(20);
-    expect(DAILY_DRAFT_LIMIT).toBeLessThan(DAILY_HARVEST_LIMIT);
+  it("has no working cap on drafting, only a runaway guard", () => {
+    // 2026-11-20: a new workspace drafts three posts at once, so the old 20/day
+    // cap no longer fits. The ceiling is only there to stop a loop.
+    expect(DAILY_DRAFT_LIMIT).toBeGreaterThanOrEqual(500);
   });
 
   it("refuses the draft after the limit", () => {

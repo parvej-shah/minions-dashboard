@@ -865,3 +865,10 @@ as JPEGs, which cost far less than the PNGs did.
 **Why:** with a wide font like Unbounded, switching a draft to Headline failed outright ("No cover copy fits") although the same words fit in the default font.
 **Alternatives considered:** shortening the headline first (the reviewer's words matter more than the font); refusing the layout (leaves the reviewer stuck).
 **Status:** active.
+
+## 2026-11-20 — A new workspace opens with three posts; Autopilot comes after a week and needs LinkedIn
+
+**Decision:** A new workspace gets its first post plus two more drafted in the background from other angles, so the dashboard opens with three to review. New workspaces start on Review first; Autopilot is offered after the first week and only works while LinkedIn is connected and healthy. With Autopilot on, tomorrow's posts are drafted ahead and scheduled into their slots without review (a post below the bar still waits for review). There is no daily drafting cap.
+**Why:** one post on day one looks empty and a missed slot looks broken; trust comes from seeing real posts before letting any go out unseen, and an Autopilot with no LinkedIn would look busy while building nothing.
+**Alternatives considered:** Autopilot from day one (posts go out before the user has seen what Minions writes); Autopilot to the blog alone (not the product's goal: LinkedIn authority); a separate small drafting budget for the starter set (no cap needed now).
+**Status:** active. Starter set built (task 107); draft-ahead (108) and LinkedIn check (109) follow.

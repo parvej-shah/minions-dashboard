@@ -9,7 +9,9 @@ import { getTenantBlogDomain } from "@/lib/tenantDomain";
 import { MEMORY_KIND_SOURCE } from "@/constants/sourceMix";
 import { FIRST_POST_TAG } from "@/constants/firstPost";
 import { defaultByline } from "@/services/cover";
+import { background } from "@/lib/background";
 import { startDraftRun } from "@/services/drafting";
+import { startStarterSet } from "@/services/starterSet";
 import { createIdeaWithNextId } from "@/services/ideas";
 import { type JsonObject } from "@/server/http/body";
 import { badRequest, conflict, HttpError } from "@/server/http/errors";
@@ -123,5 +125,8 @@ export async function startFirstPost(clientId: string, body: JsonObject) {
 
   const run = await startDraftRun(clientId, idea.id, { triggerSource: TRIGGER_SOURCE });
   if (!run.result.success) throw new HttpError(502, "Drafting could not start right now. Please try again in a minute.");
+  // Two more posts from other angles, after the response: the dashboard opens with three.
+  const firstIdeaId = idea.id;
+  background(() => startStarterSet(clientId, firstIdeaId));
   return { idea_id: idea.id, run_id: run.runId };
 }
