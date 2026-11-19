@@ -810,6 +810,13 @@ as JPEGs, which cost far less than the PNGs did.
 **Alternatives considered:** Following each viewer's device timezone (rejected for now: one shared clock is simpler while all users are on Bangladesh time).
 **Status:** active
 
+## 2026-11-19 — The app launches as "Minions Post Studio", in two films
+
+**Decision:** The product is named Minions Post Studio in marketing, with minions.getminions.ai as the link for now. It launches with two short Apple-style films, music only: film 1 presents the built-in cover layouts as the new feature, and film 2 presents bringing your own design as the answer to users who want their own look.
+**Why:** Telling it as a sequence makes the custom designs read as listening to users, not as a fix for weak layouts.
+**Alternatives considered:** One film covering both features; it would have had to belittle the built-in layouts to make the custom designs land.
+**Status:** active
+
 ## 2026-11-19 — Users can bring their own cover designs
 
 **Decision:** A workspace can paste its own cover design (HTML in a fixed, documented format). It is checked first and saved only if it fully matches the contract and is readable; otherwise nothing is saved and the user sees plain-word reasons. Designs belong to the workspace, up to 10. They alternate with the built-in designs, never two custom covers in a row; a "Use only my designs" switch turns the built-ins off. For carousels, the custom design is used on page 1 only.
