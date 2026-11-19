@@ -11,6 +11,24 @@
         ],
         "createdAt": "2026-11-19T10:14:19.177Z",
         "reason": "Claude: test fixture for the cover renderer; Plus Jakarta Sans is the bundled cover body font (contract FONTS), not a UI font choice"
+      },
+      {
+        "rule": "overused-font",
+        "value": "plus jakarta sans",
+        "files": [
+          "src/lib/covers/custom/contract.ts"
+        ],
+        "createdAt": "2026-11-19T10:22:39.591Z",
+        "reason": "Claude: contract.ts lists the bundled cover fonts for the design instructions and example; these are cover-renderer data, not app UI font choices"
+      },
+      {
+        "rule": "overused-font",
+        "value": "space grotesk",
+        "files": [
+          "src/lib/covers/custom/contract.ts"
+        ],
+        "createdAt": "2026-11-19T10:22:39.614Z",
+        "reason": "Claude: contract.ts lists the bundled cover fonts for the design instructions and example; these are cover-renderer data, not app UI font choices"
       }
     ]
   }
