@@ -170,8 +170,14 @@ function AddDesign({ isOpen, onClose, onSaved }: { isOpen: boolean; onClose: () 
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add a design" maxWidthClass="max-w-2xl" variant="sheet">
-      <div className="space-y-5">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={<h3 className="text-[21px] font-semibold leading-snug tracking-tight text-ink">Add a design</h3>}
+      maxWidthClass="max-w-2xl"
+      variant="sheet"
+    >
+      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain p-6 pt-3 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
         <p className={brandText.line}>Ask any AI or designer to make it with our instructions, then paste the result here.</p>
         <Button variant="secondary" size="sm" onClick={copy} icon={copied ? <Check className="h-4 w-4" aria-hidden="true" /> : <Copy className="h-4 w-4" aria-hidden="true" />}>
           {copied ? "Copied" : "Copy the instructions"}
@@ -180,11 +186,11 @@ function AddDesign({ isOpen, onClose, onSaved }: { isOpen: boolean; onClose: () 
           data-no-dictation
           value={html}
           onChange={(e) => edit(e.target.value)}
-          rows={9}
+          rows={8}
           spellCheck={false}
           placeholder="Paste the design's HTML here"
           aria-label="Design HTML"
-          className={`${inputClass} font-mono text-[13px]`}
+          className={`${inputClass} block resize-none font-mono text-sm leading-relaxed`}
         />
         {error && <ErrorLine text={error} />}
         {result && !result.ok && (
@@ -208,7 +214,8 @@ function AddDesign({ isOpen, onClose, onSaved }: { isOpen: boolean; onClose: () 
             </div>
           </div>
         )}
-        <div className="flex justify-end gap-3">
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Button variant="secondary" onClick={onClose}>Cancel</Button>
           {result?.ok ? (
             <Button loading={saving} onClick={save}>Save design</Button>
           ) : (
