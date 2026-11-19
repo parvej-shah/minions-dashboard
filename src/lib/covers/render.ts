@@ -1,14 +1,16 @@
 import { ImageResponse } from "next/og";
 import satori from "satori";
-import { metricsFor, satoriFonts, type Face } from "./fonts";
+import { metricsFor, satoriFonts, withCoverFont, type Face } from "./fonts";
 import { COVER_SIZE, coverElement, type CoverSpec } from "./layouts";
 
 /** Renders a cover to PNG. Throws CoverFitError when the copy cannot fit. */
-export async function renderCoverPng(spec: CoverSpec): Promise<Buffer> {
-  // coverElement runs every fit, so a CoverFitError throws here, before any drawing.
-  const element = coverElement(spec);
-  const res = new ImageResponse(element, { ...COVER_SIZE, fonts: satoriFonts() });
-  return Buffer.from(await res.arrayBuffer());
+export function renderCoverPng(spec: CoverSpec): Promise<Buffer> {
+  return withCoverFont(spec.font, async () => {
+    // coverElement runs every fit, so a CoverFitError throws here, before any drawing.
+    const element = coverElement(spec);
+    const res = new ImageResponse(element, { ...COVER_SIZE, fonts: satoriFonts(spec.layout === "CUSTOM") });
+    return Buffer.from(await res.arrayBuffer());
+  });
 }
 
 /**
@@ -20,9 +22,8 @@ export async function renderCoverPng(spec: CoverSpec): Promise<Buffer> {
  * next/og it fetches no fallback letters; check needsFallbackGlyphs first.
  * Throws CoverFitError when the copy cannot fit.
  */
-export async function renderCoverSvg(spec: CoverSpec): Promise<string> {
-  const element = coverElement(spec);
-  return satori(element, { ...COVER_SIZE, fonts: satoriFonts() });
+export function renderCoverSvg(spec: CoverSpec): Promise<string> {
+  return withCoverFont(spec.font, () => satori(coverElement(spec), { ...COVER_SIZE, fonts: satoriFonts(spec.layout === "CUSTOM") }));
 }
 
 const FACES: Face[] = ["serif", "serifItalic", "sans", "sansSemi", "sansBold", "italic"];
@@ -54,6 +55,10 @@ function coverText(spec: CoverSpec): string {
  * satori SVG would leave them out, so those tiles take the raster path.
  */
 export function needsFallbackGlyphs(spec: CoverSpec): boolean {
+  return withCoverFont(spec.font, () => lacksGlyph(spec));
+}
+
+function lacksGlyph(spec: CoverSpec): boolean {
   for (const ch of new Set(coverText(spec))) {
     const cp = ch.codePointAt(0)!;
     if (/\s/.test(ch)) continue;

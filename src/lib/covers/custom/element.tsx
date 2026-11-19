@@ -1,6 +1,6 @@
 import { createElement, type ReactNode } from "react";
 import { balance, fit, type Fitted } from "../fit";
-import { faceStyle, type Face } from "../fonts";
+import { COVER_FONTS, COVER_FONT_IDS, faceStyle, type Face } from "../fonts";
 import { CoverFitError, type CoverBrand } from "../layouts";
 import { COLOUR_VARS, SLOTS, type SlotName } from "./contract";
 import type { FitSpec, TChild, TNode, Template } from "./parse";
@@ -20,7 +20,9 @@ function faceOf(style: TNode["style"]): Face {
   const family = String(style.fontFamily ?? "").split(",")[0].trim().replace(/^["']|["']$/g, "");
   const weight = Number(style.fontWeight ?? 400);
   if (family === "Instrument Serif") return "italic";
-  if (family === "Bricolage Grotesque") return weight >= 700 ? "serif" : "serifItalic";
+  // A design names its font outright: never the workspace's cover font.
+  const id = COVER_FONT_IDS.find((f) => COVER_FONTS[f].name === family);
+  if (id) return `${id}.${weight >= 700 ? "bold" : "semi"}`;
   return weight >= 800 ? "sansBold" : weight >= 600 ? "sansSemi" : "sans";
 }
 

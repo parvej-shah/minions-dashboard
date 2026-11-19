@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Copy, Plus } from "lucide-react";
+import { Check, Copy, Plus, Upload } from "lucide-react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { contractPrompt } from "@/lib/covers/custom/contract";
-import { Button } from "@/components/ui/Button";
+import { Button, buttonStyles } from "@/components/ui/Button";
+import Segmented from "@/components/ui/Segmented";
+import { readDesignFile } from "@/lib/covers/custom/importFile";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import ErrorLine from "@/components/ui/ErrorLine";
 import { inputClass } from "@/components/ui/fieldStyles";
@@ -121,17 +123,35 @@ export default function YourDesignsCard() {
   );
 }
 
+const SAMPLE_LABELS: Record<Preview["name"], string> = { short: "Short post", long: "Long post", bare: "Only the basics" };
+const STEPS = [
+  { title: "Get the instructions", line: "Give these to Claude, ChatGPT or your designer. They send back one HTML file." },
+  { title: "Add your design", line: "Paste the HTML, or import the file." },
+  { title: "Check the preview", line: "This is your design with three different posts." },
+] as const;
+
 function AddDesign({ isOpen, onClose, onSaved }: { isOpen: boolean; onClose: () => void; onSaved: () => void }) {
+  const [step, setStep] = useState<0 | 1 | 2>(0);
   const [html, setHtml] = useState("");
+  const [fileName, setFileName] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [result, setResult] = useState<Checked | null>(null);
+  const [failed, setFailed] = useState<string[] | null>(null);
+  const [passed, setPassed] = useState<{ name: string; previews: Preview[] } | null>(null);
+  const [sample, setSample] = useState<Preview["name"]>("short");
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
+  const close = () => {
+    // A half-done design stays in the box for next time; the flow starts where it can.
+    setStep(html.trim() ? 1 : 0);
+    setError(null);
+    onClose();
+  };
   const edit = (v: string) => {
     setHtml(v);
-    setResult(null);
+    setFailed(null);
+    setPassed(null);
     setError(null);
   };
   const copy = async () => {
@@ -143,11 +163,26 @@ function AddDesign({ isOpen, onClose, onSaved }: { isOpen: boolean; onClose: () 
       setError("Couldn't copy. Select the text and copy it yourself.");
     }
   };
+  const importFile = async (file: File | undefined) => {
+    if (!file) return;
+    const read = await readDesignFile(file);
+    if (!read.ok) {
+      setError(read.error);
+      return;
+    }
+    edit(read.text);
+    setFileName(file.name);
+  };
   const check = async () => {
     setChecking(true);
     setError(null);
     try {
-      setResult(await apiClient.post<Checked>("/api/cover-templates/check", { html }));
+      const r = await apiClient.post<Checked>("/api/cover-templates/check", { html });
+      if (r.ok) {
+        setPassed({ name: r.name, previews: r.previews });
+        setSample("short");
+        setStep(2);
+      } else setFailed(r.errors);
     } catch (e) {
       setError(toErrorMessage(e, "Couldn't check the design."));
     } finally {
@@ -158,9 +193,12 @@ function AddDesign({ isOpen, onClose, onSaved }: { isOpen: boolean; onClose: () 
     setSaving(true);
     setError(null);
     try {
+      // The same text that passed the check; the server checks it again.
       await apiClient.post("/api/cover-templates", { html });
       setHtml("");
-      setResult(null);
+      setFileName(null);
+      setPassed(null);
+      setStep(0);
       onSaved();
     } catch (e) {
       setError(toErrorMessage(e, "Couldn't save the design."));
@@ -169,59 +207,117 @@ function AddDesign({ isOpen, onClose, onSaved }: { isOpen: boolean; onClose: () 
     }
   };
 
+  const shown = passed?.previews.find((p) => p.name === sample) ?? passed?.previews[0];
+  const icon = "h-4 w-4";
+
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
-      title={<h3 className="text-[21px] font-semibold leading-snug tracking-tight text-ink">Add a design</h3>}
+      onClose={close}
+      title={
+        <div className="space-y-3">
+          <ol className="grid w-40 grid-cols-3 gap-1.5" aria-label={`Step ${step + 1} of 3`}>
+            {STEPS.map((_, i) => (
+              <li key={i} className={`h-1 rounded-full transition-colors duration-300 ${i <= step ? "bg-brand" : "bg-line"}`} />
+            ))}
+          </ol>
+          <div className="space-y-1">
+            <h3 className="text-[21px] font-semibold leading-snug tracking-tight text-ink">{STEPS[step].title}</h3>
+            <p className={brandText.line}>{STEPS[step].line}</p>
+          </div>
+        </div>
+      }
       maxWidthClass="max-w-2xl"
       variant="sheet"
     >
-      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain p-6 pt-3 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
-        <p className={brandText.line}>Ask any AI or designer to make it with our instructions, then paste the result here.</p>
-        <Button variant="secondary" size="sm" onClick={copy} icon={copied ? <Check className="h-4 w-4" aria-hidden="true" /> : <Copy className="h-4 w-4" aria-hidden="true" />}>
-          {copied ? "Copied" : "Copy the instructions"}
-        </Button>
-        <textarea
-          data-no-dictation
-          value={html}
-          onChange={(e) => edit(e.target.value)}
-          rows={8}
-          spellCheck={false}
-          placeholder="Paste the design's HTML here"
-          aria-label="Design HTML"
-          className={`${inputClass} block resize-none font-mono text-sm leading-relaxed`}
-        />
-        {error && <ErrorLine text={error} />}
-        {result && !result.ok && (
-          <div role="alert" className="space-y-2 rounded-2xl bg-surface-2 p-4">
-            <p className="text-[15px] font-medium text-ink">This design can&apos;t be saved yet</p>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-muted">
-              {result.errors.map((m) => <li key={m}>{m}</li>)}
-            </ul>
+      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain p-6 pt-5">
+        {step === 0 && (
+          <div className="space-y-3">
+            <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-2xl bg-surface-2 p-4 font-sans text-sm leading-relaxed text-muted">{contractPrompt()}</pre>
+            <Button variant="secondary" size="sm" onClick={copy} icon={copied ? <Check className={icon} aria-hidden="true" /> : <Copy className={icon} aria-hidden="true" />}>
+              {copied ? "Copied" : "Copy the instructions"}
+            </Button>
           </div>
         )}
-        {result?.ok && (
+
+        {step === 1 && (
           <div className="space-y-3">
-            <p className="text-[15px] text-ink">{result.name} follows the contract. Here it is with three different posts.</p>
-            <div className="grid grid-cols-3 gap-3">
-              {result.previews.map((p) => (
-                <div key={p.name} className="aspect-[4/5] overflow-hidden rounded-xl border border-line">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={svgSrc(p.svg)} alt={`${result.name}, ${p.name} post`} className="h-full w-full object-cover" />
-                </div>
-              ))}
+            <div className="flex flex-wrap items-center gap-3">
+              <label className={`${buttonStyles({ variant: "secondary", size: "sm" })} cursor-pointer`}>
+                <Upload className={icon} aria-hidden="true" />
+                Import a file
+                <input
+                  type="file"
+                  accept=".html,.htm,.txt,text/html,text/plain"
+                  className="sr-only"
+                  onChange={(e) => {
+                    void importFile(e.target.files?.[0]);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              {fileName && <span className="min-w-0 truncate text-sm text-muted">{fileName}</span>}
+            </div>
+            <textarea
+              data-no-dictation
+              value={html}
+              onChange={(e) => {
+                edit(e.target.value);
+                setFileName(null);
+              }}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                const f = e.dataTransfer.files?.[0];
+                if (!f) return;
+                e.preventDefault();
+                void importFile(f);
+              }}
+              rows={10}
+              spellCheck={false}
+              placeholder="Paste the HTML here, or drop the file"
+              aria-label="Design HTML"
+              className={`${inputClass} block resize-none font-mono text-sm leading-relaxed`}
+            />
+            {failed && (
+              <div role="alert" className="space-y-2 rounded-2xl bg-danger/5 p-4">
+                <p className="text-[15px] font-medium text-ink">This design can&apos;t be saved yet</p>
+                <ul className="list-disc space-y-1 pl-5 text-sm text-muted">
+                  {failed.map((m) => <li key={m}>{m}</li>)}
+                </ul>
+                <p className={brandText.note}>Send these lines back to whoever made it, then paste the new version.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {step === 2 && passed && shown && (
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="flex items-center gap-2 text-[15px] text-ink">
+                <Check className="h-4 w-4 text-success" aria-hidden="true" />
+                {passed.name} passed every check.
+              </p>
+              <Segmented label="Sample post" value={sample} onChange={setSample} options={passed.previews.map((p) => ({ id: p.name, label: SAMPLE_LABELS[p.name] }))} />
+            </div>
+            <div className="mx-auto aspect-[4/5] w-full max-w-[320px] overflow-hidden rounded-2xl border border-line bg-surface-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={svgSrc(shown.svg)} alt={`${passed.name} with a ${SAMPLE_LABELS[shown.name].toLowerCase()}`} className="h-full w-full object-cover" />
             </div>
           </div>
         )}
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button variant="secondary" onClick={onClose}>Cancel</Button>
-          {result?.ok ? (
-            <Button loading={saving} onClick={save}>Save design</Button>
-          ) : (
-            <Button loading={checking} disabled={!html.trim()} onClick={check}>Check my design</Button>
-          )}
-        </div>
+
+        {error && <ErrorLine text={error} />}
+      </div>
+
+      <div className="flex flex-col-reverse gap-2 border-t border-line/60 p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-4 sm:flex-row sm:justify-end">
+        {step === 0 ? (
+          <Button variant="secondary" onClick={close}>Cancel</Button>
+        ) : (
+          <Button variant="secondary" onClick={() => setStep(step === 2 ? 1 : 0)}>Back</Button>
+        )}
+        {step === 0 && <Button onClick={() => setStep(1)}>I have my design</Button>}
+        {step === 1 && <Button loading={checking} disabled={!html.trim()} onClick={check}>Check my design</Button>}
+        {step === 2 && <Button loading={saving} onClick={save}>Save design</Button>}
       </div>
     </Modal>
   );

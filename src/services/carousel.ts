@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { readCoverFont, type CoverFontId } from "@/lib/covers/coverFonts";
 import { Prisma } from "@prisma/client";
 import { chat as qwenChat } from "@/lib/ai/qwen";
 import { withCostMeter } from "@/lib/ai/cost";
@@ -70,7 +71,7 @@ interface Context {
   stored: StoredCarousel | null;
   input: CarouselInput;
   sources: PlanSources;
-  base: { author: CoverSpec["author"]; brand: CoverSpec["brand"]; art?: CoverSpec["art"]; cover?: CoverSpec };
+  base: { author: CoverSpec["author"]; brand: CoverSpec["brand"]; art?: CoverSpec["art"]; cover?: CoverSpec; font?: CoverFontId };
   /** The post's own cover headline: the carousel opens with the same title. */
   postCover: { headline: string; emphasis?: string } | null;
   body: string;
@@ -149,7 +150,7 @@ async function loadContext(assetId: string): Promise<Context | { error: string }
     stored: (asset.carouselSpec ?? null) as StoredCarousel | null,
     input,
     sources,
-    base: { author, brand, art: cover?.art, ...(postCover ? { cover: postCover } : {}) },
+    base: { author, brand, art: cover?.art, font: readCoverFont(profile.visualAssets), ...(postCover ? { cover: postCover } : {}) },
     postCover: cover?.headline?.trim() && words(cover.headline) >= COVER_HEADLINE_WORDS.min && words(cover.headline) <= COVER_HEADLINE_WORDS.max ? { headline: cover.headline.trim(), emphasis: cover.emphasis } : null,
     body,
   };

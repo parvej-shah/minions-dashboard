@@ -1,14 +1,16 @@
 import { ImageResponse } from "next/og";
 import { PDFDocument } from "pdf-lib";
 import sharp from "sharp";
-import { satoriFonts } from "@/lib/covers/fonts";
+import { satoriFonts, withCoverFont } from "@/lib/covers/fonts";
 import { SLIDE_SIZE, slideElement, type Deck } from "./slides";
 
 /** Renders slide i (0 is the cover) to PNG. Throws CoverFitError when its copy cannot fit. */
-export async function renderSlidePng(deck: Deck, i: number): Promise<Buffer> {
-  const element = slideElement(deck, i);
-  const res = new ImageResponse(element, { ...SLIDE_SIZE, fonts: satoriFonts() });
-  return Buffer.from(await res.arrayBuffer());
+export function renderSlidePng(deck: Deck, i: number): Promise<Buffer> {
+  return withCoverFont(deck.font ?? deck.cover.font, async () => {
+    const element = slideElement(deck, i);
+    const res = new ImageResponse(element, { ...SLIDE_SIZE, fonts: satoriFonts(i === 0 && deck.cover.layout === "CUSTOM") });
+    return Buffer.from(await res.arrayBuffer());
+  });
 }
 
 /** A slide PNG as a JPEG, the only image type Instagram's API takes. Same size. */

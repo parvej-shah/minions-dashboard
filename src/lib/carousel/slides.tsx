@@ -26,7 +26,7 @@ import { blockColour, mix } from "@/lib/covers/backgrounds";
 import { textWidth } from "@/lib/covers/metrics";
 import { ICONS, type IconName } from "@/lib/covers/icons";
 import { COVER_SIZE, CoverFitError, INNER, Lines, PAD, coverElement, initials, rgba, type CoverAuthor, type CoverBrand, type CoverSpec } from "@/lib/covers/layouts";
-import type { Face } from "@/lib/covers/fonts";
+import type { CoverFontId, Face } from "@/lib/covers/fonts";
 
 export const SLIDE_SIZE = COVER_SIZE;
 
@@ -89,6 +89,8 @@ export interface Deck {
   brand: CoverBrand;
   /** The frame's style. Missing on decks stored before styles: EDITORIAL. */
   style?: SlideStyle;
+  /** The cover font every page uses; missing means the cover's own, then Bricolage. */
+  font?: CoverFontId;
 }
 
 // Chrome: label row, gaps, progress track, name row.

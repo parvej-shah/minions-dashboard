@@ -8,6 +8,7 @@
 import { bannedHits } from "@/lib/drafts/banned";
 import { numbersIn, unsupportedNumbers } from "@/lib/harvest/text";
 import { CoverFitError, coverElement, type CoverSpec } from "@/lib/covers/layouts";
+import { withCoverFont, type CoverFontId } from "@/lib/covers/fonts";
 import { ICONS, type IconName } from "@/lib/covers/icons";
 import { DEFAULT_SLIDE_STYLE, SLIDE_LAYOUTS, SLIDE_STYLES, slideElement, type Deck, type Slide, type SlideLayout, type SlideStyle } from "./slides";
 
@@ -354,8 +355,14 @@ export function postCoverSpec(stored: unknown, now: { author: CoverSpec["author"
 }
 
 /** Builds the deck, and checks that every page fits. */
-export function toDeck(plan: CarouselPlan, base: { author: CoverSpec["author"]; brand: CoverSpec["brand"]; art?: CoverSpec["art"]; cover?: CoverSpec }): { deck: Deck; errors: string[] } {
-  const headlinePage: CoverSpec = { layout: "HEADLINE", headline: plan.cover.headline, emphasis: plan.cover.emphasis, kicker: plan.cover.kicker, author: base.author, brand: base.brand, art: base.art };
+export function toDeck(plan: CarouselPlan, base: { author: CoverSpec["author"]; brand: CoverSpec["brand"]; art?: CoverSpec["art"]; cover?: CoverSpec; font?: CoverFontId }): { deck: Deck; errors: string[] } {
+  // Every page is set in the post cover's font (page 1 must match the feed), else the workspace's.
+  const font = base.cover?.font ?? base.font;
+  return withCoverFont(font, () => buildDeck(plan, base, font));
+}
+
+function buildDeck(plan: CarouselPlan, base: { author: CoverSpec["author"]; brand: CoverSpec["brand"]; art?: CoverSpec["art"]; cover?: CoverSpec }, font: CoverFontId | undefined): { deck: Deck; errors: string[] } {
+  const headlinePage: CoverSpec = { layout: "HEADLINE", headline: plan.cover.headline, emphasis: plan.cover.emphasis, kicker: plan.cover.kicker, author: base.author, brand: base.brand, art: base.art, ...(font ? { font } : {}) };
   // The post's own cover, as the reviewer left it, when there is one: the feed shows page 1, so the two must match.
   // One that cannot be drawn here falls back to the headline page.
   let cover: CoverSpec = base.cover ?? headlinePage;
@@ -367,7 +374,7 @@ export function toDeck(plan: CarouselPlan, base: { author: CoverSpec["author"]; 
       cover = headlinePage;
     }
   }
-  const deck: Deck = { cover, slides: plan.slides, label: plan.label, author: base.author, brand: base.brand, style: plan.style };
+  const deck: Deck = { cover, slides: plan.slides, label: plan.label, author: base.author, brand: base.brand, style: plan.style, ...(font ? { font } : {}) };
   const errors: string[] = [];
   try {
     coverElement(cover);

@@ -11,7 +11,7 @@
  * shrink-to-fit, so fit.ts sets every size and line break first.
  */
 import type { ReactNode } from "react";
-import { faceStyle, metricsFor, type Face } from "./fonts";
+import { faceStyle, metricsFor, type CoverFontId, type Face } from "./fonts";
 import { balance, fit, type Fitted, type TextBox } from "./fit";
 import { textWidth } from "./metrics";
 import { drawArt, type ArtChoice } from "./art";
@@ -96,6 +96,8 @@ export interface CoverSpec {
   looseHeadline?: boolean;
   /** CUSTOM: which saved design and version, and (only while drawing, never stored) the parsed design itself. */
   custom?: { id: string; version: number; template?: Template };
+  /** The workspace's cover font when this cover was made (Brand page); missing means Bricolage. */
+  font?: CoverFontId;
 }
 
 export class CoverFitError extends Error {}

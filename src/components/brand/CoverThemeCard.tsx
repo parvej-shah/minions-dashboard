@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Camera, Check, Loader2, Scissors } from "lucide-react";
 import type { BrandSettings } from "@/types";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
@@ -18,6 +18,13 @@ import ErrorLine from "@/components/ui/ErrorLine";
 import { LoadingState } from "@/components/ui/EmptyState";
 import { BrandCard, brandText } from "@/components/brand/parts";
 import BrandLookPreview from "@/components/brand/BrandLookPreview";
+
+interface FontSample {
+  id: string;
+  label: string;
+  about: string;
+  svg: string;
+}
 
 interface Props {
   profile: BrandSettings | null;
@@ -41,6 +48,19 @@ export default function CoverThemeCard({ profile, setProfile, onEdit }: Props) {
   const [uploadingCutout, setUploadingCutout] = useState(false);
   const [cutoutError, setCutoutError] = useState<string | null>(null);
 
+  const [fonts, setFonts] = useState<FontSample[]>([]);
+  const [fontSaving, setFontSaving] = useState<string | null>(null);
+  useEffect(() => {
+    let live = true;
+    apiClient
+      .get<{ fonts: FontSample[] }>("/api/brand/cover-font")
+      .then((r) => live && setFonts(r.fonts))
+      .catch(() => live && setFonts([]));
+    return () => {
+      live = false;
+    };
+  }, []);
+
   const title = "Cover look";
   const line = "The image on top of every post. Pick a theme.";
 
@@ -57,6 +77,21 @@ export default function CoverThemeCard({ profile, setProfile, onEdit }: Props) {
       setError(toErrorMessage(e, "Couldn't change the theme."));
     } finally {
       setSaving(null);
+    }
+  };
+
+  const font = profile.cover_font || "bricolage";
+  const pickFont = async (id: string) => {
+    if (id === font || fontSaving) return;
+    setFontSaving(id);
+    setError(null);
+    try {
+      await apiClient.patch("/api/brand/cover-font", { font: id });
+      setProfile({ ...profile, cover_font: id });
+    } catch (e) {
+      setError(toErrorMessage(e, "Couldn't change the font."));
+    } finally {
+      setFontSaving(null);
     }
   };
 
@@ -165,6 +200,7 @@ export default function CoverThemeCard({ profile, setProfile, onEdit }: Props) {
               byline={profile.cover_byline}
               logoUrl={profile.primary_logo_url}
               art={profile.cover_art}
+              font={font}
             />
           </div>
 
@@ -195,6 +231,45 @@ export default function CoverThemeCard({ profile, setProfile, onEdit }: Props) {
                 );
               })}
             </ul>
+            {fonts.length > 0 && (
+              <div className="space-y-2 pt-2">
+                <p className={brandText.label}>Font</p>
+                <ul role="radiogroup" aria-label="Cover font" className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {fonts.map((f) => {
+                    const on = f.id === font;
+                    return (
+                      <li key={f.id}>
+                        <button
+                          type="button"
+                          role="radio"
+                          aria-checked={on}
+                          onClick={() => void pickFont(f.id)}
+                          className={`w-full cursor-pointer rounded-2xl p-1.5 text-left focus-visible:outline-2 focus-visible:outline-brand ${on ? "ring-2 ring-ink" : "ring-1 ring-line hover:ring-subtle"}`}
+                        >
+                          <span className="flex aspect-[3/1] items-center justify-center overflow-hidden rounded-xl bg-white">
+                            {/* The sample is server-drawn SVG: its letters are shapes, so no font loads here. */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(f.svg)}`} alt="" className="h-full w-full object-contain" />
+                          </span>
+                          <span className="flex items-center justify-between gap-1 px-1.5 pb-0.5 pt-2 text-[15px] text-ink">
+                            <span className="min-w-0">
+                              <span className="block truncate">{f.label}</span>
+                              <span className="block truncate text-[13px] text-subtle">{f.about}</span>
+                            </span>
+                            {fontSaving === f.id ? (
+                              <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted" aria-hidden="true" />
+                            ) : (
+                              on && <Check className="h-4 w-4 shrink-0" aria-hidden="true" />
+                            )}
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <p className={brandText.note}>New covers and carousels use it. Covers already made keep theirs.</p>
+              </div>
+            )}
             {!current && (
               <p className={brandText.note}>
                 You use custom colours. Change them under Custom colours.

@@ -72,6 +72,8 @@ export interface BrandSettings {
   cover_art: string;
   /** The author's cut-out photo (PNG, transparent background) for the Cut-out cover; empty when none. */
   cover_cutout_url: string;
+  /** The cover font id (lib/covers/coverFonts.ts), kept in visualAssets; missing on old rows means Bricolage. */
+  cover_font?: string;
   primary_ink: string;
   brand_teal: string;
   brand_coral: string;

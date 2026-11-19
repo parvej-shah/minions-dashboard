@@ -17,6 +17,7 @@ import { editShape, parseShape, shapeJson, type PosterShape, type ShapeEdit } fr
 import { eligibleTypes, fallbackOrder, pickPosterType } from "@/lib/covers/posterType";
 import { dataUrlFitsPoster, prepareCutout } from "@/lib/covers/photo";
 import { pickCustomDesign, readOnlyMine } from "@/lib/covers/custom/rotation";
+import { isCoverFont, readCoverFont } from "@/lib/covers/coverFonts";
 import { activeCoverDesigns, loadCoverTemplate } from "@/services/coverTemplates";
 import { NEEDS_SHAPE, attempts, editAttempts, posterParts, sameType, switchLayout } from "@/lib/covers/layoutSwitch";
 
@@ -391,6 +392,8 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
     firstPost,
   };
   const order = fallbackOrder(pickPosterType(typeInput), eligibleTypes(typeInput));
+  // Every draw, an edit too, uses the workspace's cover font as it is now.
+  const font = readCoverFont(profile.visualAssets);
   /** The cover drawn as one type: the figure or quote copy for its own type, the headline copy for the rest. */
   const specFor = (layout: CoverLayout): CoverSpec => {
     const c = layout === copy.layout ? copy : headlineCopy;
@@ -408,6 +411,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
       art: layout === "HEADLINE" || layout === "STATEMENT" ? art : undefined,
       ...posterParts(card.shape),
       cutout,
+      font,
     };
   };
 
@@ -416,7 +420,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   const kept = input.edit && previous?.layout && previous.headline ? previous : null;
   // No audience label: the illustration and the headline open the cover (user decision, 2026-09-25).
   let spec: CoverSpec = kept
-    ? { layout: kept.layout!, headline: kept.headline!, emphasis: kept.emphasis, kicker: kept.kicker, quote: kept.quote, number: kept.number, author, brand, art, ...posterParts(card.shape), cutout, ...(kept.custom ? { custom: { id: kept.custom.id, version: kept.custom.version } } : {}) }
+    ? { layout: kept.layout!, headline: kept.headline!, emphasis: kept.emphasis, kicker: kept.kicker, quote: kept.quote, number: kept.number, author, brand, art, ...posterParts(card.shape), cutout, font, ...(kept.custom ? { custom: { id: kept.custom.id, version: kept.custom.version } } : {}) }
     : input.edit
       ? { ...specFor(copy.layout), art }
       : specFor(order[0]);
@@ -629,7 +633,7 @@ export async function markCoverFailed(assetId: string, error: string): Promise<v
  */
 export async function renderCoverPreview(
   clientId: string,
-  look: { brand_name?: string; primary_ink?: string; brand_cream?: string; brand_coral?: string; brand_teal?: string; cover_byline?: string; primary_logo_url?: string; positioning?: string; cover_art?: string }
+  look: { brand_name?: string; primary_ink?: string; brand_cream?: string; brand_coral?: string; brand_teal?: string; cover_byline?: string; primary_logo_url?: string; positioning?: string; cover_art?: string; cover_font?: string }
 ): Promise<{ png: Buffer; notes: string[] }> {
   const profile = await prisma.brandProfile.findUnique({ where: { clientId } });
   const { brand, notes } = coverBrand({
@@ -652,6 +656,7 @@ export async function renderCoverPreview(
     kicker: "One line under it says what the reader gets.",
     author: { name: (look.brand_name ?? profile?.brandName ?? "Your name").trim() || "Your name", role: byline, photo: image ? asDataUrl(image) : undefined },
     brand,
+    font: isCoverFont(look.cover_font) ? look.cover_font : readCoverFont(profile?.visualAssets),
   });
   if (logo && !image) notes.push("The logo or photo could not be loaded (it must be a PNG or JPEG at an https address); initials are shown instead.");
   return { png, notes };

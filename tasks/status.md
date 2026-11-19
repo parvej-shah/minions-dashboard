@@ -98,3 +98,5 @@
 | 93 | Cover templates storage + API (SQL not applied) | CLAUDE | DONE | tasks/93.md |
 | 94 | Custom cover render path, rotation, carousel p1 | CLAUDE | DONE | tasks/94.md |
 | 95 | Brand 'Your designs' card | CLAUDE | DONE | tasks/95.md |
+| 96 | Add-a-design flow: instructions, import, preview | CLAUDE | DONE | tasks/96.md |
+| 97 | Cover font choice per workspace (6 OFL fonts) | CLAUDE | DONE | tasks/97.md |

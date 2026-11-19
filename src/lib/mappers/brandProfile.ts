@@ -2,6 +2,7 @@ import type { BrandProfile } from "@prisma/client";
 import type { BrandSettings, VisualAssets } from "@/types";
 import { STATIC_BANNED_LEXICON } from "@/constants/brand";
 import { resolveWriterExpertise } from "@/constants/writerExpertise";
+import { readCoverFont } from "@/lib/covers/coverFonts";
 
 export function toBrandSettingsDTO(
   row: BrandProfile
@@ -15,6 +16,7 @@ export function toBrandSettingsDTO(
     cover_byline: row.coverByline ?? "",
     cover_art: row.coverArt,
     cover_cutout_url: cutoutUrl(row.visualAssets),
+    cover_font: readCoverFont(row.visualAssets),
     primary_ink: row.primaryInk,
     brand_teal: row.brandTeal,
     brand_coral: row.brandCoral,

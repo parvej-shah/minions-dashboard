@@ -15,6 +15,7 @@ const PREVIEW_FIELDS = [
   "primary_logo_url",
   "positioning",
   "cover_art",
+  "cover_font",
 ] as const;
 
 // Renders with the Brand page's unsaved values; notes about replaced colours or an unreadable photo travel in X-Cover-Notes.

@@ -59,7 +59,7 @@ function contrastProblems(node: TNode, brand: CoverBrand, colour: string | null,
 const DRAW = { ...COVER_SIZE };
 
 async function draw(template: Template, values: TemplateValues, brand: CoverBrand): Promise<string> {
-  return satori(templateElement(template, values, brand) as never, { ...DRAW, fonts: satoriFonts() as never });
+  return satori(templateElement(template, values, brand) as never, { ...DRAW, fonts: satoriFonts(true) as never });
 }
 
 function withPictures(values: TemplateValues): TemplateValues {

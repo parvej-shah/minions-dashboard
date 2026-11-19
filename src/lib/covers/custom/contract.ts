@@ -53,8 +53,8 @@ export const LIMITS = {
 export const TAGS = new Set(["div", "span", "p", "h1", "h2", "h3", "img", "svg", "g", "path", "rect", "circle", "ellipse", "line", "polyline", "polygon", "defs", "lineargradient", "radialgradient", "stop"]);
 export const SVG_TAGS = new Set(["svg", "g", "path", "rect", "circle", "ellipse", "line", "polyline", "polygon", "defs", "lineargradient", "radialgradient", "stop"]);
 
-/** Fonts we bundle (fonts.ts). Anything else is refused. */
-export const FONTS = ["Bricolage Grotesque", "Plus Jakarta Sans", "Instrument Serif"] as const;
+/** Fonts we bundle (fonts.ts FONT_FAMILIES; a test keeps the two equal). Anything else is refused. */
+export const FONTS = ["Bricolage Grotesque", "Anton", "Unbounded", "Syne", "Space Grotesk", "DM Serif Display", "Plus Jakarta Sans", "Instrument Serif"] as const;
 export const GENERIC_FONTS = ["sans-serif", "serif"];
 
 /** The colour variables a template may read; we fill them from the workspace's checked brand colours. */

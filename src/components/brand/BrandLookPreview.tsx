@@ -17,6 +17,8 @@ interface BrandLookPreviewProps {
   logoUrl?: string;
   /** SHAPES, DOODLES, ICONS or NONE. */
   art?: string;
+  /** The cover font id; missing uses the saved one. */
+  font?: string;
   /** No caption above it: the card around it already says what it is. */
   bare?: boolean;
 }
@@ -28,14 +30,14 @@ interface BrandLookPreviewProps {
  * shows what a mock could not: a colour deepened for contrast, a photo that
  * cannot load.
  */
-export default function BrandLookPreview({ colors, brandName, byline, logoUrl, art, bare }: BrandLookPreviewProps) {
+export default function BrandLookPreview({ colors, brandName, byline, logoUrl, art, font, bare }: BrandLookPreviewProps) {
   const [src, setSrc] = useState<string | null>(null);
   const [notes, setNotes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
 
   // One stable string for the effect; it is also the request body.
-  const key = JSON.stringify({ ...colors, brand_name: brandName, cover_byline: byline, primary_logo_url: logoUrl, cover_art: art });
+  const key = JSON.stringify({ ...colors, brand_name: brandName, cover_byline: byline, primary_logo_url: logoUrl, cover_art: art, cover_font: font });
 
   useEffect(() => {
     const controller = new AbortController();

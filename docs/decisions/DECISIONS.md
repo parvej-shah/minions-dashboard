@@ -178,7 +178,7 @@ and link to it here.
 **Decision:** Every cover and carousel page now sets headlines, quotes and big numbers in Bricolage Grotesque (ExtraBold) and the label, subtitle, list text and author line in Plus Jakarta Sans, for every workspace. This replaces Newsreader and Inter. Both are free for commercial use (SIL Open Font License). The quote mark is drawn as a shape, and the quote text is upright because Bricolage has no italic.
 **Why:** the serif and neutral sans looked like most other LinkedIn graphics and didn't stand out in a feed. A heavy, characterful sans stays readable at phone-thumbnail size. Compared against Fraunces, DM Serif Display and Instrument Serif on the same posters; the thin serif vanished at thumbnail size.
 **Alternatives considered:** DM Serif Display with Manrope (the safe serif upgrade); Fraunces with Manrope (warm, but needed spacing work).
-**Status:** active. Supersedes the Newsreader and Inter part of the fixed type system decided 2026-09-24 in [authority-flywheel-plan.md](../product/authority-flywheel-plan.md) (phase 5); one shared type system for every tenant stands.
+**Status:** active. Supersedes the Newsreader and Inter part of the fixed type system decided 2026-09-24 in [authority-flywheel-plan.md](../product/authority-flywheel-plan.md) (phase 5). The "one shared type system for every tenant" part is superseded on 2026-11-19 by "Each workspace picks its cover font": Bricolage stays the default.
 
 ---
 ## 2026-11-09 — Eight modern banner types join the cover types
@@ -816,3 +816,10 @@ as JPEGs, which cost far less than the PNGs did.
 **Why:** users wanted covers that look like their own brand. Checking before saving keeps broken or unsafe pastes out of the product.
 **Alternatives considered:** a full browser renderer (rejected: slow, larger attack surface); per-login ownership (rejected: brand data is per workspace).
 **Status:** active
+
+## 2026-11-19 — Each workspace picks its cover font
+
+**Decision:** The Brand page's Cover look card has a Font choice: Bricolage (default), Anton, Unbounded, Syne, Space Grotesk or DM Serif. It sets the headline, quote and big-number type on every new cover and carousel; the small text stays Plus Jakarta Sans. Covers already made keep the font they were made with. Custom designs may use any of these fonts by name. All are free for commercial use (SIL Open Font License).
+**Why:** the user wanted modern display type like the paid fonts in a Pinterest reference (Trapvoid, Gothif, Neue Monique, After, Bletro, Newblack, Quinn), configurable per workspace. Those are commercial; these free fonts give the same range (condensed, wide, quirky, technical, editorial) with no licence cost.
+**Alternatives considered:** buying the reference fonts (licence cost and terms per workspace); letting users upload any font (licensing and safety risk; v2 at most).
+**Status:** active. Supersedes the shared-type-system part of "Covers use Bricolage Grotesque and Plus Jakarta Sans" (2026-11-09).
