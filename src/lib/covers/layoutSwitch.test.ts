@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_COVER_BRAND } from "./brand";
 import type { CoverSpec } from "./layouts";
-import { editAttempts, posterParts, switchLayout, type SwitchContext } from "./layoutSwitch";
+import { attempts, editAttempts, posterParts, switchLayout, type SwitchContext } from "./layoutSwitch";
+import { DEFAULT_COVER_FONT } from "./coverFonts";
 
 const spec: CoverSpec = {
   layout: "HEADLINE",
@@ -64,5 +65,33 @@ describe("editAttempts", () => {
     const tries = editAttempts(spec, "A different title");
     expect(tries[0]).toEqual(spec);
     expect(tries.at(-1)?.looseHeadline).toBe(true);
+  });
+});
+
+describe("cover font fallback (task 101)", () => {
+  const art = { choice: { motif: "m" }, seed: "s" } as unknown as CoverSpec["art"];
+  const wide: CoverSpec = { ...spec, font: "unbounded", art };
+
+  it("keeps the words first, then the brand's font, then the illustration", () => {
+    const tries = attempts(wide, "A title").slice(0, 5).map((t) => [t.headline === wide.headline && t.kicker === wide.kicker, t.font, Boolean(t.art)]);
+    expect(tries).toEqual([
+      [true, "unbounded", true],
+      [true, "unbounded", false],
+      [true, DEFAULT_COVER_FONT, true],
+      [true, DEFAULT_COVER_FONT, false],
+      [false, "unbounded", true],
+    ]);
+  });
+
+  it("adds nothing when the font is already the default, or for a custom design", () => {
+    expect(attempts({ ...spec, font: DEFAULT_COVER_FONT }, "A title").every((t) => t.font === DEFAULT_COVER_FONT)).toBe(true);
+    expect(attempts(spec, "A title").every((t) => t.font === undefined)).toBe(true);
+    const custom = editAttempts({ ...spec, layout: "CUSTOM", font: "unbounded" }, "A title");
+    expect(custom.every((t) => t.font === "unbounded")).toBe(true);
+  });
+
+  it("lets a reviewer's layout switch fall back to the default font too", () => {
+    const tries = editAttempts({ ...wide, layout: "BOLD" }, "A title");
+    expect(tries.some((t) => t.layout === "BOLD" && t.font === DEFAULT_COVER_FONT && t.headline === wide.headline)).toBe(true);
   });
 });

@@ -6,6 +6,7 @@
  */
 import { COVER_LAYOUTS, type CoverLayout, type CoverSpec } from "./layouts";
 import { isBanner } from "./bannerTypes";
+import { DEFAULT_COVER_FONT } from "./coverFonts";
 import { pickQuote, quoteSource } from "./copy";
 import type { PosterShape } from "./shape";
 
@@ -58,9 +59,15 @@ export function switchLayout(spec: CoverSpec, layout: CoverLayout, ctx: SwitchCo
  */
 export function attempts(spec: CoverSpec, title: string): CoverSpec[] {
   // Each option is tried with the illustration first, then without it: the
-  // headline and subtitle carry the post, the picture does not.
-  return copyAttempts(spec, title).flatMap((s) => (s.art ? [s, { ...s, art: undefined }] : [s]));
+  // headline and subtitle carry the post, the picture does not. Before any
+  // shorter copy, the same words are tried in the default font (task 101):
+  // a wide brand font must not cost the post its words.
+  return copyAttempts(spec, title).flatMap((s) => fontAttempts(s).flatMap((f) => (f.art ? [f, { ...f, art: undefined }] : [f])));
 }
+
+/** The brand's cover font, then the default one. A custom design sets its own fonts. */
+const fontAttempts = (s: CoverSpec): CoverSpec[] =>
+  s.layout !== "CUSTOM" && s.font && s.font !== DEFAULT_COVER_FONT ? [s, { ...s, font: DEFAULT_COVER_FONT }] : [s];
 
 function copyAttempts(spec: CoverSpec, title: string): CoverSpec[] {
   const out = [spec];

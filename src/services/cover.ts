@@ -513,6 +513,7 @@ export async function renderAssetCover(assetId: string, input: { card?: CoverCar
   }
   if (!png) return { ok: false, error: input.edit && spec.layout === "CUSTOM" ? `That doesn't fit your design: ${notes.slice(-1)[0] ?? "unknown"}. Try shorter wording.` : input.edit && spec.layout !== "HEADLINE" ? `That doesn't fit on a ${spec.layout.toLowerCase()} cover: ${notes.slice(-1)[0] ?? "unknown"}. Try shorter wording.` : `No cover copy fits: ${notes.slice(-1)[0] ?? "unknown"}` };
 
+  if (used.font !== spec.font && used.layout !== "CUSTOM") notes.push("Drawn in the default font: the words did not fit this layout in your cover font.");
   const { url } = await uploadToR2(`covers/${asset.clientId}/${asset.id}-${Date.now()}.png`, png, "image/png");
   const stored: StoredCoverSpec = {
     ...used,

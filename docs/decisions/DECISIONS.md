@@ -844,3 +844,10 @@ as JPEGs, which cost far less than the PNGs did.
 **Why:** a design used only by the rotation could not be chosen for the post where it fits best, and a cover switched away from it could not be switched back.
 **Alternatives considered:** rotation only (no control per post); a separate "Your designs" row (two pickers for one choice).
 **Status:** active.
+
+## 2026-11-19 — A cover falls back to the default font before losing words
+
+**Decision:** When a post's words don't fit a layout in the workspace's cover font, the cover is drawn in the default font (Bricolage) instead. Order: keep the words first, then the brand's font, then the illustration; shorter copy comes only after both fonts fail. Custom designs keep their own fonts. A note on the cover records the fallback.
+**Why:** with a wide font like Unbounded, switching a draft to Headline failed outright ("No cover copy fits") although the same words fit in the default font.
+**Alternatives considered:** shortening the headline first (the reviewer's words matter more than the font); refusing the layout (leaves the reviewer stuck).
+**Status:** active.
