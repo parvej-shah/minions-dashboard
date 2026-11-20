@@ -112,3 +112,4 @@
 | 107 | Starter set: two extra drafts from other angles for a new workspace | CLAUDE | DONE (local; not pushed; not tried live) | tasks/107.md |
 | 108 | Draft next day ahead; Autopilot schedules, Review first waits | CLAUDE | DONE (local; not pushed; not tried live) | tasks/108.md |
 | 109 | LinkedIn must be connected for Autopilot; reconnect nudge | CLAUDE | DONE (local; not pushed; not tried live) | tasks/109.md |
+| 110 | App shows "Minions Post Studio" + Covers-film logo (sign-in, tab title, install name) | CLAUDE | DONE (local; not pushed; checked on local sign-in page) | tasks/110.md |

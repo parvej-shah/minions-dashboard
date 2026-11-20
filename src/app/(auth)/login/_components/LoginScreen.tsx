@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { signInWithGoogle } from "@/lib/googleSignIn";
 import { useSearchParams } from "next/navigation";
@@ -67,12 +68,12 @@ export default function LoginScreen() {
       <div className="animate-pop-in relative px-3 pt-3 md:sticky md:top-0 md:h-dvh md:p-3">
         <WelcomeArt className="h-[clamp(220px,36dvh,380px)] md:h-full" />
         {/* On phones the wordmark rides on the panel, so the sign-in column starts with the headline. */}
-        <span className="absolute left-8 top-8 text-[17px] font-semibold tracking-tight text-ink md:hidden">Minions</span>
+        <span className="absolute left-8 top-8 md:hidden"><span className="inline-flex items-center gap-3"><Image src="/images/minions-ai-logo.png" alt="Minions.AI" width={1076} height={158} priority className="h-[18px] w-auto" /><span className="text-[17px] font-semibold tracking-tight">Post Studio</span></span></span>
       </div>
 
       <div className="flex flex-col px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 md:min-h-dvh md:px-14 lg:px-20">
         <header className="hidden pt-8 md:block">
-          <span className="text-[19px] font-semibold tracking-tight">Minions</span>
+          <span className="inline-flex items-center gap-3"><Image src="/images/minions-ai-logo.png" alt="Minions.AI" width={1076} height={158} priority className="h-[22px] w-auto" /><span className="text-[19px] font-semibold tracking-tight">Post Studio</span></span>
         </header>
 
         <main className="animate-rise-in flex flex-1 flex-col justify-center pt-7 md:max-w-[440px] md:py-12">

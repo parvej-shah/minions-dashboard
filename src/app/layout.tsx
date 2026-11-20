@@ -14,13 +14,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: { default: "Minions.AI — LinkedIn posts in your voice", template: "%s — Minions.AI" },
+  title: { default: "Minions Post Studio — LinkedIn posts in your voice", template: "%s — Minions Post Studio" },
   description: "Weekly LinkedIn posts from your own experience, in your own voice.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Minions.AI",
+    title: "Post Studio",
   },
   formatDetection: {
     telephone: false,

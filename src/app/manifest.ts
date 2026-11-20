@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Minions.AI — LinkedIn posts in your voice',
-    short_name: 'Minions.AI',
+    name: 'Minions Post Studio — LinkedIn posts in your voice',
+    short_name: 'Post Studio',
     description: 'Weekly LinkedIn posts from your own experience, in your own voice.',
     start_url: '/',
     id: '/',
