@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { isNavActive, type NavItem } from "@/constants/nav";
 import type { NavCounts } from "@/types";
@@ -33,8 +34,8 @@ export function TopNav({ navItems, navCounts, pathname, account }: TopNavProps) 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-canvas/85 backdrop-blur-xl">
       <div className="mx-auto flex min-h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        <Link href="/" className="text-[17px] font-bold tracking-tight text-ink">
-          Minions
+        <Link href="/" aria-label="Minions Post Studio" className="text-ink">
+          <span className="inline-flex items-baseline gap-2"><Image src="/images/post-studio-wordmark.png" alt="Minions Post Studio" width={1051} height={147} priority className="h-[16px] w-auto" /><span className="text-[13px] font-medium text-muted">By Minions.AI</span></span>
         </Link>
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
           {navItems.map((item) => {

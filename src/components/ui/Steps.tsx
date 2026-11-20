@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React, { useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 
@@ -13,7 +14,7 @@ export function StepHeader({ step, total }: { step?: number; total?: number }) {
   return (
     <header className="sticky top-0 z-10 bg-canvas/90 backdrop-blur">
       <div className="mx-auto flex w-full max-w-3xl items-center gap-4 px-4 py-4 sm:gap-5 sm:px-6 sm:py-5">
-        <span className="shrink-0 text-[17px] font-semibold tracking-tight sm:min-w-16">Minions</span>
+        <span className="shrink-0 text-ink"><span className="inline-flex items-baseline gap-2"><Image src="/images/post-studio-wordmark.png" alt="Minions Post Studio" width={1051} height={147} priority className="h-[14px] w-auto" /><span className="text-[12px] font-medium text-muted">By Minions.AI</span></span></span>
         {step && total ? (
           <>
             <ol
