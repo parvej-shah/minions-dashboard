@@ -108,7 +108,7 @@
 | 103 | Launch film "Write" (the product; series film 1) | CLAUDE | DONE (first cut rendered 16:9, 4:5, 9:16; awaiting review) | tasks/103.md |
 | 104 | "Covers" 9:16 cut + "Next" tag + signature sound | CLAUDE | DONE (rendered 16:9, 4:5, 9:16 with Next: Yours tag; awaiting review) | tasks/104.md |
 | 105 | Launch film "Yours" (bring your own design; series film 3) | CLAUDE | DONE (approved 2026-11-20) | tasks/105.md |
-| 106 | Launch film "Post Studio": the whole product, Swiss kinetic type (series film 4; style = ~/minions-ai-ad v2) | CLAUDE | TODO | tasks/106.md |
+| 106 | Launch film "Post Studio": the whole product, Swiss kinetic type (series film 4; style = ~/minions-ai-ad v2) | CLAUDE | TODO (script + plan saved 2026-11-20; build after user OK) | tasks/106.md |
 | 107 | Starter set: two extra drafts from other angles for a new workspace | CLAUDE | DONE (local; not pushed; not tried live) | tasks/107.md |
 | 108 | Draft next day ahead; Autopilot schedules, Review first waits | CLAUDE | DONE (local; not pushed; not tried live) | tasks/108.md |
 | 109 | LinkedIn must be connected for Autopilot; reconnect nudge | CLAUDE | TODO | tasks/109.md |
