@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { PENDING_TOKEN_COOKIE } from "@/lib/linkedin";
+import { PENDING_EXPIRY_COOKIE, PENDING_TOKEN_COOKIE } from "@/lib/linkedin";
 import { storeChannelCredential } from "@/services/channels";
 import { asString, readJson } from "@/server/http/body";
 import { badRequest, HttpError } from "@/server/http/errors";
@@ -13,7 +13,9 @@ export const POST = route({ auth: "realTenant", failure: "Failed to save LinkedI
   const urn = asString((await readJson(request)).urn);
   if (!urn.startsWith("urn:li:")) throw badRequest("Valid LinkedIn URN is required");
 
-  await storeChannelCredential(clientId, "linkedin", token, urn);
+  const rawExpiry = Date.parse(cookieStore.get(PENDING_EXPIRY_COOKIE)?.value ?? "");
+  await storeChannelCredential(clientId, "linkedin", token, urn, Number.isNaN(rawExpiry) ? null : new Date(rawExpiry));
   cookieStore.delete(PENDING_TOKEN_COOKIE);
+  cookieStore.delete(PENDING_EXPIRY_COOKIE);
   return { success: true };
 });

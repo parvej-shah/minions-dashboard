@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { computeDueSlot } from "@/lib/scheduling";
 import { slotsToDraftNow } from "@/lib/plan/ahead";
 import { fillDueSlot, planAhead, upcomingPlanSlots } from "@/services/contentPlan";
+import { checkLinkedInConnection } from "@/services/linkedinHealth";
 import { toScheduleConfig } from "@/services/postingSchedule";
 import { countAssetsThisMonth, monthlyAssetLimit, resolvePlan } from "@/services/quota";
 
@@ -39,6 +40,9 @@ export async function findDueTenants(now: Date = new Date()) {
       return undefined;
     });
     if (planned[client.id] === undefined) delete planned[client.id];
+
+    // Once a day, a cheap live check of the LinkedIn token, so a lapse is seen before a post fails (task 109).
+    await checkLinkedInConnection(client.id, now).catch(() => undefined);
 
     // The slot due right now (the fallback), then the slots in the next 24 hours:
     // each is drafted a day ahead, so Autopilot has it scheduled before its time.

@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { autopilotAllowed, type LinkedInHealth } from "@/lib/linkedinHealth";
 import { AlertCircle, Check, Clock, Plus, RefreshCw, Save, ShieldCheck, Zap, X } from "lucide-react";
 import { LoadingState } from "@/components/ui/EmptyState";
 import ContentPlanCard from "@/components/schedule/ContentPlanCard";
@@ -28,6 +30,7 @@ interface SchedulePayload {
   posts_per_day: number;
   times_of_day: string[];
   require_review: boolean;
+  linkedin?: LinkedInHealth;
 }
 
 const EMPTY_PAYLOAD: SchedulePayload = {
@@ -64,6 +67,8 @@ function signature(data: SchedulePayload) {
  */
 export default function ScheduleSettings() {
   const [data, setData] = useState<SchedulePayload>(EMPTY_PAYLOAD);
+  // Turning Autopilot on needs LinkedIn; an Autopilot already on can still be turned off (task 109).
+  const autopilotBlocked = data.require_review && !!data.linkedin && !autopilotAllowed(data.linkedin);
   const [savedData, setSavedData] = useState<SchedulePayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -470,7 +475,7 @@ export default function ScheduleSettings() {
               type="button"
               role="radio"
               aria-checked={!data.require_review}
-              disabled={saving}
+              disabled={saving || autopilotBlocked}
               onClick={() => updateData((prev) => ({ ...prev, require_review: false }))}
               className={`flex flex-col justify-between rounded-xl border p-4 text-left transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed ${
                 !data.require_review
@@ -501,11 +506,19 @@ export default function ScheduleSettings() {
                   {!data.require_review && <span className="h-1 w-1 rounded-full bg-white" />}
                 </span>
                 <span className="text-[11px] font-medium text-subtle">
-                  {!data.require_review ? "Active mode" : "Select Autopilot"}
+                  {!data.require_review ? "Active mode" : autopilotBlocked ? "Connect LinkedIn first" : "Select Autopilot"}
                 </span>
               </div>
             </button>
           </div>
+          {autopilotBlocked && (
+            <p className="mt-3 text-xs text-muted">
+              Autopilot posts for you, so it needs a working LinkedIn connection.{" "}
+              <Link href="/fleet" className="font-semibold text-brand hover:underline">
+                {data.linkedin === "expired" ? "Reconnect LinkedIn" : "Connect LinkedIn"}
+              </Link>
+            </p>
+          )}
         </div>
 
         {/* SAVE ACTION BAR */}

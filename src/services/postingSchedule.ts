@@ -6,6 +6,8 @@ import { assertNotEstablished } from "@/services/onboardingGuard";
 import type { JsonObject } from "@/server/http/body";
 import { asString } from "@/server/http/body";
 import { badRequest } from "@/server/http/errors";
+import { autopilotAllowed, AUTOPILOT_NEEDS_LINKEDIN } from "@/lib/linkedinHealth";
+import { getLinkedInHealth } from "@/services/linkedinHealth";
 
 const CADENCE_TYPES = ["DAILY", "EVERY_N_DAYS", "DAYS_OF_WEEK"];
 const TIME_PATTERN = /^([01]?\d|2[0-3]):[0-5]\d$/;
@@ -57,7 +59,8 @@ async function loadScheduleAndTimezone(clientId: string) {
 
 export async function getScheduleSettings(clientId: string) {
   const { schedule, timezone } = await loadScheduleAndTimezone(clientId);
-  return schedule ? { ...toScheduleDTO(schedule), timezone } : { exists: false, timezone, ...DEFAULTS };
+  const linkedin = await getLinkedInHealth(clientId);
+  return schedule ? { ...toScheduleDTO(schedule), timezone, linkedin } : { exists: false, timezone, ...DEFAULTS, linkedin };
 }
 
 function parseScheduleInput(body: JsonObject) {
@@ -99,6 +102,12 @@ function parseScheduleInput(body: JsonObject) {
 export async function saveScheduleSettings(clientId: string, body: JsonObject) {
   if (body.from_onboarding === true) await assertNotEstablished(clientId);
   const data = parseScheduleInput(body);
+  // Autopilot posts to LinkedIn unseen, so it needs a working connection (task 109).
+  // Turning it off, or leaving it as it was, is always allowed.
+  if (!data.requireReview) {
+    const current = await prisma.postingSchedule.findUnique({ where: { clientId }, select: { requireReview: true } });
+    if ((current?.requireReview ?? true) && !autopilotAllowed(await getLinkedInHealth(clientId))) throw badRequest(AUTOPILOT_NEEDS_LINKEDIN);
+  }
   const saved = await prisma.postingSchedule.upsert({
     where: { clientId },
     update: data,

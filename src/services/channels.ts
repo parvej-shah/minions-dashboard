@@ -1,4 +1,4 @@
-import type { ClientChannel } from "@prisma/client";
+import { Prisma, type ClientChannel } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { postGoesTo } from "@/constants/postChannels";
@@ -103,14 +103,17 @@ export async function readChannelToken(credentialRef: string): Promise<string | 
 }
 
 // The token lives in Supabase Vault; Postgres keeps only the vault secret id as credentialRef.
-export async function storeChannelCredential(clientId: string, channelKey: string, token: string, externalId: string | null) {
+export async function storeChannelCredential(clientId: string, channelKey: string, token: string, externalId: string | null, expiresAt: Date | null = null) {
   const { data: secretId, error } = await getSupabaseAdmin().rpc("create_channel_secret", {
     secret: token,
     name: `${clientId}:${channelKey}:${Date.now()}`,
   });
   if (error) throw new Error(error.message);
 
-  const connected = { isActive: true, credentialRef: secretId, externalId };
+  // LinkedIn's health lives in config: a new connection starts clean, with the new token's expiry and no earlier refusal.
+  // Other channels keep their config (Instagram's format lives there).
+  const config = channelKey === "linkedin" ? { config: expiresAt ? { expiresAt: expiresAt.toISOString() } : Prisma.JsonNull } : {};
+  const connected = { isActive: true, credentialRef: secretId, externalId, ...config };
   await prisma.clientChannel.upsert({
     where: { clientId_channelKey: { clientId, channelKey } },
     update: connected,

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { exchangeCode, fetchUserInfo, PENDING_TOKEN_COOKIE, personUrn, redirectUriFor } from "@/lib/linkedin";
+import { exchangeCode, fetchUserInfo, PENDING_EXPIRY_COOKIE, PENDING_TOKEN_COOKIE, personUrn, redirectUriFor } from "@/lib/linkedin";
+import { DEFAULT_TOKEN_DAYS } from "@/lib/linkedinHealth";
 import { storeChannelCredential } from "@/services/channels";
 import { route } from "@/server/http/route";
 
@@ -31,10 +32,13 @@ export const GET = route({ auth: "tenant", failure: "LinkedIn connection encount
   const code = url.searchParams.get("code");
   if (!code) return fail("LinkedIn did not return an authorization code. Please try connecting again.");
 
-  const accessToken = await exchangeCode(code, redirectUriFor(url.origin));
-  if (!accessToken) {
+  const exchanged = await exchangeCode(code, redirectUriFor(url.origin));
+  if (!exchanged) {
     return fail("LinkedIn could not complete the authorization exchange. Check the configured redirect URL and try again.");
   }
+
+  const accessToken = exchanged.token;
+  const expiresAt = new Date(Date.now() + (exchanged.expiresIn ?? DEFAULT_TOKEN_DAYS * 86_400) * 1000);
 
   if (fromOnboarding) {
     const user = await fetchUserInfo(accessToken).catch(() => null);
@@ -42,7 +46,7 @@ export const GET = route({ auth: "tenant", failure: "LinkedIn connection encount
     if (!sub) return fail("LinkedIn did not return a usable member profile. Ensure this app has OpenID Connect access, then try again.");
 
     try {
-      await storeChannelCredential(clientId, "linkedin", accessToken, personUrn(sub));
+      await storeChannelCredential(clientId, "linkedin", accessToken, personUrn(sub), expiresAt);
     } catch (error) {
       console.error("[linkedin] onboarding credential save failed:", error);
       return fail("LinkedIn connected, but Minions could not save the credential. Please try again.");
@@ -53,12 +57,8 @@ export const GET = route({ auth: "tenant", failure: "LinkedIn connection encount
   const selectUrl = new URL("/fleet/linkedin/select", request.url);
   selectUrl.searchParams.set("return_to", returnTo);
   const response = NextResponse.redirect(selectUrl);
-  response.cookies.set(PENDING_TOKEN_COOKIE, accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: PENDING_TOKEN_TTL_SECONDS,
-    path: "/",
-  });
+  const cookie = { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" as const, maxAge: PENDING_TOKEN_TTL_SECONDS, path: "/" };
+  response.cookies.set(PENDING_TOKEN_COOKIE, accessToken, cookie);
+  response.cookies.set(PENDING_EXPIRY_COOKIE, expiresAt.toISOString(), cookie);
   return response;
 });

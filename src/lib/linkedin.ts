@@ -5,6 +5,7 @@ const OAUTH_URL = "https://www.linkedin.com/oauth/v2";
 const SCOPES = "openid profile email w_member_social";
 
 export const PENDING_TOKEN_COOKIE = "linkedin_pending_token";
+export const PENDING_EXPIRY_COOKIE = "linkedin_pending_expiry";
 
 export interface LinkedInUserInfo {
   sub: string;
@@ -29,7 +30,13 @@ export function authorizationUrl(redirectUri: string, state: string): string {
   return url.toString();
 }
 
-export async function exchangeCode(code: string, redirectUri: string): Promise<string | null> {
+export interface ExchangedToken {
+  token: string;
+  /** Seconds the token lasts, when LinkedIn says. */
+  expiresIn: number | null;
+}
+
+export async function exchangeCode(code: string, redirectUri: string): Promise<ExchangedToken | null> {
   const response = await fetch(`${OAUTH_URL}/accessToken`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -45,7 +52,10 @@ export async function exchangeCode(code: string, redirectUri: string): Promise<s
     console.error("[linkedin] token exchange failed:", await response.text());
     return null;
   }
-  return (await response.json()).access_token ?? null;
+  const body = await response.json();
+  if (!body.access_token) return null;
+  const expiresIn = Number(body.expires_in);
+  return { token: body.access_token, expiresIn: Number.isFinite(expiresIn) && expiresIn > 0 ? expiresIn : null };
 }
 
 const authorized = (token: string, extra: Record<string, string> = {}) => ({ headers: { Authorization: `Bearer ${token}`, ...extra } });

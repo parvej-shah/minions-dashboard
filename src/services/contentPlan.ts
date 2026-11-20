@@ -21,6 +21,8 @@ import { startHarvest } from "@/services/harvestRun";
 import { toScheduleConfig } from "@/services/postingSchedule";
 import { draftingServiceRunning } from "@/services/jobHeartbeat";
 import { DEFAULT_TIMEZONE } from "@/constants/config";
+import { autopilotAllowed } from "@/lib/linkedinHealth";
+import { getLinkedInHealth } from "@/services/linkedinHealth";
 
 /**
  * The content plan's slots (phase 7, docs/product/authority-flywheel-plan.md).
@@ -354,6 +356,8 @@ export async function onSlotDraftReady(assetId: string): Promise<SlotDraftOutcom
   const schedule = await prisma.postingSchedule.findUnique({ where: { clientId: asset.clientId }, select: { requireReview: true } });
   const publishable = schedule && !schedule.requireReview && asset.claimsOk === "Y" && asset.heroStatus === "READY" && asset.status === "PENDING_REVIEW";
   if (!publishable) return "HELD";
+  // A lapsed or missing LinkedIn connection sends the draft to review instead (task 109).
+  if (!autopilotAllowed(await getLinkedInHealth(asset.clientId))) return "HELD";
 
   // Autopilot approves the draft for the slot's own time: SCHEDULED, released by
   // 03's poll (releaseDuePosts) when due. A slot already past goes out on the next poll.

@@ -18,6 +18,8 @@ vi.mock("@/lib/prisma", () => ({
 }));
 vi.mock("@/services/publishing", () => ({ syncAssetToBlog }));
 vi.mock("@/services/pipeline", () => ({ triggerN8nWorkflow }));
+const getLinkedInHealth = vi.fn();
+vi.mock("@/services/linkedinHealth", () => ({ getLinkedInHealth }));
 vi.mock("@/services/harvestRun", () => ({ startHarvest: vi.fn() }));
 
 const { onSlotDraftReady, harvestFocusLane, upcomingPlanSlots } = await import("./contentPlan");
@@ -31,6 +33,7 @@ beforeEach(() => {
   assetFindUnique.mockResolvedValue(draft);
   slotFindFirst.mockResolvedValue(slot);
   scheduleFindUnique.mockResolvedValue({ requireReview: false });
+  getLinkedInHealth.mockResolvedValue("connected");
   assetUpdateMany.mockResolvedValue({ count: 1 });
   triggerN8nWorkflow.mockResolvedValue({ result: { success: true }, status: 200 });
 });
@@ -67,6 +70,14 @@ describe("a slot's draft once its cover is settled", () => {
     expect(await onSlotDraftReady("a1")).toBe("SCHEDULED");
     const data = assetUpdateMany.mock.calls[0][0].data;
     expect(data.scheduledFor.getTime()).toBeGreaterThan(Date.now() - 60_000);
+  });
+
+  it("holds a passing Autopilot draft for review when LinkedIn is not working", async () => {
+    for (const health of ["missing", "expired"]) {
+      getLinkedInHealth.mockResolvedValue(health);
+      expect(await onSlotDraftReady("a1")).toBe("HELD");
+    }
+    expect(assetUpdateMany).not.toHaveBeenCalled();
   });
 
   it("holds it when review is required, a check failed or the cover is missing", async () => {

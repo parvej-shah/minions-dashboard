@@ -12,6 +12,7 @@ vi.mock("@/lib/prisma", () => ({
 }));
 vi.mock("@/services/contentPlan", () => ({ planAhead, fillDueSlot, upcomingPlanSlots }));
 vi.mock("@/services/quota", () => ({ countAssetsThisMonth: vi.fn().mockResolvedValue(0), monthlyAssetLimit: () => 100, resolvePlan: () => "x" }));
+vi.mock("@/services/linkedinHealth", () => ({ checkLinkedInConnection: vi.fn().mockResolvedValue("connected") }));
 vi.mock("@/services/postingSchedule", () => ({ toScheduleConfig: () => ({}) }));
 vi.mock("@/lib/scheduling", () => ({ computeDueSlot: () => null }));
 
