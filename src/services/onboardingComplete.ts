@@ -8,7 +8,8 @@ async function ensurePostingSchedule(clientId: string) {
   await prisma.postingSchedule.upsert({
     where: { clientId },
     update: { isActive: true },
-    create: { clientId, ...DEFAULT_CADENCE, requireReview: true, isActive: true },
+    // Review first, with the plan's slot filler on so posts are drafted a day ahead (task 108).
+    create: { clientId, ...DEFAULT_CADENCE, requireReview: true, fillerEnabled: true, isActive: true },
   });
 }
 

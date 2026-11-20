@@ -44,6 +44,7 @@ const toScheduleDTO = (schedule: PostingSchedule) => ({
   times_of_day: schedule.timesOfDay,
   require_review: schedule.requireReview,
   is_active: schedule.isActive,
+  created_at: schedule.createdAt.toISOString(),
 });
 
 async function loadScheduleAndTimezone(clientId: string) {

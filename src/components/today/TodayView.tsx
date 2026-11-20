@@ -2,6 +2,7 @@
 
 import { failureSummary } from "@/lib/publishFailures";
 import React, { useMemo, useState } from "react";
+import { autopilotOffered } from "@/lib/plan/ahead";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -58,7 +59,7 @@ export default function TodayView() {
   const router = useRouter();
   const { data: session } = useSession();
   const assets = useApiResource<AssetItem[]>("/api/assets", [], { errorMessage: "Could not load your posts" });
-  const schedule = useApiResource<{ timezone?: string } | null>("/api/schedule", null);
+  const schedule = useApiResource<{ timezone?: string; require_review?: boolean; created_at?: string } | null>("/api/schedule", null);
   const preview = useApiResource<{ slots: string[] }>("/api/schedule/preview?count=14", { slots: [] });
 
   const [spotlightIndex, setSpotlightIndex] = useState(0);
@@ -78,6 +79,7 @@ export default function TodayView() {
   const week = buildWeek(now, tz, assets.data, preview.data.slots);
   const taken = assets.data.filter((a) => a.status === "SCHEDULED" && a.scheduled_for).map((a) => a.scheduled_for!);
   const nextSlot = nextFreeSlot(preview.data.slots, taken, now.getTime(), MIN_LEAD_MINUTES);
+  const offerAutopilot = schedule.data?.created_at ? autopilotOffered(new Date(schedule.data.created_at), schedule.data.require_review === true, now) : false;
   const firstName = session?.user?.name?.split(" ")[0];
   const dateLine = new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "long", day: "numeric", month: "long" }).format(now);
 
@@ -350,6 +352,7 @@ export default function TodayView() {
               + Draft from a thought or link
             </button>
             {!nextSlot && <Link href="/schedule" className="text-[17px] text-brand hover:underline">Set publishing pace</Link>}
+            {nextSlot && offerAutopilot && <Link href="/schedule" className="text-[17px] text-brand hover:underline">Ready for Autopilot? Posts go out without review.</Link>}
           </div>
         </Card>
       )}

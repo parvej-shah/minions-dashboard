@@ -23,7 +23,8 @@ vi.mock("@/services/harvestRun", () => ({ startHarvest: vi.fn() }));
 const { onSlotDraftReady, harvestFocusLane, upcomingPlanSlots } = await import("./contentPlan");
 
 const draft = { id: "a1", clientId: "c1", ideaId: "i1", status: "PENDING_REVIEW", claimsOk: "Y", heroStatus: "READY", reviewNotes: ["Reads at grade 9"] };
-const slot = { id: "s1", status: "DRAFTING", assetId: null, fillMethod: "LANE", gateReasons: [] as string[] };
+const slotAt = new Date("2099-01-01T09:00:00Z");
+const slot = { id: "s1", status: "DRAFTING", assetId: null, fillMethod: "LANE", gateReasons: [] as string[], slotAt };
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -52,12 +53,20 @@ describe("a slot's draft once its cover is settled", () => {
     expect(slotUpdate).toHaveBeenCalledWith({ where: { id: "s1" }, data: { assetId: "a1", status: "DRAFTED" } });
   });
 
-  it("publishes a passing draft when the workspace does not require review", async () => {
-    assetFindUnique.mockResolvedValueOnce(draft).mockResolvedValueOnce({ ...draft, status: "PUBLISHED" });
-    expect(await onSlotDraftReady("a1")).toBe("PUBLISHED");
-    expect(assetUpdateMany).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "a1", status: "PENDING_REVIEW" }, data: expect.objectContaining({ status: "PUBLISHED" }) }));
-    expect(syncAssetToBlog).toHaveBeenCalled();
-    expect(triggerN8nWorkflow).toHaveBeenCalledWith("publish", expect.objectContaining({ asset_id: "a1" }), expect.anything());
+  it("schedules a passing Autopilot draft at the slot's time, without publishing now", async () => {
+    expect(await onSlotDraftReady("a1")).toBe("SCHEDULED");
+    expect(assetUpdateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: "a1", status: "PENDING_REVIEW" }, data: expect.objectContaining({ status: "SCHEDULED", scheduledFor: slotAt }) })
+    );
+    expect(syncAssetToBlog).not.toHaveBeenCalled();
+    expect(triggerN8nWorkflow).not.toHaveBeenCalled();
+  });
+
+  it("schedules a draft whose slot has already passed for now", async () => {
+    slotFindFirst.mockResolvedValue({ ...slot, slotAt: new Date("2000-01-01T09:00:00Z") });
+    expect(await onSlotDraftReady("a1")).toBe("SCHEDULED");
+    const data = assetUpdateMany.mock.calls[0][0].data;
+    expect(data.scheduledFor.getTime()).toBeGreaterThan(Date.now() - 60_000);
   });
 
   it("holds it when review is required, a check failed or the cover is missing", async () => {

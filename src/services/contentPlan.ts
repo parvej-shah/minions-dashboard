@@ -18,8 +18,6 @@ import {
   type PlanLane,
 } from "@/lib/plan/fill";
 import { startHarvest } from "@/services/harvestRun";
-import { syncAssetToBlog } from "@/services/publishing";
-import { triggerN8nWorkflow } from "@/services/pipeline";
 import { toScheduleConfig } from "@/services/postingSchedule";
 import { draftingServiceRunning } from "@/services/jobHeartbeat";
 import { DEFAULT_TIMEZONE } from "@/constants/config";
@@ -33,7 +31,7 @@ import { DEFAULT_TIMEZONE } from "@/constants/config";
  *   a slot has none.
  * - `fillDueSlot`: at a slot's time, the idea 02 should draft.
  * - `onSlotDraftReady`: once that draft's cover is settled, labels a below-bar
- *   draft, or publishes it when the workspace does not require review.
+ *   draft, or schedules it for the slot's time when the workspace does not require review.
  *
  * Nothing here runs unless the workspace switched the filler on
  * (`posting_schedules.filler_enabled`); `previewWeek` shows the plan without
@@ -246,8 +244,12 @@ export interface DueFill {
   method: FillMethod;
 }
 
-/** At a slot's time: the idea to draft, or null (recorded as EMPTY). */
-export async function fillDueSlot(clientId: string, due: Date, now: Date = new Date()): Promise<DueFill | null> {
+/**
+ * At a slot's time: the idea to draft, or null (recorded as EMPTY). With
+ * `ahead` (task 108, a day before the slot) only a passing idea is used, and a
+ * slot with none is left as it is for the look-ahead and the slot's own time.
+ */
+export async function fillDueSlot(clientId: string, due: Date, now: Date = new Date(), opts: { ahead?: boolean } = {}): Promise<DueFill | null> {
   const slotAt = slotInstant(due);
   const ctx = await loadContext(clientId);
   if (!ctx || !ctx.schedule.fillerEnabled) return null;
@@ -279,11 +281,12 @@ export async function fillDueSlot(clientId: string, due: Date, now: Date = new D
         laneId: row.laneId,
         ideas: free,
         activeLaneIds: ctx.lanes.filter((l) => l.isActive).map((l) => l.id),
-        phase: "DUE",
-        harvestRequestedAt: row.harvestRequestedAt ?? now,
+        phase: opts.ahead ? "LOOKAHEAD" : "DUE",
+        harvestRequestedAt: row.harvestRequestedAt ?? (opts.ahead ? null : now),
         harvestAllowed: false,
       });
 
+  if (decision.kind !== "IDEA" && opts.ahead) return null;
   if (decision.kind !== "IDEA") {
     await prisma.scheduleSlot.update({
       where: { id: row.id },
@@ -316,13 +319,13 @@ export async function harvestFocusLane(clientId: string, now: Date = new Date())
   return slot?.laneId ?? null;
 }
 
-export type SlotDraftOutcome = "NOT_A_SLOT" | "LABELLED" | "PUBLISHED" | "HELD";
+export type SlotDraftOutcome = "NOT_A_SLOT" | "LABELLED" | "SCHEDULED" | "HELD";
 
 /**
  * Called once a draft's cover is settled (drawn or failed). For a slot's draft:
  * a below-bar draft gets its label and waits for review (D17); otherwise, when
  * the workspace does not require review, a draft that passed every check with
- * a ready cover is published, as the user chose on 2026-09-25. Drafts started
+ * a ready cover is scheduled for the slot's time (task 108). Drafts started
  * by hand are never touched here.
  */
 export async function onSlotDraftReady(assetId: string): Promise<SlotDraftOutcome> {
@@ -352,20 +355,14 @@ export async function onSlotDraftReady(assetId: string): Promise<SlotDraftOutcom
   const publishable = schedule && !schedule.requireReview && asset.claimsOk === "Y" && asset.heroStatus === "READY" && asset.status === "PENDING_REVIEW";
   if (!publishable) return "HELD";
 
-  const flipped = await prisma.asset.updateMany({
+  // Autopilot approves the draft for the slot's own time: SCHEDULED, released by
+  // 03's poll (releaseDuePosts) when due. A slot already past goes out on the next poll.
+  const at = new Date(Math.max(slot.slotAt.getTime(), Date.now()));
+  const scheduled = await prisma.asset.updateMany({
     where: { id: asset.id, status: "PENDING_REVIEW" },
-    data: { status: "PUBLISHED", publishedAt: null, updatedAt: new Date() },
+    data: { status: "SCHEDULED", scheduledFor: at, updatedAt: new Date() },
   });
-  if (flipped.count !== 1) return "HELD";
-  const published = await prisma.asset.findUnique({ where: { id: asset.id } });
-  if (published) await syncAssetToBlog(published, "PUBLISHED", {});
-  // 03's 5-minute poll would also pick it up; this starts it now.
-  await triggerN8nWorkflow(
-    "publish",
-    { asset_id: asset.id, client_id: asset.clientId, trigger_source: "CONTENT_PLAN" },
-    { failure: "The publisher did not accept the request; its 5-minute poll will retry", success: "Publish run started" }
-  ).catch(() => undefined);
-  return "PUBLISHED";
+  return scheduled.count === 1 ? "SCHEDULED" : "HELD";
 }
 
 export interface WeekSlot {

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { computeDueSlot } from "@/lib/scheduling";
-import { fillDueSlot, planAhead } from "@/services/contentPlan";
+import { slotsToDraftNow } from "@/lib/plan/ahead";
+import { fillDueSlot, planAhead, upcomingPlanSlots } from "@/services/contentPlan";
 import { toScheduleConfig } from "@/services/postingSchedule";
 import { countAssetsThisMonth, monthlyAssetLimit, resolvePlan } from "@/services/quota";
 
@@ -39,21 +40,36 @@ export async function findDueTenants(now: Date = new Date()) {
     });
     if (planned[client.id] === undefined) delete planned[client.id];
 
-    const slot = computeDueSlot(toScheduleConfig(schedule), client.timezone, now);
-    if (!slot) continue;
+    // The slot due right now (the fallback), then the slots in the next 24 hours:
+    // each is drafted a day ahead, so Autopilot has it scheduled before its time.
+    const dueNow = computeDueSlot(toScheduleConfig(schedule), client.timezone, now);
+    const upcoming = upcomingPlanSlots(schedule, client.timezone, now);
+    const handled = await prisma.scheduleSlot.findMany({
+      where: { clientId: client.id, slotAt: { in: upcoming }, status: { notIn: ["PLANNED", "HARVESTING"] } },
+      select: { slotAt: true },
+    });
+    const ahead = slotsToDraftNow(upcoming, now, new Set(handled.map((h) => h.slotAt.getTime())));
+    const slots = dueNow ? [{ at: dueNow, ahead: false }, ...ahead.map((at) => ({ at, ahead: true }))] : ahead.map((at) => ({ at, ahead: true }));
 
     const limit = monthlyAssetLimit(resolvePlan(client.subscription?.planKey), client.assetsPerMonthOverride);
-    if ((await countAssetsThisMonth(client.id)) >= limit) continue;
+    let used = await countAssetsThisMonth(client.id);
 
-    // Autonomous outcome guard (task 72): cap unposted drafts awaiting review at 5 max
-    // to protect executive attention and prevent backlog guilt.
-    const unreviewedDrafts = await prisma.asset.count({
-      where: { clientId: client.id, status: "PENDING_REVIEW" },
-    });
-    if (unreviewedDrafts >= 5) continue;
+    for (const { at, ahead: isAhead } of slots) {
+      if (used >= limit) break;
 
-    const fill = await fillDueSlot(client.id, slot, now);
-    if (fill) due.push({ client_id: client.id, slug: client.slug, idea_id: fill.idea_id, slot_id: fill.slot_id, fill_method: fill.method });
+      // Autonomous outcome guard (task 72): cap unposted drafts awaiting review at 5 max
+      // to protect executive attention and prevent backlog guilt. Autopilot has no
+      // review queue, so the cap applies to Review first only (task 108).
+      if (schedule.requireReview) {
+        const unreviewedDrafts = await prisma.asset.count({ where: { clientId: client.id, status: "PENDING_REVIEW" } });
+        if (unreviewedDrafts >= 5) break;
+      }
+
+      const fill = await fillDueSlot(client.id, at, now, { ahead: isAhead });
+      if (!fill) continue;
+      used += 1;
+      due.push({ client_id: client.id, slug: client.slug, idea_id: fill.idea_id, slot_id: fill.slot_id, fill_method: fill.method });
+    }
   }
 
   return { due_tenants: due, planned };
