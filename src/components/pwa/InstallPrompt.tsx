@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Download, X, Smartphone, Share, PlusSquare, MoreVertical } from "lucide-react";
+import { track } from "@/lib/analytics";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -71,6 +72,7 @@ export function InstallPrompt() {
     };
 
     const handleAppInstalled = () => {
+      track("app_installed");
       setIsVisible(false);
       setDeferredPrompt(null);
     };

@@ -6,6 +6,7 @@ import { blogUrl, normalizeDomain } from "@/constants/config";
 import type { AssetItem, AssetStatus, CoverSpecDTO } from "@/types";
 import { queueFor, stepWithin, type QueueFilter } from "@/lib/drafts/queue";
 import { applyOptimisticSchedule } from "@/lib/drafts/optimisticSchedule";
+import { track } from "@/lib/analytics";
 
 export type PublishState = "idle" | "pending" | "success" | "error";
 
@@ -340,6 +341,7 @@ export function useEditorialDraft(
         scheduled_for: null,
       });
       setPublishState("success");
+      track("post_approved", { method: "now" });
       window.dispatchEvent(new Event("minions-counts-updated"));
       return blogHost ? `Published live to LinkedIn & ${blogHost}` : "Published live to LinkedIn";
     } catch (err) {
@@ -368,6 +370,7 @@ export function useEditorialDraft(
       );
       patchActive({ status: res.status, scheduled_for: res.scheduled_for, claims_ok: "Y" });
       setPublishState("idle");
+      track("post_approved", { method: "scheduled" });
       window.dispatchEvent(new Event("minions-counts-updated"));
       return "Scheduled";
     } catch (err) {

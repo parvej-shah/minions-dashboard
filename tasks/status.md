@@ -113,3 +113,4 @@
 | 108 | Draft next day ahead; Autopilot schedules, Review first waits | CLAUDE | DONE (local; not pushed; not tried live) | tasks/108.md |
 | 109 | LinkedIn must be connected for Autopilot; reconnect nudge | CLAUDE | DONE (local; not pushed; not tried live) | tasks/109.md |
 | 110 | App shows "Minions Post Studio" + Covers-film logo (sign-in, tab title, install name) | CLAUDE | DONE (local; not pushed; checked on local sign-in page) | tasks/110.md |
+| 111 | Google Analytics 4: page views + post_approved + app_installed (needs NEXT_PUBLIC_GA_ID in Vercel) | CLAUDE | DONE (local; not pushed; tag not seen live: needs the ID) | tasks/111.md |

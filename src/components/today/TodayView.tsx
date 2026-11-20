@@ -38,6 +38,7 @@ import QuickDraftDrawer from "@/components/posts/QuickDraftDrawer";
 import Toast from "@/components/ui/Toast";
 import { useToast } from "@/hooks/useToast";
 import { apiClient } from "@/lib/api-client";
+import { track } from "@/lib/analytics";
 import type { AssetItem } from "@/types";
 
 function TodaySkeleton() {
@@ -93,6 +94,7 @@ export default function TodayView() {
 
     try {
       await apiClient.post(`/api/assets/${currentSpotlight.id}/schedule`, { date, time });
+      track("post_approved", { method: "scheduled" });
       setScheduledSlot(slotText);
       window.dispatchEvent(new Event("minions-counts-updated"));
       toast.show(`Scheduled for ${slotText}`);

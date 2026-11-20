@@ -4,6 +4,7 @@ import { AuthProvider } from "@/components/providers/AuthProvider";
 import { PwaRegister } from "@/components/pwa/PwaRegister";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import GlobalDictation from "@/components/ui/GlobalDictation";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const viewport: Viewport = {
   themeColor: "#FBFBFD",
@@ -63,6 +64,7 @@ export default function RootLayout({
           <GlobalDictation />
         </AuthProvider>
       </body>
+      {process.env.NEXT_PUBLIC_GA_ID && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />}
     </html>
   );
 }
