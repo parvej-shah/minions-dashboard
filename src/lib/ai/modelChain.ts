@@ -18,26 +18,23 @@ import { DASHSCOPE_CHAT_URL } from "@/constants/dashscope";
 import { callCostUsd, recordCost } from "@/lib/ai/cost";
 
 /**
- * Free quota on 2026-11-09 (home.qwencloud.com/benefits, Singapore; each
- * model probed with a real call). Every model a prompt used until then had
- * none left: glm-5.1, qwen3.7-flash, qwen-flash, qwen3.7-plus and the
- * qwen-flash snapshot answer 403 "free quota has been exhausted";
- * qwen-plus-2025-09-11 no longer exists. A test keeps prompts off these.
- * Not used: kimi-k3 and kimi-k3.1-pro refuse temperature 0.7, glm-5.3 runs
+ * Free quota on 2026-11-21 (home.qwencloud.com/benefits, Singapore, the new
+ * account: 1M tokens per model until 2027-02-13). Models with none: qwen3.8-flash
+ * (exhausted), qwen-flash and glm-5.1/glm-5.2 (not offered). A test keeps
+ * prompts off these. Not used: kimi-k3* refuse temperature 0.7, glm-5.3 runs
  * only with thinking on.
  */
-export const USED_UP = ["glm-5.1", "glm-5.2", "qwen3.8-max", "qwen3.7-max", "qwen3.7-flash", "qwen-flash", "qwen3.7-plus", "deepseek-v4-pro"];
+export const USED_UP = ["glm-5.1", "glm-5.2", "qwen-flash", "qwen3.8-flash"];
 
 /** The large stages (strategist, writer, rewrite, harvest, pulse, craft, carousel, follow-up, cover line). */
 export const LARGE_MODEL = "qwen3.8-max-0902";
 /** The short stages (editor, scrub, refine, variants) plus brand import, onboarding and the memory check. */
 export const SMALL_MODEL = "deepseek-v4.1-flash";
 
-// Free quota until: qwen3.8-max-0902 2026-12-01, deepseek-v4-pro-0813 2026-11-13,
-// deepseek-v4.1-flash 2026-12-13, deepseek-v4.1-flash-1017 2027-01-17, qwen3.8-flash 2026-11-25.
-// Each chain ends on deepseek-v4.1-flash-1017 or qwen3.8-flash so a draft is not lost while either lasts.
-const LARGE = ["deepseek-v4-pro-0813", "deepseek-v4.1-flash-1017"];
-const SMALL = ["deepseek-v4.1-flash-1017", "qwen3.8-flash"];
+// Each model has its own 1M-token quota, so the chains spread over several.
+// Every chain ends on deepseek-v4.1-flash-1017 or qwen3.7-flash (the latter is 25% used).
+const LARGE = ["deepseek-v4-pro-0813", "qwen3.8-max", "deepseek-v4-pro", "qwen3.7-max", "deepseek-v4.1-flash-1017"];
+const SMALL = ["deepseek-v4.1-flash-1017", "deepseek-v4-flash", "qwen3.7-flash"];
 
 /**
  * Primary model -> what to try after it, in order. A model not listed here
@@ -45,13 +42,13 @@ const SMALL = ["deepseek-v4.1-flash-1017", "qwen3.8-flash"];
  * (a test checks that).
  */
 export const MODEL_FALLBACKS: Record<string, string[]> = {
-  // Writer prompt 2026-11-09: valid JSON, 45s. qwen3.8-max (undated) was the writer before glm.
+  // Writer prompt 2026-11-09: valid JSON, 45s.
   [LARGE_MODEL]: LARGE,
-  // Editor prompt 2026-11-09: valid JSON in 1.2s and kept to the source; qwen3.8-flash added sentences.
+  // Editor prompt 2026-11-09: valid JSON in 1.2s and kept to the source.
   [SMALL_MODEL]: SMALL,
-  // Used-up models, kept for any caller that still names them.
-  ...Object.fromEntries(["glm-5.1", "glm-5.2", "qwen3.8-max", "qwen3.7-max", "deepseek-v4-pro"].map((m) => [m, [LARGE_MODEL, ...LARGE]])),
-  ...Object.fromEntries(["qwen3.7-flash", "qwen-flash", "qwen3.7-plus"].map((m) => [m, [SMALL_MODEL, ...SMALL]])),
+  // Models with no quota, kept for any caller that still names them.
+  ...Object.fromEntries(["glm-5.1", "glm-5.2"].map((m) => [m, [LARGE_MODEL, ...LARGE]])),
+  ...Object.fromEntries(["qwen-flash", "qwen3.8-flash"].map((m) => [m, [SMALL_MODEL, ...SMALL]])),
 };
 
 export function modelChain(primary: string): string[] {

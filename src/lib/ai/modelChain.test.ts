@@ -29,20 +29,21 @@ describe("model fallback", () => {
   it("moves down the chain when the free quota is used up, keeping the rest of the payload", async () => {
     const { fetchImpl, calls } = fakeFetch({ "qwen3.8-max-0902": [403, QUOTA], "deepseek-v4-pro-0813": [403, QUOTA] });
     const r = await chatWithFallback({ model: "qwen3.8-max-0902", temperature: 0.7, messages: [{ role: "user", content: "x" }] }, "k", { fetchImpl });
-    expect(r.model).toBe("deepseek-v4.1-flash-1017");
+    expect(r.model).toBe("qwen3.8-max");
     expect(r.status).toBe(200);
     expect(r.skipped.map((s) => s.model)).toEqual(["qwen3.8-max-0902", "deepseek-v4-pro-0813"]);
-    expect(calls).toEqual(["qwen3.8-max-0902", "deepseek-v4-pro-0813", "deepseek-v4.1-flash-1017"]);
+    expect(calls).toEqual(["qwen3.8-max-0902", "deepseek-v4-pro-0813", "qwen3.8-max"]);
   });
 
   it("runs the large stages on models with free quota, ending on one that lasts longest", () => {
-    expect(modelChain("qwen3.8-max-0902")).toEqual(["qwen3.8-max-0902", "deepseek-v4-pro-0813", "deepseek-v4.1-flash-1017"]);
-    expect(modelChain("deepseek-v4.1-flash")).toEqual(["deepseek-v4.1-flash", "deepseek-v4.1-flash-1017", "qwen3.8-flash"]);
+    expect(modelChain("qwen3.8-max-0902")).toEqual(["qwen3.8-max-0902", "deepseek-v4-pro-0813", "qwen3.8-max", "deepseek-v4-pro", "qwen3.7-max", "deepseek-v4.1-flash-1017"]);
+    expect(modelChain("deepseek-v4.1-flash")).toEqual(["deepseek-v4.1-flash", "deepseek-v4.1-flash-1017", "deepseek-v4-flash", "qwen3.7-flash"]);
+    for (const m of [...modelChain("qwen3.8-max-0902"), ...modelChain("deepseek-v4.1-flash")]) expect(USED_UP.includes(m), `${m} is used up`).toBe(false);
   });
 
   it("sends a caller that still names a used-up model on to the new chain", () => {
     expect(modelChain("glm-5.1")).toEqual(["glm-5.1", ...modelChain("qwen3.8-max-0902")]);
-    expect(modelChain("qwen3.7-plus")).toEqual(["qwen3.7-plus", ...modelChain("deepseek-v4.1-flash")]);
+    expect(modelChain("qwen3.8-flash")).toEqual(["qwen3.8-flash", ...modelChain("deepseek-v4.1-flash")]);
   });
 
   it("returns any other error as it is, without switching model", async () => {
