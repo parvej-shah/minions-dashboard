@@ -61,3 +61,16 @@ export function checkIsDue(row: LinkedInChannelRow | null, now: Date): boolean {
   const at = linkedinConfig(row).checkedAt ? Date.parse(linkedinConfig(row).checkedAt!) : NaN;
   return Number.isNaN(at) || now.getTime() - at >= CHECK_EVERY_HOURS * 3_600_000;
 }
+
+/** The banner on Today (task 120): only when a bad connection is costing posts. */
+export function linkedinBanner(
+  health: LinkedInHealth,
+  at: { scheduled: number; waiting: number },
+): { text: string; action: string } | null {
+  if (health === "connected" || at.scheduled + at.waiting === 0) return null;
+  const action = health === "missing" ? "Connect LinkedIn" : "Reconnect LinkedIn";
+  if (at.scheduled === 0) return { text: "Connect LinkedIn so your posts can go out.", action };
+  const posts = at.scheduled === 1 ? "1 scheduled post" : `${at.scheduled} scheduled posts`;
+  if (health === "expiring") return { text: "Your LinkedIn connection ends soon. Reconnect so scheduled posts keep going out.", action };
+  return { text: `${posts} won't go out until LinkedIn is ${health === "missing" ? "connected" : "reconnected"}.`, action };
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { autopilotAllowed, checkIsDue, linkedinHealth, linkedinNudge } from "./linkedinHealth";
+import { autopilotAllowed, checkIsDue, linkedinHealth, linkedinBanner, linkedinNudge } from "./linkedinHealth";
 
 const now = new Date("2026-11-20T09:00:00Z");
 const days = (d: number) => new Date(now.getTime() + d * 86_400_000).toISOString();
@@ -42,5 +42,22 @@ describe("what the health allows", () => {
     expect(checkIsDue(row({ checkedAt: days(-1.1) }), now)).toBe(true);
     expect(checkIsDue(row(null), now)).toBe(true);
     expect(checkIsDue(null, now)).toBe(false);
+  });
+});
+
+describe("linkedinBanner (task 120)", () => {
+  it("is null when connected or nothing is at stake", () => {
+    expect(linkedinBanner("connected", { scheduled: 2, waiting: 1 })).toBeNull();
+    expect(linkedinBanner("missing", { scheduled: 0, waiting: 0 })).toBeNull();
+  });
+  it("names the cost when posts are scheduled", () => {
+    expect(linkedinBanner("missing", { scheduled: 2, waiting: 0 })).toEqual({ text: "2 scheduled posts won't go out until LinkedIn is connected.", action: "Connect LinkedIn" });
+    expect(linkedinBanner("expired", { scheduled: 1, waiting: 0 })).toEqual({ text: "1 scheduled post won't go out until LinkedIn is reconnected.", action: "Reconnect LinkedIn" });
+  });
+  it("asks gently when only drafts are waiting", () => {
+    expect(linkedinBanner("missing", { scheduled: 0, waiting: 2 })).toEqual({ text: "Connect LinkedIn so your posts can go out.", action: "Connect LinkedIn" });
+  });
+  it("warns before the token ends", () => {
+    expect(linkedinBanner("expiring", { scheduled: 1, waiting: 0 })).toEqual({ text: "Your LinkedIn connection ends soon. Reconnect so scheduled posts keep going out.", action: "Reconnect LinkedIn" });
   });
 });

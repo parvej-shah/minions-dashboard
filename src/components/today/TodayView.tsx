@@ -3,7 +3,7 @@
 import { failureSummary } from "@/lib/publishFailures";
 import React, { useMemo, useState } from "react";
 import { autopilotOffered } from "@/lib/plan/ahead";
-import { autopilotAllowed, linkedinNudge, type LinkedInHealth } from "@/lib/linkedinHealth";
+import { autopilotAllowed, linkedinBanner, linkedinNudge, type LinkedInHealth } from "@/lib/linkedinHealth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -83,6 +83,11 @@ export default function TodayView() {
   const nextSlot = nextFreeSlot(preview.data.slots, taken, now.getTime(), MIN_LEAD_MINUTES);
   const offerAutopilot = schedule.data?.created_at ? autopilotOffered(new Date(schedule.data.created_at), schedule.data.require_review === true, now) : false;
   const linkedinLine = schedule.data?.linkedin ? linkedinNudge(schedule.data.linkedin) : null;
+  const atStake = {
+    scheduled: assets.data.filter((a) => a.status === "SCHEDULED" && !(a.channels?.length && a.channels.every((k) => k === "blog"))).length,
+    waiting: waiting.length,
+  };
+  const banner = schedule.data?.linkedin ? linkedinBanner(schedule.data.linkedin, atStake) : null;
   const firstName = session?.user?.name?.split(" ")[0];
   const dateLine = new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "long", day: "numeric", month: "long" }).format(now);
 
@@ -115,6 +120,13 @@ export default function TodayView() {
   return (
     <div className="mx-auto max-w-[1040px] space-y-14">
       <PageHeader kicker={dateLine} title={`${greeting(now, tz)}${firstName ? `, ${firstName}` : ""}.`} />
+
+      {banner && (
+        <div role="status" className="-mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-coral/30 bg-coral/5 px-5 py-4">
+          <p className="text-[16px] text-ink">{banner.text}</p>
+          <Link href="/api/auth/linkedin/connect?return_to=/" prefetch={false} className={buttonStyles({ size: "md" })}>{banner.action}</Link>
+        </div>
+      )}
 
       {assets.error ? (
         <Card as="section" pad="lg">
@@ -368,7 +380,7 @@ export default function TodayView() {
               + Draft from a thought or link
             </button>
             {!nextSlot && <Link href="/schedule" className="text-[17px] text-brand hover:underline">Set publishing pace</Link>}
-            {linkedinLine && (
+            {linkedinLine && !banner && (
               <span className="text-[17px] text-muted">
                 {linkedinLine.text}{" "}
                 <Link href="/fleet" className="text-brand hover:underline">{linkedinLine.action}</Link>
