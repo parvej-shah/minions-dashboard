@@ -53,6 +53,18 @@ describe("getDraftAuthorContext rotates the opening by the workspace's post coun
     expect(ctx.recent_posts).toEqual(["A booking counts when the calendar confirms it."]);
   });
 
+  it("rotates the mode and close by post count, but not for the starter set (phase 4)", async () => {
+    db.idea.findFirst.mockResolvedValue(idea());
+    db.asset.count.mockResolvedValue(1);
+    const ctx = await getDraftAuthorContext("c1", "IDEA-1");
+    expect(ctx.allowed_modes).toContain(ctx.mode_hint);
+    expect(ctx.close).toBeTruthy();
+    db.idea.findFirst.mockResolvedValue(idea(["Starter set"]));
+    const starter = await getDraftAuthorContext("c1", "IDEA-1");
+    expect(starter.mode_hint).toBeUndefined();
+    expect(starter.close).toBeUndefined();
+  });
+
   it("still drafts when counting fails", async () => {
     db.idea.findFirst.mockResolvedValue(idea());
     db.asset.count.mockRejectedValue(new Error("db"));

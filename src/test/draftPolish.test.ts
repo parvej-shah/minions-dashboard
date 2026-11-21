@@ -63,3 +63,55 @@ describe("polishDraft", () => {
     expect(r.texts.title).toBe("T");
   });
 });
+
+describe("polishDraft against the workspace's recent posts (task 113 phase 3)", () => {
+  const OLD = "Most teams think the voice agent is the hard part.";
+  const HOOK = "Most teams think the calendar sync is the easy part.";
+  const FRESH = "I'd look at the calendar sync before the voice agent.";
+  const recent = { openings: [OLD], closings: ["Has anyone measured how many of those callers try again?"] };
+
+  it("a fresh draft costs no call", async () => {
+    m.askJev.mockResolvedValue(jev(3.5));
+    await polishDraft({ hook: FRESH, li_variant: BETTER }, { openings: [OLD], closings: [] });
+    expect(m.chat).not.toHaveBeenCalled();
+  });
+
+  it("a repeated opening gets one hook-only rewrite, kept when it no longer repeats", async () => {
+    m.askJev.mockResolvedValue(jev(3.5));
+    m.chat.mockResolvedValue(reply(FRESH));
+    const r = await polishDraft({ hook: HOOK }, recent);
+    expect(m.chat).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(m.chat.mock.calls[0][0])).toMatch(/Opens the way a recent post did/);
+    expect(r.texts.hook).toBe(FRESH);
+  });
+
+  it("keeps the hook when the rewrite still repeats", async () => {
+    m.askJev.mockResolvedValue(jev(3.5));
+    m.chat.mockResolvedValue(reply("Most teams think the calendar sync is simple."));
+    const r = await polishDraft({ hook: HOOK }, recent);
+    expect(r.texts.hook).toBe(HOOK);
+    expect(r.report.hook.rejected).toMatch(/still repeats/);
+  });
+
+  it("puts the new hook on the LinkedIn post's repeated first line, without another call", async () => {
+    m.askJev.mockResolvedValue(jev(3.5));
+    m.chat.mockResolvedValue(reply(FRESH));
+    const li = `${HOOK}\n\nWhat I'd check first is how fast the call gets answered, because that is the part buyers notice.\n\n#VoiceAI #RealEstateTech`;
+    const r = await polishDraft({ hook: HOOK, li_variant: li }, recent);
+    expect(m.chat).toHaveBeenCalledTimes(1);
+    expect(r.texts.li_variant.split("\n\n")[0]).toBe(FRESH);
+    expect(r.texts.li_variant).toMatch(/#VoiceAI #RealEstateTech$/);
+  });
+
+  it("a repeated close alone costs no call; inside a rewrite it is fixed too", async () => {
+    m.askJev.mockResolvedValue(jev(3.5));
+    await polishDraft({ li_variant: BETTER }, recent);
+    expect(m.chat).not.toHaveBeenCalled();
+
+    m.askJev.mockResolvedValueOnce(jev(0.6, 0.9)).mockResolvedValue(jev(3.2));
+    m.chat.mockResolvedValue(reply(BETTER));
+    await polishDraft({ li_variant: TEMPLATE }, { openings: [], closings: ["The backend is the truth."] });
+    expect(m.chat).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(m.chat.mock.calls[0][0])).toMatch(/Ends the way a recent post did/);
+  });
+});

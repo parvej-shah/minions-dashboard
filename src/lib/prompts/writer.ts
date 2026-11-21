@@ -1,6 +1,6 @@
 import type { ChatPayload, Json } from "./types";
 import { evidenceRules, type DraftAuthorContext } from "@/lib/drafts/authorContext";
-import { resolveContentMode } from "@/lib/drafts/strategy";
+import { CLOSES, resolveContentMode } from "@/lib/drafts/strategy";
 import { authorBlock } from "./strategist";
 import { SOUND_HUMAN } from "./soundHuman";
 import { buysOutcome, OUTCOME_FIRST } from "./outcomeFirst";
@@ -33,6 +33,8 @@ export function renderWriter(input: WriterInput): ChatPayload {
   // STORY and CASE_NOTE need evidence the idea may not have; code decides.
   const mode = author ? resolveContentMode(strategy.content_mode, author.trust_basis) : String(strategy.content_mode || "INSIGHT");
   const isPost = author?.recommended_format === "POST";
+  // Rotated by post count (src/lib/drafts/strategy.ts closeFor), even for an idea with no author context.
+  const close = input.author?.close && CLOSES[input.author.close] ? input.author.close : undefined;
   const rules = author ? evidenceRules(author) : [];
 
   const writerSystemPrompt = `You are the lead writer for ${companyName}. Write in this brand's own voice for its one reader, the ICP. Prioritize specificity, usefulness, and an earned point of view over imitation or generic polish.
@@ -49,7 +51,9 @@ THE AUTHOR'S ADVANTAGE IS THE POINT: The piece must carry the specific detail fr
 
 ${OUTCOME_FIRST}` : ""}
 
-SHAPE: This is ${mode === "STORY" ? "a STORY: the moment, the tension, what changed, the lesson" : mode === "HOW_TO" ? "a HOW_TO: the problem, the method, the checks" : mode === "CASE_NOTE" ? "a CASE_NOTE: context, what was done, the result, its limits" : mode === "OPINION" ? "an OPINION: the position, the reasons, the strongest counterpoint, the conclusion" : "an INSIGHT: the observation, why it happens, what it means for the reader"}. These are the moves, not a template: use the ones the idea earns, in the order that serves the argument. There is no required section list.${author?.vision ? " You may close on the vision given, in one or two sentences." : ""}
+SHAPE: This is ${mode === "STORY" ? "a STORY: the moment, the tension, what changed, the lesson" : mode === "HOW_TO" ? "a HOW_TO: the problem, the method, the checks" : mode === "CASE_NOTE" ? "a CASE_NOTE: context, what was done, the result, its limits" : mode === "OPINION" ? "an OPINION: the position, the reasons, the strongest counterpoint, the conclusion" : "an INSIGHT: the observation, why it happens, what it means for the reader"}. These are the moves, not a template: use the ones the idea earns, in the order that serves the argument. There is no required section list.${close ? "" : author?.vision ? " You may close on the vision given, in one or two sentences." : ""}${close ? `
+
+CLOSE: ${CLOSES[close]}${author?.vision ? " The vision given may lead into it." : ""}` : ""}
 
 LENGTH: ${isPost ? "A short piece: 250 to 450 words. At most two '## ' headings; none is fine." : "350 to 800 words. Use '## ' headings only where the piece has distinct parts (usually 2 to 4)."} Prefer shorter and honest over padded. Every sentence must add evidence, interpretation, or practical value.
 

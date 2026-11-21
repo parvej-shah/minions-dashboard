@@ -143,3 +143,25 @@ export function resolveContentMode(picked: unknown, trustBasis: string[]): Conte
   if (allowed.includes(mode)) return mode;
   return mode === "STORY" ? "OPINION" : "INSIGHT";
 }
+
+/**
+ * The body's shape for this post (task 113 phase 4): `turn` walks the modes the
+ * evidence allows, so a workspace's posts don't all take one shape. A hint to
+ * the strategist, not a rule: resolveContentMode still has the last word.
+ */
+export function modeFor(allowed: ContentMode[], turn = 0): ContentMode {
+  return allowed[Math.abs(Math.trunc(turn)) % allowed.length];
+}
+
+/** How the post ends. A closing question on every post is as visible as one opening. */
+export const CLOSES = {
+  OBSERVATION: "End on a plain, specific observation about the situation: no question to the reader, no slogan.",
+  QUESTION: "End on one honest question the author still has about this, specific enough that a peer could answer it from their own work. Never a generic 'Thoughts?'.",
+  NEXT_STEP: "End on one concrete thing the reader could check or try next, put the way the author would suggest it to a peer. Claim no result.",
+} as const;
+export type CloseKind = keyof typeof CLOSES;
+const CLOSE_ORDER: CloseKind[] = ["OBSERVATION", "QUESTION", "NEXT_STEP"];
+
+export function closeFor(turn = 0): CloseKind {
+  return CLOSE_ORDER[Math.abs(Math.trunc(turn)) % CLOSE_ORDER.length];
+}

@@ -7,6 +7,8 @@ import { writerExpertisePromptGuidance } from "@/constants/writerExpertise";
 import { toIcpContext, EMPTY_ICP } from "@/services/authorContext";
 import { parseBrandProof } from "@/lib/brand-proof";
 import { STARTER_TAG } from "@/lib/starterSet";
+import { lastParagraph } from "@/lib/drafts/openingRepeats";
+import { closeFor, modeFor } from "@/lib/drafts/strategy";
 
 const hash = (s: string) => crypto.createHash("sha256").update(s).digest("hex").slice(0, 32);
 
@@ -46,6 +48,23 @@ async function recentDrafts(clientId: string, ideaId: string): Promise<{ posts: 
   };
 }
 
+/**
+ * The first lines (hooks) and LinkedIn closing lines of the workspace's recent
+ * drafts, for the cross-post check in src/services/draftPolish.ts.
+ */
+export async function recentPostLines(clientId: string): Promise<{ openings: string[]; closings: string[] }> {
+  const rows = await prisma.asset.findMany({
+    where: { clientId, createdAt: { gte: new Date(Date.now() - RECENT_DAYS * 86_400_000) } },
+    orderBy: { createdAt: "desc" },
+    take: RECENT_MAX,
+    select: { hook: true, linkedinVariant: true },
+  });
+  return {
+    openings: rows.map((r) => oneLine(r.hook)).filter(Boolean),
+    closings: rows.map((r) => oneLine(lastParagraph(r.linkedinVariant ?? ""))).filter(Boolean),
+  };
+}
+
 export async function getDraftAuthorContext(clientId: string, ideaId: string): Promise<DraftAuthorContext> {
   const [idea, icpRow, profile, recentRows, postCount] = await Promise.all([
     prisma.idea.findFirst({ where: { id: ideaId, clientId }, include: { lane: true } }),
@@ -54,18 +73,22 @@ export async function getDraftAuthorContext(clientId: string, ideaId: string): P
     recentDrafts(clientId, ideaId).catch(() => ({ posts: [], openings: [] })),
     prisma.asset.count({ where: { clientId } }).catch(() => 0),
   ]);
-  const recent = { recent_posts: recentRows.posts, recent_openings: recentRows.openings };
   // The opening walks its list by post count; the first-login set keeps the
   // openings it planned (src/lib/starterSet.ts), since its posts draft at once.
-  const turn = idea?.tags?.includes(STARTER_TAG) ? 0 : postCount;
+  const starter = !!idea?.tags?.includes(STARTER_TAG);
+  const turn = starter ? 0 : postCount;
+  const recent = { recent_posts: recentRows.posts, recent_openings: recentRows.openings };
+  // The body's shape and the close rotate the same way (phase 4); the starter set planned its own.
+  const finish = (ctx: DraftAuthorContext): DraftAuthorContext =>
+    starter ? { ...ctx, ...recent } : { ...ctx, ...recent, mode_hint: modeFor(ctx.allowed_modes, turn), close: closeFor(turn) };
   const icp = icpRow ? toIcpContext(icpRow) : EMPTY_ICP;
   const standing = writerExpertisePromptGuidance(profile?.writerExpertise);
   const note = idea ? manualIdeaNote(idea) : null;
   if (idea && note) {
     const lane = idea.lane ? { name: idea.lane.name, purpose: idea.lane.purpose, brief: idea.lane.brief } : null;
-    return { ...noteDraftContext(note, icp, standing, lane, turn), ...recent };
+    return finish(noteDraftContext(note, icp, standing, lane, turn));
   }
-  if (!idea || !idea.gateVerdict) return { ...emptyDraftContext(icp, standing, idea?.pillar, turn), ...recent };
+  if (!idea || !idea.gateVerdict) return finish(emptyDraftContext(icp, standing, idea?.pillar, turn));
 
   // Inactive items stay out: switching one off means "do not use this".
   const rows = idea.memoryIds.length
@@ -80,7 +103,7 @@ export async function getDraftAuthorContext(clientId: string, ideaId: string): P
     memory.push({ kind: m.kind, disclosure: generalize ? "GENERALIZE" : "PUBLIC", text: generalize ? await generalizedFor(m) : m.content });
   }
   const lane = idea.lane ? { name: idea.lane.name, purpose: idea.lane.purpose, brief: idea.lane.brief } : null;
-  return { ...buildDraftAuthorContext(idea, memory, icp, lane, standing, turn), ...recent };
+  return finish(buildDraftAuthorContext(idea, memory, icp, lane, standing, turn));
 }
 
 /** What the draft check needs beyond the author context: the verified proof and the original memory. */

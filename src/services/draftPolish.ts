@@ -3,6 +3,7 @@ import { askJev, type JevQuestion } from "@/lib/ai/jev";
 import { slopReport, SLOP_REWRITE_AT, type SlopProblem } from "@/lib/drafts/slop";
 import { rejectPolish } from "@/lib/drafts/polish";
 import { renderHumanize, type PolishKind } from "@/lib/prompts/humanize";
+import { firstParagraph, lastParagraph, lineRepeats } from "@/lib/drafts/openingRepeats";
 
 /**
  * Makes a finished draft read like its author wrote it (see src/lib/drafts/slop.ts).
@@ -61,8 +62,25 @@ export interface PolishVerdict {
   human: number | null;
   /** The code's weighted count of AI figures. */
   slop: number;
-  problems: Pick<SlopProblem, "kind" | "fix" | "examples">[];
+  problems: (Pick<SlopProblem, "fix" | "examples"> & { kind: SlopProblem["kind"] | "lecture" | "generic" | "repeat" })[];
   needsRewrite: boolean;
+}
+
+/** The workspace's recent first and last lines (task 113 phase 3). */
+export interface RecentLines {
+  openings: string[];
+  closings: string[];
+}
+
+/**
+ * A line that repeats a recent post. `force` makes it a reason to rewrite on
+ * its own (the hook: a short, cheap call); otherwise it only rides along in a
+ * rewrite the text already gets, so a repeated close never costs a call.
+ */
+interface RepeatCheck {
+  fix: string;
+  force: boolean;
+  repeats: (text: string) => boolean;
 }
 
 export async function judge(text: string): Promise<PolishVerdict> {
@@ -119,8 +137,12 @@ export interface PolishResult {
   rejected: string | null;
 }
 
-export async function polishText(text: string, kind: PolishKind): Promise<PolishResult> {
+export async function polishText(text: string, kind: PolishKind, repeat?: RepeatCheck): Promise<PolishResult> {
   const before = await judge(text);
+  if (repeat) {
+    before.problems.push({ kind: "repeat", fix: repeat.fix, examples: [] });
+    if (repeat.force) before.needsRewrite = true;
+  }
   let best = { text, verdict: before };
   let rewrites = 0;
   let rejected: string | null = null;
@@ -136,24 +158,64 @@ export async function polishText(text: string, kind: PolishKind): Promise<Polish
       rejected = reason;
       continue;
     }
+    if (repeat?.force && repeat.repeats(candidate)) {
+      rejected = "still repeats a recent post";
+      continue;
+    }
     const verdict = await judge(candidate);
-    if (better(verdict, best.verdict)) best = { text: candidate.trim(), verdict };
+    // A hook rewritten only for repeating is kept when it reads no worse.
+    const fixesRepeat = repeat?.force && !verdict.needsRewrite && verdict.slop <= best.verdict.slop;
+    if (better(verdict, best.verdict) || fixesRepeat) best = { text: candidate.trim(), verdict };
     else rejected = "did not read better";
   }
   return { text: best.text, before, after: best.verdict, rewrites, rejected: best.text === text ? rejected : null };
 }
 
-/** Polishes the prose texts of one draft in parallel; other keys pass through. */
-export async function polishDraft(texts: Record<string, string>): Promise<{ texts: Record<string, string>; report: Record<string, Omit<PolishResult, "text">> }> {
+/** The cross-post checks for one draft: its opening (hook) and the LinkedIn post's close. */
+function repeatChecks(texts: Record<string, string>, recent?: RecentLines): Record<string, RepeatCheck> {
+  const checks: Record<string, RepeatCheck> = {};
+  if (!recent) return checks;
+  const opening = texts.hook?.trim() ? lineRepeats(texts.hook, recent.openings) : null;
+  if (opening)
+    checks.hook = {
+      fix: `Opens the way a recent post did (${opening}). Open with a different first word and a different sentence structure; keep the meaning and every fact.`,
+      force: true,
+      repeats: (t) => lineRepeats(t, recent.openings) !== null,
+    };
+  const close = texts.li_variant?.trim() ? lineRepeats(lastParagraph(texts.li_variant), recent.closings) : null;
+  if (close)
+    checks.li_variant = {
+      fix: `Ends the way a recent post did (${close}). End on a different kind of line (a plain observation, a next step or a question), keeping every fact.`,
+      force: false,
+      repeats: (t) => lineRepeats(lastParagraph(t), recent.closings) !== null,
+    };
+  return checks;
+}
+
+/**
+ * Polishes the prose texts of one draft in parallel; other keys pass through.
+ * With the workspace's recent lines, a repeated opening is rewritten too.
+ */
+export async function polishDraft(
+  texts: Record<string, string>,
+  recent?: RecentLines
+): Promise<{ texts: Record<string, string>; report: Record<string, Omit<PolishResult, "text">> }> {
   const out = { ...texts };
   const report: Record<string, Omit<PolishResult, "text">> = {};
+  const checks = repeatChecks(texts, recent);
   await Promise.all(
     Object.entries(POLISHED).map(async ([key, kind]) => {
       if (!texts[key]?.trim()) return;
-      const { text, ...rest } = await polishText(texts[key], kind);
+      const { text, ...rest } = await polishText(texts[key], kind, checks[key]);
       out[key] = text;
       report[key] = rest;
     })
   );
+  // LinkedIn opens on the hook, so a new hook replaces its repeated first line in code, not by another call.
+  if (recent && out.hook !== texts.hook && out.li_variant?.trim()) {
+    const first = firstParagraph(out.li_variant);
+    const hook = out.hook.trim();
+    if (lineRepeats(first, recent.openings)) out.li_variant = out.li_variant.replace(first, () => hook);
+  }
   return { texts: out, report };
 }

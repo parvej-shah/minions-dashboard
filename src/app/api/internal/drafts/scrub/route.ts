@@ -1,5 +1,6 @@
 import { scrubBannedWords } from "@/services/bannedScrub";
 import { polishDraft } from "@/services/draftPolish";
+import { recentPostLines } from "@/services/draftContext";
 import { withCostMeter } from "@/lib/ai/cost";
 import { readJsonOrEmpty, requireFields } from "@/server/http/body";
 import { badRequest } from "@/server/http/errors";
@@ -21,7 +22,9 @@ export const POST = route({ auth: "webhook", failure: "Failed to scrub banned wo
 
   const strings = Object.fromEntries(Object.entries(texts).map(([key, value]) => [key, typeof value === "string" ? value : ""]));
   const { value, costUsd } = await withCostMeter(async () => {
-    const polished = await polishDraft(strings).catch((e) => {
+    // A failed read only skips the cross-post check (task 113), never the draft.
+    const recent = await recentPostLines(client_id).catch(() => undefined);
+    const polished = await polishDraft(strings, recent).catch((e) => {
       console.warn("[polish] failed, keeping the draft as written:", e);
       return { texts: strings, report: {} };
     });

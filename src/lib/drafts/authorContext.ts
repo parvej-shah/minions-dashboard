@@ -1,5 +1,5 @@
 import type { IcpContext } from "@/services/authorContext";
-import { allowedContentModes, hookFor, type ContentMode, type Hook } from "./strategy";
+import { allowedContentModes, hookFor, type CloseKind, type ContentMode, type Hook } from "./strategy";
 
 /**
  * Everything the strategist, writer and editor need to write an idea as THIS
@@ -37,6 +37,10 @@ export interface DraftAuthorContext {
   recent_posts?: string[];
   /** The first lines of the author's last few posts, so this one opens differently (task 113). */
   recent_openings?: string[];
+  /** The body shape this post should take, rotated by post count (task 113 phase 4). Absent for the starter set. */
+  mode_hint?: ContentMode;
+  /** How this post ends, rotated by post count. Absent for the starter set. */
+  close?: CloseKind;
 }
 
 /** Plain-language evidence rules for this draft, from its trust basis. */

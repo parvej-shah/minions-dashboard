@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { hookFor, hookOptions } from "@/lib/drafts/strategy";
+import { allowedContentModes, closeFor, hookFor, hookOptions, modeFor } from "@/lib/drafts/strategy";
+import { renderWriter } from "@/lib/prompts/writer";
+import { renderVariants } from "@/lib/prompts/variants";
 import { buildDraftAuthorContext } from "@/lib/drafts/authorContext";
 import { renderStrategist } from "@/lib/prompts/strategist";
 import { draftAuthor } from "@/test/n8n/fixtures";
@@ -63,5 +65,39 @@ describe("the strategist sees the openings already used", () => {
     const p = render([]);
     expect(p.messages[1].content).not.toMatch(/RECENT OPENINGS/);
     expect(p.messages[0].content).not.toMatch(/RECENT OPENINGS/);
+  });
+});
+
+// Task 113 phase 4: the body's shape and the close rotate too.
+describe("content mode and close rotate", () => {
+  it("the mode hint walks the allowed modes and never leaves them", () => {
+    for (const trust of [[], ["LIVED_EXPERIENCE"], ["APPROVED_PROOF"], ["USER_NOTE"]]) {
+      const allowed = allowedContentModes(trust);
+      const hints = [0, 1, 2].map((turn) => modeFor(allowed, turn));
+      hints.forEach((h) => expect(allowed).toContain(h));
+      expect(new Set(hints).size).toBe(Math.min(3, allowed.length));
+    }
+  });
+
+  it("the close walks observation, question and next step", () => {
+    expect(new Set([0, 1, 2].map(closeFor)).size).toBe(3);
+    expect(closeFor(3)).toBe(closeFor(0));
+  });
+
+  it("the strategist is told the mode hint", () => {
+    const p = renderStrategist({ brand_name: "Acme", target: { idea_id: "IDEA-1" }, brand_context: "ctx", author: { ...draftAuthor, mode_hint: "HOW_TO" } });
+    expect(p.messages[0].content).toMatch(/Use HOW_TO for this post/);
+    const none = renderStrategist({ brand_name: "Acme", target: { idea_id: "IDEA-1" }, brand_context: "ctx", author: { ...draftAuthor } });
+    expect(none.messages[0].content).not.toMatch(/for this post unless/);
+  });
+
+  it("the writer is told how to close, and LinkedIn keeps that kind of close", () => {
+    const w = (close?: "QUESTION" | "NEXT_STEP" | "OBSERVATION") =>
+      renderWriter({ company_name: "Acme", strategy: { content_mode: "INSIGHT" }, evidence_block: "None", brand_context: "", tone_examples: [], tone_questionnaire: null, author: { ...draftAuthor, close } }).messages[0].content;
+    expect(w("QUESTION")).toMatch(/CLOSE: End on one honest question/);
+    expect(w("NEXT_STEP")).toMatch(/CLOSE: End on one concrete thing/);
+    expect(w()).not.toMatch(/CLOSE:/);
+    const v = renderVariants({ company_name: "Acme", hook: "h", edited_body: "b", brand_context: "", tone_questionnaire: null, tone_examples: [], audience: "ICP", title: "t" });
+    expect(v.messages[0].content).toMatch(/End the way the Final Body ends/);
   });
 });
