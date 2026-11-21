@@ -67,28 +67,59 @@ const BY_ANGLE: Record<string, Hook> = {
   shift: HOOKS.WHAT_CHANGED,
 };
 
-export function hookFor(input: { sourceType?: string | null; lanePurpose?: string | null; pillar?: string | null }): Hook {
+export interface HookInput {
+  sourceType?: string | null;
+  lanePurpose?: string | null;
+  pillar?: string | null;
+  /** Whether the author's own experience backs the draft. Defaults to a past-experience source. */
+  lived?: boolean;
+}
+
+const H = HOOKS;
+
+/**
+ * The openings this idea's evidence supports, best first. One source type used
+ * to get one opening forever, so a workspace's posts all opened the same way
+ * (task 113). Only the author's own experience may open on the author's scene.
+ */
+export function hookOptions(input: HookInput): Hook[] {
   const { sourceType, lanePurpose, pillar } = input;
-  switch (sourceType) {
-    case "PAST_EXPERIENCE":
-      return HOOKS.AUTHOR_SCENE;
-    case "CURRENT_WORK":
-    case "BUILD_IN_PUBLIC":
-      return HOOKS.WORK_IN_PROGRESS;
-    case "PROFESSIONAL_OPINION":
-      return HOOKS.POSITION;
-    case "EXPERIMENT":
-      return HOOKS.EXPERIMENT;
-    // The author's own note: open on their view, not on a scene the note may not contain.
-    case "USER_NOTE":
-      return HOOKS.POSITION;
-  }
-  // A lane that exists to help the reader choose opens on the choice.
-  if (lanePurpose === "DEMAND") return HOOKS.THE_DECISION;
-  if (sourceType === "ICP_QUESTION") return HOOKS.THE_QUESTION;
-  if (sourceType === "MARKET_SIGNAL") return HOOKS.WHAT_CHANGED;
-  const angle = CONTENT_ANGLES.find((a) => a.pillar === pillar);
-  return (angle && BY_ANGLE[angle.id]) || HOOKS.READER_SCENE;
+  const lived = input.lived ?? sourceType === "PAST_EXPERIENCE";
+  const list = ((): Hook[] => {
+    switch (sourceType) {
+      case "PAST_EXPERIENCE":
+        return [H.AUTHOR_SCENE, H.POSITION, H.INVERSION, H.THE_DECISION];
+      case "CURRENT_WORK":
+      case "BUILD_IN_PUBLIC":
+        return [H.WORK_IN_PROGRESS, H.THE_DECISION, H.POSITION, H.INVERSION];
+      case "PROFESSIONAL_OPINION":
+        return [H.POSITION, H.INVERSION, H.THE_QUESTION, H.DIRECT_COST];
+      case "EXPERIMENT":
+        return [H.EXPERIMENT, H.THE_QUESTION, H.POSITION];
+      // The author's own note: open on their view, not on a scene the note may not contain.
+      case "USER_NOTE":
+        return [H.POSITION, H.THE_QUESTION, H.READER_SCENE];
+    }
+    // A lane that exists to help the reader choose opens on the choice.
+    if (lanePurpose === "DEMAND") return [H.THE_DECISION, H.DIRECT_COST, H.THE_QUESTION];
+    if (sourceType === "ICP_QUESTION") return [H.THE_QUESTION, H.READER_SCENE, H.THE_DECISION];
+    if (sourceType === "MARKET_SIGNAL") return [H.WHAT_CHANGED, H.DIRECT_COST, H.INVERSION];
+    const angle = CONTENT_ANGLES.find((a) => a.pillar === pillar);
+    const byAngle = angle && BY_ANGLE[angle.id];
+    const rest = [H.READER_SCENE, H.THE_QUESTION, H.DIRECT_COST, H.INVERSION];
+    return byAngle ? [byAngle, ...rest.filter((h) => h !== byAngle)] : rest;
+  })();
+  return lived ? list : list.filter((h) => h !== H.AUTHOR_SCENE);
+}
+
+/**
+ * The opening for this draft. `turn` (the workspace's post count) walks the
+ * list, so consecutive drafts of the same kind open differently; turn 0 is
+ * the best fit.
+ */
+export function hookFor(input: HookInput, turn = 0): Hook {
+  const options = hookOptions(input);
+  return options[Math.abs(Math.trunc(turn)) % options.length];
 }
 
 const CONTENT_MODES = ["INSIGHT", "STORY", "HOW_TO", "CASE_NOTE", "OPINION"] as const;

@@ -37,6 +37,16 @@ ${fenceSafe(recent.map((r) => `- ${r}`).join("\n"))}
 ${DATA_CLOSE}`;
 }
 
+/** The first lines of the author's recent posts, fenced as data, so this one opens differently. */
+export function recentOpeningsBlock(author: DraftAuthorContext | undefined): string {
+  const recent = author?.recent_openings ?? [];
+  if (!recent.length) return "";
+  return `${DATA_OPEN}
+RECENT OPENINGS (first lines the author already used):
+${fenceSafe(recent.map((r) => `- ${r}`).join("\n"))}
+${DATA_CLOSE}`;
+}
+
 /** The author inputs both the strategist and the writer see, fenced as data. */
 export function authorBlock(author: DraftAuthorContext | undefined): string {
   if (!author?.found) return "";
@@ -86,7 +96,8 @@ Step 1 — The Hook: For THIS idea, you MUST use the ${hookArchetype} hook arche
 Step 2 — The Reader: Describe the most specific real person implied by the ICP, the Brand Context and this idea. Never default to a software or engineering persona unless the brand and idea support it.
 Step 2b — The Argument: One central argument, built on the author's advantage when one is given. Every key point must serve it.${author?.found && !author.memory.length ? `
   No experience of the author's backs this idea, so make it the author's take on the source: what they think it means for the ICP, what they would check or do about it, and why it matters to their goal. Never a neutral explainer anyone could have written.` : ""}${author?.recent_posts?.length ? `
-  The author posted the arguments under RECENTLY POSTED below in the last few weeks. Do not argue any of them again, even in new words; find the point about this idea that they did not make.` : ""}
+  The author posted the arguments under RECENTLY POSTED below in the last few weeks. Do not argue any of them again, even in new words; find the point about this idea that they did not make.` : ""}${author?.recent_openings?.length ? `
+  The first lines under RECENT OPENINGS below are taken. The inversion_hook must start with a different first word than every one of them and must not copy their structure (the same template with new nouns counts as a copy).` : ""}
 Step 3 — The Visual Art Direction for Cover Art:
   - First decide the visual register from the article's ACTUAL subject matter: PHYSICAL_TRADE or ABSTRACT_DATA.
   - Cover Headline: 3 to 6 words and at most 40 characters, in sentence case, so it sets large in two lines a phone reads in one second. It is the thumbnail's cover line, not the article title: shorter and sharper than the title, written for someone scrolling past, who must know at once what the post is about. Name the specific things the post names (the tool, product, process or change) and what happened or why, and make it make sense with no other context.${author?.memory.length ? ` This post is the author's own account, so title it as their story, in their words: what they did and why (e.g. 'Why we moved from regex to Jev', 'How we stopped losing after-hours calls', 'What our first 50 bookings taught us'), never an abstract maxim about the topic.` : ` Title it as a specific question or claim about the reader's situation (e.g. 'Why voice agents lose bookings after hours'), never an abstract maxim.`}${outcome ? OUTCOME_COVER : ""} Never an abstract category pairing (not 'Fluency Vs Accuracy', 'Speed Versus Quality', or 'AI Scheduling Explained'), never a bare topic label.
@@ -152,7 +163,7 @@ Angle: ${target.angle}
 Why: ${target.why}
 
 Brand Context:
-${cappedBrand}${author?.found ? `\n\n${authorBlock(author)}` : ""}${recentPostsBlock(author) ? `\n\n${recentPostsBlock(author)}` : ""}`;
+${cappedBrand}${author?.found ? `\n\n${authorBlock(author)}` : ""}${recentPostsBlock(author) ? `\n\n${recentPostsBlock(author)}` : ""}${recentOpeningsBlock(author) ? `\n\n${recentOpeningsBlock(author)}` : ""}`;
 
   return {
     model: "qwen3.8-max-0902",

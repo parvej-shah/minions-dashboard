@@ -6,6 +6,7 @@ import { buildDraftAuthorContext, emptyDraftContext, manualIdeaNote, noteDraftCo
 import { writerExpertisePromptGuidance } from "@/constants/writerExpertise";
 import { toIcpContext, EMPTY_ICP } from "@/services/authorContext";
 import { parseBrandProof } from "@/lib/brand-proof";
+import { STARTER_TAG } from "@/lib/starterSet";
 
 const hash = (s: string) => crypto.createHash("sha256").update(s).digest("hex").slice(0, 32);
 
@@ -26,32 +27,45 @@ async function generalizedFor(m: { id: string; content: string; generalizedConte
 const RECENT_DAYS = 21;
 const RECENT_MAX = 8;
 
-/** The arguments of the workspace's recent drafts, newest first, so the next one makes a new point. */
-async function recentArguments(clientId: string, ideaId: string): Promise<string[]> {
+const oneLine = (s: string | null | undefined) => (s ?? "").replace(/\s+/g, " ").trim();
+
+/**
+ * The arguments and first lines of the workspace's recent drafts, newest
+ * first, so the next one makes a new point and opens a new way.
+ */
+async function recentDrafts(clientId: string, ideaId: string): Promise<{ posts: string[]; openings: string[] }> {
   const rows = await prisma.asset.findMany({
     where: { clientId, ideaId: { not: ideaId }, createdAt: { gte: new Date(Date.now() - RECENT_DAYS * 86_400_000) } },
     orderBy: { createdAt: "desc" },
     take: RECENT_MAX,
-    select: { title: true, coreArgument: true },
+    select: { title: true, coreArgument: true, hook: true },
   });
-  return rows.map((r) => (r.coreArgument?.trim() || r.title).replace(/\s+/g, " ")).filter(Boolean);
+  return {
+    posts: rows.map((r) => oneLine(r.coreArgument) || oneLine(r.title)).filter(Boolean),
+    openings: rows.map((r) => oneLine(r.hook)).filter(Boolean),
+  };
 }
 
 export async function getDraftAuthorContext(clientId: string, ideaId: string): Promise<DraftAuthorContext> {
-  const [idea, icpRow, profile, recent] = await Promise.all([
+  const [idea, icpRow, profile, recentRows, postCount] = await Promise.all([
     prisma.idea.findFirst({ where: { id: ideaId, clientId }, include: { lane: true } }),
     prisma.icpProfile.findUnique({ where: { clientId } }),
     prisma.brandProfile.findUnique({ where: { clientId }, select: { writerExpertise: true } }),
-    recentArguments(clientId, ideaId).catch(() => []),
+    recentDrafts(clientId, ideaId).catch(() => ({ posts: [], openings: [] })),
+    prisma.asset.count({ where: { clientId } }).catch(() => 0),
   ]);
+  const recent = { recent_posts: recentRows.posts, recent_openings: recentRows.openings };
+  // The opening walks its list by post count; the first-login set keeps the
+  // openings it planned (src/lib/starterSet.ts), since its posts draft at once.
+  const turn = idea?.tags?.includes(STARTER_TAG) ? 0 : postCount;
   const icp = icpRow ? toIcpContext(icpRow) : EMPTY_ICP;
   const standing = writerExpertisePromptGuidance(profile?.writerExpertise);
   const note = idea ? manualIdeaNote(idea) : null;
   if (idea && note) {
     const lane = idea.lane ? { name: idea.lane.name, purpose: idea.lane.purpose, brief: idea.lane.brief } : null;
-    return { ...noteDraftContext(note, icp, standing, lane), recent_posts: recent };
+    return { ...noteDraftContext(note, icp, standing, lane, turn), ...recent };
   }
-  if (!idea || !idea.gateVerdict) return { ...emptyDraftContext(icp, standing, idea?.pillar), recent_posts: recent };
+  if (!idea || !idea.gateVerdict) return { ...emptyDraftContext(icp, standing, idea?.pillar, turn), ...recent };
 
   // Inactive items stay out: switching one off means "do not use this".
   const rows = idea.memoryIds.length
@@ -66,7 +80,7 @@ export async function getDraftAuthorContext(clientId: string, ideaId: string): P
     memory.push({ kind: m.kind, disclosure: generalize ? "GENERALIZE" : "PUBLIC", text: generalize ? await generalizedFor(m) : m.content });
   }
   const lane = idea.lane ? { name: idea.lane.name, purpose: idea.lane.purpose, brief: idea.lane.brief } : null;
-  return { ...buildDraftAuthorContext(idea, memory, icp, lane, standing), recent_posts: recent };
+  return { ...buildDraftAuthorContext(idea, memory, icp, lane, standing, turn), ...recent };
 }
 
 /** What the draft check needs beyond the author context: the verified proof and the original memory. */

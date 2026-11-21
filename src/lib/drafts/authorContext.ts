@@ -35,6 +35,8 @@ export interface DraftAuthorContext {
   allowed_modes: ContentMode[];
   /** The arguments of the author's last few posts, so this one does not repeat them. */
   recent_posts?: string[];
+  /** The first lines of the author's last few posts, so this one opens differently (task 113). */
+  recent_openings?: string[];
 }
 
 /** Plain-language evidence rules for this draft, from its trust basis. */
@@ -57,7 +59,7 @@ export function evidenceRules(ctx: Pick<DraftAuthorContext, "trust_basis" | "mem
   return rules;
 }
 
-export function emptyDraftContext(icp: IcpContext, writerStanding: string, pillar?: string | null): DraftAuthorContext {
+export function emptyDraftContext(icp: IcpContext, writerStanding: string, pillar?: string | null, turn = 0): DraftAuthorContext {
   return {
     found: false,
     source_type: null,
@@ -73,7 +75,7 @@ export function emptyDraftContext(icp: IcpContext, writerStanding: string, pilla
     memory: [],
     icp,
     writer_standing: writerStanding,
-    hook: hookFor({ pillar }),
+    hook: hookFor({ pillar }, turn),
     allowed_modes: allowedContentModes([]),
   };
 }
@@ -91,7 +93,7 @@ export function manualIdeaNote(idea: { source: string | null; gateVerdict: strin
 }
 
 /** The context for a manual idea's note: the note is the author's experience item, and the only one. */
-export function noteDraftContext(note: string, icp: IcpContext, writerStanding: string, lane: DraftAuthorContext["lane"]): DraftAuthorContext {
+export function noteDraftContext(note: string, icp: IcpContext, writerStanding: string, lane: DraftAuthorContext["lane"], turn = 0): DraftAuthorContext {
   const trust = ["USER_NOTE"];
   return {
     ...emptyDraftContext(icp, writerStanding),
@@ -102,7 +104,7 @@ export function noteDraftContext(note: string, icp: IcpContext, writerStanding: 
     recommended_format: "POST",
     lane,
     memory: [{ kind: "NOTE", disclosure: "PUBLIC", text: note }],
-    hook: hookFor({ sourceType: "USER_NOTE" }),
+    hook: hookFor({ sourceType: "USER_NOTE" }, turn),
     allowed_modes: allowedContentModes(trust),
   };
 }
@@ -130,7 +132,9 @@ export function buildDraftAuthorContext(
   memory: DraftMemory[],
   icp: IcpContext,
   lane: { name: string; purpose: string; brief: string } | null,
-  writerStanding: string
+  writerStanding: string,
+  /** The workspace's post count: walks the opening list (src/lib/drafts/strategy.ts hookFor). */
+  turn = 0
 ): DraftAuthorContext {
   // A cited item since removed or switched off no longer backs the draft.
   const trust = idea.trustBasis.filter((t) => t !== "LIVED_EXPERIENCE" || memory.length > 0);
@@ -150,7 +154,7 @@ export function buildDraftAuthorContext(
     memory,
     icp,
     writer_standing: writerStanding,
-    hook: hookFor({ sourceType: idea.sourceType, lanePurpose: lane?.purpose, pillar: idea.pillar }),
+    hook: hookFor({ sourceType: idea.sourceType, lanePurpose: lane?.purpose, pillar: idea.pillar, lived: trust.includes("LIVED_EXPERIENCE") }, turn),
     allowed_modes: allowedContentModes(trust),
   };
 }
