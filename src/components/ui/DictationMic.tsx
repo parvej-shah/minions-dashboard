@@ -26,6 +26,7 @@ export default function DictationMic({
   keepFocus,
 }: Props) {
   const label = listening ? "Stop talking" : "Talk instead of typing";
+  const title = listening ? "Stop talking (Alt+D)" : "Talk instead of typing (Alt+D)";
   const focusKeep = keepFocus
     ? {
         onPointerDown: (e: PointerEvent) => e.preventDefault(),
@@ -41,7 +42,7 @@ export default function DictationMic({
           onClick={onToggle}
           {...focusKeep}
           aria-label="Stop dictation"
-          title="Stop dictation"
+          title="Stop dictation (Alt+D)"
           style={{ width: size, height: size }}
           className="inline-flex shrink-0 items-center justify-center rounded-full bg-surface text-coral shadow-soft ring-1 ring-coral/30 hover:bg-coral/10 active:scale-[0.94] cursor-pointer transition-[background-color,transform] duration-200 animate-pop-in"
         >
@@ -59,7 +60,7 @@ export default function DictationMic({
         disabled={disabled && !listening}
         aria-pressed={listening}
         aria-label={label}
-        title={label}
+        title={title}
         style={{ width: size, height: size }}
         className={`relative inline-flex shrink-0 items-center justify-center rounded-full transition-[background-color,color,box-shadow,transform] duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.94] ${
           listening

@@ -22,10 +22,18 @@ function asDictatable(el: EventTarget | null): Field | null {
 }
 
 /** Sets a React-controlled field's value the way typing would, so its onChange runs. */
-function writeField(el: Field, next: string) {
+function writeField(el: Field, next: string, cursor?: number) {
   const text = el.maxLength > 0 ? next.slice(0, el.maxLength) : next;
   const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
   Object.getOwnPropertyDescriptor(proto, "value")?.set?.call(el, text);
+  if (cursor !== undefined) {
+    const pos = Math.min(cursor, text.length);
+    try {
+      el.setSelectionRange(pos, pos);
+    } catch {
+      // Some input types do not support setSelectionRange
+    }
+  }
   el.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
@@ -39,7 +47,21 @@ export default function GlobalDictation() {
   const fieldRef = useRef<Field | null>(null);
   const { supported, listening, error, stop, toggle } = useDictation(
     () => fieldRef.current?.value ?? "",
-    (next) => fieldRef.current && writeField(fieldRef.current, next),
+    (next, cursor) => fieldRef.current && writeField(fieldRef.current, next, cursor),
+    () => {
+      const el = fieldRef.current;
+      if (!el) return null;
+      try {
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+        if (typeof start === "number" && typeof end === "number") {
+          return { start, end };
+        }
+      } catch {
+        // Some input types do not support selectionStart/selectionEnd
+      }
+      return null;
+    },
   );
   const listeningRef = useRef(listening);
   const stopRef = useRef(stop);
@@ -64,13 +86,27 @@ export default function GlobalDictation() {
       if (listeningRef.current) return;
       if (e.target === fieldRef.current && !asDictatable(e.relatedTarget)) setField(null);
     };
+    const onKeyDown = (e: KeyboardEvent) => {
+      // Alt+D (or Option+D) toggles dictation directly on the active dictatable field
+      if (e.altKey && !e.ctrlKey && !e.metaKey && (e.code === "KeyD" || e.key === "d" || e.key === "D")) {
+        const active = document.activeElement;
+        const target = asDictatable(active);
+        if (target) {
+          e.preventDefault();
+          e.stopPropagation();
+          toggle();
+        }
+      }
+    };
     document.addEventListener("focusin", onIn);
     document.addEventListener("focusout", onOut);
+    window.addEventListener("keydown", onKeyDown, true);
     return () => {
       document.removeEventListener("focusin", onIn);
       document.removeEventListener("focusout", onOut);
+      window.removeEventListener("keydown", onKeyDown, true);
     };
-  }, [supported]);
+  }, [supported, toggle]);
 
   // Make room for the mic and keep it on the box while things scroll or resize.
   useEffect(() => {

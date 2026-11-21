@@ -34,13 +34,52 @@ export function dictationLanguage(browserLang: string | undefined): string {
   return browserLang?.trim() || "en-US";
 }
 
+export interface DictationRange {
+  start: number;
+  end: number;
+}
+
+export interface DictationInsertionResult {
+  text: string;
+  cursor: number;
+}
+
+/**
+ * Inserts or replaces spoken text at a specific character range (e.g. caret or selection).
+ * Manages surrounding whitespace and punctuation to prevent character collisions.
+ */
+export function insertDictation(
+  base: string,
+  spoken: string,
+  range?: DictationRange,
+): DictationInsertionResult {
+  const said = spoken.trim().replace(/\s+/g, " ");
+  const rawStart = range?.start ?? base.length;
+  const rawEnd = range?.end ?? base.length;
+  const start = Math.max(0, Math.min(rawStart, base.length));
+  const end = Math.max(start, Math.min(rawEnd, base.length));
+
+  if (!said) {
+    return { text: base, cursor: start };
+  }
+
+  const prefix = base.slice(0, start);
+  const suffix = base.slice(end);
+
+  const needsLeadingSpace = prefix.length > 0 && !/\s$/.test(prefix);
+  const startsWithPunctuation = /^[.,!?;:)\]}]/.test(suffix);
+  const needsTrailingSpace = suffix.length > 0 && !/^\s/.test(suffix) && !startsWithPunctuation;
+
+  const insertText = `${needsLeadingSpace ? " " : ""}${said}${needsTrailingSpace ? " " : ""}`;
+  const text = `${prefix}${insertText}${suffix}`;
+  const cursor = prefix.length + (needsLeadingSpace ? 1 : 0) + said.length;
+
+  return { text, cursor };
+}
+
 /** Adds spoken text after what is already typed, with one space between. */
 export function joinDictation(base: string, spoken: string): string {
-  const said = spoken.trim().replace(/\s+/g, " ");
-  if (!said) return base;
-  if (!base) return said;
-  if (/\s$/.test(base)) return /\n$/.test(base) ? base + said : base.replace(/[ \t]+$/, " ") + said;
-  return `${base} ${said}`;
+  return insertDictation(base, spoken, { start: base.length, end: base.length }).text;
 }
 
 /** The whole session's text so far, final and still-being-heard parts together. */
@@ -77,16 +116,24 @@ export function isDictatable(f: { tag: string; type: string; readOnly: boolean; 
   return f.tag === "INPUT" && PROSE_INPUT_TYPES.has(f.type.toLowerCase());
 }
 
-/** Where the shared mic sits inside a field: bottom-right of a text box, middle-right of an input. */
+/** Where the shared mic sits inside a field: top-right of a text box (sticky when scrolled), middle-right of an input. */
 export function micPlacement(
   rect: { top: number; left: number; width: number; height: number },
   multiline: boolean,
+  viewportTopOffset = 72,
 ): { top: number; left: number; size: number } {
   const inset = multiline ? 8 : 4;
   const size = multiline ? 36 : Math.max(22, Math.min(36, rect.height - 8));
+  let top = multiline ? rect.top + inset : rect.top + (rect.height - size) / 2;
+  if (multiline) {
+    const bottom = rect.top + rect.height;
+    const minTop = Math.max(rect.top + inset, viewportTopOffset);
+    const maxTop = bottom - size - inset;
+    top = Math.max(rect.top + inset, Math.min(minTop, maxTop));
+  }
   return {
     size,
     left: rect.left + rect.width - size - inset,
-    top: multiline ? rect.top + rect.height - size - inset : rect.top + (rect.height - size) / 2,
+    top,
   };
 }

@@ -108,7 +108,7 @@
 | 103 | Launch film "Write" (the product; series film 1) | CLAUDE | DONE (first cut rendered 16:9, 4:5, 9:16; awaiting review) | tasks/103.md |
 | 104 | "Covers" 9:16 cut + "Next" tag + signature sound | CLAUDE | DONE (rendered 16:9, 4:5, 9:16 with Next: Yours tag; awaiting review) | tasks/104.md |
 | 105 | Launch film "Yours" (bring your own design; series film 3) | CLAUDE | DONE (approved 2026-11-20) | tasks/105.md |
-| 106 | Launch film "Post Studio": the whole product, Swiss kinetic type (series film 4; style = ~/minions-ai-ad v2) | CLAUDE | TODO (plan final 2026-11-20: Autopilot in, versions A/B on music 1/4; build later) | tasks/106.md |
+| 106 | Launch film "Post Studio": the whole product, Swiss kinetic type (series film 4; style = ~/minions-ai-ad v2) | CLAUDE | IN PROGRESS (user picked music A 2026-11-21; 9:16 re-rendered at 60 fps with motion blur; 4:5 and 16:9 next) | tasks/106.md |
 | 107 | Starter set: two extra drafts from other angles for a new workspace | CLAUDE | DONE (local; not pushed; not tried live) | tasks/107.md |
 | 108 | Draft next day ahead; Autopilot schedules, Review first waits | CLAUDE | DONE (local; not pushed; not tried live) | tasks/108.md |
 | 109 | LinkedIn must be connected for Autopilot; reconnect nudge | CLAUDE | DONE (local; not pushed; not tried live) | tasks/109.md |
@@ -120,3 +120,5 @@
 | 116 | Test flash/plus models against max (cost + quality) | CLAUDE | IN PROGRESS (eval run; owner picks the model) | tasks/116.md |
 | 117 | Admin UX/UI Overhaul & Visibility (Search, Filters, Header, Tabs, Direct Access) | ANTIGRAVITY | DONE | tasks/117.md |
 | 118 | Force channel connection before posting (Option B) | ANTIGRAVITY | DONE | tasks/118.md |
+| 119 | Dictation caret insertion, top-right sticky mic & Alt+D shortcut | ANTIGRAVITY | DONE | tasks/119.md |
+| 120 | Today banner when LinkedIn blocks posts (connect from first draft already shipped in 118) | CLAUDE | DONE (local; not pushed; not tried live) | tasks/120.md |

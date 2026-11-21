@@ -28,6 +28,13 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-21 — Dictation inserts at cursor with top-right sticky mic and Alt+D shortcut
+
+**Decision:** Free speech dictation across the app (and specifically the post edit box) now inserts or replaces text at the active text cursor (`selectionStart`/`selectionEnd`) instead of appending to the end of the post. In multiline editors, the microphone sits top-right (never bottom-right) and smoothly clamps to the viewport top when scrolling, remaining accessible without scrolling and without occluding text. Focused fields can toggle dictation instantly with `Alt + D` (or `Option + D`).
+**Why:** Appending spoken text to the end of a multi-paragraph draft forced users to scroll to the bottom, cut the text, and paste it where they wanted it. Pinned bottom-right mics forced scrolling to find the button and occluded final lines of text. Caret insertion, top-right sticky placement, and keyboard toggling match universal editor mental models and eliminate editing friction.
+**Alternatives considered:** Mic following the moving cursor across lines (evaluated via /intent and rejected: occluded words, created moving targets violating Fitts's law, collided with text selections).
+**Status:** active
+
 ## 2026-11-21 — Enforce channel connection before posting or scheduling (Option B)
 
 **Decision:** If a user has not connected the distribution channel that a post is written for (e.g. LinkedIn), the primary post button in Editorial Studio and Today no longer shows "Post now" or "Post on [date]" nor permits publishing. Instead, it displays "Connect LinkedIn to post" (or respective channel) and opens the channel connection sheet modal directly. Once connected, returning to the draft unlocks normal posting and scheduling.

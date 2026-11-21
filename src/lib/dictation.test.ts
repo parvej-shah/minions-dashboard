@@ -92,12 +92,11 @@ describe("isDictatable", () => {
 });
 
 describe("micPlacement", () => {
-  it("sits bottom-right inside a text box", () => {
+  it("sits top-right inside a text box and stays within bounds", () => {
     const p = micPlacement({ top: 100, left: 20, width: 300, height: 120 }, true);
     expect(p.size).toBe(36);
     expect(p.left + p.size).toBeLessThanOrEqual(320);
-    expect(p.top + p.size).toBeLessThanOrEqual(220);
-    expect(p.top).toBeGreaterThan(160);
+    expect(p.top).toBe(108);
   });
   it("is centred on the right of an input and shrinks for short ones", () => {
     const p = micPlacement({ top: 0, left: 0, width: 200, height: 44 }, false);
