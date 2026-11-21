@@ -31,7 +31,7 @@ export async function startStarterSet(clientId: string, firstIdeaId: string): Pr
     if (!first) return { started: 0 };
 
     let started = 0;
-    for (const pick of pickStarterSet(pool)) {
+    for (const pick of pickStarterSet(pool, first.sourceType)) {
       try {
         let ideaId: string;
         if (pick.kind === "EXISTING") {
@@ -41,13 +41,13 @@ export async function startStarterSet(clientId: string, firstIdeaId: string): Pr
           const created = await createIdeaWithNextId({
             clientId,
             rawIdea: first.rawIdea,
-            angle: pick.angle.brief,
-            pillar: pick.angle.pillar,
+            angle: pick.role.brief,
+            pillar: pick.role.pillar,
             source: "MANUAL",
             status: "REFINED",
-            sourceType: first.sourceType,
-            trustBasis: first.trustBasis,
-            memoryIds: first.memoryIds,
+            sourceType: pick.sourceType,
+            trustBasis: pick.role.keepsStory ? first.trustBasis : [],
+            memoryIds: pick.role.keepsStory ? first.memoryIds : [],
             recommendedFormat: "POST",
             profileTarget: "PERSONAL",
             gateVerdict: "PASS",

@@ -36,6 +36,15 @@ describe("startStarterSet", () => {
     expect(m.startDraftRun).toHaveBeenCalledTimes(2);
   });
 
+  it("files each extra post under its own source type, and the reader's post without the story", async () => {
+    m.findUnique.mockResolvedValue({ rawIdea: "We cut onboarding to 3 steps.", memoryIds: ["m1"], sourceType: "PAST_EXPERIENCE", trustBasis: ["LIVED_EXPERIENCE"] });
+    await startStarterSet("c1", "first");
+    const rows = m.create.mock.calls.map((c) => c[0]);
+    expect(rows.map((r) => r.sourceType)).toEqual(["PROFESSIONAL_OPINION", "ICP_QUESTION"]);
+    expect(rows[0]).toMatchObject({ memoryIds: ["m1"], trustBasis: ["LIVED_EXPERIENCE"] });
+    expect(rows[1]).toMatchObject({ memoryIds: [], trustBasis: [] });
+  });
+
   it("does nothing the second time", async () => {
     m.findFirst.mockResolvedValue({ id: "x" });
     const res = await startStarterSet("c1", "first");
