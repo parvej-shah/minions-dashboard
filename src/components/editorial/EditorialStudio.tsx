@@ -27,6 +27,7 @@ import MobileActionBar from "./MobileActionBar";
 import DraftChecks, { checksSummary } from "./DraftChecks";
 import DraftScheduleModal from "@/components/schedule/DraftScheduleModal";
 import LinkedInModal from "@/components/distribution/LinkedInModal";
+import { getMissingPostChannel } from "@/lib/drafts/channelGating";
 import { plainReviewNotes } from "@/lib/drafts/plainNotes";
 import { postGoesTo } from "@/constants/postChannels";
 import { liveLinks } from "@/lib/drafts/liveLinks";
@@ -115,7 +116,11 @@ export default function EditorialStudio({
   const panelModals = (
     <>
       <DraftScheduleModal isOpen={panel === "schedule"} onClose={closePanel} />
-      <LinkedInModal isOpen={panel === "linkedin"} onClose={closePanel} />
+      <LinkedInModal
+        isOpen={panel === "linkedin"}
+        onClose={closePanel}
+        returnTo={draft.activeAsset ? `/editorial?id=${encodeURIComponent(draft.activeAsset.id)}&linkedin=1` : "/editorial?linkedin=1"}
+      />
     </>
   );
 
@@ -210,12 +215,24 @@ export default function EditorialStudio({
   };
 
   const handlePublish = async () => {
+    const missing = getMissingPostChannel(activeAsset, channelPayload?.channels, channels);
+    if (missing) {
+      setPanel("linkedin");
+      toast.show(`Connect ${missing.name} first so your post can go out.`);
+      return;
+    }
     const message = await draft.approveAndPublish();
     if (message) toast.show(message);
     if (message.startsWith("Published live")) setAskFor(activeAsset?.id ?? null);
   };
 
   const handleSchedule = async (date: string, time: string): Promise<boolean> => {
+    const missing = getMissingPostChannel(activeAsset, channelPayload?.channels, channels);
+    if (missing) {
+      setPanel("linkedin");
+      toast.show(`Connect ${missing.name} first so your post can go out.`);
+      return false;
+    }
     const message = await draft.schedulePost(date, time);
     if (message !== "Scheduled") {
       if (message) toast.show(message);
@@ -442,6 +459,8 @@ export default function EditorialStudio({
             onEdit={startEditing}
             takenTimes={takenTimes}
             workspaceChannels={channels}
+            channelConfigs={channelPayload?.channels}
+            onConnectChannel={() => setPanel("linkedin")}
             onSetChannels={(c) => void draft.setPostChannels(c).then((m) => m && toast.show(m))}
             onMessage={toast.show}
             setToggleLiveConfirmOpen={setToggleLiveConfirmOpen}

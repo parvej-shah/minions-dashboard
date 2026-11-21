@@ -9,6 +9,7 @@ import { asString } from "@/server/http/body";
 import { badRequest } from "@/server/http/errors";
 import { metaGraph, type GraphCall } from "@/lib/metaGraph";
 import { workspaceInstagramFormat } from "@/lib/carousel/instagramFormat";
+import { linkedinHealth } from "@/lib/linkedinHealth";
 
 // The blog's webhook URL is vaulted, not stored in Postgres, so a connected blog has no readable destination.
 function targetDestinationFor(key: string, row: ClientChannel | undefined): string {
@@ -27,6 +28,7 @@ export async function getChannelSettings(clientId: string): Promise<Distribution
 
   const channels: DistributionChannelConfig[] = DISTRIBUTION_CHANNELS.map((def) => {
     const row = rows.get(def.key);
+    const health = def.key === "linkedin" && row ? linkedinHealth({ isActive: row.isActive, credentialRef: row.credentialRef, config: row.config }) : null;
     return {
       id: def.id,
       key: def.key,
@@ -38,6 +40,7 @@ export async function getChannelSettings(clientId: string): Promise<Distribution
       badge: def.badge,
       has_credential: !!row?.credentialRef,
       external_id: row?.externalId ?? null,
+      is_expired: health === "expired",
     };
   });
 

@@ -12,8 +12,9 @@ import { nextFreeSlot } from "@/lib/drafts/nextSlot";
 import { postButtonLabel, whereText } from "@/lib/drafts/decision";
 import { slotLabel } from "@/lib/today";
 import { liveLinks } from "@/lib/drafts/liveLinks";
+import { getMissingPostChannel } from "@/lib/drafts/channelGating";
 import type { PublishState } from "@/hooks/useEditorialDraft";
-import type { AssetItem, DistributionChannelKey } from "@/types";
+import type { AssetItem, DistributionChannelConfig, DistributionChannelKey } from "@/types";
 
 export interface ReviewDecisionProps {
   activeAsset: AssetItem;
@@ -32,6 +33,10 @@ export interface ReviewDecisionProps {
   takenTimes: string[];
   /** The workspace's channel switches, for choosing where this post goes (D18). */
   workspaceChannels: Record<DistributionChannelKey, boolean> | null;
+  /** Full distribution channel definitions with credential status (Task 118). */
+  channelConfigs?: DistributionChannelConfig[] | null;
+  /** Triggered when the user taps the connect channel prompt button. */
+  onConnectChannel?: (channelKey: string) => void;
   onSetChannels: (channels: string[] | null) => void;
   onMessage: (m: string) => void;
   setToggleLiveConfirmOpen: (v: boolean) => void;
@@ -85,6 +90,8 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
     onMarkPosted,
     takenTimes,
     workspaceChannels,
+    channelConfigs,
+    onConnectChannel,
     onSetChannels,
     onMessage,
     setToggleLiveConfirmOpen,
@@ -126,8 +133,14 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
   const alreadyLive = blogEnabled && Boolean(activeAsset.live_blog_url) && !isPublished;
   const where = followUp ? "LinkedIn only" : whereText(activeAsset.channels, workspaceChannels);
   const goesToLinkedIn = followUp || Boolean(where?.includes("LinkedIn"));
+  const missingChannel = !alreadyLive ? getMissingPostChannel(activeAsset, channelConfigs, workspaceChannels) : null;
 
   const schedule = async (date: string, time: string) => {
+    if (missingChannel) {
+      onConnectChannel?.(missingChannel.key);
+      onMessage(`Connect ${missingChannel.name} first so your post can go out.`);
+      return;
+    }
     if (await onSchedule(date, time)) setPicking(false);
   };
   const postInSlot = () => {
@@ -271,10 +284,16 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
         {unsaved}
         <div className="flex flex-col gap-3">
           {nextButton}
-          <button type="button" onClick={onPublish} disabled={busy} className={buttonStyles({ variant: nextButton ? "soft" : "primary", size: "lg", block: true })}>
-            {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-            Post now instead
-          </button>
+          {missingChannel ? (
+            <button type="button" onClick={() => onConnectChannel?.(missingChannel.key)} className={buttonStyles({ size: "lg", block: true })}>
+              {missingChannel.actionLabel}
+            </button>
+          ) : (
+            <button type="button" onClick={onPublish} disabled={busy} className={buttonStyles({ variant: nextButton ? "soft" : "primary", size: "lg", block: true })}>
+              {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+              Post now instead
+            </button>
+          )}
           <button type="button" onClick={onUnschedule} disabled={busy} className={quietButton}>
             Cancel the schedule
           </button>
@@ -293,6 +312,8 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
     ? { label: "Republish (replaces the live post)", run: onPublish }
     : loadingSlot
       ? { label: "Finding your next posting time…", run: () => {} }
+      : missingChannel
+      ? { label: missingChannel.actionLabel, run: () => onConnectChannel?.(missingChannel.key) }
       : slot && timezone
       ? { label: postButtonLabel(slot, timezone, now), run: postInSlot }
       : { label: "Post now", run: onPublish };
@@ -334,7 +355,7 @@ export default function ReviewDecision(props: ReviewDecisionProps) {
           {busy && <Loader2 className="h-4 w-4 animate-spin" />}
           {busy ? "Working…" : primary.label}
         </button>
-        {!alreadyLive && !loadingSlot && primary.run !== onPublish && (
+        {!alreadyLive && !loadingSlot && !missingChannel && primary.run !== onPublish && (
           <button type="button" onClick={onPublish} disabled={busy} className={buttonStyles({ variant: "soft", size: "lg", block: true })}>
             Post now instead
           </button>

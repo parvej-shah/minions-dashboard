@@ -28,6 +28,13 @@ paragraphs of justification, write that in `docs/product/` or a code comment
 and link to it here.
 
 ---
+## 2026-11-21 — Enforce channel connection before posting or scheduling (Option B)
+
+**Decision:** If a user has not connected the distribution channel that a post is written for (e.g. LinkedIn), the primary post button in Editorial Studio and Today no longer shows "Post now" or "Post on [date]" nor permits publishing. Instead, it displays "Connect LinkedIn to post" (or respective channel) and opens the channel connection sheet modal directly. Once connected, returning to the draft unlocks normal posting and scheduling.
+**Why:** Previously, clicking "Post now" without a connected channel marked the post as PUBLISHED and triggered publishing, which skipped or failed on social platforms while falsely claiming "Published live to LinkedIn". Forcing channel connection prevents phantom publishes, restores trust, and makes channel setup clear before any post is approved.
+**Alternatives considered:** Option A (leaving button as "Post now" and intercepting on click; rejected in favor of Option B's upfront transparency), allowing posts to publish only to the blog silently (rejected: Minions Post Studio is hired primarily for LinkedIn authority, not a standalone ghost blog).
+**Status:** active
+
 ## 2026-11-14 — Remove status and metadata eyebrow row from Today spotlight card
 
 **Decision:** The metadata row (`● Ready for your OK · [Format] · [Channels] · Draft X of Y`) at the top of the Today spotlight card is removed. The card opens directly and boldly with the post headline, followed by the hook excerpt quote, the primary schedule CTA (`Approve for [Slot]`) + Studio edit link, the angle switcher row, and the hero cover artwork on the right.

@@ -14,6 +14,7 @@ export interface DistributionChannelConfig {
   /** True once a Vault-backed token has been pasted in for this channel (blog never needs one). */
   has_credential?: boolean;
   external_id?: string | null;
+  is_expired?: boolean;
 }
 
 export interface DistributionChannelsPayload {

@@ -3,7 +3,7 @@
 import { failureSummary } from "@/lib/publishFailures";
 import React, { useMemo, useState } from "react";
 import { autopilotOffered } from "@/lib/plan/ahead";
-import { linkedinNudge, type LinkedInHealth } from "@/lib/linkedinHealth";
+import { autopilotAllowed, linkedinNudge, type LinkedInHealth } from "@/lib/linkedinHealth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -88,6 +88,10 @@ export default function TodayView() {
 
   const handleInlineSchedule = async () => {
     if (!currentSpotlight || !nextSlot || isScheduling) return;
+    if (schedule.data?.linkedin && !autopilotAllowed(schedule.data.linkedin)) {
+      router.push(`/editorial?id=${encodeURIComponent(currentSpotlight.id)}&linkedin=1`);
+      return;
+    }
     setIsScheduling(true);
     const { date, time } = todaySchedulePayload(nextSlot, tz);
     const slotText = slotLabel(nextSlot, tz);
@@ -201,7 +205,15 @@ export default function TodayView() {
             <div className="space-y-4 pt-1">
               {/* Single primary button + quiet Studio edit affordance */}
               <div className="flex flex-wrap items-center gap-4" onClick={(e) => e.stopPropagation()}>
-                {nextSlot ? (
+                {schedule.data?.linkedin && !autopilotAllowed(schedule.data.linkedin) ? (
+                  <Link
+                    href={`/editorial?id=${encodeURIComponent(currentSpotlight.id)}&linkedin=1`}
+                    onClick={(e) => e.stopPropagation()}
+                    className={buttonStyles({ size: "lg" })}
+                  >
+                    Connect LinkedIn to post
+                  </Link>
+                ) : nextSlot ? (
                   <button
                     type="button"
                     onClick={(e) => {
