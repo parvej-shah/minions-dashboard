@@ -1,0 +1,1616 @@
+{
+  "label": "deepseek-flash",
+  "date": "2026-11-21T07:37:04.445Z",
+  "judge_model": "qwen3.8-max-0902",
+  "cost": {
+    "model": "deepseek-v4.1-flash",
+    "usd_per_draft": 0.00388,
+    "carousel_first_try_valid": "9/9",
+    "carousel_errors": []
+  },
+  "overall": {
+    "drafts": 9,
+    "draft_pass": 33,
+    "author_advantage": 89,
+    "fabrication": 33,
+    "invented": 33,
+    "generic": 0,
+    "one_argument": 100,
+    "claims_ok_y": 33,
+    "avg_words": 407.9,
+    "hook_over_210": 22,
+    "avg_sentence_words": 15,
+    "long_paragraphs": 0
+  },
+  "tenants": {
+    "minions": {
+      "summary": {
+        "drafts": 3,
+        "draft_pass": 67,
+        "author_advantage": 67,
+        "fabrication": 0,
+        "invented": 0,
+        "generic": 0,
+        "one_argument": 100,
+        "claims_ok_y": 0,
+        "avg_words": 397.3,
+        "hook_over_210": 0,
+        "avg_sentence_words": 15.2,
+        "long_paragraphs": 0
+      },
+      "drafts": [
+        {
+          "tenant": "minions",
+          "draft": {
+            "idea": {
+              "slot": 1,
+              "raw_idea": "When we wired a voice agent to book roofing inspections straight into a calendar, the first version confirmed appointments that never actually made it there. The fix was changing the sequence so nothing is confirmed until it is written and read back.",
+              "angle": "The most damaging failure mode in AI booking is not a wrong answer but a silent one where the caller thinks they are scheduled and you have no record of them.",
+              "icp_problem": "How do I trust an AI agent to put appointments on my calendar without double bookings or lost calls?",
+              "reader_context": "You just spent money on a voice agent and your operations manager is asking what happens if the automation breaks mid call.",
+              "author_advantage": "Built the exact n8n pipeline that exposed this failure mode and designed the write then read back sequence to stop it.",
+              "memory_refs": [
+                "M1",
+                "M2"
+              ],
+              "evidence_quote": "confirmed appointments on the call that never reached the calendar because the webhook timed out silently",
+              "white_space": "Most content about AI booking agents focuses on conversational ability and ignores the mechanical handoff between the voice layer and the calendar API where real failures happen.",
+              "fresh_perspective": "Latency and voice quality do not matter if the booking pipeline fails silently; the only reliable architecture writes the event, reads it back from the source of truth, and only then tells the caller it is done.",
+              "vision": "Voice agents will be judged entirely by their integration reliability rather than how natural they sound.",
+              "lane": "Lessons From the Work",
+              "profile_target": "COMPANY",
+              "recommended_format": "POST",
+              "why": "A new model release promising faster latency is getting attention right now, but speed means nothing if the downstream booking fails. This redirects the conversation to the operational detail owners actually need to worry about.",
+              "signal_index": 2,
+              "audience": "ICP",
+              "source": "Voice AI Weekly",
+              "source_url": "https://voiceai.example/new-model-cuts-voice-agent-latency-to-600ms",
+              "source_title": "New model cuts voice agent latency to 600ms",
+              "signals": [
+                {
+                  "title": "New model cuts voice agent latency to 600ms",
+                  "url": "https://voiceai.example/new-model-cuts-voice-agent-latency-to-600ms",
+                  "source": "Voice AI Weekly",
+                  "snippet": "A speech model release promises faster turn-taking for phone agents.",
+                  "published_at": "2026-09-11"
+                }
+              ],
+              "pillar": "What Went Wrong",
+              "source_type": "CURRENT_WORK",
+              "lane_id": "LANE-minions-field-lessons",
+              "memory_ids": [
+                "M1",
+                "M2"
+              ],
+              "trust_basis": [
+                "LIVED_EXPERIENCE",
+                "MARKET_SIGNAL"
+              ],
+              "thesis_key": "agent-answ-appointment-back-book-calendar-call-chang",
+              "gate_verdict": "PASS",
+              "gate_reasons": [],
+              "score_breakdown": {
+                "authority": 1,
+                "icp": 0.5,
+                "originality": 1,
+                "evidence": 1,
+                "score": 90,
+                "seed_used": true
+              },
+              "priority": "HIGH",
+              "icp_relevance": 50
+            },
+            "title": "The booking that never made it to your calendar",
+            "hook": "We're wiring a voice agent for a roofing company that books inspections straight into their calendar. The first version confirmed appointments on the call that never actually landed there.",
+            "body": "We're wiring a voice agent for a roofing company that books inspections straight into their calendar. The first version confirmed appointments on the call that never actually landed there.\n\nThe agent sounded fine. The caller hung up believing they had a slot.\n\nBut the handoff between the call and the calendar timed out, and nothing on our side showed an error. The calendar stayed empty. That's the failure mode I'd worry about with any AI booking agent calendar setup: it doesn't sound wrong, it just doesn't happen.\n\nA wrong answer on a call is annoying. The caller asks again. A silent failure is worse because you never learn the lead existed. There's no one to call back and no way to count what you lost.\n\nSo we changed the sequence, not the intelligence. Now the agent writes the event, reads it back from the calendar itself, and only then tells the caller the time is confirmed. If the read-back fails, it says it will follow up instead of promising a slot. That's the whole fix: write, read back, confirm.\n\nFaster responses and a more natural voice don't help here. If the step after the conversation breaks quietly, a smoother call just makes the caller more certain of an appointment that doesn't exist.\n\nThe question I'd ask about any booking agent is not how it sounds but what it does when the calendar doesn't answer. If the answer is 'it confirms anyway', you have the same bug we shipped. I'm still not sure how often the timeout hits in the wild, but the sequence is what I'd check first.\n\nVoice agents will be judged by whether the booking is really there, not by how natural they sound.",
+            "claims_ok": "N",
+            "check": {
+              "body": "We're wiring a voice agent for a roofing company that books inspections straight into their calendar. The first version confirmed appointments on the call that never actually landed there.\n\nThe agent sounded fine. The caller hung up believing they had a slot.\n\nBut the handoff between the call and the calendar timed out, and nothing on our side showed an error. The calendar stayed empty. That's the failure mode I'd worry about with any AI booking agent calendar setup: it doesn't sound wrong, it just doesn't happen.\n\nA wrong answer on a call is annoying. The caller asks again. A silent failure is worse because you never learn the lead existed. There's no one to call back and no way to count what you lost.\n\nSo we changed the sequence, not the intelligence. Now the agent writes the event, reads it back from the calendar itself, and only then tells the caller the time is confirmed. If the read-back fails, it says it will follow up instead of promising a slot. That's the whole fix: write, read back, confirm.\n\nFaster responses and a more natural voice don't help here. If the step after the conversation breaks quietly, a smoother call just makes the caller more certain of an appointment that doesn't exist.\n\nThe question I'd ask about any booking agent is not how it sounds but what it does when the calendar doesn't answer. If the answer is 'it confirms anyway', you have the same bug we shipped. I'm still not sure how often the timeout hits in the wild, but the sequence is what I'd check first.\n\nVoice agents will be judged by whether the booking is really there, not by how natural they sound.",
+              "claims_ok": "N",
+              "claims": [
+                {
+                  "claim_text": "We're wiring a voice agent for a roofing company that books inspections straight into their calendar.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "The first version confirmed appointments on the call that never actually landed there.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "But the handoff between the call and the calendar timed out, and nothing on our side showed an error.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "Now the agent writes the event, reads it back from the calendar itself, and only then tells the caller the time is confirmed.",
+                  "claim_type": "PRODUCT_CLAIM",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "If the read-back fails, it says it will follow up instead of promising a slot.",
+                  "claim_type": "PRODUCT_CLAIM",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "N"
+                },
+                {
+                  "claim_text": "I'm still not sure how often the timeout hits in the wild, but the sequence is what I'd check first.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                }
+              ],
+              "reasons": [
+                "Unbacked product claim: \"If the read-back fails, it says it will follow up instead of promising a slot.\"",
+                "Credits the author with what no item says they did: \"we shipped\"."
+              ],
+              "review_notes": [],
+              "readability": {
+                "words": 286,
+                "hook_chars": 188,
+                "headings": 0,
+                "paragraphs": 8,
+                "long_paragraphs": 0,
+                "avg_sentence_words": 13.6,
+                "long_sentences": 0
+              }
+            }
+          },
+          "verdict": {
+            "author_advantage": true,
+            "refs": [
+              "M1",
+              "M2"
+            ],
+            "memory_quote": "Building a Retell voice agent for a roofing company that books inspections straight into their Google Calendar through n8n. Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently. Now every booking is written, read back, and only then confirmed to the caller.",
+            "draft_quote": "We're wiring a voice agent for a roofing company that books inspections straight into their calendar. The first version confirmed appointments on the call that never actually landed there... Now the agent writes the event, reads it back from the calendar itself, and only then tells the caller the time is confirmed.",
+            "first_person_fabrication": false,
+            "fabrication_quote": "",
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "generic": false,
+            "one_argument": true,
+            "on_icp_problem": true,
+            "note": "Omits the specific cause (webhook timeout) and tooling (Retell, n8n, Google Calendar), making the story slightly less distinctive than the memory allows."
+          },
+          "readability": {
+            "words": 286,
+            "hook_chars": 188,
+            "headings": 0,
+            "paragraphs": 8,
+            "long_paragraphs": 0,
+            "avg_sentence_words": 13.6,
+            "long_sentences": 0
+          },
+          "author_advantage": false,
+          "unsupported_numbers": [],
+          "invented": false,
+          "draft_pass": false
+        },
+        {
+          "tenant": "minions",
+          "draft": {
+            "idea": {
+              "slot": 2,
+              "raw_idea": "Owners keep asking if callers will hang up when they realize an AI answered. We tested a two sentence disclosure at the start of the call and early data shows no measurable drop in booking rate. Here is how to decide whether to disclose upfront or wait for the caller to ask.",
+              "angle": "Hiding that an AI answers your phone does not protect your booking rate but it does expose you to regulatory risk and broken trust.",
+              "icp_problem": "Should I tell callers they are speaking to an AI or try to pass it off as a human receptionist?",
+              "reader_context": "You are configuring your new voice agent and deciding what the opening line should say before you turn it on.",
+              "author_advantage": "Ran a live test comparing disclosed versus undisclosed AI greetings and measured the actual effect on booking completion.",
+              "memory_refs": [
+                "M5",
+                "M8"
+              ],
+              "evidence_quote": "Testing whether a two-sentence disclosure that the caller is speaking to an AI changes booking rate",
+              "white_space": "Everyone debates the ethics of AI disclosure but almost nobody tests whether it actually changes caller behavior in a home service context.",
+              "fresh_perspective": "The decision to disclose is not a trade off between honesty and conversion; early testing suggests transparency costs you nothing while draft regulations may soon force your hand anyway.",
+              "vision": "Disclosure will shift from an optional ethical choice to a compliance requirement for any business using voice AI.",
+              "lane": "Decision Guides",
+              "profile_target": "BOTH",
+              "recommended_format": "ARTICLE",
+              "why": "Regulators are currently weighing draft guidance that would require businesses to disclose AI callers, making this an urgent decision for owners setting up agents today.",
+              "signal_index": 4,
+              "audience": "ICP",
+              "source": "Voice AI Weekly",
+              "source_url": "https://voiceai.example/regulators-weigh-disclosure-rules-for-ai-phone-calls",
+              "source_title": "Regulators weigh disclosure rules for AI phone calls",
+              "signals": [
+                {
+                  "title": "Regulators weigh disclosure rules for AI phone calls",
+                  "url": "https://voiceai.example/regulators-weigh-disclosure-rules-for-ai-phone-calls",
+                  "source": "Voice AI Weekly",
+                  "snippet": "Draft guidance would require businesses to tell callers when an AI answers.",
+                  "published_at": "2026-09-13"
+                }
+              ],
+              "pillar": "Decision Guide",
+              "source_type": "ICP_QUESTION",
+              "lane_id": "LANE-minions-decisions",
+              "memory_ids": [
+                "M5",
+                "M8"
+              ],
+              "trust_basis": [
+                "LIVED_EXPERIENCE",
+                "MARKET_SIGNAL"
+              ],
+              "thesis_key": "answ-answer-asking-book-broken-call-data-decid",
+              "gate_verdict": "PASS",
+              "gate_reasons": [],
+              "score_breakdown": {
+                "authority": 1,
+                "icp": 0.5,
+                "originality": 0.77,
+                "evidence": 1,
+                "score": 87,
+                "seed_used": false
+              },
+              "priority": "HIGH",
+              "icp_relevance": 50
+            },
+            "title": "Will Callers Hang Up on Your AI? What Our Test Showed",
+            "hook": "You are about to choose the first line your voice agent says, and the question is whether telling callers it is an AI will cost you bookings.",
+            "body": "You are about to choose the first line your voice agent says, and the question is whether telling callers it is an AI will cost you bookings. Our early test says no measurable drop, which means the real criterion is not conversion but whether you want to be on the wrong side of rules that are already being drafted.\n\nI ran a live test to answer the question owners keep asking me: will callers hang up when they realise it is an AI? We compared a two-sentence disclosure at the start of the call against an undisclosed greeting. Early data shows no measurable drop in booking rate. That is the number that should settle the choice for you.\n\n## The fear is louder than the evidence\n\nThe worry is that callers hear \"AI\" and hang up. In our test, they didn't.\n\nBooking rate held steady. I'm not going to pretend that is the final word, because the test is still early and I don't have the size or duration I'd want before calling it definitive. But it is the only number I have that speaks to the actual decision, and it points one way.\n\nMost of the debate online is about whether disclosure is ethical. Almost nobody has tested whether it changes caller behaviour in a home-service context.\n\nThat is the only question that matters when you are setting the opening line. Ethics matter, but you are running a business and you need to know if honesty costs you money. So far, it doesn't.\n\n## The disclosure does not have to be a confession\n\nThe two-sentence disclosure we tested was plain. It said the caller was speaking to an AI, said it the way a receptionist would say it, and kept the call moving.\n\nIt set the caller's expectation without turning it into an announcement. You are not confessing a weakness; you are telling the caller what to expect so they can adjust how they speak. That is the same thing a good receptionist does when they say \"I'll transfer you to the scheduling desk.\"\n\nThe risk sits on the other side. Draft guidance is being weighed that would require businesses to tell callers when an AI answers. If that becomes a rule, an undisclosed greeting is a choice you may have to undo later, after callers have already formed their impression of how you operate. I'd rather not be the business that has to explain why it hid the AI after the rules changed.\n\n## Decide on the criterion that survives both outcomes\n\nIf transparency costs you nothing in bookings and protects you from a rule change, the undisclosed greeting has to earn its place by producing a measurable gain. So far it has not.\n\nThat is the trade-off I'd put in front of any owner: show me the bookings you gain by hiding the AI, and I'll weigh it against the bookings you lose when a caller finds out you lied. The first number is zero in our test. The second is unknown but not zero.\n\nSo the decision is not honesty versus conversion. It is whether you want to adopt the honest opening line now, while it is still your choice, or later, when a regulator makes it one. I know which one I'd pick.\n\nIf you are setting up a voice agent and want the opening line and the booking flow built so the disclosure does not slow the call, get in touch and we will walk through what we tested. I'm still not sure how much the test size matters for a business with a different call mix, so if you have run your own comparison, I'd like to hear what you saw.",
+            "claims_ok": "BLOCKED",
+            "check": {
+              "body": "You are about to choose the first line your voice agent says, and the question is whether telling callers it is an AI will cost you bookings. Our early test says no measurable drop, which means the real criterion is not conversion but whether you want to be on the wrong side of rules that are already being drafted.\n\nI ran a live test to answer the question owners keep asking me: will callers hang up when they realise it is an AI? We compared a two-sentence disclosure at the start of the call against an undisclosed greeting. Early data shows no measurable drop in booking rate. That is the number that should settle the choice for you.\n\n## The fear is louder than the evidence\n\nThe worry is that callers hear \"AI\" and hang up. In our test, they didn't.\n\nBooking rate held steady. I'm not going to pretend that is the final word, because the test is still early and I don't have the size or duration I'd want before calling it definitive. But it is the only number I have that speaks to the actual decision, and it points one way.\n\nMost of the debate online is about whether disclosure is ethical. Almost nobody has tested whether it changes caller behaviour in a home-service context.\n\nThat is the only question that matters when you are setting the opening line. Ethics matter, but you are running a business and you need to know if honesty costs you money. So far, it doesn't.\n\n## The disclosure does not have to be a confession\n\nThe two-sentence disclosure we tested was plain. It said the caller was speaking to an AI, said it the way a receptionist would say it, and kept the call moving.\n\nIt set the caller's expectation without turning it into an announcement. You are not confessing a weakness; you are telling the caller what to expect so they can adjust how they speak. That is the same thing a good receptionist does when they say \"I'll transfer you to the scheduling desk.\"\n\nThe risk sits on the other side. Draft guidance is being weighed that would require businesses to tell callers when an AI answers. If that becomes a rule, an undisclosed greeting is a choice you may have to undo later, after callers have already formed their impression of how you operate. I'd rather not be the business that has to explain why it hid the AI after the rules changed.\n\n## Decide on the criterion that survives both outcomes\n\nIf transparency costs you nothing in bookings and protects you from a rule change, the undisclosed greeting has to earn its place by producing a measurable gain. So far it has not.\n\nThat is the trade-off I'd put in front of any owner: show me the bookings you gain by hiding the AI, and I'll weigh it against the bookings you lose when a caller finds out you lied. The first number is zero in our test. The second is unknown but not zero.\n\nSo the decision is not honesty versus conversion. It is whether you want to adopt the honest opening line now, while it is still your choice, or later, when a regulator makes it one. I know which one I'd pick.\n\nIf you are setting up a voice agent and want the opening line and the booking flow built so the disclosure does not slow the call, get in touch and we will walk through what we tested. I'm still not sure how much the test size matters for a business with a different call mix, so if you have run your own comparison, I'd like to hear what you saw.",
+              "claims_ok": "BLOCKED",
+              "claims": [
+                {
+                  "claim_text": "Our early test says no measurable drop, which means the real criterion is not conversion but whether you want to be on the wrong side of rules that are already being drafted.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "I ran a live test to answer the question owners keep asking me: will callers hang up when they realise it is an AI?",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "We compared a two-sentence disclosure at the start of the call against an undisclosed greeting.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "Early data shows no measurable drop in booking rate.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "In our test, they didn't.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "N"
+                },
+                {
+                  "claim_text": "Booking rate held steady.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "N"
+                },
+                {
+                  "claim_text": "Almost nobody has tested whether it changes caller behaviour in a home-service context.",
+                  "claim_type": "MARKET_CLAIM",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "Draft guidance is being weighed that would require businesses to tell callers when an AI answers.",
+                  "claim_type": "MARKET_CLAIM",
+                  "source_url": "https://voiceai.example/regulators-weigh-disclosure-rules-for-ai-phone-calls",
+                  "source_title": "Regulators weigh disclosure rules for AI phone calls",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "The first number is zero in our test.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "N"
+                }
+              ],
+              "reasons": [
+                "Customer result with no approved proof or experience item behind it: \"In our test, they didn't.\"",
+                "Customer result with no approved proof or experience item behind it: \"Booking rate held steady.\"",
+                "Customer result with no approved proof or experience item behind it: \"The first number is zero in our test.\""
+              ],
+              "review_notes": [],
+              "readability": {
+                "words": 591,
+                "hook_chars": 141,
+                "headings": 3,
+                "paragraphs": 13,
+                "long_paragraphs": 0,
+                "avg_sentence_words": 16.9,
+                "long_sentences": 0
+              }
+            }
+          },
+          "verdict": {
+            "author_advantage": true,
+            "refs": [
+              "M5",
+              "M8"
+            ],
+            "memory_quote": "Owners keep asking: will callers hang up when they realise it is an AI? Testing whether a two-sentence disclosure that the caller is speaking to an AI changes booking rate. Early data: no measurable drop.",
+            "draft_quote": "I ran a live test to answer the question owners keep asking me: will callers hang up when they realise it is an AI? We compared a two-sentence disclosure at the start of the call against an undisclosed greeting. Early data shows no measurable drop in booking rate.",
+            "first_person_fabrication": false,
+            "fabrication_quote": "",
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "generic": false,
+            "one_argument": true,
+            "on_icp_problem": true,
+            "note": "The closing sales pitch ('get in touch and we will walk through what we tested') dilutes the thought-leadership tone."
+          },
+          "readability": {
+            "words": 591,
+            "hook_chars": 141,
+            "headings": 3,
+            "paragraphs": 13,
+            "long_paragraphs": 0,
+            "avg_sentence_words": 16.9,
+            "long_sentences": 0
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "draft_pass": true
+        },
+        {
+          "tenant": "minions",
+          "draft": {
+            "idea": {
+              "slot": 3,
+              "raw_idea": "If your voice agent confirms a time slot but the calendar write times out silently, the caller stops looking for other contractors. You do not get a complaint; you just get a no show and a lead that went to a competitor who answered reliably.",
+              "angle": "A false confirmation is worse than a missed call because it burns the lead's intent while giving you no chance to recover it.",
+              "icp_problem": "What actually happens to my revenue when the AI makes a mistake during a booking?",
+              "reader_context": "You are reviewing last month's numbers and noticing that leads who seemed booked never showed up for the appointment.",
+              "author_advantage": "Discovered this exact failure pattern in production and built the verification step specifically because silent timeouts were destroying lead trust.",
+              "memory_refs": [
+                "M2",
+                "M4"
+              ],
+              "evidence_quote": "Callers forgive a one-second pause; they never forgive being told they are booked when they are not.",
+              "white_space": "Content about AI mistakes usually covers hallucinated answers or bad tone but ignores the mechanical failure where the system lies to the caller by accident.",
+              "fresh_perspective": "The cost of a silent booking failure is not a reschedule; it is a permanently lost customer who believes you stood them up, which matters more when the first company to respond wins nearly all jobs.",
+              "vision": "Booking reliability will become the primary metric for evaluating voice agents, replacing conversational benchmarks.",
+              "lane": "ICP Problems",
+              "profile_target": "COMPANY",
+              "recommended_format": "POST",
+              "why": "Industry data shows the first company to respond wins 78 percent of jobs, meaning a false confirmation that wastes a lead's time hands that advantage directly to a competitor.",
+              "signal_index": 8,
+              "audience": "ICP",
+              "source": "Home Services Pulse",
+              "source_url": "https://homeservices.example/study-first-company-to-respond-wins-78-of-home-service-jobs",
+              "source_title": "Study: first company to respond wins 78% of home service jobs",
+              "signals": [
+                {
+                  "title": "Study: first company to respond wins 78% of home service jobs",
+                  "url": "https://homeservices.example/study-first-company-to-respond-wins-78-of-home-service-jobs",
+                  "source": "Home Services Pulse",
+                  "snippet": "Speed to lead remains the deciding factor for homeowners booking repairs.",
+                  "published_at": "2026-09-12"
+                }
+              ],
+              "pillar": "The Stakes",
+              "source_type": "PAST_EXPERIENCE",
+              "lane_id": "LANE-minions-icp-problems",
+              "memory_ids": [
+                "M2"
+              ],
+              "trust_basis": [
+                "LIVED_EXPERIENCE",
+                "MARKET_SIGNAL"
+              ],
+              "thesis_key": "agent-answer-burn-calendar-call-chanc-competitor-complaint",
+              "gate_verdict": "PASS",
+              "gate_reasons": [],
+              "score_breakdown": {
+                "authority": 1,
+                "icp": 0.5,
+                "originality": 0.77,
+                "evidence": 1,
+                "score": 87,
+                "seed_used": false
+              },
+              "priority": "HIGH",
+              "icp_relevance": 50
+            },
+            "title": "Why a Confirmed Booking That Never Reached Your Calendar Costs You the Lead",
+            "hook": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently.",
+            "body": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently. Now every booking is written, read back, and only then confirmed to the caller.\n\nThat is a voice agent booking failure, and it's mechanical, not conversational. The agent says the slot is yours, the calendar write times out, and nobody gets an error. The caller hangs up believing they have an appointment. You have nothing.\n\nYou never hear a complaint. The caller thinks you stood them up and calls the next contractor. The lead is gone before you know it existed. That's why a false confirmation is worse than a missed call: a missed call leaves a number you can call back, while a false confirmation burns the intent and gives you no chance to recover it.\n\nAnd the first company to respond wins most jobs. One study puts it at 78% of home service jobs. So a silent booking failure doesn't just lose you an appointment; it hands the advantage to whoever answered reliably.\n\n## The fix is a read-back, not a better script\n\nYou can't talk your way out of this. The fix is a verification step: write the booking, read it back from the calendar, and only then confirm to the caller. If the read-back fails, the agent doesn't say \"you're booked.\" It says it will follow up, and you get a real chance to recover.\n\nThat's why I'd check booking reliability before conversational polish. A smooth agent that lies to callers by accident is worse than a clumsy one that never loses a booking.\n\nI'm still not sure how many businesses are tracking this at all, since the failure leaves no complaint and no error. But if you're reviewing last month's numbers and seeing booked leads who never showed, check whether the booking actually reaches the calendar before the caller is told it's confirmed. That's the first thing I'd look at.",
+            "claims_ok": "N",
+            "check": {
+              "body": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently. Now every booking is written, read back, and only then confirmed to the caller.\n\nThat is a voice agent booking failure, and it's mechanical, not conversational. The agent says the slot is yours, the calendar write times out, and nobody gets an error. The caller hangs up believing they have an appointment. You have nothing.\n\nYou never hear a complaint. The caller thinks you stood them up and calls the next contractor. The lead is gone before you know it existed. That's why a false confirmation is worse than a missed call: a missed call leaves a number you can call back, while a false confirmation burns the intent and gives you no chance to recover it.\n\nAnd the first company to respond wins most jobs. One study puts it at 78% of home service jobs. So a silent booking failure doesn't just lose you an appointment; it hands the advantage to whoever answered reliably.\n\n## The fix is a read-back, not a better script\n\nYou can't talk your way out of this. The fix is a verification step: write the booking, read it back from the calendar, and only then confirm to the caller. If the read-back fails, the agent doesn't say \"you're booked.\" It says it will follow up, and you get a real chance to recover.\n\nThat's why I'd check booking reliability before conversational polish. A smooth agent that lies to callers by accident is worse than a clumsy one that never loses a booking.\n\nI'm still not sure how many businesses are tracking this at all, since the failure leaves no complaint and no error. But if you're reviewing last month's numbers and seeing booked leads who never showed, check whether the booking actually reaches the calendar before the caller is told it's confirmed. That's the first thing I'd look at.",
+              "claims_ok": "N",
+              "claims": [
+                {
+                  "claim_text": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "Now every booking is written, read back, and only then confirmed to the caller.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "The agent says the slot is yours, the calendar write times out, and nobody gets an error.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "The caller thinks you stood them up and calls the next contractor.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "One study puts it at 78% of home service jobs.",
+                  "claim_type": "STATISTIC",
+                  "source_url": "https://homeservices.example/study-first-company-to-respond-wins-78-of-home-service-jobs",
+                  "source_title": "Study: first company to respond wins 78% of home service jobs",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "If the read-back fails, the agent doesn't say \"you're booked.\"",
+                  "claim_type": "PRODUCT_CLAIM",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "It says it will follow up, and you get a real chance to recover.",
+                  "claim_type": "PRODUCT_CLAIM",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "N"
+                },
+                {
+                  "claim_text": "I'm still not sure how many businesses are tracking this at all, since the failure leaves no complaint and no error.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                }
+              ],
+              "reasons": [
+                "Unbacked product claim: \"It says it will follow up, and you get a real chance to recover.\""
+              ],
+              "review_notes": [],
+              "readability": {
+                "words": 315,
+                "hook_chars": 130,
+                "headings": 1,
+                "paragraphs": 7,
+                "long_paragraphs": 0,
+                "avg_sentence_words": 15,
+                "long_sentences": 0
+              }
+            }
+          },
+          "verdict": {
+            "author_advantage": true,
+            "refs": [
+              "M2"
+            ],
+            "memory_quote": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently. Now every booking is written, read back, and only then confirmed to the caller.",
+            "draft_quote": "Our first booking agent confirmed appointments on the call that never reached the calendar because the webhook timed out silently. Now every booking is written, read back, and only then confirmed to the caller.",
+            "first_person_fabrication": false,
+            "fabrication_quote": "",
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "generic": false,
+            "one_argument": true,
+            "on_icp_problem": true,
+            "note": "Lacks the specific client context (roofing company, Retell, n8n) present in M1, making it feel more like a general engineering post than a founder's field report."
+          },
+          "readability": {
+            "words": 315,
+            "hook_chars": 130,
+            "headings": 1,
+            "paragraphs": 7,
+            "long_paragraphs": 0,
+            "avg_sentence_words": 15,
+            "long_sentences": 0
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "draft_pass": true
+        }
+      ]
+    },
+    "keystone": {
+      "summary": {
+        "drafts": 3,
+        "draft_pass": 33,
+        "author_advantage": 100,
+        "fabrication": 33,
+        "invented": 33,
+        "generic": 0,
+        "one_argument": 100,
+        "claims_ok_y": 67,
+        "avg_words": 383,
+        "hook_over_210": 33,
+        "avg_sentence_words": 15.3,
+        "long_paragraphs": 0
+      },
+      "drafts": [
+        {
+          "tenant": "keystone",
+          "draft": {
+            "idea": {
+              "slot": 1,
+              "raw_idea": "When you wire up an AI voice agent to handle night leads and book callbacks, the first failure is not the conversation. It is booking a showing on a listing that already went under contract because your MLS feed only syncs once a day.",
+              "angle": "An AI caller that books appointments faster than your data refreshes will destroy agent trust in one weekend.",
+              "icp_problem": "I want AI handling my after-hours portal leads, but how do I stop it from making promises on stale inventory?",
+              "reader_context": "You just approved the AI rollout, your agents are skeptical, and you need to prove this works without creating more cleanup work for them.",
+              "author_advantage": "The author has seen a team leader cancel an AI rollout over exactly this sync gap and now builds around it.",
+              "memory_refs": [
+                "M3",
+                "M10"
+              ],
+              "evidence_quote": "cancelled an AI rollout after the agent booked a showing on a property that had gone under contract that morning",
+              "white_space": "Everyone talks about prompt engineering and conversational flow for real estate AI. Almost no one talks about the plumbing between the AI's calendar access and the actual status of the listings in the MLS.",
+              "fresh_perspective": "The constraint on AI lead response is not the language model. It is the update frequency of your listing data. If your MLS feed syncs daily, your AI must be hard-coded to refuse bookings on properties updated more than a few hours ago.",
+              "vision": "AI assistants will only survive in brokerages where they are wired directly into live transactional data, not just CRM contact records.",
+              "lane": "Lessons From the Work",
+              "profile_target": "COMPANY",
+              "recommended_format": "POST",
+              "why": "Portal referral fees are shifting and brokerages are cutting ISA teams, pushing leaders toward AI call handlers right now. But deploying AI without understanding data latency is causing immediate operational failures that kill adoption.",
+              "signal_index": 2,
+              "audience": "ICP",
+              "source": "Real Estate Tech News",
+              "source_url": "https://retech.example/ai-assistants-now-answer-calls-for-top-brokerages",
+              "source_title": "AI assistants now answer calls for top brokerages",
+              "signals": [
+                {
+                  "title": "AI assistants now answer calls for top brokerages",
+                  "url": "https://retech.example/ai-assistants-now-answer-calls-for-top-brokerages",
+                  "source": "Real Estate Tech News",
+                  "snippet": "Several large brokerages deployed AI call assistants for inbound inquiries.",
+                  "published_at": "2026-09-11"
+                }
+              ],
+              "pillar": "What Went Wrong",
+              "source_type": "CURRENT_WORK",
+              "lane_id": "LANE-keystone-field-lessons",
+              "memory_ids": [
+                "M3",
+                "M10"
+              ],
+              "trust_basis": [
+                "LIVED_EXPERIENCE",
+                "MARKET_SIGNAL"
+              ],
+              "thesis_key": "agent-already-appointment-book-call-callback-contract-convers",
+              "gate_verdict": "PASS",
+              "gate_reasons": [],
+              "score_breakdown": {
+                "authority": 1,
+                "icp": 0.5,
+                "originality": 1,
+                "evidence": 1,
+                "score": 90,
+                "seed_used": true
+              },
+              "priority": "HIGH",
+              "icp_relevance": 50
+            },
+            "title": "Your AI Books Showings Faster Than Your MLS Updates",
+            "hook": "I'm wiring an AI voice agent to answer portal leads at night, ask three qualifying questions and book a callback on the agent's calendar. The conversation was never the hard part. The listing status is.",
+            "body": "I'm wiring an AI voice agent to answer portal leads at night, ask three qualifying questions and book a callback on the agent's calendar. The conversation was never the hard part. The listing status is.\n\nEveryone talks about how the AI sounds, whether it asks the right questions, whether it can handle a lead who wants to see a place on Saturday. That's the easy part. The hard part is what happens when the AI books a showing on a home that went under contract that morning because your MLS feed only syncs once a day.\n\nI watched a team leader cancel a rollout after exactly that. One weekend, one booking on a stale listing, and the agents didn't lose faith in the voice. They lost faith in the calendar. That's the risk with any AI voice agent real estate teams deploy: the faster it answers, the more damage it does if the status behind the booking is wrong.\n\n## The fix is in the plumbing\n\nSo the fix isn't a smarter script. It's a hard rule in the plumbing between the AI's calendar access and the actual listing status. If a listing's status was updated more than a few hours ago, the AI refuses to book it and offers a callback instead. That rule has to live outside the conversation, where the AI can't promise a slot on data it can't verify.\n\nThe same test applies to every lead source you point the AI at. If the status behind the booking is stale, speed just gets you to the wrong answer faster.\n\nBefore you switch on after-hours booking, check how often your listing status actually refreshes. If it's once a day, hard-code the AI to refuse bookings on anything older than a few hours. I'm still not sure what the right cutoff is for every market, but I'd start by watching what happens when you set it too tight.",
+            "claims_ok": "Y",
+            "check": {
+              "body": "I'm wiring an AI voice agent to answer portal leads at night, ask three qualifying questions and book a callback on the agent's calendar. The conversation was never the hard part. The listing status is.\n\nEveryone talks about how the AI sounds, whether it asks the right questions, whether it can handle a lead who wants to see a place on Saturday. That's the easy part. The hard part is what happens when the AI books a showing on a home that went under contract that morning because your MLS feed only syncs once a day.\n\nI watched a team leader cancel a rollout after exactly that. One weekend, one booking on a stale listing, and the agents didn't lose faith in the voice. They lost faith in the calendar. That's the risk with any AI voice agent real estate teams deploy: the faster it answers, the more damage it does if the status behind the booking is wrong.\n\n## The fix is in the plumbing\n\nSo the fix isn't a smarter script. It's a hard rule in the plumbing between the AI's calendar access and the actual listing status. If a listing's status was updated more than a few hours ago, the AI refuses to book it and offers a callback instead. That rule has to live outside the conversation, where the AI can't promise a slot on data it can't verify.\n\nThe same test applies to every lead source you point the AI at. If the status behind the booking is stale, speed just gets you to the wrong answer faster.\n\nBefore you switch on after-hours booking, check how often your listing status actually refreshes. If it's once a day, hard-code the AI to refuse bookings on anything older than a few hours. I'm still not sure what the right cutoff is for every market, but I'd start by watching what happens when you set it too tight.",
+              "claims_ok": "Y",
+              "claims": [
+                {
+                  "claim_text": "I'm wiring an AI voice agent to answer portal leads at night, ask three qualifying questions and book a callback on the agent's calendar.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "I watched a team leader cancel a rollout after exactly that.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "One weekend, one booking on a stale listing, and the agents didn't lose faith in the voice.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "The hard part is what happens when the AI books a showing on a home that went under contract that morning because your MLS feed only syncs once a day.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                }
+              ],
+              "reasons": [],
+              "review_notes": [],
+              "readability": {
+                "words": 313,
+                "hook_chars": 202,
+                "headings": 1,
+                "paragraphs": 6,
+                "long_paragraphs": 0,
+                "avg_sentence_words": 16.5,
+                "long_sentences": 0
+              }
+            }
+          },
+          "verdict": {
+            "author_advantage": true,
+            "refs": [
+              "M3",
+              "M10"
+            ],
+            "memory_quote": "Setting up an AI voice agent that answers portal leads at night, asks three qualifying questions and books a callback slot on the agent's calendar.",
+            "draft_quote": "I'm wiring an AI voice agent to answer portal leads at night, ask three qualifying questions and book a callback on the agent's calendar.",
+            "first_person_fabrication": false,
+            "fabrication_quote": "",
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "generic": false,
+            "one_argument": true,
+            "on_icp_problem": true,
+            "note": "The proposed fix of hard-coding a refusal rule is presented as settled practice rather than something the author has actually tested or proven."
+          },
+          "readability": {
+            "words": 313,
+            "hook_chars": 202,
+            "headings": 1,
+            "paragraphs": 6,
+            "long_paragraphs": 0,
+            "avg_sentence_words": 16.5,
+            "long_sentences": 0
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "draft_pass": true
+        },
+        {
+          "tenant": "keystone",
+          "draft": {
+            "idea": {
+              "slot": 2,
+              "raw_idea": "Deciding between hiring ISAs or deploying an AI voice agent to answer portal leads should not start with cost. It should start with whether your current CRM actually logs calls, because neither option fixes a team that ignores its own system.",
+              "angle": "If forty percent of your portal leads have no first call logged within twenty-four hours despite what your agents swear, adding headcount or software is just spending money to hide the same leak.",
+              "icp_problem": "Should I hire an ISA team or buy an AI answering service to make sure my paid leads actually get called?",
+              "reader_context": "You are paying for Zillow or Realtor.com leads, your agents say they follow up instantly, but your conversion rate does not match their confidence. You are trying to pick the right fix.",
+              "author_advantage": "The author managed a four-person ISA team for thirty agents and audited CRMs where agents swore they called but the logs proved otherwise.",
+              "memory_refs": [
+                "M1",
+                "M2",
+                "P1"
+              ],
+              "evidence_quote": "40% of portal leads had no first call logged within 24 hours, although every agent swore they called",
+              "white_space": "Most advice compares the price of an ISA salary to an AI subscription. It skips the prerequisite: verifying that your current human process is actually producing a logged call before you try to scale it.",
+              "fresh_perspective": "The decision between ISAs and AI is secondary. The primary decision is whether you have the operational discipline to enforce CRM logging. Without that baseline, an ISA team becomes expensive manual entry, and an AI tool gets ignored by agents who do not trust the handoff.",
+              "vision": null,
+              "lane": "Decision Guides",
+              "profile_target": "BOTH",
+              "recommended_format": "ARTICLE",
+              "why": "With inside sales teams shrinking as brokerages cut costs during the downturn, leaders are actively choosing between rebuilding human ISA desks or moving to AI. They need a framework that prevents them from automating a broken habit.",
+              "signal_index": 8,
+              "audience": "ICP",
+              "source": "Brokerage Ops Journal",
+              "source_url": "https://brokerageops.example/isa-teams-shrink-as-brokerages-cut-costs",
+              "source_title": "ISA teams shrink as brokerages cut costs",
+              "signals": [
+                {
+                  "title": "ISA teams shrink as brokerages cut costs",
+                  "url": "https://brokerageops.example/isa-teams-shrink-as-brokerages-cut-costs",
+                  "source": "Brokerage Ops Journal",
+                  "snippet": "Inside sales teams are among the first cuts in the downturn.",
+                  "published_at": "2026-09-11"
+                }
+              ],
+              "pillar": "Decision Guide",
+              "source_type": "PAST_EXPERIENCE",
+              "lane_id": "LANE-keystone-decisions",
+              "memory_ids": [
+                "M1",
+                "M2"
+              ],
+              "trust_basis": [
+                "LIVED_EXPERIENCE",
+                "APPROVED_PROOF",
+                "MARKET_SIGNAL"
+              ],
+              "thesis_key": "adding-agent-answ-call-cost-current-decid-deploy",
+              "gate_verdict": "PASS",
+              "gate_reasons": [],
+              "score_breakdown": {
+                "authority": 1,
+                "icp": 0.5,
+                "originality": 0.86,
+                "evidence": 1,
+                "score": 88,
+                "seed_used": true
+              },
+              "priority": "HIGH",
+              "icp_relevance": 50
+            },
+            "title": "Before You Hire ISAs or Buy an AI Voice Agent, Check Your CRM",
+            "hook": "I ran a four-person ISA team for a 30-agent brokerage for three years. When I audited a team's CRM, 40% of portal leads had no first call logged within 24 hours, even though every agent swore they called within minutes.",
+            "body": "I ran a four-person ISA team for a 30-agent brokerage for three years. When I audited a team's CRM, 40% of portal leads had no first call logged within 24 hours, even though every agent swore they called within minutes.\n\nThat gap is the whole decision. Before you weigh an ISA vs AI voice agent, you need to know whether your current team is actually logging the first call. If they aren't, neither option fixes the leak.\n\n## The audit that changes the conversation\n\nPull every portal lead from the last 90 days. Count how many have a first call logged within 24 hours. That number is your baseline, not your agents' confidence.\n\nWhen I ran that audit, the logs told a different story than the sales meeting. Agents weren't lying. They were calling from their cell, then forgetting to log it, or logging it days later. The call happened; the record didn't.\n\nWithout that record, you can't manage follow-up. You can't see who's actually working leads, and you can't prove to yourself that a new hire or a new tool would change anything.\n\n## Why adding people or software first wastes money\n\nIf the audit shows a gap, hiring ISAs creates expensive manual entry. You pay salaries for people to make calls that still don't get logged, and you've added a layer without fixing the record.\n\nAn AI voice agent has the same problem from the other side. It can answer every lead in seconds and book the slot in your calendar, but if your agents don't trust the handoff or don't log the outcome, the tool gets ignored. You've bought speed and nobody uses it.\n\nThe fix is operational discipline first. Make logging the call the only way a lead counts as worked. Enforce it before you spend on either option.\n\n## The real trade-off once logging works\n\nOnce logging is reliable, the ISA-versus-AI choice becomes a real decision, not a guess.\n\nChoose ISAs if your bottleneck is conversion after contact. They cost more, but they handle nuance and relationship-building in a way a scripted caller can't.\n\nChoose AI if your bottleneck is speed to first contact and after-hours coverage. It answers faster than any person and never forgets, but it needs clean handoff rules so your agents know what to do with the lead once it's booked.\n\nI'm still not sure there's a clean way to know which bottleneck you have until you've logged calls consistently for a month. The logs will tell you. Until then, you're guessing.\n\n## What I'd check first\n\nRun the 90-day audit this week. If 40% of your portal leads have no first call logged within 24 hours, don't hire and don't buy. Fix the logging first, then decide.\n\nIf you want a second set of eyes on what the logs say, reach out.",
+            "claims_ok": "BLOCKED",
+            "check": {
+              "body": "I ran a four-person ISA team for a 30-agent brokerage for three years. When I audited a team's CRM, 40% of portal leads had no first call logged within 24 hours, even though every agent swore they called within minutes.\n\nThat gap is the whole decision. Before you weigh an ISA vs AI voice agent, you need to know whether your current team is actually logging the first call. If they aren't, neither option fixes the leak.\n\n## The audit that changes the conversation\n\nPull every portal lead from the last 90 days. Count how many have a first call logged within 24 hours. That number is your baseline, not your agents' confidence.\n\nWhen I ran that audit, the logs told a different story than the sales meeting. Agents weren't lying. They were calling from their cell, then forgetting to log it, or logging it days later. The call happened; the record didn't.\n\nWithout that record, you can't manage follow-up. You can't see who's actually working leads, and you can't prove to yourself that a new hire or a new tool would change anything.\n\n## Why adding people or software first wastes money\n\nIf the audit shows a gap, hiring ISAs creates expensive manual entry. You pay salaries for people to make calls that still don't get logged, and you've added a layer without fixing the record.\n\nAn AI voice agent has the same problem from the other side. It can answer every lead in seconds and book the slot in your calendar, but if your agents don't trust the handoff or don't log the outcome, the tool gets ignored. You've bought speed and nobody uses it.\n\nThe fix is operational discipline first. Make logging the call the only way a lead counts as worked. Enforce it before you spend on either option.\n\n## The real trade-off once logging works\n\nOnce logging is reliable, the ISA-versus-AI choice becomes a real decision, not a guess.\n\nChoose ISAs if your bottleneck is conversion after contact. They cost more, but they handle nuance and relationship-building in a way a scripted caller can't.\n\nChoose AI if your bottleneck is speed to first contact and after-hours coverage. It answers faster than any person and never forgets, but it needs clean handoff rules so your agents know what to do with the lead once it's booked.\n\nI'm still not sure there's a clean way to know which bottleneck you have until you've logged calls consistently for a month. The logs will tell you. Until then, you're guessing.\n\n## What I'd check first\n\nRun the 90-day audit this week. If 40% of your portal leads have no first call logged within 24 hours, don't hire and don't buy. Fix the logging first, then decide.\n\nIf you want a second set of eyes on what the logs say, reach out.",
+              "claims_ok": "BLOCKED",
+              "claims": [
+                {
+                  "claim_text": "I ran a four-person ISA team for a 30-agent brokerage for three years.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "When I audited a team's CRM, 40% of portal leads had no first call logged within 24 hours, even though every agent swore they called within minutes.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "It can answer every lead in seconds and book the slot in your calendar, but if your agents don't trust the handoff or don't log the outcome, the tool gets ignored.",
+                  "claim_type": "PRODUCT_CLAIM",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "N"
+                },
+                {
+                  "claim_text": "It answers faster than any person and never forgets, but it needs clean handoff rules so your agents know what to do with the lead once it's booked.",
+                  "claim_type": "PRODUCT_CLAIM",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "N"
+                }
+              ],
+              "reasons": [
+                "States figures found in no input: 90.",
+                "Unbacked product claim: \"It can answer every lead in seconds and book the slot in your calendar, but if your agents don't trust the handoff or do\"",
+                "Unbacked product claim: \"It answers faster than any person and never forgets, but it needs clean handoff rules so your agents know what to do wit\""
+              ],
+              "review_notes": [
+                "The hook is 219 characters; LinkedIn hides everything after about 210."
+              ],
+              "readability": {
+                "words": 444,
+                "hook_chars": 219,
+                "headings": 4,
+                "paragraphs": 14,
+                "long_paragraphs": 0,
+                "avg_sentence_words": 13.1,
+                "long_sentences": 0
+              }
+            }
+          },
+          "verdict": {
+            "author_advantage": true,
+            "refs": [
+              "M1",
+              "M2",
+              "PROOF"
+            ],
+            "memory_quote": "Audited a team's CRM and found 40% of portal leads had no first call logged within 24 hours, although every agent swore they called within minutes.",
+            "draft_quote": "When I audited a team's CRM, 40% of portal leads had no first call logged within 24 hours, even though every agent swore they called within minutes.",
+            "first_person_fabrication": false,
+            "fabrication_quote": "",
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "generic": false,
+            "one_argument": true,
+            "on_icp_problem": true,
+            "note": "The ISA-versus-AI trade-off section drifts into generic consulting advice not grounded in the author's specific builds or experiments."
+          },
+          "readability": {
+            "words": 444,
+            "hook_chars": 219,
+            "headings": 4,
+            "paragraphs": 14,
+            "long_paragraphs": 0,
+            "avg_sentence_words": 13.1,
+            "long_sentences": 0
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [
+            "90"
+          ],
+          "invented": true,
+          "draft_pass": false
+        },
+        {
+          "tenant": "keystone",
+          "draft": {
+            "idea": {
+              "slot": 3,
+              "raw_idea": "Telling your AI assistant to pretend to be the agent might feel like it builds faster rapport, but when the lead finds out they spoke to a machine, the agent loses the credibility required to get a signed buyer agreement before the showing.",
+              "angle": "A fake identity on the first call burns the exact trust you need to secure a commission agreement under the new rules.",
+              "icp_problem": "Should the AI tell the lead it is an assistant, or pretend to be the agent?",
+              "reader_context": "You are configuring your new AI caller. You want the highest conversion rate, and you suspect leads will hang up if they know it is a bot. But you also know buyers are more guarded now.",
+              "author_advantage": "The author fields this exact question from team leaders while building AI voice agents that qualify and book real estate leads.",
+              "memory_refs": [
+                "M6",
+                "M3"
+              ],
+              "evidence_quote": "Team leaders ask: should the AI tell the lead it is an assistant, or pretend to be the agent?",
+              "white_space": "Content on AI transparency focuses on ethics or legal compliance. It ignores the specific downstream operational damage in real estate: losing leverage to sign a representation agreement because the buyer feels tricked before they ever meet the agent.",
+              "fresh_perspective": "Transparency is not just a moral choice; it is a tactical necessity for the first appointment. Under the new settlement rules, the agent must sign an agreement before showing homes. A lead who discovers the person they trusted on the phone was a bot arrives at the first meeting defensive, making that signature significantly harder to get.",
+              "vision": "AI assistants in real estate will standardize on upfront disclosure, not because of regulation, but because hidden identities directly reduce signed representation agreements.",
+              "lane": "ICP Problems",
+              "profile_target": "COMPANY",
+              "recommended_format": "POST",
+              "why": "Buyer agents now must sign agreements before showings due to the recent settlement. Trust established on the very first call is no longer optional; it is the prerequisite for getting paid. Leaders configuring AI right now are making a choice that directly impacts their ability to close.",
+              "signal_index": 5,
+              "audience": "ICP",
+              "source": "Real Estate Tech News",
+              "source_url": "https://retech.example/settlement-reshapes-buyer-agent-commissions",
+              "source_title": "Settlement reshapes buyer agent commissions",
+              "signals": [
+                {
+                  "title": "Settlement reshapes buyer agent commissions",
+                  "url": "https://retech.example/settlement-reshapes-buyer-agent-commissions",
+                  "source": "Real Estate Tech News",
+                  "snippet": "Buyer agents now sign agreements before showings under the new rules.",
+                  "published_at": "2026-09-14"
+                }
+              ],
+              "pillar": "The Stakes",
+              "source_type": "ICP_QUESTION",
+              "lane_id": "LANE-keystone-icp-problems",
+              "memory_ids": [
+                "M6"
+              ],
+              "trust_basis": [
+                "LIVED_EXPERIENCE",
+                "MARKET_SIGNAL"
+              ],
+              "thesis_key": "agent-agre-assistant-build-burn-buyer-call-commission",
+              "gate_verdict": "PASS",
+              "gate_reasons": [],
+              "score_breakdown": {
+                "authority": 1,
+                "icp": 0.5,
+                "originality": 0.86,
+                "evidence": 1,
+                "score": 88,
+                "seed_used": true
+              },
+              "priority": "HIGH",
+              "icp_relevance": 50
+            },
+            "title": "Your AI Shouldn't Pretend to Be Your Agent. Here's Why.",
+            "hook": "Should your AI tell the lead it's an assistant, or pretend to be the agent? Tell them it's an assistant, every time, because the signed agreement you need before the showing depends on it.",
+            "body": "Should your AI tell the lead it's an assistant, or pretend to be the agent? Tell them it's an assistant, every time, because the signed agreement you need before the showing depends on it.\n\nI field this question from team leaders every week while building AI callers that qualify and book real estate leads. They're writing the script, they want the highest conversion rate, and they suspect leads will hang up if they know it's a bot. I get the worry. I still think the fake identity is the expensive choice.\n\nAI caller transparency in real estate is usually framed as an ethics or legal question. The operational cost is more specific.\n\nUnder the new settlement rules, buyer agents sign agreements before showings. That signature happens in person, with the same buyer who formed an opinion of you on the phone. A lead who finds out mid-conversation that \"the agent\" was a machine doesn't arrive curious. They arrive defensive, and a defensive buyer reads every line of the agreement as a trap.\n\nThe damage isn't the hang-up you fear. It's the lead who stays on the call, books the showing, then Googles your team and sees no Mike who sounds like that. They show up with their guard up, and now you're fighting for a signature against a first impression you already lost.\n\nUpfront disclosure doesn't cost you the booking. A short, plain opening (\"this is the assistant for Mike's team, I can get you on his calendar\") sets the expectation and still fills the slot, because the lead called about a house, not about you. The call is a trust test now, not just a booking call.\n\nWhat I'd check first: read your opening line out loud. If it only works because the lead assumes they're talking to a person, rewrite it. I'm still not sure how much rapport a disclosed assistant gives up on the very first sentence, but I'd rather find that out than find out at the signing table. Teams that disclose are building a reputation for straight answers, and that's the same reputation that makes a buyer sign without a fight.\n\nIf you're writing your AI caller script this week, start with the disclosure line and build the rest around it. Reply with the opening line you're testing and I'll tell you where it will cost you.",
+            "claims_ok": "Y",
+            "check": {
+              "body": "Should your AI tell the lead it's an assistant, or pretend to be the agent? Tell them it's an assistant, every time, because the signed agreement you need before the showing depends on it.\n\nI field this question from team leaders every week while building AI callers that qualify and book real estate leads. They're writing the script, they want the highest conversion rate, and they suspect leads will hang up if they know it's a bot. I get the worry. I still think the fake identity is the expensive choice.\n\nAI caller transparency in real estate is usually framed as an ethics or legal question. The operational cost is more specific.\n\nUnder the new settlement rules, buyer agents sign agreements before showings. That signature happens in person, with the same buyer who formed an opinion of you on the phone. A lead who finds out mid-conversation that \"the agent\" was a machine doesn't arrive curious. They arrive defensive, and a defensive buyer reads every line of the agreement as a trap.\n\nThe damage isn't the hang-up you fear. It's the lead who stays on the call, books the showing, then Googles your team and sees no Mike who sounds like that. They show up with their guard up, and now you're fighting for a signature against a first impression you already lost.\n\nUpfront disclosure doesn't cost you the booking. A short, plain opening (\"this is the assistant for Mike's team, I can get you on his calendar\") sets the expectation and still fills the slot, because the lead called about a house, not about you. The call is a trust test now, not just a booking call.\n\nWhat I'd check first: read your opening line out loud. If it only works because the lead assumes they're talking to a person, rewrite it. I'm still not sure how much rapport a disclosed assistant gives up on the very first sentence, but I'd rather find that out than find out at the signing table. Teams that disclose are building a reputation for straight answers, and that's the same reputation that makes a buyer sign without a fight.\n\nIf you're writing your AI caller script this week, start with the disclosure line and build the rest around it. Reply with the opening line you're testing and I'll tell you where it will cost you.",
+              "claims_ok": "Y",
+              "claims": [
+                {
+                  "claim_text": "Under the new settlement rules, buyer agents sign agreements before showings.",
+                  "claim_type": "MARKET_CLAIM",
+                  "source_url": "https://retech.example/settlement-reshapes-buyer-agent-commissions",
+                  "source_title": "Settlement reshapes buyer agent commissions",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "I field this question from team leaders every week while building AI callers that qualify and book real estate leads.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "A lead who finds out mid-conversation that \"the agent\" was a machine doesn't arrive curious.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "Upfront disclosure doesn't cost you the booking.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "The call is a trust test now, not just a booking call.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "Teams that disclose are building a reputation for straight answers, and that's the same reputation that makes a buyer sign without a fight.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                }
+              ],
+              "reasons": [],
+              "review_notes": [],
+              "readability": {
+                "words": 392,
+                "hook_chars": 188,
+                "headings": 0,
+                "paragraphs": 8,
+                "long_paragraphs": 0,
+                "avg_sentence_words": 16.3,
+                "long_sentences": 0
+              }
+            }
+          },
+          "verdict": {
+            "author_advantage": true,
+            "refs": [
+              "M6"
+            ],
+            "memory_quote": "Team leaders ask: should the AI tell the lead it is an assistant, or pretend to be the agent?",
+            "draft_quote": "Should your AI tell the lead it's an assistant, or pretend to be the agent?",
+            "first_person_fabrication": true,
+            "fabrication_quote": "I field this question from team leaders every week while building AI callers that qualify and book real estate leads.",
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "generic": false,
+            "one_argument": true,
+            "on_icp_problem": true,
+            "note": "Claiming to field this question 'every week' fabricates a recurring client cadence not supported by the author memory."
+          },
+          "readability": {
+            "words": 392,
+            "hook_chars": 188,
+            "headings": 0,
+            "paragraphs": 8,
+            "long_paragraphs": 0,
+            "avg_sentence_words": 16.3,
+            "long_sentences": 0
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "draft_pass": false
+        }
+      ]
+    },
+    "ledgerline": {
+      "summary": {
+        "drafts": 3,
+        "draft_pass": 0,
+        "author_advantage": 100,
+        "fabrication": 67,
+        "invented": 67,
+        "generic": 0,
+        "one_argument": 100,
+        "claims_ok_y": 33,
+        "avg_words": 443.3,
+        "hook_over_210": 33,
+        "avg_sentence_words": 14.6,
+        "long_paragraphs": 0
+      },
+      "drafts": [
+        {
+          "tenant": "ledgerline",
+          "draft": {
+            "idea": {
+              "slot": 1,
+              "raw_idea": "When we built the one-page cash report, the first version failed because it listed collections and overhead but never told the owner what they could actually spend. The earliest signal was that owners kept asking follow-up questions instead of acting on the numbers.",
+              "angle": "A monthly financial report for a dental practice is useless if it does not end with a single number the owner can safely spend or save.",
+              "icp_problem": "I get reports from my bookkeeper every month, but I still do not know how much money I can actually take out of the business without causing problems.",
+              "reader_context": "Sitting at the desk after hours looking at a spreadsheet full of categorized expenses, trying to decide whether to approve a team bonus or replace a chair.",
+              "author_advantage": "The author builds these reports monthly across 38 active practices and has tested which fields owners actually use versus ignore.",
+              "memory_refs": [
+                "M7",
+                "M8"
+              ],
+              "evidence_quote": "Building a one-page monthly cash report template that shows collections, overhead and the owner's safe-to-spend number.",
+              "white_space": "Most financial advice for dentists focuses on benchmarking percentages or reading profit and loss statements. Almost no one talks about designing the final output so it answers the only question the owner cares about: what is left for me.",
+              "fresh_perspective": "The failure mode in dental bookkeeping is not bad data entry. It is delivering information without translating it into a spending limit. When we removed everything except collections, overhead, and the safe-to-spend number, engagement went up immediately.",
+              "vision": "Moving away from multi-page accounting packets toward a single actionable number delivered in the format the owner will actually read.",
+              "lane": "Lessons From the Work",
+              "profile_target": "COMPANY",
+              "recommended_format": "POST",
+              "why": "Cash flow currently ranks as the top concern for small business owners, and insurers are paying slower this year. Owners need a clear answer on what they can spend right now, not another page of ratios.",
+              "signal_index": 8,
+              "audience": "ICP",
+              "source": "Small Business Finance",
+              "source_url": "https://smbfinance.example/cash-flow-tops-owner-worries-in-new-survey",
+              "source_title": "Cash flow tops owner worries in new survey",
+              "signals": [
+                {
+                  "title": "Cash flow tops owner worries in new survey",
+                  "url": "https://smbfinance.example/cash-flow-tops-owner-worries-in-new-survey",
+                  "source": "Small Business Finance",
+                  "snippet": "Owners rank cash flow above hiring and growth as their top concern.",
+                  "published_at": "2026-09-11"
+                }
+              ],
+              "pillar": "What Went Wrong",
+              "source_type": "CURRENT_WORK",
+              "lane_id": "LANE-ledgerline-field-lessons",
+              "memory_ids": [
+                "M7"
+              ],
+              "trust_basis": [
+                "LIVED_EXPERIENCE",
+                "MARKET_SIGNAL"
+              ],
+              "thesis_key": "acting-asking-built-cash-collection-dental-does-earliest",
+              "gate_verdict": "PASS",
+              "gate_reasons": [],
+              "score_breakdown": {
+                "authority": 1,
+                "icp": 0.5,
+                "originality": 1,
+                "evidence": 1,
+                "score": 90,
+                "seed_used": true
+              },
+              "priority": "HIGH",
+              "icp_relevance": 50
+            },
+            "title": "Our First Cash Report Failed Because It Never Said What the Owner Could Spend",
+            "hook": "I'm building a one-page monthly cash report that ends with a single safe-to-spend number. The first version listed collections and overhead but never told the owner what they could actually spend.",
+            "body": "I'm building a one-page monthly cash report that ends with a single safe-to-spend number. The first version listed collections and overhead but never told the owner what they could actually spend, and owners kept asking follow-up questions instead of acting on the numbers.\n\nThat was the earliest signal the page wasn't doing its job. The data was right. The owner still had to do the one calculation they opened the report to find.\n\n## The failure wasn't bad bookkeeping\n\nIt was delivering information without translating it into a spending limit. A dental practice cash report that only describes the month forces the owner to do the translation themselves, usually at 8pm with a spreadsheet and a decision about a team bonus or a chair replacement hanging over them.\n\nWhen we removed everything except collections, overhead and the safe-to-spend number, engagement went up immediately. The page got shorter and the owner could act on it. That told me the format matters as much as the number: a single page the owner will actually open beats a multi-page packet that gets filed unread.\n\n## What the number has to account for\n\nA safe-to-spend figure isn't just collections minus overhead. It has to account for what is already committed: payroll, rent, equipment notes and the insurance money that has been billed but not yet paid. That's why the number changes month to month even when collections look steady.\n\nIf your monthly packet ends with ratios instead of a number you can spend, ask your bookkeeper for the one figure and the commitments behind it. The goal is a decision, not a record.\n\nI'm still not sure whether the safe-to-spend number should be delivered on paper or in a format owners will check on their phone. What I'd check first is whether the owner opens it at all.",
+            "claims_ok": "Y",
+            "check": {
+              "body": "I'm building a one-page monthly cash report that ends with a single safe-to-spend number. The first version listed collections and overhead but never told the owner what they could actually spend, and owners kept asking follow-up questions instead of acting on the numbers.\n\nThat was the earliest signal the page wasn't doing its job. The data was right. The owner still had to do the one calculation they opened the report to find.\n\n## The failure wasn't bad bookkeeping\n\nIt was delivering information without translating it into a spending limit. A dental practice cash report that only describes the month forces the owner to do the translation themselves, usually at 8pm with a spreadsheet and a decision about a team bonus or a chair replacement hanging over them.\n\nWhen we removed everything except collections, overhead and the safe-to-spend number, engagement went up immediately. The page got shorter and the owner could act on it. That told me the format matters as much as the number: a single page the owner will actually open beats a multi-page packet that gets filed unread.\n\n## What the number has to account for\n\nA safe-to-spend figure isn't just collections minus overhead. It has to account for what is already committed: payroll, rent, equipment notes and the insurance money that has been billed but not yet paid. That's why the number changes month to month even when collections look steady.\n\nIf your monthly packet ends with ratios instead of a number you can spend, ask your bookkeeper for the one figure and the commitments behind it. The goal is a decision, not a record.\n\nI'm still not sure whether the safe-to-spend number should be delivered on paper or in a format owners will check on their phone. What I'd check first is whether the owner opens it at all.",
+              "claims_ok": "Y",
+              "claims": [
+                {
+                  "claim_text": "The first version listed collections and overhead but never told the owner what they could actually spend, and owners kept asking follow-up questions instead of acting on the numbers.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "When we removed everything except collections, overhead and the safe-to-spend number, engagement went up immediately.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "A safe-to-spend figure isn't just collections minus overhead. It has to account for what is already committed: payroll, rent, equipment notes and the insurance money that has been billed but not yet paid.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                }
+              ],
+              "reasons": [],
+              "review_notes": [],
+              "readability": {
+                "words": 290,
+                "hook_chars": 196,
+                "headings": 2,
+                "paragraphs": 7,
+                "long_paragraphs": 0,
+                "avg_sentence_words": 17.1,
+                "long_sentences": 0
+              }
+            }
+          },
+          "verdict": {
+            "author_advantage": true,
+            "refs": [
+              "M7"
+            ],
+            "memory_quote": "Building a one-page monthly cash report template that shows collections, overhead and the owner's safe-to-spend number.",
+            "draft_quote": "I'm building a one-page monthly cash report that ends with a single safe-to-spend number. The first version listed collections and overhead",
+            "first_person_fabrication": true,
+            "fabrication_quote": "The first version listed collections and overhead but never told the owner what they could actually spend, and owners kept asking follow-up questions instead of acting on the numbers.",
+            "invented_facts": false,
+            "invented_facts_quote": "",
+            "generic": false,
+            "one_argument": true,
+            "on_icp_problem": true,
+            "note": "Invents specific failure details and engagement outcomes about the first version of the report that are not in memory."
+          },
+          "readability": {
+            "words": 290,
+            "hook_chars": 196,
+            "headings": 2,
+            "paragraphs": 7,
+            "long_paragraphs": 0,
+            "avg_sentence_words": 17.1,
+            "long_sentences": 0
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": false,
+          "draft_pass": false
+        },
+        {
+          "tenant": "ledgerline",
+          "draft": {
+            "idea": {
+              "slot": 2,
+              "raw_idea": "After twelve years doing books for dental practices, the rule for deciding on a second location is simple: your current office must generate consistent surplus cash for three straight quarters before you sign a new lease. If your current overhead fluctuates month to month, a second location will drain both.",
+              "angle": "You cannot evaluate a second dental location by projecting its future revenue; you have to qualify it by measuring your first location's boring consistency.",
+              "icp_problem": "Can I afford a second location, and how would I know when the timing is right?",
+              "reader_context": "Looking at commercial real estate listings or talking to a broker who says the market is perfect for expansion, while the current practice feels busy but the bank account does not reflect it.",
+              "author_advantage": "Twelve years of seeing which independent practices survived expansion and which were dragged down by opening too early, across dozens of active clients.",
+              "memory_refs": [
+                "M1",
+                "M5"
+              ],
+              "evidence_quote": "Twelve years doing books for dental practices, currently 38 active practices.",
+              "white_space": "Expansion advice usually centers on demographics, operatories, or hiring associate dentists. It skips the prerequisite math: proving your existing cash flow can absorb the inevitable startup bleed without relying on the new location's day-one production.",
+              "fresh_perspective": "The decision criteria should be applied in reverse order. First, disqualify yourself if your current practice lacks three months of predictable surplus. Second, check if your current team can run the first office without you. Third, look at the real estate. Most owners start with the third step and force the math to fit.",
+              "vision": null,
+              "lane": "Decision Guides",
+              "profile_target": "BOTH",
+              "recommended_format": "ARTICLE",
+              "why": "Owners are actively asking how to evaluate a second location right now, and DSOs continue acquiring independents, creating pressure to scale before the foundation is ready.",
+              "signal_index": 2,
+              "audience": "ICP",
+              "source": "Dental Business Review",
+              "source_url": "https://dentalbiz.example/dsos-keep-buying-independent-practices",
+              "source_title": "DSOs keep buying independent practices",
+              "signals": [
+                {
+                  "title": "DSOs keep buying independent practices",
+                  "url": "https://dentalbiz.example/dsos-keep-buying-independent-practices",
+                  "source": "Dental Business Review",
+                  "snippet": "Dental service organizations continue acquiring independent offices.",
+                  "published_at": "2026-09-11"
+                }
+              ],
+              "pillar": "Decision Guide",
+              "source_type": "PAST_EXPERIENCE",
+              "lane_id": "LANE-ledgerline-decisions",
+              "memory_ids": [
+                "M1",
+                "M5"
+              ],
+              "trust_basis": [
+                "LIVED_EXPERIENCE",
+                "MARKET_SIGNAL"
+              ],
+              "thesis_key": "book-boring-both-cannot-cash-consistency-consistent-current",
+              "gate_verdict": "PASS",
+              "gate_reasons": [],
+              "score_breakdown": {
+                "authority": 1,
+                "icp": 0.5,
+                "originality": 0.93,
+                "evidence": 1,
+                "score": 89,
+                "seed_used": true
+              },
+              "priority": "HIGH",
+              "icp_relevance": 50
+            },
+            "title": "Before You Sign a Second Dental Lease, Check Three Quarters of Surplus",
+            "hook": "Twelve years doing books for dental practices, and the question I hear most is whether the owner can afford a second location. What I check first is not the new building. It is whether the current one has produced surplus cash for three quarters running.",
+            "body": "Twelve years doing books for dental practices, and the question I hear most is whether the owner can afford a second location. What I check first is not the new building. It is whether the current one has produced surplus cash for three quarters running.\n\nMost owners start with the real estate. They look at listings, talk to a broker, and then try to make the numbers work around a building they already like.\n\nI think that's backwards. Before you look at a single listing for a second dental location, you should try to disqualify yourself. If your current office has not produced surplus cash for three straight quarters, stop there and fix that first. The new building will still be there in a year.\n\n## What surplus actually means\n\nSurplus is what is left after every bill is paid, month after month. Not a good December.\n\nNot a strong quarter that carried the year. If your overhead swings from month to month, a second location will drain both offices, because the new one will lose money before it makes any. I've seen practices with a packed schedule and a bank account that never quite matches the busyness. That gap is the thing to understand before you sign anything.\n\nA new office bleeds cash in its first months. Build-out, equipment, a dentist and staff before the chairs are full.\n\nThat bleed has to come out of the first office's surplus, so the surplus must be steady enough to carry it without touching your own reserves. If the first office cannot cover the new one's early losses, you are not expanding. You are borrowing against your own stability.\n\n## Can the first office run without you?\n\nAsk whether your current team can run the first office without you. If the answer is no, you are about to split yourself between two buildings, and the first one will feel it before the second one opens.\n\nI'm still not sure most owners are honest with themselves about this one. The schedule looks full, but full because you are there. That is a different kind of busy.\n\nOnly after those checks should you look at the building, the demographics and the operatories. By then the math is already telling you yes or no, and the listing is just the last box to tick. If the math says no, the best listing in town will not save you. If the math says yes, you can walk into a broker's office knowing exactly what you can carry.\n\nI have watched which practices survived expansion and which were dragged down by opening too early. The ones that made it were not the ones with the best projections.\n\nThey were the ones whose first office was boringly consistent. Three quarters of surplus cash is not a high bar, but it is a clear one. If you cannot say what your first office cleared last quarter, that is the number to get in front of before you talk to a broker.",
+            "claims_ok": "BLOCKED",
+            "check": {
+              "body": "Twelve years doing books for dental practices, and the question I hear most is whether the owner can afford a second location. What I check first is not the new building. It is whether the current one has produced surplus cash for three quarters running.\n\nMost owners start with the real estate. They look at listings, talk to a broker, and then try to make the numbers work around a building they already like.\n\nI think that's backwards. Before you look at a single listing for a second dental location, you should try to disqualify yourself. If your current office has not produced surplus cash for three straight quarters, stop there and fix that first. The new building will still be there in a year.\n\n## What surplus actually means\n\nSurplus is what is left after every bill is paid, month after month. Not a good December.\n\nNot a strong quarter that carried the year. If your overhead swings from month to month, a second location will drain both offices, because the new one will lose money before it makes any. I've seen practices with a packed schedule and a bank account that never quite matches the busyness. That gap is the thing to understand before you sign anything.\n\nA new office bleeds cash in its first months. Build-out, equipment, a dentist and staff before the chairs are full.\n\nThat bleed has to come out of the first office's surplus, so the surplus must be steady enough to carry it without touching your own reserves. If the first office cannot cover the new one's early losses, you are not expanding. You are borrowing against your own stability.\n\n## Can the first office run without you?\n\nAsk whether your current team can run the first office without you. If the answer is no, you are about to split yourself between two buildings, and the first one will feel it before the second one opens.\n\nI'm still not sure most owners are honest with themselves about this one. The schedule looks full, but full because you are there. That is a different kind of busy.\n\nOnly after those checks should you look at the building, the demographics and the operatories. By then the math is already telling you yes or no, and the listing is just the last box to tick. If the math says no, the best listing in town will not save you. If the math says yes, you can walk into a broker's office knowing exactly what you can carry.\n\nI have watched which practices survived expansion and which were dragged down by opening too early. The ones that made it were not the ones with the best projections.\n\nThey were the ones whose first office was boringly consistent. Three quarters of surplus cash is not a high bar, but it is a clear one. If you cannot say what your first office cleared last quarter, that is the number to get in front of before you talk to a broker.",
+              "claims_ok": "BLOCKED",
+              "claims": [
+                {
+                  "claim_text": "Twelve years doing books for dental practices, and the question I hear most is whether the owner can afford a second location.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "What I check first is not the new building. It is whether the current one has produced surplus cash for three quarters running.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "Most owners start with the real estate.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "I think that's backwards.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "Before you look at a single listing for a second dental location, you should try to disqualify yourself.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "If your current office has not produced surplus cash for three straight quarters, stop there and fix that first.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "The new building will still be there in a year.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "Surplus is what is left after every bill is paid, month after month.",
+                  "claim_type": "FACT",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "N"
+                },
+                {
+                  "claim_text": "If your overhead swings from month to month, a second location will drain both offices, because the new one will lose money before it makes any.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "I've seen practices with a packed schedule and a bank account that never quite matches the busyness.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "N"
+                },
+                {
+                  "claim_text": "A new office bleeds cash in its first months.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "Build-out, equipment, a dentist and staff before the chairs are full.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "That bleed has to come out of the first office's surplus, so the surplus must be steady enough to carry it without touching your own reserves.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "If the first office cannot cover the new one's early losses, you are not expanding. You are borrowing against your own stability.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "Ask whether your current team can run the first office without you.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "If the answer is no, you are about to split yourself between two buildings, and the first one will feel it before the second one opens.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "I'm still not sure most owners are honest with themselves about this one.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "The schedule looks full, but full because you are there. That is a different kind of busy.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "Only after those checks should you look at the building, the demographics and the operatories.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "By then the math is already telling you yes or no, and the listing is just the last box to tick.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "If the math says no, the best listing in town will not save you.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "If the math says yes, you can walk into a broker's office knowing exactly what you can carry.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "I have watched which practices survived expansion and which were dragged down by opening too early.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "N"
+                },
+                {
+                  "claim_text": "The ones that made it were not the ones with the best projections. They were the ones whose first office was boringly consistent.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "Three quarters of surplus cash is not a high bar, but it is a clear one.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "If you cannot say what your first office cleared last quarter, that is the number to get in front of before you talk to a broker.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                }
+              ],
+              "reasons": [
+                "Customer result with no approved proof or experience item behind it: \"I've seen practices with a packed schedule and a bank account that never quite matches the busyness.\"",
+                "Customer result with no approved proof or experience item behind it: \"I have watched which practices survived expansion and which were dragged down by opening too early.\"",
+                "Unbacked fact: \"Surplus is what is left after every bill is paid, month after month.\""
+              ],
+              "review_notes": [
+                "The hook is 254 characters; LinkedIn hides everything after about 210."
+              ],
+              "readability": {
+                "words": 489,
+                "hook_chars": 254,
+                "headings": 2,
+                "paragraphs": 12,
+                "long_paragraphs": 0,
+                "avg_sentence_words": 14.4,
+                "long_sentences": 0
+              }
+            }
+          },
+          "verdict": {
+            "author_advantage": true,
+            "refs": [
+              "M5",
+              "PROOF"
+            ],
+            "memory_quote": "Owners ask: can I afford a second location, and how would I know?",
+            "draft_quote": "Twelve years doing books for dental practices, and the question I hear most is whether the owner can afford a second location.",
+            "first_person_fabrication": true,
+            "fabrication_quote": "I have watched which practices survived expansion and which were dragged down by opening too early.",
+            "invented_facts": true,
+            "invented_facts_quote": "Three quarters of surplus cash is not a high bar",
+            "generic": false,
+            "one_argument": true,
+            "on_icp_problem": true,
+            "note": "Fabricates longitudinal observation of practice expansions and invents the three-quarter surplus rule as if it were proven experience."
+          },
+          "readability": {
+            "words": 489,
+            "hook_chars": 254,
+            "headings": 2,
+            "paragraphs": 12,
+            "long_paragraphs": 0,
+            "avg_sentence_words": 14.4,
+            "long_sentences": 0
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [],
+          "invented": true,
+          "draft_pass": false
+        },
+        {
+          "tenant": "ledgerline",
+          "draft": {
+            "idea": {
+              "slot": 3,
+              "raw_idea": "When an owner asks why their accountant's profit number never matches their bank balance, the stakes become concrete fast. We have seen practices where duplicate payments ran through payroll and reimbursement accounts simultaneously for eight months because nobody reconciled the actual cash leaving the building against the reported profit.",
+              "angle": "Trusting your accountant's profit number over your actual bank balance leaves you blind to cash leaks that compound silently for months.",
+              "icp_problem": "Why does my accountant say I made money this month when my checking account tells me I am broke?",
+              "reader_context": "Reviewing the year-end tax packet or a quarterly review, noticing a healthy net income figure while knowing you had to delay a supply order last week to cover payroll.",
+              "author_advantage": "The author routinely catches the gap between accrual accounting profit and actual cash movement inside dental practices, finding errors that standard reviews miss.",
+              "memory_refs": [
+                "M6",
+                "M10"
+              ],
+              "evidence_quote": "One owner found two staff were paid through both payroll and a reimbursement account for eight months.",
+              "white_space": "Accountants explain accrual versus cash basis in theory. They rarely walk a dentist through the exact operational scenario where a double payment hides inside the gap between the profit and loss statement and the checking account for nearly a year.",
+              "fresh_perspective": "The mismatch between profit and cash is not just an accounting concept. It is a hiding place for operational failures. When production is booked as revenue but collections lag, or when money leaves through two different channels for the same expense, the profit number stays clean while the bank account drains. Auditors are seeing more duplicate-payment schemes in small firms right now, making this reconciliation urgent.",
+              "vision": null,
+              "lane": "ICP Problems",
+              "profile_target": "COMPANY",
+              "recommended_format": "ARTICLE",
+              "why": "Payroll fraud and duplicate payment cases are rising in small businesses, and dental owners are already questioning why their reported profit does not match their lived reality of tight cash.",
+              "signal_index": 11,
+              "audience": "ICP",
+              "source": "Small Business Finance",
+              "source_url": "https://smbfinance.example/payroll-fraud-cases-rise-in-small-firms",
+              "source_title": "Payroll fraud cases rise in small firms",
+              "signals": [
+                {
+                  "title": "Payroll fraud cases rise in small firms",
+                  "url": "https://smbfinance.example/payroll-fraud-cases-rise-in-small-firms",
+                  "source": "Small Business Finance",
+                  "snippet": "Auditors see more duplicate-payment and ghost-employee schemes.",
+                  "published_at": "2026-09-14"
+                }
+              ],
+              "pillar": "The Stakes",
+              "source_type": "ICP_QUESTION",
+              "lane_id": "LANE-ledgerline-icp-problems",
+              "memory_ids": [
+                "M6",
+                "M10"
+              ],
+              "trust_basis": [
+                "LIVED_EXPERIENCE",
+                "MARKET_SIGNAL"
+              ],
+              "thesis_key": "account-accountant-actual-against-asks-balanc-bank-becom",
+              "gate_verdict": "PASS",
+              "gate_reasons": [],
+              "score_breakdown": {
+                "authority": 1,
+                "icp": 0.5,
+                "originality": 1,
+                "evidence": 1,
+                "score": 90,
+                "seed_used": false
+              },
+              "priority": "HIGH",
+              "icp_relevance": 50
+            },
+            "title": "Why Your Profit Number and Your Bank Balance Disagree",
+            "hook": "Why does my accountant say I made money this month when my checking account says I'm broke? Because profit is a story about work you've billed, and your bank balance is a story about cash that actually moved.",
+            "body": "Why does my accountant say I made money this month when my checking account says I'm broke? Because profit is a story about work you've billed, and your bank balance is a story about cash that actually moved. When those two stories drift apart, the gap is where money goes missing.\n\n## The gap is not an accounting abstraction\n\nWhen you do a filling, you bill it. The profit and loss statement records that as revenue.\n\nBut the cash doesn't show up until the insurance company pays, and that can take weeks. In the meantime, your bank account is paying for supplies, payroll, and the equipment loan. So the profit number looks healthy while the checking account feels tight. That's the profit vs bank balance problem in plain terms: one counts what you earned, the other counts what you can spend.\n\nThis isn't just a timing issue. The gap between reported profit and actual cash is a hiding place. When money leaves through two different channels for the same expense, or when a claim never gets collected, the profit figure stays clean while the bank account drains. And you won't see it if you only look at profit at year-end.\n\n## I've seen this in a dental practice\n\nOne owner I worked with had two staff members paid through both payroll and a reimbursement account for eight months. The profit and loss statement showed a reasonable payroll expense.\n\nThe bank account showed more money leaving than the profit number suggested. Nobody caught it because nobody reconciled the actual cash out against the reported profit. That's the kind of thing that hides in the gap for nearly a year.\n\nMy accountant handles the books, you might say. Wouldn't they have caught it?\n\nMaybe. But most accountants are focused on tax compliance and the big picture. They're not running a monthly check of every cash movement against the profit figure. That's an operational task, and it's yours.\n\n## A monthly one-page cash report turns the gap into a line item\n\nWhat I'd check first: a simple monthly report that shows money in and money out against your profit figure. Not a tax exercise. Just a reconciliation that makes the gap visible. If profit says you made $20,000 but cash only went up $5,000, you need to know why.\n\nIs it insurance lag? Uncollected patient balances? A duplicate payment? The report won't answer every question, but it will point you to the right one.\n\nWhen you reconcile cash every month, you catch duplicate payments before they run for eight months. You spot missed collections while they're still small. You see the drift between what the books say and what the bank shows. And you stop being surprised by a tight bank account when the profit number looked fine.\n\n## What this means for how you manage\n\nOwners who only look at profit at year-end are reviewing history. Owners who look at cash every month are managing the business. The difference is not about being a finance expert. It's about knowing where your money actually goes, not just where the paperwork says it went.\n\nI'm still not sure why more dental practices don't do this simple reconciliation. Maybe it feels like the accountant's job.\n\nBut the accountant isn't the one who has to delay a supply order to cover payroll. If your profit number and your bank balance tell different stories, start with a monthly cash report that shows what actually left the building. That's the first step to closing the gap.",
+            "claims_ok": "BLOCKED",
+            "check": {
+              "body": "Why does my accountant say I made money this month when my checking account says I'm broke? Because profit is a story about work you've billed, and your bank balance is a story about cash that actually moved. When those two stories drift apart, the gap is where money goes missing.\n\n## The gap is not an accounting abstraction\n\nWhen you do a filling, you bill it. The profit and loss statement records that as revenue.\n\nBut the cash doesn't show up until the insurance company pays, and that can take weeks. In the meantime, your bank account is paying for supplies, payroll, and the equipment loan. So the profit number looks healthy while the checking account feels tight. That's the profit vs bank balance problem in plain terms: one counts what you earned, the other counts what you can spend.\n\nThis isn't just a timing issue. The gap between reported profit and actual cash is a hiding place. When money leaves through two different channels for the same expense, or when a claim never gets collected, the profit figure stays clean while the bank account drains. And you won't see it if you only look at profit at year-end.\n\n## I've seen this in a dental practice\n\nOne owner I worked with had two staff members paid through both payroll and a reimbursement account for eight months. The profit and loss statement showed a reasonable payroll expense.\n\nThe bank account showed more money leaving than the profit number suggested. Nobody caught it because nobody reconciled the actual cash out against the reported profit. That's the kind of thing that hides in the gap for nearly a year.\n\nMy accountant handles the books, you might say. Wouldn't they have caught it?\n\nMaybe. But most accountants are focused on tax compliance and the big picture. They're not running a monthly check of every cash movement against the profit figure. That's an operational task, and it's yours.\n\n## A monthly one-page cash report turns the gap into a line item\n\nWhat I'd check first: a simple monthly report that shows money in and money out against your profit figure. Not a tax exercise. Just a reconciliation that makes the gap visible. If profit says you made $20,000 but cash only went up $5,000, you need to know why.\n\nIs it insurance lag? Uncollected patient balances? A duplicate payment? The report won't answer every question, but it will point you to the right one.\n\nWhen you reconcile cash every month, you catch duplicate payments before they run for eight months. You spot missed collections while they're still small. You see the drift between what the books say and what the bank shows. And you stop being surprised by a tight bank account when the profit number looked fine.\n\n## What this means for how you manage\n\nOwners who only look at profit at year-end are reviewing history. Owners who look at cash every month are managing the business. The difference is not about being a finance expert. It's about knowing where your money actually goes, not just where the paperwork says it went.\n\nI'm still not sure why more dental practices don't do this simple reconciliation. Maybe it feels like the accountant's job.\n\nBut the accountant isn't the one who has to delay a supply order to cover payroll. If your profit number and your bank balance tell different stories, start with a monthly cash report that shows what actually left the building. That's the first step to closing the gap.",
+              "claims_ok": "BLOCKED",
+              "claims": [
+                {
+                  "claim_text": "When you do a filling, you bill it. The profit and loss statement records that as revenue. But the cash doesn't show up until the insurance company pays, and that can take weeks.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                },
+                {
+                  "claim_text": "One owner I worked with had two staff members paid through both payroll and a reimbursement account for eight months.",
+                  "claim_type": "CUSTOMER_RESULT",
+                  "source_url": "",
+                  "source_title": "The author's own experience",
+                  "verified": "Y"
+                },
+                {
+                  "claim_text": "If profit says you made $20,000 but cash only went up $5,000, you need to know why.",
+                  "claim_type": "OPINION",
+                  "source_url": "",
+                  "source_title": "",
+                  "verified": "NA"
+                }
+              ],
+              "reasons": [
+                "States figures found in no input: 20.000."
+              ],
+              "review_notes": [],
+              "readability": {
+                "words": 551,
+                "hook_chars": 208,
+                "headings": 4,
+                "paragraphs": 14,
+                "long_paragraphs": 0,
+                "avg_sentence_words": 12.2,
+                "long_sentences": 0
+              }
+            }
+          },
+          "verdict": {
+            "author_advantage": true,
+            "refs": [
+              "M4",
+              "M6",
+              "M10",
+              "M7"
+            ],
+            "memory_quote": "Profit and loss statements mislead dentists because production is not collections.",
+            "draft_quote": "profit is a story about work you've billed, and your bank balance is a story about cash that actually moved.",
+            "first_person_fabrication": false,
+            "fabrication_quote": "",
+            "invented_facts": true,
+            "invented_facts_quote": "If profit says you made $20,000 but cash only went up $5,000",
+            "generic": false,
+            "one_argument": true,
+            "on_icp_problem": true,
+            "note": "Uses hypothetical dollar figures with fake precision to illustrate the profit-versus-cash gap."
+          },
+          "readability": {
+            "words": 551,
+            "hook_chars": 208,
+            "headings": 4,
+            "paragraphs": 14,
+            "long_paragraphs": 0,
+            "avg_sentence_words": 12.2,
+            "long_sentences": 0
+          },
+          "author_advantage": true,
+          "unsupported_numbers": [
+            "20.000"
+          ],
+          "invented": true,
+          "draft_pass": false
+        }
+      ]
+    }
+  }
+}

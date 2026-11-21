@@ -8,6 +8,13 @@
  *
  * The idea set lives in draft-ideas.json and never changes under a
  * comparison. Stops before the variants and cover stages: no image calls.
+ *
+ *   npm run eval:drafts -- --label plus --model qwen3.7-plus
+ *
+ * --model swaps the model of the large stages (strategist, writer, and one
+ * carousel try per draft) to compare models; the editor and the judge keep
+ * theirs, so the scores stay comparable. Each run records what the large
+ * stages cost per draft and how many carousels came out valid first time.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -21,6 +28,9 @@ import { harvestOnce, contextFor } from "./run";
 import { arg, chat, content } from "./llm";
 import { renderDraftJudge, scoreDraft, type Draft, type DraftScore, type DraftVerdict } from "./draftRubric";
 import { JUDGE_MODEL } from "./rubric";
+import { callCostUsd } from "@/lib/ai/cost";
+import { renderCarousel } from "@/lib/prompts/carousel";
+import { parsePlan } from "@/lib/carousel/plan";
 
 type Json = Record<string, unknown>;
 const D = "02_idea_to_asset";
@@ -62,9 +72,40 @@ function upstream(tenant: EvalTenant, idea: Json, index: number) {
   } as Record<string, Json[]>;
 }
 
+/** --model: the large stages' model for this run; empty keeps each prompt's own. */
+const MODEL = arg("model", "");
+/** What each draft's model calls cost (USD, list price) and how its carousel came out. */
+const meter = { usd: 0, carouselsValid: 0, carousels: 0, carouselErrors: [] as string[] };
+
+async function priced(payload: Json): Promise<Json> {
+  const response = await chat(payload);
+  meter.usd += callCostUsd(String(payload.model), JSON.stringify(response));
+  return response;
+}
+
 async function call(stage: "strategist" | "writer" | "editor", promptInputs: unknown): Promise<Json> {
   const { payload } = renderPrompt(stage, promptInputs) as { payload: Json };
-  return chat(payload);
+  return priced(MODEL && stage !== "editor" ? { ...payload, model: MODEL } : payload);
+}
+
+/** One carousel try for the draft, as the reviewer's button makes it (task 114: no retries). */
+async function carouselOnce(tenant: EvalTenant, draft: Draft, coreArgument: string) {
+  const payload = renderCarousel({
+    brand_name: tenant.settings.brand_name,
+    author_name: "the author",
+    title: draft.title,
+    hook: draft.hook,
+    core_argument: coreArgument,
+    body: draft.body,
+    icp: { who: tenant.icp, role: "" },
+    memory: [],
+    evidence_rules: [],
+    banned: [],
+  }) as unknown as Json;
+  const { plan, errors } = parsePlan(content(await priced(MODEL ? { ...payload, model: MODEL } : payload)));
+  meter.carousels++;
+  if (plan && !errors.length) meter.carouselsValid++;
+  else meter.carouselErrors.push(errors.slice(0, 2).join("; ") || "no plan");
 }
 
 /** The strategist stage alone, as 02 runs it. The cover eval uses it. */
@@ -100,7 +141,9 @@ export async function draftOnce(tenant: EvalTenant, idea: Json, index: number): 
   if (hasNode("Check Draft")) check = checkFor(tenant, idea, edited, String(evidence.evidence_block ?? ""), String(assembled.brand_context ?? "")) as unknown as Json;
   const [gate] = await runCodeNode(D, "Parse Claims and Gate", { nodes, input: check ? [check] : [{}] });
   const s = edited.strategy as Json;
-  return { idea, title: String(s.title ?? ""), hook: String(edited.hook ?? ""), body: String(gate.edited_body ?? edited.edited_body ?? ""), claims_ok: String(gate.claims_ok ?? ""), ...(check ? { check } : {}) };
+  const draft: Draft = { idea, title: String(s.title ?? ""), hook: String(edited.hook ?? ""), body: String(gate.edited_body ?? edited.edited_body ?? ""), claims_ok: String(gate.claims_ok ?? ""), ...(check ? { check } : {}) };
+  await carouselOnce(tenant, draft, String(s.core_argument ?? ""));
+  return draft;
 }
 
 /** What POST /api/internal/drafts/context serves for this eval idea (corpus memory is all PUBLIC). */
@@ -225,10 +268,17 @@ async function main() {
     perTenant[tenant.id] = { summary: summarizeDrafts(scores), drafts: scores };
   }
   const all = Object.values(perTenant).flatMap((t) => t.drafts);
-  const result = { label, date: new Date().toISOString(), judge_model: JUDGE_MODEL, overall: summarizeDrafts(all), tenants: perTenant };
+  const cost = {
+    model: MODEL || "each prompt's own",
+    usd_per_draft: Math.round((meter.usd / Math.max(all.length, 1)) * 1e5) / 1e5,
+    carousel_first_try_valid: `${meter.carouselsValid}/${meter.carousels}`,
+    carousel_errors: meter.carouselErrors,
+  };
+  const result = { label, date: new Date().toISOString(), judge_model: JUDGE_MODEL, cost, overall: summarizeDrafts(all), tenants: perTenant };
   const file = path.join(RESULTS_DIR, `drafts-${result.date.slice(0, 10)}-${label}.json`);
   fs.writeFileSync(file, JSON.stringify(result, null, 2) + "\n");
   console.table({ overall: result.overall, ...Object.fromEntries(Object.entries(perTenant).map(([k, v]) => [k, v.summary])) });
+  console.log("COST", JSON.stringify(cost));
   console.log(`wrote ${path.relative(process.cwd(), file)}`);
 }
 
