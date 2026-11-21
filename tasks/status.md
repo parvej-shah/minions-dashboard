@@ -116,3 +116,4 @@
 | 111 | Google Analytics 4: page views + post_approved + app_installed (needs NEXT_PUBLIC_GA_ID in Vercel) | CLAUDE | DONE (local; not pushed; GA4 property + Vercel Production NEXT_PUBLIC_GA_ID set 2026-11-20; tag not seen live until pushed) | tasks/111.md |
 | 112 | New QwenCloud account: model chains spread over models with quota; key tested | CLAUDE | IN PROGRESS (chains + new key verified locally on all chain models; not pushed; waiting on owner to paste the key in Vercel Production) | tasks/112.md |
 | 113 | Posts must not open the same way: distinct first-login three, archetype rotation, cross-post opening check | CLAUDE | IN PROGRESS (Phase 1 first-login three built + tested, local, not pushed; Phases 2-5 next) | tasks/113.md |
+| 114 | Carousel makes one model call, no retries (keep a post under 3 BDT) | CLAUDE | DONE (local, not pushed) | tasks/114.md |

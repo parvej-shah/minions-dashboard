@@ -52,9 +52,6 @@ export type CarouselResult =
 export const CAROUSEL_LOCKED = "This draft is published, so its carousel stays as it went out.";
 const COVER_POST_NO_CAROUSEL = "This post shares the cover. The carousel already went out with the first post.";
 const CAROUSEL_POST_STAYS_ON = "This post is the carousel's, so the carousel stays on.";
-const MAX_ATTEMPTS = 3;
-/** The route may run 300s; a retry starts only this soon after the first call, so it can finish. */
-const RETRY_CUTOFF_MS = 120_000;
 
 const words = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
 
@@ -213,31 +210,31 @@ async function dropReplaced(assetId: string, old: StoredCarousel | null): Promis
 
 type Planned = { ok: true; plan: CarouselPlan; deck: Deck; attempts: number; model: string } | { ok: false; error: string; errors: string[] };
 
-/** The model's plan, repaired in code, through every gate; each retry is told exactly what failed. */
+/**
+ * The model's plan, repaired in code, through every gate. One paid call only:
+ * a post must stay under 3 BDT (task 114), so a plan that fails is not retried;
+ * the reviewer can make it again by hand.
+ */
 async function planWithModel(ctx: Context, chat: Chat, style?: SlideStyle): Promise<Planned> {
   let errors: string[] = [];
-  const started = Date.now();
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    // A retry only when there is time for it inside the route's limit.
-    if (attempt > 1 && Date.now() - started > RETRY_CUTOFF_MS) break;
-    const res = await chat({ ...renderCarousel({ ...ctx.input, style, feedback: attempt > 1 ? errors : undefined }) });
-    if (res.status >= 400) return { ok: false, error: `The model call failed (${res.status}). Try again in a minute.`, errors: [] };
-    let content = "";
-    try {
-      content = JSON.parse(res.body)?.choices?.[0]?.message?.content ?? "";
-    } catch {
-      content = "";
-    }
-    const parsed = parsePlan(content);
-    errors = parsed.errors;
-    if (!parsed.plan || errors.length) continue;
+  const res = await chat({ ...renderCarousel({ ...ctx.input, style }) });
+  if (res.status >= 400) return { ok: false, error: `The model call failed (${res.status}). Try again in a minute.`, errors: [] };
+  let content = "";
+  try {
+    content = JSON.parse(res.body)?.choices?.[0]?.message?.content ?? "";
+  } catch {
+    content = "";
+  }
+  const parsed = parsePlan(content);
+  errors = parsed.errors;
+  if (parsed.plan && !errors.length) {
     // The reviewer's chosen design wins over whatever the model wrote.
     const repaired = { ...repairPlan(parsed.plan, ctx.sources), ...(style ? { style } : {}) };
     // The deck opens with the post's own cover title, so the two never disagree.
     const plan = ctx.postCover ? { ...repaired, cover: { ...repaired.cover, ...ctx.postCover } } : repaired;
     const gated = gate(ctx, plan);
     errors = gated.errors;
-    if (gated.deck) return { ok: true, plan, deck: gated.deck, attempts: attempt, model: res.model };
+    if (gated.deck) return { ok: true, plan, deck: gated.deck, attempts: 1, model: res.model };
   }
   // The reasons go to the log, not the reviewer: they can only make it again.
   if (errors.length) console.warn(`[carousel] ${ctx.assetId} failed the checks:`, errors);
