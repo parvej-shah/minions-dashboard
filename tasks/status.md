@@ -114,4 +114,4 @@
 | 109 | LinkedIn must be connected for Autopilot; reconnect nudge | CLAUDE | DONE (local; not pushed; not tried live) | tasks/109.md |
 | 110 | App shows "Minions Post Studio" + Covers-film logo (sign-in, tab title, install name) | CLAUDE | DONE (local; not pushed; checked on local sign-in page) | tasks/110.md |
 | 111 | Google Analytics 4: page views + post_approved + app_installed (needs NEXT_PUBLIC_GA_ID in Vercel) | CLAUDE | DONE (local; not pushed; GA4 property + Vercel Production NEXT_PUBLIC_GA_ID set 2026-11-20; tag not seen live until pushed) | tasks/111.md |
-| 112 | New QwenCloud account: model chains spread over models with quota (key pasted by owner) | CLAUDE | IN PROGRESS (chains done + tested locally, not pushed; waiting on owner to paste new DASHSCOPE_API_KEY in Vercel + .env.local, then probe) | tasks/112.md |
+| 112 | New QwenCloud account: model chains spread over models with quota; key tested | CLAUDE | IN PROGRESS (chains + new key verified locally on all chain models; not pushed; waiting on owner to paste the key in Vercel Production) | tasks/112.md |

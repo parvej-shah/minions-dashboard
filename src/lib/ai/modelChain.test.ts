@@ -37,7 +37,7 @@ describe("model fallback", () => {
 
   it("runs the large stages on models with free quota, ending on one that lasts longest", () => {
     expect(modelChain("qwen3.8-max-0902")).toEqual(["qwen3.8-max-0902", "deepseek-v4-pro-0813", "qwen3.8-max", "deepseek-v4-pro", "qwen3.7-max", "deepseek-v4.1-flash-1017"]);
-    expect(modelChain("deepseek-v4.1-flash")).toEqual(["deepseek-v4.1-flash", "deepseek-v4.1-flash-1017", "deepseek-v4-flash", "qwen3.7-flash"]);
+    expect(modelChain("deepseek-v4.1-flash")).toEqual(["deepseek-v4.1-flash", "deepseek-v4.1-flash-1017", "qwen3.7-flash"]);
     for (const m of [...modelChain("qwen3.8-max-0902"), ...modelChain("deepseek-v4.1-flash")]) expect(USED_UP.includes(m), `${m} is used up`).toBe(false);
   });
 

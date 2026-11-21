@@ -34,7 +34,7 @@ export const SMALL_MODEL = "deepseek-v4.1-flash";
 // Each model has its own 1M-token quota, so the chains spread over several.
 // Every chain ends on deepseek-v4.1-flash-1017 or qwen3.7-flash (the latter is 25% used).
 const LARGE = ["deepseek-v4-pro-0813", "qwen3.8-max", "deepseek-v4-pro", "qwen3.7-max", "deepseek-v4.1-flash-1017"];
-const SMALL = ["deepseek-v4.1-flash-1017", "deepseek-v4-flash", "qwen3.7-flash"];
+const SMALL = ["deepseek-v4.1-flash-1017", "qwen3.7-flash"];
 
 /**
  * Primary model -> what to try after it, in order. A model not listed here
