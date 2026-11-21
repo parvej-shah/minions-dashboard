@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Shield } from "lucide-react";
 import { isNavActive, type NavItem } from "@/constants/nav";
 import type { NavCounts } from "@/types";
 
@@ -12,6 +13,8 @@ export interface TopNavProps {
   pathname: string;
   /** The avatar and its menu, on the right. */
   account: React.ReactNode;
+  /** Whether the user is platform staff (SYSTEM_ADMIN). */
+  isPlatformAdmin?: boolean;
 }
 
 function Badge({ count }: { count: number }) {
@@ -30,7 +33,7 @@ function badgeFor(item: NavItem, counts: NavCounts | null) {
 }
 
 /** The thin top bar: name on the left, the four places in the middle, the avatar on the right. */
-export function TopNav({ navItems, navCounts, pathname, account }: TopNavProps) {
+export function TopNav({ navItems, navCounts, pathname, account, isPlatformAdmin }: TopNavProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-canvas/85 backdrop-blur-xl">
       <div className="mx-auto flex min-h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
@@ -55,7 +58,18 @@ export function TopNav({ navItems, navCounts, pathname, account }: TopNavProps) 
             );
           })}
         </nav>
-        {account}
+        <div className="flex items-center gap-3">
+          {isPlatformAdmin && (
+            <Link
+              href="/platform-admin"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand/10 text-brand hover:bg-brand/20 border border-brand/30 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>Platform Admin</span>
+            </Link>
+          )}
+          {account}
+        </div>
       </div>
     </header>
   );

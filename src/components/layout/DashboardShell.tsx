@@ -137,6 +137,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         navItems={navItems}
         navCounts={navCounts}
         pathname={pathname}
+        isPlatformAdmin={session?.user?.role === "SYSTEM_ADMIN"}
         account={
           <AccountMenu
             session={session}

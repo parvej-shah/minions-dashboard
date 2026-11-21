@@ -133,7 +133,17 @@ export default function AccountMenu({
               Install app
             </button>
             {session.user?.role === "SYSTEM_ADMIN" && (
-              <Link role="menuitem" href="/platform-admin" onClick={close} className={item}>Platform admin</Link>
+              <Link
+                role="menuitem"
+                href="/platform-admin"
+                onClick={close}
+                className={`${item} font-semibold text-brand flex items-center justify-between`}
+              >
+                <span>Platform admin</span>
+                <span className="text-[10px] font-mono uppercase bg-brand/15 text-brand px-1.5 py-0.5 rounded border border-brand/30">
+                  Staff
+                </span>
+              </Link>
             )}
           </div>
           <div className="h-px bg-line mx-2" />

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Eye, X } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
@@ -37,14 +38,29 @@ export default function ImpersonationBanner() {
   };
 
   return (
-    <div className="bg-brand/20 border-b border-brand/40 px-4 sm:px-6 py-2 text-xs font-medium text-brand flex items-center justify-between">
-      <span className="flex items-center gap-2">
-        <Eye className="w-3.5 h-3.5" />
-        Viewing as <strong>{data.client.name}</strong> (support session)
-      </span>
-      <button onClick={stop} className="flex items-center gap-1 hover:opacity-75 cursor-pointer">
-        <X className="w-3.5 h-3.5" />
-        <span>Stop</span>
+    <div className="bg-brand/10 border-b border-brand/30 px-4 sm:px-6 py-2.5 text-xs font-medium text-ink flex items-center justify-between gap-4">
+      <div className="flex items-center gap-2.5 flex-wrap">
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-brand/20 text-brand font-semibold text-[11px]">
+          <Eye className="w-3 h-3" />
+          <span>Support Session</span>
+        </span>
+        <span className="text-muted">
+          Viewing workspace: <strong className="text-ink">{data.client.name}</strong>
+        </span>
+        <Link
+          href={`/platform-admin/tenants/${data.client.id}`}
+          className="text-brand hover:underline font-medium text-[11px]"
+        >
+          Manage tenant ↗
+        </Link>
+      </div>
+      <button
+        type="button"
+        onClick={stop}
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface hover:bg-surface-2 border border-line text-ink text-xs font-semibold shadow-sm transition-all cursor-pointer"
+      >
+        <X className="w-3.5 h-3.5 text-muted" />
+        <span>Exit session</span>
       </button>
     </div>
   );
