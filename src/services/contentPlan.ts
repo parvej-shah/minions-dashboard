@@ -43,6 +43,7 @@ import { getLinkedInHealth } from "@/services/linkedinHealth";
 const DRAFTABLE_STATUSES = ["HARVESTED", "REFINED", "QUEUED"];
 /** A slot left DRAFTING this long without a draft did not start. */
 const DRAFT_START_MINUTES = 30;
+const RETRY_NOTE = "Retrying";
 
 const asObjective = (v: string | null | undefined): Objective | null =>
   v && (OBJECTIVES as readonly string[]).includes(v) ? (v as Objective) : null;
@@ -130,14 +131,21 @@ async function laneHistory(clientId: string, before: Date): Promise<(string | nu
  * Settles slots left DRAFTING: links the draft 02 made, or records that none
  * started (the idea was taken, or the run failed) so the slot is not left hanging.
  */
-async function settleDraftingSlots(clientId: string, now: Date): Promise<void> {
+export async function settleDraftingSlots(clientId: string, now: Date): Promise<void> {
   const drafting = await prisma.scheduleSlot.findMany({ where: { clientId, status: "DRAFTING" } });
   for (const slot of drafting) {
     const asset = slot.ideaId ? await prisma.asset.findFirst({ where: { ideaId: slot.ideaId }, select: { id: true } }) : null;
     if (asset) {
       await prisma.scheduleSlot.update({ where: { id: slot.id }, data: { assetId: asset.id, status: "DRAFTED" } });
     } else if (now.getTime() - slot.updatedAt.getTime() > DRAFT_START_MINUTES * 60_000) {
-      await prisma.scheduleSlot.update({ where: { id: slot.id }, data: { status: "EMPTY", note: "The draft did not start. Draft another idea from the Idea Stream for this slot." } });
+      // A slot still ahead gets one more try with a fresh idea; after that, or once its time has passed, it is given up (task 124).
+      const retry = slot.slotAt.getTime() > now.getTime() && !slot.note?.startsWith(RETRY_NOTE);
+      await prisma.scheduleSlot.update({
+        where: { id: slot.id },
+        data: retry
+          ? { status: "PLANNED", ideaId: null, fillMethod: null, note: `${RETRY_NOTE}: the first draft did not start.` }
+          : { status: "EMPTY", note: "The draft did not start. Draft another idea from the Idea Stream for this slot." },
+      });
     }
   }
 }
@@ -298,7 +306,7 @@ export async function fillDueSlot(clientId: string, due: Date, now: Date = new D
   }
   await prisma.scheduleSlot.update({
     where: { id: row.id },
-    data: { ideaId: decision.ideaId, fillMethod: decision.method, gateReasons: decision.reasons, status: "DRAFTING", note: null },
+    data: { ideaId: decision.ideaId, fillMethod: decision.method, gateReasons: decision.reasons, status: "DRAFTING", note: row.note?.startsWith(RETRY_NOTE) ? row.note : null },
   });
   return { slot_id: row.id, idea_id: decision.ideaId, method: decision.method };
 }

@@ -4,6 +4,8 @@ const assetFindUnique = vi.fn();
 const assetUpdate = vi.fn();
 const assetUpdateMany = vi.fn();
 const slotFindFirst = vi.fn();
+const slotFindMany = vi.fn();
+const assetFindFirst = vi.fn();
 const slotUpdate = vi.fn();
 const scheduleFindUnique = vi.fn();
 const syncAssetToBlog = vi.fn();
@@ -11,8 +13,8 @@ const triggerN8nWorkflow = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    asset: { findUnique: assetFindUnique, update: assetUpdate, updateMany: assetUpdateMany },
-    scheduleSlot: { findFirst: slotFindFirst, update: slotUpdate },
+    asset: { findFirst: assetFindFirst, findUnique: assetFindUnique, update: assetUpdate, updateMany: assetUpdateMany },
+    scheduleSlot: { findFirst: slotFindFirst, findMany: slotFindMany, update: slotUpdate },
     postingSchedule: { findUnique: scheduleFindUnique },
   },
 }));
@@ -22,7 +24,7 @@ const getLinkedInHealth = vi.fn();
 vi.mock("@/services/linkedinHealth", () => ({ getLinkedInHealth }));
 vi.mock("@/services/harvestRun", () => ({ startHarvest: vi.fn() }));
 
-const { onSlotDraftReady, harvestFocusLane, upcomingPlanSlots } = await import("./contentPlan");
+const { onSlotDraftReady, harvestFocusLane, upcomingPlanSlots, settleDraftingSlots } = await import("./contentPlan");
 
 const draft = { id: "a1", clientId: "c1", ideaId: "i1", status: "PENDING_REVIEW", claimsOk: "Y", heroStatus: "READY", reviewNotes: ["Reads at grade 9"] };
 const slotAt = new Date("2099-01-01T09:00:00Z");
@@ -123,5 +125,38 @@ describe("the look-ahead's slots", () => {
   it("keeps to the plan's dates", () => {
     const ranged = { ...(schedule as object), planStartsOn: new Date("2026-09-29T00:00:00Z"), planEndsOn: new Date("2026-10-01T00:00:00Z") } as never;
     expect(upcomingPlanSlots(ranged, "America/New_York", new Date("2026-09-27T10:00:00Z")).map((d) => d.toISOString())).toEqual(["2026-09-30T13:00:00.000Z"]);
+  });
+});
+
+describe("a slot whose draft never started (task 124)", () => {
+  const now = new Date("2099-01-01T08:00:00Z");
+  const stuck = (over: object = {}) => ({ id: "s1", ideaId: "i1", status: "DRAFTING", note: null, slotAt, updatedAt: new Date(now.getTime() - 31 * 60_000), ...over });
+
+  it("gives a future slot one more try instead of leaving it empty", async () => {
+    slotFindMany.mockResolvedValue([stuck()]);
+    assetFindFirst.mockResolvedValue(null);
+    await settleDraftingSlots("c1", now);
+    expect(slotUpdate).toHaveBeenCalledWith({ where: { id: "s1" }, data: expect.objectContaining({ status: "PLANNED", ideaId: null, note: expect.stringMatching(/^Retrying/) }) });
+  });
+
+  it("gives up after the retry", async () => {
+    slotFindMany.mockResolvedValue([stuck({ note: "Retrying: the first draft did not start." })]);
+    assetFindFirst.mockResolvedValue(null);
+    await settleDraftingSlots("c1", now);
+    expect(slotUpdate).toHaveBeenCalledWith({ where: { id: "s1" }, data: expect.objectContaining({ status: "EMPTY" }) });
+  });
+
+  it("gives up on a slot whose time has passed", async () => {
+    slotFindMany.mockResolvedValue([stuck({ slotAt: new Date(now.getTime() - 3_600_000) })]);
+    assetFindFirst.mockResolvedValue(null);
+    await settleDraftingSlots("c1", now);
+    expect(slotUpdate).toHaveBeenCalledWith({ where: { id: "s1" }, data: expect.objectContaining({ status: "EMPTY" }) });
+  });
+
+  it("waits while the draft is still starting", async () => {
+    slotFindMany.mockResolvedValue([stuck({ updatedAt: new Date(now.getTime() - 5 * 60_000) })]);
+    assetFindFirst.mockResolvedValue(null);
+    await settleDraftingSlots("c1", now);
+    expect(slotUpdate).not.toHaveBeenCalled();
   });
 });

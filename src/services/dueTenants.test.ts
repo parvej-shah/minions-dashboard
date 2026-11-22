@@ -63,6 +63,25 @@ describe("drafting a day ahead", () => {
   });
 });
 
+describe("Autopilot catches up a slot the scheduler missed (task 124)", () => {
+  it("drafts a planned slot from the last hours, marked ahead so only passing ideas are used", async () => {
+    scheduleFindMany.mockResolvedValue([schedule(false)]);
+    upcomingPlanSlots.mockReturnValue([]);
+    slotFindMany.mockResolvedValueOnce([]).mockResolvedValueOnce([{ slotAt: hours(-2) }]);
+    const { due_tenants } = await findDueTenants(now);
+    expect(fillDueSlot).toHaveBeenCalledWith("c1", hours(-2), now, { ahead: true });
+    expect(due_tenants).toHaveLength(1);
+  });
+
+  it("Review first does not catch up a past slot", async () => {
+    scheduleFindMany.mockResolvedValue([schedule(true)]);
+    upcomingPlanSlots.mockReturnValue([]);
+    slotFindMany.mockResolvedValue([{ slotAt: hours(-2) }]);
+    await findDueTenants(now);
+    expect(fillDueSlot).not.toHaveBeenCalled();
+  });
+});
+
 describe("Autopilot sweeps drafts that are waiting (task 121)", () => {
   it("schedules a drafted slot's post that an earlier rule held", async () => {
     scheduleFindMany.mockResolvedValue([schedule(false)]);

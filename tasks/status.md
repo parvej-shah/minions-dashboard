@@ -122,7 +122,8 @@
 | 118 | Force channel connection before posting (Option B) | ANTIGRAVITY | DONE | tasks/118.md |
 | 119 | Dictation caret insertion, top-right sticky mic & Alt+D shortcut | ANTIGRAVITY | DONE | tasks/119.md |
 | 120 | Today banner when LinkedIn blocks posts (connect from first draft already shipped in 118) | CLAUDE | DONE (local; not pushed; not tried live) | tasks/120.md |
-| 121 | Autopilot means autopilot: no checks, next 3 days drafted + scheduled; Review first keeps 3 slots | CLAUDE | DONE (local; not pushed; not tried live) | tasks/121.md |
-| 122 | Today week rail: click a day to see its post (scheduled/posted; Review-first drafts not mapped to days yet) | CLAUDE | DONE (local; not pushed; not tried in a browser) | tasks/122.md |
+| 121 | Autopilot means autopilot: no checks, next 3 days drafted + scheduled; Review first keeps 3 slots | CLAUDE | DONE (pushed 00f1c75) | tasks/121.md |
+| 122 | Today week rail: click a day to see its post (scheduled/posted; Review-first drafts not mapped to days yet) | CLAUDE | DONE (pushed 00f1c75; not tried in a browser) | tasks/122.md |
 | 123 | Delete stale unreviewed drafts (>7 days, no slot) + Autopilot pros/cons card | CLAUDE | TODO (needs owner OK for live deletes) | tasks/121.md |
+| 124 | Failed slot retries once; missed Autopilot slot drafted late (6 h) | CLAUDE | DONE (local; not pushed) | tasks/124.md |
 

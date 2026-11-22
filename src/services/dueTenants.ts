@@ -6,6 +6,9 @@ import { checkLinkedInConnection } from "@/services/linkedinHealth";
 import { toScheduleConfig } from "@/services/postingSchedule";
 import { countAssetsThisMonth, monthlyAssetLimit, resolvePlan } from "@/services/quota";
 
+/** How long after its time a still-PLANNED slot may be drafted late. */
+const MISSED_SLOT_GRACE_HOURS = 6;
+
 export interface DueTenant {
   client_id: string;
   slug: string;
@@ -56,6 +59,16 @@ export async function findDueTenants(now: Date = new Date()) {
       for (const w of waitingDrafts) await onSlotDraftReady(w.id).catch(() => undefined);
     }
 
+    // A slot the scheduler missed (an outage, a late tick) and that is still PLANNED is drafted late, so the day
+    // is not skipped; Autopilot schedules it for as soon as it is ready (task 124).
+    const missed = schedule.requireReview
+      ? []
+      : await prisma.scheduleSlot.findMany({
+          where: { clientId: client.id, status: "PLANNED", slotAt: { gte: new Date(now.getTime() - MISSED_SLOT_GRACE_HOURS * 3_600_000), lt: now } },
+          orderBy: { slotAt: "asc" },
+          select: { slotAt: true },
+        });
+
     // The slot due right now (the fallback), then the upcoming slots drafted ahead,
     // so Autopilot has them scheduled before their time.
     const dueNow = computeDueSlot(toScheduleConfig(schedule), client.timezone, now);
@@ -71,7 +84,11 @@ export async function findDueTenants(now: Date = new Date()) {
       new Set(handled.map((h) => h.slotAt.getTime())),
       schedule.requireReview ? { leadHours: DRAFT_LEAD_HOURS, minSlots: REVIEW_MIN_SLOTS } : { leadHours: AUTOPILOT_LEAD_HOURS },
     );
-    const slots = dueNow ? [{ at: dueNow, ahead: false }, ...ahead.map((at) => ({ at, ahead: true }))] : ahead.map((at) => ({ at, ahead: true }));
+    const slots = [
+      ...(dueNow ? [{ at: dueNow, ahead: false }] : []),
+      ...missed.map((m) => ({ at: m.slotAt, ahead: true })),
+      ...ahead.map((at) => ({ at, ahead: true })),
+    ];
 
     const limit = monthlyAssetLimit(resolvePlan(client.subscription?.planKey), client.assetsPerMonthOverride);
     let used = await countAssetsThisMonth(client.id);
