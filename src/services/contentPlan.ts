@@ -23,6 +23,7 @@ import { draftingServiceRunning } from "@/services/jobHeartbeat";
 import { DEFAULT_TIMEZONE } from "@/constants/config";
 import { autopilotAllowed } from "@/lib/linkedinHealth";
 import { getLinkedInHealth } from "@/services/linkedinHealth";
+import { resolveFreeTime } from "@/services/slotBooking";
 
 /**
  * The content plan's slots (phase 7, docs/product/authority-flywheel-plan.md).
@@ -371,7 +372,9 @@ export async function onSlotDraftReady(assetId: string): Promise<SlotDraftOutcom
 
   // Autopilot approves the draft for the slot's own time: SCHEDULED, released by
   // 03's poll (releaseDuePosts) when due. A slot already past goes out on the next poll.
-  const at = new Date(Math.max(slot.slotAt.getTime(), Date.now()));
+  // A time another post already holds is booked (task 125): take the next free one.
+  const at = await resolveFreeTime(asset.clientId, new Date(Math.max(slot.slotAt.getTime(), Date.now())), asset.id);
+  if (!at) return "HELD";
   const scheduled = await prisma.asset.updateMany({
     where: { id: asset.id, status: "PENDING_REVIEW" },
     data: { status: "SCHEDULED", scheduledFor: at, updatedAt: new Date() },

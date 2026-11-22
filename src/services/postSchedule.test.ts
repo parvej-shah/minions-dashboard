@@ -16,6 +16,8 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 vi.mock("@/services/publishing", () => ({ syncAssetToBlog }));
+const resolveFreeTime = vi.fn();
+vi.mock("@/services/slotBooking", () => ({ resolveFreeTime }));
 
 const { schedulePost, unschedulePost, releaseDuePosts } = await import("./postSchedule");
 
@@ -28,6 +30,7 @@ beforeEach(() => {
   clientFindUnique.mockResolvedValue({ timezone: "America/New_York" });
   blogFindFirst.mockResolvedValue(null);
   assetUpdateMany.mockResolvedValue({ count: 1 });
+  resolveFreeTime.mockImplementation(async (_c: string, wanted: Date) => wanted);
 });
 
 describe("scheduling a reviewed post", () => {
@@ -45,6 +48,14 @@ describe("scheduling a reviewed post", () => {
     assetFindFirst.mockResolvedValue(draft);
     blogFindFirst.mockResolvedValue({ slug: "a-post" });
     expect(await schedulePost("c1", "a1", "2026-09-28", "09:00", NOW)).toMatchObject({ ok: false, status: 409 });
+    expect(assetUpdateMany).not.toHaveBeenCalled();
+  });
+
+  it("refuses a time another post already holds and names the next free one (task 125)", async () => {
+    resolveFreeTime.mockResolvedValue(new Date("2026-09-29T13:00:00Z"));
+    const r = await schedulePost("c1", "a1", "2026-09-28", "09:00", NOW);
+    expect(r).toMatchObject({ ok: false, status: 409 });
+    expect(r.ok === false && r.error).toContain("next free time");
     expect(assetUpdateMany).not.toHaveBeenCalled();
   });
 

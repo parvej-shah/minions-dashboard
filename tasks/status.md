@@ -125,5 +125,6 @@
 | 121 | Autopilot means autopilot: no checks, next 3 days drafted + scheduled; Review first keeps 3 slots | CLAUDE | DONE (pushed 00f1c75) | tasks/121.md |
 | 122 | Today week rail: click a day to see its post (scheduled/posted; Review-first drafts not mapped to days yet) | CLAUDE | DONE (pushed 00f1c75; not tried in a browser) | tasks/122.md |
 | 123 | Delete stale unreviewed drafts (>7 days, no slot) + Autopilot pros/cons card | CLAUDE | TODO (needs owner OK for live deletes) | tasks/121.md |
-| 124 | Failed slot retries once; missed Autopilot slot drafted late (6 h) | CLAUDE | DONE (local; not pushed) | tasks/124.md |
+| 124 | Failed slot retries once; missed Autopilot slot drafted late (6 h) | CLAUDE | DONE (pushed ba302b8) | tasks/124.md |
+| 125 | One post per posting time: manual Schedule refuses a taken time, Autopilot moves to the next free one | CLAUDE | DONE (local; not pushed) | tasks/125.md |
 

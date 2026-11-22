@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { followUpNotReady } from "@/lib/followUp";
 import { ownedAssetWhere } from "@/services/assets";
-import { checkScheduleTime } from "@/lib/postTime";
+import { checkScheduleTime, formatPostTime } from "@/lib/postTime";
+import { resolveFreeTime } from "@/services/slotBooking";
 import { syncAssetToBlog } from "@/services/publishing";
 import { refreshCoverIfStale } from "@/services/cover";
 import { DEFAULT_TIMEZONE } from "@/constants/config";
@@ -42,6 +43,14 @@ export async function schedulePost(clientId: string, assetId: string, date: stri
 
   const check = checkScheduleTime(date, time, client?.timezone ?? DEFAULT_TIMEZONE, now);
   if (!check.ok) return { ok: false, error: check.error, status: 400 };
+
+  // One post per posting time (task 125): a time another post holds is refused, with the next free one named.
+  const tz = client?.timezone ?? DEFAULT_TIMEZONE;
+  const free = await resolveFreeTime(clientId, check.at, asset.id, now);
+  if (!free || free.getTime() !== check.at.getTime()) {
+    const next = free ? ` The next free time is ${formatPostTime(free, tz)}.` : "";
+    return { ok: false, error: `Another post is already scheduled for that time.${next}`, status: 409 };
+  }
 
   // Scheduling is the reviewer's approval, exactly as "Approve & Publish" is,
   // so the cover is brought in line with the approved text first.

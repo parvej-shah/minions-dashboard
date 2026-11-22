@@ -22,6 +22,8 @@ vi.mock("@/services/publishing", () => ({ syncAssetToBlog }));
 vi.mock("@/services/pipeline", () => ({ triggerN8nWorkflow }));
 const getLinkedInHealth = vi.fn();
 vi.mock("@/services/linkedinHealth", () => ({ getLinkedInHealth }));
+const resolveFreeTime = vi.fn(async (_c: string, wanted: Date) => wanted as Date | null);
+vi.mock("@/services/slotBooking", () => ({ resolveFreeTime }));
 vi.mock("@/services/harvestRun", () => ({ startHarvest: vi.fn() }));
 
 const { onSlotDraftReady, harvestFocusLane, upcomingPlanSlots, settleDraftingSlots } = await import("./contentPlan");
@@ -66,6 +68,15 @@ describe("a slot's draft once its cover is settled", () => {
     );
     expect(syncAssetToBlog).not.toHaveBeenCalled();
     expect(triggerN8nWorkflow).not.toHaveBeenCalled();
+  });
+
+  it("moves to the next free time when the slot's time is already taken (task 125)", async () => {
+    const next = new Date("2099-01-02T09:00:00Z");
+    resolveFreeTime.mockResolvedValueOnce(next);
+    expect(await onSlotDraftReady("a1")).toBe("SCHEDULED");
+    expect(assetUpdateMany).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ scheduledFor: next }) }));
+    resolveFreeTime.mockResolvedValueOnce(null);
+    expect(await onSlotDraftReady("a1")).toBe("HELD");
   });
 
   it("schedules a draft whose slot has already passed for now", async () => {
