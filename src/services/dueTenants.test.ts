@@ -48,10 +48,10 @@ describe("drafting a day ahead", () => {
     expect(fillDueSlot).not.toHaveBeenCalledWith("c1", hours(150), now, expect.anything());
   });
 
-  it("Autopilot drafts every slot in the next 7 days (task 121)", async () => {
+  it("Autopilot drafts every slot in the next 3 days (task 121)", async () => {
     scheduleFindMany.mockResolvedValue([schedule(false)]);
     upcomingPlanSlots.mockReturnValue([hours(10), hours(60), hours(110), hours(150), hours(200)]);
-    expect((await findDueTenants(now)).due_tenants).toHaveLength(4);
+    expect((await findDueTenants(now)).due_tenants).toHaveLength(2);
   });
 
   it("skips a slot already drafted by an earlier tick", async () => {

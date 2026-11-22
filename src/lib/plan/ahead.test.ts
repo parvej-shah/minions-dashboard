@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { autopilotOffered, slotsToDraftNow } from "./ahead";
+import { AUTOPILOT_LEAD_HOURS, autopilotOffered, slotsToDraftNow } from "./ahead";
 
 const now = new Date("2026-11-20T09:00:00Z");
 const hoursOut = (h: number) => new Date(now.getTime() + h * 3_600_000);
@@ -20,9 +20,9 @@ describe("slotsToDraftNow", () => {
 });
 
 describe("slotsToDraftNow with a longer window or a minimum count (task 121)", () => {
-  it("drafts a slot 5 days out with a 168 hour lead", () => {
-    expect(slotsToDraftNow([hoursOut(120)], now, new Set(), { leadHours: 168 })).toHaveLength(1);
-    expect(slotsToDraftNow([hoursOut(170)], now, new Set(), { leadHours: 168 })).toHaveLength(0);
+  it("drafts a slot 3 days out with Autopilot's lead, not one at 3 days and an hour", () => {
+    expect(slotsToDraftNow([hoursOut(72)], now, new Set(), { leadHours: AUTOPILOT_LEAD_HOURS })).toHaveLength(1);
+    expect(slotsToDraftNow([hoursOut(73)], now, new Set(), { leadHours: AUTOPILOT_LEAD_HOURS })).toHaveLength(0);
   });
   it("drafts the next N slots even beyond the lead window", () => {
     const slots = [hoursOut(10), hoursOut(60), hoursOut(110), hoursOut(160)];

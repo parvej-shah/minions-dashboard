@@ -10,8 +10,9 @@ export const DRAFT_LEAD_HOURS = 24;
 
 const HOUR_MS = 3_600_000;
 
-/** Autopilot drafts and schedules this far ahead (task 121). */
-export const AUTOPILOT_LEAD_HOURS = 7 * 24;
+/** Autopilot drafts and schedules this far ahead (task 121). 3 days while testing; the plan was 7. */
+export const AUTOPILOT_LEAD_DAYS = 3;
+export const AUTOPILOT_LEAD_HOURS = AUTOPILOT_LEAD_DAYS * 24;
 
 /** Review first keeps at least this many upcoming slots drafted (task 121). */
 export const REVIEW_MIN_SLOTS = 3;
