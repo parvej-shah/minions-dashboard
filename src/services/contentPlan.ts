@@ -325,10 +325,10 @@ export type SlotDraftOutcome = "NOT_A_SLOT" | "LABELLED" | "SCHEDULED" | "HELD";
 
 /**
  * Called once a draft's cover is settled (drawn or failed). For a slot's draft:
- * a below-bar draft gets its label and waits for review (D17); otherwise, when
- * the workspace does not require review, a draft that passed every check with
- * a ready cover is scheduled for the slot's time (task 108). Drafts started
- * by hand are never touched here.
+ * a below-bar draft gets its label and, on Review first, waits for review (D17).
+ * On Autopilot the draft is scheduled for the slot's time whatever the claims
+ * and cover checks say (tasks 108, 121); only a LinkedIn that cannot post holds
+ * it. Drafts started by hand are never touched here.
  */
 export async function onSlotDraftReady(assetId: string): Promise<SlotDraftOutcome> {
   const asset = await prisma.asset.findUnique({
@@ -345,18 +345,20 @@ export async function onSlotDraftReady(assetId: string): Promise<SlotDraftOutcom
     await prisma.scheduleSlot.update({ where: { id: slot.id }, data: { assetId: asset.id, status: "DRAFTED" } });
   }
 
+  const schedule = await prisma.postingSchedule.findUnique({ where: { clientId: asset.clientId }, select: { requireReview: true } });
+
+  // A below-bar draft keeps its label. On Review first it waits (D17); on Autopilot it is
+  // scheduled anyway: Autopilot means no review and no checks (task 121).
   if (slot.fillMethod === "BELOW_BAR") {
     const note = belowBarNote(slot.gateReasons);
     if (!asset.reviewNotes.includes(note)) {
       await prisma.asset.update({ where: { id: asset.id }, data: { reviewNotes: [note, ...asset.reviewNotes] } });
     }
-    return "LABELLED";
+    if (!schedule || schedule.requireReview) return "LABELLED";
   }
 
-  const schedule = await prisma.postingSchedule.findUnique({ where: { clientId: asset.clientId }, select: { requireReview: true } });
-  const publishable = schedule && !schedule.requireReview && asset.claimsOk === "Y" && asset.heroStatus === "READY" && asset.status === "PENDING_REVIEW";
-  if (!publishable) return "HELD";
-  // A lapsed or missing LinkedIn connection sends the draft to review instead (task 109).
+  if (!schedule || schedule.requireReview || asset.status !== "PENDING_REVIEW") return "HELD";
+  // Only a LinkedIn connection that cannot post stops Autopilot; it sends the draft to review instead (task 109).
   if (!autopilotAllowed(await getLinkedInHealth(asset.clientId))) return "HELD";
 
   // Autopilot approves the draft for the slot's own time: SCHEDULED, released by

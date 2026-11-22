@@ -19,6 +19,22 @@ describe("slotsToDraftNow", () => {
   });
 });
 
+describe("slotsToDraftNow with a longer window or a minimum count (task 121)", () => {
+  it("drafts a slot 5 days out with a 168 hour lead", () => {
+    expect(slotsToDraftNow([hoursOut(120)], now, new Set(), { leadHours: 168 })).toHaveLength(1);
+    expect(slotsToDraftNow([hoursOut(170)], now, new Set(), { leadHours: 168 })).toHaveLength(0);
+  });
+  it("drafts the next N slots even beyond the lead window", () => {
+    const slots = [hoursOut(10), hoursOut(60), hoursOut(110), hoursOut(160)];
+    expect(slotsToDraftNow(slots, now, new Set(), { leadHours: 24, minSlots: 3 })).toHaveLength(3);
+  });
+  it("counts handled slots toward the minimum, so the buffer does not grow every tick", () => {
+    const slots = [hoursOut(10), hoursOut(60), hoursOut(110), hoursOut(160)];
+    const handled = new Set([slots[0].getTime(), slots[1].getTime()]);
+    expect(slotsToDraftNow(slots, now, handled, { leadHours: 24, minSlots: 3 }).map((d) => d.getTime())).toEqual([slots[2].getTime()]);
+  });
+});
+
 describe("autopilotOffered", () => {
   it("offers Autopilot to a Review-first workspace after a week", () => {
     expect(autopilotOffered(hoursOut(-24 * 7), true, now)).toBe(true);

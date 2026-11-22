@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { computeDueSlot } from "@/lib/scheduling";
-import { slotsToDraftNow } from "@/lib/plan/ahead";
-import { fillDueSlot, planAhead, upcomingPlanSlots } from "@/services/contentPlan";
+import { AUTOPILOT_LEAD_HOURS, DRAFT_LEAD_HOURS, REVIEW_MIN_SLOTS, slotsToDraftNow } from "@/lib/plan/ahead";
+import { fillDueSlot, onSlotDraftReady, planAhead, upcomingPlanSlots } from "@/services/contentPlan";
 import { checkLinkedInConnection } from "@/services/linkedinHealth";
 import { toScheduleConfig } from "@/services/postingSchedule";
 import { countAssetsThisMonth, monthlyAssetLimit, resolvePlan } from "@/services/quota";
@@ -44,15 +44,33 @@ export async function findDueTenants(now: Date = new Date()) {
     // Once a day, a cheap live check of the LinkedIn token, so a lapse is seen before a post fails (task 109).
     await checkLinkedInConnection(client.id, now).catch(() => undefined);
 
-    // The slot due right now (the fallback), then the slots in the next 24 hours:
-    // each is drafted a day ahead, so Autopilot has it scheduled before its time.
+    // Autopilot means autopilot: a drafted slot's post still waiting (held by an older rule, or by a
+    // LinkedIn that has since been fixed) is scheduled now (task 121).
+    if (!schedule.requireReview) {
+      const drafted = await prisma.scheduleSlot.findMany({
+        where: { clientId: client.id, status: "DRAFTED", slotAt: { gte: now }, assetId: { not: null } },
+        select: { assetId: true },
+      });
+      const ids = drafted.map((d) => d.assetId).filter((x): x is string => Boolean(x));
+      const waitingDrafts = ids.length ? await prisma.asset.findMany({ where: { id: { in: ids }, status: "PENDING_REVIEW" }, select: { id: true } }) : [];
+      for (const w of waitingDrafts) await onSlotDraftReady(w.id).catch(() => undefined);
+    }
+
+    // The slot due right now (the fallback), then the upcoming slots drafted ahead,
+    // so Autopilot has them scheduled before their time.
     const dueNow = computeDueSlot(toScheduleConfig(schedule), client.timezone, now);
     const upcoming = upcomingPlanSlots(schedule, client.timezone, now);
     const handled = await prisma.scheduleSlot.findMany({
       where: { clientId: client.id, slotAt: { in: upcoming }, status: { notIn: ["PLANNED", "HARVESTING"] } },
       select: { slotAt: true },
     });
-    const ahead = slotsToDraftNow(upcoming, now, new Set(handled.map((h) => h.slotAt.getTime())));
+    // Autopilot has the next 7 days drafted and scheduled; Review first keeps at least the next 3 slots drafted (task 121).
+    const ahead = slotsToDraftNow(
+      upcoming,
+      now,
+      new Set(handled.map((h) => h.slotAt.getTime())),
+      schedule.requireReview ? { leadHours: DRAFT_LEAD_HOURS, minSlots: REVIEW_MIN_SLOTS } : { leadHours: AUTOPILOT_LEAD_HOURS },
+    );
     const slots = dueNow ? [{ at: dueNow, ahead: false }, ...ahead.map((at) => ({ at, ahead: true }))] : ahead.map((at) => ({ at, ahead: true }));
 
     const limit = monthlyAssetLimit(resolvePlan(client.subscription?.planKey), client.assetsPerMonthOverride);

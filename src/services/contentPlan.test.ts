@@ -45,7 +45,8 @@ describe("a slot's draft once its cover is settled", () => {
     expect(assetUpdateMany).not.toHaveBeenCalled();
   });
 
-  it("labels a below-bar draft and holds it, even with review off (D17)", async () => {
+  it("labels a below-bar draft and holds it on Review first (D17)", async () => {
+    scheduleFindUnique.mockResolvedValue({ requireReview: true });
     slotFindFirst.mockResolvedValue({ ...slot, fillMethod: "BELOW_BAR", gateReasons: ["no author advantage"] });
     expect(await onSlotDraftReady("a1")).toBe("LABELLED");
     expect(assetUpdate).toHaveBeenCalledWith({
@@ -80,15 +81,21 @@ describe("a slot's draft once its cover is settled", () => {
     expect(assetUpdateMany).not.toHaveBeenCalled();
   });
 
-  it("holds it when review is required, a check failed or the cover is missing", async () => {
+  it("holds it when review is required", async () => {
     scheduleFindUnique.mockResolvedValue({ requireReview: true });
     expect(await onSlotDraftReady("a1")).toBe("HELD");
-    scheduleFindUnique.mockResolvedValue({ requireReview: false });
-    assetFindUnique.mockResolvedValue({ ...draft, claimsOk: "BLOCKED" });
-    expect(await onSlotDraftReady("a1")).toBe("HELD");
-    assetFindUnique.mockResolvedValue({ ...draft, heroStatus: "FAILED" });
-    expect(await onSlotDraftReady("a1")).toBe("HELD");
     expect(assetUpdateMany).not.toHaveBeenCalled();
+  });
+
+  it("Autopilot schedules whatever the checks say (task 121)", async () => {
+    assetFindUnique.mockResolvedValue({ ...draft, claimsOk: "BLOCKED" });
+    expect(await onSlotDraftReady("a1")).toBe("SCHEDULED");
+    assetFindUnique.mockResolvedValue({ ...draft, heroStatus: "FAILED" });
+    expect(await onSlotDraftReady("a1")).toBe("SCHEDULED");
+    slotFindFirst.mockResolvedValue({ ...slot, fillMethod: "BELOW_BAR", gateReasons: ["no author advantage"] });
+    assetFindUnique.mockResolvedValue(draft);
+    expect(await onSlotDraftReady("a1")).toBe("SCHEDULED");
+    expect(assetUpdateMany).toHaveBeenCalledTimes(3);
   });
 });
 

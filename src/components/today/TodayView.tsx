@@ -65,6 +65,8 @@ export default function TodayView() {
   const preview = useApiResource<{ slots: string[] }>("/api/schedule/preview?count=14", { slots: [] });
 
   const [spotlightIndex, setSpotlightIndex] = useState(0);
+  // A day picked in "This week" replaces the main card with that day's post (task 122).
+  const [pickedDay, setPickedDay] = useState<string | null>(null);
   const [isScheduling, setIsScheduling] = useState(false);
   const [scheduledSlot, setScheduledSlot] = useState<string | null>(null);
   const [isQuickDraftOpen, setIsQuickDraftOpen] = useState(false);
@@ -115,6 +117,8 @@ export default function TodayView() {
     }
   };
 
+  const pickedWeekDay = pickedDay ? week.find((d) => d.key === pickedDay) ?? null : null;
+
   if (assets.isLoading) return <TodaySkeleton />;
 
   return (
@@ -136,6 +140,8 @@ export default function TodayView() {
             Try again
           </button>
         </Card>
+      ) : pickedWeekDay ? (
+        <DayCard day={pickedWeekDay} posts={assets.data} onBack={() => setPickedDay(null)} />
       ) : scheduledSlot ? (
         <Card
           as="section"
@@ -422,7 +428,8 @@ export default function TodayView() {
             <DayTile
               key={day.key}
               day={day}
-              onSelect={(id) => router.push(`/editorial?id=${encodeURIComponent(id)}`)}
+              selected={pickedDay === day.key}
+              onSelect={() => setPickedDay((cur) => (cur === day.key ? null : day.key))}
             />
           ))}
         </ol>
@@ -521,35 +528,82 @@ export default function TodayView() {
   );
 }
 
-function DayTile({ day, onSelect }: { day: WeekDay; onSelect?: (id: string) => void }) {
+function DayTile({ day, selected, onSelect }: { day: WeekDay; selected: boolean; onSelect: () => void }) {
   const first = day.items[0];
   const weekend = day.weekday === "Sat" || day.weekday === "Sun";
-  const isInteractive = Boolean(first && (first.kind === "scheduled" || first.kind === "posted") && "id" in first);
   const label = !first
-    ? { text: "·", cls: "text-muted", title: undefined }
+    ? { text: "·", cls: "text-muted", title: "Nothing planned" }
     : first.kind === "slot"
       ? { text: first.time, cls: "text-muted", title: `Open posting time ${first.time}` }
       : first.kind === "scheduled"
         ? { text: first.time, cls: "font-semibold text-success", title: `Scheduled: ${first.title}` }
         : { text: "Posted", cls: "text-muted", title: `Posted: ${first.title}` };
   return (
-    <li
-      title={isInteractive ? `${label.title} · Click to edit in Studio` : label.title}
-      aria-current={day.isToday ? "date" : undefined}
-      onClick={() => {
-        if (isInteractive && onSelect && first && "id" in first) {
-          onSelect(first.id);
-        }
-      }}
-      className={`min-w-0 rounded-2xl px-1 py-3.5 text-center sm:px-2 transition-all ${
-        weekend && !day.isToday ? "bg-surface-2" : "bg-surface"
-      } ${day.isToday ? "shadow-[0_0_0_2px_var(--color-ink)]" : ""} ${
-        isInteractive ? "cursor-pointer hover:border-ink/20 hover:shadow-md hover:scale-[1.02]" : ""
-      }`}
-    >
-      <p className="text-[13px] text-muted">{day.weekday}</p>
-      <p className={`mt-1 text-xl font-semibold ${weekend && !day.isToday ? "text-muted" : "text-ink"}`}>{day.day}</p>
-      <p className={`mt-1.5 truncate text-xs ${label.cls}`}>{label.text}</p>
+    <li className="min-w-0">
+      <button
+        type="button"
+        title={`${label.title} · Click to see it here`}
+        aria-pressed={selected}
+        aria-current={day.isToday ? "date" : undefined}
+        onClick={onSelect}
+        className={`w-full min-w-0 cursor-pointer rounded-2xl px-1 py-3.5 text-center sm:px-2 transition-all hover:shadow-md ${
+          weekend && !day.isToday ? "bg-surface-2" : "bg-surface"
+        } ${selected ? "shadow-[0_0_0_2px_var(--color-brand)]" : day.isToday ? "shadow-[0_0_0_2px_var(--color-ink)]" : ""}`}
+      >
+        <p className="text-[13px] text-muted">{day.weekday}</p>
+        <p className={`mt-1 text-xl font-semibold ${weekend && !day.isToday ? "text-muted" : "text-ink"}`}>{day.day}</p>
+        <p className={`mt-1.5 truncate text-xs ${label.cls}`}>{label.text}</p>
+      </button>
     </li>
+  );
+}
+
+/** The main card while a day from the week rail is picked: what is going out that day. */
+function DayCard({ day, posts, onBack }: { day: WeekDay; posts: AssetItem[]; onBack: () => void }) {
+  const title = `${day.weekday} ${day.day}`;
+  return (
+    <Card as="section" pad="lg" aria-label={`${title} in your week`} className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[13px] text-muted">{day.isToday ? "Today" : title}</p>
+        <button type="button" onClick={onBack} className="text-[14px] font-medium text-brand hover:underline cursor-pointer">
+          Back to my review
+        </button>
+      </div>
+      {day.items.length === 0 && <CardTitle>Nothing is planned for {title}.</CardTitle>}
+      {day.items.map((item, i) => {
+        if (item.kind === "slot") {
+          return (
+            <div key={`slot-${i}`} className="space-y-1">
+              <CardTitle>Nothing scheduled yet for {item.time}.</CardTitle>
+              <p className="text-[17px] text-muted">Minions drafts this slot ahead of time. It will show here once it is ready.</p>
+            </div>
+          );
+        }
+        const post = posts.find((p) => p.id === item.id);
+        return (
+          <div key={item.id} className="flex flex-col items-stretch gap-6 md:flex-row">
+            <div className="min-w-0 flex-1 space-y-3">
+              <div className="flex items-center gap-2 text-[13px] text-muted">
+                <StatusLabel tone={item.kind === "scheduled" ? "success" : "muted"}>{item.kind === "scheduled" ? "Scheduled" : "Posted"}</StatusLabel>
+                <span>·</span>
+                <span>{item.kind === "scheduled" ? item.time : title}</span>
+              </div>
+              <h2 className="text-[22px] font-semibold leading-snug tracking-tight text-ink sm:text-[26px]">{item.title}</h2>
+              {post?.hook && (
+                <p className="line-clamp-3 border-l-2 border-line pl-3.5 text-[16px] italic leading-relaxed text-muted">“{post.hook.replace(/^["']|["']$/g, "")}”</p>
+              )}
+              <Link href={`/editorial?id=${encodeURIComponent(item.id)}`} className={buttonStyles({ variant: "soft", size: "lg" })}>
+                Edit in Studio
+              </Link>
+            </div>
+            {post && (
+              <div className="flex w-full shrink-0 items-center justify-center md:w-[300px]" aria-hidden="true">
+                <PostThumb post={post} className="w-full rounded-[22px] shadow-lg" />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </Card>
   );
 }
