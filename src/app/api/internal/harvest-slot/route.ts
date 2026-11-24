@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { recordHeartbeat } from "@/services/jobHeartbeat";
 import { claimHarvestSlot, getHarvestBudget } from "@/lib/harvestBudget";
+import { isHarvestReady } from "@/services/harvestReady";
 import { readJsonOrEmpty, requireFields } from "@/server/http/body";
 import { route } from "@/server/http/route";
 
@@ -9,6 +10,11 @@ import { route } from "@/server/http/route";
 export const POST = route({ auth: "webhook", failure: "Failed to claim a harvest slot" }, async ({ request }) => {
   await recordHeartbeat("00_tenant_dispatcher");
   const { client_id } = requireFields(await readJsonOrEmpty(request), "client_id");
+
+  // A workspace that never saved its brand brief has nothing to judge ideas against; skip it (no run row, no budget).
+  if (!(await isHarvestReady(client_id))) {
+    return NextResponse.json({ success: false, granted: false, message: "Workspace setup is not finished; harvest skipped." }, { status: 422 });
+  }
 
   const slot = await claimHarvestSlot(client_id, { trigger_source: "TENANT_DISPATCHER_SCHEDULED" });
   if (!slot.granted) {

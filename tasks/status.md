@@ -126,5 +126,6 @@
 | 122 | Today week rail: click a day to see its post (scheduled/posted; Review-first drafts not mapped to days yet) | CLAUDE | DONE (pushed 00f1c75; not tried in a browser) | tasks/122.md |
 | 123 | Delete stale unreviewed drafts (>7 days, no slot) + Autopilot pros/cons card | CLAUDE | TODO (needs owner OK for live deletes) | tasks/121.md |
 | 124 | Failed slot retries once; missed Autopilot slot drafted late (6 h) | CLAUDE | DONE (pushed ba302b8) | tasks/124.md |
-| 125 | One post per posting time: manual Schedule refuses a taken time, Autopilot moves to the next free one | CLAUDE | DONE (local; not pushed) | tasks/125.md |
+| 125 | One post per posting time: manual Schedule refuses a taken time, Autopilot moves to the next free one | CLAUDE | DONE (pushed 4cb24fb) | tasks/125.md |
 
+| 126 | Staff view-as-tenant no longer bounced into the setup wizard; no harvest for workspaces with no brand brief | CLAUDE | DONE (local; not pushed) | tasks/126.md |

@@ -12,6 +12,7 @@ import { BottomTabs, TopNav } from "./TopNav";
 import { useNavCounts } from "@/hooks/useNavCounts";
 import { useChannelSummary } from "@/hooks/useChannelSummary";
 import { useBrandSettings } from "@/hooks/useBrandSettings";
+import { shouldSendToBrief } from "@/lib/briefRedirect";
 import { useToast } from "@/hooks/useToast";
 import { buildNavItems } from "@/constants/nav";
 import ImpersonationBanner from "./ImpersonationBanner";
@@ -91,8 +92,14 @@ export default function DashboardShell({ children }: DashboardShellProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // A workspace whose brand brief was never finished belongs in the wizard.
-  const needsBrief = !brandLoading && !!brandSettings && !brandSettings.positioning && pathname === "/";
+  // A workspace whose brand brief was never finished belongs in the wizard (not for staff viewing it).
+  const needsBrief = shouldSendToBrief({
+    brandLoading,
+    hasSettings: !!brandSettings,
+    positioning: brandSettings?.positioning,
+    pathname,
+    role: session?.user?.role,
+  });
   // While either redirect is pending, show a skeleton rather than a flash of an empty dashboard.
   const redirecting = needsWorkspace || needsBrief;
 
