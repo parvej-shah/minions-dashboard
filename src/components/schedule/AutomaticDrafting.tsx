@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { Bot, RefreshCw } from "lucide-react";
-import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { useApiResource } from "@/hooks/useApiResource";
 import { LoadingState } from "@/components/ui/EmptyState";
 import { draftingCardText, type QuotaState } from "@/lib/plan/quota";
@@ -29,18 +28,14 @@ const TONE_STYLE: Record<Tone, { box: string; dot: string; text: string }> = {
 };
 
 /**
- * The single switch for automatic drafting in this workspace.
- * Displays executive-calibrated status without leaking backend infrastructure plumbing.
+ * Automatic drafting status for this workspace.
+ * No switch: drafting is always on once a pace is saved (task 129).
  */
 export default function AutomaticDrafting({
-  onChanged,
-  onMessage,
   onEnableWithSave,
   canSaveSchedule,
   blockedByUnsavedChanges,
 }: {
-  onChanged: () => void;
-  onMessage: (m: string) => void;
   onEnableWithSave: () => Promise<boolean>;
   canSaveSchedule: boolean;
   blockedByUnsavedChanges: boolean;
@@ -85,20 +80,6 @@ export default function AutomaticDrafting({
   const { tone, title, detail } = describe(data);
   const style = TONE_STYLE[tone];
 
-  const toggle = async () => {
-    setSaving(true);
-    try {
-      await apiClient.patch("/api/plan", { filler_enabled: !data.drafting_on });
-      onMessage(data.drafting_on ? "Automatic drafting paused" : "Automatic drafting active: your upcoming posts are scheduled");
-      await reload();
-      onChanged();
-    } catch (e) {
-      onMessage(toErrorMessage(e, "Could not change automatic drafting"));
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const saveAndEnable = async () => {
     setSaving(true);
     try {
@@ -108,8 +89,6 @@ export default function AutomaticDrafting({
       setSaving(false);
     }
   };
-
-  const showSaveAndEnable = !data.drafting_on && (!data.exists || blockedByUnsavedChanges);
 
   return (
     <div className={`flex flex-col gap-4 rounded-2xl border bg-surface p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5 ${style.box}`}>
@@ -123,17 +102,17 @@ export default function AutomaticDrafting({
           </span>
         </div>
         <p className="mt-1 text-xs leading-relaxed text-muted">{detail}</p>
-        {saving && !showSaveAndEnable && (
+        {saving && data.drafting_on && (
           <p role="status" aria-live="polite" className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-medium text-brand">
             <RefreshCw className="h-3 w-3 animate-spin" />
-            {data.drafting_on ? "Pausing automatic drafting…" : "Activating automatic drafting…"}
+            Updating…
           </p>
         )}
         {blockedByUnsavedChanges && data.exists && !data.drafting_on && (
           <p className="mt-1.5 text-xs font-medium text-brand">Save settings below to use your updated pace.</p>
         )}
       </div>
-      {showSaveAndEnable ? (
+      {!data.drafting_on && (
         <button
           type="button"
           aria-busy={saving}
@@ -142,27 +121,7 @@ export default function AutomaticDrafting({
           className="inline-flex min-h-11 w-full shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full bg-brand px-5 text-sm font-semibold text-brand-ink transition-transform active:scale-[0.985] hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
         >
           {saving && <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />}
-          {saving ? "Saving & turning on…" : "Save & turn on"}
-        </button>
-      ) : (
-        <button
-          type="button"
-          role="switch"
-          aria-checked={data.drafting_on}
-          aria-label="Automatic drafting"
-          aria-busy={saving}
-          title={data.drafting_on ? "Pause automatic drafting" : "Turn on automatic drafting"}
-          disabled={saving || !data.exists}
-          onClick={() => void toggle()}
-          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full p-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
-            data.drafting_on ? "bg-brand" : "bg-line"
-          }`}
-        >
-          <span
-            className={`inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
-              data.drafting_on ? "translate-x-5" : "translate-x-0"
-            }`}
-          />
+          {saving ? "Turning on…" : "Save & turn on"}
         </button>
       )}
     </div>

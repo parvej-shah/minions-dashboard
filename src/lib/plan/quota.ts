@@ -28,7 +28,7 @@ export interface DraftingCardInput {
 export function draftingCardText(s: DraftingCardInput): { tone: "off" | "on" | "paused"; title: string; detail: string } {
   if (!s.exists) return { tone: "off", title: "Off", detail: "Set your publishing pace below, then turn this on." };
   if (!s.drafting_on) {
-    return { tone: "off", title: "Off", detail: "Automatic drafting is off. Turn this on to have Minions draft according to your pace." };
+    return { tone: "off", title: "Off", detail: "Drafting has not started. Turn it on to have Minions draft for your pace." };
   }
   if (s.quota?.limit_reached) {
     const day = new Intl.DateTimeFormat("en-GB", { timeZone: s.timezone, day: "numeric", month: "short" }).format(new Date(s.quota.resets_at));

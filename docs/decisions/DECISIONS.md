@@ -893,3 +893,10 @@ as JPEGs, which cost far less than the PNGs did.
 **Why:** the user found a week-old workspace with one draft ready and a post held for "unbacked facts" even though Autopilot was on, which looked like the product not working. "Autopilot with review" is neither.
 **Alternatives considered:** keeping the claims check as a hold on Autopilot (the 2026-11-20 rule; users read it as a bug); scheduling a post the user rejected after repeated cancels (publishes what they said no to).
 **Status:** active. Supersedes the "passes every check" and "below-bar always waits" parts of 2026-11-20 for Autopilot workspaces. Built in task 121; each post is scheduled onto its own day by itself, so it shows on the week rail with no user action.
+
+## 2026-11-26 — Drafting is always on: the choice is Review first or Autopilot
+
+**Decision:** There is no "I'll draft myself" option and no Automatic drafting on/off switch. A workspace always gets drafts for its publishing pace; the owner chooses only whether they wait for review (Review first) or go out on their own (Autopilot). Saving a pace turns drafting on. A workspace that is full for the month shows "Monthly limit reached (n of N). Drafting resumes <date>" instead of promising a next draft.
+**Why:** Autopilot with drafting off did nothing, and a drafting switch beside the mode choice read as two settings for one idea. The owner said writing your own is not needed. A silent monthly stop looked like the product not working (BSSE 1610 had no drafts from 22 Nov).
+**Alternatives considered:** keeping the switch and greying Autopilot when it is off (two controls for one idea); a third "write my own" mode (owner: not needed).
+**Status:** active. Built in tasks 128-129. Workspaces whose drafting is still off stay off until their owner saves a pace or taps "Save & turn on". BSSE 1610's monthly allowance was raised to 30 by hand (assets_per_month_override); plan limits themselves are unchanged.

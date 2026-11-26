@@ -110,8 +110,9 @@ export async function saveScheduleSettings(clientId: string, body: JsonObject) {
   }
   const saved = await prisma.postingSchedule.upsert({
     where: { clientId },
-    update: data,
-    create: { clientId, ...data },
+    // Drafting is not optional: saving a pace turns it on (task 129).
+    update: { ...data, fillerEnabled: true },
+    create: { clientId, ...data, fillerEnabled: true },
   });
   return toScheduleDTO(saved);
 }

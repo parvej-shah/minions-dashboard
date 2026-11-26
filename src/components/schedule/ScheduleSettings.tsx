@@ -251,9 +251,7 @@ export default function ScheduleSettings() {
         key={`status-${statusKey}`}
         blockedByUnsavedChanges={hasUnsavedChanges || saving}
         canSaveSchedule={canSave}
-        onChanged={() => setPlanKey((key) => key + 1)}
         onEnableWithSave={handleSaveAndEnable}
-        onMessage={toast.show}
       />
 
       <section aria-label="Publishing pace and cadence" className="space-y-6 rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6">

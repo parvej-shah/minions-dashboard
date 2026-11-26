@@ -42,3 +42,16 @@ describe("turning Autopilot on", () => {
     expect(scheduleUpsert).toHaveBeenCalledTimes(2);
   });
 });
+
+describe("saving a publishing pace (task 129)", () => {
+  it("turns automatic drafting on: there is no separate switch any more", async () => {
+    getLinkedInHealth.mockResolvedValue("connected");
+    await saveScheduleSettings("c1", body(true));
+    expect(scheduleUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.objectContaining({ fillerEnabled: true }),
+        create: expect.objectContaining({ fillerEnabled: true }),
+      }),
+    );
+  });
+});

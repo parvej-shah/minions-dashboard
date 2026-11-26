@@ -131,3 +131,4 @@
 | 126 | Staff view-as-tenant no longer bounced into the setup wizard; no harvest for workspaces with no brand brief | CLAUDE | DONE (pushed 45ec49b) | tasks/126.md |
 | 127 | A released post always reaches the publisher (claims_ok=Y on release); one that never went out shows "Not posted", not "Posted" | CLAUDE | DONE (local; not pushed) | tasks/127.md |
 | 128 | Monthly draft limit shown on the Automatic drafting card (was silent) | CLAUDE | DONE (local; not pushed) | tasks/128.md |
+| 129 | Drafting always on: no Automatic drafting switch; Review first or Autopilot only | CLAUDE | DONE (local; not pushed) | tasks/129.md |
