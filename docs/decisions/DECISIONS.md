@@ -900,3 +900,10 @@ as JPEGs, which cost far less than the PNGs did.
 **Why:** Autopilot with drafting off did nothing, and a drafting switch beside the mode choice read as two settings for one idea. The owner said writing your own is not needed. A silent monthly stop looked like the product not working (BSSE 1610 had no drafts from 22 Nov).
 **Alternatives considered:** keeping the switch and greying Autopilot when it is off (two controls for one idea); a third "write my own" mode (owner: not needed).
 **Status:** active. Built in tasks 128-129. Workspaces whose drafting is still off stay off until their owner saves a pace or taps "Save & turn on". BSSE 1610's monthly allowance was raised to 30 by hand (assets_per_month_override); plan limits themselves are unchanged.
+
+## 2026-11-26 — Monthly post limits: Starter 30, Growth 45, Scale 60
+
+**Decision:** A workspace can draft 30 posts a month on Starter, 45 on Growth and 60 on Scale (was 8, 20 and 60). The order Starter < Growth < Scale is kept.
+**Why:** Starter's 8 stopped Autopilot workspaces mid-month (BSSE 1610 hit 9, Rakibul 8) and the owner wants about 30 posts a month as the normal pace.
+**Alternatives considered:** Starter 30 with Growth left at 20 (Starter would exceed the paid tier); all plans at 30 (Scale would lose its higher limit).
+**Status:** active. Built in task 130. BSSE 1610's own override of 30 stays and is now the same as Starter.

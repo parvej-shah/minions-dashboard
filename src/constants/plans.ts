@@ -22,13 +22,13 @@ export const PLANS: readonly PlanDefinition[] = [
     key: "starter",
     name: "Starter",
     description: "One channel, light cadence. Good for testing the voice match before committing.",
-    limits: { ideasPerWeek: 3, assetsPerMonth: 8, channels: 1 },
+    limits: { ideasPerWeek: 3, assetsPerMonth: 30, channels: 1 },
   },
   {
     key: "growth",
     name: "Growth",
     description: "Full omnichannel cadence across blog and social.",
-    limits: { ideasPerWeek: 6, assetsPerMonth: 20, channels: 3 },
+    limits: { ideasPerWeek: 6, assetsPerMonth: 45, channels: 3 },
   },
   {
     key: "scale",

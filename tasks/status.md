@@ -132,3 +132,4 @@
 | 127 | A released post always reaches the publisher (claims_ok=Y on release); one that never went out shows "Not posted", not "Posted" | CLAUDE | DONE (local; not pushed) | tasks/127.md |
 | 128 | Monthly draft limit shown on the Automatic drafting card (was silent) | CLAUDE | DONE (local; not pushed) | tasks/128.md |
 | 129 | Drafting always on: no Automatic drafting switch; Review first or Autopilot only | CLAUDE | DONE (local; not pushed) | tasks/129.md |
+| 130 | Monthly post limits: Starter 30, Growth 45, Scale 60 (was 8/20/60) | CLAUDE | DONE (local; not pushed) | tasks/130.md |
