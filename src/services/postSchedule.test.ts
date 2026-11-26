@@ -80,4 +80,14 @@ describe("releasing due posts", () => {
     expect(syncAssetToBlog).toHaveBeenCalledTimes(1);
     expect(syncAssetToBlog).toHaveBeenCalledWith({ id: "a1", status: "PUBLISHED" }, "PUBLISHED", {});
   });
+
+  it("marks a released post approved, so 03's publisher (claims_ok=Y only) always picks it up (task 127)", async () => {
+    assetFindMany.mockResolvedValue([{ id: "a1" }]);
+    assetUpdateMany.mockResolvedValueOnce({ count: 1 });
+    assetFindUnique.mockResolvedValue({ id: "a1", status: "PUBLISHED" });
+    await releaseDuePosts(NOW);
+    expect(assetUpdateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: "a1", status: "SCHEDULED" }, data: expect.objectContaining({ status: "PUBLISHED", publishedAt: null, claimsOk: "Y" }) }),
+    );
+  });
 });

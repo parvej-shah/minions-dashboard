@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { defaultShow, groupOf, postsFor, statusLine } from "./library";
+import { defaultShow, groupOf, isPostStuck, postsFor, statusLine } from "./library";
 
 type P = { id: string; status: string; created_at: string; scheduled_for: string | null; published_at: string | null; publish_failures?: Record<string, string> | null };
 const p = (id: string, status: string, extra: Partial<P> = {}): P => ({
@@ -59,5 +59,34 @@ describe("statusLine", () => {
     expect(statusLine(p("a", "PUBLISHED", { published_at: "2026-11-06T03:00:00Z", publish_failures: { linkedin: "expired" } }), tz)).toEqual({ text: "Partly posted · LinkedIn failed", tone: "coral" });
     expect(statusLine(p("a", "UNPUBLISHED"), tz)).toEqual({ text: "Taken down", tone: "muted" });
     expect(statusLine(p("a", "DRAFT"), tz)).toEqual({ text: "Being written", tone: "brand" });
+  });
+});
+
+describe("a released post that never went out (task 127)", () => {
+  const tz = "Asia/Dhaka";
+  const released = "2026-11-24T15:00:00Z";
+  const minutesAfter = (m: number) => new Date(new Date(released).getTime() + m * 60_000);
+  const post = p("s", "PUBLISHED", { scheduled_for: released });
+
+  it("is stuck 20 minutes after its release, with no posting time and no failure", () => {
+    expect(isPostStuck(post, minutesAfter(20))).toBe(true);
+    expect(groupOf(post, minutesAfter(20))).toBe("failed");
+    expect(statusLine(post, tz, minutesAfter(20))).toEqual({ text: "Not posted · it did not reach your channels", tone: "coral" });
+  });
+
+  it("reads Going out in the first 15 minutes", () => {
+    expect(isPostStuck(post, minutesAfter(5))).toBe(false);
+    expect(groupOf(post, minutesAfter(5))).toBe("posted");
+    expect(statusLine(post, tz, minutesAfter(5))).toEqual({ text: "Going out", tone: "brand" });
+  });
+
+  it("is not stuck once it has a posting time", () => {
+    const sent = p("s", "PUBLISHED", { scheduled_for: released, published_at: "2026-11-24T15:03:00Z" });
+    expect(isPostStuck(sent, minutesAfter(60))).toBe(false);
+    expect(statusLine(sent, tz, minutesAfter(60)).text).toBe("Posted · Tue 24 Nov");
+  });
+
+  it("is not stuck when it was never scheduled (older or hand-marked posts)", () => {
+    expect(isPostStuck(p("s", "PUBLISHED"), minutesAfter(60))).toBe(false);
   });
 });

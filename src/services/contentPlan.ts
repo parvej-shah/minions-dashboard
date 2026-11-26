@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { nextUpcomingSlots } from "@/lib/scheduling";
 import { localParts } from "@/lib/pulse/week";
 import { utcToZoned } from "@/lib/postTime";
+import { quotaState } from "@/lib/plan/quota";
+import { countAssetsThisMonth, monthlyAssetLimit, resolvePlan } from "@/services/quota";
 import {
   belowBarNote,
   chooseLane,
@@ -485,9 +487,16 @@ export async function settleSlotDraft(assetId: string): Promise<SlotDraftOutcome
 export async function getPlanStatus(clientId: string) {
   const [schedule, client, service] = await Promise.all([
     prisma.postingSchedule.findUnique({ where: { clientId } }),
-    prisma.client.findUnique({ where: { id: clientId }, select: { timezone: true } }),
+    prisma.client.findUnique({
+      where: { id: clientId },
+      select: { timezone: true, assetsPerMonthOverride: true, subscription: { select: { planKey: true } } },
+    }),
     draftingServiceRunning(),
   ]);
+  const quota = quotaState(
+    await countAssetsThisMonth(clientId),
+    monthlyAssetLimit(resolvePlan(client?.subscription?.planKey), client?.assetsPerMonthOverride),
+  );
   const timezone = client?.timezone ?? DEFAULT_TIMEZONE;
   const nextAt = schedule ? (upcomingPlanSlots(schedule, timezone, new Date())[0] ?? null) : null;
   const slot = nextAt
@@ -503,5 +512,6 @@ export async function getPlanStatus(clientId: string) {
     timezone,
     next_slot_at: nextAt?.toISOString() ?? null,
     next_lane_name: lane?.name ?? null,
+    quota,
   };
 }

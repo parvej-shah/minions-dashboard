@@ -414,7 +414,7 @@ export default function TodayView() {
             </div>
           </div>
           <CardTitle id="failed">{failed.length === 1 ? "1 post didn't reach every channel." : `${failed.length} posts didn't reach every channel.`}</CardTitle>
-          <p className="text-[17px] text-muted">{failed[0].title}: {failureSummary(failed[0].publish_failures)}. Open it to try again.</p>
+          <p className="text-[17px] text-muted">{failed[0].title}: {failureSummary(failed[0].publish_failures) ?? "it did not go out"}. Open it to try again.</p>
           <div onClick={(e) => e.stopPropagation()}>
             <Link href={`/editorial?id=${encodeURIComponent(failed[0].id)}`} className={buttonStyles({ size: "lg", className: "self-start" })}>Fix it</Link>
           </div>

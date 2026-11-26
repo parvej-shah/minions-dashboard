@@ -5,7 +5,7 @@ import { Bot, RefreshCw } from "lucide-react";
 import { apiClient, toErrorMessage } from "@/lib/api-client";
 import { useApiResource } from "@/hooks/useApiResource";
 import { LoadingState } from "@/components/ui/EmptyState";
-import { formatPostTime } from "@/lib/postTime";
+import { draftingCardText, type QuotaState } from "@/lib/plan/quota";
 
 interface DraftingStatus {
   exists: boolean;
@@ -15,24 +15,17 @@ interface DraftingStatus {
   timezone: string;
   next_slot_at: string | null;
   next_lane_name: string | null;
+  quota: QuotaState | null;
 }
 
-type Tone = "off" | "on";
+type Tone = "off" | "on" | "paused";
 
-function describe(s: DraftingStatus): { tone: Tone; title: string; detail: string } {
-  if (!s.exists) return { tone: "off", title: "Off", detail: "Set your publishing pace below, then turn this on." };
-  if (!s.drafting_on) {
-    return { tone: "off", title: "Off", detail: "Automatic drafting is off. Turn this on to have Minions draft according to your pace." };
-  }
-  const next = s.next_slot_at
-    ? `Next draft scheduled for ${formatPostTime(s.next_slot_at, s.timezone)}.`
-    : "Active. Drafts are prepared automatically for your upcoming slots.";
-  return { tone: "on", title: "Active", detail: next };
-}
+const describe = draftingCardText;
 
 const TONE_STYLE: Record<Tone, { box: string; dot: string; text: string }> = {
   off: { box: "border-line", dot: "bg-subtle", text: "text-muted" },
   on: { box: "border-brand/40 bg-brand/[0.02]", dot: "bg-brand", text: "text-brand" },
+  paused: { box: "border-coral/40 bg-coral/[0.03]", dot: "bg-coral", text: "text-coral" },
 };
 
 /**

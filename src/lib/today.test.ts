@@ -82,3 +82,11 @@ describe("failedPosts", () => {
     expect(list.map((p) => p.id)).toEqual(["new", "old"]);
   });
 });
+
+describe("failedPosts: a released post that never went out (task 127)", () => {
+  it("includes it once 15 minutes have passed", () => {
+    const stuck = { id: "stuck", title: "t", status: "PUBLISHED", scheduled_for: "2026-11-24T15:00:00Z", published_at: null, created_at: "2026-11-20T00:00:00Z", publish_failures: null };
+    expect(failedPosts([stuck], new Date("2026-11-24T15:20:00Z")).map((x) => x.id)).toEqual(["stuck"]);
+    expect(failedPosts([stuck], new Date("2026-11-24T15:05:00Z"))).toEqual([]);
+  });
+});

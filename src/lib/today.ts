@@ -4,6 +4,7 @@
  */
 
 import { utcToZoned } from "@/lib/postTime";
+import { isPostStuck } from "@/lib/posts/stuck";
 
 interface Post {
   id: string;
@@ -125,10 +126,11 @@ export function recentlyPosted<T extends Post>(posts: T[], limit: number): T[] {
 }
 
 /** Posts that went out but that a channel refused (LinkedIn's token expired, say), newest first. */
-export function failedPosts<T extends Post>(posts: T[]): T[] {
+export function failedPosts<T extends Post>(posts: T[], now: Date = new Date()): T[] {
+  const refused = (p: T) => p.status === "PUBLISHED" && Object.values(p.publish_failures ?? {}).some((r) => typeof r === "string" && r.trim());
   return posts
-    .filter((p) => p.status === "PUBLISHED" && Object.values(p.publish_failures ?? {}).some((r) => typeof r === "string" && r.trim()))
-    .sort((a, b) => (b.published_at ?? "").localeCompare(a.published_at ?? ""));
+    .filter((p) => refused(p) || isPostStuck(p, now))
+    .sort((a, b) => (b.published_at ?? b.scheduled_for ?? "").localeCompare(a.published_at ?? a.scheduled_for ?? ""));
 }
 
 /** "Wed 11 Nov, 09:00" on the workspace clock. */

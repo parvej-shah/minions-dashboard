@@ -3,9 +3,11 @@
  */
 import { slotLabel } from "@/lib/today";
 import { failureSummary } from "@/lib/publishFailures";
+import { isPostStuck } from "@/lib/posts/stuck";
 import type { StatusTone as Tone } from "@/components/ui/Text";
 
 export type { Tone };
+export { isPostStuck };
 
 export type PostGroup = "needs" | "failed" | "scheduled" | "posted" | "other";
 export type PostShow = "all" | "needs" | "scheduled" | "posted" | "failed";
@@ -26,9 +28,9 @@ export function isPostFailed(post: Post): boolean {
   return Object.values(failures).some((r) => typeof r === "string" && r.trim().length > 0);
 }
 
-export function groupOf(postOrStatus: string | Post): PostGroup {
+export function groupOf(postOrStatus: string | Post, now: Date = new Date()): PostGroup {
   if (typeof postOrStatus !== "string") {
-    if (isPostFailed(postOrStatus)) return "failed";
+    if (isPostFailed(postOrStatus) || isPostStuck(postOrStatus, now)) return "failed";
     return groupOf(postOrStatus.status);
   }
   switch (postOrStatus) {
@@ -101,7 +103,7 @@ export function resolveEffectiveShow(show: PostShow, failedCount: number, defaul
 }
 
 
-export function statusLine(post: Post, timeZone: string): { text: string; tone: Tone } {
+export function statusLine(post: Post, timeZone: string, now: Date = new Date()): { text: string; tone: Tone } {
   const day = (iso: string) =>
     new Intl.DateTimeFormat("en-GB", { timeZone, weekday: "short", day: "numeric", month: "short" }).format(new Date(iso)).replace(/,/g, "");
 
@@ -112,6 +114,9 @@ export function statusLine(post: Post, timeZone: string): { text: string; tone: 
     }
     return { text: failed ?? "Failed to post", tone: "coral" };
   }
+
+  if (isPostStuck(post, now)) return { text: "Not posted · it did not reach your channels", tone: "coral" };
+  if (post.status === "PUBLISHED" && !post.published_at && post.scheduled_for) return { text: "Going out", tone: "brand" };
 
   switch (post.status) {
     case "PENDING_REVIEW":

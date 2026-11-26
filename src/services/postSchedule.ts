@@ -93,7 +93,8 @@ export async function releaseDuePosts(now: Date = new Date(), limit = 20): Promi
   for (const { id } of due) {
     const flipped = await prisma.asset.updateMany({
       where: { id, status: "SCHEDULED" },
-      data: { status: "PUBLISHED", publishedAt: null, updatedAt: now },
+      // SCHEDULED means approved: claims_ok must be Y or 03's publisher (which reads only Y) never broadcasts it (task 127).
+      data: { status: "PUBLISHED", publishedAt: null, claimsOk: "Y", updatedAt: now },
     });
     if (flipped.count !== 1) continue;
     const asset = await prisma.asset.findUnique({ where: { id } });
